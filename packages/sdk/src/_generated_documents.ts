@@ -4413,6 +4413,8 @@ export type OrganizationInvite = Node & {
   organization: Organization;
   /** The permission that the invitee will receive upon accepting invite. */
   permission?: Maybe<Scalars["String"]>;
+  /** The permission that the invitee will receive upon accepting invite. */
+  role: UserRoleType;
   /**
    * The last time at which the entity was updated. This is the same as the creation time if the
    *     entity hasn't been updated after creation.
@@ -4552,6 +4554,8 @@ export type Project = Node & {
   name: Scalars["String"];
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   progress: Scalars["Float"];
+  /** Project updates associated with the project. */
+  projectUpdates: ProjectUpdateConnection;
   /** The total number of estimation points after each week. */
   scopeHistory: Array<Scalars["Float"]>;
   /** Whether to send new issue comment notifications to Slack. */
@@ -4622,6 +4626,16 @@ export type ProjectMembersArgs = {
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   includeDisabled?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** A project. */
+export type ProjectProjectUpdatesArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 };
@@ -4822,6 +4836,44 @@ export type ProjectPayload = {
   project?: Maybe<Project>;
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
+};
+
+/** A update associated with an project. */
+export type ProjectUpdate = Node & {
+  __typename?: "ProjectUpdate";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The update content in markdown format. */
+  body: Scalars["String"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The time the project update was edited. */
+  editedAt?: Maybe<Scalars["DateTime"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The project that the update is associated with. */
+  project: Project;
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** The user who wrote the update. */
+  user: User;
+};
+
+export type ProjectUpdateConnection = {
+  __typename?: "ProjectUpdateConnection";
+  edges: Array<ProjectUpdateEdge>;
+  nodes: Array<ProjectUpdate>;
+  pageInfo: PageInfo;
+};
+
+export type ProjectUpdateEdge = {
+  __typename?: "ProjectUpdateEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: ProjectUpdate;
 };
 
 export type ProjectUpdateInput = {
@@ -6822,6 +6874,13 @@ export type UserPayload = {
   user?: Maybe<User>;
 };
 
+/** The different permission roles available to users on an organization */
+export enum UserRoleType {
+  Admin = "admin",
+  Guest = "guest",
+  User = "user",
+}
+
 /** The settings of a user as a JSON object. */
 export type UserSettings = Node & {
   __typename?: "UserSettings";
@@ -6957,6 +7016,7 @@ export type ViewPreferencesUpdateInput = {
 export enum ViewType {
   ActiveIssues = "activeIssues",
   AllIssues = "allIssues",
+  Archive = "archive",
   Backlog = "backlog",
   Board = "board",
   CompletedCycle = "completedCycle",
@@ -7377,6 +7437,11 @@ export type TemplateFragment = { __typename: "Template" } & Pick<
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
+
+export type ProjectUpdateFragment = { __typename: "ProjectUpdate" } & Pick<
+  ProjectUpdate,
+  "updatedAt" | "archivedAt" | "createdAt" | "editedAt" | "id" | "body"
+> & { project: { __typename?: "Project" } & Pick<Project, "id">; user: { __typename?: "User" } & Pick<User, "id"> };
 
 export type UserAccountFragment = { __typename: "UserAccount" } & Pick<
   UserAccount,
@@ -8192,6 +8257,8 @@ type Node_Project_Fragment = { __typename: "Project" } & Pick<Project, "id">;
 
 type Node_ProjectLink_Fragment = { __typename: "ProjectLink" } & Pick<ProjectLink, "id">;
 
+type Node_ProjectUpdate_Fragment = { __typename: "ProjectUpdate" } & Pick<ProjectUpdate, "id">;
+
 type Node_PushSubscription_Fragment = { __typename: "PushSubscription" } & Pick<PushSubscription, "id">;
 
 type Node_Reaction_Fragment = { __typename: "Reaction" } & Pick<Reaction, "id">;
@@ -8242,6 +8309,7 @@ export type NodeFragment =
   | Node_OrganizationInvite_Fragment
   | Node_Project_Fragment
   | Node_ProjectLink_Fragment
+  | Node_ProjectUpdate_Fragment
   | Node_PushSubscription_Fragment
   | Node_Reaction_Fragment
   | Node_Subscription_Fragment
@@ -8376,6 +8444,11 @@ export type ProjectPayloadFragment = { __typename: "ProjectPayload" } & Pick<
   ProjectPayload,
   "lastSyncId" | "success"
 > & { project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">> };
+
+export type ProjectUpdateConnectionFragment = { __typename: "ProjectUpdateConnection" } & {
+  nodes: Array<{ __typename?: "ProjectUpdate" } & ProjectUpdateFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
 
 export type PushSubscriptionConnectionFragment = { __typename: "PushSubscriptionConnection" } & {
   nodes: Array<{ __typename?: "PushSubscription" } & PushSubscriptionFragment>;
@@ -9556,6 +9629,22 @@ export type Project_MembersQueryVariables = Exact<{
 
 export type Project_MembersQuery = { __typename?: "Query" } & {
   project: { __typename?: "Project" } & { members: { __typename?: "UserConnection" } & UserConnectionFragment };
+};
+
+export type Project_ProjectUpdatesQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type Project_ProjectUpdatesQuery = { __typename?: "Query" } & {
+  project: { __typename?: "Project" } & {
+    projectUpdates: { __typename?: "ProjectUpdateConnection" } & ProjectUpdateConnectionFragment;
+  };
 };
 
 export type Project_TeamsQueryVariables = Exact<{
@@ -15651,6 +15740,78 @@ export const ProjectPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<ProjectPayloadFragment, unknown>;
+export const ProjectUpdateFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectUpdate" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectUpdate" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "editedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "body" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ProjectUpdateFragment, unknown>;
+export const ProjectUpdateConnectionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectUpdateConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectUpdateConnection" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectUpdate" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectUpdateFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ProjectUpdateConnectionFragment, unknown>;
 export const PushSubscriptionFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -23530,6 +23691,115 @@ export const Project_MembersDocument = {
     ...UserConnectionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_MembersQuery, Project_MembersQueryVariables>;
+export const Project_ProjectUpdatesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "project_projectUpdates" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "projectUpdates" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectUpdateConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectUpdateConnectionFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<Project_ProjectUpdatesQuery, Project_ProjectUpdatesQueryVariables>;
 export const Project_TeamsDocument = {
   kind: "Document",
   definitions: [

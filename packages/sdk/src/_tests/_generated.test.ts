@@ -1928,6 +1928,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the project connection query for the ProjectUpdate */
+    it("project.projectUpdates", async () => {
+      if (_project) {
+        const projectUpdates: L.ProjectUpdateConnection | undefined = await _project.projectUpdates();
+        expect(projectUpdates instanceof L.ProjectUpdateConnection);
+      } else {
+        console.warn("codegen-doc:print: No project found - cannot test _project.projectUpdates query");
+      }
+    });
+
     /** Test the project connection query for the Team */
     it("project.teams", async () => {
       if (_project) {

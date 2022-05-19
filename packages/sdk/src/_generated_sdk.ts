@@ -4153,6 +4153,10 @@ export class Project extends Request {
   public members(variables?: Omit<L.Project_MembersQueryVariables, "id">) {
     return new Project_MembersQuery(this._request, this.id, variables).fetch(variables);
   }
+  /** Project updates associated with the project. */
+  public projectUpdates(variables?: Omit<L.Project_ProjectUpdatesQueryVariables, "id">) {
+    return new Project_ProjectUpdatesQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Teams associated with this project. */
   public teams(variables?: Omit<L.Project_TeamsQueryVariables, "id">) {
     return new Project_TeamsQuery(this._request, this.id, variables).fetch(variables);
@@ -4319,6 +4323,73 @@ export class ProjectPayload extends Request {
   /** The project that was created or updated. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+}
+/**
+ * A update associated with an project.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectUpdateFragment response data
+ */
+export class ProjectUpdate extends Request {
+  private _project: L.ProjectUpdateFragment["project"];
+  private _user: L.ProjectUpdateFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.ProjectUpdateFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.body = data.body;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.editedAt = parseDate(data.editedAt) ?? undefined;
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._project = data.project;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The update content in markdown format. */
+  public body: string;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The time the project update was edited. */
+  public editedAt?: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was updated. This is the same as the creation time if the
+   *     entity hasn't been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The project that the update is associated with. */
+  public get project(): LinearFetch<Project> | undefined {
+    return new ProjectQuery(this._request).fetch(this._project.id);
+  }
+  /** The user who wrote the update. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+}
+/**
+ * ProjectUpdateConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this ProjectUpdateConnection model
+ * @param data - ProjectUpdateConnection response data
+ */
+export class ProjectUpdateConnection extends Connection<ProjectUpdate> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ProjectUpdate> | undefined>,
+    data: L.ProjectUpdateConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new ProjectUpdate(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
   }
 }
 /**
@@ -14482,6 +14553,60 @@ export class Project_MembersQuery extends Request {
     );
     const data = response.project.members;
     return new UserConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Project_ProjectUpdates Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to project
+ * @param variables - variables without 'id' to pass into the Project_ProjectUpdatesQuery
+ */
+export class Project_ProjectUpdatesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Project_ProjectUpdatesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.Project_ProjectUpdatesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Project_ProjectUpdates query and return a ProjectUpdateConnection
+   *
+   * @param variables - variables without 'id' to pass into the Project_ProjectUpdatesQuery
+   * @returns parsed response from Project_ProjectUpdatesQuery
+   */
+  public async fetch(
+    variables?: Omit<L.Project_ProjectUpdatesQueryVariables, "id">
+  ): LinearFetch<ProjectUpdateConnection> {
+    const response = await this._request<L.Project_ProjectUpdatesQuery, L.Project_ProjectUpdatesQueryVariables>(
+      L.Project_ProjectUpdatesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.project.projectUpdates;
+    return new ProjectUpdateConnection(
       this._request,
       connection =>
         this.fetch(

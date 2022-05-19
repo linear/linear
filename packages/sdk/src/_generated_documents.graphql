@@ -517,6 +517,32 @@ fragment Template on Template {
   }
 }
 
+# A update associated with an project.
+fragment ProjectUpdate on ProjectUpdate {
+  __typename
+  # The last time at which the entity was updated. This is the same as the creation time if the
+  #     entity hasn't been updated after creation.
+  updatedAt
+  # The project that the update is associated with.
+  project {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time the project update was edited.
+  editedAt
+  # The unique identifier of the entity.
+  id
+  # The update content in markdown format.
+  body
+  # The user who wrote the update.
+  user {
+    id
+  }
+}
+
 # A user account.
 fragment UserAccount on UserAccount {
   __typename
@@ -2657,6 +2683,16 @@ fragment ProjectPayload on ProjectPayload {
   success
 }
 
+fragment ProjectUpdateConnection on ProjectUpdateConnection {
+  __typename
+  nodes {
+    ...ProjectUpdate
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment PushSubscriptionConnection on PushSubscriptionConnection {
   __typename
   nodes {
@@ -4777,6 +4813,35 @@ query project_members(
       orderBy: $orderBy
     ) {
       ...UserConnection
+    }
+  }
+}
+# Project updates associated with the project.
+query project_projectUpdates(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  project(id: $id) {
+    projectUpdates(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ProjectUpdateConnection
     }
   }
 }
