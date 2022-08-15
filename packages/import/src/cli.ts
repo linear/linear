@@ -3,11 +3,11 @@
 import chalk from "chalk";
 import * as inquirer from "inquirer";
 import { asanaCsvImport } from "./importers/asanaCsv";
-import { clubhouseCsvImport } from "./importers/clubhouseCsv";
 import { githubImport } from "./importers/github";
 import { jiraCsvImport } from "./importers/jiraCsv";
 import { linearCsvImporter } from "./importers/linearCsv";
 import { pivotalCsvImport } from "./importers/pivotalCsv";
+import { shortcutCsvImport } from "./importers/shortcutCsv";
 import { trelloJsonImport } from "./importers/trelloJson";
 import { importIssues } from "./importIssues";
 import { ImportAnswers } from "./types";
@@ -44,8 +44,8 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
             value: "pivotalCsv",
           },
           {
-            name: "Clubhouse (CSV export)",
-            value: "clubhouseCsv",
+            name: "Shortcut (CSV export)",
+            value: "shortcutCsv",
           },
           {
             name: "Trello (JSON export)",
@@ -74,8 +74,8 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
       case "pivotalCsv":
         importer = await pivotalCsvImport();
         break;
-      case "clubhouseCsv":
-        importer = await clubhouseCsvImport();
+      case "shortcutCsv":
+        importer = await shortcutCsvImport();
         break;
       case "trelloJson":
         importer = await trelloJsonImport();

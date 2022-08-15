@@ -72,21 +72,21 @@ Following fields are supported:
 - `URL` - URL of Pivotal Tracker story
 - `Created at` - Preserves the story creation date
 
-### Clubhouse CSV
+### Shortcut CSV
 
-Clubhouse workspaces can be imported into a Linear team from the CSV export file. It only imports `chores`, `features`, and `bugs`.
+Shortcut workspaces can be imported into a Linear team from the CSV export file. It only imports `chores`, `features`, and `bugs`.
 
 Following fields are supported:
 
 - `Name` - Issue title
-- `Description` - Clubhouse markdown formatted description
+- `Description` - Shortcut markdown formatted description
 - `Tasks` - Appended to the description
 - `External Tickets` - Appended to the description
 - `State` - Mapped to the most similar Linear status
 - `Type` - Added as a label
 - `Tags` - Added as labels
 - `Owners` - Story owner (only the first is preserved)
-- `URL` - URL of Clubhouse story, also appended to the description
+- `URL` - URL of Shortcut story, also appended to the description
 - `Created at` - Preserves the story creation date
 
 ### Trello JSON
