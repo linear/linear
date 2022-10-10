@@ -79,9 +79,7 @@ export class ClickupCsvImporter implements Importer {
       statuses: {},
     };
 
-    const assignees = Array.from(
-      new Set(data.map(row => row.Assignees.replace("[", "").replace("]", "").split(",")).flat())
-    );
+    const assignees = Array.from(new Set(data.map(row => row.Assignees.slice(1, -1).split(",")).flat()));
 
     for (const user of assignees) {
       importData.users[user] = {
@@ -103,9 +101,10 @@ export class ClickupCsvImporter implements Importer {
 
       const dueDate = row["Due Date"] ? new Date(row["Due Date"]) : undefined;
 
-      const tags = row.Tags.replace("[", "").replace("]", "").split(",");
+      const tags = row.Tags.slice(1, -1).split(",");
 
-      const assigneeId = row.Assignees.replace("[", "").replace("]", "").split(",")[0] ?? undefined;
+      // FIX: ClickUp export includes users' names as assignees and not the ids
+      const assigneeId = row.Assignees.slice(1, -1).split(",")[0] ?? undefined;
 
       const status = row.Status === "Closed" ? "Done" : "Todo";
 
