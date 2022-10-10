@@ -1,37 +1,77 @@
 {
   "name": "linear",
   "private": true,
-  "author": "Linear Orbit, Inc",
   "license": "MIT",
-  "engines": {
-    "node": ">=12.x",
-    "yarn": "1.x"
-  },
+  "author": "Linear Orbit, Inc",
   "workspaces": [
     "./packages/*"
   ],
   "scripts": {
     "bootstrap": "lerna bootstrap",
+    "build": "run-s generate build:sdk generate:test build:import build:types docs",
     "build:import": "lerna run build:import",
     "build:sdk": "lerna run build:sdk",
     "build:types": "npx tsc --project tsconfig.check.json",
-    "build": "run-s generate build:sdk generate:test build:import build:types docs",
     "dev": "NODE_ENV=development yarn build",
     "docs": "npx md-magic --path './packages/**/README.md' --config ./docs/markdown-magic.config.js",
+    "generate": "run-s generate:clean generate:doc generate:sdk",
     "generate:clean": "lerna run generate:clean",
     "generate:doc": "lerna run build:codegen-doc && lerna run generate:doc",
     "generate:sdk": "lerna run build:codegen-sdk && lerna run generate:sdk",
     "generate:test": "lerna run build:codegen-test && lerna run generate:test",
-    "generate": "run-s generate:clean generate:doc generate:sdk",
     "lint": "npx eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
     "mock": "npx graphql-faker packages/sdk/src/schema.graphql",
     "schema": "yarn update:schema",
+    "test": "npx jest -w 1",
     "test:e2e": "E2E=true yarn test _generated.test",
     "test:update": "yarn test -u",
     "test:watch": "yarn test --watch",
-    "test": "npx jest -w 1",
     "update:dependencies": "yarn upgrade && lerna run generate:changeset:dependencies",
     "update:schema": "lerna run generate:schema && lerna run generate:changeset:schema"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npx lint-staged",
+      "commit-msg": "npx commitlint -E  HUSKY_GIT_PARAMS"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx,json,css,yaml}": [
+      "npx prettier --write **/*.{js,ts,tsx,json,css,yaml}"
+    ],
+    "*.{js,ts,tsx}": [
+      "npx eslint --max-warnings 0 --fix -c .eslintrc.precommit.json"
+    ]
+  },
+  "jest": {
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "tsconfig.json"
+      }
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/*.test.ts?(x)"
+    ],
+    "testTimeout": 20000,
+    "transform": {
+      "^.*\\.tsx?$": "ts-jest"
+    }
+  },
+  "resolutions": {
+    "graphql": "^15.4.0"
   },
   "dependencies": {
     "@changesets/cli": "^2.14.1",
@@ -71,48 +111,8 @@
     "tslib": "^2.1.0",
     "typescript": "^4.0.5"
   },
-  "resolutions": {
-    "graphql": "^15.4.0"
-  },
-  "lint-staged": {
-    "*.{js,ts,tsx,json,css,yaml}": [
-      "npx prettier --write **/*.{js,ts,tsx,json,css,yaml}"
-    ],
-    "*.{js,ts,tsx}": [
-      "npx eslint --max-warnings 0 --fix -c .eslintrc.precommit.json"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "npx commitlint -E  HUSKY_GIT_PARAMS",
-      "pre-commit": "npx lint-staged"
-    }
-  },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json"
-    ],
-    "testMatch": [
-      "**/*.test.ts?(x)"
-    ],
-    "transform": {
-      "^.*\\.tsx?$": "ts-jest"
-    },
-    "testTimeout": 20000,
-    "globals": {
-      "ts-jest": {
-        "tsconfig": "tsconfig.json"
-      }
-    }
+  "engines": {
+    "node": ">=12.x",
+    "yarn": "1.x"
   }
 }

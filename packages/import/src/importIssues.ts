@@ -283,9 +283,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
     });
   }
 
-  console.info(
-    chalk.green(`${importer.name} issues imported to your team: https://linear.app/team/${teamKey}/all`)
-  );
+  console.info(chalk.green(`${importer.name} issues imported to your team: https://linear.app/team/${teamKey}/all`));
 };
 
 // Build comments into issue description

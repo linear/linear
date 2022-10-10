@@ -1,19 +1,15 @@
 {
   "name": "@linear/import",
-  "description": "Import helpers for uploading issues to Linear",
   "version": "1.5.17",
-  "author": "Linear Orbit, Inc",
+  "description": "Import helpers for uploading issues to Linear",
+  "repository": "https://github.com/linear/linear",
   "license": "MIT",
+  "author": "Linear Orbit, Inc",
   "main": "dist/index-cjs.min.js",
   "module": "dist/index-es.min.js",
   "types": "dist/index.d.ts",
   "bin": {
     "linear-import": "bin/linear-import.js"
-  },
-  "repository": "https://github.com/linear/linear",
-  "engines": {
-    "node": ">=12.x",
-    "yarn": "1.x"
   },
   "files": [
     "dist"
@@ -47,6 +43,10 @@
     "rollup-plugin-size-snapshot": "^0.12.0",
     "rollup-plugin-terser": "^7.0.2",
     "ts-node": "^9.1.1"
+  },
+  "engines": {
+    "node": ">=12.x",
+    "yarn": "1.x"
   },
   "publishConfig": {
     "access": "public"
