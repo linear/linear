@@ -33,7 +33,7 @@ interface ClickupTaskType {
   "Start Date Text": string;
   "Parent ID": string;
   Attachments: ClickupAttachment[];
-  Assignees: string;
+  Assignees: string[];
   Tags: string;
   Priority: ClickupPriority;
   "List Name": string;
@@ -50,6 +50,26 @@ interface ClickupTaskType {
   "Rolled Up Time Text": string;
 }
 
+const parseAttachments = (str: string): ClickupAttachment[] => JSON.parse(str);
+const parseAssignees = (str: string): string[] =>
+  str
+    .slice(1, -1)
+    .split(",")
+    .filter(s => s.length);
+const parseChecklists = (str: string): ClickupChecklist[] => JSON.parse(str);
+const parseComments = (str: string): ClickupComment[] => JSON.parse(str);
+const parsePriority = (str: string): ClickupPriority => JSON.parse(str);
+const parseAssignedComments = (str: string): number => JSON.parse(str);
+
+const colParser = {
+  Attachments: parseAttachments,
+  Assignees: parseAssignees,
+  Checklists: parseChecklists,
+  Comments: parseComments,
+  Priority: parsePriority,
+  "Assigned Comments": parseAssignedComments,
+};
+
 export class ClickupCsvImporter implements Importer {
   public constructor(private filePath: string) {}
 
@@ -62,15 +82,7 @@ export class ClickupCsvImporter implements Importer {
   }
 
   public import = async (): Promise<ImportResult> => {
-    const data = (await csv({
-      colParser: {
-        Attachments: item => JSON.parse(item),
-        Checklists: item => JSON.parse(item),
-        Comments: item => JSON.parse(item),
-        Priority: item => parseInt(item),
-        "Assigned Comments": item => parseInt(item),
-      },
-    }).fromFile(this.filePath)) as ClickupTaskType[];
+    const data = (await csv({ colParser, checkType: true }).fromFile(this.filePath)) as ClickupTaskType[];
 
     const importData: ImportResult = {
       issues: [],
@@ -79,7 +91,7 @@ export class ClickupCsvImporter implements Importer {
       statuses: {},
     };
 
-    const assignees = Array.from(new Set(data.map(row => row.Assignees.slice(1, -1).split(",")).flat()));
+    const assignees = Array.from(new Set(data.map(row => row.Assignees).flat()));
 
     for (const user of assignees) {
       importData.users[user] = {
@@ -103,12 +115,13 @@ export class ClickupCsvImporter implements Importer {
 
       const tags = row.Tags.slice(1, -1).split(",");
 
-      // FIX: ClickUp export includes users' names as assignees and not the ids
-      const assigneeId = row.Assignees.slice(1, -1).split(",")[0] ?? undefined;
+      const assigneeId = row.Assignees[0] ?? undefined;
 
       const status = row.Status === "Closed" ? "Done" : "Todo";
 
       const labels = tags.filter(tag => !!tag);
+
+      const createdAt = row["Date Created"] ? new Date(row["Date Created"]) : undefined;
 
       importData.issues.push({
         title,
@@ -119,6 +132,7 @@ export class ClickupCsvImporter implements Importer {
         assigneeId,
         labels,
         dueDate,
+        createdAt,
       });
 
       for (const label of labels) {
