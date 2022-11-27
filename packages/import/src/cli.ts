@@ -1,9 +1,10 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import chalk from "chalk";
-import * as inquirer from "inquirer";
+import inquirer from 'inquirer';
 import { asanaCsvImport } from "./importers/asanaCsv";
 import { githubImport } from "./importers/github";
+import { gitlabCsvImporter } from "./importers/gitlabCsv";
 import { jiraCsvImport } from "./importers/jiraCsv";
 import { linearCsvImporter } from "./importers/linearCsv";
 import { pivotalCsvImport } from "./importers/pivotalCsv";
@@ -55,6 +56,10 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
             name: "Linear (CSV export)",
             value: "linearCsv",
           },
+          {
+            name: "Gitlab (CSV export)",
+            value: "gitlabCsv",
+          },
         ],
       },
     ]);
@@ -82,6 +87,9 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
         break;
       case "linearCsv":
         importer = await linearCsvImporter();
+        break;
+      case "gitlabCsv":
+        importer = await gitlabCsvImporter();
         break;
       default:
         console.log(chalk.red(`Invalid importer`));
