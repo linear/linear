@@ -1,6 +1,5 @@
 import typescript from "@rollup/plugin-typescript";
 import gzip from "rollup-plugin-gzip";
-import { sizeSnapshot } from "rollup-plugin-size-snapshot";
 import { terser } from "rollup-plugin-terser";
 import { brotliCompressSync } from "zlib";
 
@@ -23,7 +22,6 @@ export default [
     ],
     plugins: [
       typescript(),
-      sizeSnapshot(),
       terser(),
       gzip(),
       gzip({

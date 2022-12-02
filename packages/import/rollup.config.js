@@ -3,7 +3,6 @@ import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import gzip from "rollup-plugin-gzip";
-import { sizeSnapshot } from "rollup-plugin-size-snapshot";
 import { terser } from "rollup-plugin-terser";
 import { brotliCompressSync } from "zlib";
 
@@ -41,7 +40,6 @@ export default [
       resolve(),
       commonjs(),
       json(),
-      sizeSnapshot(),
       terser(),
       gzip(),
       gzip({
