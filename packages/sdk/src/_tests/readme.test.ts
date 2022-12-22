@@ -37,7 +37,7 @@ describe("readme.md", () => {
   });
 
   async function createTeam(input: LinearDocument.TeamCreateInput) {
-    linearClient.teamCreate(input);
+    linearClient.createTeam(input);
   }
 
   async function run() {}
@@ -147,7 +147,7 @@ describe("readme.md", () => {
       const teams = await linearClient.teams();
       const team = teams.nodes[0];
       if (team.id) {
-        await linearClient.issueCreate({ teamId: team.id, title: "My Created Issue" });
+        await linearClient.createIssue({ teamId: team.id, title: "My Created Issue" });
       }
       /** CODE_SECTION:4_1:END */
     });
@@ -156,7 +156,7 @@ describe("readme.md", () => {
       /** CODE_SECTION:4_2:START */
       const me = await linearClient.viewer;
       if (me.id) {
-        await linearClient.userUpdate(me.id, { displayName: "Alice" });
+        await linearClient.updateUser(me.id, { displayName: "Alice" });
       }
       /** CODE_SECTION:4_2:END */
     });
@@ -173,7 +173,7 @@ describe("readme.md", () => {
       const projects = await linearClient.projects();
       const project = projects.nodes[0];
       if (project.id) {
-        await linearClient.projectArchive(project.id);
+        await linearClient.archiveProject(project.id);
         await project.archive();
       }
       /** CODE_SECTION:4_4:END */
@@ -181,7 +181,7 @@ describe("readme.md", () => {
 
     it("Mutations will often return a success boolean and the mutated entity", async () => {
       /** CODE_SECTION:4_5:START */
-      const commentPayload = await linearClient.commentCreate({ issueId: "some-issue-id" });
+      const commentPayload = await linearClient.createComment({ issueId: "some-issue-id" });
       if (commentPayload.success) {
         return commentPayload.comment;
       } else {
@@ -247,7 +247,7 @@ describe("readme.md", () => {
           /** Use the asset URL to attach the stored file */
           const assetUrl = uploadPayload.uploadFile?.assetUrl;
           if (assetUrl) {
-            const issuePayload = await linearClient.issueCreate({
+            const issuePayload = await linearClient.createIssue({
               title,
               /** Use the asset URL in a markdown link */
               description: `Attached file: ![${assetUrl}](${encodeURI(assetUrl)})`,
@@ -271,7 +271,7 @@ describe("readme.md", () => {
       ): LinearFetch<Comment | undefined | UserError> {
         try {
           /** Try to create a comment */
-          const commentPayload = await linearClient.commentCreate(input);
+          const commentPayload = await linearClient.createComment(input);
           /** Return it if available */
           return commentPayload.comment;
         } catch (error) {
@@ -290,7 +290,7 @@ describe("readme.md", () => {
         const firstIssue = issues.nodes[0];
 
         if (firstIssue.id) {
-          const payload = await linearClient.issueArchive(firstIssue.id);
+          const payload = await linearClient.archiveIssue(firstIssue.id);
           return payload;
         } else {
           return undefined;
@@ -419,7 +419,7 @@ describe("readme.md", () => {
       /** Create the custom request function */
       const customLinearRequest: LinearRequest = <Data, Variables>(document: DocumentNode, variables?: Variables) => {
         /** The request must take a GraphQL document and variables, then return a promise for the result */
-        return customGraphqlClient.request<Data>(print(document), variables).catch(error => {
+        return customGraphqlClient.request<Data, Variables>(print(document), variables).catch(error => {
           /** Optionally catch and parse errors from the Linear API */
           throw parseLinearError(error);
         });

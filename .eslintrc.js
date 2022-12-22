@@ -108,6 +108,7 @@ module.exports = {
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/array-type": "off",
         "@typescript-eslint/ban-types": "off",
+        "@typescript-eslint/no-shadow": "off",
         "id-blacklist": "off",
       },
     },

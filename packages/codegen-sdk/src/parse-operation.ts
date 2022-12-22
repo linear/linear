@@ -1,12 +1,15 @@
 import { Types } from "@graphql-codegen/plugin-helpers";
 import {
   ArgDefinition,
+  Doc,
   getArgList,
   getOptionalVariables,
   getRequiredVariables,
+  lowerFirst,
   nonNullable,
   PluginContext,
   printList,
+  printPrefixedMutationName,
   printPascal,
   printTypescriptType,
   reduceNonNullType,
@@ -60,10 +63,24 @@ export function parseOperations(
   const operations = getOperations(documents);
 
   return operations.reduce<SdkDefinitions>((acc, node) => {
-    const path = (node.name?.value ?? "").split("_");
+    const nodeName = node.name?.value ?? "";
+    let path;
+
+    if (
+      node.operation === "mutation" &&
+      hasBeenTransformed(
+        nodeName,
+        context.mutations.map(mutationNode => mutationNode.name.value)
+      )
+    ) {
+      path = restoreSuffixedMutationName(nodeName).split("_");
+    } else {
+      path = nodeName.split("_");
+    }
+
     const sdkPath = path.slice(0, path.length - 1);
     const sdkKey = sdkPath.join("_");
-    const operationName = printPascal(node.name?.value);
+    const operationName = printPascal(nodeName);
     const operationType = printPascal(node.operation);
 
     /** Identify returned field node */
@@ -84,7 +101,7 @@ export function parseOperations(
     /** Find a matching query or mutation for descriptions */
     const query =
       context.queries.find(q => q.name.value === node.name?.value) ??
-      context.mutations.find(q => q.name.value === node.name?.value);
+      context.mutations.find(m => printPrefixedMutationName(m.name.value) === node.name?.value);
 
     /** Identify list types */
     const queryType = printTypescriptType(context, query?.type);
@@ -211,4 +228,25 @@ export function parseOperations(
       },
     };
   }, {});
+}
+
+/**
+ * Checks whether a mutation has been transformed into a prefixed form.
+ * @param nodeName The current name of the node.
+ * @param originalMutations The list of mutations before any modification.
+ */
+function hasBeenTransformed(nodeName: string, originalMutations: string[]): boolean {
+  return !originalMutations.includes(nodeName);
+}
+
+/**
+ * Restores the original suffixed mutation name
+ * @param nodeName The prefixed mutation name
+ */
+function restoreSuffixedMutationName(nodeName: string): string {
+  const mutationType = Doc.MUTATION_TYPES.find(type => nodeName.startsWith(type));
+  if (mutationType) {
+    return lowerFirst(`${nodeName.replace(mutationType, "")}${upperFirst(mutationType)}`);
+  }
+  return nodeName;
 }

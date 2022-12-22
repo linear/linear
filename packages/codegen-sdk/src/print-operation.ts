@@ -100,13 +100,17 @@ function printOperationCall(context: SdkPluginContext, operation: SdkOperation):
     ? printObjectInstantiationSwitch(implementations, operation)
     : printObjectInstantiation(operation);
 
+  const isNullableConnectionOperation = isConnectionModel(operation.model) && !operation.nonNull;
+
   return printLines([
     `public async ${Sdk.FETCH_NAME}(${operation.fetchArgs.printInput}): ${operation.print.promise} {
       const ${Sdk.RESPONSE_NAME} = await this._${Sdk.REQUEST_NAME}<${responseType}, ${
       operation.print.variables
     }>(${printList([operation.print.document, printOperationArgs(operation)])})
         ${printSet(`const ${Sdk.DATA_NAME}`, `${operation.print.responsePath}`)}
+        ${isNullableConnectionOperation ? `if(${Sdk.DATA_NAME}){` : ""}
         ${operationCall}
+        ${isNullableConnectionOperation ? `} else { return ${Sdk.UNDEFINED};}` : ""}
       }
     `,
   ]);
@@ -140,11 +144,13 @@ function printObjectInstantiationSwitch(impl: string[], op: SdkOperation, nodeNa
   }
 
   switch (${nodeName}.__typename) {
-    ${impl.map(
-      objectType => `case "${objectType}":
+    ${impl
+      .map(
+        objectType => `case "${objectType}":
         return new ${objectType}(this._${Sdk.REQUEST_NAME}, ${nodeName} as L.${objectType}Fragment)
       `
-    )}
+      )
+      .join("")}
 
     default:
       return new ${name}(this._${Sdk.REQUEST_NAME}, ${nodeName})

@@ -91,14 +91,6 @@ export class FragmentVisitor {
         `fragment ${node.name} on ${node.name} {
           __typename
           ${printLines(node.fields.sort())}
-          ${(
-            this._context.interfaceImplementations[node.name]?.map(
-              obj => `
-                ... on ${obj.name.value} {
-                  ... ${obj.name.value}
-                }`
-            ) ?? []
-          ).join("\n")}
           }
         `,
       ]);

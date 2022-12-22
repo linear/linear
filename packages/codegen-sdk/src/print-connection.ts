@@ -251,12 +251,14 @@ export function printConnectionModel(context: SdkPluginContext, model: SdkModel)
   if (returnsInterface) {
     nodesCall = `${Sdk.DATA_NAME}.${Sdk.NODE_NAME}.map(node => {
       switch (node.__typename) {
-        ${implementations.map(
-          objectType =>
-            `case "${objectType}":
+        ${implementations
+          .map(
+            objectType =>
+              `case "${objectType}":
             return new ${objectType}(${Sdk.REQUEST_NAME}, node as L.${objectType}Fragment)
           `
-        )}
+          )
+          .join("")}
         default:
           return new ${modelType}(${Sdk.REQUEST_NAME}, node)
       }

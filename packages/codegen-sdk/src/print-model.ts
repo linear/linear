@@ -13,7 +13,7 @@ import {
   reduceNonNullType,
 } from "@linear/codegen-doc";
 import { Sdk } from "./constants";
-import { findMutations, getMutationName } from "./mutation";
+import { findMutations, getMutationTypeFromName } from "./mutation";
 import { isConnectionModel, printConnectionModel } from "./print-connection";
 import { getRequestArg } from "./print-request";
 import { printModelScalar } from "./print-scalar";
@@ -249,7 +249,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             return printLines([
               printComment([field.description?.value]),
               printDebug(operation),
-              `public ${getMutationName(model, operation.name)}(${printList([mutationArgs.printInput]) ?? ""}) {
+              `public ${getMutationTypeFromName(model, operation.key)}(${printList([mutationArgs.printInput]) ?? ""}) {
                 return ${reduceNonNullType(field.type) ? operationCall : printTernary(variableCheck, operationCall)}
               }`,
             ]);

@@ -146,7 +146,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
   let teamId: string | undefined;
   if (importAnswers.newTeam) {
     // Create a new team
-    const teamResponse = await client.teamCreate({
+    const teamResponse = await client.createTeam({
       name: importAnswers.teamName as string,
     });
     const team = await teamResponse?.team;
@@ -188,7 +188,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
     let actualLabelId = existingLabelMap[labelName.toLowerCase()];
 
     if (!actualLabelId) {
-      const labelResponse = await client.issueLabelCreate({
+      const labelResponse = await client.createIssueLabel({
         name: labelName,
         description: label.description,
         color: label.color,
@@ -242,7 +242,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       } else if (issue.startedAt) {
         stateType = "started";
       }
-      const newStateResult = await client.workflowStateCreate({
+      const newStateResult = await client.createWorkflowState({
         name: issue.status,
         teamId,
         color: defaultStateColors[stateType],
@@ -270,7 +270,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
     const formattedDueDate = issue.dueDate ? format(issue.dueDate, "yyyy-MM-dd") : undefined;
 
-    await client.issueCreate({
+    await client.createIssue({
       teamId,
       projectId: projectId as unknown as string,
       title: issue.title,

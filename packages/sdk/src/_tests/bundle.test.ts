@@ -129,7 +129,7 @@ Object.entries(bundles).map(([bundleFormat, bundle]) =>
 
         /** Create issue */
         const createdInput = { title: `title ${uuid()}`, description: `description ${uuid()}` };
-        const created = await client.issueCreate({ teamId: team?.id ?? "", ...createdInput });
+        const created = await client.createIssue({ teamId: team?.id ?? "", ...createdInput });
         const createdIssue = await created?.issue;
 
         if (process.env.E2E) {

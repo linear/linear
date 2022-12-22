@@ -183,6 +183,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the team.integrationsSettings query for L.IntegrationsSettings */
+    it("team.integrationsSettings", async () => {
+      if (_team) {
+        const team_integrationsSettings: L.IntegrationsSettings | undefined = await _team.integrationsSettings;
+        expect(team_integrationsSettings instanceof L.IntegrationsSettings);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.integrationsSettings query");
+      }
+    });
+
     /** Test the team.markedAsDuplicateWorkflowState query for L.WorkflowState */
     it("team.markedAsDuplicateWorkflowState", async () => {
       if (_team) {
@@ -245,12 +255,30 @@ describe("generated", () => {
     });
   });
 
+  /** Test all ApiKey queries */
+  describe("ApiKeys", () => {
+    /** Test the root connection query for the ApiKey */
+    it("apiKeys", async () => {
+      const apiKeys: L.ApiKeyConnection | undefined = await client.apiKeys();
+      expect(apiKeys instanceof L.ApiKeyConnection);
+    });
+  });
+
   /** Test ApplicationInfo query */
   describe("ApplicationInfo", () => {
     /** Test the root model query for ApplicationInfo */
     it("applicationInfo", async () => {
       const applicationInfo: L.Application | undefined = await client.applicationInfo("mock-clientId");
       expect(applicationInfo instanceof L.Application);
+    });
+  });
+
+  /** Test ApplicationInfoByIds query */
+  describe("ApplicationInfoByIds", () => {
+    /** Test the root model query for ApplicationInfoByIds */
+    it("applicationInfoByIds", async () => {
+      const applicationInfoByIds: L.Application[] | undefined = await client.applicationInfoByIds(["mock-ids"]);
+      applicationInfoByIds?.map(node => expect(node instanceof L.Application));
     });
   });
 
@@ -481,53 +509,6 @@ describe("generated", () => {
     it("availableUsers", async () => {
       const availableUsers: L.AuthResolverResponse | undefined = await client.availableUsers;
       expect(availableUsers instanceof L.AuthResolverResponse);
-    });
-  });
-
-  /** Test BillingDetails query */
-  describe("BillingDetails", () => {
-    let _billingDetails: L.BillingDetailsPayload | undefined;
-
-    /** Test the root model query for BillingDetails */
-    it("billingDetails", async () => {
-      const billingDetails: L.BillingDetailsPayload | undefined = await client.billingDetails;
-      _billingDetails = billingDetails;
-      expect(billingDetails instanceof L.BillingDetailsPayload);
-    });
-
-    /** Test the billingDetails model query for BillingDetails_PaymentMethod */
-    it("billingDetails.paymentMethod", async () => {
-      if (_billingDetails) {
-        const paymentMethod: L.Card | undefined = _billingDetails.paymentMethod;
-        expect(paymentMethod instanceof L.Card);
-      } else {
-        console.warn("codegen-doc:print: No billingDetails found - cannot test _billingDetails.paymentMethod query");
-      }
-    });
-  });
-
-  /** Test CollaborativeDocumentJoin query */
-  describe("CollaborativeDocumentJoin", () => {
-    let _collaborativeDocumentJoin: L.CollaborationDocumentUpdatePayload | undefined;
-
-    /** Test the root model query for CollaborativeDocumentJoin */
-    it("collaborativeDocumentJoin", async () => {
-      const collaborativeDocumentJoin: L.CollaborationDocumentUpdatePayload | undefined =
-        await client.collaborativeDocumentJoin("mock-clientId", "mock-issueId", 123);
-      _collaborativeDocumentJoin = collaborativeDocumentJoin;
-      expect(collaborativeDocumentJoin instanceof L.CollaborationDocumentUpdatePayload);
-    });
-
-    /** Test the collaborativeDocumentJoin model query for CollaborativeDocumentJoin_Steps */
-    it("collaborativeDocumentJoin.steps", async () => {
-      if (_collaborativeDocumentJoin) {
-        const steps: L.StepsResponse | undefined = _collaborativeDocumentJoin.steps;
-        expect(steps instanceof L.StepsResponse);
-      } else {
-        console.warn(
-          "codegen-doc:print: No collaborativeDocumentJoin found - cannot test _collaborativeDocumentJoin.steps query"
-        );
-      }
     });
   });
 
@@ -930,6 +911,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the favorite.roadmap query for L.Roadmap */
+    it("favorite.roadmap", async () => {
+      if (_favorite) {
+        const favorite_roadmap: L.Roadmap | undefined = await _favorite.roadmap;
+        expect(favorite_roadmap instanceof L.Roadmap);
+      } else {
+        console.warn("codegen-doc:print: No Favorite found - cannot test favorite.roadmap query");
+      }
+    });
+
     /** Test the favorite.user query for L.User */
     it("favorite.user", async () => {
       if (_favorite) {
@@ -959,6 +950,104 @@ describe("generated", () => {
         expect(figmaEmbed instanceof L.FigmaEmbed);
       } else {
         console.warn("codegen-doc:print: No figmaEmbedInfo found - cannot test _figmaEmbedInfo.figmaEmbed query");
+      }
+    });
+  });
+
+  /** Test all Initiative queries */
+  describe("Initiatives", () => {
+    let _initiative: L.Initiative | undefined;
+    let _initiative_id: string | undefined;
+
+    /** Test the root connection query for the Initiative */
+    it("initiatives", async () => {
+      const initiatives: L.InitiativeConnection | undefined = await client.initiatives();
+      const initiative = initiatives?.nodes?.[0];
+      _initiative_id = initiative?.id;
+      expect(initiatives instanceof L.InitiativeConnection);
+    });
+
+    /** Test the root query for a single Initiative */
+    it("initiative", async () => {
+      if (_initiative_id) {
+        const initiative: L.Initiative | undefined = await client.initiative(_initiative_id);
+        _initiative = initiative;
+        expect(initiative instanceof L.Initiative);
+      } else {
+        console.warn("codegen-doc:print: No first Initiative found in connection - cannot test initiative query");
+      }
+    });
+
+    /** Test the initiative connection query for the Project */
+    it("initiative.projects", async () => {
+      if (_initiative) {
+        const projects: L.ProjectConnection | undefined = await _initiative.projects();
+        expect(projects instanceof L.ProjectConnection);
+      } else {
+        console.warn("codegen-doc:print: No initiative found - cannot test _initiative.projects query");
+      }
+    });
+
+    /** Test the initiative.organization query for L.Organization */
+    it("initiative.organization", async () => {
+      if (_initiative) {
+        const initiative_organization: L.Organization | undefined = await _initiative.organization;
+        expect(initiative_organization instanceof L.Organization);
+      } else {
+        console.warn("codegen-doc:print: No Initiative found - cannot test initiative.organization query");
+      }
+    });
+  });
+
+  /** Test all IntegrationTemplate queries */
+  describe("IntegrationTemplates", () => {
+    let _integrationTemplate: L.IntegrationTemplate | undefined;
+    let _integrationTemplate_id: string | undefined;
+
+    /** Test the root connection query for the IntegrationTemplate */
+    it("integrationTemplates", async () => {
+      const integrationTemplates: L.IntegrationTemplateConnection | undefined = await client.integrationTemplates();
+      const integrationTemplate = integrationTemplates?.nodes?.[0];
+      _integrationTemplate_id = integrationTemplate?.id;
+      expect(integrationTemplates instanceof L.IntegrationTemplateConnection);
+    });
+
+    /** Test the root query for a single IntegrationTemplate */
+    it("integrationTemplate", async () => {
+      if (_integrationTemplate_id) {
+        const integrationTemplate: L.IntegrationTemplate | undefined = await client.integrationTemplate(
+          _integrationTemplate_id
+        );
+        _integrationTemplate = integrationTemplate;
+        expect(integrationTemplate instanceof L.IntegrationTemplate);
+      } else {
+        console.warn(
+          "codegen-doc:print: No first IntegrationTemplate found in connection - cannot test integrationTemplate query"
+        );
+      }
+    });
+
+    /** Test the integrationTemplate.integration query for L.Integration */
+    it("integrationTemplate.integration", async () => {
+      if (_integrationTemplate) {
+        const integrationTemplate_integration: L.Integration | undefined = await _integrationTemplate.integration;
+        expect(integrationTemplate_integration instanceof L.Integration);
+      } else {
+        console.warn(
+          "codegen-doc:print: No IntegrationTemplate found - cannot test integrationTemplate.integration query"
+        );
+      }
+    });
+
+    /** Test the integrationTemplate.template query for L.Template */
+    it("integrationTemplate.template", async () => {
+      if (_integrationTemplate) {
+        const integrationTemplate_template: L.Template | undefined = await _integrationTemplate.template;
+        expect(integrationTemplate_template instanceof L.Template);
+      } else {
+        console.warn(
+          "codegen-doc:print: No IntegrationTemplate found - cannot test integrationTemplate.template query"
+        );
       }
     });
   });
@@ -1018,6 +1107,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test IntegrationsSettings query */
+  describe("IntegrationsSettings", () => {
+    /** Test the root model query for IntegrationsSettings */
+    it("integrationsSettings", async () => {
+      const integrationsSettings: L.IntegrationsSettings | undefined = await client.integrationsSettings("mock-id");
+      expect(integrationsSettings instanceof L.IntegrationsSettings);
+    });
+  });
+
   /** Test IssueImportFinishGithubOAuth query */
   describe("IssueImportFinishGithubOAuth", () => {
     /** Test the root model query for IssueImportFinishGithubOAuth */
@@ -1052,6 +1150,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issueLabel connection query for the IssueLabel */
+    it("issueLabel.children", async () => {
+      if (_issueLabel) {
+        const children: L.IssueLabelConnection | undefined = await _issueLabel.children();
+        expect(children instanceof L.IssueLabelConnection);
+      } else {
+        console.warn("codegen-doc:print: No issueLabel found - cannot test _issueLabel.children query");
+      }
+    });
+
     /** Test the issueLabel connection query for the Issue */
     it("issueLabel.issues", async () => {
       if (_issueLabel) {
@@ -1079,6 +1187,16 @@ describe("generated", () => {
         expect(issueLabel_organization instanceof L.Organization);
       } else {
         console.warn("codegen-doc:print: No IssueLabel found - cannot test issueLabel.organization query");
+      }
+    });
+
+    /** Test the issueLabel.parent query for L.IssueLabel */
+    it("issueLabel.parent", async () => {
+      if (_issueLabel) {
+        const issueLabel_parent: L.IssueLabel | undefined = await _issueLabel.parent;
+        expect(issueLabel_parent instanceof L.IssueLabel);
+      } else {
+        console.warn("codegen-doc:print: No IssueLabel found - cannot test issueLabel.parent query");
       }
     });
 
@@ -1332,6 +1450,114 @@ describe("generated", () => {
     });
   });
 
+  /** Test IssueVcsBranchSearch query */
+  describe("IssueVcsBranchSearch", () => {
+    let _issueVcsBranchSearch: L.Issue | undefined;
+
+    /** Test the root model query for IssueVcsBranchSearch */
+    it("issueVcsBranchSearch", async () => {
+      const issueVcsBranchSearch: L.Issue | undefined = await client.issueVcsBranchSearch("mock-branchName");
+      _issueVcsBranchSearch = issueVcsBranchSearch;
+      expect(issueVcsBranchSearch instanceof L.Issue);
+    });
+
+    /** Test the issueVcsBranchSearch connection query for the Attachment */
+    it("issueVcsBranchSearch.attachments", async () => {
+      if (_issueVcsBranchSearch) {
+        const attachments: L.AttachmentConnection | undefined = await _issueVcsBranchSearch.attachments();
+        expect(attachments instanceof L.AttachmentConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.attachments query"
+        );
+      }
+    });
+
+    /** Test the issueVcsBranchSearch connection query for the Issue */
+    it("issueVcsBranchSearch.children", async () => {
+      if (_issueVcsBranchSearch) {
+        const children: L.IssueConnection | undefined = await _issueVcsBranchSearch.children();
+        expect(children instanceof L.IssueConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.children query"
+        );
+      }
+    });
+
+    /** Test the issueVcsBranchSearch connection query for the Comment */
+    it("issueVcsBranchSearch.comments", async () => {
+      if (_issueVcsBranchSearch) {
+        const comments: L.CommentConnection | undefined = await _issueVcsBranchSearch.comments();
+        expect(comments instanceof L.CommentConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.comments query"
+        );
+      }
+    });
+
+    /** Test the issueVcsBranchSearch connection query for the IssueHistory */
+    it("issueVcsBranchSearch.history", async () => {
+      if (_issueVcsBranchSearch) {
+        const history: L.IssueHistoryConnection | undefined = await _issueVcsBranchSearch.history();
+        expect(history instanceof L.IssueHistoryConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.history query"
+        );
+      }
+    });
+
+    /** Test the issueVcsBranchSearch connection query for the IssueRelation */
+    it("issueVcsBranchSearch.inverseRelations", async () => {
+      if (_issueVcsBranchSearch) {
+        const inverseRelations: L.IssueRelationConnection | undefined = await _issueVcsBranchSearch.inverseRelations();
+        expect(inverseRelations instanceof L.IssueRelationConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.inverseRelations query"
+        );
+      }
+    });
+
+    /** Test the issueVcsBranchSearch connection query for the IssueLabel */
+    it("issueVcsBranchSearch.labels", async () => {
+      if (_issueVcsBranchSearch) {
+        const labels: L.IssueLabelConnection | undefined = await _issueVcsBranchSearch.labels();
+        expect(labels instanceof L.IssueLabelConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.labels query"
+        );
+      }
+    });
+
+    /** Test the issueVcsBranchSearch connection query for the IssueRelation */
+    it("issueVcsBranchSearch.relations", async () => {
+      if (_issueVcsBranchSearch) {
+        const relations: L.IssueRelationConnection | undefined = await _issueVcsBranchSearch.relations();
+        expect(relations instanceof L.IssueRelationConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.relations query"
+        );
+      }
+    });
+
+    /** Test the issueVcsBranchSearch connection query for the User */
+    it("issueVcsBranchSearch.subscribers", async () => {
+      if (_issueVcsBranchSearch) {
+        const subscribers: L.UserConnection | undefined = await _issueVcsBranchSearch.subscribers();
+        expect(subscribers instanceof L.UserConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.subscribers query"
+        );
+      }
+    });
+  });
+
   /** Test all Issue queries */
   describe("Issues", () => {
     let _issue: L.Issue | undefined;
@@ -1564,7 +1790,11 @@ describe("generated", () => {
 
   /** Test all NotificationSubscription queries */
   describe("NotificationSubscriptions", () => {
-    let _notificationSubscription: L.NotificationSubscription | undefined;
+    let _notificationSubscription:
+      | L.NotificationSubscription
+      | L.ProjectNotificationSubscription
+      | L.TeamNotificationSubscription
+      | undefined;
     let _notificationSubscription_id: string | undefined;
 
     /** Test the root connection query for the NotificationSubscription */
@@ -1579,9 +1809,11 @@ describe("generated", () => {
     /** Test the root query for a single NotificationSubscription */
     it("notificationSubscription", async () => {
       if (_notificationSubscription_id) {
-        const notificationSubscription: L.NotificationSubscription | undefined = await client.notificationSubscription(
-          _notificationSubscription_id
-        );
+        const notificationSubscription:
+          | L.NotificationSubscription
+          | L.ProjectNotificationSubscription
+          | L.TeamNotificationSubscription
+          | undefined = await client.notificationSubscription(_notificationSubscription_id);
         _notificationSubscription = notificationSubscription;
         expect(notificationSubscription instanceof L.NotificationSubscription);
       } else {
@@ -1630,7 +1862,12 @@ describe("generated", () => {
 
   /** Test all Notification queries */
   describe("Notifications", () => {
-    let _notification: L.Notification | L.IssueNotification | undefined;
+    let _notification:
+      | L.Notification
+      | L.IssueNotification
+      | L.OauthClientApprovalNotification
+      | L.ProjectNotification
+      | undefined;
     let _notification_id: string | undefined;
 
     /** Test the root connection query for the Notification */
@@ -1644,13 +1881,26 @@ describe("generated", () => {
     /** Test the root query for a single Notification */
     it("notification", async () => {
       if (_notification_id) {
-        const notification: L.Notification | L.IssueNotification | undefined = await client.notification(
-          _notification_id
-        );
+        const notification:
+          | L.Notification
+          | L.IssueNotification
+          | L.OauthClientApprovalNotification
+          | L.ProjectNotification
+          | undefined = await client.notification(_notification_id);
         _notification = notification;
         expect(notification instanceof L.Notification);
       } else {
         console.warn("codegen-doc:print: No first Notification found in connection - cannot test notification query");
+      }
+    });
+
+    /** Test the notification.actor query for L.User */
+    it("notification.actor", async () => {
+      if (_notification) {
+        const notification_actor: L.User | undefined = await _notification.actor;
+        expect(notification_actor instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Notification found - cannot test notification.actor query");
       }
     });
 
@@ -1706,6 +1956,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the organization model query for Organization_Subscription */
+    it("organization.subscription", async () => {
+      if (_organization) {
+        const subscription: L.PaidSubscription | undefined = _organization.subscription;
+        expect(subscription instanceof L.PaidSubscription);
+      } else {
+        console.warn("codegen-doc:print: No organization found - cannot test _organization.subscription query");
+      }
+    });
+
     /** Test the organization connection query for the Team */
     it("organization.teams", async () => {
       if (_organization) {
@@ -1734,6 +1994,16 @@ describe("generated", () => {
       } else {
         console.warn("codegen-doc:print: No organization found - cannot test _organization.users query");
       }
+    });
+  });
+
+  /** Test OrganizationDomainClaimRequest query */
+  describe("OrganizationDomainClaimRequest", () => {
+    /** Test the root model query for OrganizationDomainClaimRequest */
+    it("organizationDomainClaimRequest", async () => {
+      const organizationDomainClaimRequest: L.OrganizationDomainClaimPayload | undefined =
+        await client.organizationDomainClaimRequest("mock-id");
+      expect(organizationDomainClaimRequest instanceof L.OrganizationDomainClaimPayload);
     });
   });
 
@@ -1864,6 +2134,106 @@ describe("generated", () => {
     });
   });
 
+  /** Test all ProjectUpdateInteraction queries */
+  describe("ProjectUpdateInteractions", () => {
+    let _projectUpdateInteraction: L.ProjectUpdateInteraction | undefined;
+    let _projectUpdateInteraction_id: string | undefined;
+
+    /** Test the root connection query for the ProjectUpdateInteraction */
+    it("projectUpdateInteractions", async () => {
+      const projectUpdateInteractions: L.ProjectUpdateInteractionConnection | undefined =
+        await client.projectUpdateInteractions();
+      const projectUpdateInteraction = projectUpdateInteractions?.nodes?.[0];
+      _projectUpdateInteraction_id = projectUpdateInteraction?.id;
+      expect(projectUpdateInteractions instanceof L.ProjectUpdateInteractionConnection);
+    });
+
+    /** Test the root query for a single ProjectUpdateInteraction */
+    it("projectUpdateInteraction", async () => {
+      if (_projectUpdateInteraction_id) {
+        const projectUpdateInteraction: L.ProjectUpdateInteraction | undefined = await client.projectUpdateInteraction(
+          _projectUpdateInteraction_id
+        );
+        _projectUpdateInteraction = projectUpdateInteraction;
+        expect(projectUpdateInteraction instanceof L.ProjectUpdateInteraction);
+      } else {
+        console.warn(
+          "codegen-doc:print: No first ProjectUpdateInteraction found in connection - cannot test projectUpdateInteraction query"
+        );
+      }
+    });
+
+    /** Test the projectUpdateInteraction.projectUpdate query for L.ProjectUpdate */
+    it("projectUpdateInteraction.projectUpdate", async () => {
+      if (_projectUpdateInteraction) {
+        const projectUpdateInteraction_projectUpdate: L.ProjectUpdate | undefined =
+          await _projectUpdateInteraction.projectUpdate;
+        expect(projectUpdateInteraction_projectUpdate instanceof L.ProjectUpdate);
+      } else {
+        console.warn(
+          "codegen-doc:print: No ProjectUpdateInteraction found - cannot test projectUpdateInteraction.projectUpdate query"
+        );
+      }
+    });
+
+    /** Test the projectUpdateInteraction.user query for L.User */
+    it("projectUpdateInteraction.user", async () => {
+      if (_projectUpdateInteraction) {
+        const projectUpdateInteraction_user: L.User | undefined = await _projectUpdateInteraction.user;
+        expect(projectUpdateInteraction_user instanceof L.User);
+      } else {
+        console.warn(
+          "codegen-doc:print: No ProjectUpdateInteraction found - cannot test projectUpdateInteraction.user query"
+        );
+      }
+    });
+  });
+
+  /** Test all ProjectUpdate queries */
+  describe("ProjectUpdates", () => {
+    let _projectUpdate: L.ProjectUpdate | undefined;
+    let _projectUpdate_id: string | undefined;
+
+    /** Test the root connection query for the ProjectUpdate */
+    it("projectUpdates", async () => {
+      const projectUpdates: L.ProjectUpdateConnection | undefined = await client.projectUpdates();
+      const projectUpdate = projectUpdates?.nodes?.[0];
+      _projectUpdate_id = projectUpdate?.id;
+      expect(projectUpdates instanceof L.ProjectUpdateConnection);
+    });
+
+    /** Test the root query for a single ProjectUpdate */
+    it("projectUpdate", async () => {
+      if (_projectUpdate_id) {
+        const projectUpdate: L.ProjectUpdate | undefined = await client.projectUpdate(_projectUpdate_id);
+        _projectUpdate = projectUpdate;
+        expect(projectUpdate instanceof L.ProjectUpdate);
+      } else {
+        console.warn("codegen-doc:print: No first ProjectUpdate found in connection - cannot test projectUpdate query");
+      }
+    });
+
+    /** Test the projectUpdate.project query for L.Project */
+    it("projectUpdate.project", async () => {
+      if (_projectUpdate) {
+        const projectUpdate_project: L.Project | undefined = await _projectUpdate.project;
+        expect(projectUpdate_project instanceof L.Project);
+      } else {
+        console.warn("codegen-doc:print: No ProjectUpdate found - cannot test projectUpdate.project query");
+      }
+    });
+
+    /** Test the projectUpdate.user query for L.User */
+    it("projectUpdate.user", async () => {
+      if (_projectUpdate) {
+        const projectUpdate_user: L.User | undefined = await _projectUpdate.user;
+        expect(projectUpdate_user instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No ProjectUpdate found - cannot test projectUpdate.user query");
+      }
+    });
+  });
+
   /** Test all Project queries */
   describe("Projects", () => {
     let _project: L.Project | undefined;
@@ -1928,6 +2298,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the project connection query for the ProjectUpdate */
+    it("project.projectUpdates", async () => {
+      if (_project) {
+        const projectUpdates: L.ProjectUpdateConnection | undefined = await _project.projectUpdates();
+        expect(projectUpdates instanceof L.ProjectUpdateConnection);
+      } else {
+        console.warn("codegen-doc:print: No project found - cannot test _project.projectUpdates query");
+      }
+    });
+
     /** Test the project connection query for the Team */
     it("project.teams", async () => {
       if (_project) {
@@ -1938,6 +2318,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the project.convertedFromIssue query for L.Issue */
+    it("project.convertedFromIssue", async () => {
+      if (_project) {
+        const project_convertedFromIssue: L.Issue | undefined = await _project.convertedFromIssue;
+        expect(project_convertedFromIssue instanceof L.Issue);
+      } else {
+        console.warn("codegen-doc:print: No Project found - cannot test project.convertedFromIssue query");
+      }
+    });
+
     /** Test the project.creator query for L.User */
     it("project.creator", async () => {
       if (_project) {
@@ -1945,6 +2335,26 @@ describe("generated", () => {
         expect(project_creator instanceof L.User);
       } else {
         console.warn("codegen-doc:print: No Project found - cannot test project.creator query");
+      }
+    });
+
+    /** Test the project.initiative query for L.Initiative */
+    it("project.initiative", async () => {
+      if (_project) {
+        const project_initiative: L.Initiative | undefined = await _project.initiative;
+        expect(project_initiative instanceof L.Initiative);
+      } else {
+        console.warn("codegen-doc:print: No Project found - cannot test project.initiative query");
+      }
+    });
+
+    /** Test the project.integrationsSettings query for L.IntegrationsSettings */
+    it("project.integrationsSettings", async () => {
+      if (_project) {
+        const project_integrationsSettings: L.IntegrationsSettings | undefined = await _project.integrationsSettings;
+        expect(project_integrationsSettings instanceof L.IntegrationsSettings);
+      } else {
+        console.warn("codegen-doc:print: No Project found - cannot test project.integrationsSettings query");
       }
     });
 
@@ -1987,47 +2397,114 @@ describe("generated", () => {
     });
   });
 
-  /** Test all Reaction queries */
-  describe("Reactions", () => {
-    let _reaction: L.Reaction | undefined;
-    let _reaction_id: string | undefined;
+  /** Test all RoadmapToProject queries */
+  describe("RoadmapToProjects", () => {
+    let _roadmapToProject: L.RoadmapToProject | undefined;
+    let _roadmapToProject_id: string | undefined;
 
-    /** Test the root connection query for the Reaction */
-    it("reactions", async () => {
-      const reactions: L.ReactionConnection | undefined = await client.reactions();
-      const reaction = reactions?.nodes?.[0];
-      _reaction_id = reaction?.id;
-      expect(reactions instanceof L.ReactionConnection);
+    /** Test the root connection query for the RoadmapToProject */
+    it("roadmapToProjects", async () => {
+      const roadmapToProjects: L.RoadmapToProjectConnection | undefined = await client.roadmapToProjects();
+      const roadmapToProject = roadmapToProjects?.nodes?.[0];
+      _roadmapToProject_id = roadmapToProject?.id;
+      expect(roadmapToProjects instanceof L.RoadmapToProjectConnection);
     });
 
-    /** Test the root query for a single Reaction */
-    it("reaction", async () => {
-      if (_reaction_id) {
-        const reaction: L.Reaction | undefined = await client.reaction(_reaction_id);
-        _reaction = reaction;
-        expect(reaction instanceof L.Reaction);
+    /** Test the root query for a single RoadmapToProject */
+    it("roadmapToProject", async () => {
+      if (_roadmapToProject_id) {
+        const roadmapToProject: L.RoadmapToProject | undefined = await client.roadmapToProject(_roadmapToProject_id);
+        _roadmapToProject = roadmapToProject;
+        expect(roadmapToProject instanceof L.RoadmapToProject);
       } else {
-        console.warn("codegen-doc:print: No first Reaction found in connection - cannot test reaction query");
+        console.warn(
+          "codegen-doc:print: No first RoadmapToProject found in connection - cannot test roadmapToProject query"
+        );
       }
     });
 
-    /** Test the reaction.comment query for L.Comment */
-    it("reaction.comment", async () => {
-      if (_reaction) {
-        const reaction_comment: L.Comment | undefined = await _reaction.comment;
-        expect(reaction_comment instanceof L.Comment);
+    /** Test the roadmapToProject.project query for L.Project */
+    it("roadmapToProject.project", async () => {
+      if (_roadmapToProject) {
+        const roadmapToProject_project: L.Project | undefined = await _roadmapToProject.project;
+        expect(roadmapToProject_project instanceof L.Project);
       } else {
-        console.warn("codegen-doc:print: No Reaction found - cannot test reaction.comment query");
+        console.warn("codegen-doc:print: No RoadmapToProject found - cannot test roadmapToProject.project query");
       }
     });
 
-    /** Test the reaction.user query for L.User */
-    it("reaction.user", async () => {
-      if (_reaction) {
-        const reaction_user: L.User | undefined = await _reaction.user;
-        expect(reaction_user instanceof L.User);
+    /** Test the roadmapToProject.roadmap query for L.Roadmap */
+    it("roadmapToProject.roadmap", async () => {
+      if (_roadmapToProject) {
+        const roadmapToProject_roadmap: L.Roadmap | undefined = await _roadmapToProject.roadmap;
+        expect(roadmapToProject_roadmap instanceof L.Roadmap);
       } else {
-        console.warn("codegen-doc:print: No Reaction found - cannot test reaction.user query");
+        console.warn("codegen-doc:print: No RoadmapToProject found - cannot test roadmapToProject.roadmap query");
+      }
+    });
+  });
+
+  /** Test all Roadmap queries */
+  describe("Roadmaps", () => {
+    let _roadmap: L.Roadmap | undefined;
+    let _roadmap_id: string | undefined;
+
+    /** Test the root connection query for the Roadmap */
+    it("roadmaps", async () => {
+      const roadmaps: L.RoadmapConnection | undefined = await client.roadmaps();
+      const roadmap = roadmaps?.nodes?.[0];
+      _roadmap_id = roadmap?.id;
+      expect(roadmaps instanceof L.RoadmapConnection);
+    });
+
+    /** Test the root query for a single Roadmap */
+    it("roadmap", async () => {
+      if (_roadmap_id) {
+        const roadmap: L.Roadmap | undefined = await client.roadmap(_roadmap_id);
+        _roadmap = roadmap;
+        expect(roadmap instanceof L.Roadmap);
+      } else {
+        console.warn("codegen-doc:print: No first Roadmap found in connection - cannot test roadmap query");
+      }
+    });
+
+    /** Test the roadmap connection query for the Project */
+    it("roadmap.projects", async () => {
+      if (_roadmap) {
+        const projects: L.ProjectConnection | undefined = await _roadmap.projects();
+        expect(projects instanceof L.ProjectConnection);
+      } else {
+        console.warn("codegen-doc:print: No roadmap found - cannot test _roadmap.projects query");
+      }
+    });
+
+    /** Test the roadmap.creator query for L.User */
+    it("roadmap.creator", async () => {
+      if (_roadmap) {
+        const roadmap_creator: L.User | undefined = await _roadmap.creator;
+        expect(roadmap_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Roadmap found - cannot test roadmap.creator query");
+      }
+    });
+
+    /** Test the roadmap.organization query for L.Organization */
+    it("roadmap.organization", async () => {
+      if (_roadmap) {
+        const roadmap_organization: L.Organization | undefined = await _roadmap.organization;
+        expect(roadmap_organization instanceof L.Organization);
+      } else {
+        console.warn("codegen-doc:print: No Roadmap found - cannot test roadmap.organization query");
+      }
+    });
+
+    /** Test the roadmap.owner query for L.User */
+    it("roadmap.owner", async () => {
+      if (_roadmap) {
+        const roadmap_owner: L.User | undefined = await _roadmap.owner;
+        expect(roadmap_owner instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Roadmap found - cannot test roadmap.owner query");
       }
     });
   });
@@ -2038,15 +2515,6 @@ describe("generated", () => {
     it("ssoUrlFromEmail", async () => {
       const ssoUrlFromEmail: L.SsoUrlFromEmailResponse | undefined = await client.ssoUrlFromEmail("mock-email");
       expect(ssoUrlFromEmail instanceof L.SsoUrlFromEmailResponse);
-    });
-  });
-
-  /** Test Subscription query */
-  describe("Subscription", () => {
-    /** Test the root model query for Subscription */
-    it("subscription", async () => {
-      const subscription: L.Subscription | undefined = await client.subscription;
-      expect(subscription instanceof L.Subscription);
     });
   });
 
@@ -2258,6 +2726,16 @@ describe("generated", () => {
         expect(team_draftWorkflowState instanceof L.WorkflowState);
       } else {
         console.warn("codegen-doc:print: No Team found - cannot test team.draftWorkflowState query");
+      }
+    });
+
+    /** Test the team.integrationsSettings query for L.IntegrationsSettings */
+    it("team.integrationsSettings", async () => {
+      if (_team) {
+        const team_integrationsSettings: L.IntegrationsSettings | undefined = await _team.integrationsSettings;
+        expect(team_integrationsSettings instanceof L.IntegrationsSettings);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.integrationsSettings query");
       }
     });
 
@@ -2564,6 +3042,16 @@ describe("generated", () => {
       } else {
         console.warn("codegen-doc:print: No WorkflowState found - cannot test workflowState.team query");
       }
+    });
+  });
+
+  /** Test WorkspaceAuthorizedApplications query */
+  describe("WorkspaceAuthorizedApplications", () => {
+    /** Test the root model query for WorkspaceAuthorizedApplications */
+    it("workspaceAuthorizedApplications", async () => {
+      const workspaceAuthorizedApplications: L.WorkspaceAuthorizedApplication[] | undefined =
+        await client.workspaceAuthorizedApplications;
+      workspaceAuthorizedApplications?.map(node => expect(node instanceof L.WorkspaceAuthorizedApplication));
     });
   });
 });

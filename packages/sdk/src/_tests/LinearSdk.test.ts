@@ -46,7 +46,7 @@ describe("LinearSdk", () => {
 
     try {
       await sdk.viewer;
-    } catch (error) {
+    } catch (error: any) {
       expect(error.message).toEqual(expect.stringContaining("test error"));
     }
   });
