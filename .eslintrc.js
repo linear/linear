@@ -58,7 +58,6 @@ module.exports = {
     "id-match": "error",
     "jsdoc/check-alignment": "warn",
     "jsdoc/check-indentation": "off",
-    "jsdoc/newline-after-description": "warn",
     "linebreak-style": "off",
     "no-caller": "error",
     "no-console": "warn",
