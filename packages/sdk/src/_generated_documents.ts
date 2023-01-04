@@ -9562,10 +9562,6 @@ export type WorkspaceAuthorizedApplicationFragment = { __typename: "WorkspaceAut
   "name" | "imageUrl" | "appId" | "clientId" | "scope" | "totalMembers" | "webhooksEnabled"
 > & { memberships: Array<{ __typename?: "AuthMembership" } & AuthMembershipFragment> };
 
-export type UserAccountEmailChangeVerifyCodePayloadFragment = {
-  __typename: "UserAccountEmailChangeVerifyCodePayload";
-} & Pick<UserAccountEmailChangeVerifyCodePayload, "failureReason" | "success">;
-
 export type AdminJobConfigurationPayloadFragment = { __typename: "AdminJobConfigurationPayload" } & Pick<
   AdminJobConfigurationPayload,
   "currentJob" | "delay" | "enabled" | "param"
@@ -10336,14 +10332,6 @@ export type ApplicationInfoQuery = { __typename?: "Query" } & {
   applicationInfo: { __typename?: "Application" } & ApplicationFragment;
 };
 
-export type ApplicationInfoByIdsQueryVariables = Exact<{
-  ids: Array<Scalars["String"]> | Scalars["String"];
-}>;
-
-export type ApplicationInfoByIdsQuery = { __typename?: "Query" } & {
-  applicationInfoByIds: Array<{ __typename?: "Application" } & ApplicationFragment>;
-};
-
 export type ApplicationWithAuthorizationQueryVariables = Exact<{
   actor?: Maybe<Scalars["String"]>;
   clientId: Scalars["String"];
@@ -10551,12 +10539,6 @@ export type AuditEntryTypesQueryVariables = Exact<{ [key: string]: never }>;
 
 export type AuditEntryTypesQuery = { __typename?: "Query" } & {
   auditEntryTypes: Array<{ __typename?: "AuditEntryType" } & AuditEntryTypeFragment>;
-};
-
-export type AuthorizedApplicationsQueryVariables = Exact<{ [key: string]: never }>;
-
-export type AuthorizedApplicationsQuery = { __typename?: "Query" } & {
-  authorizedApplications: Array<{ __typename?: "AuthorizedApplication" } & AuthorizedApplicationFragment>;
 };
 
 export type AvailableUsersQueryVariables = Exact<{ [key: string]: never }>;
@@ -11389,16 +11371,6 @@ export type Organization_UsersQuery = { __typename?: "Query" } & {
   organization: { __typename?: "Organization" } & { users: { __typename?: "UserConnection" } & UserConnectionFragment };
 };
 
-export type OrganizationDomainClaimRequestQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type OrganizationDomainClaimRequestQuery = { __typename?: "Query" } & {
-  organizationDomainClaimRequest: {
-    __typename?: "OrganizationDomainClaimPayload";
-  } & OrganizationDomainClaimPayloadFragment;
-};
-
 export type OrganizationExistsQueryVariables = Exact<{
   urlKey: Scalars["String"];
 }>;
@@ -12098,14 +12070,6 @@ export type WorkflowStatesQuery = { __typename?: "Query" } & {
   workflowStates: { __typename?: "WorkflowStateConnection" } & WorkflowStateConnectionFragment;
 };
 
-export type WorkspaceAuthorizedApplicationsQueryVariables = Exact<{ [key: string]: never }>;
-
-export type WorkspaceAuthorizedApplicationsQuery = { __typename?: "Query" } & {
-  workspaceAuthorizedApplications: Array<
-    { __typename?: "WorkspaceAuthorizedApplication" } & WorkspaceAuthorizedApplicationFragment
-  >;
-};
-
 export type AirbyteIntegrationConnectMutationVariables = Exact<{
   input: AirbyteConfigurationInput;
 }>;
@@ -12251,14 +12215,6 @@ export type CreateContactMutationVariables = Exact<{
 
 export type CreateContactMutation = { __typename?: "Mutation" } & {
   contactCreate: { __typename?: "ContactPayload" } & ContactPayloadFragment;
-};
-
-export type CreateContactSalesMutationVariables = Exact<{
-  input: ContactSalesCreateInput;
-}>;
-
-export type CreateContactSalesMutation = { __typename?: "Mutation" } & {
-  contactSalesCreate: { __typename?: "ContactPayload" } & ContactPayloadFragment;
 };
 
 export type CreateCsvExportReportMutationVariables = Exact<{
@@ -12590,15 +12546,6 @@ export type IntegrationSentryConnectMutation = { __typename?: "Mutation" } & {
   integrationSentryConnect: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
-export type UpdateIntegrationSettingsMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: IntegrationSettingsInput;
-}>;
-
-export type UpdateIntegrationSettingsMutation = { __typename?: "Mutation" } & {
-  integrationSettingsUpdate: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
 export type IntegrationSlackMutationVariables = Exact<{
   code: Scalars["String"];
   redirectUri: Scalars["String"];
@@ -12911,14 +12858,6 @@ export type UpdateIssueMutation = { __typename?: "Mutation" } & {
   issueUpdate: { __typename?: "IssuePayload" } & IssuePayloadFragment;
 };
 
-export type JiraIntegrationConnectMutationVariables = Exact<{
-  input: JiraConfigurationInput;
-}>;
-
-export type JiraIntegrationConnectMutation = { __typename?: "Mutation" } & {
-  jiraIntegrationConnect: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
 export type JoinOrganizationFromOnboardingMutationVariables = Exact<{
   input: JoinOrganizationInput;
 }>;
@@ -13052,37 +12991,12 @@ export type OrganizationDeleteChallengeMutation = { __typename?: "Mutation" } & 
   organizationDeleteChallenge: { __typename?: "OrganizationDeletePayload" } & OrganizationDeletePayloadFragment;
 };
 
-export type OrganizationDomainClaimMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type OrganizationDomainClaimMutation = { __typename?: "Mutation" } & {
-  organizationDomainClaim: { __typename?: "OrganizationDomainSimplePayload" } & OrganizationDomainSimplePayloadFragment;
-};
-
-export type CreateOrganizationDomainMutationVariables = Exact<{
-  input: OrganizationDomainCreateInput;
-  triggerEmailVerification?: Maybe<Scalars["Boolean"]>;
-}>;
-
-export type CreateOrganizationDomainMutation = { __typename?: "Mutation" } & {
-  organizationDomainCreate: { __typename?: "OrganizationDomainPayload" } & OrganizationDomainPayloadFragment;
-};
-
 export type DeleteOrganizationDomainMutationVariables = Exact<{
   id: Scalars["String"];
 }>;
 
 export type DeleteOrganizationDomainMutation = { __typename?: "Mutation" } & {
   organizationDomainDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type OrganizationDomainVerifyMutationVariables = Exact<{
-  input: OrganizationDomainVerificationInput;
-}>;
-
-export type OrganizationDomainVerifyMutation = { __typename?: "Mutation" } & {
-  organizationDomainVerify: { __typename?: "OrganizationDomainPayload" } & OrganizationDomainPayloadFragment;
 };
 
 export type CreateOrganizationInviteMutationVariables = Exact<{
@@ -13425,17 +13339,6 @@ export type UpdateTemplateMutationVariables = Exact<{
 
 export type UpdateTemplateMutation = { __typename?: "Mutation" } & {
   templateUpdate: { __typename?: "TemplatePayload" } & TemplatePayloadFragment;
-};
-
-export type UserAccountEmailChangeVerifyCodeMutationVariables = Exact<{
-  code: Scalars["String"];
-  email: Scalars["String"];
-}>;
-
-export type UserAccountEmailChangeVerifyCodeMutation = { __typename?: "Mutation" } & {
-  userAccountEmailChangeVerifyCode: {
-    __typename?: "UserAccountEmailChangeVerifyCodePayload";
-  } & UserAccountEmailChangeVerifyCodePayloadFragment;
 };
 
 export type UserDemoteAdminMutationVariables = Exact<{
@@ -14811,24 +14714,6 @@ export const WorkspaceAuthorizedApplicationFragmentDoc = {
     ...AuthMembershipFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<WorkspaceAuthorizedApplicationFragment, unknown>;
-export const UserAccountEmailChangeVerifyCodePayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "UserAccountEmailChangeVerifyCodePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserAccountEmailChangeVerifyCodePayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "failureReason" } },
-          { kind: "Field", name: { kind: "Name", value: "success" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<UserAccountEmailChangeVerifyCodePayloadFragment, unknown>;
 export const AdminJobConfigurationPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -20181,50 +20066,6 @@ export const ApplicationInfoDocument = {
     ...ApplicationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ApplicationInfoQuery, ApplicationInfoQueryVariables>;
-export const ApplicationInfoByIdsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "applicationInfoByIds" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "ids" } },
-          type: {
-            kind: "NonNullType",
-            type: {
-              kind: "ListType",
-              type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-            },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "applicationInfoByIds" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "ids" },
-                value: { kind: "Variable", name: { kind: "Name", value: "ids" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Application" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ApplicationFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ApplicationInfoByIdsQuery, ApplicationInfoByIdsQueryVariables>;
 export const ApplicationWithAuthorizationDocument = {
   kind: "Document",
   definitions: [
@@ -21625,30 +21466,6 @@ export const AuditEntryTypesDocument = {
     ...AuditEntryTypeFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AuditEntryTypesQuery, AuditEntryTypesQueryVariables>;
-export const AuthorizedApplicationsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "authorizedApplications" },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "authorizedApplications" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthorizedApplication" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...AuthorizedApplicationFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<AuthorizedApplicationsQuery, AuthorizedApplicationsQueryVariables>;
 export const AvailableUsersDocument = {
   kind: "Document",
   definitions: [
@@ -27092,44 +26909,6 @@ export const Organization_UsersDocument = {
     ...UserConnectionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Organization_UsersQuery, Organization_UsersQueryVariables>;
-export const OrganizationDomainClaimRequestDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "organizationDomainClaimRequest" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationDomainClaimRequest" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDomainClaimPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationDomainClaimPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<OrganizationDomainClaimRequestQuery, OrganizationDomainClaimRequestQueryVariables>;
 export const OrganizationExistsDocument = {
   kind: "Document",
   definitions: [
@@ -31892,30 +31671,6 @@ export const WorkflowStatesDocument = {
     ...WorkflowStateConnectionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<WorkflowStatesQuery, WorkflowStatesQueryVariables>;
-export const WorkspaceAuthorizedApplicationsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "workspaceAuthorizedApplications" },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "workspaceAuthorizedApplications" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkspaceAuthorizedApplication" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...WorkspaceAuthorizedApplicationFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<WorkspaceAuthorizedApplicationsQuery, WorkspaceAuthorizedApplicationsQueryVariables>;
 export const AirbyteIntegrationConnectDocument = {
   kind: "Document",
   definitions: [
@@ -32693,47 +32448,6 @@ export const CreateContactDocument = {
     ...ContactPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CreateContactMutation, CreateContactMutationVariables>;
-export const CreateContactSalesDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createContactSales" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ContactSalesCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "contactSalesCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ContactPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ContactPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateContactSalesMutation, CreateContactSalesMutationVariables>;
 export const CreateCsvExportReportDocument = {
   kind: "Document",
   definitions: [
@@ -34399,57 +34113,6 @@ export const IntegrationSentryConnectDocument = {
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationSentryConnectMutation, IntegrationSentryConnectMutationVariables>;
-export const UpdateIntegrationSettingsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateIntegrationSettings" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "IntegrationSettingsInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationSettingsUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateIntegrationSettingsMutation, UpdateIntegrationSettingsMutationVariables>;
 export const IntegrationSlackDocument = {
   kind: "Document",
   definitions: [
@@ -36259,47 +35922,6 @@ export const UpdateIssueDocument = {
     ...IssuePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateIssueMutation, UpdateIssueMutationVariables>;
-export const JiraIntegrationConnectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "jiraIntegrationConnect" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "JiraConfigurationInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "jiraIntegrationConnect" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<JiraIntegrationConnectMutation, JiraIntegrationConnectMutationVariables>;
 export const JoinOrganizationFromOnboardingDocument = {
   kind: "Document",
   definitions: [
@@ -36930,97 +36552,6 @@ export const OrganizationDeleteChallengeDocument = {
     ...OrganizationDeletePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<OrganizationDeleteChallengeMutation, OrganizationDeleteChallengeMutationVariables>;
-export const OrganizationDomainClaimDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "organizationDomainClaim" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationDomainClaim" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDomainSimplePayload" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationDomainSimplePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<OrganizationDomainClaimMutation, OrganizationDomainClaimMutationVariables>;
-export const CreateOrganizationDomainDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createOrganizationDomain" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainCreateInput" } },
-          },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "triggerEmailVerification" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationDomainCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "triggerEmailVerification" },
-                value: { kind: "Variable", name: { kind: "Name", value: "triggerEmailVerification" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDomainPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationDomainPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateOrganizationDomainMutation, CreateOrganizationDomainMutationVariables>;
 export const DeleteOrganizationDomainDocument = {
   kind: "Document",
   definitions: [
@@ -37059,47 +36590,6 @@ export const DeleteOrganizationDomainDocument = {
     ...ArchivePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DeleteOrganizationDomainMutation, DeleteOrganizationDomainMutationVariables>;
-export const OrganizationDomainVerifyDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "organizationDomainVerify" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainVerificationInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationDomainVerify" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDomainPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationDomainPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<OrganizationDomainVerifyMutation, OrganizationDomainVerifyMutationVariables>;
 export const CreateOrganizationInviteDocument = {
   kind: "Document",
   definitions: [
@@ -38825,59 +38315,6 @@ export const UpdateTemplateDocument = {
     ...TemplatePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateTemplateMutation, UpdateTemplateMutationVariables>;
-export const UserAccountEmailChangeVerifyCodeDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "userAccountEmailChangeVerifyCode" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "email" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userAccountEmailChangeVerifyCode" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "email" },
-                value: { kind: "Variable", name: { kind: "Name", value: "email" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "UserAccountEmailChangeVerifyCodePayload" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...UserAccountEmailChangeVerifyCodePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<
-  UserAccountEmailChangeVerifyCodeMutation,
-  UserAccountEmailChangeVerifyCodeMutationVariables
->;
 export const UserDemoteAdminDocument = {
   kind: "Document",
   definitions: [

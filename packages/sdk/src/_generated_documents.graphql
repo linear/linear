@@ -2430,15 +2430,6 @@ fragment WorkspaceAuthorizedApplication on WorkspaceAuthorizedApplication {
   webhooksEnabled
 }
 
-# [INTERNAL] Result of verifying an email and code.
-fragment UserAccountEmailChangeVerifyCodePayload on UserAccountEmailChangeVerifyCodePayload {
-  __typename
-  # [INTERNAL] Reason why the operation was not successful.
-  failureReason
-  # [INTERNAL] Whether the operation was successful.
-  success
-}
-
 fragment AdminJobConfigurationPayload on AdminJobConfigurationPayload {
   __typename
   currentJob
@@ -3695,15 +3686,6 @@ query applicationInfo(
     ...Application
   }
 }
-# [INTERNAL] Get basic information for a list of applications
-query applicationInfoByIds(
-  # The IDs of the applications.
-  $ids: [String!]!
-) {
-  applicationInfoByIds(ids: $ids) {
-    ...Application
-  }
-}
 # Get information for an application and whether a user has approved it for the given scopes.
 query applicationWithAuthorization(
   # Actor mode used for the authorization.
@@ -4086,12 +4068,6 @@ query auditEntries(
 query auditEntryTypes {
   auditEntryTypes {
     ...AuditEntryType
-  }
-}
-# [INTERNAL] Get all authorized applications for a user
-query authorizedApplications {
-  authorizedApplications {
-    ...AuthorizedApplication
   }
 }
 # Fetch users belonging to this user account.
@@ -5545,15 +5521,6 @@ query organization_users(
     }
   }
 }
-# [INTERNAL] Checks whether the domain can be claimed.
-query organizationDomainClaimRequest(
-  # The ID of the organization domain to claim.
-  $id: String!
-) {
-  organizationDomainClaimRequest(id: $id) {
-    ...OrganizationDomainClaimPayload
-  }
-}
 # Does the organization exist.
 query organizationExists($urlKey: String!) {
   organizationExists(urlKey: $urlKey) {
@@ -6818,12 +6785,6 @@ query workflowStates(
     ...WorkflowStateConnection
   }
 }
-# [INTERNAL] Get all authorized applications (with limited fields) for a workspace
-query workspaceAuthorizedApplications {
-  workspaceAuthorizedApplications {
-    ...WorkspaceAuthorizedApplication
-  }
-}
 # Creates an integration api key for Airbyte to connect with Linear
 mutation airbyteIntegrationConnect(
   # Airbyte integration settings.
@@ -6996,15 +6957,6 @@ mutation createContact(
   $input: ContactCreateInput!
 ) {
   contactCreate(input: $input) {
-    ...ContactPayload
-  }
-}
-# [INTERNAL] Saves sales pricing inquiry to Front.
-mutation createContactSales(
-  # The contact entry to create.
-  $input: ContactSalesCreateInput!
-) {
-  contactSalesCreate(input: $input) {
     ...ContactPayload
   }
 }
@@ -7385,17 +7337,6 @@ mutation integrationSentryConnect(
   $organizationSlug: String!
 ) {
   integrationSentryConnect(code: $code, installationId: $installationId, organizationSlug: $organizationSlug) {
-    ...IntegrationPayload
-  }
-}
-# [INTERNAL] Updates the integration.
-mutation updateIntegrationSettings(
-  # The identifier of the integration to update.
-  $id: String!
-  # An integration settings object.
-  $input: IntegrationSettingsInput!
-) {
-  integrationSettingsUpdate(id: $id, input: $input) {
     ...IntegrationPayload
   }
 }
@@ -7840,15 +7781,6 @@ mutation updateIssue(
     ...IssuePayload
   }
 }
-# [INTERNAL] Connects the organization with a Jira Personal Access Token.
-mutation jiraIntegrationConnect(
-  # Jira integration settings.
-  $input: JiraConfigurationInput!
-) {
-  jiraIntegrationConnect(input: $input) {
-    ...IntegrationPayload
-  }
-}
 # Join an organization from onboarding.
 mutation joinOrganizationFromOnboarding(
   # Organization details for the organization to join.
@@ -7990,26 +7922,6 @@ mutation organizationDeleteChallenge {
     ...OrganizationDeletePayload
   }
 }
-# [INTERNAL] Verifies a domain claim.
-mutation organizationDomainClaim(
-  # The ID of the organization domain to claim.
-  $id: String!
-) {
-  organizationDomainClaim(id: $id) {
-    ...OrganizationDomainSimplePayload
-  }
-}
-# [INTERNAL] Adds a domain to be allowed for an organization.
-mutation createOrganizationDomain(
-  # The organization domain entry to create.
-  $input: OrganizationDomainCreateInput!
-  # Whether to trigger an email verification flow during domain creation.
-  $triggerEmailVerification: Boolean
-) {
-  organizationDomainCreate(input: $input, triggerEmailVerification: $triggerEmailVerification) {
-    ...OrganizationDomainPayload
-  }
-}
 # Deletes a domain.
 mutation deleteOrganizationDomain(
   # The identifier of the domain to delete.
@@ -8017,15 +7929,6 @@ mutation deleteOrganizationDomain(
 ) {
   organizationDomainDelete(id: $id) {
     ...ArchivePayload
-  }
-}
-# [INTERNAL] Verifies a domain to be added to an organization.
-mutation organizationDomainVerify(
-  # The organization domain to verify.
-  $input: OrganizationDomainVerificationInput!
-) {
-  organizationDomainVerify(input: $input) {
-    ...OrganizationDomainPayload
   }
 }
 # Creates a new organization invite.
@@ -8416,17 +8319,6 @@ mutation updateTemplate(
 ) {
   templateUpdate(id: $id, input: $input) {
     ...TemplatePayload
-  }
-}
-# [INTERNAL] Verifies the email address and code for a user account that wants to change email.
-mutation userAccountEmailChangeVerifyCode(
-  # [INTERNAL] The code to verify.
-  $code: String!
-  # [INTERNAL] The email to verify.
-  $email: String!
-) {
-  userAccountEmailChangeVerifyCode(code: $code, email: $email) {
-    ...UserAccountEmailChangeVerifyCodePayload
   }
 }
 # Makes user a regular user. Can only be called by an admin.

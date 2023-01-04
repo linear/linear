@@ -273,15 +273,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test ApplicationInfoByIds query */
-  describe("ApplicationInfoByIds", () => {
-    /** Test the root model query for ApplicationInfoByIds */
-    it("applicationInfoByIds", async () => {
-      const applicationInfoByIds: L.Application[] | undefined = await client.applicationInfoByIds(["mock-ids"]);
-      applicationInfoByIds?.map(node => expect(node instanceof L.Application));
-    });
-  });
-
   /** Test ApplicationWithAuthorization query */
   describe("ApplicationWithAuthorization", () => {
     /** Test the root model query for ApplicationWithAuthorization */
@@ -491,15 +482,6 @@ describe("generated", () => {
     it("auditEntryTypes", async () => {
       const auditEntryTypes: L.AuditEntryType[] | undefined = await client.auditEntryTypes;
       auditEntryTypes?.map(node => expect(node instanceof L.AuditEntryType));
-    });
-  });
-
-  /** Test AuthorizedApplications query */
-  describe("AuthorizedApplications", () => {
-    /** Test the root model query for AuthorizedApplications */
-    it("authorizedApplications", async () => {
-      const authorizedApplications: L.AuthorizedApplication[] | undefined = await client.authorizedApplications;
-      authorizedApplications?.map(node => expect(node instanceof L.AuthorizedApplication));
     });
   });
 
@@ -1942,16 +1924,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test OrganizationDomainClaimRequest query */
-  describe("OrganizationDomainClaimRequest", () => {
-    /** Test the root model query for OrganizationDomainClaimRequest */
-    it("organizationDomainClaimRequest", async () => {
-      const organizationDomainClaimRequest: L.OrganizationDomainClaimPayload | undefined =
-        await client.organizationDomainClaimRequest("mock-id");
-      expect(organizationDomainClaimRequest instanceof L.OrganizationDomainClaimPayload);
-    });
-  });
-
   /** Test OrganizationExists query */
   describe("OrganizationExists", () => {
     /** Test the root model query for OrganizationExists */
@@ -2987,16 +2959,6 @@ describe("generated", () => {
       } else {
         console.warn("codegen-doc:print: No WorkflowState found - cannot test workflowState.team query");
       }
-    });
-  });
-
-  /** Test WorkspaceAuthorizedApplications query */
-  describe("WorkspaceAuthorizedApplications", () => {
-    /** Test the root model query for WorkspaceAuthorizedApplications */
-    it("workspaceAuthorizedApplications", async () => {
-      const workspaceAuthorizedApplications: L.WorkspaceAuthorizedApplication[] | undefined =
-        await client.workspaceAuthorizedApplications;
-      workspaceAuthorizedApplications?.map(node => expect(node instanceof L.WorkspaceAuthorizedApplication));
     });
   });
 });

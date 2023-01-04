@@ -6,6 +6,7 @@ hooks:
 config:
   skipComments:
     - "[Internal]"
+    - "[INTERNAL]"
   skipFields:
     - integrationResource
     - integrationResources

@@ -1942,10 +1942,6 @@ export class Integration extends Request {
   public archiveResource() {
     return new ArchiveIntegrationResourceMutation(this._request).fetch(this.id);
   }
-  /** [INTERNAL] Updates the integration. */
-  public updateSettings(input: L.IntegrationSettingsInput) {
-    return new UpdateIntegrationSettingsMutation(this._request).fetch(this.id, input);
-  }
 }
 /**
  * IntegrationConnection model
@@ -2148,11 +2144,6 @@ export class IntegrationSettings extends Request {
   public slackPost?: SlackPostSettings;
   public slackProjectPost?: SlackPostSettings;
   public zendesk?: ZendeskSettings;
-
-  /** [INTERNAL] Updates the integration. */
-  public update(id: string, input: L.IntegrationSettingsInput) {
-    return new UpdateIntegrationSettingsMutation(this._request).fetch(id, input);
-  }
 }
 /**
  * Join table between templates and integrations
@@ -4183,13 +4174,6 @@ export class OrganizationDomain extends Request {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 
-  /** [INTERNAL] Adds a domain to be allowed for an organization. */
-  public create(
-    input: L.OrganizationDomainCreateInput,
-    variables?: Omit<L.CreateOrganizationDomainMutationVariables, "input">
-  ) {
-    return new CreateOrganizationDomainMutation(this._request).fetch(input, variables);
-  }
   /** Deletes a domain. */
   public delete() {
     return new DeleteOrganizationDomainMutation(this._request).fetch(this.id);
@@ -6781,24 +6765,6 @@ export class UserAccountEmailChange extends Request {
   public updatedAt: Date;
 }
 /**
- * [INTERNAL] Result of verifying an email and code.
- *
- * @param request - function to call the graphql client
- * @param data - L.UserAccountEmailChangeVerifyCodePayloadFragment response data
- */
-export class UserAccountEmailChangeVerifyCodePayload extends Request {
-  public constructor(request: LinearRequest, data: L.UserAccountEmailChangeVerifyCodePayloadFragment) {
-    super(request);
-    this.failureReason = data.failureReason ?? undefined;
-    this.success = data.success;
-  }
-
-  /** [INTERNAL] Reason why the operation was not successful. */
-  public failureReason?: number;
-  /** [INTERNAL] Whether the operation was successful. */
-  public success: boolean;
-}
-/**
  * UserAdminPayload model
  *
  * @param request - function to call the graphql client
@@ -7562,37 +7528,6 @@ export class ApplicationInfoQuery extends Request {
 }
 
 /**
- * A fetchable ApplicationInfoByIds Query
- *
- * @param request - function to call the graphql client
- */
-export class ApplicationInfoByIdsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ApplicationInfoByIds query and return a Application list
-   *
-   * @param ids - required ids to pass to applicationInfoByIds
-   * @returns parsed response from ApplicationInfoByIdsQuery
-   */
-  public async fetch(ids: string[]): LinearFetch<Application[]> {
-    const response = await this._request<L.ApplicationInfoByIdsQuery, L.ApplicationInfoByIdsQueryVariables>(
-      L.ApplicationInfoByIdsDocument,
-      {
-        ids,
-      }
-    );
-    const data = response.applicationInfoByIds;
-
-    return data.map(node => {
-      return new Application(this._request, node);
-    });
-  }
-}
-
-/**
  * A fetchable ApplicationWithAuthorization Query
  *
  * @param request - function to call the graphql client
@@ -7827,34 +7762,6 @@ export class AuditEntryTypesQuery extends Request {
 
     return data.map(node => {
       return new AuditEntryType(this._request, node);
-    });
-  }
-}
-
-/**
- * A fetchable AuthorizedApplications Query
- *
- * @param request - function to call the graphql client
- */
-export class AuthorizedApplicationsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AuthorizedApplications query and return a AuthorizedApplication list
-   *
-   * @returns parsed response from AuthorizedApplicationsQuery
-   */
-  public async fetch(): LinearFetch<AuthorizedApplication[]> {
-    const response = await this._request<L.AuthorizedApplicationsQuery, L.AuthorizedApplicationsQueryVariables>(
-      L.AuthorizedApplicationsDocument,
-      {}
-    );
-    const data = response.authorizedApplications;
-
-    return data.map(node => {
-      return new AuthorizedApplication(this._request, node);
     });
   }
 }
@@ -8994,35 +8901,6 @@ export class OrganizationQuery extends Request {
 }
 
 /**
- * A fetchable OrganizationDomainClaimRequest Query
- *
- * @param request - function to call the graphql client
- */
-export class OrganizationDomainClaimRequestQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the OrganizationDomainClaimRequest query and return a OrganizationDomainClaimPayload
-   *
-   * @param id - required id to pass to organizationDomainClaimRequest
-   * @returns parsed response from OrganizationDomainClaimRequestQuery
-   */
-  public async fetch(id: string): LinearFetch<OrganizationDomainClaimPayload> {
-    const response = await this._request<
-      L.OrganizationDomainClaimRequestQuery,
-      L.OrganizationDomainClaimRequestQueryVariables
-    >(L.OrganizationDomainClaimRequestDocument, {
-      id,
-    });
-    const data = response.organizationDomainClaimRequest;
-
-    return new OrganizationDomainClaimPayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable OrganizationExists Query
  *
  * @param request - function to call the graphql client
@@ -10019,34 +9897,6 @@ export class WorkflowStatesQuery extends Request {
 }
 
 /**
- * A fetchable WorkspaceAuthorizedApplications Query
- *
- * @param request - function to call the graphql client
- */
-export class WorkspaceAuthorizedApplicationsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the WorkspaceAuthorizedApplications query and return a WorkspaceAuthorizedApplication list
-   *
-   * @returns parsed response from WorkspaceAuthorizedApplicationsQuery
-   */
-  public async fetch(): LinearFetch<WorkspaceAuthorizedApplication[]> {
-    const response = await this._request<
-      L.WorkspaceAuthorizedApplicationsQuery,
-      L.WorkspaceAuthorizedApplicationsQueryVariables
-    >(L.WorkspaceAuthorizedApplicationsDocument, {});
-    const data = response.workspaceAuthorizedApplications;
-
-    return data.map(node => {
-      return new WorkspaceAuthorizedApplication(this._request, node);
-    });
-  }
-}
-
-/**
  * A fetchable AirbyteIntegrationConnect Mutation
  *
  * @param request - function to call the graphql client
@@ -10565,35 +10415,6 @@ export class CreateContactMutation extends Request {
       }
     );
     const data = response.contactCreate;
-
-    return new ContactPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable CreateContactSales Mutation
- *
- * @param request - function to call the graphql client
- */
-export class CreateContactSalesMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the CreateContactSales mutation and return a ContactPayload
-   *
-   * @param input - required input to pass to createContactSales
-   * @returns parsed response from CreateContactSalesMutation
-   */
-  public async fetch(input: L.ContactSalesCreateInput): LinearFetch<ContactPayload> {
-    const response = await this._request<L.CreateContactSalesMutation, L.CreateContactSalesMutationVariables>(
-      L.CreateContactSalesDocument,
-      {
-        input,
-      }
-    );
-    const data = response.contactSalesCreate;
 
     return new ContactPayload(this._request, data);
   }
@@ -11746,37 +11567,6 @@ export class IntegrationSentryConnectMutation extends Request {
 }
 
 /**
- * A fetchable UpdateIntegrationSettings Mutation
- *
- * @param request - function to call the graphql client
- */
-export class UpdateIntegrationSettingsMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the UpdateIntegrationSettings mutation and return a IntegrationPayload
-   *
-   * @param id - required id to pass to updateIntegrationSettings
-   * @param input - required input to pass to updateIntegrationSettings
-   * @returns parsed response from UpdateIntegrationSettingsMutation
-   */
-  public async fetch(id: string, input: L.IntegrationSettingsInput): LinearFetch<IntegrationPayload> {
-    const response = await this._request<
-      L.UpdateIntegrationSettingsMutation,
-      L.UpdateIntegrationSettingsMutationVariables
-    >(L.UpdateIntegrationSettingsDocument, {
-      id,
-      input,
-    });
-    const data = response.integrationSettingsUpdate;
-
-    return new IntegrationPayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable IntegrationSlack Mutation
  *
  * @param request - function to call the graphql client
@@ -12810,35 +12600,6 @@ export class UpdateIssueMutation extends Request {
 }
 
 /**
- * A fetchable JiraIntegrationConnect Mutation
- *
- * @param request - function to call the graphql client
- */
-export class JiraIntegrationConnectMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the JiraIntegrationConnect mutation and return a IntegrationPayload
-   *
-   * @param input - required input to pass to jiraIntegrationConnect
-   * @returns parsed response from JiraIntegrationConnectMutation
-   */
-  public async fetch(input: L.JiraConfigurationInput): LinearFetch<IntegrationPayload> {
-    const response = await this._request<L.JiraIntegrationConnectMutation, L.JiraIntegrationConnectMutationVariables>(
-      L.JiraIntegrationConnectDocument,
-      {
-        input,
-      }
-    );
-    const data = response.jiraIntegrationConnect;
-
-    return new IntegrationPayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable JoinOrganizationFromOnboarding Mutation
  *
  * @param request - function to call the graphql client
@@ -13300,69 +13061,6 @@ export class OrganizationDeleteChallengeMutation extends Request {
 }
 
 /**
- * A fetchable OrganizationDomainClaim Mutation
- *
- * @param request - function to call the graphql client
- */
-export class OrganizationDomainClaimMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the OrganizationDomainClaim mutation and return a OrganizationDomainSimplePayload
-   *
-   * @param id - required id to pass to organizationDomainClaim
-   * @returns parsed response from OrganizationDomainClaimMutation
-   */
-  public async fetch(id: string): LinearFetch<OrganizationDomainSimplePayload> {
-    const response = await this._request<L.OrganizationDomainClaimMutation, L.OrganizationDomainClaimMutationVariables>(
-      L.OrganizationDomainClaimDocument,
-      {
-        id,
-      }
-    );
-    const data = response.organizationDomainClaim;
-
-    return new OrganizationDomainSimplePayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable CreateOrganizationDomain Mutation
- *
- * @param request - function to call the graphql client
- */
-export class CreateOrganizationDomainMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the CreateOrganizationDomain mutation and return a OrganizationDomainPayload
-   *
-   * @param input - required input to pass to createOrganizationDomain
-   * @param variables - variables without 'input' to pass into the CreateOrganizationDomainMutation
-   * @returns parsed response from CreateOrganizationDomainMutation
-   */
-  public async fetch(
-    input: L.OrganizationDomainCreateInput,
-    variables?: Omit<L.CreateOrganizationDomainMutationVariables, "input">
-  ): LinearFetch<OrganizationDomainPayload> {
-    const response = await this._request<
-      L.CreateOrganizationDomainMutation,
-      L.CreateOrganizationDomainMutationVariables
-    >(L.CreateOrganizationDomainDocument, {
-      input,
-      ...variables,
-    });
-    const data = response.organizationDomainCreate;
-
-    return new OrganizationDomainPayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable DeleteOrganizationDomain Mutation
  *
  * @param request - function to call the graphql client
@@ -13388,35 +13086,6 @@ export class DeleteOrganizationDomainMutation extends Request {
     const data = response.organizationDomainDelete;
 
     return new ArchivePayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable OrganizationDomainVerify Mutation
- *
- * @param request - function to call the graphql client
- */
-export class OrganizationDomainVerifyMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the OrganizationDomainVerify mutation and return a OrganizationDomainPayload
-   *
-   * @param input - required input to pass to organizationDomainVerify
-   * @returns parsed response from OrganizationDomainVerifyMutation
-   */
-  public async fetch(input: L.OrganizationDomainVerificationInput): LinearFetch<OrganizationDomainPayload> {
-    const response = await this._request<
-      L.OrganizationDomainVerifyMutation,
-      L.OrganizationDomainVerifyMutationVariables
-    >(L.OrganizationDomainVerifyDocument, {
-      input,
-    });
-    const data = response.organizationDomainVerify;
-
-    return new OrganizationDomainPayload(this._request, data);
   }
 }
 
@@ -14620,37 +14289,6 @@ export class UpdateTemplateMutation extends Request {
     const data = response.templateUpdate;
 
     return new TemplatePayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable UserAccountEmailChangeVerifyCode Mutation
- *
- * @param request - function to call the graphql client
- */
-export class UserAccountEmailChangeVerifyCodeMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the UserAccountEmailChangeVerifyCode mutation and return a UserAccountEmailChangeVerifyCodePayload
-   *
-   * @param code - required code to pass to userAccountEmailChangeVerifyCode
-   * @param email - required email to pass to userAccountEmailChangeVerifyCode
-   * @returns parsed response from UserAccountEmailChangeVerifyCodeMutation
-   */
-  public async fetch(code: string, email: string): LinearFetch<UserAccountEmailChangeVerifyCodePayload> {
-    const response = await this._request<
-      L.UserAccountEmailChangeVerifyCodeMutation,
-      L.UserAccountEmailChangeVerifyCodeMutationVariables
-    >(L.UserAccountEmailChangeVerifyCodeDocument, {
-      code,
-      email,
-    });
-    const data = response.userAccountEmailChangeVerifyCode;
-
-    return new UserAccountEmailChangeVerifyCodePayload(this._request, data);
   }
 }
 
@@ -18532,15 +18170,6 @@ export class LinearSdk extends Request {
     return new ApplicationInfoQuery(this._request).fetch(clientId);
   }
   /**
-   * [INTERNAL] Get basic information for a list of applications
-   *
-   * @param ids - required ids to pass to applicationInfoByIds
-   * @returns Application[]
-   */
-  public applicationInfoByIds(ids: string[]): LinearFetch<Application[]> {
-    return new ApplicationInfoByIdsQuery(this._request).fetch(ids);
-  }
-  /**
    * Get information for an application and whether a user has approved it for the given scopes.
    *
    * @param clientId - required clientId to pass to applicationWithAuthorization
@@ -18614,14 +18243,6 @@ export class LinearSdk extends Request {
    */
   public get auditEntryTypes(): LinearFetch<AuditEntryType[]> {
     return new AuditEntryTypesQuery(this._request).fetch();
-  }
-  /**
-   * [INTERNAL] Get all authorized applications for a user
-   *
-   * @returns AuthorizedApplication[]
-   */
-  public get authorizedApplications(): LinearFetch<AuthorizedApplication[]> {
-    return new AuthorizedApplicationsQuery(this._request).fetch();
   }
   /**
    * Fetch users belonging to this user account.
@@ -18961,15 +18582,6 @@ export class LinearSdk extends Request {
     return new OrganizationQuery(this._request).fetch();
   }
   /**
-   * [INTERNAL] Checks whether the domain can be claimed.
-   *
-   * @param id - required id to pass to organizationDomainClaimRequest
-   * @returns OrganizationDomainClaimPayload
-   */
-  public organizationDomainClaimRequest(id: string): LinearFetch<OrganizationDomainClaimPayload> {
-    return new OrganizationDomainClaimRequestQuery(this._request).fetch(id);
-  }
-  /**
    * Does the organization exist.
    *
    * @param urlKey - required urlKey to pass to organizationExists
@@ -19270,14 +18882,6 @@ export class LinearSdk extends Request {
     return new WorkflowStatesQuery(this._request).fetch(variables);
   }
   /**
-   * [INTERNAL] Get all authorized applications (with limited fields) for a workspace
-   *
-   * @returns WorkspaceAuthorizedApplication[]
-   */
-  public get workspaceAuthorizedApplications(): LinearFetch<WorkspaceAuthorizedApplication[]> {
-    return new WorkspaceAuthorizedApplicationsQuery(this._request).fetch();
-  }
-  /**
    * Creates an integration api key for Airbyte to connect with Linear
    *
    * @param input - required input to pass to airbyteIntegrationConnect
@@ -19449,15 +19053,6 @@ export class LinearSdk extends Request {
    */
   public createContact(input: L.ContactCreateInput): LinearFetch<ContactPayload> {
     return new CreateContactMutation(this._request).fetch(input);
-  }
-  /**
-   * [INTERNAL] Saves sales pricing inquiry to Front.
-   *
-   * @param input - required input to pass to createContactSales
-   * @returns ContactPayload
-   */
-  public createContactSales(input: L.ContactSalesCreateInput): LinearFetch<ContactPayload> {
-    return new CreateContactSalesMutation(this._request).fetch(input);
   }
   /**
    * Create CSV export report for the organization.
@@ -19842,16 +19437,6 @@ export class LinearSdk extends Request {
     organizationSlug: string
   ): LinearFetch<IntegrationPayload> {
     return new IntegrationSentryConnectMutation(this._request).fetch(code, installationId, organizationSlug);
-  }
-  /**
-   * [INTERNAL] Updates the integration.
-   *
-   * @param id - required id to pass to updateIntegrationSettings
-   * @param input - required input to pass to updateIntegrationSettings
-   * @returns IntegrationPayload
-   */
-  public updateIntegrationSettings(id: string, input: L.IntegrationSettingsInput): LinearFetch<IntegrationPayload> {
-    return new UpdateIntegrationSettingsMutation(this._request).fetch(id, input);
   }
   /**
    * Integrates the organization with Slack.
@@ -20240,15 +19825,6 @@ export class LinearSdk extends Request {
     return new UpdateIssueMutation(this._request).fetch(id, input);
   }
   /**
-   * [INTERNAL] Connects the organization with a Jira Personal Access Token.
-   *
-   * @param input - required input to pass to jiraIntegrationConnect
-   * @returns IntegrationPayload
-   */
-  public jiraIntegrationConnect(input: L.JiraConfigurationInput): LinearFetch<IntegrationPayload> {
-    return new JiraIntegrationConnectMutation(this._request).fetch(input);
-  }
-  /**
    * Join an organization from onboarding.
    *
    * @param input - required input to pass to joinOrganizationFromOnboarding
@@ -20398,28 +19974,6 @@ export class LinearSdk extends Request {
     return new OrganizationDeleteChallengeMutation(this._request).fetch();
   }
   /**
-   * [INTERNAL] Verifies a domain claim.
-   *
-   * @param id - required id to pass to organizationDomainClaim
-   * @returns OrganizationDomainSimplePayload
-   */
-  public organizationDomainClaim(id: string): LinearFetch<OrganizationDomainSimplePayload> {
-    return new OrganizationDomainClaimMutation(this._request).fetch(id);
-  }
-  /**
-   * [INTERNAL] Adds a domain to be allowed for an organization.
-   *
-   * @param input - required input to pass to createOrganizationDomain
-   * @param variables - variables without 'input' to pass into the CreateOrganizationDomainMutation
-   * @returns OrganizationDomainPayload
-   */
-  public createOrganizationDomain(
-    input: L.OrganizationDomainCreateInput,
-    variables?: Omit<L.CreateOrganizationDomainMutationVariables, "input">
-  ): LinearFetch<OrganizationDomainPayload> {
-    return new CreateOrganizationDomainMutation(this._request).fetch(input, variables);
-  }
-  /**
    * Deletes a domain.
    *
    * @param id - required id to pass to deleteOrganizationDomain
@@ -20427,17 +19981,6 @@ export class LinearSdk extends Request {
    */
   public deleteOrganizationDomain(id: string): LinearFetch<ArchivePayload> {
     return new DeleteOrganizationDomainMutation(this._request).fetch(id);
-  }
-  /**
-   * [INTERNAL] Verifies a domain to be added to an organization.
-   *
-   * @param input - required input to pass to organizationDomainVerify
-   * @returns OrganizationDomainPayload
-   */
-  public organizationDomainVerify(
-    input: L.OrganizationDomainVerificationInput
-  ): LinearFetch<OrganizationDomainPayload> {
-    return new OrganizationDomainVerifyMutation(this._request).fetch(input);
   }
   /**
    * Creates a new organization invite.
@@ -20828,19 +20371,6 @@ export class LinearSdk extends Request {
    */
   public updateTemplate(id: string, input: L.TemplateUpdateInput): LinearFetch<TemplatePayload> {
     return new UpdateTemplateMutation(this._request).fetch(id, input);
-  }
-  /**
-   * [INTERNAL] Verifies the email address and code for a user account that wants to change email.
-   *
-   * @param code - required code to pass to userAccountEmailChangeVerifyCode
-   * @param email - required email to pass to userAccountEmailChangeVerifyCode
-   * @returns UserAccountEmailChangeVerifyCodePayload
-   */
-  public userAccountEmailChangeVerifyCode(
-    code: string,
-    email: string
-  ): LinearFetch<UserAccountEmailChangeVerifyCodePayload> {
-    return new UserAccountEmailChangeVerifyCodeMutation(this._request).fetch(code, email);
   }
   /**
    * Makes user a regular user. Can only be called by an admin.
