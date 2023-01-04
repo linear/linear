@@ -18,7 +18,7 @@ export function findMutations(
           return (
             mutation.name.value.startsWith(lowerFirst(model.name)) &&
             Sdk.MUTATION_TYPES.find(
-              mutationType => getMutationTypeFromName(model, mutation.name.value) === mutationType
+              mutationType => getMutationTypeFromSuffixedName(model, mutation.name.value) === mutationType
             )
           );
         })
@@ -36,8 +36,15 @@ export function findMutations(
 }
 
 /**
- * Remove the model name from the mutation name
+ * Remove the model name from the suffixed mutation name
  */
-export function getMutationTypeFromName(model: SdkModel, mutationName: string): string {
+export function getMutationTypeFromSuffixedName(model: SdkModel, mutationName: string): string {
   return lowerFirst(lowerFirst(mutationName).replace(lowerFirst(model.name), ""));
+}
+
+/**
+ * Remove the model name from the prefixed mutation name
+ */
+export function getMutationTypeFromPrefixedName(model: SdkModel, mutationName: string): string {
+  return lowerFirst(mutationName.replace(model.name, ""));
 }

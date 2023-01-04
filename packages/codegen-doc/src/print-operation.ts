@@ -185,7 +185,9 @@ export function printOperations(
 export function printPrefixedMutationName(operationName: string): string {
   const mutationType = Doc.MUTATION_TYPES.find(type => operationName.endsWith(upperFirst(type)));
   if (mutationType) {
-    return lowerFirst(`${mutationType}${upperFirst(operationName.replace(upperFirst(mutationType), ""))}`);
+    return lowerFirst(
+      `${mutationType}${upperFirst(operationName.replace(new RegExp(upperFirst(mutationType) + "$"), ""))}`
+    );
   }
   return operationName;
 }

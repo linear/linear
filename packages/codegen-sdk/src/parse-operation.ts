@@ -73,7 +73,7 @@ export function parseOperations(
         context.mutations.map(mutationNode => mutationNode.name.value)
       )
     ) {
-      path = restoreSuffixedMutationName(nodeName).split("_");
+      path = getSuffixedMutationName(nodeName).split("_");
     } else {
       path = nodeName.split("_");
     }
@@ -240,10 +240,10 @@ function hasBeenTransformed(nodeName: string, originalMutations: string[]): bool
 }
 
 /**
- * Restores the original suffixed mutation name
+ * Gets the original suffixed mutation name from the prefixed mutation name.
  * @param nodeName The prefixed mutation name
  */
-function restoreSuffixedMutationName(nodeName: string): string {
+function getSuffixedMutationName(nodeName: string): string {
   const mutationType = Doc.MUTATION_TYPES.find(type => nodeName.startsWith(type));
   if (mutationType) {
     return lowerFirst(`${nodeName.replace(mutationType, "")}${upperFirst(mutationType)}`);

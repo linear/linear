@@ -1864,22 +1864,6 @@ export class Initiative extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** Projects associated with the initiative. */
-  public projects(variables?: Omit<L.Initiative_ProjectsQueryVariables, "id">) {
-    return new Initiative_ProjectsQuery(this._request, this.id, variables).fetch(variables);
-  }
-  /** Creates a new initiative. */
-  public create(input: L.InitiativeCreateInput) {
-    return new CreateInitiativeMutation(this._request).fetch(input);
-  }
-  /** Deletes a initiative. */
-  public delete() {
-    return new DeleteInitiativeMutation(this._request).fetch(this.id);
-  }
-  /** Updates a initiative. */
-  public update(input: L.InitiativeUpdateInput) {
-    return new UpdateInitiativeMutation(this._request).fetch(this.id, input);
-  }
 }
 /**
  * InitiativeConnection model
@@ -1900,31 +1884,6 @@ export class InitiativeConnection extends Connection<Initiative> {
       data.nodes.map(node => new Initiative(request, node)),
       new PageInfo(request, data.pageInfo)
     );
-  }
-}
-/**
- * InitiativePayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.InitiativePayloadFragment response data
- */
-export class InitiativePayload extends Request {
-  private _initiative?: L.InitiativePayloadFragment["initiative"];
-
-  public constructor(request: LinearRequest, data: L.InitiativePayloadFragment) {
-    super(request);
-    this.lastSyncId = data.lastSyncId;
-    this.success = data.success;
-    this._initiative = data.initiative ?? undefined;
-  }
-
-  /** The identifier of the last sync operation. */
-  public lastSyncId: number;
-  /** Whether the operation was successful. */
-  public success: boolean;
-  /** The milesteone that was created or updated. */
-  public get initiative(): LinearFetch<Initiative> | undefined {
-    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
 }
 /**
@@ -1980,11 +1939,11 @@ export class Integration extends Request {
     return new DeleteIntegrationMutation(this._request).fetch(this.id);
   }
   /** Archives an integration resource. */
-  public resourceArchive() {
+  public archiveResource() {
     return new ArchiveIntegrationResourceMutation(this._request).fetch(this.id);
   }
   /** [INTERNAL] Updates the integration. */
-  public settingsUpdate(input: L.IntegrationSettingsInput) {
+  public updateSettings(input: L.IntegrationSettingsInput) {
     return new UpdateIntegrationSettingsMutation(this._request).fetch(this.id, input);
   }
 }
@@ -4126,10 +4085,6 @@ export class Organization extends Request {
   public labels(variables?: L.Organization_LabelsQueryVariables) {
     return new Organization_LabelsQuery(this._request, variables).fetch(variables);
   }
-  /** Milestones associated with the organization. */
-  public milestones(variables?: L.Organization_MilestonesQueryVariables) {
-    return new Organization_MilestonesQuery(this._request, variables).fetch(variables);
-  }
   /** Teams associated with the organization. */
   public teams(variables?: L.Organization_TeamsQueryVariables) {
     return new Organization_TeamsQuery(this._request, variables).fetch(variables);
@@ -4576,7 +4531,6 @@ export class PaidSubscription extends Request {
 export class Project extends Request {
   private _convertedFromIssue?: L.ProjectFragment["convertedFromIssue"];
   private _creator: L.ProjectFragment["creator"];
-  private _initiative?: L.ProjectFragment["initiative"];
   private _integrationsSettings?: L.ProjectFragment["integrationsSettings"];
   private _lead?: L.ProjectFragment["lead"];
   private _milestone?: L.ProjectFragment["milestone"];
@@ -4610,9 +4564,9 @@ export class Project extends Request {
     this.targetDate = data.targetDate ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
+    this.initiative = data.initiative ? new Initiative(request, data.initiative) : undefined;
     this._convertedFromIssue = data.convertedFromIssue ?? undefined;
     this._creator = data.creator;
-    this._initiative = data.initiative ?? undefined;
     this._integrationsSettings = data.integrationsSettings ?? undefined;
     this._lead = data.lead ?? undefined;
     this._milestone = data.milestone ?? undefined;
@@ -4676,6 +4630,8 @@ export class Project extends Request {
   public updatedAt: Date;
   /** Project URL. */
   public url: string;
+  /** The initiative that this project is associated with. */
+  public initiative?: Initiative;
   /** The project was created based on this issue. */
   public get convertedFromIssue(): LinearFetch<Issue> | undefined {
     return this._convertedFromIssue?.id ? new IssueQuery(this._request).fetch(this._convertedFromIssue?.id) : undefined;
@@ -4683,10 +4639,6 @@ export class Project extends Request {
   /** The user who created the project. */
   public get creator(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
-  }
-  /** The initiative that this project is associated with. */
-  public get initiative(): LinearFetch<Initiative> | undefined {
-    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
   /** Settings for all integrations associated with that project. */
   public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
@@ -6737,7 +6689,7 @@ export class User extends Request {
     return new User_TeamsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Updates the user's settings. */
-  public settingsUpdate(input: L.UserSettingsUpdateInput) {
+  public updateSettings(input: L.UserSettingsUpdateInput) {
     return new UpdateUserSettingsMutation(this._request).fetch(this.id, input);
   }
   /** Suspends a user. Can only be called by an admin. */
@@ -8327,69 +8279,6 @@ export class FigmaEmbedInfoQuery extends Request {
     const data = response.figmaEmbedInfo;
 
     return new FigmaEmbedPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable Initiative Query
- *
- * @param request - function to call the graphql client
- */
-export class InitiativeQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Initiative query and return a Initiative
-   *
-   * @param id - required id to pass to initiative
-   * @returns parsed response from InitiativeQuery
-   */
-  public async fetch(id: string): LinearFetch<Initiative> {
-    const response = await this._request<L.InitiativeQuery, L.InitiativeQueryVariables>(L.InitiativeDocument, {
-      id,
-    });
-    const data = response.initiative;
-
-    return new Initiative(this._request, data);
-  }
-}
-
-/**
- * A fetchable Initiatives Query
- *
- * @param request - function to call the graphql client
- */
-export class InitiativesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Initiatives query and return a InitiativeConnection
-   *
-   * @param variables - variables to pass into the InitiativesQuery
-   * @returns parsed response from InitiativesQuery
-   */
-  public async fetch(variables?: L.InitiativesQueryVariables): LinearFetch<InitiativeConnection> {
-    const response = await this._request<L.InitiativesQuery, L.InitiativesQueryVariables>(
-      L.InitiativesDocument,
-      variables
-    );
-    const data = response.initiatives;
-
-    return new InitiativeConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
   }
 }
 
@@ -11411,95 +11300,6 @@ export class ImageUploadFromUrlMutation extends Request {
 }
 
 /**
- * A fetchable CreateInitiative Mutation
- *
- * @param request - function to call the graphql client
- */
-export class CreateInitiativeMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the CreateInitiative mutation and return a InitiativePayload
-   *
-   * @param input - required input to pass to createInitiative
-   * @returns parsed response from CreateInitiativeMutation
-   */
-  public async fetch(input: L.InitiativeCreateInput): LinearFetch<InitiativePayload> {
-    const response = await this._request<L.CreateInitiativeMutation, L.CreateInitiativeMutationVariables>(
-      L.CreateInitiativeDocument,
-      {
-        input,
-      }
-    );
-    const data = response.initiativeCreate;
-
-    return new InitiativePayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable DeleteInitiative Mutation
- *
- * @param request - function to call the graphql client
- */
-export class DeleteInitiativeMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the DeleteInitiative mutation and return a ArchivePayload
-   *
-   * @param id - required id to pass to deleteInitiative
-   * @returns parsed response from DeleteInitiativeMutation
-   */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
-    const response = await this._request<L.DeleteInitiativeMutation, L.DeleteInitiativeMutationVariables>(
-      L.DeleteInitiativeDocument,
-      {
-        id,
-      }
-    );
-    const data = response.initiativeDelete;
-
-    return new ArchivePayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable UpdateInitiative Mutation
- *
- * @param request - function to call the graphql client
- */
-export class UpdateInitiativeMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the UpdateInitiative mutation and return a InitiativePayload
-   *
-   * @param id - required id to pass to updateInitiative
-   * @param input - required input to pass to updateInitiative
-   * @returns parsed response from UpdateInitiativeMutation
-   */
-  public async fetch(id: string, input: L.InitiativeUpdateInput): LinearFetch<InitiativePayload> {
-    const response = await this._request<L.UpdateInitiativeMutation, L.UpdateInitiativeMutationVariables>(
-      L.UpdateInitiativeDocument,
-      {
-        id,
-        input,
-      }
-    );
-    const data = response.initiativeUpdate;
-
-    return new InitiativePayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable DeleteIntegration Mutation
  *
  * @param request - function to call the graphql client
@@ -11751,14 +11551,20 @@ export class IntegrationIntercomMutation extends Request {
    *
    * @param code - required code to pass to integrationIntercom
    * @param redirectUri - required redirectUri to pass to integrationIntercom
+   * @param variables - variables without 'code', 'redirectUri' to pass into the IntegrationIntercomMutation
    * @returns parsed response from IntegrationIntercomMutation
    */
-  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public async fetch(
+    code: string,
+    redirectUri: string,
+    variables?: Omit<L.IntegrationIntercomMutationVariables, "code" | "redirectUri">
+  ): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationIntercomMutation, L.IntegrationIntercomMutationVariables>(
       L.IntegrationIntercomDocument,
       {
         code,
         redirectUri,
+        ...variables,
       }
     );
     const data = response.integrationIntercom;
@@ -16256,55 +16062,6 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends Request {
 }
 
 /**
- * A fetchable Initiative_Projects Query
- *
- * @param request - function to call the graphql client
- * @param id - required id to pass to initiative
- * @param variables - variables without 'id' to pass into the Initiative_ProjectsQuery
- */
-export class Initiative_ProjectsQuery extends Request {
-  private _id: string;
-  private _variables?: Omit<L.Initiative_ProjectsQueryVariables, "id">;
-
-  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Initiative_ProjectsQueryVariables, "id">) {
-    super(request);
-    this._id = id;
-    this._variables = variables;
-  }
-
-  /**
-   * Call the Initiative_Projects query and return a ProjectConnection
-   *
-   * @param variables - variables without 'id' to pass into the Initiative_ProjectsQuery
-   * @returns parsed response from Initiative_ProjectsQuery
-   */
-  public async fetch(variables?: Omit<L.Initiative_ProjectsQueryVariables, "id">): LinearFetch<ProjectConnection> {
-    const response = await this._request<L.Initiative_ProjectsQuery, L.Initiative_ProjectsQueryVariables>(
-      L.Initiative_ProjectsDocument,
-      {
-        id: this._id,
-        ...this._variables,
-        ...variables,
-      }
-    );
-    const data = response.initiative.projects;
-
-    return new ProjectConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...this._variables,
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
  * A fetchable Issue_Attachments Query
  *
  * @param request - function to call the graphql client
@@ -17394,49 +17151,6 @@ export class Organization_LabelsQuery extends Request {
 }
 
 /**
- * A fetchable Organization_Milestones Query
- *
- * @param request - function to call the graphql client
- * @param variables - variables to pass into the Organization_MilestonesQuery
- */
-export class Organization_MilestonesQuery extends Request {
-  private _variables?: L.Organization_MilestonesQueryVariables;
-
-  public constructor(request: LinearRequest, variables?: L.Organization_MilestonesQueryVariables) {
-    super(request);
-
-    this._variables = variables;
-  }
-
-  /**
-   * Call the Organization_Milestones query and return a MilestoneConnection
-   *
-   * @param variables - variables to pass into the Organization_MilestonesQuery
-   * @returns parsed response from Organization_MilestonesQuery
-   */
-  public async fetch(variables?: L.Organization_MilestonesQueryVariables): LinearFetch<MilestoneConnection> {
-    const response = await this._request<L.Organization_MilestonesQuery, L.Organization_MilestonesQueryVariables>(
-      L.Organization_MilestonesDocument,
-      variables
-    );
-    const data = response.organization.milestones;
-
-    return new MilestoneConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...this._variables,
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
  * A fetchable Organization_Subscription Query
  *
  * @param request - function to call the graphql client
@@ -17626,6 +17340,38 @@ export class Project_DocumentsQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable Project_Initiative Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to project
+ */
+export class Project_InitiativeQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the Project_Initiative query and return a Initiative
+   *
+   * @returns parsed response from Project_InitiativeQuery
+   */
+  public async fetch(): LinearFetch<Initiative | undefined> {
+    const response = await this._request<L.Project_InitiativeQuery, L.Project_InitiativeQueryVariables>(
+      L.Project_InitiativeDocument,
+      {
+        id: this._id,
+      }
+    );
+    const data = response.project.initiative;
+
+    return data ? new Initiative(this._request, data) : undefined;
   }
 }
 
@@ -19007,24 +18753,6 @@ export class LinearSdk extends Request {
     return new FigmaEmbedInfoQuery(this._request).fetch(fileId, variables);
   }
   /**
-   * [ALPHA] One specific initiative.
-   *
-   * @param id - required id to pass to initiative
-   * @returns Initiative
-   */
-  public initiative(id: string): LinearFetch<Initiative> {
-    return new InitiativeQuery(this._request).fetch(id);
-  }
-  /**
-   * [ALPHA] All initiatives.
-   *
-   * @param variables - variables to pass into the InitiativesQuery
-   * @returns InitiativeConnection
-   */
-  public initiatives(variables?: L.InitiativesQueryVariables): LinearFetch<InitiativeConnection> {
-    return new InitiativesQuery(this._request).fetch(variables);
-  }
-  /**
    * One specific integration.
    *
    * @param id - required id to pass to integration
@@ -19968,34 +19696,6 @@ export class LinearSdk extends Request {
     return new ImageUploadFromUrlMutation(this._request).fetch(url);
   }
   /**
-   * Creates a new initiative.
-   *
-   * @param input - required input to pass to createInitiative
-   * @returns InitiativePayload
-   */
-  public createInitiative(input: L.InitiativeCreateInput): LinearFetch<InitiativePayload> {
-    return new CreateInitiativeMutation(this._request).fetch(input);
-  }
-  /**
-   * Deletes a initiative.
-   *
-   * @param id - required id to pass to deleteInitiative
-   * @returns ArchivePayload
-   */
-  public deleteInitiative(id: string): LinearFetch<ArchivePayload> {
-    return new DeleteInitiativeMutation(this._request).fetch(id);
-  }
-  /**
-   * Updates a initiative.
-   *
-   * @param id - required id to pass to updateInitiative
-   * @param input - required input to pass to updateInitiative
-   * @returns InitiativePayload
-   */
-  public updateInitiative(id: string, input: L.InitiativeUpdateInput): LinearFetch<InitiativePayload> {
-    return new UpdateInitiativeMutation(this._request).fetch(id, input);
-  }
-  /**
    * Deletes an integration.
    *
    * @param id - required id to pass to deleteIntegration
@@ -20075,10 +19775,15 @@ export class LinearSdk extends Request {
    *
    * @param code - required code to pass to integrationIntercom
    * @param redirectUri - required redirectUri to pass to integrationIntercom
+   * @param variables - variables without 'code', 'redirectUri' to pass into the IntegrationIntercomMutation
    * @returns IntegrationPayload
    */
-  public integrationIntercom(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
-    return new IntegrationIntercomMutation(this._request).fetch(code, redirectUri);
+  public integrationIntercom(
+    code: string,
+    redirectUri: string,
+    variables?: Omit<L.IntegrationIntercomMutationVariables, "code" | "redirectUri">
+  ): LinearFetch<IntegrationPayload> {
+    return new IntegrationIntercomMutation(this._request).fetch(code, redirectUri, variables);
   }
   /**
    * Disconnects the organization from Intercom.

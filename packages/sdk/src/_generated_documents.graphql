@@ -317,7 +317,7 @@ fragment Project on Project {
   icon
   # The initiative that this project is associated with.
   initiative {
-    id
+    ...Initiative
   }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -2778,18 +2778,6 @@ fragment InitiativeConnection on InitiativeConnection {
   }
 }
 
-fragment InitiativePayload on InitiativePayload {
-  __typename
-  # The identifier of the last sync operation.
-  lastSyncId
-  # The milesteone that was created or updated.
-  initiative {
-    id
-  }
-  # Whether the operation was successful.
-  success
-}
-
 fragment IntegrationConnection on IntegrationConnection {
   __typename
   nodes {
@@ -4466,73 +4454,6 @@ query figmaEmbedInfo_figmaEmbed(
     }
   }
 }
-# [ALPHA] One specific initiative.
-query initiative($id: String!) {
-  initiative(id: $id) {
-    ...Initiative
-  }
-}
-# Projects associated with the initiative.
-query initiative_projects(
-  $id: String!
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # Filter returned projects.
-  $filter: ProjectFilter
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  initiative(id: $id) {
-    projects(
-      after: $after
-      before: $before
-      filter: $filter
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...ProjectConnection
-    }
-  }
-}
-# [ALPHA] All initiatives.
-query initiatives(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # Filter returned projects.
-  $filter: InitiativeFilter
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  initiatives(
-    after: $after
-    before: $before
-    filter: $filter
-    first: $first
-    includeArchived: $includeArchived
-    last: $last
-    orderBy: $orderBy
-  ) {
-    ...InitiativeConnection
-  }
-}
 # One specific integration.
 query integration($id: String!) {
   integration(id: $id) {
@@ -5377,8 +5298,6 @@ query milestones(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
-  # Filter returned projects.
-  $filter: MilestoneFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -5391,7 +5310,6 @@ query milestones(
   milestones(
     after: $after
     before: $before
-    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -5526,37 +5444,6 @@ query organization_labels(
       orderBy: $orderBy
     ) {
       ...IssueLabelConnection
-    }
-  }
-}
-# Milestones associated with the organization.
-query organization_milestones(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # Filter returned projects.
-  $filter: MilestoneFilter
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  organization {
-    milestones(
-      after: $after
-      before: $before
-      filter: $filter
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...MilestoneConnection
     }
   }
 }
@@ -5743,6 +5630,14 @@ query project_documents(
       orderBy: $orderBy
     ) {
       ...DocumentConnection
+    }
+  }
+}
+# The initiative that this project is associated with.
+query project_initiative($id: String!) {
+  project(id: $id) {
+    initiative {
+      ...Initiative
     }
   }
 }
@@ -7351,35 +7246,6 @@ mutation imageUploadFromUrl(
     ...ImageUploadFromUrlPayload
   }
 }
-# Creates a new initiative.
-mutation createInitiative(
-  # The issue object to create.
-  $input: InitiativeCreateInput!
-) {
-  initiativeCreate(input: $input) {
-    ...InitiativePayload
-  }
-}
-# Deletes a initiative.
-mutation deleteInitiative(
-  # The identifier of the initiative to delete.
-  $id: String!
-) {
-  initiativeDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates a initiative.
-mutation updateInitiative(
-  # The identifier of the initiative to update.
-  $id: String!
-  # A partial initiative object to update the initiative with.
-  $input: InitiativeUpdateInput!
-) {
-  initiativeUpdate(id: $id, input: $input) {
-    ...InitiativePayload
-  }
-}
 # Deletes an integration.
 mutation deleteIntegration(
   # The identifier of the integration to delete.
@@ -7461,10 +7327,12 @@ mutation integrationGoogleSheets(
 mutation integrationIntercom(
   # The Intercom OAuth code.
   $code: String!
+  # The Intercom domain URL to use for the integration. Defaults to app.intercom.com if not provided.
+  $domainUrl: String
   # The Intercom OAuth redirect URI.
   $redirectUri: String!
 ) {
-  integrationIntercom(code: $code, redirectUri: $redirectUri) {
+  integrationIntercom(code: $code, domainUrl: $domainUrl, redirectUri: $redirectUri) {
     ...IntegrationPayload
   }
 }
