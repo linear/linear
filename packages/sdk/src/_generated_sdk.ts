@@ -3432,11 +3432,9 @@ export class Milestone extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.description = data.description ?? undefined;
     this.id = data.id;
     this.name = data.name;
     this.sortOrder = data.sortOrder;
-    this.targetDate = data.targetDate ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
   }
 
@@ -3444,16 +3442,12 @@ export class Milestone extends Request {
   public archivedAt?: Date;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** [ALPHA] The milestone's description. */
-  public description?: string;
   /** The unique identifier of the entity. */
   public id: string;
   /** The name of the milestone. */
   public name: string;
   /** The sort order for the milestone. */
   public sortOrder: number;
-  /** [ALPHA] The estimated completion date of the initiative. */
-  public targetDate?: L.Scalars["TimelessDate"];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -4537,6 +4531,7 @@ export class Project extends Request {
     this.name = data.name;
     this.progress = data.progress;
     this.projectUpdateRemindersPausedUntilAt = parseDate(data.projectUpdateRemindersPausedUntilAt) ?? undefined;
+    this.scope = data.scope;
     this.scopeHistory = data.scopeHistory;
     this.slackIssueComments = data.slackIssueComments;
     this.slackIssueStatuses = data.slackIssueStatuses;
@@ -4588,6 +4583,8 @@ export class Project extends Request {
   public progress: number;
   /** The time until which project update reminders are paused. */
   public projectUpdateRemindersPausedUntilAt?: Date;
+  /** The overall scope (total estimate points) of the project. */
+  public scope: number;
   /** The total number of estimation points after each week. */
   public scopeHistory: number[];
   /** Whether to send new issue comment notifications to Slack. */
@@ -8546,48 +8543,6 @@ export class IssueRelationsQuery extends Request {
       this._request,
       connection =>
         this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable IssueSearch Query
- *
- * @param request - function to call the graphql client
- */
-export class IssueSearchQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueSearch query and return a IssueConnection
-   *
-   * @param query - required query to pass to issueSearch
-   * @param variables - variables without 'query' to pass into the IssueSearchQuery
-   * @returns parsed response from IssueSearchQuery
-   */
-  public async fetch(
-    query: string,
-    variables?: Omit<L.IssueSearchQueryVariables, "query">
-  ): LinearFetch<IssueConnection> {
-    const response = await this._request<L.IssueSearchQuery, L.IssueSearchQueryVariables>(L.IssueSearchDocument, {
-      query,
-      ...variables,
-    });
-    const data = response.issueSearch;
-
-    return new IssueConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          query,
           defaultConnection({
             ...variables,
             ...connection,
@@ -18481,19 +18436,6 @@ export class LinearSdk extends Request {
    */
   public issueRelations(variables?: L.IssueRelationsQueryVariables): LinearFetch<IssueRelationConnection> {
     return new IssueRelationsQuery(this._request).fetch(variables);
-  }
-  /**
-   * [ALPHA] Search issues. This query is experimental and is subject to change without notice.
-   *
-   * @param query - required query to pass to issueSearch
-   * @param variables - variables without 'query' to pass into the IssueSearchQuery
-   * @returns IssueConnection
-   */
-  public issueSearch(
-    query: string,
-    variables?: Omit<L.IssueSearchQueryVariables, "query">
-  ): LinearFetch<IssueConnection> {
-    return new IssueSearchQuery(this._request).fetch(query, variables);
   }
   /**
    * Find issue based on the VCS branch name.

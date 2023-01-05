@@ -33866,6 +33866,22 @@
             "deprecationReason": null
           },
           {
+            "name": "scope",
+            "description": "The overall scope (total estimate points) of the project.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationsSettings",
             "description": "Settings for all integrations associated with that project.",
             "args": [],

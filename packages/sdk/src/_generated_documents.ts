@@ -5291,6 +5291,8 @@ export type Project = Node & {
   projectUpdateRemindersPausedUntilAt?: Maybe<Scalars["DateTime"]>;
   /** Project updates associated with the project. */
   projectUpdates: ProjectUpdateConnection;
+  /** The overall scope (total estimate points) of the project. */
+  scope: Scalars["Float"];
   /** The total number of estimation points after each week. */
   scopeHistory: Array<Scalars["Float"]>;
   /** Whether to send new issue comment notifications to Slack. */
@@ -8710,7 +8712,7 @@ export type InitiativeFragment = { __typename: "Initiative" } & Pick<
 
 export type MilestoneFragment = { __typename: "Milestone" } & Pick<
   Milestone,
-  "updatedAt" | "name" | "sortOrder" | "archivedAt" | "createdAt" | "id" | "targetDate" | "description"
+  "updatedAt" | "name" | "sortOrder" | "archivedAt" | "createdAt" | "id"
 >;
 
 type Notification_IssueNotification_Fragment = { __typename: "IssueNotification" } & Pick<
@@ -8762,6 +8764,7 @@ export type ProjectFragment = { __typename: "Project" } & Pick<
   | "completedIssueCountHistory"
   | "inProgressScopeHistory"
   | "progress"
+  | "scope"
   | "color"
   | "description"
   | "name"
@@ -11017,21 +11020,6 @@ export type IssueRelationsQueryVariables = Exact<{
 
 export type IssueRelationsQuery = { __typename?: "Query" } & {
   issueRelations: { __typename?: "IssueRelationConnection" } & IssueRelationConnectionFragment;
-};
-
-export type IssueSearchQueryVariables = Exact<{
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  filter?: Maybe<IssueFilter>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-  query: Scalars["String"];
-}>;
-
-export type IssueSearchQuery = { __typename?: "Query" } & {
-  issueSearch: { __typename?: "IssueConnection" } & IssueConnectionFragment;
 };
 
 export type IssueVcsBranchSearchQueryVariables = Exact<{
@@ -17516,8 +17504,6 @@ export const MilestoneFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "targetDate" } },
-          { kind: "Field", name: { kind: "Name", value: "description" } },
         ],
       },
     },
@@ -18063,6 +18049,7 @@ export const ProjectFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "completedIssueCountHistory" } },
           { kind: "Field", name: { kind: "Name", value: "inProgressScopeHistory" } },
           { kind: "Field", name: { kind: "Name", value: "progress" } },
+          { kind: "Field", name: { kind: "Name", value: "scope" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "lead" },
@@ -24659,114 +24646,6 @@ export const IssueRelationsDocument = {
     ...IssueRelationConnectionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueRelationsQuery, IssueRelationsQueryVariables>;
-export const IssueSearchDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "issueSearch" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "query" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueSearch" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "filter" },
-                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "query" },
-                value: { kind: "Variable", name: { kind: "Name", value: "query" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueConnectionFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IssueSearchQuery, IssueSearchQueryVariables>;
 export const IssueVcsBranchSearchDocument = {
   kind: "Document",
   definitions: [

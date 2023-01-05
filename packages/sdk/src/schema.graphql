@@ -9115,6 +9115,10 @@ type Project implements Node {
     orderBy: PaginationOrderBy
   ): ProjectUpdateConnection!
   """
+  The overall scope (total estimate points) of the project.
+  """
+  scope: Float!
+  """
   The total number of estimation points after each week.
   """
   scopeHistory: [Float!]!

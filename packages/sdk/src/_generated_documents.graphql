@@ -191,10 +191,6 @@ fragment Milestone on Milestone {
   createdAt
   # The unique identifier of the entity.
   id
-  # [ALPHA] The estimated completion date of the initiative.
-  targetDate
-  # [ALPHA] The milestone's description.
-  description
 }
 
 # A notification sent to a user.
@@ -335,6 +331,8 @@ fragment Project on Project {
   inProgressScopeHistory
   # The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
   progress
+  # The overall scope (total estimate points) of the project.
+  scope
   # The project lead.
   lead {
     id
@@ -4900,38 +4898,6 @@ query issueRelations(
     orderBy: $orderBy
   ) {
     ...IssueRelationConnection
-  }
-}
-# [ALPHA] Search issues. This query is experimental and is subject to change without notice.
-query issueSearch(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # Filter returned issues.
-  $filter: IssueFilter
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-  # [Deprecated] Search string to look for.
-  $query: String!
-) {
-  issueSearch(
-    after: $after
-    before: $before
-    filter: $filter
-    first: $first
-    includeArchived: $includeArchived
-    last: $last
-    orderBy: $orderBy
-    query: $query
-  ) {
-    ...IssueConnection
   }
 }
 # Find issue based on the VCS branch name.
