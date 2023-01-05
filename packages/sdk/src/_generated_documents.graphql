@@ -225,6 +225,18 @@ fragment Notification on Notification {
   user {
     id
   }
+
+  ... on IssueNotification {
+    ...IssueNotification
+  }
+
+  ... on OauthClientApprovalNotification {
+    ...OauthClientApprovalNotification
+  }
+
+  ... on ProjectNotification {
+    ...ProjectNotification
+  }
 }
 
 # A project notification subscription.
