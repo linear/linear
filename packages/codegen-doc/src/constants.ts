@@ -1,7 +1,6 @@
 export const Doc = {
   MUTATION_TYPES: [
     "update",
-    "settingsUpdate",
     "archive",
     "unarchive",
     "delete",
@@ -10,7 +9,6 @@ export const Doc = {
     "upgrade",
     "revoke",
     "rotateSecret",
-    "resourceArchive",
     "create",
   ],
   SCALAR_STRING_NAMES: ["TimelessDateScalar"],

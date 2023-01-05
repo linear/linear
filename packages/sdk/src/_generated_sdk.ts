@@ -1938,10 +1938,6 @@ export class Integration extends Request {
   public delete() {
     return new DeleteIntegrationMutation(this._request).fetch(this.id);
   }
-  /** Archives an integration resource. */
-  public archiveResource() {
-    return new ArchiveIntegrationResourceMutation(this._request).fetch(this.id);
-  }
 }
 /**
  * IntegrationConnection model
@@ -6668,10 +6664,6 @@ export class User extends Request {
   /** Teams the user is part of. */
   public teams(variables?: Omit<L.User_TeamsQueryVariables, "id">) {
     return new User_TeamsQuery(this._request, this.id, variables).fetch(variables);
-  }
-  /** Updates the user's settings. */
-  public updateSettings(input: L.UserSettingsUpdateInput) {
-    return new UpdateUserSettingsMutation(this._request).fetch(this.id, input);
   }
   /** Suspends a user. Can only be called by an admin. */
   public suspend() {
