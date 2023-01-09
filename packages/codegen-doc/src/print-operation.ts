@@ -7,7 +7,8 @@ import { findObject } from "./object";
 import { printGraphqlDebug, printGraphqlDescription, printLines, printList } from "./print";
 import { findQuery } from "./query";
 import { OperationType, PluginContext } from "./types";
-import { getLast, reduceListType } from "./utils";
+import { getLast, lowerFirst, reduceListType, upperFirst } from "./utils";
+import { Doc } from "./constants";
 
 const log = "codegen-doc:print-operation:";
 
@@ -33,7 +34,9 @@ function printOperationWrapper(
       printGraphqlDescription(lastField.description?.value),
       printGraphqlDebug({ type, operationName, field: lastField }),
       /** The operation definition */
-      `${type} ${operationName}${printGraphqlInputArgs(fields)} {`,
+      type === "mutation"
+        ? `${type} ${printPrefixedMutationName(operationName)}${printGraphqlInputArgs(fields)} {`
+        : `${type} ${operationName}${printGraphqlInputArgs(fields)} {`,
       /** Each field and its required content */
       fields
         .slice()
@@ -173,4 +176,18 @@ export function printOperations(
   } else {
     return undefined;
   }
+}
+
+/**
+ * Prefix mutations with the type of the mutation.
+ * @param operationName The original operation name.
+ */
+export function printPrefixedMutationName(operationName: string): string {
+  const mutationType = Doc.MUTATION_TYPES.find(type => operationName.endsWith(upperFirst(type)));
+  if (mutationType) {
+    return lowerFirst(
+      `${mutationType}${upperFirst(operationName.replace(new RegExp(upperFirst(mutationType) + "$"), ""))}`
+    );
+  }
+  return operationName;
 }

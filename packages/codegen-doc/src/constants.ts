@@ -1,4 +1,16 @@
 export const Doc = {
+  MUTATION_TYPES: [
+    "update",
+    "archive",
+    "unarchive",
+    "delete",
+    "suspend",
+    "unsuspend",
+    "upgrade",
+    "revoke",
+    "rotateSecret",
+    "create",
+  ],
   SCALAR_STRING_NAMES: ["TimelessDateScalar"],
   SCALAR_STRING_TYPE: "string",
   SCALAR_DATE_NAMES: ["DateTime", "TimelessDateScalar"],

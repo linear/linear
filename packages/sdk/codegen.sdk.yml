@@ -8,6 +8,8 @@ config:
   documentFile: ./_generated_documents
   skipComments:
     - "[Internal]"
+    - "[INTERNAL]"
+    - "[ALPHA]"
   skipFields:
     - integrationResource
     - integrationResources

@@ -17,13 +17,13 @@ export function findMutations(
         .filter(mutation => {
           return (
             mutation.name.value.startsWith(lowerFirst(model.name)) &&
-            Sdk.MUTATION_TYPES.find(mutationType => getMutationName(model, mutation.name.value) === mutationType)
+            Sdk.MUTATION_TYPES.find(
+              mutationType => getMutationTypeFromSuffixedName(model, mutation.name.value) === mutationType
+            )
           );
         })
         .map(mutation => {
-          const operation = rootOperations.find(
-            rootOperation => rootOperation.node.name?.value === mutation.name.value
-          );
+          const operation = rootOperations.find(rootOperation => rootOperation.key === mutation.name.value);
           return operation
             ? {
                 field: mutation,
@@ -36,8 +36,15 @@ export function findMutations(
 }
 
 /**
- * Remove the model name from the mutation name
+ * Remove the model name from the suffixed mutation name
  */
-export function getMutationName(model: SdkModel, mutationName: string): string {
+export function getMutationTypeFromSuffixedName(model: SdkModel, mutationName: string): string {
   return lowerFirst(lowerFirst(mutationName).replace(lowerFirst(model.name), ""));
+}
+
+/**
+ * Remove the model name from the prefixed mutation name
+ */
+export function getMutationTypeFromPrefixedName(model: SdkModel, mutationName: string): string {
+  return lowerFirst(mutationName.replace(model.name, ""));
 }

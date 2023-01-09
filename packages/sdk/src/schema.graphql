@@ -1,7 +1,49 @@
 schema {
   query: Query
   mutation: Mutation
-  subscription: Subscription
+}
+
+input AdminJobConfiguration {
+  currentJob: String
+  delay: Float
+  enabled: Boolean!
+  param: String
+}
+
+type AdminJobConfigurationPayload {
+  currentJob: String
+  delay: Float!
+  enabled: Boolean!
+  param: String
+}
+
+type AdminJobStatusPayload {
+  availableJobs: [String!]!
+  configuration: AdminJobConfigurationPayload!
+  cursor: String
+  startedAt: DateTime
+}
+
+"""
+Different aggregation functions for analytical queries.
+"""
+enum Aggregation {
+  avg
+  count
+  max
+  median
+  min
+  p90
+  p95
+  p99
+  sum
+}
+
+input AirbyteConfigurationInput {
+  """
+  Linear export API key.
+  """
+  apiKey: String!
 }
 
 """
@@ -25,8 +67,9 @@ type ApiKey implements Node {
   """
   label: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -39,7 +82,7 @@ type ApiKeyConnection {
 
 input ApiKeyCreateInput {
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -96,6 +139,10 @@ type Application {
   """
   developerUrl: String!
   """
+  OAuth application's ID.
+  """
+  id: String!
+  """
   Image of the application.
   """
   imageUrl: String
@@ -117,29 +164,7 @@ type ArchivePayload {
 }
 
 """
-Contains requested archived model objects.
-"""
-type ArchiveResponse {
-  """
-  A JSON serialized collection of model objects loaded from the archive
-  """
-  archive: String!
-  """
-  The version of the remote database. Incremented by 1 for each migration run on the database.
-  """
-  databaseVersion: Float!
-  """
-  Whether the dependencies for the model objects are included in the archive.
-  """
-  includesDependencies: Boolean!
-  """
-  The total number of entities in the archive.
-  """
-  totalCount: Float!
-}
-
-"""
-[Alpha] Issue attachment (e.g. support ticket, pull request).
+Issue attachment (e.g. support ticket, pull request).
 """
 type Attachment implements Node {
   """
@@ -187,14 +212,73 @@ type Attachment implements Node {
   """
   title: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
   Location of the attachment which is also used as an identifier.
   """
   url: String!
+}
+
+"""
+Attachment collection filtering options.
+"""
+input AttachmentCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the attachment.
+  """
+  and: [AttachmentCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the attachments creator must satisfy.
+  """
+  creator: NullableUserFilter
+  """
+  Filters that needs to be matched by all attachments.
+  """
+  every: AttachmentFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Compound filters, one of which need to be matched by the attachment.
+  """
+  or: [AttachmentCollectionFilter!]
+  """
+  Filters that needs to be matched by some attachments.
+  """
+  some: AttachmentFilter
+  """
+  Comparator for the source type.
+  """
+  sourceType: NestedStringComparator
+  """
+  Comparator for the subtitle.
+  """
+  subtitle: NullableStringComparator
+  """
+  Comparator for the title.
+  """
+  title: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+  """
+  Comparator for the url.
+  """
+  url: StringComparator
 }
 
 type AttachmentConnection {
@@ -209,7 +293,7 @@ input AttachmentCreateInput {
   """
   commentBody: String
   """
-  [Internal] Create a linked comment with Prosemirror body. Please use `commentBody` instead
+  Create a linked comment with Prosemirror body. Please use `commentBody` instead
   """
   commentBodyData: JSONObject
   """
@@ -225,7 +309,7 @@ input AttachmentCreateInput {
   """
   iconUrl: String
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -259,9 +343,13 @@ type AttachmentEdge {
 }
 
 """
-[Alpha] Attachment filtering options.
+Attachment filtering options.
 """
 input AttachmentFilter {
+  """
+  Compound filters, all of which need to be matched by the attachment.
+  """
+  and: [AttachmentFilter!]
   """
   Comparator for the created at date.
   """
@@ -274,6 +362,10 @@ input AttachmentFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the attachment.
+  """
+  or: [AttachmentFilter!]
   """
   Comparator for the source type.
   """
@@ -368,8 +460,9 @@ type AuditEntry implements Node {
   metadata: JSONObject
   type: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -389,7 +482,7 @@ type AuditEntryEdge {
 }
 
 """
-[Alpha] Audit entry filtering options.
+Audit entry filtering options.
 """
 input AuditEntryFilter {
   """
@@ -433,6 +526,20 @@ type AuditEntryType {
   type: String!
 }
 
+"""
+[INTERNAL] An OAuth userId/createdDate tuple
+"""
+type AuthMembership {
+  """
+  The date of the authorization
+  """
+  createdAt: DateTime!
+  """
+  The authorizing userId
+  """
+  userId: String!
+}
+
 type AuthResolverResponse {
   """
   Should the signup flow allow access for the domain.
@@ -465,7 +572,7 @@ type AuthResolverResponse {
 }
 
 """
-Public information of the OAuth application, plus the authorized scopes for a given user.
+[INTERNAL] Public information of the OAuth application, plus the authorized scopes for a given user.
 """
 type AuthorizedApplication {
   """
@@ -476,18 +583,6 @@ type AuthorizedApplication {
   OAuth application's client ID.
   """
   clientId: String!
-  """
-  Information about the application.
-  """
-  description: String
-  """
-  Name of the developer.
-  """
-  developer: String!
-  """
-  Url of the developer (homepage or docs).
-  """
-  developerUrl: String!
   """
   Image of the application.
   """
@@ -507,61 +602,6 @@ type AuthorizedApplication {
 }
 
 """
-Relation load request.
-"""
-input BatchRequest {
-  """
-  The indexed key to load models for.
-  """
-  indexedKey: String!
-  """
-  The value of the indexed key to load models for.
-  """
-  keyValue: String!
-  """
-  The class name of the model to load.
-  """
-  modelClass: String!
-}
-
-type BillingDetailsPayload {
-  """
-  The customer's email address the invoices are sent to.
-  """
-  email: String
-  """
-  List of invoices, if any.
-  """
-  invoices: [Invoice!]!
-  """
-  The payment method.
-  """
-  paymentMethod: Card
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-type BillingEmailPayload {
-  """
-  The customer's email address the invoices are sent to.
-  """
-  email: String
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-input BillingEmailUpdateInput {
-  """
-  The email address to which to send invoices.
-  """
-  email: String!
-}
-
-"""
 Comparator for booleans.
 """
 input BooleanComparator {
@@ -575,45 +615,12 @@ input BooleanComparator {
   neq: Boolean
 }
 
-type Card {
-  """
-  The brand of the card, e.g. Visa.
-  """
-  brand: String!
-  """
-  The last four digits used to identify the card.
-  """
-  last4: String!
-}
-
-input CollaborationDocumentUpdateInput {
-  """
-  Client identifier.
-  """
-  clientId: String!
-  """
-  Document identifier.
-  """
-  issueId: String!
-  """
-  New document steps from the client.
-  """
-  steps: [JSON!]!
-  """
-  Client's document version number.
-  """
-  version: Int!
-}
-
-type CollaborationDocumentUpdatePayload {
-  """
-  Document steps the client has not seen yet and need to rebase it's local steps on.
-  """
-  steps: StepsResponse
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
+"""
+All possible chart types.
+"""
+enum ChartType {
+  nivoBar
+  nivoScatterPlot
 }
 
 """
@@ -629,6 +636,10 @@ type Comment implements Node {
   """
   body: String!
   """
+  The comment content as a Prosemirror document.
+  """
+  bodyData: String!
+  """
   The children of the comment.
   """
   children(
@@ -641,7 +652,7 @@ type Comment implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned comments.
+    Filter returned comments.
     """
     filter: CommentFilter
     """
@@ -682,8 +693,13 @@ type Comment implements Node {
   """
   parent: Comment
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  Emoji reaction summary, grouped by emoji type
+  """
+  reactionData: JSONObject!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -697,13 +713,13 @@ type Comment implements Node {
 }
 
 """
-[Alpha] Comment filtering options.
+Comment filtering options.
 """
 input CommentCollectionFilter {
   """
   Compound filters, all of which need to be matched by the comment.
   """
-  and: [CommentFilter!]
+  and: [CommentCollectionFilter!]
   """
   Comparator for the comments body.
   """
@@ -725,9 +741,13 @@ input CommentCollectionFilter {
   """
   issue: IssueFilter
   """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
   Compound filters, one of which need to be matched by the comment.
   """
-  or: [CommentFilter!]
+  or: [CommentCollectionFilter!]
   """
   Filters that needs to be matched by some comments.
   """
@@ -762,7 +782,15 @@ input CommentCreateInput {
   """
   createAsUser: String
   """
-  The identifier. If none is provided, the backend will generate one.
+  The date when the comment was created (e.g. if importing from another system). Must be a date in the past. If none is provided, the backend will generate the time as now.
+  """
+  createdAt: DateTime
+  """
+  Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  """
+  displayIconUrl: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -784,7 +812,7 @@ type CommentEdge {
 }
 
 """
-[Alpha] Comment filtering options.
+Comment filtering options.
 """
 input CommentFilter {
   """
@@ -898,6 +926,38 @@ type ContactPayload {
   success: Boolean!
 }
 
+"""
+[INTERNAL] Input for sending a message to the Linear Sales team
+"""
+input ContactSalesCreateInput {
+  """
+  Work email of the person requesting information.
+  """
+  email: String!
+  """
+  The message the user sent.
+  """
+  message: String
+  """
+  Name of the person requesting information.
+  """
+  name: String!
+}
+
+"""
+[Internal] Comparator for content.
+"""
+input ContentComparator {
+  """
+  [Internal] Contains constraint.
+  """
+  contains: String
+  """
+  [Internal] Not-contains constraint.
+  """
+  notContains: String
+}
+
 type CreateCsvExportReportPayload {
   """
   Whether the operation was successful.
@@ -958,7 +1018,7 @@ type CustomView implements Node {
   """
   description: String
   """
-  [Alpha] The filter applied to issues in the custom view.
+  The filter applied to issues in the custom view.
   """
   filterData: JSONObject!
   """
@@ -990,8 +1050,9 @@ type CustomView implements Node {
   """
   team: Team
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -1024,7 +1085,7 @@ input CustomViewCreateInput {
   """
   icon: String
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -1128,6 +1189,10 @@ type Cycle implements Node {
   """
   createdAt: DateTime!
   """
+  The cycle's description.
+  """
+  description: String
+  """
   The end time of the cycle.
   """
   endsAt: DateTime!
@@ -1135,6 +1200,10 @@ type Cycle implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  The number of in progress estimation points after each day.
+  """
+  inProgressScopeHistory: [Float!]!
   """
   The total number of issues in the cycle after each day.
   """
@@ -1152,7 +1221,7 @@ type Cycle implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned issues.
+    Filter returned issues.
     """
     filter: IssueFilter
     """
@@ -1209,7 +1278,7 @@ type Cycle implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned issues.
+    Filter returned issues.
     """
     filter: IssueFilter
     """
@@ -1230,8 +1299,9 @@ type Cycle implements Node {
     orderBy: PaginationOrderBy
   ): IssueConnection!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -1248,11 +1318,15 @@ input CycleCreateInput {
   """
   completedAt: DateTime
   """
+  The description of the cycle.
+  """
+  description: String
+  """
   The end date of the cycle.
   """
   endsAt: DateTime!
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -1278,7 +1352,7 @@ type CycleEdge {
 }
 
 """
-[Alpha] Project filtering options.
+Cycle filtering options.
 """
 input CycleFilter {
   """
@@ -1301,6 +1375,26 @@ input CycleFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Comparator for the filtering active cycle.
+  """
+  isActive: BooleanComparator
+  """
+  Comparator for the filtering future cycles.
+  """
+  isFuture: BooleanComparator
+  """
+  Comparator for the filtering next cycle.
+  """
+  isNext: BooleanComparator
+  """
+  Comparator for the filtering past cycles.
+  """
+  isPast: BooleanComparator
+  """
+  Comparator for the filtering previous cycle.
+  """
+  isPrevious: BooleanComparator
   """
   Filters that the cycles issues must satisfy.
   """
@@ -1352,6 +1446,10 @@ input CycleUpdateInput {
   """
   completedAt: DateTime
   """
+  The description of the cycle.
+  """
+  description: String
+  """
   The end date of the cycle.
   """
   endsAt: DateTime
@@ -1363,6 +1461,17 @@ input CycleUpdateInput {
   The start date of the cycle.
   """
   startsAt: DateTime
+}
+
+"""
+Different date aggregation functions for date dimension.
+"""
+enum DateAggregation {
+  day
+  month
+  thirtyMinutes
+  week
+  year
 }
 
 """
@@ -1408,11 +1517,17 @@ Represents a date and time in ISO 8601 format. Accepts shortcuts like `2021` to 
 """
 scalar DateTime
 
-type DebugPayload {
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
+"""
+The day of the week.
+"""
+enum Day {
+  Friday
+  Monday
+  Saturday
+  Sunday
+  Thursday
+  Tuesday
+  Wednesday
 }
 
 input DeleteOrganizationInput {
@@ -1423,13 +1538,38 @@ input DeleteOrganizationInput {
 }
 
 """
-Contains the requested dependencies.
+Object describing a dimension in analytical query, value to group by.
 """
-type DependencyResponse {
+input Dimension {
   """
-  A JSON serialized collection of dependencies.
+  aggregation function to be applied on date dimensions
   """
-  dependencies: String!
+  dateAggregation: DateAggregation
+  """
+  name of the dimension column
+  """
+  name: DimensionName!
+}
+
+"""
+All possible dimensions that can be applied to analytical queries.
+"""
+enum DimensionName {
+  assignee
+  completedAt
+  createdAt
+  creator
+  cycle
+  dueDate
+  estimate
+  label
+  priority
+  project
+  roadmap
+  snapshotAt
+  stateName
+  stateType
+  team
 }
 
 """
@@ -1481,8 +1621,9 @@ type Document implements Node {
   """
   title: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -1507,7 +1648,7 @@ input DocumentCreateInput {
   """
   content: String
   """
-  [Internal] The document content as a Prosemirror document.
+  The document content as a Prosemirror document.
   """
   contentData: JSONObject
   """
@@ -1515,7 +1656,7 @@ input DocumentCreateInput {
   """
   icon: String
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -1551,41 +1692,6 @@ type DocumentPayload {
   success: Boolean!
 }
 
-"""
-Collaborative editing steps for documents.
-"""
-type DocumentStep implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  Connected client ID.
-  """
-  clientId: String!
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  Step data.
-  """
-  step: JSON!
-  """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  Step version.
-  """
-  version: Float!
-}
-
 input DocumentUpdateInput {
   """
   The color of the icon.
@@ -1596,7 +1702,7 @@ input DocumentUpdateInput {
   """
   content: String
   """
-  [Internal] The document content as a Prosemirror document.
+  The document content as a Prosemirror document.
   """
   contentData: JSONObject
   """
@@ -1611,63 +1717,6 @@ input DocumentUpdateInput {
   The title of the document.
   """
   title: String
-}
-
-"""
-A version of a document.
-"""
-type DocumentVersion implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The document's content in markdown format.
-  """
-  content: String
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The user who created the version.
-  """
-  creator: User!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The project that the document is associated with.
-  """
-  project: Project!
-  """
-  The version revision number.
-  """
-  revision: Float!
-  """
-  The document's title.
-  """
-  title: String!
-  """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
-type DocumentVersionConnection {
-  edges: [DocumentVersionEdge!]!
-  nodes: [DocumentVersion!]!
-  pageInfo: PageInfo!
-}
-
-type DocumentVersionEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: DocumentVersion!
 }
 
 input EmailSubscribeInput {
@@ -1769,8 +1818,9 @@ type Emoji implements Node {
   """
   source: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -1787,7 +1837,7 @@ type EmojiConnection {
 
 input EmojiCreateInput {
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -1840,10 +1890,61 @@ interface Entity implements Node {
   """
   id: ID!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
+}
+
+"""
+Comparator for estimates.
+"""
+input EstimateComparator {
+  """
+  Compound filters, one of which need to be matched by the estimate.
+  """
+  and: [NullableNumberComparator!]
+  """
+  Equals constraint.
+  """
+  eq: Float
+  """
+  Greater-than constraint. Matches any values that are greater than the given value.
+  """
+  gt: Float
+  """
+  Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.
+  """
+  gte: Float
+  """
+  In-array constraint.
+  """
+  in: [Float!]
+  """
+  Less-than constraint. Matches any values that are less than the given value.
+  """
+  lt: Float
+  """
+  Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.
+  """
+  lte: Float
+  """
+  Not-equals constraint.
+  """
+  neq: Float
+  """
+  Not-in-array constraint.
+  """
+  nin: [Float!]
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
+  """
+  Compound filters, all of which need to be matched by the estimate.
+  """
+  or: [NullableNumberComparator!]
 }
 
 input EventCreateInput {
@@ -1874,6 +1975,14 @@ type EventPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+Different facts tables to run analytical queries against.
+"""
+enum FactsTable {
+  issue
+  issueSnapshot
 }
 
 """
@@ -1966,6 +2075,10 @@ type Favorite implements Node {
   """
   projectTeam: Team
   """
+  The favorited roadmap.
+  """
+  roadmap: Roadmap
+  """
   The order of the item in the favorites list.
   """
   sortOrder: Float!
@@ -1974,8 +2087,9 @@ type Favorite implements Node {
   """
   type: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -2040,6 +2154,10 @@ input FavoriteCreateInput {
   """
   projectTeamId: String
   """
+  The identifier of the roadmap to favorite.
+  """
+  roadmapId: String
+  """
   The position of the item in the favorites list.
   """
   sortOrder: Float
@@ -2074,31 +2192,13 @@ input FavoriteUpdateInput {
   """
   folderName: String
   """
-  The id of the folder to move the favorite under.
+  The identifier (in UUID v4 format) of the folder to move the favorite under.
   """
   parentId: String
   """
   The position of the item in the favorites list.
   """
   sortOrder: Float
-}
-
-input FeedbackCreateInput {
-  """
-  How disappointed the user would be if he/she could no longer use Linear.
-  """
-  disappointmentRating: Float!
-  """
-  The feedback the user sent.
-  """
-  feedback: String!
-}
-
-type FeedbackPayload {
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
 }
 
 """
@@ -2145,6 +2245,55 @@ type FrontAttachmentPayload {
   success: Boolean!
 }
 
+"""
+Front specific settings.
+"""
+type FrontSettings {
+  """
+  Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.
+  """
+  automateTicketReopeningOnCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue
+  """
+  automateTicketReopeningOnComment: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear issue is completed.
+  """
+  automateTicketReopeningOnCompletion: Boolean
+  """
+  Whether an internal message should be added when someone comments on an issue.
+  """
+  sendNoteOnComment: Boolean
+  """
+  Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).
+  """
+  sendNoteOnStatusChange: Boolean
+}
+
+input FrontSettingsInput {
+  """
+  Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.
+  """
+  automateTicketReopeningOnCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue
+  """
+  automateTicketReopeningOnComment: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear issue is completed.
+  """
+  automateTicketReopeningOnCompletion: Boolean
+  """
+  Whether an internal message should be added when someone comments on an issue.
+  """
+  sendNoteOnComment: Boolean
+  """
+  Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).
+  """
+  sendNoteOnStatusChange: Boolean
+}
+
 type GitHubCommitIntegrationPayload {
   """
   The integration that was created or updated.
@@ -2162,6 +2311,31 @@ type GitHubCommitIntegrationPayload {
   The webhook secret to provide to GitHub.
   """
   webhookSecret: String!
+}
+
+"""
+Metadata and settings for a GitHub integration.
+"""
+type GitHubSettings {
+  """
+  The avatar URL for the GitHub organization
+  """
+  orgAvatarUrl: String!
+  """
+  The GitHub organization's name
+  """
+  orgLogin: String!
+}
+
+input GitHubSettingsInput {
+  """
+  The avatar URL for the GitHub organization
+  """
+  orgAvatarUrl: String!
+  """
+  The GitHub organization's name
+  """
+  orgLogin: String!
 }
 
 """
@@ -2186,6 +2360,10 @@ type GithubOrg {
   GitHub organization id.
   """
   id: String!
+  """
+  Whether or not this org is the user's personal repositories.
+  """
+  isPersonal: Boolean
   """
   The login for the GitHub organization.
   """
@@ -2292,6 +2470,89 @@ type ImageUploadFromUrlPayload {
 }
 
 """
+A initiative that contains projects.
+"""
+type Initiative implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The initiative's description.
+  """
+  description: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The name of the initiative.
+  """
+  name: String!
+  """
+  The organization that the initiative belongs to.
+  """
+  organization: Organization!
+  """
+  The sort order for the initiative.
+  """
+  sortOrder: Float!
+  """
+  The estimated completion date of the initiative.
+  """
+  targetDate: TimelessDate
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type InitiativeConnection {
+  edges: [InitiativeEdge!]!
+  nodes: [Initiative!]!
+  pageInfo: PageInfo!
+}
+
+type InitiativeEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: Initiative!
+}
+
+input InsightPayload {
+  """
+  Chart type of the visualization.
+  """
+  chartType: ChartType!
+  dimensions: [Dimension!]!
+  """
+  If set to true, analytics data will include archived data
+  """
+  includeArchived: Boolean
+  """
+  Insight id where to send data to.
+  """
+  insightId: String!
+  """
+  Filters that needs to be matched by some issues.
+  """
+  issueFilter: IssueFilter!
+  measures: [Measure!]!
+  """
+  Table to run analytical query against.
+  """
+  table: FactsTable!
+}
+
+"""
 An integration with an external service.
 """
 type Integration implements Node {
@@ -2324,8 +2585,9 @@ type Integration implements Node {
   """
   team: Team
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -2359,6 +2621,24 @@ type IntegrationPayload {
   success: Boolean!
 }
 
+input IntegrationRequestInput {
+  """
+  Email associated with the request.
+  """
+  email: String
+  """
+  Name of the requested integration.
+  """
+  name: String!
+}
+
+type IntegrationRequestPayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 """
 An integration resource created by an external service.
 """
@@ -2382,7 +2662,7 @@ type IntegrationResource implements Node {
   """
   The integration that the resource is associated with.
   """
-  integration: Integration!
+  integration: Integration
   """
   The issue that the resource is associated with.
   """
@@ -2400,8 +2680,9 @@ type IntegrationResource implements Node {
   """
   resourceType: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -2446,29 +2727,298 @@ type IntegrationResourceEdge {
 The integration resource's settings
 """
 type IntegrationSettings {
+  front: FrontSettings
+  gitHub: GitHubSettings
   googleSheets: GoogleSheetsSettings
   intercom: IntercomSettings
   jira: JiraSettings
   sentry: SentrySettings
+  slackOrgProjectUpdatesPost: SlackPostSettings
   slackPost: SlackPostSettings
   slackProjectPost: SlackPostSettings
   zendesk: ZendeskSettings
 }
 
 input IntegrationSettingsInput {
+  front: FrontSettingsInput
+  gitHub: GitHubSettingsInput
   googleSheets: GoogleSheetsSettingsInput
   intercom: IntercomSettingsInput
   jira: JiraSettingsInput
   sentry: SentrySettingsInput
+  slackOrgProjectUpdatesPost: SlackPostSettingsInput
   slackPost: SlackPostSettingsInput
   slackProjectPost: SlackPostSettingsInput
   zendesk: ZendeskSettingsInput
 }
 
 """
+Join table between templates and integrations
+"""
+type IntegrationTemplate implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The integration that the template is associated with.
+  """
+  integration: Integration!
+  """
+  The template that the integration is associated with.
+  """
+  template: Template!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type IntegrationTemplateConnection {
+  edges: [IntegrationTemplateEdge!]!
+  nodes: [IntegrationTemplate!]!
+  pageInfo: PageInfo!
+}
+
+input IntegrationTemplateCreateInput {
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The identifier of the integration.
+  """
+  integrationId: String!
+  """
+  The identifier of the template.
+  """
+  templateId: String!
+}
+
+type IntegrationTemplateEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: IntegrationTemplate!
+}
+
+type IntegrationTemplatePayload {
+  """
+  The IntegrationTemplate that was created or updated.
+  """
+  integrationTemplate: IntegrationTemplate!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+The configuration of all integrations for a project or a team.
+"""
+type IntegrationsSettings implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Project which those settings apply to.
+  """
+  project: Project
+  """
+  Whether to send a Slack message when a new issue is created for the project or the team.
+  """
+  slackIssueCreated: Boolean
+  """
+  Whether to send a Slack message when a comment is created on any of the project or team's issues.
+  """
+  slackIssueNewComment: Boolean
+  """
+  Whether to send a Slack message when any of the project or team's issues has a change in status.
+  """
+  slackIssueStatusChangedAll: Boolean
+  """
+  Whether to send a Slack message when any of the project or team's issues change to completed or cancelled.
+  """
+  slackIssueStatusChangedDone: Boolean
+  """
+  Whether to send a Slack message when a project update is created.
+  """
+  slackProjectUpdateCreated: Boolean
+  """
+  Whether to send a new project update to milestone Slack channels.
+  """
+  slackProjectUpdateCreatedToMilestone: Boolean
+  """
+  Whether to send a new project update to team Slack channels.
+  """
+  slackProjectUpdateCreatedToTeam: Boolean
+  """
+  Whether to send a new project update to workspace Slack channel.
+  """
+  slackProjectUpdateCreatedToWorkspace: Boolean
+  """
+  Team which those settings apply to.
+  """
+  team: Team
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type IntegrationsSettingsConnection {
+  edges: [IntegrationsSettingsEdge!]!
+  nodes: [IntegrationsSettings!]!
+  pageInfo: PageInfo!
+}
+
+input IntegrationsSettingsCreateInput {
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The identifier of the project to create settings for.
+  """
+  projectId: String
+  """
+  Whether to send a Slack message when a new issue is created for the project or the team.
+  """
+  slackIssueCreated: Boolean
+  """
+  Whether to send a Slack message when a comment is created on any of the project or team's issues.
+  """
+  slackIssueNewComment: Boolean
+  """
+  Whether to send a Slack message when any of the project or team's issues has a change in status.
+  """
+  slackIssueStatusChangedAll: Boolean
+  """
+  Whether to send a Slack message when any of the project or team's issues change to completed or cancelled.
+  """
+  slackIssueStatusChangedDone: Boolean
+  """
+  Whether to send a Slack message when a project update is created.
+  """
+  slackProjectUpdateCreated: Boolean
+  """
+  Whether to send a Slack message when a project update is created to milestone channels.
+  """
+  slackProjectUpdateCreatedToMilestone: Boolean
+  """
+  Whether to send a Slack message when a project update is created to team channels.
+  """
+  slackProjectUpdateCreatedToTeam: Boolean
+  """
+  Whether to send a Slack message when a project update is created to workspace channel.
+  """
+  slackProjectUpdateCreatedToWorkspace: Boolean
+  """
+  The identifier of the team to create settings for.
+  """
+  teamId: String
+}
+
+type IntegrationsSettingsEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: IntegrationsSettings!
+}
+
+type IntegrationsSettingsPayload {
+  """
+  The settings that were created or updated.
+  """
+  integrationsSettings: IntegrationsSettings!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+input IntegrationsSettingsUpdateInput {
+  """
+  Whether to send a Slack message when a new issue is created for the project or the team.
+  """
+  slackIssueCreated: Boolean
+  """
+  Whether to send a Slack message when a comment is created on any of the project or team's issues.
+  """
+  slackIssueNewComment: Boolean
+  """
+  Whether to send a Slack message when any of the project or team's issues has a change in status.
+  """
+  slackIssueStatusChangedAll: Boolean
+  """
+  Whether to send a Slack message when any of the project or team's issues change to completed or cancelled.
+  """
+  slackIssueStatusChangedDone: Boolean
+  """
+  Whether to send a Slack message when a project update is created.
+  """
+  slackProjectUpdateCreated: Boolean
+  """
+  Whether to send a Slack message when a project update is created to milestone channels.
+  """
+  slackProjectUpdateCreatedToMilestone: Boolean
+  """
+  Whether to send a Slack message when a project update is created to team channels.
+  """
+  slackProjectUpdateCreatedToTeam: Boolean
+  """
+  Whether to send a Slack message when a project update is created to workspace channel.
+  """
+  slackProjectUpdateCreatedToWorkspace: Boolean
+}
+
+"""
 Intercom specific settings.
 """
 type IntercomSettings {
+  """
+  Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.
+  """
+  automateTicketReopeningOnCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue
+  """
+  automateTicketReopeningOnComment: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear issue is completed.
+  """
+  automateTicketReopeningOnCompletion: Boolean
   """
   Whether an internal message should be added when someone comments on an issue.
   """
@@ -2481,6 +3031,18 @@ type IntercomSettings {
 
 input IntercomSettingsInput {
   """
+  Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.
+  """
+  automateTicketReopeningOnCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue
+  """
+  automateTicketReopeningOnComment: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear issue is completed.
+  """
+  automateTicketReopeningOnCompletion: Boolean
+  """
   Whether an internal message should be added when someone comments on an issue.
   """
   sendNoteOnComment: Boolean
@@ -2488,29 +3050,6 @@ input IntercomSettingsInput {
   Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).
   """
   sendNoteOnStatusChange: Boolean
-}
-
-type Invoice {
-  """
-  The creation date of the invoice.
-  """
-  created: DateTime!
-  """
-  The due date of the invoice.
-  """
-  dueDate: TimelessDate
-  """
-  The status of the invoice.
-  """
-  status: String!
-  """
-  The invoice total, in cents.
-  """
-  total: Float!
-  """
-  The URL at which the invoice can be viewed or paid.
-  """
-  url: String
 }
 
 """
@@ -2538,7 +3077,7 @@ type Issue implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned attachments.
+    Filter returned attachments.
     """
     filter: AttachmentFilter
     """
@@ -2591,7 +3130,7 @@ type Issue implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned issues.
+    Filter returned issues.
     """
     filter: IssueFilter
     """
@@ -2624,7 +3163,7 @@ type Issue implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned comments.
+    Filter returned comments.
     """
     filter: CommentFilter
     """
@@ -2668,6 +3207,10 @@ type Issue implements Node {
   The issue's description in markdown format.
   """
   description: String
+  """
+  [Internal] The issue's description as a Prosemirror document.
+  """
+  descriptionData: JSON
   """
   The date at which the issue is due.
   """
@@ -2714,7 +3257,7 @@ type Issue implements Node {
   """
   identifier: String!
   """
-  Integration resources for this issue.
+  [DEPRECATED] Integration resources for this issue.
   """
   integrationResources(
     """
@@ -2742,6 +3285,7 @@ type Issue implements Node {
     """
     orderBy: PaginationOrderBy
   ): IntegrationResourceConnection!
+    @deprecated(reason: "This field will soon be deprecated, please use `attachments` instead")
   """
   Inverse relations associated with this issue.
   """
@@ -2784,7 +3328,7 @@ type Issue implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned issue labels.
+    Filter returned issue labels.
     """
     filter: IssueLabelFilter
     """
@@ -2894,7 +3438,7 @@ type Issue implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned subscribers.
+    Filter returned subscribers.
     """
     filter: UserFilter
     """
@@ -2931,8 +3475,13 @@ type Issue implements Node {
   """
   trashed: Boolean
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The time at which the issue left triage.
+  """
+  triagedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -2957,13 +3506,13 @@ type IssueBatchPayload {
 }
 
 """
-[Alpha] Issue filtering options.
+Issue filtering options.
 """
 input IssueCollectionFilter {
   """
   Compound filters, all of which need to be matched by the issue.
   """
-  and: [IssueFilter!]
+  and: [IssueCollectionFilter!]
   """
   Filters that the issues assignee must satisfy.
   """
@@ -2971,7 +3520,7 @@ input IssueCollectionFilter {
   """
   Filters that the issues attachments must satisfy.
   """
-  attachments: AttachmentFilter
+  attachments: AttachmentCollectionFilter
   """
   Comparator for the issues auto archived at date.
   """
@@ -3019,11 +3568,27 @@ input IssueCollectionFilter {
   """
   Comparator for the issues estimate.
   """
-  estimate: NumberComparator
+  estimate: EstimateComparator
   """
   Filters that needs to be matched by all issues.
   """
   every: IssueFilter
+  """
+  Comparator for filtering issues which are blocked.
+  """
+  hasBlockedByRelations: RelationExistsComparator
+  """
+  Comparator for filtering issues which are blocking.
+  """
+  hasBlockingRelations: RelationExistsComparator
+  """
+  Comparator for filtering issues which are duplicates.
+  """
+  hasDuplicateRelations: RelationExistsComparator
+  """
+  Comparator for filtering issues with relations.
+  """
+  hasRelatedRelations: RelationExistsComparator
   """
   Comparator for the identifier.
   """
@@ -3033,13 +3598,21 @@ input IssueCollectionFilter {
   """
   labels: IssueLabelCollectionFilter
   """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
   Comparator for the issues number.
   """
   number: NumberComparator
   """
   Compound filters, one of which need to be matched by the issue.
   """
-  or: [IssueFilter!]
+  or: [IssueCollectionFilter!]
+  """
+  Filters that the issue parent must satisfy.
+  """
+  parent: NullableIssueFilter
   """
   Comparator for the issues priority.
   """
@@ -3048,6 +3621,10 @@ input IssueCollectionFilter {
   Filters that the issues project must satisfy.
   """
   project: NullableProjectFilter
+  """
+  [Internal] Comparator for the issues content.
+  """
+  searchableContent: ContentComparator
   """
   Filters that the issues snoozer must satisfy.
   """
@@ -3068,6 +3645,10 @@ input IssueCollectionFilter {
   Filters that the issues state must satisfy.
   """
   state: WorkflowStateFilter
+  """
+  Filters that issue subscribers must satisfy.
+  """
+  subscribers: UserCollectionFilter
   """
   Filters that the issues team must satisfy.
   """
@@ -3102,6 +3683,10 @@ input IssueCreateInput {
   """
   createAsUser: String
   """
+  The date when the issue was created (e.g. if importing from another system). Must be a date in the past. If none is provided, the backend will generate the time as now.
+  """
+  createdAt: DateTime
+  """
   The cycle associated with the issue.
   """
   cycleId: String
@@ -3114,6 +3699,10 @@ input IssueCreateInput {
   """
   descriptionData: JSON
   """
+  Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  """
+  displayIconUrl: String
+  """
   The date at which the issue is due.
   """
   dueDate: TimelessDate
@@ -3122,7 +3711,7 @@ input IssueCreateInput {
   """
   estimate: Int
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -3180,7 +3769,7 @@ type IssueEdge {
 }
 
 """
-[Alpha] Issue filtering options.
+Issue filtering options.
 """
 input IssueFilter {
   """
@@ -3194,7 +3783,7 @@ input IssueFilter {
   """
   Filters that the issues attachments must satisfy.
   """
-  attachments: AttachmentFilter
+  attachments: AttachmentCollectionFilter
   """
   Comparator for the issues auto archived at date.
   """
@@ -3242,7 +3831,23 @@ input IssueFilter {
   """
   Comparator for the issues estimate.
   """
-  estimate: NumberComparator
+  estimate: EstimateComparator
+  """
+  Comparator for filtering issues which are blocked.
+  """
+  hasBlockedByRelations: RelationExistsComparator
+  """
+  Comparator for filtering issues which are blocking.
+  """
+  hasBlockingRelations: RelationExistsComparator
+  """
+  Comparator for filtering issues which are duplicates.
+  """
+  hasDuplicateRelations: RelationExistsComparator
+  """
+  Comparator for filtering issues with relations.
+  """
+  hasRelatedRelations: RelationExistsComparator
   """
   Comparator for the identifier.
   """
@@ -3260,6 +3865,10 @@ input IssueFilter {
   """
   or: [IssueFilter!]
   """
+  Filters that the issue parent must satisfy.
+  """
+  parent: NullableIssueFilter
+  """
   Comparator for the issues priority.
   """
   priority: NullableNumberComparator
@@ -3267,6 +3876,10 @@ input IssueFilter {
   Filters that the issues project must satisfy.
   """
   project: NullableProjectFilter
+  """
+  [Internal] Comparator for the issues content.
+  """
+  searchableContent: ContentComparator
   """
   Filters that the issues snoozer must satisfy.
   """
@@ -3283,6 +3896,10 @@ input IssueFilter {
   Filters that the issues state must satisfy.
   """
   state: WorkflowStateFilter
+  """
+  Filters that issue subscribers must satisfy.
+  """
+  subscribers: UserCollectionFilter
   """
   Filters that the issues team must satisfy.
   """
@@ -3306,6 +3923,10 @@ type IssueHistory implements Node {
   """
   actor: User
   """
+  The id of user who made these changes. If null, possibly means that the change made by an integration.
+  """
+  actorId: String
+  """
   ID's of labels that were added.
   """
   addedLabelIds: [String!]
@@ -3321,7 +3942,17 @@ type IssueHistory implements Node {
   The linked attachment.
   """
   attachment: Attachment
+  """
+  The id of linked attachment.
+  """
+  attachmentId: String
+  """
+  Whether the issue was auto-archived.
+  """
   autoArchived: Boolean
+  """
+  Whether the issue was auto-closed.
+  """
   autoClosed: Boolean
   """
   The time at which the entity was created.
@@ -3332,9 +3963,17 @@ type IssueHistory implements Node {
   """
   fromAssignee: User
   """
+  The id of user from whom the issue was re-assigned from.
+  """
+  fromAssigneeId: String
+  """
   The previous cycle of the issue.
   """
   fromCycle: Cycle
+  """
+  The id of previous cycle of the issue.
+  """
+  fromCycleId: String
   """
   What the due date was changed from
   """
@@ -3348,6 +3987,10 @@ type IssueHistory implements Node {
   """
   fromParent: Issue
   """
+  The id of previous parent of the issue.
+  """
+  fromParentId: String
+  """
   What the priority was changed from.
   """
   fromPriority: Float
@@ -3356,13 +3999,25 @@ type IssueHistory implements Node {
   """
   fromProject: Project
   """
+  The id of previous project of the issue.
+  """
+  fromProjectId: String
+  """
   The previous workflow state of the issue.
   """
   fromState: WorkflowState
   """
+  The id of previous workflow state of the issue.
+  """
+  fromStateId: String
+  """
   The team from which the issue was moved from.
   """
   fromTeam: Team
+  """
+  The id of team from which the issue was moved from.
+  """
+  fromTeamId: String
   """
   What the title was changed from.
   """
@@ -3388,17 +4043,29 @@ type IssueHistory implements Node {
   """
   removedLabelIds: [String!]
   """
-  Information about the integration or application which created this history entry.
-  """
-  source: JSONObject
-  """
   The user to whom the issue was assigned to.
   """
   toAssignee: User
   """
+  The id of user to whom the issue was assigned to.
+  """
+  toAssigneeId: String
+  """
+  The new project created from the issue.
+  """
+  toConvertedProject: Project
+  """
+  The id of new project created from the issue.
+  """
+  toConvertedProjectId: String
+  """
   The new cycle of the issue.
   """
   toCycle: Cycle
+  """
+  The id of new cycle of the issue.
+  """
+  toCycleId: String
   """
   What the due date was changed to
   """
@@ -3412,6 +4079,10 @@ type IssueHistory implements Node {
   """
   toParent: Issue
   """
+  The id of new parent of the issue.
+  """
+  toParentId: String
+  """
   What the priority was changed to.
   """
   toPriority: Float
@@ -3420,13 +4091,25 @@ type IssueHistory implements Node {
   """
   toProject: Project
   """
+  The id of new project of the issue.
+  """
+  toProjectId: String
+  """
   The new workflow state of the issue.
   """
   toState: WorkflowState
   """
+  The id of new workflow state of the issue.
+  """
+  toStateId: String
+  """
   The team to which the issue was moved to.
   """
   toTeam: Team
+  """
+  The id of team to which the issue was moved to.
+  """
+  toTeamId: String
   """
   What the title was changed to.
   """
@@ -3436,8 +4119,9 @@ type IssueHistory implements Node {
   """
   trashed: Boolean
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -3489,6 +4173,10 @@ type IssueImport implements Node {
   """
   mapping: JSONObject
   """
+  Current step progress in % (0-100).
+  """
+  progress: Float
+  """
   The service from which data will be imported.
   """
   service: String!
@@ -3497,8 +4185,13 @@ type IssueImport implements Node {
   """
   status: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  New team's name in cases when teamId not set
+  """
+  teamName: String
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -3567,6 +4260,39 @@ type IssueLabel implements Node {
   """
   archivedAt: DateTime
   """
+  Children of the label.
+  """
+  children(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned issue labels.
+    """
+    filter: IssueLabelFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueLabelConnection!
+  """
   The label's color as a HEX string.
   """
   color: String!
@@ -3599,7 +4325,7 @@ type IssueLabel implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned issues.
+    Filter returned issues.
     """
     filter: IssueFilter
     """
@@ -3623,26 +4349,31 @@ type IssueLabel implements Node {
   The label's name.
   """
   name: String!
-  organization: Organization @deprecated(reason: "Workspace labels are identified by their team being null.")
+  organization: Organization! @deprecated(reason: "Workspace labels are identified by their team being null.")
   """
-  The team that the label is associated with. If null, the label is associated with the global workspace..
+  The parent label.
+  """
+  parent: IssueLabel
+  """
+  The team that the label is associated with. If null, the label is associated with the global workspace.
   """
   team: Team
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
 
 """
-[Alpha] Issue label filtering options.
+Issue label filtering options.
 """
 input IssueLabelCollectionFilter {
   """
   Compound filters, all of which need to be matched by the label.
   """
-  and: [IssueLabelFilter!]
+  and: [IssueLabelCollectionFilter!]
   """
   Comparator for the created at date.
   """
@@ -3660,13 +4391,21 @@ input IssueLabelCollectionFilter {
   """
   id: IDComparator
   """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
   Comparator for the name.
   """
   name: StringComparator
   """
   Compound filters, one of which need to be matched by the label.
   """
-  or: [IssueLabelFilter!]
+  or: [IssueLabelCollectionFilter!]
+  """
+  Filters that the issue label's parent label must satisfy.
+  """
+  parent: IssueLabelFilter
   """
   Filters that needs to be matched by some issue labels.
   """
@@ -3697,13 +4436,17 @@ input IssueLabelCreateInput {
   """
   description: String
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
   The name of the label.
   """
   name: String!
+  """
+  The identifier of the parent label.
+  """
+  parentId: String
   """
   The team associated with the label. If not given, the label will be associated with the entire workspace.
   """
@@ -3719,7 +4462,7 @@ type IssueLabelEdge {
 }
 
 """
-[Alpha] Issue label filtering options.
+Issue label filtering options.
 """
 input IssueLabelFilter {
   """
@@ -3746,6 +4489,10 @@ input IssueLabelFilter {
   Compound filters, one of which need to be matched by the label.
   """
   or: [IssueLabelFilter!]
+  """
+  Filters that the issue label's parent label must satisfy.
+  """
+  parent: IssueLabelFilter
   """
   Filters that the issue labels team must satisfy.
   """
@@ -3784,12 +4531,20 @@ input IssueLabelUpdateInput {
   The name of the label.
   """
   name: String
+  """
+  The identifier of the parent label.
+  """
+  parentId: String
 }
 
 """
 An issue related notification
 """
 type IssueNotification implements Entity & Node & Notification {
+  """
+  The user that caused the notification. If empty it's Linear itself.
+  """
+  actor: User
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
@@ -3836,8 +4591,13 @@ type IssueNotification implements Entity & Node & Notification {
   """
   type: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The time at which a notification was unsnoozed..
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -3901,8 +4661,9 @@ type IssueRelation implements Node {
   """
   type: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -3915,7 +4676,7 @@ type IssueRelationConnection {
 
 input IssueRelationCreateInput {
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -4015,10 +4776,6 @@ input IssueUpdateInput {
   """
   descriptionData: JSON
   """
-  [DEPRECATED] Document version for backwards compatibility.
-  """
-  documentVersion: Int
-  """
   The date at which the issue is due.
   """
   dueDate: TimelessDate
@@ -4081,12 +4838,12 @@ input IssueUpdateInput {
 }
 
 """
-The `JSON` scalar type represents JSON values
+The `JSON` scalar type represents arbitrary values as *stringified* JSON
 """
 scalar JSON
 
 """
-The `JSONObject` scalar type represents JSON values as a string
+The `JSONObject` scalar type represents arbitrary values as *embedded* JSON
 """
 scalar JSONObject
 
@@ -4199,6 +4956,38 @@ input JoinOrganizationInput {
   organizationId: String!
 }
 
+type LogoutResponse {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+Object describing a measure in analytical query.
+"""
+input Measure {
+  """
+  aggregation function to be applied on the measure column
+  """
+  aggregation: Aggregation!
+  """
+  name of the measure
+  """
+  name: MeasureName!
+}
+
+"""
+All possible measures that can be applied to analytical queries.
+"""
+enum MeasureName {
+  cycleTime
+  effort
+  id
+  timeToStart
+  timeToTriage
+}
+
 """
 A milestone that contains projects.
 """
@@ -4211,6 +5000,10 @@ type Milestone implements Node {
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  """
+  [ALPHA] The milestone's description.
+  """
+  description: String
   """
   The unique identifier of the entity.
   """
@@ -4236,7 +5029,7 @@ type Milestone implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned projects.
+    Filter returned projects.
     """
     filter: ProjectFilter
     """
@@ -4255,14 +5048,19 @@ type Milestone implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
-  ): ProjectConnection!
+  ): ProjectConnection! @deprecated(reason: "Milestones will be removed. Use roadmaps instead.")
   """
   The sort order for the milestone.
   """
   sortOrder: Float!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  [ALPHA] The estimated completion date of the initiative.
+  """
+  targetDate: TimelessDate
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -4275,7 +5073,11 @@ type MilestoneConnection {
 
 input MilestoneCreateInput {
   """
-  The identifier. If none is provided, the backend will generate one.
+  [ALPHA] The description for the milestone.
+  """
+  description: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -4286,6 +5088,14 @@ input MilestoneCreateInput {
   The sort order of the milestone.
   """
   sortOrder: Float
+  """
+  [ALPHA] The planned target date of the milestone.
+  """
+  targetDate: TimelessDate
+  """
+  [ALPHA] The identifiers of the teams this milestone is associated with.
+  """
+  teamIds: [String!]
 }
 
 type MilestoneEdge {
@@ -4296,42 +5106,15 @@ type MilestoneEdge {
   node: Milestone!
 }
 
-"""
-[Alpha] Milestone filtering options.
-"""
-input MilestoneFilter {
+type MilestoneMigrationPayload {
   """
-  Compound filters, all of which need to be matched by the milestone.
+  The identifier of the last sync operation.
   """
-  and: [MilestoneFilter!]
+  lastSyncId: Float!
   """
-  Comparator for the created at date.
+  Whether the operation was successful.
   """
-  createdAt: DateComparator
-  """
-  Comparator for the identifier.
-  """
-  id: IDComparator
-  """
-  Comparator for the milestone name.
-  """
-  name: StringComparator
-  """
-  Compound filters, one of which need to be matched by the milestone.
-  """
-  or: [MilestoneFilter!]
-  """
-  Filters that the milestones projects must satisfy.
-  """
-  projects: ProjectCollectionFilter
-  """
-  Comparator for the milestone sort order.
-  """
-  sortOrder: NumberComparator
-  """
-  Comparator for the updated at date.
-  """
-  updatedAt: DateComparator
+  success: Boolean!
 }
 
 type MilestonePayload {
@@ -4351,6 +5134,10 @@ type MilestonePayload {
 
 input MilestoneUpdateInput {
   """
+  [ALPHA] The description for the milestone.
+  """
+  description: String
+  """
   The name of the milestone.
   """
   name: String
@@ -4358,11 +5145,39 @@ input MilestoneUpdateInput {
   The sort order of the milestone.
   """
   sortOrder: Float
+  """
+  [ALPHA] The planned target date of the milestone.
+  """
+  targetDate: TimelessDate
+  """
+  [ALPHA] The identifiers of the teams this milestone is associated with.
+  """
+  teamIds: [String!]
+}
+
+input MilestonesMigrateInput {
+  """
+  IDs of the milestones to delete.
+  """
+  milestonesToDelete: [String!]
+  """
+  IDs of the milestones to migrate.
+  """
+  milestonesToMigrate: [String!]
 }
 
 type Mutation {
   """
-  [Internal] Creates a new API key.
+  Creates an integration api key for Airbyte to connect with Linear
+  """
+  airbyteIntegrationConnect(
+    """
+    Airbyte integration settings.
+    """
+    input: AirbyteConfigurationInput!
+  ): IntegrationPayload!
+  """
+  Creates a new API key.
   """
   apiKeyCreate(
     """
@@ -4371,7 +5186,7 @@ type Mutation {
     input: ApiKeyCreateInput!
   ): ApiKeyPayload!
   """
-  [Internal] Deletes an API key.
+  Deletes an API key.
   """
   apiKeyDelete(
     """
@@ -4389,7 +5204,7 @@ type Mutation {
     id: String!
   ): ArchivePayload! @deprecated(reason: "This mutation is deprecated, please use `attachmentDelete` instead")
   """
-  [Alpha] Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
+  Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
   """
   attachmentCreate(
     """
@@ -4398,7 +5213,7 @@ type Mutation {
     input: AttachmentCreateInput!
   ): AttachmentPayload!
   """
-  [Alpha] Deletes an issue attachment.
+  Deletes an issue attachment.
   """
   attachmentDelete(
     """
@@ -4497,7 +5312,7 @@ type Mutation {
     ticketId: String!
   ): AttachmentPayload!
   """
-  [Alpha] Updates an existing issue attachment.
+  Updates an existing issue attachment.
   """
   attachmentUpdate(
     """
@@ -4509,19 +5324,6 @@ type Mutation {
     """
     input: AttachmentUpdateInput!
   ): AttachmentPayload!
-  """
-  Updates the billing email address for the customer.
-  """
-  billingEmailUpdate(
-    """
-    The properties of the billing details.
-    """
-    input: BillingEmailUpdateInput!
-  ): BillingEmailPayload!
-  """
-  Update collaborative document with client steps.
-  """
-  collaborativeDocumentUpdate(input: CollaborationDocumentUpdateInput!): CollaborationDocumentUpdatePayload!
   """
   Creates a new comment.
   """
@@ -4561,6 +5363,15 @@ type Mutation {
     The contact entry to create.
     """
     input: ContactCreateInput!
+  ): ContactPayload!
+  """
+  [INTERNAL] Saves sales pricing inquiry to Front.
+  """
+  contactSalesCreate(
+    """
+    The contact entry to create.
+    """
+    input: ContactSalesCreateInput!
   ): ContactPayload!
   """
   Create CSV export report for the organization.
@@ -4641,31 +5452,6 @@ type Mutation {
     """
     input: CycleUpdateInput!
   ): CyclePayload!
-  """
-  [Internal] Create the OAuth test applications in development.
-  """
-  debugCreateOAuthApps: DebugPayload!
-  """
-  [Internal] Create the SAML test organization in development.
-  """
-  debugCreateSAMLOrg: DebugPayload!
-  """
-  [Internal] Create test subscription in development.
-  """
-  debugCreateSubscription(
-    """
-    Subscription type.
-    """
-    subscriptionType: String!
-  ): DebugPayload!
-  """
-  Always fails with internal error. Used to debug logging.
-  """
-  debugFailWithInternalError: DebugPayload!
-  """
-  [Internal] Always logs an error to Sentry as warning. Used to debug logging.
-  """
-  debugFailWithWarning: DebugPayload!
   """
   Creates a new document.
   """
@@ -4792,15 +5578,6 @@ type Mutation {
     input: FavoriteUpdateInput!
   ): FavoritePayload!
   """
-  Saves user feedback.
-  """
-  feedbackCreate(
-    """
-    The feedback entry to create.
-    """
-    input: FeedbackCreateInput!
-  ): FeedbackPayload!
-  """
   XHR request payload to upload an images, video and other attachments directly to Linear's cloud storage.
   """
   fileUpload(
@@ -4812,6 +5589,10 @@ type Mutation {
     Filename of the uploaded file.
     """
     filename: String!
+    """
+    Should the file be made publicly accessible (default: false).
+    """
+    makePublic: Boolean
     """
     Optional metadata.
     """
@@ -4931,6 +5712,10 @@ type Mutation {
     """
     code: String!
     """
+    The Intercom domain URL to use for the integration. Defaults to app.intercom.com if not provided.
+    """
+    domainUrl: String
+    """
     The Intercom OAuth redirect URI.
     """
     redirectUri: String!
@@ -4954,6 +5739,15 @@ type Mutation {
   """
   integrationLoom: IntegrationPayload! @deprecated(reason: "Not available.")
   """
+  Requests a currently unavailable integration.
+  """
+  integrationRequest(
+    """
+    Integration request details.
+    """
+    input: IntegrationRequestInput!
+  ): IntegrationRequestPayload!
+  """
   Archives an integration resource.
   """
   integrationResourceArchive(
@@ -4961,7 +5755,7 @@ type Mutation {
     The identifier of the integration resource to archive.
     """
     id: String!
-  ): ArchivePayload!
+  ): ArchivePayload! @deprecated(reason: "This query will soon be deprecated, please use `attachmentArchive` instead")
   """
   Integrates the organization with Sentry.
   """
@@ -5023,6 +5817,19 @@ type Mutation {
     redirectUri: String!
   ): IntegrationPayload!
   """
+  Slack integration for organization level project update notifications.
+  """
+  integrationSlackOrgProjectUpdatesPost(
+    """
+    The Slack OAuth code.
+    """
+    code: String!
+    """
+    The Slack OAuth redirect URI.
+    """
+    redirectUri: String!
+  ): IntegrationPayload!
+  """
   Integrates your personal notifications with Slack.
   """
   integrationSlackPersonal(
@@ -5072,7 +5879,29 @@ type Mutation {
     The Slack OAuth redirect URI.
     """
     redirectUri: String!
+    """
+    The service to enable once connected, either 'notifications' or 'updates'.
+    """
+    service: String!
   ): IntegrationPayload!
+  """
+  Creates a new integrationTemplate join.
+  """
+  integrationTemplateCreate(
+    """
+    The properties of the integrationTemplate to create.
+    """
+    input: IntegrationTemplateCreateInput!
+  ): IntegrationTemplatePayload!
+  """
+  Deletes a integrationTemplate.
+  """
+  integrationTemplateDelete(
+    """
+    The identifier of the integrationTemplate to delete.
+    """
+    id: String!
+  ): ArchivePayload!
   """
   Integrates the organization with Zendesk.
   """
@@ -5094,6 +5923,28 @@ type Mutation {
     """
     subdomain: String!
   ): IntegrationPayload!
+  """
+  Creates new settings for one or more integrations.
+  """
+  integrationsSettingsCreate(
+    """
+    The settings to create.
+    """
+    input: IntegrationsSettingsCreateInput!
+  ): IntegrationsSettingsPayload!
+  """
+  Updates settings related to integrations for a project or a team.
+  """
+  integrationsSettingsUpdate(
+    """
+    The identifier of the settings to update.
+    """
+    id: String!
+    """
+    A settings object to update the settings with.
+    """
+    input: IntegrationsSettingsUpdateInput!
+  ): IntegrationsSettingsPayload!
   """
   Archives an issue.
   """
@@ -5163,20 +6014,28 @@ type Mutation {
     """
     instantProcess: Boolean
     """
+    ID of the organization into which to import data.
+    """
+    organizationId: String
+    """
     ID of the team into which to import data.
     """
-    teamId: String!
+    teamId: String
+    """
+    Name of new team. When teamId is not set.
+    """
+    teamName: String
   ): IssueImportPayload!
   """
-  Kicks off a Clubhouse import job.
+  Kicks off a Shortcut (formerly Clubhouse) import job.
   """
   issueImportCreateClubhouse(
     """
-    Clubhouse team name to choose which issues we should import.
+    Shortcut (formerly Clubhouse) team name to choose which issues we should import.
     """
     clubhouseTeamName: String!
     """
-    Clubhouse token to fetch information from the Clubhouse API.
+    Shortcut (formerly Clubhouse) token to fetch information from the Clubhouse API.
     """
     clubhouseToken: String!
     """
@@ -5192,9 +6051,17 @@ type Mutation {
     """
     instantProcess: Boolean
     """
+    ID of the organization into which to import data.
+    """
+    organizationId: String
+    """
     ID of the team into which to import data.
     """
-    teamId: String!
+    teamId: String
+    """
+    Name of new team. When teamId is not set.
+    """
+    teamName: String
   ): IssueImportPayload!
   """
   Kicks off a GitHub import job.
@@ -5229,9 +6096,17 @@ type Mutation {
     """
     instantProcess: Boolean
     """
+    ID of the organization into which to import data.
+    """
+    organizationId: String
+    """
     ID of the team into which to import data.
     """
-    teamId: String!
+    teamId: String
+    """
+    Name of new team. When teamId is not set.
+    """
+    teamName: String
   ): IssueImportPayload!
   """
   Kicks off a Jira import job.
@@ -5266,9 +6141,17 @@ type Mutation {
     """
     jiraToken: String!
     """
-    ID of the team into which to import data.
+    ID of the organization into which to import data.
     """
-    teamId: String!
+    organizationId: String
+    """
+    ID of the team into which to import data. Empty to create new team.
+    """
+    teamId: String
+    """
+    Name of new team. When teamId is not set.
+    """
+    teamName: String
   ): IssueImportPayload!
   """
   Deletes an import job.
@@ -5306,14 +6189,14 @@ type Mutation {
     input: IssueImportUpdateInput!
   ): IssueImportPayload!
   """
-  Archives an issue label.
+  Deletes an issue label.
   """
   issueLabelArchive(
     """
     The identifier of the label to archive.
     """
     id: String!
-  ): ArchivePayload! @deprecated(reason: "Labels are deleted instead of archived.")
+  ): ArchivePayload! @deprecated(reason: "Labels are deleted instead of archived now!")
   """
   Creates a new label.
   """
@@ -5381,6 +6264,19 @@ type Mutation {
     input: IssueRelationUpdateInput!
   ): IssueRelationPayload!
   """
+  Adds an issue reminder. Will cause a notification to be sent when the issue reminder time is reached.
+  """
+  issueReminder(
+    """
+    The identifier of the issue to add a reminder for.
+    """
+    id: String!
+    """
+    The time when a reminder notification will be sent.
+    """
+    reminderAt: DateTime!
+  ): IssuePayload!
+  """
   Unarchives an issue.
   """
   issueUnarchive(
@@ -5430,6 +6326,19 @@ type Mutation {
     organizationId: String!
   ): CreateOrJoinOrganizationResponse!
   """
+  Logout of all clients.
+  """
+  logout: LogoutResponse!
+  """
+  Migrates milestones to roadmaps
+  """
+  migrateMilestonesToRoadmaps(
+    """
+    Ids for milestones to migrate and milestones to delete
+    """
+    input: MilestonesMigrateInput!
+  ): MilestoneMigrationPayload!
+  """
   Creates a new milestone.
   """
   milestoneCreate(
@@ -5437,7 +6346,7 @@ type Mutation {
     The issue object to create.
     """
     input: MilestoneCreateInput!
-  ): MilestonePayload!
+  ): MilestonePayload! @deprecated(reason: "Milestones will be removed. Use roadmaps instead.")
   """
   Deletes a milestone.
   """
@@ -5446,7 +6355,7 @@ type Mutation {
     The identifier of the milestone to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): ArchivePayload! @deprecated(reason: "Milestones will be removed. Use roadmaps instead.")
   """
   Updates a milestone.
   """
@@ -5459,7 +6368,7 @@ type Mutation {
     A partial milestone object to update the milestone with.
     """
     input: MilestoneUpdateInput!
-  ): MilestonePayload!
+  ): MilestonePayload! @deprecated(reason: "Milestones will be removed. Use roadmaps instead.")
   """
   Archives a notification.
   """
@@ -5469,19 +6378,6 @@ type Mutation {
     """
     id: String!
   ): ArchivePayload!
-  """
-  Creates a notification.
-  """
-  notificationCreate(
-    """
-    The identifier of the notification to update.
-    """
-    id: String!
-    """
-    A partial notification object to update the issue with.
-    """
-    input: NotificationUpdateInput!
-  ): NotificationPayload!
   """
   Creates a new notification subscription for a team or a project.
   """
@@ -5501,6 +6397,19 @@ type Mutation {
     id: String!
   ): ArchivePayload!
   """
+  Updates a notification subscription.
+  """
+  notificationSubscriptionUpdate(
+    """
+    The identifier of the notification subscription to update.
+    """
+    id: String!
+    """
+    A partial notification subscription object to update the notification subscription with.
+    """
+    input: NotificationSubscriptionUpdateInput!
+  ): NotificationSubscriptionPayload!
+  """
   Unarchives a notification.
   """
   notificationUnarchive(
@@ -5518,102 +6427,10 @@ type Mutation {
     """
     id: String!
     """
-    A partial notification object to update the issue with.
+    A partial notification object to update the notification with.
     """
     input: NotificationUpdateInput!
   ): NotificationPayload!
-  """
-  [Internal] Authenticates an auth string by the user.
-  """
-  oauthAuthStringAuthorize(
-    """
-    The identifier of the OAuth client that's trying to authenticate.
-    """
-    appId: String!
-    """
-    The auth string to authenticate.
-    """
-    authString: String!
-  ): OauthAuthStringAuthorizePayload!
-  """
-  [Internal] Creates a temporary authentication code that can be exchanged for an OAuth token.
-  """
-  oauthAuthStringChallenge(
-    """
-    The identifier of the OAuth client that's trying to authenticate.
-    """
-    appId: String!
-    """
-    The group of scopes that are being requested.
-    """
-    scope: [String!]!
-  ): OauthAuthStringChallengePayload!
-  """
-  [Internal] Returns an access token once the auth string has been authenticated.
-  """
-  oauthAuthStringCheck(
-    """
-    The identifier of the OAuth client that's trying to authenticate.
-    """
-    appId: String!
-    """
-    The auth string to authenticate.
-    """
-    authString: String!
-  ): OauthAuthStringCheckPayload!
-  """
-  Archives an OAuth client.
-  """
-  oauthClientArchive(
-    """
-    The identifier of the OAuth client to archive.
-    """
-    id: String!
-  ): ArchivePayload!
-  """
-  Creates a new OAuth client.
-  """
-  oauthClientCreate(
-    """
-    The OAuth client application object to create.
-    """
-    input: OauthClientCreateInput!
-  ): OauthClientPayload!
-  """
-  Updates an OAuth client.
-  """
-  oauthClientRotateSecret(
-    """
-    The identifier of the OAuth client for which we want to rotate the secret.
-    """
-    id: String!
-  ): RotateSecretPayload!
-  """
-  Updates an OAuth client.
-  """
-  oauthClientUpdate(
-    """
-    The identifier of the OAuth client to update.
-    """
-    id: String!
-    """
-    A partial client object to update the OAuth client with.
-    """
-    input: OauthClientUpdateInput!
-  ): OauthClientPayload!
-  """
-  Revokes an OAuth token.
-  """
-  oauthTokenRevoke(
-    """
-    The identifier of the OAuth client for the tokens to be revoked.
-    """
-    appId: String!
-    """
-    The group of scopes for the tokens to be revoked.
-    """
-    scope: [String!]!
-  ): OauthTokenRevokePayload!
   """
   Cancels the deletion of an organization. Administrator privileges required.
   """
@@ -5632,13 +6449,26 @@ type Mutation {
   """
   organizationDeleteChallenge: OrganizationDeletePayload!
   """
-  Adds a domain to be allowed for an organization.
+  [INTERNAL] Verifies a domain claim.
+  """
+  organizationDomainClaim(
+    """
+    The ID of the organization domain to claim.
+    """
+    id: String!
+  ): OrganizationDomainSimplePayload!
+  """
+  [INTERNAL] Adds a domain to be allowed for an organization.
   """
   organizationDomainCreate(
     """
     The organization domain entry to create.
     """
     input: OrganizationDomainCreateInput!
+    """
+    Whether to trigger an email verification flow during domain creation.
+    """
+    triggerEmailVerification: Boolean
   ): OrganizationDomainPayload!
   """
   Deletes a domain.
@@ -5650,7 +6480,7 @@ type Mutation {
     id: String!
   ): ArchivePayload!
   """
-  Verifies a domain to be added to an organization.
+  [INTERNAL] Verifies a domain to be added to an organization.
   """
   organizationDomainVerify(
     """
@@ -5676,6 +6506,19 @@ type Mutation {
     """
     id: String!
   ): ArchivePayload!
+  """
+  Updates an organization invite.
+  """
+  organizationInviteUpdate(
+    """
+    The identifier of the organization invite to update.
+    """
+    id: String!
+    """
+    The updates to make to the organization invite object.
+    """
+    input: OrganizationInviteUpdateInput!
+  ): OrganizationInvitePayload!
   """
   Updates the user's organization.
   """
@@ -5766,6 +6609,55 @@ type Mutation {
     input: ProjectUpdateInput!
   ): ProjectPayload!
   """
+  Creates a new project update.
+  """
+  projectUpdateCreate(
+    """
+    Data for the project update to create.
+    """
+    input: ProjectUpdateCreateInput!
+  ): ProjectUpdatePayload!
+  """
+  Deletes a project update.
+  """
+  projectUpdateDelete(
+    """
+    The identifier of the project update to delete.
+    """
+    id: String!
+  ): ArchivePayload!
+  """
+  Creates a new interaction on a project update.
+  """
+  projectUpdateInteractionCreate(
+    """
+    Data for the project update interaction to create.
+    """
+    input: ProjectUpdateInteractionCreateInput!
+  ): ProjectUpdateInteractionPayload!
+  """
+  Mark a project update as read.
+  """
+  projectUpdateMarkAsRead(
+    """
+    The identifier of the project update.
+    """
+    id: String!
+  ): ProjectUpdateWithInteractionPayload!
+  """
+  Updates a project update.
+  """
+  projectUpdateUpdate(
+    """
+    The identifier of the project update to update.
+    """
+    id: String!
+    """
+    A data to update the project update with.
+    """
+    input: ProjectUpdateUpdateInput!
+  ): ProjectUpdatePayload!
+  """
   Creates a push subscription.
   """
   pushSubscriptionCreate(
@@ -5820,6 +6712,68 @@ type Mutation {
     id: String!
   ): ArchivePayload!
   """
+  Creates a new roadmap.
+  """
+  roadmapCreate(
+    """
+    The properties of the roadmap to create.
+    """
+    input: RoadmapCreateInput!
+  ): RoadmapPayload!
+  """
+  Deletes a roadmap.
+  """
+  roadmapDelete(
+    """
+    The identifier of the roadmap to delete.
+    """
+    id: String!
+  ): ArchivePayload!
+  """
+  Creates a new roadmapToProject join.
+  """
+  roadmapToProjectCreate(
+    """
+    The properties of the roadmapToProject to create.
+    """
+    input: RoadmapToProjectCreateInput!
+  ): RoadmapToProjectPayload!
+  """
+  Deletes a roadmapToProject.
+  """
+  roadmapToProjectDelete(
+    """
+    The identifier of the roadmapToProject to delete.
+    """
+    id: String!
+  ): ArchivePayload!
+  """
+  Updates a roadmapToProject.
+  """
+  roadmapToProjectUpdate(
+    """
+    The identifier of the roadmapToProject to update.
+    """
+    id: String!
+    """
+    The properties of the roadmapToProject to update.
+    """
+    input: RoadmapToProjectUpdateInput!
+  ): RoadmapToProjectPayload!
+  """
+  Updates a roadmap.
+  """
+  roadmapUpdate(
+    """
+    The identifier of the roadmap to update.
+    """
+    id: String!
+    """
+    The properties of the roadmap to update.
+    """
+    input: RoadmapUpdateInput!
+  ): RoadmapPayload!
+  """
   Authenticates a user account via email and authentication token for SAML.
   """
   samlTokenUserAccountAuth(
@@ -5828,58 +6782,6 @@ type Mutation {
     """
     input: TokenUserAccountAuthInput!
   ): AuthResolverResponse!
-  """
-  [Internal] Archives a subscription.
-  """
-  subscriptionArchive(
-    """
-    The identifier of the subscription to archive.
-    """
-    id: String!
-  ): ArchivePayload!
-  """
-  [Internal] Creates a subscription session. Used internally to integrate with Stripe.
-  """
-  subscriptionSessionCreate(
-    """
-    The id of an optional coupon to apply.
-    """
-    coupon: String
-    """
-    The name of the plan.
-    """
-    plan: String!
-  ): SubscriptionSessionPayload!
-  """
-  [Internal] Updates a subscription.
-  """
-  subscriptionUpdate(
-    """
-    The identifier of the subscription.
-    """
-    id: String!
-    """
-    The properties of the subscription.
-    """
-    input: SubscriptionUpdateInput!
-  ): SubscriptionPayload!
-  """
-  [Internal] Creates a subscription update session. Used internally to integrate with Stripe.
-  """
-  subscriptionUpdateSessionCreate: SubscriptionSessionPayload!
-  """
-  [Internal] Upgrades a subscription plan.
-  """
-  subscriptionUpgrade(
-    """
-    The identifier of the subscription.
-    """
-    id: String!
-    """
-    The subscription type to upgrade to.
-    """
-    type: String!
-  ): SubscriptionPayload!
   """
   Creates a new team. The user who creates the team will automatically be added as a member to the newly created team.
   """
@@ -5892,6 +6794,15 @@ type Mutation {
     The team object to create.
     """
     input: TeamCreateInput!
+  ): TeamPayload!
+  """
+  Deletes team's cycles data
+  """
+  teamCyclesDelete(
+    """
+    The identifier of the team, which cycles will be deleted.
+    """
+    id: String!
   ): TeamPayload!
   """
   Deletes a team.
@@ -5987,11 +6898,33 @@ type Mutation {
     input: TemplateUpdateInput!
   ): TemplatePayload!
   """
+  [INTERNAL] Verifies the email address and code for a user account that wants to change email.
+  """
+  userAccountEmailChangeVerifyCode(
+    """
+    [INTERNAL] The code to verify.
+    """
+    code: String!
+    """
+    [INTERNAL] The email to verify.
+    """
+    email: String!
+  ): UserAccountEmailChangeVerifyCodePayload!
+  """
   Makes user a regular user. Can only be called by an admin.
   """
   userDemoteAdmin(
     """
     The identifier of the user to make a regular user.
+    """
+    id: String!
+  ): UserAdminPayload!
+  """
+  Makes user a guest. Can only be called by an admin.
+  """
+  userDemoteMember(
+    """
+    The identifier of the user to make a guest.
     """
     id: String!
   ): UserAdminPayload!
@@ -6031,11 +6964,38 @@ type Mutation {
     operation: UserFlagUpdateOperation!
   ): UserSettingsFlagPayload!
   """
+  Connects the GitHub user to this Linear account via OAuth2.
+  """
+  userGitHubConnect(
+    """
+    The GitHub OAuth code.
+    """
+    code: String!
+  ): UserPayload!
+  """
+  Connects the Google Calendar to the user to this Linear account via OAuth2.
+  """
+  userGoogleCalendarConnect(
+    """
+    [Internal] The Google OAuth code.
+    """
+    code: String!
+  ): UserPayload!
+  """
   Makes user an admin. Can only be called by an admin.
   """
   userPromoteAdmin(
     """
     The identifier of the user to make an admin.
+    """
+    id: String!
+  ): UserAdminPayload!
+  """
+  Makes user a regular user. Can only be called by an admin.
+  """
+  userPromoteMember(
+    """
+    The identifier of the user to make a regular user.
     """
     id: String!
   ): UserAdminPayload!
@@ -6274,6 +7234,10 @@ A notification sent to a user.
 """
 interface Notification implements Entity & Node {
   """
+  The user that caused the notification. If empty it's Linear itself.
+  """
+  actor: User
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -6303,8 +7267,13 @@ interface Notification implements Entity & Node {
   """
   type: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The time at which a notification was unsnoozed..
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -6345,7 +7314,7 @@ type NotificationPayload {
 """
 Notification subscriptions for models.
 """
-type NotificationSubscription implements Node {
+interface NotificationSubscription implements Entity & Node {
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
@@ -6371,8 +7340,9 @@ type NotificationSubscription implements Node {
   """
   type: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -6389,13 +7359,17 @@ type NotificationSubscriptionConnection {
 
 input NotificationSubscriptionCreateInput {
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
   The identifier of the project to subscribe to.
   """
   projectId: String
+  """
+  The type of the project subscription.
+  """
+  projectNotificationSubscriptionType: ProjectNotificationSubscriptionType
   """
   The identifier of the team to subscribe to.
   """
@@ -6425,7 +7399,18 @@ type NotificationSubscriptionPayload {
   success: Boolean!
 }
 
+input NotificationSubscriptionUpdateInput {
+  """
+  The type of the project subscription.
+  """
+  projectNotificationSubscriptionType: ProjectNotificationSubscriptionType!
+}
+
 input NotificationUpdateInput {
+  """
+  The id of the project update related to the notification.
+  """
+  projectUpdateId: String
   """
   The time when notification was marked as read.
   """
@@ -6437,13 +7422,13 @@ input NotificationUpdateInput {
 }
 
 """
-[Alpha] Cycle filtering options.
+Cycle filtering options.
 """
 input NullableCycleFilter {
   """
-  Compound filters, all of which need to be matched by the cycle.
+  Compound filters, one of which need to be matched by the cycle.
   """
-  and: [CycleFilter!]
+  and: [NullableCycleFilter!]
   """
   Comparator for the cycle completed at date.
   """
@@ -6460,6 +7445,26 @@ input NullableCycleFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Comparator for the filtering active cycle.
+  """
+  isActive: BooleanComparator
+  """
+  Comparator for the filtering future cycles.
+  """
+  isFuture: BooleanComparator
+  """
+  Comparator for the filtering next cycle.
+  """
+  isNext: BooleanComparator
+  """
+  Comparator for the filtering past cycles.
+  """
+  isPast: BooleanComparator
+  """
+  Comparator for the filtering previous cycle.
+  """
+  isPrevious: BooleanComparator
   """
   Filters that the cycles issues must satisfy.
   """
@@ -6479,7 +7484,7 @@ input NullableCycleFilter {
   """
   Compound filters, one of which need to be matched by the cycle.
   """
-  or: [CycleFilter!]
+  or: [NullableCycleFilter!]
   """
   Comparator for the cycle start date.
   """
@@ -6537,41 +7542,149 @@ input NullableDateComparator {
 }
 
 """
-[Alpha] User filtering options.
+Issue filtering options.
 """
-input NullableMilestoneFilter {
+input NullableIssueFilter {
   """
-  Compound filters, all of which need to be matched by the milestone.
+  Compound filters, all of which need to be matched by the issue.
   """
-  and: [MilestoneFilter!]
+  and: [NullableIssueFilter!]
+  """
+  Filters that the issues assignee must satisfy.
+  """
+  assignee: NullableUserFilter
+  """
+  Filters that the issues attachments must satisfy.
+  """
+  attachments: AttachmentCollectionFilter
+  """
+  Comparator for the issues auto archived at date.
+  """
+  autoArchivedAt: NullableDateComparator
+  """
+  Comparator for the issues auto closed at date.
+  """
+  autoClosedAt: NullableDateComparator
+  """
+  Comparator for the issues canceled at date.
+  """
+  canceledAt: NullableDateComparator
+  """
+  Filters that the child issues must satisfy.
+  """
+  children: IssueCollectionFilter
+  """
+  Filters that the issues comments must satisfy.
+  """
+  comments: CommentCollectionFilter
+  """
+  Comparator for the issues completed at date.
+  """
+  completedAt: NullableDateComparator
   """
   Comparator for the created at date.
   """
   createdAt: DateComparator
   """
+  Filters that the issues creator must satisfy.
+  """
+  creator: NullableUserFilter
+  """
+  Filters that the issues cycle must satisfy.
+  """
+  cycle: NullableCycleFilter
+  """
+  Comparator for the issues description.
+  """
+  description: NullableStringComparator
+  """
+  Comparator for the issues due date.
+  """
+  dueDate: NullableTimelessDateComparator
+  """
+  Comparator for the issues estimate.
+  """
+  estimate: EstimateComparator
+  """
+  Comparator for filtering issues which are blocked.
+  """
+  hasBlockedByRelations: RelationExistsComparator
+  """
+  Comparator for filtering issues which are blocking.
+  """
+  hasBlockingRelations: RelationExistsComparator
+  """
+  Comparator for filtering issues which are duplicates.
+  """
+  hasDuplicateRelations: RelationExistsComparator
+  """
+  Comparator for filtering issues with relations.
+  """
+  hasRelatedRelations: RelationExistsComparator
+  """
   Comparator for the identifier.
   """
   id: IDComparator
   """
-  Comparator for the milestone name.
+  Filters that issue labels must satisfy.
   """
-  name: StringComparator
+  labels: IssueLabelCollectionFilter
   """
   Filter based on the existence of the relation.
   """
   null: Boolean
   """
-  Compound filters, one of which need to be matched by the milestone.
+  Comparator for the issues number.
   """
-  or: [MilestoneFilter!]
+  number: NumberComparator
   """
-  Filters that the milestones projects must satisfy.
+  Compound filters, one of which need to be matched by the issue.
   """
-  projects: ProjectCollectionFilter
+  or: [NullableIssueFilter!]
   """
-  Comparator for the milestone sort order.
+  Filters that the issue parent must satisfy.
   """
-  sortOrder: NumberComparator
+  parent: NullableIssueFilter
+  """
+  Comparator for the issues priority.
+  """
+  priority: NullableNumberComparator
+  """
+  Filters that the issues project must satisfy.
+  """
+  project: NullableProjectFilter
+  """
+  [Internal] Comparator for the issues content.
+  """
+  searchableContent: ContentComparator
+  """
+  Filters that the issues snoozer must satisfy.
+  """
+  snoozedBy: NullableUserFilter
+  """
+  Comparator for the issues snoozed until date.
+  """
+  snoozedUntilAt: NullableDateComparator
+  """
+  Comparator for the issues started at date.
+  """
+  startedAt: NullableDateComparator
+  """
+  Filters that the issues state must satisfy.
+  """
+  state: WorkflowStateFilter
+  """
+  Filters that issue subscribers must satisfy.
+  """
+  subscribers: UserCollectionFilter
+  """
+  Filters that the issues team must satisfy.
+  """
+  team: TeamFilter
+  """
+  Comparator for the issues title.
+  """
+  title: StringComparator
   """
   Comparator for the updated at date.
   """
@@ -6621,13 +7734,13 @@ input NullableNumberComparator {
 }
 
 """
-[Alpha] Project filtering options.
+Project filtering options.
 """
 input NullableProjectFilter {
   """
   Compound filters, all of which need to be matched by the project.
   """
-  and: [ProjectFilter!]
+  and: [NullableProjectFilter!]
   """
   Comparator for the created at date.
   """
@@ -6653,10 +7766,6 @@ input NullableProjectFilter {
   """
   members: UserFilter
   """
-  Filters that the projects milestones must satisfy.
-  """
-  milestone: NullableMilestoneFilter
-  """
   Comparator for the project name.
   """
   name: StringComparator
@@ -6667,7 +7776,15 @@ input NullableProjectFilter {
   """
   Compound filters, one of which need to be matched by the project.
   """
-  or: [ProjectFilter!]
+  or: [NullableProjectFilter!]
+  """
+  Filters that the projects roadmaps must satisfy.
+  """
+  roadmaps: RoadmapCollectionFilter
+  """
+  Comparator for the project slug ID.
+  """
+  slugId: StringComparator
   """
   Comparator for the project start date.
   """
@@ -6792,7 +7909,7 @@ input NullableTimelessDateComparator {
 }
 
 """
-[Alpha] User filtering options.
+User filtering options.
 """
 input NullableUserFilter {
   """
@@ -6806,7 +7923,7 @@ input NullableUserFilter {
   """
   Compound filters, all of which need to be matched by the user.
   """
-  and: [UserFilter!]
+  and: [NullableUserFilter!]
   """
   Filters that the users assigned issues must satisfy.
   """
@@ -6842,7 +7959,7 @@ input NullableUserFilter {
   """
   Compound filters, one of which need to be matched by the user.
   """
-  or: [UserFilter!]
+  or: [NullableUserFilter!]
   """
   Comparator for the updated at date.
   """
@@ -6887,33 +8004,13 @@ input NumberComparator {
   nin: [Float!]
 }
 
-type OauthAuthStringAuthorizePayload {
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-type OauthAuthStringChallengePayload {
-  """
-  The created authentication string.
-  """
-  authString: String!
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-type OauthAuthStringCheckPayload {
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-  """
-  Access token for use.
-  """
-  token: String
+"""
+The different requests statuses possible for an OAuth client approval request
+"""
+enum OAuthClientApprovalStatus {
+  approved
+  denied
+  requested
 }
 
 """
@@ -6937,9 +8034,13 @@ type OauthClient implements Node {
   """
   createdAt: DateTime!
   """
+  The user who created the OAuthClient.
+  """
+  creator: User!
+  """
   Information about the application.
   """
-  description: String!
+  description: String
   """
   Name of the developer.
   """
@@ -6955,11 +8056,15 @@ type OauthClient implements Node {
   """
   Image of the application.
   """
-  imageUrl: String!
+  imageUrl: String
   """
   OAuth application's client name.
   """
   name: String!
+  """
+  The organization that the OAuthClient is associated with.
+  """
+  organization: Organization!
   """
   Whether the OAuth application is publicly visible, or only visible to the creating workspace.
   """
@@ -6969,8 +8074,9 @@ type OauthClient implements Node {
   """
   redirectUris: [String!]!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -6983,108 +8089,113 @@ type OauthClient implements Node {
   webhookUrl: String
 }
 
-input OauthClientCreateInput {
+"""
+Request to install OAuth clients on organizations and the response to the request.
+"""
+type OauthClientApproval implements Node {
   """
-  User facing description of the application.
+  The time at which the entity was archived. Null if the entity has not been archived.
   """
-  description: String
+  archivedAt: DateTime
   """
-  Name of the developer of the application.
+  The time at which the entity was created.
   """
-  developer: String!
+  createdAt: DateTime!
   """
-  Url of the developer (homepage or docs).
+  The reason the request for the OAuth client approval was denied.
   """
-  developerUrl: String!
+  denyReason: String
   """
-  The identifier. If none is provided, the backend will generate one.
+  The unique identifier of the entity.
   """
-  id: String
+  id: ID!
   """
-  URL for the app icon.
+  The uuid of the OAuth client being requested for installation.
   """
-  imageUrl: String
+  oauthClientId: String!
   """
-  The application's name.
+  The reason the person wants to install this OAuth client.
   """
-  name: String!
+  requestReason: String
   """
-  Whether the OAuth application should be publicly visible, or only visible to the creating workspace.
+  The person who requested installing the OAuth client.
   """
-  publicEnabled: Boolean
+  requesterId: String!
   """
-  List of allowed redirect URIs for the application.
+  The person who responded to the request to install the OAuth client.
   """
-  redirectUris: [String!]!
+  responderId: String
   """
-  List of resources the webhooks should subscribe to.
+  The scopes the app has requested.
   """
-  webhookResourceTypes: [String!]!
+  scopes: [String!]!
   """
-  The URL that will be called on data changes.
+  The status for the OAuth client approval request.
   """
-  webhookUrl: String
+  status: OAuthClientApprovalStatus!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
 }
 
-type OauthClientPayload {
+"""
+An oauth client approval related notification
+"""
+type OauthClientApprovalNotification implements Entity & Node & Notification {
   """
-  The identifier of the last sync operation.
+  The user that caused the notification. If empty it's Linear itself.
   """
-  lastSyncId: Float!
+  actor: User
   """
-  The OAuth client application that was created or updated.
+  The time at which the entity was archived. Null if the entity has not been archived.
   """
-  oauthClient: OauthClient!
+  archivedAt: DateTime
   """
-  Whether the operation was successful.
+  The time at which the entity was created.
   """
-  success: Boolean!
-}
-
-input OauthClientUpdateInput {
+  createdAt: DateTime!
   """
-  User facing description of the application.
+  The time at when an email reminder for this notification was sent to the user. Null, if no email
+      reminder has been sent.
   """
-  description: String
+  emailedAt: DateTime
   """
-  Name of the developer of the application.
+  The unique identifier of the entity.
   """
-  developer: String
+  id: ID!
   """
-  URL of the developer (homepage or docs).
+  The OAuth client approval request related to the notification.
   """
-  developerUrl: String
+  oauthClientApproval: OauthClientApproval!
   """
-  URL for the app icon.
+  The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
   """
-  imageUrl: String
+  readAt: DateTime
   """
-  The application's name.
+  The time until a notification will be snoozed. After that it will appear in the inbox again.
   """
-  name: String
+  snoozedUntilAt: DateTime
   """
-  Whether the OAuth application should be publicly visible, or only visible to the creating workspace.
+  Notification type
   """
-  publicEnabled: Boolean
+  type: String!
   """
-  List of allowed redirect URIs for the application.
+  The time at which a notification was unsnoozed..
   """
-  redirectUris: [String!]
+  unsnoozedAt: DateTime
   """
-  List of resources the webhooks should subscribe to.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
-  webhookResourceTypes: [String!]
+  updatedAt: DateTime!
   """
-  The URL that will be called on data changes.
+  The user that received the notification.
   """
-  webhookUrl: String
-}
-
-type OauthTokenRevokePayload {
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
+  user: User!
 }
 
 input OnboardingCustomerSurvey {
@@ -7174,7 +8285,7 @@ type Organization implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned issue labels.
+    Filter returned issue labels.
     """
     filter: IssueLabelFilter
     """
@@ -7199,39 +8310,6 @@ type Organization implements Node {
   """
   logoUrl: String
   """
-  Milestones associated with the organization.
-  """
-  milestones(
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    [Alpha] Filter returned projects.
-    """
-    filter: MilestoneFilter
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): MilestoneConnection!
-  """
   The organization's name.
   """
   name: String!
@@ -7239,6 +8317,22 @@ type Organization implements Node {
   Rolling 30-day total upload volume for the organization, in megabytes.
   """
   periodUploadVolume: Float!
+  """
+  Previously used URL keys for the organization (last 3 are kept and redirected).
+  """
+  previousUrlKeys: [String!]!
+  """
+  The day at which to prompt for project updates.
+  """
+  projectUpdateRemindersDay: Day!
+  """
+  The hour at which to prompt for project updates.
+  """
+  projectUpdateRemindersHour: Float!
+  """
+  The frequency at which to prompt for project updates.
+  """
+  projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency!
   """
   Whether the organization is using a roadmap.
   """
@@ -7248,9 +8342,13 @@ type Organization implements Node {
   """
   samlEnabled: Boolean!
   """
+  Whether SCIM provisioning is enabled for organization.
+  """
+  scimEnabled: Boolean!
+  """
   The organization's subscription to a paid plan.
   """
-  subscription: Subscription
+  subscription: PaidSubscription
   """
   Teams associated with the organization.
   """
@@ -7264,7 +8362,7 @@ type Organization implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned teams.
+    Filter returned teams.
     """
     filter: TeamFilter
     """
@@ -7314,8 +8412,9 @@ type Organization implements Node {
     orderBy: PaginationOrderBy
   ): TemplateConnection!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -7384,6 +8483,14 @@ type OrganizationDomain implements Node {
   """
   archivedAt: DateTime
   """
+  What type of auth is the domain used for
+  """
+  authType: OrganizationDomainAuthType!
+  """
+  Whether the domains was claimed by the organization through DNS verification.
+  """
+  claimed: Boolean
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -7400,8 +8507,9 @@ type OrganizationDomain implements Node {
   """
   name: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -7414,9 +8522,31 @@ type OrganizationDomain implements Node {
   verified: Boolean!
 }
 
+"""
+What type of auth is the domain used for.
+"""
+enum OrganizationDomainAuthType {
+  general
+  saml
+}
+
+"""
+[INTERNAL] Domain claim request response.
+"""
+type OrganizationDomainClaimPayload {
+  """
+  String to put into DNS for verification.
+  """
+  verificationString: String!
+}
+
 input OrganizationDomainCreateInput {
   """
-  The identifier. If none is provided, the backend will generate one.
+  The authentication type this domain is for.
+  """
+  authType: String = "general"
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -7426,9 +8556,12 @@ input OrganizationDomainCreateInput {
   """
   The email address to which to send the verification code.
   """
-  verificationEmail: String!
+  verificationEmail: String
 }
 
+"""
+[INTERNAL] Organization domain operation response.
+"""
 type OrganizationDomainPayload {
   """
   The identifier of the last sync operation.
@@ -7444,6 +8577,9 @@ type OrganizationDomainPayload {
   success: Boolean!
 }
 
+"""
+[INTERNAL] Organization domain operation response.
+"""
 type OrganizationDomainSimplePayload {
   """
   Whether the operation was successful.
@@ -7453,7 +8589,7 @@ type OrganizationDomainSimplePayload {
 
 input OrganizationDomainVerificationInput {
   """
-  The identifier of the domain being verified.
+  The identifier in UUID v4 format of the domain being verified.
   """
   organizationDomainId: String!
   """
@@ -7518,12 +8654,13 @@ type OrganizationInvite implements Node {
   """
   organization: Organization!
   """
-  The permission that the invitee will receive upon accepting invite.
+  The user role that the invitee will receive upon accepting the invite.
   """
-  permission: String
+  role: UserRoleType!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -7540,7 +8677,7 @@ input OrganizationInviteCreateInput {
   """
   email: String!
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -7548,9 +8685,9 @@ input OrganizationInviteCreateInput {
   """
   message: String
   """
-  Whether the invite should grant admin permissions.
+  What user role the invite should grant.
   """
-  permission: String
+  role: UserRoleType = user
   """
   The teams that the user has been invited to.
   """
@@ -7591,9 +8728,9 @@ type OrganizationInviteDetailsPayload {
   """
   organizationName: String!
   """
-  Whether the invite should grant admin permissions
+  What user role the invite should grant.
   """
-  permission: String
+  role: UserRoleType!
 }
 
 type OrganizationInviteEdge {
@@ -7617,6 +8754,13 @@ type OrganizationInvitePayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+input OrganizationInviteUpdateInput {
+  """
+  The teams that the user has been invited to.
+  """
+  teamIds: [String!]!
 }
 
 type OrganizationPayload {
@@ -7662,6 +8806,66 @@ enum PaginationOrderBy {
 }
 
 """
+The paid subscription of an organization.
+"""
+type PaidSubscription implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The date the subscription was canceled, if any.
+  """
+  canceledAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The creator of the subscription.
+  """
+  creator: User
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The date the subscription will be billed next.
+  """
+  nextBillingAt: DateTime
+  """
+  The organization that the subscription is associated with.
+  """
+  organization: Organization!
+  """
+  The subscription type of a pending change. Null if no change pending.
+  """
+  pendingChangeType: String
+  """
+  The number of seats in the subscription.
+  """
+  seats: Float!
+  """
+  The maximum number of seats that can be added to the subscription.
+  """
+  seatsMaximum: Float
+  """
+  The minimum number of seats that will be billed in the subscription.
+  """
+  seatsMinimum: Float
+  """
+  The subscription type.
+  """
+  type: String!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
 A project.
 """
 type Project implements Node {
@@ -7693,6 +8897,10 @@ type Project implements Node {
   The number of completed estimation points after each week.
   """
   completedScopeHistory: [Float!]!
+  """
+  The project was created based on this issue.
+  """
+  convertedFromIssue: Issue
   """
   The time at which the entity was created.
   """
@@ -7743,6 +8951,18 @@ type Project implements Node {
   """
   id: ID!
   """
+  The number of in progress estimation points after each week.
+  """
+  inProgressScopeHistory: [Float!]!
+  """
+  The initiative that this project is associated with.
+  """
+  initiative: Initiative
+  """
+  Settings for all integrations associated with that project.
+  """
+  integrationsSettings: IntegrationsSettings
+  """
   The total number of issues in the project after each week.
   """
   issueCountHistory: [Float!]!
@@ -7759,7 +8979,7 @@ type Project implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned issues.
+    Filter returned issues.
     """
     filter: IssueFilter
     """
@@ -7825,7 +9045,7 @@ type Project implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned users.
+    Filter returned users.
     """
     filter: UserFilter
     """
@@ -7852,7 +9072,7 @@ type Project implements Node {
   """
   The milestone that this project is associated with.
   """
-  milestone: Milestone
+  milestone: Milestone @deprecated(reason: "Milestones will be removed. Use roadmaps instead.")
   """
   The project's name.
   """
@@ -7861,6 +9081,43 @@ type Project implements Node {
   The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
   """
   progress: Float!
+  """
+  The time until which project update reminders are paused.
+  """
+  projectUpdateRemindersPausedUntilAt: DateTime
+  """
+  Project updates associated with the project.
+  """
+  projectUpdates(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectUpdateConnection!
+  """
+  The overall scope (total estimate points) of the project.
+  """
+  scope: Float!
   """
   The total number of estimation points after each week.
   """
@@ -7882,7 +9139,7 @@ type Project implements Node {
   """
   slugId: String!
   """
-  The sort order for the project within its milestone.
+  The sort order for the project within its milestone/initiative.
   """
   sortOrder: Float!
   """
@@ -7914,7 +9171,7 @@ type Project implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned teams.
+    Filter returned teams.
     """
     filter: TeamFilter
     """
@@ -7935,8 +9192,9 @@ type Project implements Node {
     orderBy: PaginationOrderBy
   ): TeamConnection!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -7946,13 +9204,13 @@ type Project implements Node {
 }
 
 """
-[Alpha] Project filtering options.
+Project filtering options.
 """
 input ProjectCollectionFilter {
   """
   Compound filters, all of which need to be matched by the project.
   """
-  and: [ProjectFilter!]
+  and: [ProjectCollectionFilter!]
   """
   Comparator for the created at date.
   """
@@ -7978,13 +9236,13 @@ input ProjectCollectionFilter {
   """
   lead: NullableUserFilter
   """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
   Filters that the projects members must satisfy.
   """
   members: UserFilter
-  """
-  Filters that the projects milestones must satisfy.
-  """
-  milestone: NullableMilestoneFilter
   """
   Comparator for the project name.
   """
@@ -7992,7 +9250,15 @@ input ProjectCollectionFilter {
   """
   Compound filters, one of which need to be matched by the project.
   """
-  or: [ProjectFilter!]
+  or: [ProjectCollectionFilter!]
+  """
+  Filters that the projects roadmaps must satisfy.
+  """
+  roadmaps: RoadmapCollectionFilter
+  """
+  Comparator for the project slug ID.
+  """
+  slugId: StringComparator
   """
   Filters that needs to be matched by some projects.
   """
@@ -8027,6 +9293,10 @@ input ProjectCreateInput {
   """
   color: String
   """
+  The ID of the issue from which that project is created.
+  """
+  convertedFromIssueId: String
+  """
   The description for the project.
   """
   description: String
@@ -8035,7 +9305,7 @@ input ProjectCreateInput {
   """
   icon: String
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -8055,11 +9325,11 @@ input ProjectCreateInput {
   """
   name: String!
   """
-  The sort order for the project within its milestone.
+  The sort order for the project within shared views.
   """
   sortOrder: Float
   """
-  [Internal] The planned start date of the project.
+  The planned start date of the project.
   """
   startDate: TimelessDate
   """
@@ -8085,7 +9355,7 @@ type ProjectEdge {
 }
 
 """
-[Alpha] Project filtering options.
+Project filtering options.
 """
 input ProjectFilter {
   """
@@ -8117,10 +9387,6 @@ input ProjectFilter {
   """
   members: UserFilter
   """
-  Filters that the projects milestones must satisfy.
-  """
-  milestone: NullableMilestoneFilter
-  """
   Comparator for the project name.
   """
   name: StringComparator
@@ -8128,6 +9394,14 @@ input ProjectFilter {
   Compound filters, one of which need to be matched by the project.
   """
   or: [ProjectFilter!]
+  """
+  Filters that the projects roadmaps must satisfy.
+  """
+  roadmaps: RoadmapCollectionFilter
+  """
+  Comparator for the project slug ID.
+  """
+  slugId: StringComparator
   """
   Comparator for the project start date.
   """
@@ -8175,8 +9449,9 @@ type ProjectLink implements Node {
   """
   project: Project!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -8193,7 +9468,7 @@ type ProjectLinkConnection {
 
 input ProjectLinkCreateInput {
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -8244,6 +9519,120 @@ input ProjectLinkUpdateInput {
   url: String
 }
 
+"""
+A project related notification
+"""
+type ProjectNotification implements Entity & Node & Notification {
+  """
+  The user that caused the notification. If empty it's Linear itself.
+  """
+  actor: User
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time at when an email reminder for this notification was sent to the user. Null, if no email
+      reminder has been sent.
+  """
+  emailedAt: DateTime
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The project related to the notification.
+  """
+  project: Project!
+  """
+  The project update related to the notification.
+  """
+  projectUpdate: ProjectUpdate
+  """
+  The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  """
+  readAt: DateTime
+  """
+  The time until a notification will be snoozed. After that it will appear in the inbox again.
+  """
+  snoozedUntilAt: DateTime
+  """
+  Notification type
+  """
+  type: String!
+  """
+  The time at which a notification was unsnoozed..
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user that received the notification.
+  """
+  user: User!
+}
+
+"""
+A project notification subscription.
+"""
+type ProjectNotificationSubscription implements Entity & Node & NotificationSubscription {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The project subscribed to.
+  """
+  project: Project!
+  """
+  The type of the project subscription.
+  """
+  projectNotificationSubscriptionType: ProjectNotificationSubscriptionType!
+  """
+  Subscribed team.
+  """
+  team: Team
+  """
+  The type of the subscription.
+  """
+  type: String!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user associated with notification subscriptions.
+  """
+  user: User!
+}
+
+"""
+The type of a project notification subscription.
+"""
+enum ProjectNotificationSubscriptionType {
+  all
+  custom
+  importantOnly
+}
+
 type ProjectPayload {
   """
   The identifier of the last sync operation.
@@ -8259,6 +9648,100 @@ type ProjectPayload {
   success: Boolean!
 }
 
+"""
+A update associated with an project.
+"""
+type ProjectUpdate implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The update content in markdown format.
+  """
+  body: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time the project update was edited.
+  """
+  editedAt: DateTime
+  """
+  The health of the project at the time of the update.
+  """
+  health: ProjectUpdateHealthType!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The project that the update is associated with.
+  """
+  project: Project!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The URL to the project update.
+  """
+  url: String!
+  """
+  The user who wrote the update.
+  """
+  user: User!
+}
+
+type ProjectUpdateConnection {
+  edges: [ProjectUpdateEdge!]!
+  nodes: [ProjectUpdate!]!
+  pageInfo: PageInfo!
+}
+
+input ProjectUpdateCreateInput {
+  """
+  The content of the project update in markdown format.
+  """
+  body: String
+  """
+  The content of the project update as a Prosemirror document.
+  """
+  bodyData: JSON
+  """
+  The health of the project at the time of the update.
+  """
+  health: ProjectUpdateHealthType
+  """
+  The identifier. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The project to associate the project update with.
+  """
+  projectId: String!
+}
+
+type ProjectUpdateEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: ProjectUpdate!
+}
+
+"""
+The health type of a project when the update is created.
+"""
+enum ProjectUpdateHealthType {
+  atRisk
+  offTrack
+  onTrack
+}
+
 input ProjectUpdateInput {
   """
   The date when the project was canceled.
@@ -8272,6 +9755,10 @@ input ProjectUpdateInput {
   The date when the project was completed.
   """
   completedAt: DateTime
+  """
+  The ID of the issue from which that project is created.
+  """
+  convertedFromIssueId: String
   """
   The description for the project.
   """
@@ -8297,6 +9784,10 @@ input ProjectUpdateInput {
   """
   name: String
   """
+  The time until which project update reminders are paused.
+  """
+  projectUpdateRemindersPausedUntilAt: DateTime
+  """
   Whether to send new issue comment notifications to Slack.
   """
   slackIssueComments: Boolean
@@ -8309,11 +9800,11 @@ input ProjectUpdateInput {
   """
   slackNewIssue: Boolean
   """
-  The sort order for the project within its milestone.
+  The sort order for the project in shared views.
   """
   sortOrder: Float
   """
-  [Internal] The planned start date of the project.
+  The planned start date of the project.
   """
   startDate: TimelessDate
   """
@@ -8331,6 +9822,144 @@ input ProjectUpdateInput {
 }
 
 """
+Holds information about when a user has interacted with a project update.
+"""
+type ProjectUpdateInteraction implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The project update that has been interacted with.
+  """
+  projectUpdate: ProjectUpdate!
+  """
+  The time at which the user read the project update.
+  """
+  readAt: DateTime!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user that has interacted with the project update.
+  """
+  user: User!
+}
+
+type ProjectUpdateInteractionConnection {
+  edges: [ProjectUpdateInteractionEdge!]!
+  nodes: [ProjectUpdateInteraction!]!
+  pageInfo: PageInfo!
+}
+
+input ProjectUpdateInteractionCreateInput {
+  """
+  The identifier. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The id of the project update that has been interacted with.
+  """
+  projectUpdateId: String!
+  """
+  The time at which the user read the project update.
+  """
+  readAt: DateTime!
+}
+
+type ProjectUpdateInteractionEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: ProjectUpdateInteraction!
+}
+
+type ProjectUpdateInteractionPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The project update interaction that was created or updated.
+  """
+  projectUpdateInteraction: ProjectUpdateInteraction!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+type ProjectUpdatePayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The project update that was created or updated.
+  """
+  projectUpdate: ProjectUpdate!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+The frequency at which to send project update reminders.
+"""
+enum ProjectUpdateReminderFrequency {
+  never
+  twoWeeks
+  week
+}
+
+input ProjectUpdateUpdateInput {
+  """
+  The content of the project update in markdown format.
+  """
+  body: String
+  """
+  The content of the project update as a Prosemirror document.
+  """
+  bodyData: JSON
+  """
+  The health of the project at the time of the update.
+  """
+  health: ProjectUpdateHealthType
+}
+
+type ProjectUpdateWithInteractionPayload {
+  """
+  The project update that was created or updated.
+  """
+  interaction: ProjectUpdateInteraction!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The project update that was created or updated.
+  """
+  projectUpdate: ProjectUpdate!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
 Pull request data
 """
 type PullRequestPayload {
@@ -8343,12 +9972,44 @@ type PullRequestPayload {
   number: Float!
   repoLogin: String!
   repoName: String!
+  reviewers: [String!]
+  reviews: [PullRequestReview!]
   status: String!
   title: String!
   updatedAt: String!
   url: String!
   userId: String!
   userLogin: String!
+}
+
+"""
+Pull request review data
+"""
+type PullRequestReview {
+  """
+  The ID of the review.
+  """
+  id: Float!
+  """
+  [Internal] The reviewer's avatar URL.
+  """
+  reviewerAvatarUrl: String
+  """
+  The user ID of the reviewer.
+  """
+  reviewerId: Float!
+  """
+  The login of the reviewer.
+  """
+  reviewerLogin: String!
+  """
+  The state of the review.
+  """
+  state: String!
+  """
+  The timestamp of review submission.
+  """
+  submittedAt: String!
 }
 
 """
@@ -8368,8 +10029,9 @@ type PushSubscription implements Node {
   """
   id: ID!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -8386,9 +10048,13 @@ input PushSubscriptionCreateInput {
   """
   data: String!
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  Whether this is a subscription payload for Google Cloud Messaging or Apple Push Notification service
+  """
+  type: PushSubscriptionType = web
   """
   The user identifier of the subscription.
   """
@@ -8421,6 +10087,14 @@ type PushSubscriptionTestPayload {
   success: Boolean!
 }
 
+"""
+The different push subscription types
+"""
+enum PushSubscriptionType {
+  apple
+  web
+}
+
 type Query {
   """
   All teams you the user can administrate. Administrable teams are teams whose settings the user can change, but to whose issues the user doesn't necessarily have access to.
@@ -8435,7 +10109,7 @@ type Query {
     """
     before: String
     """
-    [Alpha] Filter returned teams.
+    Filter returned teams.
     """
     filter: TeamFilter
     """
@@ -8456,7 +10130,7 @@ type Query {
     orderBy: PaginationOrderBy
   ): TeamConnection!
   """
-  [Internal] All API keys for the user.
+  All API keys for the user.
   """
   apiKeys(
     """
@@ -8494,6 +10168,15 @@ type Query {
     clientId: String!
   ): Application!
   """
+  [INTERNAL] Get basic information for a list of applications
+  """
+  applicationInfoByIds(
+    """
+    The IDs of the applications.
+    """
+    ids: [String!]!
+  ): [Application!]!
+  """
   Get information for an application and whether a user has approved it for the given scopes.
   """
   applicationWithAuthorization(
@@ -8515,50 +10198,12 @@ type Query {
     scope: [String!]!
   ): UserAuthorizedApplication!
   """
-  [Internal] Fetches an archived model.
-  """
-  archivedModelSync(
-    """
-    The identifier of the model to load. What an identifier is specific to the model class.
-    """
-    identifier: String!
-    """
-    The class name of the model to load.
-    """
-    modelClass: String!
-  ): ArchiveResponse!
-  """
-  [Internal] Fetches archived models.
-  """
-  archivedModelsSync(
-    """
-    Retrieve issues that have been archived before this date.
-    """
-    before: DateTime
-    """
-    The number of issues to load.
-    """
-    last: Int
-    """
-    The class name of the models to load.
-    """
-    modelClass: String!
-    """
-    The teamId for which to load archived models.
-    """
-    teamId: String!
-    """
-    How trashed issues should be loaded. Defaults to TrashOptionType.excludeTrash
-    """
-    trashOption: TrashOptionType
-  ): ArchiveResponse!
-  """
-  [Alpha] One specific issue attachment.
+  One specific issue attachment.
   [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
   """
   attachment(id: String!): Attachment!
   """
-  [Alpha] Query an issue by its associated attachment, and its id.
+  Query an issue by its associated attachment, and its id.
   """
   attachmentIssue(
     """
@@ -8570,7 +10215,7 @@ type Query {
       reason: "Will be removed in near future, please use `attachmentsForURL` to get attachments and their issues instead."
     )
   """
-  [Alpha] All issue attachments.
+  All issue attachments.
 
   To get attachments for a given URL, use `attachmentsForURL` query.
   """
@@ -8584,7 +10229,7 @@ type Query {
     """
     before: String
     """
-    [Alpha] Filter returned attachments.
+    Filter returned attachments.
     """
     filter: AttachmentFilter
     """
@@ -8605,7 +10250,7 @@ type Query {
     orderBy: PaginationOrderBy
   ): AttachmentConnection!
   """
-  [Alpha] Returns issue attachments for a given `url`.
+  Returns issue attachments for a given `url`.
   """
   attachmentsForURL(
     """
@@ -8650,7 +10295,7 @@ type Query {
     """
     before: String
     """
-    [Alpha] Filter returned audit entries.
+    Filter returned audit entries.
     """
     filter: AuditEntryFilter
     """
@@ -8675,34 +10320,13 @@ type Query {
   """
   auditEntryTypes: [AuditEntryType!]!
   """
-  Get all authorized applications for a user
+  [INTERNAL] Get all authorized applications for a user
   """
   authorizedApplications: [AuthorizedApplication!]!
   """
   Fetch users belonging to this user account.
   """
   availableUsers: AuthResolverResponse!
-  """
-  Billing details for the customer.
-  """
-  billingDetails: BillingDetailsPayload!
-  """
-  Join collaborative document and get missing steps.
-  """
-  collaborativeDocumentJoin(
-    """
-    The identifier of the client.
-    """
-    clientId: String!
-    """
-    The identifier of the Issue to join.
-    """
-    issueId: String!
-    """
-    Document version.
-    """
-    version: Int!
-  ): CollaborationDocumentUpdatePayload!
   """
   A specific comment.
   """
@@ -8725,7 +10349,7 @@ type Query {
     """
     before: String
     """
-    [Alpha] Filter returned comments.
+    Filter returned comments.
     """
     filter: CommentFilter
     """
@@ -8795,7 +10419,7 @@ type Query {
     """
     before: String
     """
-    [Alpha] Filter returned users.
+    Filter returned users.
     """
     filter: CycleFilter
     """
@@ -8815,23 +10439,6 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): CycleConnection!
-  """
-  [Internal] Fetches the dependencies of a model.
-  """
-  dependentModelSync(
-    """
-    The identifier of the model whose dependencies to load.
-    """
-    identifier: String!
-    """
-    Whether to also include the dependent model referenced by the given identifier in the response.
-    """
-    includeDependent: Boolean
-    """
-    The class name of the model to load.
-    """
-    modelClass: String!
-  ): DependencyResponse!
   """
   One specific document.
   """
@@ -8957,6 +10564,7 @@ type Query {
   One specific integration resource. (e.g. linked GitHub pull requests for an issue)
   """
   integrationResource(id: String!): IntegrationResource!
+    @deprecated(reason: "This query will soon be deprecated, please use `attachment` instead")
   """
   All integrations resources (e.g. linked GitHub pull requests for issues).
   """
@@ -8986,6 +10594,40 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): IntegrationResourceConnection!
+    @deprecated(reason: "This query will soon be deprecated, please use `attachments` instead")
+  """
+  One specific integrationTemplate.
+  """
+  integrationTemplate(id: String!): IntegrationTemplate!
+  """
+  Template and integration connections.
+  """
+  integrationTemplates(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IntegrationTemplateConnection!
   """
   All integrations.
   """
@@ -9016,6 +10658,10 @@ type Query {
     orderBy: PaginationOrderBy
   ): IntegrationConnection!
   """
+  One specific set of settings.
+  """
+  integrationsSettings(id: String!): IntegrationsSettings!
+  """
   One specific issue.
   """
   issue(id: String!): Issue!
@@ -9045,7 +10691,7 @@ type Query {
     """
     before: String
     """
-    [Alpha] Filter returned issue labels.
+    Filter returned issue labels.
     """
     filter: IssueLabelFilter
     """
@@ -9115,7 +10761,7 @@ type Query {
     """
     before: String
     """
-    [Alpha] Filter returned issues.
+    Filter returned issues.
     """
     filter: IssueFilter
     """
@@ -9140,7 +10786,7 @@ type Query {
     query: String!
   ): IssueConnection!
   """
-  [Internal] Find issue based on the VCS branch name.
+  Find issue based on the VCS branch name.
   """
   issueVcsBranchSearch(
     """
@@ -9161,7 +10807,7 @@ type Query {
     """
     before: String
     """
-    [Alpha] Filter returned issues.
+    Filter returned issues.
     """
     filter: IssueFilter
     """
@@ -9184,7 +10830,7 @@ type Query {
   """
   One specific milestone.
   """
-  milestone(id: String!): Milestone!
+  milestone(id: String!): Milestone! @deprecated(reason: "Milestones will be removed. Use roadmaps instead.")
   """
   All milestones.
   """
@@ -9197,10 +10843,6 @@ type Query {
     A cursor to be used with last for backward pagination.
     """
     before: String
-    """
-    [Alpha] Filter returned projects.
-    """
-    filter: MilestoneFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -9217,7 +10859,7 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
-  ): MilestoneConnection!
+  ): MilestoneConnection! @deprecated(reason: "Milestones will be removed. Use roadmaps instead.")
   """
   One specific notification.
   """
@@ -9288,6 +10930,15 @@ type Query {
   The user's organization.
   """
   organization: Organization!
+  """
+  [INTERNAL] Checks whether the domain can be claimed.
+  """
+  organizationDomainClaimRequest(
+    """
+    The ID of the organization domain to claim.
+    """
+    id: String!
+  ): OrganizationDomainClaimPayload!
   """
   Does the organization exist.
   """
@@ -9367,6 +11018,82 @@ type Query {
     orderBy: PaginationOrderBy
   ): ProjectLinkConnection!
   """
+  A specific project update.
+  """
+  projectUpdate(
+    """
+    The identifier of the project update to retrieve.
+    """
+    id: String!
+  ): ProjectUpdate!
+  """
+  A specific interaction on a project update.
+  """
+  projectUpdateInteraction(
+    """
+    The identifier of the project update interaction to retrieve.
+    """
+    id: String!
+  ): ProjectUpdateInteraction!
+  """
+  All interactions on project updates.
+  """
+  projectUpdateInteractions(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectUpdateInteractionConnection!
+  """
+  All project updates.
+  """
+  projectUpdates(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectUpdateConnection!
+  """
   All projects.
   """
   projects(
@@ -9379,7 +11106,7 @@ type Query {
     """
     before: String
     """
-    [Alpha] Filter returned projects.
+    Filter returned projects.
     """
     filter: ProjectFilter
     """
@@ -9408,18 +11135,17 @@ type Query {
   """
   rateLimitStatus: RateLimitPayload!
   """
-  A specific reaction.
+  One specific roadmap.
   """
-  reaction(
-    """
-    The identifier to retrieve.
-    """
-    id: String!
-  ): Reaction!
+  roadmap(id: String!): Roadmap!
   """
-  All comment emoji reactions.
+  One specific roadmapToProject.
   """
-  reactions(
+  roadmapToProject(id: String!): RoadmapToProject!
+  """
+  Custom views for the user.
+  """
+  roadmapToProjects(
     """
     A cursor to be used with first for forward pagination
     """
@@ -9444,7 +11170,36 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
-  ): ReactionConnection!
+  ): RoadmapToProjectConnection!
+  """
+  All roadmaps in the workspace.
+  """
+  roadmaps(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): RoadmapConnection!
   """
   Fetch SSO login URL for the email provided.
   """
@@ -9458,49 +11213,6 @@ type Query {
     """
     isDesktop: Boolean
   ): SsoUrlFromEmailResponse!
-  """
-  The organization's subscription.
-  """
-  subscription: Subscription
-  """
-  [Internal] Syncs a batch of models.
-  """
-  syncBatch(
-    """
-    The requests to load.
-    """
-    requests: [BatchRequest!]!
-  ): SyncBatchResponse!
-  """
-  [Internal] Fetch data to catch up the client to the state of the world.
-  """
-  syncBootstrap(
-    """
-    If defined, only models of the given type will be loaded.
-    """
-    onlyModels: [String!]
-    """
-    If defined, only models for the given sync groups will be loaded.
-    """
-    syncGroups: [String!]
-  ): SyncResponse!
-  """
-  [Internal] Fetches delta sync packets.
-  """
-  syncDelta(
-    """
-    The last sync id the client has seen.
-    """
-    lastSyncId: Int!
-    """
-    After which update to start, used for pagination.
-    """
-    offset: Int
-    """
-    Up until which sync id to load data for.
-    """
-    toSyncId: Int!
-  ): SyncDeltaResponse!
   """
   One specific team.
   """
@@ -9551,7 +11263,7 @@ type Query {
     """
     before: String
     """
-    [Alpha] Filter returned teams.
+    Filter returned teams.
     """
     filter: TeamFilter
     """
@@ -9610,7 +11322,7 @@ type Query {
     """
     before: String
     """
-    [Alpha] Filter returned users.
+    Filter returned users.
     """
     filter: UserFilter
     """
@@ -9693,7 +11405,7 @@ type Query {
     """
     before: String
     """
-    [Alpha] Filter returned workflow states.
+    Filter returned workflow states.
     """
     filter: WorkflowStateFilter
     """
@@ -9713,6 +11425,10 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): WorkflowStateConnection!
+  """
+  [INTERNAL] Get all authorized applications (with limited fields) for a workspace
+  """
+  workspaceAuthorizedApplications: [WorkspaceAuthorizedApplication!]!
 }
 
 type RateLimitPayload {
@@ -9758,17 +11474,13 @@ type RateLimitResultPayload {
 }
 
 """
-A reaction associated with a comment.
+A reaction associated with a comment or a project update.
 """
 type Reaction implements Node {
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
-  """
-  The comment that the reaction is associated with.
-  """
-  comment: Comment!
   """
   The time at which the entity was created.
   """
@@ -9782,8 +11494,9 @@ type Reaction implements Node {
   """
   id: ID!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -9802,15 +11515,19 @@ input ReactionCreateInput {
   """
   The comment to associate the reaction with.
   """
-  commentId: String!
+  commentId: String
   """
   The emoji the user reacted with.
   """
   emoji: String
   """
-  The identifier. If none is provided, the backend will generate one
+  The identifier in UUID v4 format. If none is provided, the backend will generate one
   """
   id: String
+  """
+  The project update to associate the reaction with.
+  """
+  projectUpdateId: String
 }
 
 type ReactionEdge {
@@ -9830,22 +11547,344 @@ type ReactionPayload {
   success: Boolean!
 }
 
-type RotateSecretPayload {
+"""
+Comparator for relation existence.
+"""
+input RelationExistsComparator {
+  """
+  Equals constraint.
+  """
+  eq: Boolean
+  """
+  Not equals constraint.
+  """
+  neq: Boolean
+}
+
+"""
+A roadmap for projects.
+"""
+type Roadmap implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the roadmap.
+  """
+  creator: User!
+  """
+  The description of the roadmap.
+  """
+  description: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The name of the roadmap.
+  """
+  name: String!
+  """
+  The organization of the roadmap.
+  """
+  organization: Organization!
+  """
+  The user who owns the roadmap.
+  """
+  owner: User!
+  """
+  Projects associated with the roadmap.
+  """
+  projects(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned projects.
+    """
+    filter: ProjectFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectConnection!
+  """
+  The roadmap's unique URL slug.
+  """
+  slugId: String!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Roadmap collection filtering options.
+"""
+input RoadmapCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the roadmap.
+  """
+  and: [RoadmapCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the roadmap creator must satisfy.
+  """
+  creator: UserFilter
+  """
+  Filters that needs to be matched by all roadmaps.
+  """
+  every: RoadmapFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Comparator for the roadmap name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the roadmap.
+  """
+  or: [RoadmapCollectionFilter!]
+  """
+  Comparator for the roadmap slug ID.
+  """
+  slugId: StringComparator
+  """
+  Filters that needs to be matched by some roadmaps.
+  """
+  some: RoadmapFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+type RoadmapConnection {
+  edges: [RoadmapEdge!]!
+  nodes: [Roadmap!]!
+  pageInfo: PageInfo!
+}
+
+input RoadmapCreateInput {
+  """
+  The description of the roadmap.
+  """
+  description: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The name of the roadmap.
+  """
+  name: String!
+  """
+  The owner of the roadmap
+  """
+  ownerId: String
+}
+
+type RoadmapEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: Roadmap!
+}
+
+"""
+Roadmap filtering options.
+"""
+input RoadmapFilter {
+  """
+  Compound filters, all of which need to be matched by the roadmap.
+  """
+  and: [RoadmapFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the roadmap creator must satisfy.
+  """
+  creator: UserFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the roadmap name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the roadmap.
+  """
+  or: [RoadmapFilter!]
+  """
+  Comparator for the roadmap slug ID.
+  """
+  slugId: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+type RoadmapPayload {
   """
   The identifier of the last sync operation.
   """
   lastSyncId: Float!
+  """
+  The roadmap that was created or updated.
+  """
+  roadmap: Roadmap!
   """
   Whether the operation was successful.
   """
   success: Boolean!
 }
 
+"""
+Join table between projects and roadmaps
+"""
+type RoadmapToProject implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The project that the roadmap is associated with.
+  """
+  project: Project!
+  """
+  The roadmap that the project is associated with.
+  """
+  roadmap: Roadmap!
+  """
+  The sort order of the project within the roadmap.
+  """
+  sortOrder: String!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type RoadmapToProjectConnection {
+  edges: [RoadmapToProjectEdge!]!
+  nodes: [RoadmapToProject!]!
+  pageInfo: PageInfo!
+}
+
+input RoadmapToProjectCreateInput {
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The identifier of the project.
+  """
+  projectId: String!
+  """
+  The identifier of the roadmap.
+  """
+  roadmapId: String!
+  """
+  The sort order for the project within its milestone.
+  """
+  sortOrder: Float
+}
+
+type RoadmapToProjectEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: RoadmapToProject!
+}
+
+type RoadmapToProjectPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The roadmapToProject that was created or updated.
+  """
+  roadmapToProject: RoadmapToProject!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+input RoadmapToProjectUpdateInput {
+  """
+  The sort order for the project within its milestone.
+  """
+  sortOrder: Float
+}
+
+input RoadmapUpdateInput {
+  """
+  The description of the roadmap.
+  """
+  description: String
+  """
+  The name of the roadmap.
+  """
+  name: String
+  """
+  The owner of the roadmap
+  """
+  ownerId: String
+}
+
 type SamlConfiguration {
-  """
-  List of allowed email domains for SAML authentication.
-  """
-  allowedDomains: [String!]
   """
   The issuer's custom entity ID.
   """
@@ -9869,10 +11908,6 @@ type SamlConfiguration {
 }
 
 input SamlConfigurationInput {
-  """
-  List of allowed email domains for SAML authentication.
-  """
-  allowedDomains: [String!]
   """
   The issuer's custom entity ID.
   """
@@ -9899,10 +11934,6 @@ input SamlConfigurationInput {
 The organization's SAML configuration
 """
 type SamlConfigurationPayload {
-  """
-  List of allowed email domains for SAML authentication.
-  """
-  allowedDomains: [String!]
   """
   The issuer's custom entity ID.
   """
@@ -10014,21 +12045,6 @@ type SsoUrlFromEmailResponse {
   success: Boolean!
 }
 
-type StepsResponse {
-  """
-  List of client IDs for the document steps.
-  """
-  clientIds: [String!]!
-  """
-  New document steps from the client.
-  """
-  steps: [JSON!]
-  """
-  Client's document version.
-  """
-  version: Int!
-}
-
 """
 Comparator for strings.
 """
@@ -10089,122 +12105,6 @@ input StringComparator {
   Starts with constraint. Matches any values that start with the given string.
   """
   startsWith: String
-}
-
-"""
-The subscription of an organization.
-"""
-type Subscription implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The date the subscription was canceled, if any.
-  """
-  canceledAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The creator of the subscription.
-  """
-  creator: User
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The date the subscription will be billed next.
-  """
-  nextBillingAt: DateTime
-  """
-  The organization that the subscription is associated with.
-  """
-  organization: Organization!
-  """
-  The subscription type of a pending change. Null if no change pending.
-  """
-  pendingChangeType: String
-  """
-  The number of seats in the subscription.
-  """
-  seats: Float!
-  """
-  The subscription type.
-  """
-  type: String!
-  """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
-type SubscriptionPayload {
-  """
-  The date the subscription was set to cancel at the end of the billing period, if any.
-  """
-  canceledAt: DateTime
-  """
-  The identifier of the last sync operation.
-  """
-  lastSyncId: Float!
-  """
-  The subscription entity being mutated.
-  """
-  subscription: Subscription!
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-type SubscriptionSessionPayload {
-  """
-  The subscription session that was created or updated.
-  """
-  session: String
-}
-
-input SubscriptionUpdateInput {
-  """
-  The date the subscription was set to cancel, if any.
-  """
-  canceledAt: DateTime
-  """
-  The subscription type of a pending change. Null if no change pending.
-  """
-  pendingChangeType: String
-}
-
-"""
-Contains the requested relations.
-"""
-type SyncBatchResponse {
-  """
-  A JSON serialized collection of relations model object.
-  """
-  models: String!
-}
-
-"""
-Contains a delta sync.
-"""
-type SyncDeltaResponse {
-  """
-  Whether the client should try loading more.
-  """
-  loadMore: Boolean!
-  """
-  Whether loading the delta was successful. In case it wasn't, the client is instructed to do a full bootstrap.
-  """
-  success: Boolean!
-  """
-  A JSON serialized collection of delta packets.
-  """
-  updates: String
 }
 
 """
@@ -10316,7 +12216,7 @@ type Team implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned cycles.
+    Filter returned cycles.
     """
     filter: CycleFilter
     """
@@ -10385,6 +12285,10 @@ type Team implements Node {
   """
   id: ID!
   """
+  Settings for all integrations associated with that team.
+  """
+  integrationsSettings: IntegrationsSettings
+  """
   Unique hash for the team to be used in invite URLs.
   """
   inviteHash: String!
@@ -10405,6 +12309,10 @@ type Team implements Node {
   """
   issueOrderingNoPriorityFirst: Boolean!
   """
+  Whether to move issues to bottom of the column when changing state.
+  """
+  issueSortOrderDefaultToBottom: Boolean!
+  """
   Issues associated with the team.
   """
   issues(
@@ -10417,7 +12325,7 @@ type Team implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned issues.
+    Filter returned issues.
     """
     filter: IssueFilter
     """
@@ -10454,7 +12362,7 @@ type Team implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned issue labels.
+    Filter returned issue labels.
     """
     filter: IssueLabelFilter
     """
@@ -10491,7 +12399,7 @@ type Team implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned users.
+    Filter returned users.
     """
     filter: UserFilter
     """
@@ -10573,7 +12481,7 @@ type Team implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned projects.
+    Filter returned projects.
     """
     filter: ProjectFilter
     """
@@ -10626,7 +12534,7 @@ type Team implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned workflow states.
+    Filter returned workflow states.
     """
     filter: WorkflowStateFilter
     """
@@ -10692,8 +12600,9 @@ type Team implements Node {
   """
   upcomingCycleCount: Float!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -10803,7 +12712,7 @@ input TeamCreateInput {
   """
   icon: String
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -10822,6 +12731,10 @@ input TeamCreateInput {
   Whether issues without priority should be sorted first.
   """
   issueOrderingNoPriorityFirst: Boolean
+  """
+  Whether to move issues to bottom of the column when changing state.
+  """
+  issueSortOrderDefaultToBottom: Boolean
   """
   The key of the team. If not given, the key will be generated based on the name of the team.
   """
@@ -10865,7 +12778,7 @@ type TeamEdge {
 }
 
 """
-[Alpha] Project filtering options.
+Team filtering options.
 """
 input TeamFilter {
   """
@@ -10927,12 +12840,17 @@ type TeamMembership implements Node {
   """
   owner: Boolean
   """
+  The order of the item in the users team list.
+  """
+  sortOrder: Float!
+  """
   The team that the membership is associated with.
   """
   team: Team!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -10949,13 +12867,17 @@ type TeamMembershipConnection {
 
 input TeamMembershipCreateInput {
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
   Internal. Whether the user is the owner of the team.
   """
   owner: Boolean
+  """
+  The position of the item in the users list.
+  """
+  sortOrder: Float
   """
   The identifier of the team associated with the membership.
   """
@@ -10993,7 +12915,51 @@ input TeamMembershipUpdateInput {
   """
   Internal. Whether the user is the owner of the team.
   """
-  owner: Boolean!
+  owner: Boolean
+  """
+  The position of the item in the users list.
+  """
+  sortOrder: Float
+}
+
+"""
+A team notification subscription.
+"""
+type TeamNotificationSubscription implements Entity & Node & NotificationSubscription {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Subscribed project.
+  """
+  project: Project
+  """
+  The team subscribed to.
+  """
+  team: Team!
+  """
+  The type of the subscription.
+  """
+  type: String!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user associated with notification subscriptions.
+  """
+  user: User!
 }
 
 type TeamPayload {
@@ -11109,6 +13075,10 @@ input TeamUpdateInput {
   """
   issueOrderingNoPriorityFirst: Boolean
   """
+  Whether to move issues to bottom of the column when changing state.
+  """
+  issueSortOrderDefaultToBottom: Boolean
+  """
   The key of the team.
   """
   key: String
@@ -11187,6 +13157,10 @@ type Template implements Node {
   """
   id: ID!
   """
+  The user who last updated the template.
+  """
+  lastUpdatedBy: User
+  """
   The name of the template.
   """
   name: String!
@@ -11207,8 +13181,9 @@ type Template implements Node {
   """
   type: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -11225,7 +13200,7 @@ input TemplateCreateInput {
   """
   description: String
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -11351,15 +13326,6 @@ input TokenUserAccountAuthInput {
 }
 
 """
-How trashed models should be loaded.
-"""
-enum TrashOptionType {
-  excludeTrash
-  includeTrash
-  trashOnly
-}
-
-"""
 A universally unique identifier as specified by RFC 4122.
 """
 scalar UUID
@@ -11394,11 +13360,27 @@ input UpdateOrganizationInput {
   """
   name: String
   """
-  Whether the organization is using project milestones.
+  Whether the organization has opted for having to approve all OAuth applications for install.
+  """
+  oauthAppReview: Boolean
+  """
+  The day at which project updates are sent.
+  """
+  projectUpdateRemindersDay: Day
+  """
+  The hour at which project updates are sent.
+  """
+  projectUpdateRemindersHour: Float
+  """
+  The frequency at which project updates are sent.
+  """
+  projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency
+  """
+  Whether the organization has opted for reduced customer support attachment information.
   """
   reducedPersonalInformation: Boolean
   """
-  Whether the organization is using project milestones.
+  Whether the organization is using roadmap.
   """
   roadmapEnabled: Boolean
   """
@@ -11471,7 +13453,7 @@ type UploadFile {
   """
   filename: String!
   headers: [UploadFileHeader!]!
-  metaData: JSON
+  metaData: JSONObject
   """
   The size of the uploaded file.
   """
@@ -11537,7 +13519,7 @@ type User implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned issues.
+    Filter returned issues.
     """
     filter: IssueFilter
     """
@@ -11562,6 +13544,10 @@ type User implements Node {
   """
   avatarUrl: String
   """
+  Hash for the user to be used in calendar URLs.
+  """
+  calendarHash: String
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -11582,7 +13568,7 @@ type User implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned issues.
+    Filter returned issues.
     """
     filter: IssueFilter
     """
@@ -11700,7 +13686,7 @@ type User implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned teams.
+    Filter returned teams.
     """
     filter: TeamFilter
     """
@@ -11725,8 +13711,9 @@ type User implements Node {
   """
   timezone: String
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -11773,6 +13760,62 @@ type UserAccount {
   users: [User!]!
 }
 
+"""
+[INTERNAL] An email change verification challenge.
+"""
+type UserAccountEmailChange {
+  """
+  The time at which the model was archived.
+  """
+  archivedAt: DateTime
+  """
+  The timestamp this verification challenge was canceled at.
+  """
+  canceledAt: DateTime
+  """
+  The timestamp the verification codes expire at.
+  """
+  expiresAt: DateTime!
+  """
+  The model's identifier.
+  """
+  id: ID!
+  """
+  The new email the user account wants to change to.
+  """
+  newEmail: String!
+  """
+  The timestamp the new email was verified at.
+  """
+  newEmailVerifiedAt: DateTime
+  """
+  The user account's current email.
+  """
+  oldEmail: String!
+  """
+  The timestamp the old email was verified at.
+  """
+  oldEmailVerifiedAt: DateTime
+  """
+  The time at which the model was updated.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+[INTERNAL] Result of verifying an email and code.
+"""
+type UserAccountEmailChangeVerifyCodePayload {
+  """
+  [INTERNAL] Reason why the operation was not successful.
+  """
+  failureReason: Float
+  """
+  [INTERNAL] Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 type UserAdminPayload {
   """
   Whether the operation was successful.
@@ -11784,6 +13827,10 @@ type UserAdminPayload {
 Public information of the OAuth application, plus whether the application has been authorized for the given scopes.
 """
 type UserAuthorizedApplication {
+  """
+  Error associated with the application needing to be requested for approval in the workspace
+  """
+  approvalErrorCode: String
   """
   OAuth application's client ID.
   """
@@ -11805,6 +13852,10 @@ type UserAuthorizedApplication {
   """
   developerUrl: String!
   """
+  OAuth application's ID.
+  """
+  id: String!
+  """
   Image of the application.
   """
   imageUrl: String
@@ -11822,6 +13873,72 @@ type UserAuthorizedApplication {
   webhooksEnabled: Boolean!
 }
 
+"""
+User filtering options.
+"""
+input UserCollectionFilter {
+  """
+  Comparator for the user's activity status.
+  """
+  active: BooleanComparator
+  """
+  Comparator for the user's admin status.
+  """
+  admin: BooleanComparator
+  """
+  Compound filters, all of which need to be matched by the user.
+  """
+  and: [UserCollectionFilter!]
+  """
+  Filters that the users assigned issues must satisfy.
+  """
+  assignedIssues: IssueCollectionFilter
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the user's display name.
+  """
+  displayName: StringComparator
+  """
+  Comparator for the user's email.
+  """
+  email: StringComparator
+  """
+  Filters that needs to be matched by all users.
+  """
+  every: UserFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user.
+  """
+  isMe: BooleanComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Comparator for the user's name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the user.
+  """
+  or: [UserCollectionFilter!]
+  """
+  Filters that needs to be matched by some users.
+  """
+  some: UserFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 type UserConnection {
   edges: [UserEdge!]!
   nodes: [User!]!
@@ -11837,7 +13954,7 @@ type UserEdge {
 }
 
 """
-[Alpha] User filtering options.
+User filtering options.
 """
 input UserFilter {
   """
@@ -11909,12 +14026,18 @@ enum UserFlagType {
   emptyMyIssuesDismissed
   figmaPromptDismissed
   importBannerDismissed
+  insightsWelcomeDismissed
+  issueLabelSuggestionUsed
   issueMovePromptCompleted
+  joinTeamIntroductionDismissed
   listSelectionTip
   migrateThemePreference
   projectBacklogWelcomeDismissed
+  projectUpdatesWelcomeDismissed
   projectWelcomeDismissed
+  rewindBannerDismissed
   slackCommentReactionTipShown
+  teamsPageIntroductionDismissed
   triageWelcomeDismissed
 }
 
@@ -11944,6 +14067,15 @@ type UserPayload {
 }
 
 """
+The different permission roles available to users on an organization
+"""
+enum UserRoleType {
+  admin
+  guest
+  user
+}
+
+"""
 The settings of a user as a JSON object.
 """
 type UserSettings implements Node {
@@ -11968,8 +14100,9 @@ type UserSettings implements Node {
   """
   unsubscribedFrom: [String!]!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -12031,7 +14164,7 @@ input UserSettingsUpdateInput {
   """
   The user's settings.
   """
-  settings: String
+  settings: JSONObject
   """
   The types of emails the user has unsubscribed from.
   """
@@ -12066,8 +14199,9 @@ type ViewPreferences implements Node {
   """
   type: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -12086,7 +14220,7 @@ input ViewPreferencesCreateInput {
   """
   cycleId: String
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -12101,6 +14235,10 @@ input ViewPreferencesCreateInput {
   The project these view preferences are associated with.
   """
   projectId: String
+  """
+  The roadmap these view preferences are associated with.
+  """
+  roadmapId: String
   """
   The team these view preferences are associated with.
   """
@@ -12155,14 +14293,18 @@ The client view this custom view is targeting.
 enum ViewType {
   activeIssues
   allIssues
+  archive
   backlog
   board
   completedCycle
+  customRoadmap
   customView
   cycle
   inbox
   label
   myIssues
+  myIssuesCreatedByMe
+  myIssuesSubscribedTo
   project
   projects
   projectsAll
@@ -12173,8 +14315,10 @@ enum ViewType {
   roadmapBacklog
   roadmapClosed
   search
+  teams
   triage
   userProfile
+  userProfileCreatedByUser
 }
 
 """
@@ -12208,7 +14352,7 @@ type Webhook implements Node {
   """
   Webhook label
   """
-  label: String!
+  label: String
   """
   The resource types this webhook is subscribed to.
   """
@@ -12222,8 +14366,9 @@ type Webhook implements Node {
   """
   team: Team
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
   """
@@ -12248,7 +14393,7 @@ input WebhookCreateInput {
   """
   enabled: Boolean = true
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -12320,6 +14465,104 @@ input WebhookUpdateInput {
 }
 
 """
+The conditions to match different events, which need to be true for workflow to be started.
+"""
+input WorkflowConditions {
+  """
+  The conditions to match triggers based on issue (creation, update, deletion).
+  """
+  issue: WorkflowEntityPropertyMatcher!
+}
+
+type WorkflowDefinition implements Node {
+  """
+  An array of activities that will be executed as part of the workflow.
+  """
+  activities: JSONObject!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  One or more conditions that need to be true for workflow to be triggered.
+  """
+  conditions: JSONObject!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the workflow.
+  """
+  creator: User!
+  """
+  The workflow description.
+  """
+  description: String
+  enabled: Boolean!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The name of the workflow.
+  """
+  name: String!
+  """
+  The organization where workflow was created.
+  """
+  organization: Organization!
+  """
+  Cron schedule which is used to execute the workflow. Only applicable for cron based workflows.
+  """
+  schedule: JSONObject!
+  """
+  The team associated with the workflow.
+  """
+  team: Team!
+  """
+  The type of the trigger that kicks off the workflow.
+  """
+  trigger: WorkflowTriggerType!
+  """
+  The type of the workflow
+  """
+  type: WorkflowType!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Object to provide conditions to match an entity change.
+"""
+input WorkflowEntityPropertyMatcher {
+  """
+  The optional list of property matchers that all have to match.
+  """
+  and: [WorkflowEntityPropertyMatcher!]
+  """
+  The initial value of the property to match.
+  """
+  fromValue: String
+  """
+  The optional list of property matchers where at least one have to match.
+  """
+  or: [WorkflowEntityPropertyMatcher!]
+  """
+  The property to check for matching.
+  """
+  property: String!
+  """
+  The new value of the property to match.
+  """
+  toValue: String
+}
+
+"""
 A state in a team workflow.
 """
 type WorkflowState implements Node {
@@ -12356,7 +14599,7 @@ type WorkflowState implements Node {
     """
     before: String
     """
-    [Alpha] Filter returned issues.
+    Filter returned issues.
     """
     filter: IssueFilter
     """
@@ -12393,8 +14636,9 @@ type WorkflowState implements Node {
   """
   type: String!
   """
-  The last time at which the entity was updated. This is the same as the creation time if the
-      entity hasn't been updated after creation.
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
   """
   updatedAt: DateTime!
 }
@@ -12415,7 +14659,7 @@ input WorkflowStateCreateInput {
   """
   description: String
   """
-  The identifier. If none is provided, the backend will generate one.
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
@@ -12445,7 +14689,7 @@ type WorkflowStateEdge {
 }
 
 """
-[Alpha] Workflow state filtering options.
+Workflow state filtering options.
 """
 input WorkflowStateFilter {
   """
@@ -12528,14 +14772,84 @@ input WorkflowStateUpdateInput {
   position: Float
 }
 
+enum WorkflowTriggerType {
+  cron
+  issueCreated
+  issueDeleted
+  issueUpdated
+}
+
+enum WorkflowType {
+  custom
+  recurringIssue
+}
+
+"""
+[INTERNAL] Public information of the OAuth application, plus the userIds and scopes for those users.
+"""
+type WorkspaceAuthorizedApplication {
+  """
+  OAuth application's ID.
+  """
+  appId: String!
+  """
+  OAuth application's client ID.
+  """
+  clientId: String!
+  """
+  Image of the application.
+  """
+  imageUrl: String
+  """
+  UserIds and membership dates of everyone who has authorized the application with the set of scopes
+  """
+  memberships: [AuthMembership!]!
+  """
+  Application name.
+  """
+  name: String!
+  """
+  Scopes that are authorized for this application for a given user.
+  """
+  scope: [String!]!
+  """
+  Total number of members that authorized the application
+  """
+  totalMembers: Float!
+  """
+  Whether or not webhooks are enabled for the application.
+  """
+  webhooksEnabled: Boolean!
+}
+
 """
 Zendesk specific settings.
 """
 type ZendeskSettings {
   """
+  Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.
+  """
+  automateTicketReopeningOnCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue
+  """
+  automateTicketReopeningOnComment: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear issue is completed.
+  """
+  automateTicketReopeningOnCompletion: Boolean
+  """
   The ID of the Linear bot user.
   """
-  botUserId: String!
+  botUserId: String
+  """
+  Whether an internal message should be added when someone comments on an issue.
+  """
+  sendNoteOnComment: Boolean
+  """
+  Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).
+  """
+  sendNoteOnStatusChange: Boolean
   """
   The subdomain of the Zendesk organization being connected.
   """
@@ -12548,9 +14862,29 @@ type ZendeskSettings {
 
 input ZendeskSettingsInput {
   """
+  Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.
+  """
+  automateTicketReopeningOnCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue
+  """
+  automateTicketReopeningOnComment: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear issue is completed.
+  """
+  automateTicketReopeningOnCompletion: Boolean
+  """
   The ID of the Linear bot user.
   """
-  botUserId: String!
+  botUserId: String
+  """
+  Whether an internal message should be added when someone comments on an issue.
+  """
+  sendNoteOnComment: Boolean
+  """
+  Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).
+  """
+  sendNoteOnStatusChange: Boolean
   """
   The subdomain of the Zendesk organization being connected.
   """
