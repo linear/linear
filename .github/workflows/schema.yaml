@@ -5,6 +5,11 @@ on:
     - cron: "0 0 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: read
+
 jobs:
   schema:
     name: Schema
