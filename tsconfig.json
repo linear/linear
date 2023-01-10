@@ -24,7 +24,8 @@
     "strict": true,
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
-    "target": "es6"
+    "target": "es6",
+    "useUnknownInCatchVariables": false
   },
   "exclude": ["../**/node_modules", "../**/build", "../**/dist", "./**/jest"]
 }
