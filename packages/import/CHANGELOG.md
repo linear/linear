@@ -1,5 +1,24 @@
 # Change Log
 
+## 1.6.0
+
+### Minor Changes
+
+- 5604ab9: Use prefixed mutations
+
+### Patch Changes
+
+- dec5d48: fix: improve import cli success message
+- 5e25484: chore(import): rename Clubhouse -> Shortcut
+- 980454f: Removed deprecated rollup plugin `rollup-plugin-size-snapshot`
+- Updated dependencies [5604ab9]
+- Updated dependencies [2c682eb]
+- Updated dependencies [2457fd0]
+- Updated dependencies [5604ab9]
+- Updated dependencies [5604ab9]
+- Updated dependencies [980454f]
+  - @linear/sdk@2.0.0
+
 ## 1.5.17
 
 ### Patch Changes

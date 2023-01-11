@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.11.0
+
+### Minor Changes
+
+- 5604ab9: Use prefixed mutations
+
+### Patch Changes
+
+- 980454f: Removed deprecated rollup plugin `rollup-plugin-size-snapshot`
+
 ## 1.10.0
 
 ### Minor Changes
