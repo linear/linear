@@ -2440,6 +2440,20 @@ fragment WorkspaceAuthorizedApplication on WorkspaceAuthorizedApplication {
   webhooksEnabled
 }
 
+# [INTERNAL] Result of creating or cancelling a verification challenge for email change.
+fragment UserAccountEmailVerificationPayload on UserAccountEmailVerificationPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+}
+
+# [INTERNAL] Result of searching for a verification challenge for a user account.
+fragment UserAccountEmailChangeFindPayload on UserAccountEmailChangeFindPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+}
+
 fragment AdminJobConfigurationPayload on AdminJobConfigurationPayload {
   __typename
   currentJob
@@ -2653,12 +2667,6 @@ fragment DocumentPayload on DocumentPayload {
   }
   # The identifier of the last sync operation.
   lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
-fragment EmailSubscribePayload on EmailSubscribePayload {
-  __typename
   # Whether the operation was successful.
   success
 }
@@ -7042,15 +7050,6 @@ mutation updateDocument(
     ...DocumentPayload
   }
 }
-# Subscribes the email to the newsletter.
-mutation emailSubscribe(
-  # Subscription details.
-  $input: EmailSubscribeInput!
-) {
-  emailSubscribe(input: $input) {
-    ...EmailSubscribePayload
-  }
-}
 # Authenticates a user account via email and authentication token.
 mutation emailTokenUserAccountAuth(
   # The data used for token authentication.
@@ -8297,6 +8296,15 @@ mutation updateTemplate(
 ) {
   templateUpdate(id: $id, input: $input) {
     ...TemplatePayload
+  }
+}
+# Cancels an ongoing email change for the user account
+mutation userAccountEmailChangeCancel(
+  # The id of the user account to cancel the change for.
+  $id: String!
+) {
+  userAccountEmailChangeCancel(id: $id) {
+    ...UserAccountEmailVerificationPayload
   }
 }
 # Makes user a regular user. Can only be called by an admin.

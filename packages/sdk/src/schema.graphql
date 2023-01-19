@@ -1721,14 +1721,14 @@ input DocumentUpdateInput {
 
 input EmailSubscribeInput {
   """
-  Email to subscribe.
+  [INTERNAL] Email to subscribe.
   """
   email: String!
 }
 
 type EmailSubscribePayload {
   """
-  Whether the operation was successful.
+  [INTERNAL] Whether the operation was successful.
   """
   success: Boolean!
 }
@@ -5484,7 +5484,7 @@ type Mutation {
     input: DocumentUpdateInput!
   ): DocumentPayload!
   """
-  Subscribes the email to the newsletter.
+  [INTERNAL] Subscribes the email to the newsletter.
   """
   emailSubscribe(
     """
@@ -6897,6 +6897,32 @@ type Mutation {
     """
     input: TemplateUpdateInput!
   ): TemplatePayload!
+  """
+  Cancels an ongoing email change for the user account
+  """
+  userAccountEmailChangeCancel(
+    """
+    The id of the user account to cancel the change for.
+    """
+    id: String!
+  ): UserAccountEmailVerificationPayload!
+  """
+  [INTERNAL] Creates an email verification challenge from the app for a user account that wants to change email.
+  """
+  userAccountEmailChangeCreate(
+    """
+    [INTERNAL] Whether an existing account exists for the new email address.
+    """
+    hasExistingAccount: Boolean!
+    """
+    [INTERNAL] The identifier of the user account that wants to change email.
+    """
+    id: String!
+    """
+    [INTERNAL] The new email address the user wants to use.
+    """
+    newEmail: String!
+  ): UserAccountEmailVerificationPayload!
   """
   [INTERNAL] Verifies the email address and code for a user account that wants to change email.
   """
@@ -11306,6 +11332,24 @@ type Query {
     id: String!
   ): User!
   """
+  [INTERNAL] Checks if there's a currently active email verification challenge for a user account.
+  """
+  userAccountEmailChangeFind(
+    """
+    [INTERNAL] The email of the user account.
+    """
+    email: String!
+  ): UserAccountEmailChangeFindPayload!
+  """
+  Finds a user account by email.
+  """
+  userAccountExists(
+    """
+    The email to find the user account by.
+    """
+    email: String!
+  ): UserAccountExistsPayload
+  """
   The user's settings.
   """
   userSettings: UserSettings!
@@ -13803,6 +13847,20 @@ type UserAccountEmailChange {
 }
 
 """
+[INTERNAL] Result of searching for a verification challenge for a user account.
+"""
+type UserAccountEmailChangeFindPayload {
+  """
+  [INTERNAL] Whether there is a currently active change.
+  """
+  hasChangeActive: Boolean!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+}
+
+"""
 [INTERNAL] Result of verifying an email and code.
 """
 type UserAccountEmailChangeVerifyCodePayload {
@@ -13810,6 +13868,30 @@ type UserAccountEmailChangeVerifyCodePayload {
   [INTERNAL] Reason why the operation was not successful.
   """
   failureReason: Float
+  """
+  [INTERNAL] Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+[INTERNAL] Result of creating or cancelling a verification challenge for email change.
+"""
+type UserAccountEmailVerificationPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  [INTERNAL] Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+[INTERNAL] Result of looking up a user account by email.
+"""
+type UserAccountExistsPayload {
   """
   [INTERNAL] Whether the operation was successful.
   """

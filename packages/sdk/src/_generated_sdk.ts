@@ -1222,21 +1222,6 @@ export class DocumentPayload extends Request {
   }
 }
 /**
- * EmailSubscribePayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.EmailSubscribePayloadFragment response data
- */
-export class EmailSubscribePayload extends Request {
-  public constructor(request: LinearRequest, data: L.EmailSubscribePayloadFragment) {
-    super(request);
-    this.success = data.success;
-  }
-
-  /** Whether the operation was successful. */
-  public success: boolean;
-}
-/**
  * EmailUnsubscribePayload model
  *
  * @param request - function to call the graphql client
@@ -6754,6 +6739,36 @@ export class UserAccountEmailChange extends Request {
   public updatedAt: Date;
 }
 /**
+ * [INTERNAL] Result of searching for a verification challenge for a user account.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.UserAccountEmailChangeFindPayloadFragment response data
+ */
+export class UserAccountEmailChangeFindPayload extends Request {
+  public constructor(request: LinearRequest, data: L.UserAccountEmailChangeFindPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+}
+/**
+ * [INTERNAL] Result of creating or cancelling a verification challenge for email change.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.UserAccountEmailVerificationPayloadFragment response data
+ */
+export class UserAccountEmailVerificationPayload extends Request {
+  public constructor(request: LinearRequest, data: L.UserAccountEmailVerificationPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+}
+/**
  * UserAdminPayload model
  *
  * @param request - function to call the graphql client
@@ -10690,35 +10705,6 @@ export class UpdateDocumentMutation extends Request {
 }
 
 /**
- * A fetchable EmailSubscribe Mutation
- *
- * @param request - function to call the graphql client
- */
-export class EmailSubscribeMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the EmailSubscribe mutation and return a EmailSubscribePayload
-   *
-   * @param input - required input to pass to emailSubscribe
-   * @returns parsed response from EmailSubscribeMutation
-   */
-  public async fetch(input: L.EmailSubscribeInput): LinearFetch<EmailSubscribePayload> {
-    const response = await this._request<L.EmailSubscribeMutation, L.EmailSubscribeMutationVariables>(
-      L.EmailSubscribeDocument,
-      {
-        input,
-      }
-    );
-    const data = response.emailSubscribe;
-
-    return new EmailSubscribePayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable EmailTokenUserAccountAuth Mutation
  *
  * @param request - function to call the graphql client
@@ -14236,6 +14222,35 @@ export class UpdateTemplateMutation extends Request {
     const data = response.templateUpdate;
 
     return new TemplatePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UserAccountEmailChangeCancel Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserAccountEmailChangeCancelMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserAccountEmailChangeCancel mutation and return a UserAccountEmailVerificationPayload
+   *
+   * @param id - required id to pass to userAccountEmailChangeCancel
+   * @returns parsed response from UserAccountEmailChangeCancelMutation
+   */
+  public async fetch(id: string): LinearFetch<UserAccountEmailVerificationPayload> {
+    const response = await this._request<
+      L.UserAccountEmailChangeCancelMutation,
+      L.UserAccountEmailChangeCancelMutationVariables
+    >(L.UserAccountEmailChangeCancelDocument, {
+      id,
+    });
+    const data = response.userAccountEmailChangeCancel;
+
+    return new UserAccountEmailVerificationPayload(this._request, data);
   }
 }
 
@@ -19097,15 +19112,6 @@ export class LinearSdk extends Request {
     return new UpdateDocumentMutation(this._request).fetch(id, input);
   }
   /**
-   * Subscribes the email to the newsletter.
-   *
-   * @param input - required input to pass to emailSubscribe
-   * @returns EmailSubscribePayload
-   */
-  public emailSubscribe(input: L.EmailSubscribeInput): LinearFetch<EmailSubscribePayload> {
-    return new EmailSubscribeMutation(this._request).fetch(input);
-  }
-  /**
    * Authenticates a user account via email and authentication token.
    *
    * @param input - required input to pass to emailTokenUserAccountAuth
@@ -20305,6 +20311,15 @@ export class LinearSdk extends Request {
    */
   public updateTemplate(id: string, input: L.TemplateUpdateInput): LinearFetch<TemplatePayload> {
     return new UpdateTemplateMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Cancels an ongoing email change for the user account
+   *
+   * @param id - required id to pass to userAccountEmailChangeCancel
+   * @returns UserAccountEmailVerificationPayload
+   */
+  public userAccountEmailChangeCancel(id: string): LinearFetch<UserAccountEmailVerificationPayload> {
+    return new UserAccountEmailChangeCancelMutation(this._request).fetch(id);
   }
   /**
    * Makes user a regular user. Can only be called by an admin.
