@@ -87,7 +87,7 @@ Object.entries(bundles).map(([bundleFormat, bundle]) =>
       expectError(
         () => client.viewer,
         LinearErrorType.AuthenticationError,
-        "Authentication required - You need to authenticate to access this operation."
+        "Authentication required, not authenticated - You need to authenticate to access this operation."
       );
     });
 
