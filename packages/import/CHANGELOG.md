@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.6.1
+
+### Patch Changes
+
+- 921a28b: chore(deps): update dependency patch versions
+- Updated dependencies [921a28b]
+- Updated dependencies [edf0c13]
+- Updated dependencies [edf0c13]
+- Updated dependencies [21b3b4f]
+  - @linear/sdk@2.1.0
+
 ## 1.6.0
 
 ### Minor Changes

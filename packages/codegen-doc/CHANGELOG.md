@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.12.0
+
+### Minor Changes
+
+- edf0c13: Support skipComment on objects
+
+### Patch Changes
+
+- 921a28b: chore(deps): update dependency patch versions
+
 ## 1.11.0
 
 ### Minor Changes
