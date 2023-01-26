@@ -45,19 +45,6 @@ export type AdminJobStatusPayload = {
   startedAt?: Maybe<Scalars["DateTime"]>;
 };
 
-/** Different aggregation functions for analytical queries. */
-export enum Aggregation {
-  Avg = "avg",
-  Count = "count",
-  Max = "max",
-  Median = "median",
-  Min = "min",
-  P90 = "p90",
-  P95 = "p95",
-  P99 = "p99",
-  Sum = "sum",
-}
-
 export type AirbyteConfigurationInput = {
   /** Linear export API key. */
   apiKey: Scalars["String"];
@@ -310,6 +297,8 @@ export type AuditEntry = Node & {
   ip?: Maybe<Scalars["String"]>;
   /** Additional metadata related to the audit entry. */
   metadata?: Maybe<Scalars["JSONObject"]>;
+  /** Additional information related to the request which performed the action. */
+  requestInformation?: Maybe<Scalars["JSONObject"]>;
   type: Scalars["String"];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -410,12 +399,6 @@ export type BooleanComparator = {
   /** Not equals constraint. */
   neq?: Maybe<Scalars["Boolean"]>;
 };
-
-/** All possible chart types. */
-export enum ChartType {
-  NivoBar = "nivoBar",
-  NivoScatterPlot = "nivoScatterPlot",
-}
 
 /** A comment associated with an issue. */
 export type Comment = Node & {
@@ -904,15 +887,6 @@ export type CycleUpdateInput = {
   startsAt?: Maybe<Scalars["DateTime"]>;
 };
 
-/** Different date aggregation functions for date dimension. */
-export enum DateAggregation {
-  Day = "day",
-  Month = "month",
-  ThirtyMinutes = "thirtyMinutes",
-  Week = "week",
-  Year = "year",
-}
-
 /** Comparator for dates. */
 export type DateComparator = {
   /** Equals constraint. */
@@ -948,33 +922,6 @@ export type DeleteOrganizationInput = {
   /** The deletion code to confirm operation. */
   deletionCode: Scalars["String"];
 };
-
-/** Object describing a dimension in analytical query, value to group by. */
-export type Dimension = {
-  /** aggregation function to be applied on date dimensions */
-  dateAggregation?: Maybe<DateAggregation>;
-  /** name of the dimension column */
-  name: DimensionName;
-};
-
-/** All possible dimensions that can be applied to analytical queries. */
-export enum DimensionName {
-  Assignee = "assignee",
-  CompletedAt = "completedAt",
-  CreatedAt = "createdAt",
-  Creator = "creator",
-  Cycle = "cycle",
-  DueDate = "dueDate",
-  Estimate = "estimate",
-  Label = "label",
-  Priority = "priority",
-  Project = "project",
-  Roadmap = "roadmap",
-  SnapshotAt = "snapshotAt",
-  StateName = "stateName",
-  StateType = "stateType",
-  Team = "team",
-}
 
 /** A document for a project. */
 export type Document = Node & {
@@ -1068,13 +1015,13 @@ export type DocumentUpdateInput = {
 };
 
 export type EmailSubscribeInput = {
-  /** Email to subscribe. */
+  /** [INTERNAL] Email to subscribe. */
   email: Scalars["String"];
 };
 
 export type EmailSubscribePayload = {
   __typename?: "EmailSubscribePayload";
-  /** Whether the operation was successful. */
+  /** [INTERNAL] Whether the operation was successful. */
   success: Scalars["Boolean"];
 };
 
@@ -1232,12 +1179,6 @@ export type EventPayload = {
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
 };
-
-/** Different facts tables to run analytical queries against. */
-export enum FactsTable {
-  Issue = "issue",
-  IssueSnapshot = "issueSnapshot",
-}
 
 /** User favorites presented in the sidebar. */
 export type Favorite = Node & {
@@ -1570,21 +1511,6 @@ export type InitiativeEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: Initiative;
-};
-
-export type InsightPayload = {
-  /** Chart type of the visualization. */
-  chartType: ChartType;
-  dimensions: Array<Dimension>;
-  /** If set to true, analytics data will include archived data */
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  /** Insight id where to send data to. */
-  insightId: Scalars["String"];
-  /** Filters that needs to be matched by some issues. */
-  issueFilter: IssueFilter;
-  measures: Array<Measure>;
-  /** Table to run analytical query against. */
-  table: FactsTable;
 };
 
 /** An integration with an external service. */
@@ -2958,23 +2884,6 @@ export type LogoutResponse = {
   success: Scalars["Boolean"];
 };
 
-/** Object describing a measure in analytical query. */
-export type Measure = {
-  /** aggregation function to be applied on the measure column */
-  aggregation: Aggregation;
-  /** name of the measure */
-  name: MeasureName;
-};
-
-/** All possible measures that can be applied to analytical queries. */
-export enum MeasureName {
-  CycleTime = "cycleTime",
-  Effort = "effort",
-  Id = "id",
-  TimeToStart = "timeToStart",
-  TimeToTriage = "timeToTriage",
-}
-
 /** A milestone that contains projects. */
 export type Milestone = Node & {
   __typename?: "Milestone";
@@ -3148,7 +3057,7 @@ export type Mutation = {
   documentDelete: ArchivePayload;
   /** Updates a document. */
   documentUpdate: DocumentPayload;
-  /** Subscribes the email to the newsletter. */
+  /** [INTERNAL] Subscribes the email to the newsletter. */
   emailSubscribe: EmailSubscribePayload;
   /** Authenticates a user account via email and authentication token. */
   emailTokenUserAccountAuth: AuthResolverResponse;
@@ -3418,6 +3327,10 @@ export type Mutation = {
   templateDelete: ArchivePayload;
   /** Updates an existing template. */
   templateUpdate: TemplatePayload;
+  /** [INTERNAL] Cancels an ongoing email change for the user account */
+  userAccountEmailChangeCancel: UserAccountEmailVerificationPayload;
+  /** [INTERNAL] Creates an email verification challenge from the app for a user account that wants to change email. */
+  userAccountEmailChangeCreate: UserAccountEmailVerificationPayload;
   /** [INTERNAL] Verifies the email address and code for a user account that wants to change email. */
   userAccountEmailChangeVerifyCode: UserAccountEmailChangeVerifyCodePayload;
   /** Makes user a regular user. Can only be called by an admin. */
@@ -3444,8 +3357,6 @@ export type Mutation = {
   userSettingsFlagsReset: UserSettingsFlagsResetPayload;
   /** Updates the user's settings. */
   userSettingsUpdate: UserSettingsPayload;
-  /** Subscribes user to changelog newsletter. */
-  userSubscribeToNewsletter: UserSubscribeToNewsletterPayload;
   /** Suspends a user. Can only be called by an admin. */
   userSuspend: UserAdminPayload;
   /** Un-suspends a user. Can only be called by an admin. */
@@ -4153,6 +4064,16 @@ export type MutationTemplateDeleteArgs = {
 export type MutationTemplateUpdateArgs = {
   id: Scalars["String"];
   input: TemplateUpdateInput;
+};
+
+export type MutationUserAccountEmailChangeCancelArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationUserAccountEmailChangeCreateArgs = {
+  hasExistingAccount: Scalars["Boolean"];
+  id: Scalars["String"];
+  newEmail: Scalars["String"];
 };
 
 export type MutationUserAccountEmailChangeVerifyCodeArgs = {
@@ -6138,6 +6059,10 @@ export type Query = {
   templates: Array<Template>;
   /** One specific user. */
   user: User;
+  /** [INTERNAL] Checks if there's a currently active email verification challenge for a user account. */
+  userAccountEmailChangeFind: UserAccountEmailChangeFindPayload;
+  /** Finds a user account by email. */
+  userAccountExists?: Maybe<UserAccountExistsPayload>;
   /** The user's settings. */
   userSettings: UserSettings;
   /** All users for the organization. */
@@ -6597,6 +6522,14 @@ export type QueryTemplateArgs = {
 
 export type QueryUserArgs = {
   id: Scalars["String"];
+};
+
+export type QueryUserAccountEmailChangeFindArgs = {
+  email: Scalars["String"];
+};
+
+export type QueryUserAccountExistsArgs = {
+  email: Scalars["String"];
 };
 
 export type QueryUsersArgs = {
@@ -7954,11 +7887,36 @@ export type UserAccountEmailChange = {
   updatedAt: Scalars["DateTime"];
 };
 
+/** [INTERNAL] Result of searching for a verification challenge for a user account. */
+export type UserAccountEmailChangeFindPayload = {
+  __typename?: "UserAccountEmailChangeFindPayload";
+  /** [INTERNAL] Whether there is a currently active change. */
+  hasChangeActive: Scalars["Boolean"];
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+};
+
 /** [INTERNAL] Result of verifying an email and code. */
 export type UserAccountEmailChangeVerifyCodePayload = {
   __typename?: "UserAccountEmailChangeVerifyCodePayload";
   /** [INTERNAL] Reason why the operation was not successful. */
   failureReason?: Maybe<Scalars["Float"]>;
+  /** [INTERNAL] Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+/** [INTERNAL] Result of creating or cancelling a verification challenge for email change. */
+export type UserAccountEmailVerificationPayload = {
+  __typename?: "UserAccountEmailVerificationPayload";
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** [INTERNAL] Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+/** [INTERNAL] Result of looking up a user account by email. */
+export type UserAccountExistsPayload = {
+  __typename?: "UserAccountExistsPayload";
   /** [INTERNAL] Whether the operation was successful. */
   success: Scalars["Boolean"];
 };
@@ -8101,6 +8059,7 @@ export enum UserFlagType {
   RewindBannerDismissed = "rewindBannerDismissed",
   SlackCommentReactionTipShown = "slackCommentReactionTipShown",
   TeamsPageIntroductionDismissed = "teamsPageIntroductionDismissed",
+  ThreadedCommentsNudgeIsSeen = "threadedCommentsNudgeIsSeen",
   TriageWelcomeDismissed = "triageWelcomeDismissed",
 }
 
@@ -8189,12 +8148,6 @@ export type UserSettingsUpdateInput = {
   settings?: Maybe<Scalars["JSONObject"]>;
   /** The types of emails the user has unsubscribed from. */
   unsubscribedFrom?: Maybe<Array<Scalars["String"]>>;
-};
-
-export type UserSubscribeToNewsletterPayload = {
-  __typename?: "UserSubscribeToNewsletterPayload";
-  /** Whether the operation was successful. */
-  success: Scalars["Boolean"];
 };
 
 /** View preferences. */
@@ -9519,7 +9472,16 @@ export type ViewPreferencesFragment = { __typename: "ViewPreferences" } & Pick<
 
 export type AuditEntryFragment = { __typename: "AuditEntry" } & Pick<
   AuditEntry,
-  "metadata" | "countryCode" | "ip" | "actorId" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "type"
+  | "requestInformation"
+  | "metadata"
+  | "countryCode"
+  | "ip"
+  | "actorId"
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
+  | "type"
 > & { actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
 export type ZendeskSettingsFragment = { __typename: "ZendeskSettings" } & Pick<
@@ -9533,46 +9495,6 @@ export type ZendeskSettingsFragment = { __typename: "ZendeskSettings" } & Pick<
   | "sendNoteOnStatusChange"
   | "sendNoteOnComment"
 >;
-
-export type AuthMembershipFragment = { __typename: "AuthMembership" } & Pick<AuthMembership, "userId" | "createdAt">;
-
-export type UserAccountEmailChangeFragment = { __typename: "UserAccountEmailChange" } & Pick<
-  UserAccountEmailChange,
-  | "id"
-  | "newEmail"
-  | "archivedAt"
-  | "updatedAt"
-  | "newEmailVerifiedAt"
-  | "oldEmailVerifiedAt"
-  | "expiresAt"
-  | "canceledAt"
-  | "oldEmail"
->;
-
-export type OrganizationDomainClaimPayloadFragment = { __typename: "OrganizationDomainClaimPayload" } & Pick<
-  OrganizationDomainClaimPayload,
-  "verificationString"
->;
-
-export type OrganizationDomainPayloadFragment = { __typename: "OrganizationDomainPayload" } & Pick<
-  OrganizationDomainPayload,
-  "lastSyncId" | "success"
-> & { organizationDomain: { __typename?: "OrganizationDomain" } & OrganizationDomainFragment };
-
-export type OrganizationDomainSimplePayloadFragment = { __typename: "OrganizationDomainSimplePayload" } & Pick<
-  OrganizationDomainSimplePayload,
-  "success"
->;
-
-export type AuthorizedApplicationFragment = { __typename: "AuthorizedApplication" } & Pick<
-  AuthorizedApplication,
-  "name" | "imageUrl" | "appId" | "clientId" | "scope" | "webhooksEnabled"
->;
-
-export type WorkspaceAuthorizedApplicationFragment = { __typename: "WorkspaceAuthorizedApplication" } & Pick<
-  WorkspaceAuthorizedApplication,
-  "name" | "imageUrl" | "appId" | "clientId" | "scope" | "totalMembers" | "webhooksEnabled"
-> & { memberships: Array<{ __typename?: "AuthMembership" } & AuthMembershipFragment> };
 
 export type AdminJobConfigurationPayloadFragment = { __typename: "AdminJobConfigurationPayload" } & Pick<
   AdminJobConfigurationPayload,
@@ -9669,11 +9591,6 @@ export type DocumentPayloadFragment = { __typename: "DocumentPayload" } & Pick<
   DocumentPayload,
   "lastSyncId" | "success"
 > & { document: { __typename?: "Document" } & Pick<Document, "id"> };
-
-export type EmailSubscribePayloadFragment = { __typename: "EmailSubscribePayload" } & Pick<
-  EmailSubscribePayload,
-  "success"
->;
 
 export type EmailUnsubscribePayloadFragment = { __typename: "EmailUnsubscribePayload" } & Pick<
   EmailUnsubscribePayload,
@@ -10263,11 +10180,6 @@ export type UserSettingsFlagsResetPayloadFragment = { __typename: "UserSettingsF
 export type UserSettingsPayloadFragment = { __typename: "UserSettingsPayload" } & Pick<
   UserSettingsPayload,
   "lastSyncId" | "success"
->;
-
-export type UserSubscribeToNewsletterPayloadFragment = { __typename: "UserSubscribeToNewsletterPayload" } & Pick<
-  UserSubscribeToNewsletterPayload,
-  "success"
 >;
 
 export type ViewPreferencesPayloadFragment = { __typename: "ViewPreferencesPayload" } & Pick<
@@ -12308,14 +12220,6 @@ export type UpdateDocumentMutation = { __typename?: "Mutation" } & {
   documentUpdate: { __typename?: "DocumentPayload" } & DocumentPayloadFragment;
 };
 
-export type EmailSubscribeMutationVariables = Exact<{
-  input: EmailSubscribeInput;
-}>;
-
-export type EmailSubscribeMutation = { __typename?: "Mutation" } & {
-  emailSubscribe: { __typename?: "EmailSubscribePayload" } & EmailSubscribePayloadFragment;
-};
-
 export type EmailTokenUserAccountAuthMutationVariables = Exact<{
   input: TokenUserAccountAuthInput;
 }>;
@@ -13437,14 +13341,6 @@ export type UpdateUserSettingsMutation = { __typename?: "Mutation" } & {
   userSettingsUpdate: { __typename?: "UserSettingsPayload" } & UserSettingsPayloadFragment;
 };
 
-export type UserSubscribeToNewsletterMutationVariables = Exact<{ [key: string]: never }>;
-
-export type UserSubscribeToNewsletterMutation = { __typename?: "Mutation" } & {
-  userSubscribeToNewsletter: {
-    __typename?: "UserSubscribeToNewsletterPayload";
-  } & UserSubscribeToNewsletterPayloadFragment;
-};
-
 export type SuspendUserMutationVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -13795,6 +13691,38 @@ export const SyncResponseFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<SyncResponseFragment, unknown>;
+export const OrganizationDomainFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OrganizationDomain" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomain" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "verificationEmail" } },
+          { kind: "Field", name: { kind: "Name", value: "verified" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "claimed" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<OrganizationDomainFragment, unknown>;
 export const GithubRepoFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -14322,196 +14250,6 @@ export const UserSettingsFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<UserSettingsFragment, unknown>;
-export const UserAccountEmailChangeFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "UserAccountEmailChange" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserAccountEmailChange" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "newEmail" } },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "newEmailVerifiedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "oldEmailVerifiedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "expiresAt" } },
-          { kind: "Field", name: { kind: "Name", value: "canceledAt" } },
-          { kind: "Field", name: { kind: "Name", value: "oldEmail" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<UserAccountEmailChangeFragment, unknown>;
-export const OrganizationDomainClaimPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OrganizationDomainClaimPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainClaimPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "verificationString" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<OrganizationDomainClaimPayloadFragment, unknown>;
-export const OrganizationDomainFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OrganizationDomain" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomain" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          { kind: "Field", name: { kind: "Name", value: "verificationEmail" } },
-          { kind: "Field", name: { kind: "Name", value: "verified" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "claimed" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<OrganizationDomainFragment, unknown>;
-export const OrganizationDomainPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OrganizationDomainPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationDomain" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDomain" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" } },
-        ],
-      },
-    },
-    ...OrganizationDomainFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<OrganizationDomainPayloadFragment, unknown>;
-export const OrganizationDomainSimplePayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OrganizationDomainSimplePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationDomainSimplePayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "success" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<OrganizationDomainSimplePayloadFragment, unknown>;
-export const AuthorizedApplicationFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AuthorizedApplication" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AuthorizedApplication" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
-          { kind: "Field", name: { kind: "Name", value: "appId" } },
-          { kind: "Field", name: { kind: "Name", value: "clientId" } },
-          { kind: "Field", name: { kind: "Name", value: "scope" } },
-          { kind: "Field", name: { kind: "Name", value: "webhooksEnabled" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<AuthorizedApplicationFragment, unknown>;
-export const AuthMembershipFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AuthMembership" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AuthMembership" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "userId" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<AuthMembershipFragment, unknown>;
-export const WorkspaceAuthorizedApplicationFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "WorkspaceAuthorizedApplication" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WorkspaceAuthorizedApplication" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
-          { kind: "Field", name: { kind: "Name", value: "appId" } },
-          { kind: "Field", name: { kind: "Name", value: "clientId" } },
-          { kind: "Field", name: { kind: "Name", value: "scope" } },
-          { kind: "Field", name: { kind: "Name", value: "totalMembers" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "memberships" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthMembership" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "webhooksEnabled" } },
-        ],
-      },
-    },
-    ...AuthMembershipFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<WorkspaceAuthorizedApplicationFragment, unknown>;
 export const AdminJobConfigurationPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -14794,6 +14532,7 @@ export const AuditEntryFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "requestInformation" } },
           { kind: "Field", name: { kind: "Name", value: "metadata" } },
           { kind: "Field", name: { kind: "Name", value: "countryCode" } },
           { kind: "Field", name: { kind: "Name", value: "ip" } },
@@ -15468,23 +15207,6 @@ export const DocumentPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<DocumentPayloadFragment, unknown>;
-export const EmailSubscribePayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "EmailSubscribePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EmailSubscribePayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "success" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<EmailSubscribePayloadFragment, unknown>;
 export const EmailUnsubscribePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -19564,23 +19286,6 @@ export const UserSettingsPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<UserSettingsPayloadFragment, unknown>;
-export const UserSubscribeToNewsletterPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "UserSubscribeToNewsletterPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserSubscribeToNewsletterPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "success" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<UserSubscribeToNewsletterPayloadFragment, unknown>;
 export const ViewPreferencesFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -32846,47 +32551,6 @@ export const UpdateDocumentDocument = {
     ...DocumentPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateDocumentMutation, UpdateDocumentMutationVariables>;
-export const EmailSubscribeDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "emailSubscribe" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "EmailSubscribeInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "emailSubscribe" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EmailSubscribePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...EmailSubscribePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<EmailSubscribeMutation, EmailSubscribeMutationVariables>;
 export const EmailTokenUserAccountAuthDocument = {
   kind: "Document",
   definitions: [
@@ -38727,32 +38391,6 @@ export const UpdateUserSettingsDocument = {
     ...UserSettingsPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateUserSettingsMutation, UpdateUserSettingsMutationVariables>;
-export const UserSubscribeToNewsletterDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "userSubscribeToNewsletter" },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userSubscribeToNewsletter" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "UserSubscribeToNewsletterPayload" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...UserSubscribeToNewsletterPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UserSubscribeToNewsletterMutation, UserSubscribeToNewsletterMutationVariables>;
 export const SuspendUserDocument = {
   kind: "Document",
   definitions: [

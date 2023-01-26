@@ -23,9 +23,10 @@ export function findFragment(
 }
 
 /**
- * Check whether this object has valid content and is not a connection, edge or root
+ * Check whether this object has valid content and is not a connection, edge, root or has a skip comment.
  */
 export function isValidObject(context: PluginContext, fragment: NamedFields<ObjectTypeDefinitionNode>): boolean {
   const hasFields = (fragment.fields ?? []).filter(Boolean).length;
-  return Boolean(hasFields && !isEdge(fragment) && !isOperationRoot(context, fragment));
+  const skipComment = context.config.skipComments?.some(comment => fragment.description?.value.includes(comment));
+  return Boolean(hasFields && !isEdge(fragment) && !isOperationRoot(context, fragment) && !skipComment);
 }
