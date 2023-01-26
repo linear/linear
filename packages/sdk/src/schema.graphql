@@ -24,21 +24,6 @@ type AdminJobStatusPayload {
   startedAt: DateTime
 }
 
-"""
-Different aggregation functions for analytical queries.
-"""
-enum Aggregation {
-  avg
-  count
-  max
-  median
-  min
-  p90
-  p95
-  p99
-  sum
-}
-
 input AirbyteConfigurationInput {
   """
   Linear export API key.
@@ -458,6 +443,10 @@ type AuditEntry implements Node {
   Additional metadata related to the audit entry.
   """
   metadata: JSONObject
+  """
+  Additional information related to the request which performed the action.
+  """
+  requestInformation: JSONObject
   type: String!
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -613,14 +602,6 @@ input BooleanComparator {
   Not equals constraint.
   """
   neq: Boolean
-}
-
-"""
-All possible chart types.
-"""
-enum ChartType {
-  nivoBar
-  nivoScatterPlot
 }
 
 """
@@ -1464,17 +1445,6 @@ input CycleUpdateInput {
 }
 
 """
-Different date aggregation functions for date dimension.
-"""
-enum DateAggregation {
-  day
-  month
-  thirtyMinutes
-  week
-  year
-}
-
-"""
 Comparator for dates.
 """
 input DateComparator {
@@ -1535,41 +1505,6 @@ input DeleteOrganizationInput {
   The deletion code to confirm operation.
   """
   deletionCode: String!
-}
-
-"""
-Object describing a dimension in analytical query, value to group by.
-"""
-input Dimension {
-  """
-  aggregation function to be applied on date dimensions
-  """
-  dateAggregation: DateAggregation
-  """
-  name of the dimension column
-  """
-  name: DimensionName!
-}
-
-"""
-All possible dimensions that can be applied to analytical queries.
-"""
-enum DimensionName {
-  assignee
-  completedAt
-  createdAt
-  creator
-  cycle
-  dueDate
-  estimate
-  label
-  priority
-  project
-  roadmap
-  snapshotAt
-  stateName
-  stateType
-  team
 }
 
 """
@@ -1721,14 +1656,14 @@ input DocumentUpdateInput {
 
 input EmailSubscribeInput {
   """
-  Email to subscribe.
+  [INTERNAL] Email to subscribe.
   """
   email: String!
 }
 
 type EmailSubscribePayload {
   """
-  Whether the operation was successful.
+  [INTERNAL] Whether the operation was successful.
   """
   success: Boolean!
 }
@@ -1975,14 +1910,6 @@ type EventPayload {
   Whether the operation was successful.
   """
   success: Boolean!
-}
-
-"""
-Different facts tables to run analytical queries against.
-"""
-enum FactsTable {
-  issue
-  issueSnapshot
 }
 
 """
@@ -2525,31 +2452,6 @@ type InitiativeEdge {
   """
   cursor: String!
   node: Initiative!
-}
-
-input InsightPayload {
-  """
-  Chart type of the visualization.
-  """
-  chartType: ChartType!
-  dimensions: [Dimension!]!
-  """
-  If set to true, analytics data will include archived data
-  """
-  includeArchived: Boolean
-  """
-  Insight id where to send data to.
-  """
-  insightId: String!
-  """
-  Filters that needs to be matched by some issues.
-  """
-  issueFilter: IssueFilter!
-  measures: [Measure!]!
-  """
-  Table to run analytical query against.
-  """
-  table: FactsTable!
 }
 
 """
@@ -4964,31 +4866,6 @@ type LogoutResponse {
 }
 
 """
-Object describing a measure in analytical query.
-"""
-input Measure {
-  """
-  aggregation function to be applied on the measure column
-  """
-  aggregation: Aggregation!
-  """
-  name of the measure
-  """
-  name: MeasureName!
-}
-
-"""
-All possible measures that can be applied to analytical queries.
-"""
-enum MeasureName {
-  cycleTime
-  effort
-  id
-  timeToStart
-  timeToTriage
-}
-
-"""
 A milestone that contains projects.
 """
 type Milestone implements Node {
@@ -5484,7 +5361,7 @@ type Mutation {
     input: DocumentUpdateInput!
   ): DocumentPayload!
   """
-  Subscribes the email to the newsletter.
+  [INTERNAL] Subscribes the email to the newsletter.
   """
   emailSubscribe(
     """
@@ -6898,6 +6775,32 @@ type Mutation {
     input: TemplateUpdateInput!
   ): TemplatePayload!
   """
+  [INTERNAL] Cancels an ongoing email change for the user account
+  """
+  userAccountEmailChangeCancel(
+    """
+    The id of the user account to cancel the change for.
+    """
+    id: String!
+  ): UserAccountEmailVerificationPayload!
+  """
+  [INTERNAL] Creates an email verification challenge from the app for a user account that wants to change email.
+  """
+  userAccountEmailChangeCreate(
+    """
+    [INTERNAL] Whether an existing account exists for the new email address.
+    """
+    hasExistingAccount: Boolean!
+    """
+    [INTERNAL] The identifier of the user account that wants to change email.
+    """
+    id: String!
+    """
+    [INTERNAL] The new email address the user wants to use.
+    """
+    newEmail: String!
+  ): UserAccountEmailVerificationPayload!
+  """
   [INTERNAL] Verifies the email address and code for a user account that wants to change email.
   """
   userAccountEmailChangeVerifyCode(
@@ -7030,10 +6933,6 @@ type Mutation {
     """
     input: UserSettingsUpdateInput!
   ): UserSettingsPayload!
-  """
-  Subscribes user to changelog newsletter.
-  """
-  userSubscribeToNewsletter: UserSubscribeToNewsletterPayload!
   """
   Suspends a user. Can only be called by an admin.
   """
@@ -11306,6 +11205,24 @@ type Query {
     id: String!
   ): User!
   """
+  [INTERNAL] Checks if there's a currently active email verification challenge for a user account.
+  """
+  userAccountEmailChangeFind(
+    """
+    [INTERNAL] The email of the user account.
+    """
+    email: String!
+  ): UserAccountEmailChangeFindPayload!
+  """
+  Finds a user account by email.
+  """
+  userAccountExists(
+    """
+    The email to find the user account by.
+    """
+    email: String!
+  ): UserAccountExistsPayload
+  """
   The user's settings.
   """
   userSettings: UserSettings!
@@ -13803,6 +13720,20 @@ type UserAccountEmailChange {
 }
 
 """
+[INTERNAL] Result of searching for a verification challenge for a user account.
+"""
+type UserAccountEmailChangeFindPayload {
+  """
+  [INTERNAL] Whether there is a currently active change.
+  """
+  hasChangeActive: Boolean!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+}
+
+"""
 [INTERNAL] Result of verifying an email and code.
 """
 type UserAccountEmailChangeVerifyCodePayload {
@@ -13810,6 +13741,30 @@ type UserAccountEmailChangeVerifyCodePayload {
   [INTERNAL] Reason why the operation was not successful.
   """
   failureReason: Float
+  """
+  [INTERNAL] Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+[INTERNAL] Result of creating or cancelling a verification challenge for email change.
+"""
+type UserAccountEmailVerificationPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  [INTERNAL] Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+[INTERNAL] Result of looking up a user account by email.
+"""
+type UserAccountExistsPayload {
   """
   [INTERNAL] Whether the operation was successful.
   """
@@ -14038,6 +13993,7 @@ enum UserFlagType {
   rewindBannerDismissed
   slackCommentReactionTipShown
   teamsPageIntroductionDismissed
+  threadedCommentsNudgeIsSeen
   triageWelcomeDismissed
 }
 
@@ -14169,13 +14125,6 @@ input UserSettingsUpdateInput {
   The types of emails the user has unsubscribed from.
   """
   unsubscribedFrom: [String!]
-}
-
-type UserSubscribeToNewsletterPayload {
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
 }
 
 """

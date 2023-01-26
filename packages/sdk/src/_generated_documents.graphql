@@ -2295,6 +2295,8 @@ fragment ViewPreferences on ViewPreferences {
 # Workspace audit log entry object.
 fragment AuditEntry on AuditEntry {
   __typename
+  # Additional information related to the request which performed the action.
+  requestInformation
   # Additional metadata related to the audit entry.
   metadata
   # Country code of request resulting to audit entry.
@@ -2339,105 +2341,6 @@ fragment ZendeskSettings on ZendeskSettings {
   sendNoteOnStatusChange
   # Whether an internal message should be added when someone comments on an issue.
   sendNoteOnComment
-}
-
-# [INTERNAL] An OAuth userId/createdDate tuple
-fragment AuthMembership on AuthMembership {
-  __typename
-  # The authorizing userId
-  userId
-  # The date of the authorization
-  createdAt
-}
-
-# [INTERNAL] An email change verification challenge.
-fragment UserAccountEmailChange on UserAccountEmailChange {
-  __typename
-  # The model's identifier.
-  id
-  # The new email the user account wants to change to.
-  newEmail
-  # The time at which the model was archived.
-  archivedAt
-  # The time at which the model was updated.
-  updatedAt
-  # The timestamp the new email was verified at.
-  newEmailVerifiedAt
-  # The timestamp the old email was verified at.
-  oldEmailVerifiedAt
-  # The timestamp the verification codes expire at.
-  expiresAt
-  # The timestamp this verification challenge was canceled at.
-  canceledAt
-  # The user account's current email.
-  oldEmail
-}
-
-# [INTERNAL] Domain claim request response.
-fragment OrganizationDomainClaimPayload on OrganizationDomainClaimPayload {
-  __typename
-  # String to put into DNS for verification.
-  verificationString
-}
-
-# [INTERNAL] Organization domain operation response.
-fragment OrganizationDomainPayload on OrganizationDomainPayload {
-  __typename
-  # The identifier of the last sync operation.
-  lastSyncId
-  # The organization domain that was created or updated.
-  organizationDomain {
-    ...OrganizationDomain
-  }
-  # Whether the operation was successful.
-  success
-}
-
-# [INTERNAL] Organization domain operation response.
-fragment OrganizationDomainSimplePayload on OrganizationDomainSimplePayload {
-  __typename
-  # Whether the operation was successful.
-  success
-}
-
-# [INTERNAL] Public information of the OAuth application, plus the authorized scopes for a given user.
-fragment AuthorizedApplication on AuthorizedApplication {
-  __typename
-  # Application name.
-  name
-  # Image of the application.
-  imageUrl
-  # OAuth application's ID.
-  appId
-  # OAuth application's client ID.
-  clientId
-  # Scopes that are authorized for this application for a given user.
-  scope
-  # Whether or not webhooks are enabled for the application.
-  webhooksEnabled
-}
-
-# [INTERNAL] Public information of the OAuth application, plus the userIds and scopes for those users.
-fragment WorkspaceAuthorizedApplication on WorkspaceAuthorizedApplication {
-  __typename
-  # Application name.
-  name
-  # Image of the application.
-  imageUrl
-  # OAuth application's ID.
-  appId
-  # OAuth application's client ID.
-  clientId
-  # Scopes that are authorized for this application for a given user.
-  scope
-  # Total number of members that authorized the application
-  totalMembers
-  # UserIds and membership dates of everyone who has authorized the application with the set of scopes
-  memberships {
-    ...AuthMembership
-  }
-  # Whether or not webhooks are enabled for the application.
-  webhooksEnabled
 }
 
 fragment AdminJobConfigurationPayload on AdminJobConfigurationPayload {
@@ -2653,12 +2556,6 @@ fragment DocumentPayload on DocumentPayload {
   }
   # The identifier of the last sync operation.
   lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
-fragment EmailSubscribePayload on EmailSubscribePayload {
-  __typename
   # Whether the operation was successful.
   success
 }
@@ -3532,12 +3429,6 @@ fragment UserSettingsPayload on UserSettingsPayload {
   __typename
   # The identifier of the last sync operation.
   lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
-fragment UserSubscribeToNewsletterPayload on UserSubscribeToNewsletterPayload {
-  __typename
   # Whether the operation was successful.
   success
 }
@@ -7042,15 +6933,6 @@ mutation updateDocument(
     ...DocumentPayload
   }
 }
-# Subscribes the email to the newsletter.
-mutation emailSubscribe(
-  # Subscription details.
-  $input: EmailSubscribeInput!
-) {
-  emailSubscribe(input: $input) {
-    ...EmailSubscribePayload
-  }
-}
 # Authenticates a user account via email and authentication token.
 mutation emailTokenUserAccountAuth(
   # The data used for token authentication.
@@ -8411,12 +8293,6 @@ mutation updateUserSettings(
 ) {
   userSettingsUpdate(id: $id, input: $input) {
     ...UserSettingsPayload
-  }
-}
-# Subscribes user to changelog newsletter.
-mutation userSubscribeToNewsletter {
-  userSubscribeToNewsletter {
-    ...UserSubscribeToNewsletterPayload
   }
 }
 # Suspends a user. Can only be called by an admin.

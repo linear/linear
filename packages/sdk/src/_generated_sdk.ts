@@ -478,6 +478,7 @@ export class AuditEntry extends Request {
     this.id = data.id;
     this.ip = data.ip ?? undefined;
     this.metadata = parseJson(data.metadata) ?? undefined;
+    this.requestInformation = parseJson(data.requestInformation) ?? undefined;
     this.type = data.type;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._actor = data.actor ?? undefined;
@@ -497,6 +498,8 @@ export class AuditEntry extends Request {
   public ip?: string;
   /** Additional metadata related to the audit entry. */
   public metadata?: Record<string, unknown>;
+  /** Additional information related to the request which performed the action. */
+  public requestInformation?: Record<string, unknown>;
   public type: string;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -549,24 +552,6 @@ export class AuditEntryType extends Request {
   public type: string;
 }
 /**
- * [INTERNAL] An OAuth userId/createdDate tuple
- *
- * @param request - function to call the graphql client
- * @param data - L.AuthMembershipFragment response data
- */
-export class AuthMembership extends Request {
-  public constructor(request: LinearRequest, data: L.AuthMembershipFragment) {
-    super(request);
-    this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.userId = data.userId;
-  }
-
-  /** The date of the authorization */
-  public createdAt: Date;
-  /** The authorizing userId */
-  public userId: string;
-}
-/**
  * AuthResolverResponse model
  *
  * @param request - function to call the graphql client
@@ -600,36 +585,6 @@ export class AuthResolverResponse extends Request {
   public availableOrganizations?: Organization[];
   /** Users belonging to this account. */
   public users: User[];
-}
-/**
- * [INTERNAL] Public information of the OAuth application, plus the authorized scopes for a given user.
- *
- * @param request - function to call the graphql client
- * @param data - L.AuthorizedApplicationFragment response data
- */
-export class AuthorizedApplication extends Request {
-  public constructor(request: LinearRequest, data: L.AuthorizedApplicationFragment) {
-    super(request);
-    this.appId = data.appId;
-    this.clientId = data.clientId;
-    this.imageUrl = data.imageUrl ?? undefined;
-    this.name = data.name;
-    this.scope = data.scope;
-    this.webhooksEnabled = data.webhooksEnabled;
-  }
-
-  /** OAuth application's ID. */
-  public appId: string;
-  /** OAuth application's client ID. */
-  public clientId: string;
-  /** Image of the application. */
-  public imageUrl?: string;
-  /** Application name. */
-  public name: string;
-  /** Scopes that are authorized for this application for a given user. */
-  public scope: string[];
-  /** Whether or not webhooks are enabled for the application. */
-  public webhooksEnabled: boolean;
 }
 /**
  * A comment associated with an issue.
@@ -1220,21 +1175,6 @@ export class DocumentPayload extends Request {
   public get document(): LinearFetch<Document> | undefined {
     return new DocumentQuery(this._request).fetch(this._document.id);
   }
-}
-/**
- * EmailSubscribePayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.EmailSubscribePayloadFragment response data
- */
-export class EmailSubscribePayload extends Request {
-  public constructor(request: LinearRequest, data: L.EmailSubscribePayloadFragment) {
-    super(request);
-    this.success = data.success;
-  }
-
-  /** Whether the operation was successful. */
-  public success: boolean;
 }
 /**
  * EmailUnsubscribePayload model
@@ -4170,57 +4110,6 @@ export class OrganizationDomain extends Request {
   }
 }
 /**
- * [INTERNAL] Domain claim request response.
- *
- * @param request - function to call the graphql client
- * @param data - L.OrganizationDomainClaimPayloadFragment response data
- */
-export class OrganizationDomainClaimPayload extends Request {
-  public constructor(request: LinearRequest, data: L.OrganizationDomainClaimPayloadFragment) {
-    super(request);
-    this.verificationString = data.verificationString;
-  }
-
-  /** String to put into DNS for verification. */
-  public verificationString: string;
-}
-/**
- * [INTERNAL] Organization domain operation response.
- *
- * @param request - function to call the graphql client
- * @param data - L.OrganizationDomainPayloadFragment response data
- */
-export class OrganizationDomainPayload extends Request {
-  public constructor(request: LinearRequest, data: L.OrganizationDomainPayloadFragment) {
-    super(request);
-    this.lastSyncId = data.lastSyncId;
-    this.success = data.success;
-    this.organizationDomain = new OrganizationDomain(request, data.organizationDomain);
-  }
-
-  /** The identifier of the last sync operation. */
-  public lastSyncId: number;
-  /** Whether the operation was successful. */
-  public success: boolean;
-  /** The organization domain that was created or updated. */
-  public organizationDomain: OrganizationDomain;
-}
-/**
- * [INTERNAL] Organization domain operation response.
- *
- * @param request - function to call the graphql client
- * @param data - L.OrganizationDomainSimplePayloadFragment response data
- */
-export class OrganizationDomainSimplePayload extends Request {
-  public constructor(request: LinearRequest, data: L.OrganizationDomainSimplePayloadFragment) {
-    super(request);
-    this.success = data.success;
-  }
-
-  /** Whether the operation was successful. */
-  public success: boolean;
-}
-/**
  * OrganizationExistsPayload model
  *
  * @param request - function to call the graphql client
@@ -6715,45 +6604,6 @@ export class UserAccount extends Request {
   public users: User[];
 }
 /**
- * [INTERNAL] An email change verification challenge.
- *
- * @param request - function to call the graphql client
- * @param data - L.UserAccountEmailChangeFragment response data
- */
-export class UserAccountEmailChange extends Request {
-  public constructor(request: LinearRequest, data: L.UserAccountEmailChangeFragment) {
-    super(request);
-    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.canceledAt = parseDate(data.canceledAt) ?? undefined;
-    this.expiresAt = parseDate(data.expiresAt) ?? new Date();
-    this.id = data.id;
-    this.newEmail = data.newEmail;
-    this.newEmailVerifiedAt = parseDate(data.newEmailVerifiedAt) ?? undefined;
-    this.oldEmail = data.oldEmail;
-    this.oldEmailVerifiedAt = parseDate(data.oldEmailVerifiedAt) ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-  }
-
-  /** The time at which the model was archived. */
-  public archivedAt?: Date;
-  /** The timestamp this verification challenge was canceled at. */
-  public canceledAt?: Date;
-  /** The timestamp the verification codes expire at. */
-  public expiresAt: Date;
-  /** The model's identifier. */
-  public id: string;
-  /** The new email the user account wants to change to. */
-  public newEmail: string;
-  /** The timestamp the new email was verified at. */
-  public newEmailVerifiedAt?: Date;
-  /** The user account's current email. */
-  public oldEmail: string;
-  /** The timestamp the old email was verified at. */
-  public oldEmailVerifiedAt?: Date;
-  /** The time at which the model was updated. */
-  public updatedAt: Date;
-}
-/**
  * UserAdminPayload model
  *
  * @param request - function to call the graphql client
@@ -6968,21 +6818,6 @@ export class UserSettingsPayload extends Request {
   public get userSettings(): LinearFetch<UserSettings> {
     return new UserSettingsQuery(this._request).fetch();
   }
-}
-/**
- * UserSubscribeToNewsletterPayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.UserSubscribeToNewsletterPayloadFragment response data
- */
-export class UserSubscribeToNewsletterPayload extends Request {
-  public constructor(request: LinearRequest, data: L.UserSubscribeToNewsletterPayloadFragment) {
-    super(request);
-    this.success = data.success;
-  }
-
-  /** Whether the operation was successful. */
-  public success: boolean;
 }
 /**
  * View preferences.
@@ -7343,42 +7178,6 @@ export class WorkflowStatePayload extends Request {
   public get workflowState(): LinearFetch<WorkflowState> | undefined {
     return new WorkflowStateQuery(this._request).fetch(this._workflowState.id);
   }
-}
-/**
- * [INTERNAL] Public information of the OAuth application, plus the userIds and scopes for those users.
- *
- * @param request - function to call the graphql client
- * @param data - L.WorkspaceAuthorizedApplicationFragment response data
- */
-export class WorkspaceAuthorizedApplication extends Request {
-  public constructor(request: LinearRequest, data: L.WorkspaceAuthorizedApplicationFragment) {
-    super(request);
-    this.appId = data.appId;
-    this.clientId = data.clientId;
-    this.imageUrl = data.imageUrl ?? undefined;
-    this.name = data.name;
-    this.scope = data.scope;
-    this.totalMembers = data.totalMembers;
-    this.webhooksEnabled = data.webhooksEnabled;
-    this.memberships = data.memberships.map(node => new AuthMembership(request, node));
-  }
-
-  /** OAuth application's ID. */
-  public appId: string;
-  /** OAuth application's client ID. */
-  public clientId: string;
-  /** Image of the application. */
-  public imageUrl?: string;
-  /** Application name. */
-  public name: string;
-  /** Scopes that are authorized for this application for a given user. */
-  public scope: string[];
-  /** Total number of members that authorized the application */
-  public totalMembers: number;
-  /** Whether or not webhooks are enabled for the application. */
-  public webhooksEnabled: boolean;
-  /** UserIds and membership dates of everyone who has authorized the application with the set of scopes */
-  public memberships: AuthMembership[];
 }
 /**
  * Zendesk specific settings.
@@ -10686,35 +10485,6 @@ export class UpdateDocumentMutation extends Request {
     const data = response.documentUpdate;
 
     return new DocumentPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable EmailSubscribe Mutation
- *
- * @param request - function to call the graphql client
- */
-export class EmailSubscribeMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the EmailSubscribe mutation and return a EmailSubscribePayload
-   *
-   * @param input - required input to pass to emailSubscribe
-   * @returns parsed response from EmailSubscribeMutation
-   */
-  public async fetch(input: L.EmailSubscribeInput): LinearFetch<EmailSubscribePayload> {
-    const response = await this._request<L.EmailSubscribeMutation, L.EmailSubscribeMutationVariables>(
-      L.EmailSubscribeDocument,
-      {
-        input,
-      }
-    );
-    const data = response.emailSubscribe;
-
-    return new EmailSubscribePayload(this._request, data);
   }
 }
 
@@ -14590,32 +14360,6 @@ export class UpdateUserSettingsMutation extends Request {
     const data = response.userSettingsUpdate;
 
     return new UserSettingsPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable UserSubscribeToNewsletter Mutation
- *
- * @param request - function to call the graphql client
- */
-export class UserSubscribeToNewsletterMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the UserSubscribeToNewsletter mutation and return a UserSubscribeToNewsletterPayload
-   *
-   * @returns parsed response from UserSubscribeToNewsletterMutation
-   */
-  public async fetch(): LinearFetch<UserSubscribeToNewsletterPayload> {
-    const response = await this._request<
-      L.UserSubscribeToNewsletterMutation,
-      L.UserSubscribeToNewsletterMutationVariables
-    >(L.UserSubscribeToNewsletterDocument, {});
-    const data = response.userSubscribeToNewsletter;
-
-    return new UserSubscribeToNewsletterPayload(this._request, data);
   }
 }
 
@@ -19097,15 +18841,6 @@ export class LinearSdk extends Request {
     return new UpdateDocumentMutation(this._request).fetch(id, input);
   }
   /**
-   * Subscribes the email to the newsletter.
-   *
-   * @param input - required input to pass to emailSubscribe
-   * @returns EmailSubscribePayload
-   */
-  public emailSubscribe(input: L.EmailSubscribeInput): LinearFetch<EmailSubscribePayload> {
-    return new EmailSubscribeMutation(this._request).fetch(input);
-  }
-  /**
    * Authenticates a user account via email and authentication token.
    *
    * @param input - required input to pass to emailTokenUserAccountAuth
@@ -20421,14 +20156,6 @@ export class LinearSdk extends Request {
    */
   public updateUserSettings(id: string, input: L.UserSettingsUpdateInput): LinearFetch<UserSettingsPayload> {
     return new UpdateUserSettingsMutation(this._request).fetch(id, input);
-  }
-  /**
-   * Subscribes user to changelog newsletter.
-   *
-   * @returns UserSubscribeToNewsletterPayload
-   */
-  public get userSubscribeToNewsletter(): LinearFetch<UserSubscribeToNewsletterPayload> {
-    return new UserSubscribeToNewsletterMutation(this._request).fetch();
   }
   /**
    * Suspends a user. Can only be called by an admin.
