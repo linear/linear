@@ -13752,6 +13752,10 @@ type UserAccountEmailChangeVerifyCodePayload {
 """
 type UserAccountEmailVerificationPayload {
   """
+  [INTERNAL] Reason why the operation was not successful.
+  """
+  failureReason: Float
+  """
   The identifier of the last sync operation.
   """
   lastSyncId: Float!
