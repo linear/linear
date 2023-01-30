@@ -7908,6 +7908,8 @@ export type UserAccountEmailChangeVerifyCodePayload = {
 /** [INTERNAL] Result of creating or cancelling a verification challenge for email change. */
 export type UserAccountEmailVerificationPayload = {
   __typename?: "UserAccountEmailVerificationPayload";
+  /** [INTERNAL] Reason why the operation was not successful. */
+  failureReason?: Maybe<Scalars["Float"]>;
   /** The identifier of the last sync operation. */
   lastSyncId: Scalars["Float"];
   /** [INTERNAL] Whether the operation was successful. */
