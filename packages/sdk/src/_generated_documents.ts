@@ -297,6 +297,8 @@ export type AuditEntry = Node & {
   ip?: Maybe<Scalars["String"]>;
   /** Additional metadata related to the audit entry. */
   metadata?: Maybe<Scalars["JSONObject"]>;
+  /** The organization the audit log belongs to. */
+  organization?: Maybe<Organization>;
   /** Additional information related to the request which performed the action. */
   requestInformation?: Maybe<Scalars["JSONObject"]>;
   type: Scalars["String"];
@@ -2189,6 +2191,55 @@ export type IssueCreateInput = {
   teamId: Scalars["String"];
   /** The title of the issue. */
   title: Scalars["String"];
+};
+
+/** [Internal] A draft issue. */
+export type IssueDraft = Node & {
+  __typename?: "IssueDraft";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The user assigned to the draft. */
+  assigneeId?: Maybe<Scalars["String"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The user who created the draft. */
+  creator: User;
+  /** The cycle associated with the draft. */
+  cycleId?: Maybe<Scalars["String"]>;
+  /** The draft's description in markdown format. */
+  description?: Maybe<Scalars["String"]>;
+  /** [Internal] The draft's description as a Prosemirror document. */
+  descriptionData?: Maybe<Scalars["JSON"]>;
+  /** The date at which the issue would be due. */
+  dueDate?: Maybe<Scalars["TimelessDate"]>;
+  /** The estimate of the complexity of the draft. */
+  estimate?: Maybe<Scalars["Float"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The parent draft of the draft. */
+  parent?: Maybe<IssueDraft>;
+  /** The parent issue of the draft. */
+  parentIssue?: Maybe<Issue>;
+  /** The priority of the draft. */
+  priority: Scalars["Float"];
+  /** Label for the priority. */
+  priorityLabel: Scalars["String"];
+  /** The project associated with the draft. */
+  projectId?: Maybe<Scalars["String"]>;
+  /** The workflow state associated with the draft. */
+  stateId: Scalars["String"];
+  /** The order of items in the sub-draft list. Only set if the draft has `parent` set. */
+  subIssueSortOrder?: Maybe<Scalars["Float"]>;
+  /** The team associated with the draft. */
+  teamId: Scalars["String"];
+  /** The draft's title. */
+  title: Scalars["String"];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
 };
 
 export type IssueEdge = {
@@ -9789,6 +9840,8 @@ type Node_IntegrationsSettings_Fragment = { __typename: "IntegrationsSettings" }
 
 type Node_Issue_Fragment = { __typename: "Issue" } & Pick<Issue, "id">;
 
+type Node_IssueDraft_Fragment = { __typename: "IssueDraft" } & Pick<IssueDraft, "id">;
+
 type Node_IssueHistory_Fragment = { __typename: "IssueHistory" } & Pick<IssueHistory, "id">;
 
 type Node_IssueImport_Fragment = { __typename: "IssueImport" } & Pick<IssueImport, "id">;
@@ -9883,6 +9936,7 @@ export type NodeFragment =
   | Node_IntegrationTemplate_Fragment
   | Node_IntegrationsSettings_Fragment
   | Node_Issue_Fragment
+  | Node_IssueDraft_Fragment
   | Node_IssueHistory_Fragment
   | Node_IssueImport_Fragment
   | Node_IssueLabel_Fragment

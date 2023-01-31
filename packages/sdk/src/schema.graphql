@@ -444,6 +444,10 @@ type AuditEntry implements Node {
   """
   metadata: JSONObject
   """
+  The organization the audit log belongs to.
+  """
+  organization: Organization
+  """
   Additional information related to the request which performed the action.
   """
   requestInformation: JSONObject
@@ -3660,6 +3664,94 @@ input IssueCreateInput {
   The title of the issue.
   """
   title: String!
+}
+
+"""
+[Internal] A draft issue.
+"""
+type IssueDraft implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The user assigned to the draft.
+  """
+  assigneeId: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the draft.
+  """
+  creator: User!
+  """
+  The cycle associated with the draft.
+  """
+  cycleId: String
+  """
+  The draft's description in markdown format.
+  """
+  description: String
+  """
+  [Internal] The draft's description as a Prosemirror document.
+  """
+  descriptionData: JSON
+  """
+  The date at which the issue would be due.
+  """
+  dueDate: TimelessDate
+  """
+  The estimate of the complexity of the draft.
+  """
+  estimate: Float
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The parent draft of the draft.
+  """
+  parent: IssueDraft
+  """
+  The parent issue of the draft.
+  """
+  parentIssue: Issue
+  """
+  The priority of the draft.
+  """
+  priority: Float!
+  """
+  Label for the priority.
+  """
+  priorityLabel: String!
+  """
+  The project associated with the draft.
+  """
+  projectId: String
+  """
+  The workflow state associated with the draft.
+  """
+  stateId: String!
+  """
+  The order of items in the sub-draft list. Only set if the draft has `parent` set.
+  """
+  subIssueSortOrder: Float
+  """
+  The team associated with the draft.
+  """
+  teamId: String!
+  """
+  The draft's title.
+  """
+  title: String!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
 }
 
 type IssueEdge {

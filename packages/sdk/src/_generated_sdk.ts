@@ -511,6 +511,10 @@ export class AuditEntry extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
+  /** The organization the audit log belongs to. */
+  public get organization(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
 }
 /**
  * AuditEntryConnection model
