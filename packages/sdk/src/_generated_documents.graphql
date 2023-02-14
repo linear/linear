@@ -32,7 +32,7 @@ fragment Comment on Comment {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The parent of the comment.
+  # The parent comment under which the current comment is nested.
   parent {
     id
   }
@@ -151,40 +151,23 @@ fragment Document on Document {
   }
 }
 
-# A initiative that contains projects.
-fragment Initiative on Initiative {
+# A milestone for a project.
+fragment ProjectMilestone on ProjectMilestone {
   __typename
-  # The estimated completion date of the initiative.
-  targetDate
-  # The initiative's description.
+  # The description of the project milestone.
   description
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The name of the initiative.
+  # The name of the project milestone.
   name
-  # The sort order for the initiative.
-  sortOrder
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The unique identifier of the entity.
-  id
-}
-
-# A milestone that contains projects.
-fragment Milestone on Milestone {
-  __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The name of the milestone.
-  name
-  # The sort order for the milestone.
-  sortOrder
+  # The planned completion date of the milestone.
+  targetDate
+  # The project of the milestone.
+  project {
+    id
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -236,6 +219,27 @@ fragment Notification on Notification {
 
   ... on ProjectNotification {
     ...ProjectNotification
+  }
+}
+
+# A personal note for a user
+fragment PersonalNote on PersonalNote {
+  __typename
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The note content as JSON.
+  contentData
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user that owns the note.
+  user {
+    id
   }
 }
 
@@ -323,18 +327,10 @@ fragment Project on Project {
   targetDate
   # The icon of the project.
   icon
-  # The initiative that this project is associated with.
-  initiative {
-    ...Initiative
-  }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The milestone that this project is associated with.
-  milestone {
-    id
-  }
   # The number of completed estimation points after each week.
   completedScopeHistory
   # The number of completed issues in the project after each week.
@@ -361,7 +357,7 @@ fragment Project on Project {
   name
   # The project's unique URL slug.
   slugId
-  # The sort order for the project within its milestone/initiative.
+  # The sort order for the project within the organizion.
   sortOrder
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
@@ -1183,6 +1179,8 @@ fragment Issue on Issue {
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The time at which the issue entered triage.
+  startedTriageAt
   # The time at which the issue left triage.
   triagedAt
   # The time at which the issue was automatically archived by the auto pruning process.
@@ -1213,6 +1211,10 @@ fragment Issue on Issue {
   }
   # The workflow state that the issue is associated with.
   state {
+    id
+  }
+  # [ALPHA] The projectMilestone that the issue is associated with.
+  projectMilestone {
     id
   }
 }
@@ -1407,6 +1409,8 @@ fragment Team on Team {
   inviteHash
   # What to use as an default estimate for unestimated issues.
   defaultIssueEstimate
+  # Whether an issue needs to have a priority set before leaving triage
+  requirePriorityToLeaveTriage
   # Whether issues without priority should be sorted first.
   issueOrderingNoPriorityFirst
   # Whether the team is private or not.
@@ -1800,6 +1804,15 @@ fragment NotificationSubscription on NotificationSubscription {
   }
 }
 
+# Notion specific settings.
+fragment NotionSettings on NotionSettings {
+  __typename
+  # The ID of the Notion workspace being connected.
+  workspaceId
+  # The name of the Notion workspace being connected.
+  workspaceName
+}
+
 # OAuth2 client application
 fragment OauthClient on OauthClient {
   __typename
@@ -2077,16 +2090,20 @@ fragment IntegrationsSettings on IntegrationsSettings {
   id
   # Whether to send a Slack message when a comment is created on any of the project or team's issues.
   slackIssueNewComment
+  # Whether to send a Slack message when a new issue is added to triage.
+  slackIssueAddedToTriage
   # Whether to send a Slack message when a new issue is created for the project or the team.
   slackIssueCreated
   # Whether to send a Slack message when a project update is created.
   slackProjectUpdateCreated
+  # Whether to send a Slack message when an SLA is at high risk
+  slackIssueSlaHighRisk
+  # Whether to send a Slack message when an SLA is breached
+  slackIssueSlaBreached
   # Whether to send a Slack message when any of the project or team's issues change to completed or cancelled.
   slackIssueStatusChangedDone
   # Whether to send a Slack message when any of the project or team's issues has a change in status.
   slackIssueStatusChangedAll
-  # Whether to send a new project update to milestone Slack channels.
-  slackProjectUpdateCreatedToMilestone
   # Whether to send a new project update to team Slack channels.
   slackProjectUpdateCreatedToTeam
   # Whether to send a new project update to workspace Slack channel.
@@ -2110,6 +2127,9 @@ fragment IntegrationSettings on IntegrationSettings {
   }
   jira {
     ...JiraSettings
+  }
+  notion {
+    ...NotionSettings
   }
   sentry {
     ...SentrySettings
@@ -2156,7 +2176,7 @@ fragment PaidSubscription on PaidSubscription {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The maximum number of seats that can be added to the subscription.
+  # The maximum number of seats that will be billed in the subscription.
   seatsMaximum
   # The minimum number of seats that will be billed in the subscription.
   seatsMinimum
@@ -2666,16 +2686,6 @@ fragment ImageUploadFromUrlPayload on ImageUploadFromUrlPayload {
   success
 }
 
-fragment InitiativeConnection on InitiativeConnection {
-  __typename
-  nodes {
-    ...Initiative
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
 fragment IntegrationConnection on IntegrationConnection {
   __typename
   nodes {
@@ -2884,36 +2894,6 @@ fragment LogoutResponse on LogoutResponse {
   success
 }
 
-fragment MilestoneConnection on MilestoneConnection {
-  __typename
-  nodes {
-    ...Milestone
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-fragment MilestoneMigrationPayload on MilestoneMigrationPayload {
-  __typename
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
-fragment MilestonePayload on MilestonePayload {
-  __typename
-  # The identifier of the last sync operation.
-  lastSyncId
-  # The milesteone that was created or updated.
-  milestone {
-    id
-  }
-  # Whether the operation was successful.
-  success
-}
-
 fragment Node on Node {
   __typename
   # The unique identifier of the entity.
@@ -3072,6 +3052,28 @@ fragment ProjectLinkPayload on ProjectLinkPayload {
   lastSyncId
   # The project that was created or updated.
   projectLink {
+    id
+  }
+  # Whether the operation was successful.
+  success
+}
+
+fragment ProjectMilestoneConnection on ProjectMilestoneConnection {
+  __typename
+  nodes {
+    ...ProjectMilestone
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ProjectMilestonePayload on ProjectMilestonePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The project milestone that was created or updated.
+  projectMilestone {
     id
   }
   # Whether the operation was successful.
@@ -3473,15 +3475,21 @@ fragment WorkflowDefinition on WorkflowDefinition {
   activities
   # Cron schedule which is used to execute the workflow. Only applicable for cron based workflows.
   schedule
-  # One or more conditions that need to be true for workflow to be triggered.
+  # The conditions that need to be match for the workflow to be triggered.
   conditions
+  # The description of the workflow.
+  description
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The name of the group that the workflow belongs to.
+  groupName
   # The name of the workflow.
   name
-  # The team associated with the workflow.
+  # The sort order of the workflow definition within its siblings.
+  sortOrder
+  # The team associated with the workflow. If not set, the workflow is associated with the entire organization.
   team {
     id
   }
@@ -3495,9 +3503,17 @@ fragment WorkflowDefinition on WorkflowDefinition {
   creator {
     id
   }
-  # The workflow description.
-  description
   enabled
+}
+
+fragment WorkflowDefinitionConnection on WorkflowDefinitionConnection {
+  __typename
+  nodes {
+    ...WorkflowDefinition
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment WorkflowStateConnection on WorkflowStateConnection {
@@ -3522,6 +3538,1788 @@ fragment WorkflowStatePayload on WorkflowStatePayload {
   success
 }
 
+# Creates an integration api key for Airbyte to connect with Linear
+mutation airbyteIntegrationConnect(
+  # Airbyte integration settings.
+  $input: AirbyteConfigurationInput!
+) {
+  airbyteIntegrationConnect(input: $input) {
+    ...IntegrationPayload
+  }
+}
+# Creates a new API key.
+mutation createApiKey(
+  # The api key object to create.
+  $input: ApiKeyCreateInput!
+) {
+  apiKeyCreate(input: $input) {
+    ...ApiKeyPayload
+  }
+}
+# Deletes an API key.
+mutation deleteApiKey(
+  # The identifier of the API key to delete.
+  $id: String!
+) {
+  apiKeyDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# [DEPRECATED] Archives an issue attachment.
+mutation archiveAttachment(
+  # The identifier of the attachment to archive.
+  $id: String!
+) {
+  attachmentArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
+mutation createAttachment(
+  # The attachment object to create.
+  $input: AttachmentCreateInput!
+) {
+  attachmentCreate(input: $input) {
+    ...AttachmentPayload
+  }
+}
+# Deletes an issue attachment.
+mutation deleteAttachment(
+  # The identifier of the attachment to delete.
+  $id: String!
+) {
+  attachmentDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Link an existing Discord message to an issue.
+mutation attachmentLinkDiscord(
+  # The Discord channel ID for the message to link.
+  $channelId: String!
+  # The issue for which to link the Discord message.
+  $issueId: String!
+  # The Discord message ID for the message to link.
+  $messageId: String!
+  # The Discord message URL for the message to link.
+  $url: String!
+) {
+  attachmentLinkDiscord(channelId: $channelId, issueId: $issueId, messageId: $messageId, url: $url) {
+    ...AttachmentPayload
+  }
+}
+# Link an existing Front conversation to an issue.
+mutation attachmentLinkFront(
+  # The Front conversation ID to link.
+  $conversationId: String!
+  # The issue for which to link the Front conversation.
+  $issueId: String!
+) {
+  attachmentLinkFront(conversationId: $conversationId, issueId: $issueId) {
+    ...FrontAttachmentPayload
+  }
+}
+# Link an existing Intercom conversation to an issue.
+mutation attachmentLinkIntercom(
+  # The Intercom conversation ID to link.
+  $conversationId: String!
+  # The issue for which to link the Intercom conversation.
+  $issueId: String!
+) {
+  attachmentLinkIntercom(conversationId: $conversationId, issueId: $issueId) {
+    ...AttachmentPayload
+  }
+}
+# Link an existing Jira issue to an issue.
+mutation attachmentLinkJiraIssue(
+  # The issue for which to link the Jira issue.
+  $issueId: String!
+  # The Jira issue key or ID to link.
+  $jiraIssueId: String!
+) {
+  attachmentLinkJiraIssue(issueId: $issueId, jiraIssueId: $jiraIssueId) {
+    ...AttachmentPayload
+  }
+}
+# Link any url to an issue.
+mutation attachmentLinkURL(
+  # The id for the attachment.
+  $id: String
+  # The issue for which to link the url.
+  $issueId: String!
+  # The title to use for the attachment.
+  $title: String
+  # The url to link.
+  $url: String!
+) {
+  attachmentLinkURL(id: $id, issueId: $issueId, title: $title, url: $url) {
+    ...AttachmentPayload
+  }
+}
+# Link an existing Zendesk ticket to an issue.
+mutation attachmentLinkZendesk(
+  # The issue for which to link the Zendesk ticket.
+  $issueId: String!
+  # The Zendesk ticket ID to link.
+  $ticketId: String!
+) {
+  attachmentLinkZendesk(issueId: $issueId, ticketId: $ticketId) {
+    ...AttachmentPayload
+  }
+}
+# Updates an existing issue attachment.
+mutation updateAttachment(
+  # The identifier of the attachment to update.
+  $id: String!
+  # A partial attachment object to update the attachment with.
+  $input: AttachmentUpdateInput!
+) {
+  attachmentUpdate(id: $id, input: $input) {
+    ...AttachmentPayload
+  }
+}
+# Creates a new comment.
+mutation createComment(
+  # The comment object to create.
+  $input: CommentCreateInput!
+) {
+  commentCreate(input: $input) {
+    ...CommentPayload
+  }
+}
+# Deletes a comment.
+mutation deleteComment(
+  # The identifier of the comment to delete.
+  $id: String!
+) {
+  commentDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a comment.
+mutation updateComment(
+  # The identifier of the comment to update.
+  $id: String!
+  # A partial comment object to update the comment with.
+  $input: CommentUpdateInput!
+) {
+  commentUpdate(id: $id, input: $input) {
+    ...CommentPayload
+  }
+}
+# Saves user message.
+mutation createContact(
+  # The contact entry to create.
+  $input: ContactCreateInput!
+) {
+  contactCreate(input: $input) {
+    ...ContactPayload
+  }
+}
+# Create CSV export report for the organization.
+mutation createCsvExportReport($includePrivateTeamIds: [String!]) {
+  createCsvExportReport(includePrivateTeamIds: $includePrivateTeamIds) {
+    ...CreateCsvExportReportPayload
+  }
+}
+# Creates an organization from onboarding.
+mutation createOrganizationFromOnboarding(
+  # Organization details for the new organization.
+  $input: CreateOrganizationInput!
+  # Onboarding survey.
+  $survey: OnboardingCustomerSurvey
+) {
+  createOrganizationFromOnboarding(input: $input, survey: $survey) {
+    ...CreateOrJoinOrganizationResponse
+  }
+}
+# Creates a new custom view.
+mutation createCustomView(
+  # The properties of the custom view to create.
+  $input: CustomViewCreateInput!
+) {
+  customViewCreate(input: $input) {
+    ...CustomViewPayload
+  }
+}
+# Deletes a custom view.
+mutation deleteCustomView(
+  # The identifier of the custom view to delete.
+  $id: String!
+) {
+  customViewDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a custom view.
+mutation updateCustomView(
+  # The identifier of the custom view to update.
+  $id: String!
+  # The properties of the custom view to update.
+  $input: CustomViewUpdateInput!
+) {
+  customViewUpdate(id: $id, input: $input) {
+    ...CustomViewPayload
+  }
+}
+# Archives a cycle.
+mutation archiveCycle(
+  # The identifier of the cycle to archive.
+  $id: String!
+) {
+  cycleArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new cycle.
+mutation createCycle(
+  # The cycle object to create.
+  $input: CycleCreateInput!
+) {
+  cycleCreate(input: $input) {
+    ...CyclePayload
+  }
+}
+# Updates a cycle.
+mutation updateCycle(
+  # The identifier of the cycle to update.
+  $id: String!
+  # A partial cycle object to update the cycle with.
+  $input: CycleUpdateInput!
+) {
+  cycleUpdate(id: $id, input: $input) {
+    ...CyclePayload
+  }
+}
+# Creates a new document.
+mutation createDocument(
+  # The document to create.
+  $input: DocumentCreateInput!
+) {
+  documentCreate(input: $input) {
+    ...DocumentPayload
+  }
+}
+# Deletes a document.
+mutation deleteDocument(
+  # The identifier of the document to delete.
+  $id: String!
+) {
+  documentDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a document.
+mutation updateDocument(
+  # The identifier of the document to update. Also the identifier from the URL is accepted.
+  $id: String!
+  # A partial document object to update the document with.
+  $input: DocumentUpdateInput!
+) {
+  documentUpdate(id: $id, input: $input) {
+    ...DocumentPayload
+  }
+}
+# Authenticates a user account via email and authentication token.
+mutation emailTokenUserAccountAuth(
+  # The data used for token authentication.
+  $input: TokenUserAccountAuthInput!
+) {
+  emailTokenUserAccountAuth(input: $input) {
+    ...AuthResolverResponse
+  }
+}
+# Unsubscribes the user from one type of emails.
+mutation emailUnsubscribe(
+  # Unsubscription details.
+  $input: EmailUnsubscribeInput!
+) {
+  emailUnsubscribe(input: $input) {
+    ...EmailUnsubscribePayload
+  }
+}
+# Finds or creates a new user account by email and sends an email with token.
+mutation emailUserAccountAuthChallenge(
+  # The data used for email authentication.
+  $input: EmailUserAccountAuthChallengeInput!
+) {
+  emailUserAccountAuthChallenge(input: $input) {
+    ...EmailUserAccountAuthChallengeResponse
+  }
+}
+# Creates a custom emoji.
+mutation createEmoji(
+  # The emoji object to create.
+  $input: EmojiCreateInput!
+) {
+  emojiCreate(input: $input) {
+    ...EmojiPayload
+  }
+}
+# Deletes an emoji.
+mutation deleteEmoji(
+  # The identifier of the emoji to delete.
+  $id: String!
+) {
+  emojiDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# [Deprecated] Creates a new event.
+mutation createEvent(
+  # The event to create.
+  $input: EventCreateInput!
+) {
+  eventCreate(input: $input) {
+    ...EventPayload
+  }
+}
+# Creates a new favorite (project, cycle etc).
+mutation createFavorite(
+  # The favorite object to create.
+  $input: FavoriteCreateInput!
+) {
+  favoriteCreate(input: $input) {
+    ...FavoritePayload
+  }
+}
+# Deletes a favorite reference.
+mutation deleteFavorite(
+  # The identifier of the favorite reference to delete.
+  $id: String!
+) {
+  favoriteDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a favorite.
+mutation updateFavorite(
+  # The identifier of the favorite to update.
+  $id: String!
+  # A partial favorite object to update the favorite with.
+  $input: FavoriteUpdateInput!
+) {
+  favoriteUpdate(id: $id, input: $input) {
+    ...FavoritePayload
+  }
+}
+# XHR request payload to upload an images, video and other attachments directly to Linear's cloud
+# storage.
+mutation fileUpload(
+  # MIME type of the uploaded file.
+  $contentType: String!
+  # Filename of the uploaded file.
+  $filename: String!
+  # Should the file be made publicly accessible (default: false).
+  $makePublic: Boolean
+  # Optional metadata.
+  $metaData: JSON
+  # File size of the uploaded file.
+  $size: Int!
+) {
+  fileUpload(
+    contentType: $contentType
+    filename: $filename
+    makePublic: $makePublic
+    metaData: $metaData
+    size: $size
+  ) {
+    ...UploadPayload
+  }
+}
+# Authenticate user account through Google OAuth. This is the 2nd step of OAuth flow.
+mutation googleUserAccountAuth(
+  # The data used for Google authentication.
+  $input: GoogleUserAccountAuthInput!
+) {
+  googleUserAccountAuth(input: $input) {
+    ...AuthResolverResponse
+  }
+}
+# Upload an image from an URL to Linear.
+mutation imageUploadFromUrl(
+  # URL of the file to be uploaded to Linear.
+  $url: String!
+) {
+  imageUploadFromUrl(url: $url) {
+    ...ImageUploadFromUrlPayload
+  }
+}
+# Deletes an integration.
+mutation deleteIntegration(
+  # The identifier of the integration to delete.
+  $id: String!
+) {
+  integrationDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Integrates the organization with Discord.
+mutation integrationDiscord(
+  # The Discord OAuth code.
+  $code: String!
+  # The Discord OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationDiscord(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Integrates the organization with Figma.
+mutation integrationFigma(
+  # The Figma OAuth code.
+  $code: String!
+  # The Figma OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationFigma(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Integrates the organization with Front.
+mutation integrationFront(
+  # The Front OAuth code.
+  $code: String!
+  # The Front OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationFront(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Generates a webhook for the GitHub commit integration.
+mutation createIntegrationGithubCommit {
+  integrationGithubCommitCreate {
+    ...GitHubCommitIntegrationPayload
+  }
+}
+# Connects the organization with the GitHub App.
+mutation integrationGithubConnect(
+  # The GitHub data to connect with.
+  $installationId: String!
+) {
+  integrationGithubConnect(installationId: $installationId) {
+    ...IntegrationPayload
+  }
+}
+# Connects the organization with a GitLab Access Token.
+mutation integrationGitlabConnect(
+  # The GitLab Access Token to connect with.
+  $accessToken: String!
+  # The URL of the GitLab installation
+  $gitlabUrl: String!
+) {
+  integrationGitlabConnect(accessToken: $accessToken, gitlabUrl: $gitlabUrl) {
+    ...IntegrationPayload
+  }
+}
+# Integrates the organization with Google Sheets.
+mutation integrationGoogleSheets(
+  # The Google OAuth code.
+  $code: String!
+) {
+  integrationGoogleSheets(code: $code) {
+    ...IntegrationPayload
+  }
+}
+# Integrates the organization with Intercom.
+mutation integrationIntercom(
+  # The Intercom OAuth code.
+  $code: String!
+  # The Intercom domain URL to use for the integration. Defaults to app.intercom.com if not provided.
+  $domainUrl: String
+  # The Intercom OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationIntercom(code: $code, domainUrl: $domainUrl, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Disconnects the organization from Intercom.
+mutation deleteIntegrationIntercom {
+  integrationIntercomDelete {
+    ...IntegrationPayload
+  }
+}
+# [DEPRECATED] Updates settings on the Intercom integration.
+mutation updateIntegrationIntercomSettings(
+  # A partial Intercom integration settings object to update the integration settings with.
+  $input: IntercomSettingsInput!
+) {
+  integrationIntercomSettingsUpdate(input: $input) {
+    ...IntegrationPayload
+  }
+}
+# Enables Loom integration for the organization.
+mutation integrationLoom {
+  integrationLoom {
+    ...IntegrationPayload
+  }
+}
+# Requests a currently unavailable integration.
+mutation integrationRequest(
+  # Integration request details.
+  $input: IntegrationRequestInput!
+) {
+  integrationRequest(input: $input) {
+    ...IntegrationRequestPayload
+  }
+}
+# Archives an integration resource.
+mutation archiveIntegrationResource(
+  # The identifier of the integration resource to archive.
+  $id: String!
+) {
+  integrationResourceArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Integrates the organization with Sentry.
+mutation integrationSentryConnect(
+  # The Sentry grant code that's exchanged for OAuth tokens.
+  $code: String!
+  # The Sentry installationId to connect with.
+  $installationId: String!
+  # The slug of the Sentry organization being connected.
+  $organizationSlug: String!
+) {
+  integrationSentryConnect(code: $code, installationId: $installationId, organizationSlug: $organizationSlug) {
+    ...IntegrationPayload
+  }
+}
+# Integrates the organization with Slack.
+mutation integrationSlack(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+  # [DEPRECATED] Whether or not v2 of Slack OAuth should be used. No longer used.
+  $shouldUseV2Auth: Boolean
+) {
+  integrationSlack(code: $code, redirectUri: $redirectUri, shouldUseV2Auth: $shouldUseV2Auth) {
+    ...IntegrationPayload
+  }
+}
+# Imports custom emojis from your Slack workspace.
+mutation integrationSlackImportEmojis(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationSlackImportEmojis(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Slack integration for organization level project update notifications.
+mutation integrationSlackOrgProjectUpdatesPost(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationSlackOrgProjectUpdatesPost(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Integrates your personal notifications with Slack.
+mutation integrationSlackPersonal(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationSlackPersonal(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Slack webhook integration.
+mutation integrationSlackPost(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+  # [DEPRECATED] Whether or not v2 of Slack OAuth should be used. No longer used.
+  $shouldUseV2Auth: Boolean
+  # Integration's associated team.
+  $teamId: String!
+) {
+  integrationSlackPost(code: $code, redirectUri: $redirectUri, shouldUseV2Auth: $shouldUseV2Auth, teamId: $teamId) {
+    ...IntegrationPayload
+  }
+}
+# Slack integration for project notifications.
+mutation integrationSlackProjectPost(
+  # The Slack OAuth code.
+  $code: String!
+  # Integration's associated project.
+  $projectId: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+  # The service to enable once connected, either 'notifications' or 'updates'.
+  $service: String!
+) {
+  integrationSlackProjectPost(code: $code, projectId: $projectId, redirectUri: $redirectUri, service: $service) {
+    ...IntegrationPayload
+  }
+}
+# Creates a new integrationTemplate join.
+mutation createIntegrationTemplate(
+  # The properties of the integrationTemplate to create.
+  $input: IntegrationTemplateCreateInput!
+) {
+  integrationTemplateCreate(input: $input) {
+    ...IntegrationTemplatePayload
+  }
+}
+# Deletes a integrationTemplate.
+mutation deleteIntegrationTemplate(
+  # The identifier of the integrationTemplate to delete.
+  $id: String!
+) {
+  integrationTemplateDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Integrates the organization with Zendesk.
+mutation integrationZendesk(
+  # The Zendesk OAuth code.
+  $code: String!
+  # The Zendesk OAuth redirect URI.
+  $redirectUri: String!
+  # The Zendesk OAuth scopes.
+  $scope: String!
+  # The Zendesk installation subdomain.
+  $subdomain: String!
+) {
+  integrationZendesk(code: $code, redirectUri: $redirectUri, scope: $scope, subdomain: $subdomain) {
+    ...IntegrationPayload
+  }
+}
+# Creates new settings for one or more integrations.
+mutation createIntegrationsSettings(
+  # The settings to create.
+  $input: IntegrationsSettingsCreateInput!
+) {
+  integrationsSettingsCreate(input: $input) {
+    ...IntegrationsSettingsPayload
+  }
+}
+# Updates settings related to integrations for a project or a team.
+mutation updateIntegrationsSettings(
+  # The identifier of the settings to update.
+  $id: String!
+  # A settings object to update the settings with.
+  $input: IntegrationsSettingsUpdateInput!
+) {
+  integrationsSettingsUpdate(id: $id, input: $input) {
+    ...IntegrationsSettingsPayload
+  }
+}
+# Archives an issue.
+mutation archiveIssue(
+  # The identifier of the issue to archive.
+  $id: String!
+  # Whether to trash the issue
+  $trash: Boolean
+) {
+  issueArchive(id: $id, trash: $trash) {
+    ...ArchivePayload
+  }
+}
+# Updates multiple issues at once.
+mutation updateIssueBatch(
+  # The id's of the issues to update. Can't be more than 50 at a time.
+  $ids: [UUID!]!
+  # A partial issue object to update the issues with.
+  $input: IssueUpdateInput!
+) {
+  issueBatchUpdate(ids: $ids, input: $input) {
+    ...IssueBatchPayload
+  }
+}
+# Creates a new issue.
+mutation createIssue(
+  # The issue object to create.
+  $input: IssueCreateInput!
+) {
+  issueCreate(input: $input) {
+    ...IssuePayload
+  }
+}
+# Deletes (trashes) an issue.
+mutation deleteIssue(
+  # The identifier of the issue to delete.
+  $id: String!
+) {
+  issueDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Kicks off an Asana import job.
+mutation issueImportCreateAsana(
+  # Asana team name to choose which issues we should import.
+  $asanaTeamName: String!
+  # Asana token to fetch information from the Asana API.
+  $asanaToken: String!
+  # ID of issue import. If not provided it will be generated.
+  $id: String
+  # Whether or not we should collect the data for closed issues.
+  $includeClosedIssues: Boolean
+  # Whether to instantly process the import with the default configuration mapping.
+  $instantProcess: Boolean
+  # ID of the organization into which to import data.
+  $organizationId: String
+  # ID of the team into which to import data.
+  $teamId: String
+  # Name of new team. When teamId is not set.
+  $teamName: String
+) {
+  issueImportCreateAsana(
+    asanaTeamName: $asanaTeamName
+    asanaToken: $asanaToken
+    id: $id
+    includeClosedIssues: $includeClosedIssues
+    instantProcess: $instantProcess
+    organizationId: $organizationId
+    teamId: $teamId
+    teamName: $teamName
+  ) {
+    ...IssueImportPayload
+  }
+}
+# Kicks off a Shortcut (formerly Clubhouse) import job.
+mutation issueImportCreateClubhouse(
+  # Shortcut (formerly Clubhouse) team name to choose which issues we should import.
+  $clubhouseTeamName: String!
+  # Shortcut (formerly Clubhouse) token to fetch information from the Clubhouse API.
+  $clubhouseToken: String!
+  # ID of issue import. If not provided it will be generated.
+  $id: String
+  # Whether or not we should collect the data for closed issues.
+  $includeClosedIssues: Boolean
+  # Whether to instantly process the import with the default configuration mapping.
+  $instantProcess: Boolean
+  # ID of the organization into which to import data.
+  $organizationId: String
+  # ID of the team into which to import data.
+  $teamId: String
+  # Name of new team. When teamId is not set.
+  $teamName: String
+) {
+  issueImportCreateClubhouse(
+    clubhouseTeamName: $clubhouseTeamName
+    clubhouseToken: $clubhouseToken
+    id: $id
+    includeClosedIssues: $includeClosedIssues
+    instantProcess: $instantProcess
+    organizationId: $organizationId
+    teamId: $teamId
+    teamName: $teamName
+  ) {
+    ...IssueImportPayload
+  }
+}
+# Kicks off a GitHub import job.
+mutation issueImportCreateGithub(
+  # GitHub repository name from which we will import data.
+  $githubRepoName: String!
+  # GitHub owner (user or org) for the repository from which we will import data.
+  $githubRepoOwner: String!
+  # Whether or not we should import GitHub organization level projects.
+  $githubShouldImportOrgProjects: Boolean
+  # GitHub token to fetch information from the GitHub API.
+  $githubToken: String!
+  # ID of issue import. If not provided it will be generated.
+  $id: String
+  # Whether or not we should collect the data for closed issues.
+  $includeClosedIssues: Boolean
+  # Whether to instantly process the import with the default configuration mapping.
+  $instantProcess: Boolean
+  # ID of the organization into which to import data.
+  $organizationId: String
+  # ID of the team into which to import data.
+  $teamId: String
+  # Name of new team. When teamId is not set.
+  $teamName: String
+) {
+  issueImportCreateGithub(
+    githubRepoName: $githubRepoName
+    githubRepoOwner: $githubRepoOwner
+    githubShouldImportOrgProjects: $githubShouldImportOrgProjects
+    githubToken: $githubToken
+    id: $id
+    includeClosedIssues: $includeClosedIssues
+    instantProcess: $instantProcess
+    organizationId: $organizationId
+    teamId: $teamId
+    teamName: $teamName
+  ) {
+    ...IssueImportPayload
+  }
+}
+# Kicks off a Jira import job.
+mutation issueImportCreateJira(
+  # ID of issue import. If not provided it will be generated.
+  $id: String
+  # Whether or not we should collect the data for closed issues.
+  $includeClosedIssues: Boolean
+  # Whether to instantly process the import with the default configuration mapping.
+  $instantProcess: Boolean
+  # Jira user account email.
+  $jiraEmail: String!
+  # Jira installation or cloud hostname.
+  $jiraHostname: String!
+  # Jira project key from which we will import data.
+  $jiraProject: String!
+  # Jira personal access token to access Jira REST API.
+  $jiraToken: String!
+  # ID of the organization into which to import data.
+  $organizationId: String
+  # ID of the team into which to import data. Empty to create new team.
+  $teamId: String
+  # Name of new team. When teamId is not set.
+  $teamName: String
+) {
+  issueImportCreateJira(
+    id: $id
+    includeClosedIssues: $includeClosedIssues
+    instantProcess: $instantProcess
+    jiraEmail: $jiraEmail
+    jiraHostname: $jiraHostname
+    jiraProject: $jiraProject
+    jiraToken: $jiraToken
+    organizationId: $organizationId
+    teamId: $teamId
+    teamName: $teamName
+  ) {
+    ...IssueImportPayload
+  }
+}
+# Deletes an import job.
+mutation deleteIssueImport(
+  # ID of the issue import to delete.
+  $issueImportId: String!
+) {
+  issueImportDelete(issueImportId: $issueImportId) {
+    ...IssueImportDeletePayload
+  }
+}
+# Kicks off import processing.
+mutation issueImportProcess(
+  # ID of the issue import which we're going to process.
+  $issueImportId: String!
+  # The mapping configuration to use for processing the import.
+  $mapping: JSONObject!
+) {
+  issueImportProcess(issueImportId: $issueImportId, mapping: $mapping) {
+    ...IssueImportPayload
+  }
+}
+# Updates the mapping for the issue import.
+mutation updateIssueImport(
+  # The identifier of the issue import.
+  $id: String!
+  # The properties of the issue import to update.
+  $input: IssueImportUpdateInput!
+) {
+  issueImportUpdate(id: $id, input: $input) {
+    ...IssueImportPayload
+  }
+}
+# Deletes an issue label.
+mutation archiveIssueLabel(
+  # The identifier of the label to archive.
+  $id: String!
+) {
+  issueLabelArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new label.
+mutation createIssueLabel(
+  # The issue label to create.
+  $input: IssueLabelCreateInput!
+  # Whether to replace all team-specific labels with the same name with this newly created workspace label.
+  $replaceTeamLabels: Boolean
+) {
+  issueLabelCreate(input: $input, replaceTeamLabels: $replaceTeamLabels) {
+    ...IssueLabelPayload
+  }
+}
+# Deletes an issue label.
+mutation deleteIssueLabel(
+  # The identifier of the label to delete.
+  $id: String!
+) {
+  issueLabelDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates an label.
+mutation updateIssueLabel(
+  # The identifier of the label to update.
+  $id: String!
+  # A partial label object to update.
+  $input: IssueLabelUpdateInput!
+) {
+  issueLabelUpdate(id: $id, input: $input) {
+    ...IssueLabelPayload
+  }
+}
+# Creates a new issue relation.
+mutation createIssueRelation(
+  # The issue relation to create.
+  $input: IssueRelationCreateInput!
+) {
+  issueRelationCreate(input: $input) {
+    ...IssueRelationPayload
+  }
+}
+# Deletes an issue relation.
+mutation deleteIssueRelation(
+  # The identifier of the issue relation to delete.
+  $id: String!
+) {
+  issueRelationDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates an issue relation.
+mutation updateIssueRelation(
+  # The identifier of the issue relation to update.
+  $id: String!
+  # The properties of the issue relation to update.
+  $input: IssueRelationUpdateInput!
+) {
+  issueRelationUpdate(id: $id, input: $input) {
+    ...IssueRelationPayload
+  }
+}
+# Adds an issue reminder. Will cause a notification to be sent when the issue reminder time is
+# reached.
+mutation issueReminder(
+  # The identifier of the issue to add a reminder for.
+  $id: String!
+  # The time when a reminder notification will be sent.
+  $reminderAt: DateTime!
+) {
+  issueReminder(id: $id, reminderAt: $reminderAt) {
+    ...IssuePayload
+  }
+}
+# Unarchives an issue.
+mutation unarchiveIssue(
+  # The identifier of the issue to archive.
+  $id: String!
+) {
+  issueUnarchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates an issue.
+mutation updateIssue(
+  # The identifier of the issue to update.
+  $id: String!
+  # A partial issue object to update the issue with.
+  $input: IssueUpdateInput!
+) {
+  issueUpdate(id: $id, input: $input) {
+    ...IssuePayload
+  }
+}
+# Join an organization from onboarding.
+mutation joinOrganizationFromOnboarding(
+  # Organization details for the organization to join.
+  $input: JoinOrganizationInput!
+) {
+  joinOrganizationFromOnboarding(input: $input) {
+    ...CreateOrJoinOrganizationResponse
+  }
+}
+# Leave an organization.
+mutation leaveOrganization(
+  # ID of the organization to leave.
+  $organizationId: String!
+) {
+  leaveOrganization(organizationId: $organizationId) {
+    ...CreateOrJoinOrganizationResponse
+  }
+}
+# Logout of all clients.
+mutation logout {
+  logout {
+    ...LogoutResponse
+  }
+}
+# Archives a notification.
+mutation archiveNotification(
+  # The id of the notification to archive.
+  $id: String!
+) {
+  notificationArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new notification subscription for a team or a project.
+mutation createNotificationSubscription(
+  # The subscription object to create.
+  $input: NotificationSubscriptionCreateInput!
+) {
+  notificationSubscriptionCreate(input: $input) {
+    ...NotificationSubscriptionPayload
+  }
+}
+# Deletes a notification subscription reference.
+mutation deleteNotificationSubscription(
+  # The identifier of the notification subscription reference to delete.
+  $id: String!
+) {
+  notificationSubscriptionDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a notification subscription.
+mutation updateNotificationSubscription(
+  # The identifier of the notification subscription to update.
+  $id: String!
+  # A partial notification subscription object to update the notification subscription with.
+  $input: NotificationSubscriptionUpdateInput!
+) {
+  notificationSubscriptionUpdate(id: $id, input: $input) {
+    ...NotificationSubscriptionPayload
+  }
+}
+# Unarchives a notification.
+mutation unarchiveNotification(
+  # The id of the notification to archive.
+  $id: String!
+) {
+  notificationUnarchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a notification.
+mutation updateNotification(
+  # The identifier of the notification to update.
+  $id: String!
+  # A partial notification object to update the notification with.
+  $input: NotificationUpdateInput!
+) {
+  notificationUpdate(id: $id, input: $input) {
+    ...NotificationPayload
+  }
+}
+# Cancels the deletion of an organization. Administrator privileges required.
+mutation deleteOrganizationCancel {
+  organizationCancelDelete {
+    ...OrganizationCancelDeletePayload
+  }
+}
+# Delete's an organization. Administrator privileges required.
+mutation deleteOrganization(
+  # Information required to delete an organization.
+  $input: DeleteOrganizationInput!
+) {
+  organizationDelete(input: $input) {
+    ...OrganizationDeletePayload
+  }
+}
+# Get an organization's delete confirmation token. Administrator privileges required.
+mutation organizationDeleteChallenge {
+  organizationDeleteChallenge {
+    ...OrganizationDeletePayload
+  }
+}
+# Deletes a domain.
+mutation deleteOrganizationDomain(
+  # The identifier of the domain to delete.
+  $id: String!
+) {
+  organizationDomainDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new organization invite.
+mutation createOrganizationInvite(
+  # The organization invite object to create.
+  $input: OrganizationInviteCreateInput!
+) {
+  organizationInviteCreate(input: $input) {
+    ...OrganizationInvitePayload
+  }
+}
+# Deletes an organization invite.
+mutation deleteOrganizationInvite(
+  # The identifier of the organization invite to delete.
+  $id: String!
+) {
+  organizationInviteDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates an organization invite.
+mutation updateOrganizationInvite(
+  # The identifier of the organization invite to update.
+  $id: String!
+  # The updates to make to the organization invite object.
+  $input: OrganizationInviteUpdateInput!
+) {
+  organizationInviteUpdate(id: $id, input: $input) {
+    ...OrganizationInvitePayload
+  }
+}
+# Updates the user's organization.
+mutation updateOrganization(
+  # A partial organization object to update the organization with.
+  $input: UpdateOrganizationInput!
+) {
+  organizationUpdate(input: $input) {
+    ...OrganizationPayload
+  }
+}
+# Archives a project.
+mutation archiveProject(
+  # The identifier of the project to archive. Also the identifier from the URL is accepted.
+  $id: String!
+) {
+  projectArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new project.
+mutation createProject(
+  # The issue object to create.
+  $input: ProjectCreateInput!
+) {
+  projectCreate(input: $input) {
+    ...ProjectPayload
+  }
+}
+# Deletes a project. All issues will be disassociated from the deleted project.
+mutation deleteProject(
+  # The identifier of the project to delete. Also the identifier from the URL is accepted.
+  $id: String!
+) {
+  projectDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new project link.
+mutation createProjectLink(
+  # The project link object to create.
+  $input: ProjectLinkCreateInput!
+) {
+  projectLinkCreate(input: $input) {
+    ...ProjectLinkPayload
+  }
+}
+# Deletes a project link.
+mutation deleteProjectLink(
+  # The identifier of the project link to delete.
+  $id: String!
+) {
+  projectLinkDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a project link.
+mutation updateProjectLink(
+  # The identifier of the project link to update.
+  $id: String!
+  # The project link object to update.
+  $input: ProjectLinkUpdateInput!
+) {
+  projectLinkUpdate(id: $id, input: $input) {
+    ...ProjectLinkPayload
+  }
+}
+# Creates a new project milestone.
+mutation createProjectMilestone(
+  # The project milestone to create.
+  $input: ProjectMilestoneCreateInput!
+) {
+  projectMilestoneCreate(input: $input) {
+    ...ProjectMilestonePayload
+  }
+}
+# Deletes a project milestone.
+mutation deleteProjectMilestone(
+  # The identifier of the project milestone to delete.
+  $id: String!
+) {
+  projectMilestoneDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a project milestone.
+mutation updateProjectMilestone(
+  # The identifier of the project milestone to update. Also the identifier from the URL is accepted.
+  $id: String!
+  # A partial object to update the project milestone with.
+  $input: ProjectMilestoneUpdateInput!
+) {
+  projectMilestoneUpdate(id: $id, input: $input) {
+    ...ProjectMilestonePayload
+  }
+}
+# Unarchives a project.
+mutation unarchiveProject(
+  # The identifier of the project to restore. Also the identifier from the URL is accepted.
+  $id: String!
+) {
+  projectUnarchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a project.
+mutation updateProject(
+  # The identifier of the project to update. Also the identifier from the URL is accepted.
+  $id: String!
+  # A partial project object to update the project with.
+  $input: ProjectUpdateInput!
+) {
+  projectUpdate(id: $id, input: $input) {
+    ...ProjectPayload
+  }
+}
+# Creates a new project update.
+mutation createProjectUpdate(
+  # Data for the project update to create.
+  $input: ProjectUpdateCreateInput!
+) {
+  projectUpdateCreate(input: $input) {
+    ...ProjectUpdatePayload
+  }
+}
+# Deletes a project update.
+mutation deleteProjectUpdate(
+  # The identifier of the project update to delete.
+  $id: String!
+) {
+  projectUpdateDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new interaction on a project update.
+mutation createProjectUpdateInteraction(
+  # Data for the project update interaction to create.
+  $input: ProjectUpdateInteractionCreateInput!
+) {
+  projectUpdateInteractionCreate(input: $input) {
+    ...ProjectUpdateInteractionPayload
+  }
+}
+# Mark a project update as read.
+mutation projectUpdateMarkAsRead(
+  # The identifier of the project update.
+  $id: String!
+) {
+  projectUpdateMarkAsRead(id: $id) {
+    ...ProjectUpdateWithInteractionPayload
+  }
+}
+# Updates a project update.
+mutation updateProjectUpdate(
+  # The identifier of the project update to update.
+  $id: String!
+  # A data to update the project update with.
+  $input: ProjectUpdateUpdateInput!
+) {
+  projectUpdateUpdate(id: $id, input: $input) {
+    ...ProjectUpdatePayload
+  }
+}
+# Creates a push subscription.
+mutation createPushSubscription(
+  # The push subscription to create.
+  $input: PushSubscriptionCreateInput!
+) {
+  pushSubscriptionCreate(input: $input) {
+    ...PushSubscriptionPayload
+  }
+}
+# Deletes a push subscription.
+mutation deletePushSubscription(
+  # The identifier of the push subscription to delete.
+  $id: String!
+) {
+  pushSubscriptionDelete(id: $id) {
+    ...PushSubscriptionPayload
+  }
+}
+# Creates a new reaction.
+mutation createReaction(
+  # The reaction object to create.
+  $input: ReactionCreateInput!
+) {
+  reactionCreate(input: $input) {
+    ...ReactionPayload
+  }
+}
+# Deletes a reaction.
+mutation deleteReaction(
+  # The identifier of the reaction to delete.
+  $id: String!
+) {
+  reactionDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Manually update Google Sheets data.
+mutation refreshGoogleSheetsData(
+  # The identifier of the Google Sheets integration to update.
+  $id: String!
+) {
+  refreshGoogleSheetsData(id: $id) {
+    ...IntegrationPayload
+  }
+}
+# Re-send an organization invite.
+mutation resendOrganizationInvite(
+  # The identifier of the organization invite to be re-send.
+  $id: String!
+) {
+  resendOrganizationInvite(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new roadmap.
+mutation createRoadmap(
+  # The properties of the roadmap to create.
+  $input: RoadmapCreateInput!
+) {
+  roadmapCreate(input: $input) {
+    ...RoadmapPayload
+  }
+}
+# Deletes a roadmap.
+mutation deleteRoadmap(
+  # The identifier of the roadmap to delete.
+  $id: String!
+) {
+  roadmapDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new roadmapToProject join.
+mutation createRoadmapToProject(
+  # The properties of the roadmapToProject to create.
+  $input: RoadmapToProjectCreateInput!
+) {
+  roadmapToProjectCreate(input: $input) {
+    ...RoadmapToProjectPayload
+  }
+}
+# Deletes a roadmapToProject.
+mutation deleteRoadmapToProject(
+  # The identifier of the roadmapToProject to delete.
+  $id: String!
+) {
+  roadmapToProjectDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a roadmapToProject.
+mutation updateRoadmapToProject(
+  # The identifier of the roadmapToProject to update.
+  $id: String!
+  # The properties of the roadmapToProject to update.
+  $input: RoadmapToProjectUpdateInput!
+) {
+  roadmapToProjectUpdate(id: $id, input: $input) {
+    ...RoadmapToProjectPayload
+  }
+}
+# Updates a roadmap.
+mutation updateRoadmap(
+  # The identifier of the roadmap to update.
+  $id: String!
+  # The properties of the roadmap to update.
+  $input: RoadmapUpdateInput!
+) {
+  roadmapUpdate(id: $id, input: $input) {
+    ...RoadmapPayload
+  }
+}
+# Authenticates a user account via email and authentication token for SAML.
+mutation samlTokenUserAccountAuth(
+  # The data used for token authentication.
+  $input: TokenUserAccountAuthInput!
+) {
+  samlTokenUserAccountAuth(input: $input) {
+    ...AuthResolverResponse
+  }
+}
+# Creates a new team. The user who creates the team will automatically be added as a member to the
+# newly created team.
+mutation createTeam(
+  # The team id to copy settings from.
+  $copySettingsFromTeamId: String
+  # The team object to create.
+  $input: TeamCreateInput!
+) {
+  teamCreate(copySettingsFromTeamId: $copySettingsFromTeamId, input: $input) {
+    ...TeamPayload
+  }
+}
+# Deletes team's cycles data
+mutation deleteTeamCycles(
+  # The identifier of the team, which cycles will be deleted.
+  $id: String!
+) {
+  teamCyclesDelete(id: $id) {
+    ...TeamPayload
+  }
+}
+# Deletes a team.
+mutation deleteTeam(
+  # The identifier of the team to delete.
+  $id: String!
+) {
+  teamDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Deletes a previously used team key.
+mutation deleteTeamKey(
+  # The identifier of the team key to delete.
+  $id: String!
+) {
+  teamKeyDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new team membership.
+mutation createTeamMembership(
+  # The team membership object to create.
+  $input: TeamMembershipCreateInput!
+) {
+  teamMembershipCreate(input: $input) {
+    ...TeamMembershipPayload
+  }
+}
+# Deletes a team membership.
+mutation deleteTeamMembership(
+  # The identifier of the team membership to delete.
+  $id: String!
+) {
+  teamMembershipDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates a team membership.
+mutation updateTeamMembership(
+  # The identifier of the team membership to update.
+  $id: String!
+  # A partial team membership object to update the team membership with.
+  $input: TeamMembershipUpdateInput!
+) {
+  teamMembershipUpdate(id: $id, input: $input) {
+    ...TeamMembershipPayload
+  }
+}
+# Updates a team.
+mutation updateTeam(
+  # The identifier of the team to update.
+  $id: String!
+  # A partial team object to update the team with.
+  $input: TeamUpdateInput!
+) {
+  teamUpdate(id: $id, input: $input) {
+    ...TeamPayload
+  }
+}
+# Creates a new template.
+mutation createTemplate(
+  # The template object to create.
+  $input: TemplateCreateInput!
+) {
+  templateCreate(input: $input) {
+    ...TemplatePayload
+  }
+}
+# Deletes a template.
+mutation deleteTemplate(
+  # The identifier of the template to delete.
+  $id: String!
+) {
+  templateDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates an existing template.
+mutation updateTemplate(
+  # The identifier of the template.
+  $id: String!
+  # The properties of the template to update.
+  $input: TemplateUpdateInput!
+) {
+  templateUpdate(id: $id, input: $input) {
+    ...TemplatePayload
+  }
+}
+# Makes user a regular user. Can only be called by an admin.
+mutation userDemoteAdmin(
+  # The identifier of the user to make a regular user.
+  $id: String!
+) {
+  userDemoteAdmin(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Makes user a guest. Can only be called by an admin.
+mutation userDemoteMember(
+  # The identifier of the user to make a guest.
+  $id: String!
+) {
+  userDemoteMember(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Connects the Discord user to this Linear account via OAuth2.
+mutation userDiscordConnect(
+  # The Discord OAuth code.
+  $code: String!
+  # The Discord OAuth redirect URI.
+  $redirectUri: String!
+) {
+  userDiscordConnect(code: $code, redirectUri: $redirectUri) {
+    ...UserPayload
+  }
+}
+# Disconnects the external user from this Linear account.
+mutation userExternalUserDisconnect(
+  # The external service to disconnect
+  $service: String!
+) {
+  userExternalUserDisconnect(service: $service) {
+    ...UserPayload
+  }
+}
+# Updates a user's settings flag.
+mutation updateUserFlag(
+  # Settings flag to increment.
+  $flag: UserFlagType!
+  # Flag operation to perform
+  $operation: UserFlagUpdateOperation!
+) {
+  userFlagUpdate(flag: $flag, operation: $operation) {
+    ...UserSettingsFlagPayload
+  }
+}
+# Connects the GitHub user to this Linear account via OAuth2.
+mutation userGitHubConnect(
+  # The GitHub OAuth code.
+  $code: String!
+) {
+  userGitHubConnect(code: $code) {
+    ...UserPayload
+  }
+}
+# Connects the Google Calendar to the user to this Linear account via OAuth2.
+mutation userGoogleCalendarConnect(
+  # [Internal] The Google OAuth code.
+  $code: String!
+) {
+  userGoogleCalendarConnect(code: $code) {
+    ...UserPayload
+  }
+}
+# Makes user an admin. Can only be called by an admin.
+mutation userPromoteAdmin(
+  # The identifier of the user to make an admin.
+  $id: String!
+) {
+  userPromoteAdmin(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Makes user a regular user. Can only be called by an admin.
+mutation userPromoteMember(
+  # The identifier of the user to make a regular user.
+  $id: String!
+) {
+  userPromoteMember(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# [Deprecated] Updates a user's settings flag.
+mutation userSettingsFlagIncrement(
+  # Flag to increment.
+  $flag: String!
+) {
+  userSettingsFlagIncrement(flag: $flag) {
+    ...UserSettingsFlagPayload
+  }
+}
+# Resets user's setting flags.
+mutation userSettingsFlagsReset(
+  # The flags to reset. If not provided all flags will be reset.
+  $flags: [UserFlagType!]
+) {
+  userSettingsFlagsReset(flags: $flags) {
+    ...UserSettingsFlagsResetPayload
+  }
+}
+# Updates the user's settings.
+mutation updateUserSettings(
+  # The identifier of the userSettings to update.
+  $id: String!
+  # A partial notification object to update the settings with.
+  $input: UserSettingsUpdateInput!
+) {
+  userSettingsUpdate(id: $id, input: $input) {
+    ...UserSettingsPayload
+  }
+}
+# Suspends a user. Can only be called by an admin.
+mutation suspendUser(
+  # The identifier of the user to suspend.
+  $id: String!
+) {
+  userSuspend(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Un-suspends a user. Can only be called by an admin.
+mutation unsuspendUser(
+  # The identifier of the user to unsuspend.
+  $id: String!
+) {
+  userUnsuspend(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Updates a user. Only available to organization admins and the user themselves.
+mutation updateUser(
+  # The identifier of the user to update. Use `me` to reference currently authenticated user.
+  $id: String!
+  # A partial user object to update the user with.
+  $input: UpdateUserInput!
+) {
+  userUpdate(id: $id, input: $input) {
+    ...UserPayload
+  }
+}
+# Creates a new ViewPreferences object.
+mutation createViewPreferences(
+  # The ViewPreferences object to create.
+  $input: ViewPreferencesCreateInput!
+) {
+  viewPreferencesCreate(input: $input) {
+    ...ViewPreferencesPayload
+  }
+}
+# Deletes a ViewPreferences.
+mutation deleteViewPreferences(
+  # The identifier of the ViewPreferences to delete.
+  $id: String!
+) {
+  viewPreferencesDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates an existing ViewPreferences object.
+mutation updateViewPreferences(
+  # The identifier of the ViewPreferences object.
+  $id: String!
+  # The properties of the view preferences.
+  $input: ViewPreferencesUpdateInput!
+) {
+  viewPreferencesUpdate(id: $id, input: $input) {
+    ...ViewPreferencesPayload
+  }
+}
+# Creates a new webhook.
+mutation createWebhook(
+  # The webhook object to create.
+  $input: WebhookCreateInput!
+) {
+  webhookCreate(input: $input) {
+    ...WebhookPayload
+  }
+}
+# Deletes a Webhook.
+mutation deleteWebhook(
+  # The identifier of the Webhook to delete.
+  $id: String!
+) {
+  webhookDelete(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Updates an existing Webhook.
+mutation updateWebhook(
+  # The identifier of the Webhook.
+  $id: String!
+  # The properties of the Webhook.
+  $input: WebhookUpdateInput!
+) {
+  webhookUpdate(id: $id, input: $input) {
+    ...WebhookPayload
+  }
+}
+# Archives a state. Only states with issues that have all been archived can be archived.
+mutation archiveWorkflowState(
+  # The identifier of the state to archive.
+  $id: String!
+) {
+  workflowStateArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
+# Creates a new state, adding it to the workflow of a team.
+mutation createWorkflowState(
+  # The state to create.
+  $input: WorkflowStateCreateInput!
+) {
+  workflowStateCreate(input: $input) {
+    ...WorkflowStatePayload
+  }
+}
+# Updates a state.
+mutation updateWorkflowState(
+  # The identifier of the state to update.
+  $id: String!
+  # A partial state object to update.
+  $input: WorkflowStateUpdateInput!
+) {
+  workflowStateUpdate(id: $id, input: $input) {
+    ...WorkflowStatePayload
+  }
+}
+# One specific project milestone.
+query ProjectMilestone($id: String!) {
+  ProjectMilestone(id: $id) {
+    ...ProjectMilestone
+  }
+}
+# All milestones for the project.
+query ProjectMilestones(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  ProjectMilestones(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...ProjectMilestoneConnection
+  }
+}
 # All teams you the user can administrate. Administrable teams are teams whose settings the user can
 # change, but to whose issues the user doesn't necessarily have access to.
 query administrableTeams(
@@ -4803,6 +6601,38 @@ query issueRelations(
     ...IssueRelationConnection
   }
 }
+# [ALPHA] Search issues. This query is experimental and is subject to change without notice.
+query issueSearch(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # [Deprecated] Search string to look for.
+  $query: String!
+) {
+  issueSearch(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    query: $query
+  ) {
+    ...IssueConnection
+  }
+}
 # Find issue based on the VCS branch name.
 query issueVcsBranchSearch(
   # The VCS branch name to search for.
@@ -5097,70 +6927,6 @@ query issues(
     orderBy: $orderBy
   ) {
     ...IssueConnection
-  }
-}
-# One specific milestone.
-query milestone($id: String!) {
-  milestone(id: $id) {
-    ...Milestone
-  }
-}
-# Projects associated with the milestone.
-query milestone_projects(
-  $id: String!
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # Filter returned projects.
-  $filter: ProjectFilter
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  milestone(id: $id) {
-    projects(
-      after: $after
-      before: $before
-      filter: $filter
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...ProjectConnection
-    }
-  }
-}
-# All milestones.
-query milestones(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  milestones(
-    after: $after
-    before: $before
-    first: $first
-    includeArchived: $includeArchived
-    last: $last
-    orderBy: $orderBy
-  ) {
-    ...MilestoneConnection
   }
 }
 # One specific notification.
@@ -5469,14 +7235,6 @@ query project_documents(
     }
   }
 }
-# The initiative that this project is associated with.
-query project_initiative($id: String!) {
-  project(id: $id) {
-    initiative {
-      ...Initiative
-    }
-  }
-}
 # Issues associated with the project.
 query project_issues(
   $id: String!
@@ -5570,6 +7328,35 @@ query project_members(
       orderBy: $orderBy
     ) {
       ...UserConnection
+    }
+  }
+}
+# [ALPHA] Milestones associated with the project.
+query project_projectMilestones(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  project(id: $id) {
+    projectMilestones(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ProjectMilestoneConnection
     }
   }
 }
@@ -6652,1762 +8439,5 @@ query workflowStates(
     orderBy: $orderBy
   ) {
     ...WorkflowStateConnection
-  }
-}
-# Creates an integration api key for Airbyte to connect with Linear
-mutation airbyteIntegrationConnect(
-  # Airbyte integration settings.
-  $input: AirbyteConfigurationInput!
-) {
-  airbyteIntegrationConnect(input: $input) {
-    ...IntegrationPayload
-  }
-}
-# Creates a new API key.
-mutation createApiKey(
-  # The api key object to create.
-  $input: ApiKeyCreateInput!
-) {
-  apiKeyCreate(input: $input) {
-    ...ApiKeyPayload
-  }
-}
-# Deletes an API key.
-mutation deleteApiKey(
-  # The identifier of the API key to delete.
-  $id: String!
-) {
-  apiKeyDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# [DEPRECATED] Archives an issue attachment.
-mutation archiveAttachment(
-  # The identifier of the attachment to archive.
-  $id: String!
-) {
-  attachmentArchive(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
-mutation createAttachment(
-  # The attachment object to create.
-  $input: AttachmentCreateInput!
-) {
-  attachmentCreate(input: $input) {
-    ...AttachmentPayload
-  }
-}
-# Deletes an issue attachment.
-mutation deleteAttachment(
-  # The identifier of the attachment to delete.
-  $id: String!
-) {
-  attachmentDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Link an existing Discord message to an issue.
-mutation attachmentLinkDiscord(
-  # The Discord channel ID for the message to link.
-  $channelId: String!
-  # The issue for which to link the Discord message.
-  $issueId: String!
-  # The Discord message ID for the message to link.
-  $messageId: String!
-  # The Discord message URL for the message to link.
-  $url: String!
-) {
-  attachmentLinkDiscord(channelId: $channelId, issueId: $issueId, messageId: $messageId, url: $url) {
-    ...AttachmentPayload
-  }
-}
-# Link an existing Front conversation to an issue.
-mutation attachmentLinkFront(
-  # The Front conversation ID to link.
-  $conversationId: String!
-  # The issue for which to link the Front conversation.
-  $issueId: String!
-) {
-  attachmentLinkFront(conversationId: $conversationId, issueId: $issueId) {
-    ...FrontAttachmentPayload
-  }
-}
-# Link an existing Intercom conversation to an issue.
-mutation attachmentLinkIntercom(
-  # The Intercom conversation ID to link.
-  $conversationId: String!
-  # The issue for which to link the Intercom conversation.
-  $issueId: String!
-) {
-  attachmentLinkIntercom(conversationId: $conversationId, issueId: $issueId) {
-    ...AttachmentPayload
-  }
-}
-# Link an existing Jira issue to an issue.
-mutation attachmentLinkJiraIssue(
-  # The issue for which to link the Jira issue.
-  $issueId: String!
-  # The Jira issue key or ID to link.
-  $jiraIssueId: String!
-) {
-  attachmentLinkJiraIssue(issueId: $issueId, jiraIssueId: $jiraIssueId) {
-    ...AttachmentPayload
-  }
-}
-# Link any url to an issue.
-mutation attachmentLinkURL(
-  # The issue for which to link the url.
-  $issueId: String!
-  # The title to use for the attachment.
-  $title: String
-  # The url to link.
-  $url: String!
-) {
-  attachmentLinkURL(issueId: $issueId, title: $title, url: $url) {
-    ...AttachmentPayload
-  }
-}
-# Link an existing Zendesk ticket to an issue.
-mutation attachmentLinkZendesk(
-  # The issue for which to link the Zendesk ticket.
-  $issueId: String!
-  # The Zendesk ticket ID to link.
-  $ticketId: String!
-) {
-  attachmentLinkZendesk(issueId: $issueId, ticketId: $ticketId) {
-    ...AttachmentPayload
-  }
-}
-# Updates an existing issue attachment.
-mutation updateAttachment(
-  # The identifier of the attachment to update.
-  $id: String!
-  # A partial attachment object to update the attachment with.
-  $input: AttachmentUpdateInput!
-) {
-  attachmentUpdate(id: $id, input: $input) {
-    ...AttachmentPayload
-  }
-}
-# Creates a new comment.
-mutation createComment(
-  # The comment object to create.
-  $input: CommentCreateInput!
-) {
-  commentCreate(input: $input) {
-    ...CommentPayload
-  }
-}
-# Deletes a comment.
-mutation deleteComment(
-  # The identifier of the comment to delete.
-  $id: String!
-) {
-  commentDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates a comment.
-mutation updateComment(
-  # The identifier of the comment to update.
-  $id: String!
-  # A partial comment object to update the comment with.
-  $input: CommentUpdateInput!
-) {
-  commentUpdate(id: $id, input: $input) {
-    ...CommentPayload
-  }
-}
-# Saves user message.
-mutation createContact(
-  # The contact entry to create.
-  $input: ContactCreateInput!
-) {
-  contactCreate(input: $input) {
-    ...ContactPayload
-  }
-}
-# Create CSV export report for the organization.
-mutation createCsvExportReport($includePrivateTeamIds: [String!]) {
-  createCsvExportReport(includePrivateTeamIds: $includePrivateTeamIds) {
-    ...CreateCsvExportReportPayload
-  }
-}
-# Creates an organization from onboarding.
-mutation createOrganizationFromOnboarding(
-  # Organization details for the new organization.
-  $input: CreateOrganizationInput!
-  # Onboarding survey.
-  $survey: OnboardingCustomerSurvey
-) {
-  createOrganizationFromOnboarding(input: $input, survey: $survey) {
-    ...CreateOrJoinOrganizationResponse
-  }
-}
-# Creates a new custom view.
-mutation createCustomView(
-  # The properties of the custom view to create.
-  $input: CustomViewCreateInput!
-) {
-  customViewCreate(input: $input) {
-    ...CustomViewPayload
-  }
-}
-# Deletes a custom view.
-mutation deleteCustomView(
-  # The identifier of the custom view to delete.
-  $id: String!
-) {
-  customViewDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates a custom view.
-mutation updateCustomView(
-  # The identifier of the custom view to update.
-  $id: String!
-  # The properties of the custom view to update.
-  $input: CustomViewUpdateInput!
-) {
-  customViewUpdate(id: $id, input: $input) {
-    ...CustomViewPayload
-  }
-}
-# Archives a cycle.
-mutation archiveCycle(
-  # The identifier of the cycle to archive.
-  $id: String!
-) {
-  cycleArchive(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Creates a new cycle.
-mutation createCycle(
-  # The cycle object to create.
-  $input: CycleCreateInput!
-) {
-  cycleCreate(input: $input) {
-    ...CyclePayload
-  }
-}
-# Updates a cycle.
-mutation updateCycle(
-  # The identifier of the cycle to update.
-  $id: String!
-  # A partial cycle object to update the cycle with.
-  $input: CycleUpdateInput!
-) {
-  cycleUpdate(id: $id, input: $input) {
-    ...CyclePayload
-  }
-}
-# Creates a new document.
-mutation createDocument(
-  # The document to create.
-  $input: DocumentCreateInput!
-) {
-  documentCreate(input: $input) {
-    ...DocumentPayload
-  }
-}
-# Deletes a document.
-mutation deleteDocument(
-  # The identifier of the document to delete.
-  $id: String!
-) {
-  documentDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates a document.
-mutation updateDocument(
-  # The identifier of the document to update. Also the identifier from the URL is accepted.
-  $id: String!
-  # A partial document object to update the document with.
-  $input: DocumentUpdateInput!
-) {
-  documentUpdate(id: $id, input: $input) {
-    ...DocumentPayload
-  }
-}
-# Authenticates a user account via email and authentication token.
-mutation emailTokenUserAccountAuth(
-  # The data used for token authentication.
-  $input: TokenUserAccountAuthInput!
-) {
-  emailTokenUserAccountAuth(input: $input) {
-    ...AuthResolverResponse
-  }
-}
-# Unsubscribes the user from one type of emails.
-mutation emailUnsubscribe(
-  # Unsubscription details.
-  $input: EmailUnsubscribeInput!
-) {
-  emailUnsubscribe(input: $input) {
-    ...EmailUnsubscribePayload
-  }
-}
-# Finds or creates a new user account by email and sends an email with token.
-mutation emailUserAccountAuthChallenge(
-  # The data used for email authentication.
-  $input: EmailUserAccountAuthChallengeInput!
-) {
-  emailUserAccountAuthChallenge(input: $input) {
-    ...EmailUserAccountAuthChallengeResponse
-  }
-}
-# Creates a custom emoji.
-mutation createEmoji(
-  # The emoji object to create.
-  $input: EmojiCreateInput!
-) {
-  emojiCreate(input: $input) {
-    ...EmojiPayload
-  }
-}
-# Deletes an emoji.
-mutation deleteEmoji(
-  # The identifier of the emoji to delete.
-  $id: String!
-) {
-  emojiDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# [Deprecated] Creates a new event.
-mutation createEvent(
-  # The event to create.
-  $input: EventCreateInput!
-) {
-  eventCreate(input: $input) {
-    ...EventPayload
-  }
-}
-# Creates a new favorite (project, cycle etc).
-mutation createFavorite(
-  # The favorite object to create.
-  $input: FavoriteCreateInput!
-) {
-  favoriteCreate(input: $input) {
-    ...FavoritePayload
-  }
-}
-# Deletes a favorite reference.
-mutation deleteFavorite(
-  # The identifier of the favorite reference to delete.
-  $id: String!
-) {
-  favoriteDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates a favorite.
-mutation updateFavorite(
-  # The identifier of the favorite to update.
-  $id: String!
-  # A partial favorite object to update the favorite with.
-  $input: FavoriteUpdateInput!
-) {
-  favoriteUpdate(id: $id, input: $input) {
-    ...FavoritePayload
-  }
-}
-# XHR request payload to upload an images, video and other attachments directly to Linear's cloud
-# storage.
-mutation fileUpload(
-  # MIME type of the uploaded file.
-  $contentType: String!
-  # Filename of the uploaded file.
-  $filename: String!
-  # Should the file be made publicly accessible (default: false).
-  $makePublic: Boolean
-  # Optional metadata.
-  $metaData: JSON
-  # File size of the uploaded file.
-  $size: Int!
-) {
-  fileUpload(
-    contentType: $contentType
-    filename: $filename
-    makePublic: $makePublic
-    metaData: $metaData
-    size: $size
-  ) {
-    ...UploadPayload
-  }
-}
-# Authenticate user account through Google OAuth. This is the 2nd step of OAuth flow.
-mutation googleUserAccountAuth(
-  # The data used for Google authentication.
-  $input: GoogleUserAccountAuthInput!
-) {
-  googleUserAccountAuth(input: $input) {
-    ...AuthResolverResponse
-  }
-}
-# Upload an image from an URL to Linear.
-mutation imageUploadFromUrl(
-  # URL of the file to be uploaded to Linear.
-  $url: String!
-) {
-  imageUploadFromUrl(url: $url) {
-    ...ImageUploadFromUrlPayload
-  }
-}
-# Deletes an integration.
-mutation deleteIntegration(
-  # The identifier of the integration to delete.
-  $id: String!
-) {
-  integrationDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Integrates the organization with Discord.
-mutation integrationDiscord(
-  # The Discord OAuth code.
-  $code: String!
-  # The Discord OAuth redirect URI.
-  $redirectUri: String!
-) {
-  integrationDiscord(code: $code, redirectUri: $redirectUri) {
-    ...IntegrationPayload
-  }
-}
-# Integrates the organization with Figma.
-mutation integrationFigma(
-  # The Figma OAuth code.
-  $code: String!
-  # The Figma OAuth redirect URI.
-  $redirectUri: String!
-) {
-  integrationFigma(code: $code, redirectUri: $redirectUri) {
-    ...IntegrationPayload
-  }
-}
-# Integrates the organization with Front.
-mutation integrationFront(
-  # The Front OAuth code.
-  $code: String!
-  # The Front OAuth redirect URI.
-  $redirectUri: String!
-) {
-  integrationFront(code: $code, redirectUri: $redirectUri) {
-    ...IntegrationPayload
-  }
-}
-# Generates a webhook for the GitHub commit integration.
-mutation createIntegrationGithubCommit {
-  integrationGithubCommitCreate {
-    ...GitHubCommitIntegrationPayload
-  }
-}
-# Connects the organization with the GitHub App.
-mutation integrationGithubConnect(
-  # The GitHub data to connect with.
-  $installationId: String!
-) {
-  integrationGithubConnect(installationId: $installationId) {
-    ...IntegrationPayload
-  }
-}
-# Connects the organization with a GitLab Access Token.
-mutation integrationGitlabConnect(
-  # The GitLab Access Token to connect with.
-  $accessToken: String!
-  # The URL of the GitLab installation
-  $gitlabUrl: String!
-) {
-  integrationGitlabConnect(accessToken: $accessToken, gitlabUrl: $gitlabUrl) {
-    ...IntegrationPayload
-  }
-}
-# Integrates the organization with Google Sheets.
-mutation integrationGoogleSheets(
-  # The Google OAuth code.
-  $code: String!
-) {
-  integrationGoogleSheets(code: $code) {
-    ...IntegrationPayload
-  }
-}
-# Integrates the organization with Intercom.
-mutation integrationIntercom(
-  # The Intercom OAuth code.
-  $code: String!
-  # The Intercom domain URL to use for the integration. Defaults to app.intercom.com if not provided.
-  $domainUrl: String
-  # The Intercom OAuth redirect URI.
-  $redirectUri: String!
-) {
-  integrationIntercom(code: $code, domainUrl: $domainUrl, redirectUri: $redirectUri) {
-    ...IntegrationPayload
-  }
-}
-# Disconnects the organization from Intercom.
-mutation deleteIntegrationIntercom {
-  integrationIntercomDelete {
-    ...IntegrationPayload
-  }
-}
-# [DEPRECATED] Updates settings on the Intercom integration.
-mutation updateIntegrationIntercomSettings(
-  # A partial Intercom integration settings object to update the integration settings with.
-  $input: IntercomSettingsInput!
-) {
-  integrationIntercomSettingsUpdate(input: $input) {
-    ...IntegrationPayload
-  }
-}
-# Enables Loom integration for the organization.
-mutation integrationLoom {
-  integrationLoom {
-    ...IntegrationPayload
-  }
-}
-# Requests a currently unavailable integration.
-mutation integrationRequest(
-  # Integration request details.
-  $input: IntegrationRequestInput!
-) {
-  integrationRequest(input: $input) {
-    ...IntegrationRequestPayload
-  }
-}
-# Archives an integration resource.
-mutation archiveIntegrationResource(
-  # The identifier of the integration resource to archive.
-  $id: String!
-) {
-  integrationResourceArchive(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Integrates the organization with Sentry.
-mutation integrationSentryConnect(
-  # The Sentry grant code that's exchanged for OAuth tokens.
-  $code: String!
-  # The Sentry installationId to connect with.
-  $installationId: String!
-  # The slug of the Sentry organization being connected.
-  $organizationSlug: String!
-) {
-  integrationSentryConnect(code: $code, installationId: $installationId, organizationSlug: $organizationSlug) {
-    ...IntegrationPayload
-  }
-}
-# Integrates the organization with Slack.
-mutation integrationSlack(
-  # The Slack OAuth code.
-  $code: String!
-  # The Slack OAuth redirect URI.
-  $redirectUri: String!
-  # [DEPRECATED] Whether or not v2 of Slack OAuth should be used. No longer used.
-  $shouldUseV2Auth: Boolean
-) {
-  integrationSlack(code: $code, redirectUri: $redirectUri, shouldUseV2Auth: $shouldUseV2Auth) {
-    ...IntegrationPayload
-  }
-}
-# Imports custom emojis from your Slack workspace.
-mutation integrationSlackImportEmojis(
-  # The Slack OAuth code.
-  $code: String!
-  # The Slack OAuth redirect URI.
-  $redirectUri: String!
-) {
-  integrationSlackImportEmojis(code: $code, redirectUri: $redirectUri) {
-    ...IntegrationPayload
-  }
-}
-# Slack integration for organization level project update notifications.
-mutation integrationSlackOrgProjectUpdatesPost(
-  # The Slack OAuth code.
-  $code: String!
-  # The Slack OAuth redirect URI.
-  $redirectUri: String!
-) {
-  integrationSlackOrgProjectUpdatesPost(code: $code, redirectUri: $redirectUri) {
-    ...IntegrationPayload
-  }
-}
-# Integrates your personal notifications with Slack.
-mutation integrationSlackPersonal(
-  # The Slack OAuth code.
-  $code: String!
-  # The Slack OAuth redirect URI.
-  $redirectUri: String!
-) {
-  integrationSlackPersonal(code: $code, redirectUri: $redirectUri) {
-    ...IntegrationPayload
-  }
-}
-# Slack webhook integration.
-mutation integrationSlackPost(
-  # The Slack OAuth code.
-  $code: String!
-  # The Slack OAuth redirect URI.
-  $redirectUri: String!
-  # [DEPRECATED] Whether or not v2 of Slack OAuth should be used. No longer used.
-  $shouldUseV2Auth: Boolean
-  # Integration's associated team.
-  $teamId: String!
-) {
-  integrationSlackPost(code: $code, redirectUri: $redirectUri, shouldUseV2Auth: $shouldUseV2Auth, teamId: $teamId) {
-    ...IntegrationPayload
-  }
-}
-# Slack integration for project notifications.
-mutation integrationSlackProjectPost(
-  # The Slack OAuth code.
-  $code: String!
-  # Integration's associated project.
-  $projectId: String!
-  # The Slack OAuth redirect URI.
-  $redirectUri: String!
-  # The service to enable once connected, either 'notifications' or 'updates'.
-  $service: String!
-) {
-  integrationSlackProjectPost(code: $code, projectId: $projectId, redirectUri: $redirectUri, service: $service) {
-    ...IntegrationPayload
-  }
-}
-# Creates a new integrationTemplate join.
-mutation createIntegrationTemplate(
-  # The properties of the integrationTemplate to create.
-  $input: IntegrationTemplateCreateInput!
-) {
-  integrationTemplateCreate(input: $input) {
-    ...IntegrationTemplatePayload
-  }
-}
-# Deletes a integrationTemplate.
-mutation deleteIntegrationTemplate(
-  # The identifier of the integrationTemplate to delete.
-  $id: String!
-) {
-  integrationTemplateDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Integrates the organization with Zendesk.
-mutation integrationZendesk(
-  # The Zendesk OAuth code.
-  $code: String!
-  # The Zendesk OAuth redirect URI.
-  $redirectUri: String!
-  # The Zendesk OAuth scopes.
-  $scope: String!
-  # The Zendesk installation subdomain.
-  $subdomain: String!
-) {
-  integrationZendesk(code: $code, redirectUri: $redirectUri, scope: $scope, subdomain: $subdomain) {
-    ...IntegrationPayload
-  }
-}
-# Creates new settings for one or more integrations.
-mutation createIntegrationsSettings(
-  # The settings to create.
-  $input: IntegrationsSettingsCreateInput!
-) {
-  integrationsSettingsCreate(input: $input) {
-    ...IntegrationsSettingsPayload
-  }
-}
-# Updates settings related to integrations for a project or a team.
-mutation updateIntegrationsSettings(
-  # The identifier of the settings to update.
-  $id: String!
-  # A settings object to update the settings with.
-  $input: IntegrationsSettingsUpdateInput!
-) {
-  integrationsSettingsUpdate(id: $id, input: $input) {
-    ...IntegrationsSettingsPayload
-  }
-}
-# Archives an issue.
-mutation archiveIssue(
-  # The identifier of the issue to archive.
-  $id: String!
-  # Whether to trash the issue
-  $trash: Boolean
-) {
-  issueArchive(id: $id, trash: $trash) {
-    ...ArchivePayload
-  }
-}
-# Updates multiple issues at once.
-mutation updateIssueBatch(
-  # The id's of the issues to update. Can't be more than 50 at a time.
-  $ids: [UUID!]!
-  # A partial issue object to update the issues with.
-  $input: IssueUpdateInput!
-) {
-  issueBatchUpdate(ids: $ids, input: $input) {
-    ...IssueBatchPayload
-  }
-}
-# Creates a new issue.
-mutation createIssue(
-  # The issue object to create.
-  $input: IssueCreateInput!
-) {
-  issueCreate(input: $input) {
-    ...IssuePayload
-  }
-}
-# Deletes (trashes) an issue.
-mutation deleteIssue(
-  # The identifier of the issue to delete.
-  $id: String!
-) {
-  issueDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Kicks off an Asana import job.
-mutation issueImportCreateAsana(
-  # Asana team name to choose which issues we should import.
-  $asanaTeamName: String!
-  # Asana token to fetch information from the Asana API.
-  $asanaToken: String!
-  # ID of issue import. If not provided it will be generated.
-  $id: String
-  # Whether or not we should collect the data for closed issues.
-  $includeClosedIssues: Boolean
-  # Whether to instantly process the import with the default configuration mapping.
-  $instantProcess: Boolean
-  # ID of the organization into which to import data.
-  $organizationId: String
-  # ID of the team into which to import data.
-  $teamId: String
-  # Name of new team. When teamId is not set.
-  $teamName: String
-) {
-  issueImportCreateAsana(
-    asanaTeamName: $asanaTeamName
-    asanaToken: $asanaToken
-    id: $id
-    includeClosedIssues: $includeClosedIssues
-    instantProcess: $instantProcess
-    organizationId: $organizationId
-    teamId: $teamId
-    teamName: $teamName
-  ) {
-    ...IssueImportPayload
-  }
-}
-# Kicks off a Shortcut (formerly Clubhouse) import job.
-mutation issueImportCreateClubhouse(
-  # Shortcut (formerly Clubhouse) team name to choose which issues we should import.
-  $clubhouseTeamName: String!
-  # Shortcut (formerly Clubhouse) token to fetch information from the Clubhouse API.
-  $clubhouseToken: String!
-  # ID of issue import. If not provided it will be generated.
-  $id: String
-  # Whether or not we should collect the data for closed issues.
-  $includeClosedIssues: Boolean
-  # Whether to instantly process the import with the default configuration mapping.
-  $instantProcess: Boolean
-  # ID of the organization into which to import data.
-  $organizationId: String
-  # ID of the team into which to import data.
-  $teamId: String
-  # Name of new team. When teamId is not set.
-  $teamName: String
-) {
-  issueImportCreateClubhouse(
-    clubhouseTeamName: $clubhouseTeamName
-    clubhouseToken: $clubhouseToken
-    id: $id
-    includeClosedIssues: $includeClosedIssues
-    instantProcess: $instantProcess
-    organizationId: $organizationId
-    teamId: $teamId
-    teamName: $teamName
-  ) {
-    ...IssueImportPayload
-  }
-}
-# Kicks off a GitHub import job.
-mutation issueImportCreateGithub(
-  # GitHub repository name from which we will import data.
-  $githubRepoName: String!
-  # GitHub owner (user or org) for the repository from which we will import data.
-  $githubRepoOwner: String!
-  # Whether or not we should import GitHub organization level projects.
-  $githubShouldImportOrgProjects: Boolean
-  # GitHub token to fetch information from the GitHub API.
-  $githubToken: String!
-  # ID of issue import. If not provided it will be generated.
-  $id: String
-  # Whether or not we should collect the data for closed issues.
-  $includeClosedIssues: Boolean
-  # Whether to instantly process the import with the default configuration mapping.
-  $instantProcess: Boolean
-  # ID of the organization into which to import data.
-  $organizationId: String
-  # ID of the team into which to import data.
-  $teamId: String
-  # Name of new team. When teamId is not set.
-  $teamName: String
-) {
-  issueImportCreateGithub(
-    githubRepoName: $githubRepoName
-    githubRepoOwner: $githubRepoOwner
-    githubShouldImportOrgProjects: $githubShouldImportOrgProjects
-    githubToken: $githubToken
-    id: $id
-    includeClosedIssues: $includeClosedIssues
-    instantProcess: $instantProcess
-    organizationId: $organizationId
-    teamId: $teamId
-    teamName: $teamName
-  ) {
-    ...IssueImportPayload
-  }
-}
-# Kicks off a Jira import job.
-mutation issueImportCreateJira(
-  # ID of issue import. If not provided it will be generated.
-  $id: String
-  # Whether or not we should collect the data for closed issues.
-  $includeClosedIssues: Boolean
-  # Whether to instantly process the import with the default configuration mapping.
-  $instantProcess: Boolean
-  # Jira user account email.
-  $jiraEmail: String!
-  # Jira installation or cloud hostname.
-  $jiraHostname: String!
-  # Jira project key from which we will import data.
-  $jiraProject: String!
-  # Jira personal access token to access Jira REST API.
-  $jiraToken: String!
-  # ID of the organization into which to import data.
-  $organizationId: String
-  # ID of the team into which to import data. Empty to create new team.
-  $teamId: String
-  # Name of new team. When teamId is not set.
-  $teamName: String
-) {
-  issueImportCreateJira(
-    id: $id
-    includeClosedIssues: $includeClosedIssues
-    instantProcess: $instantProcess
-    jiraEmail: $jiraEmail
-    jiraHostname: $jiraHostname
-    jiraProject: $jiraProject
-    jiraToken: $jiraToken
-    organizationId: $organizationId
-    teamId: $teamId
-    teamName: $teamName
-  ) {
-    ...IssueImportPayload
-  }
-}
-# Deletes an import job.
-mutation deleteIssueImport(
-  # ID of the issue import to delete.
-  $issueImportId: String!
-) {
-  issueImportDelete(issueImportId: $issueImportId) {
-    ...IssueImportDeletePayload
-  }
-}
-# Kicks off import processing.
-mutation issueImportProcess(
-  # ID of the issue import which we're going to process.
-  $issueImportId: String!
-  # The mapping configuration to use for processing the import.
-  $mapping: JSONObject!
-) {
-  issueImportProcess(issueImportId: $issueImportId, mapping: $mapping) {
-    ...IssueImportPayload
-  }
-}
-# Updates the mapping for the issue import.
-mutation updateIssueImport(
-  # The identifier of the issue import.
-  $id: String!
-  # The properties of the issue import to update.
-  $input: IssueImportUpdateInput!
-) {
-  issueImportUpdate(id: $id, input: $input) {
-    ...IssueImportPayload
-  }
-}
-# Deletes an issue label.
-mutation archiveIssueLabel(
-  # The identifier of the label to archive.
-  $id: String!
-) {
-  issueLabelArchive(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Creates a new label.
-mutation createIssueLabel(
-  # The issue label to create.
-  $input: IssueLabelCreateInput!
-  # Whether to replace all team-specific labels with the same name with this newly created workspace label.
-  $replaceTeamLabels: Boolean
-) {
-  issueLabelCreate(input: $input, replaceTeamLabels: $replaceTeamLabels) {
-    ...IssueLabelPayload
-  }
-}
-# Deletes an issue label.
-mutation deleteIssueLabel(
-  # The identifier of the label to delete.
-  $id: String!
-) {
-  issueLabelDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates an label.
-mutation updateIssueLabel(
-  # The identifier of the label to update.
-  $id: String!
-  # A partial label object to update.
-  $input: IssueLabelUpdateInput!
-) {
-  issueLabelUpdate(id: $id, input: $input) {
-    ...IssueLabelPayload
-  }
-}
-# Creates a new issue relation.
-mutation createIssueRelation(
-  # The issue relation to create.
-  $input: IssueRelationCreateInput!
-) {
-  issueRelationCreate(input: $input) {
-    ...IssueRelationPayload
-  }
-}
-# Deletes an issue relation.
-mutation deleteIssueRelation(
-  # The identifier of the issue relation to delete.
-  $id: String!
-) {
-  issueRelationDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates an issue relation.
-mutation updateIssueRelation(
-  # The identifier of the issue relation to update.
-  $id: String!
-  # The properties of the issue relation to update.
-  $input: IssueRelationUpdateInput!
-) {
-  issueRelationUpdate(id: $id, input: $input) {
-    ...IssueRelationPayload
-  }
-}
-# Adds an issue reminder. Will cause a notification to be sent when the issue reminder time is
-# reached.
-mutation issueReminder(
-  # The identifier of the issue to add a reminder for.
-  $id: String!
-  # The time when a reminder notification will be sent.
-  $reminderAt: DateTime!
-) {
-  issueReminder(id: $id, reminderAt: $reminderAt) {
-    ...IssuePayload
-  }
-}
-# Unarchives an issue.
-mutation unarchiveIssue(
-  # The identifier of the issue to archive.
-  $id: String!
-) {
-  issueUnarchive(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates an issue.
-mutation updateIssue(
-  # The identifier of the issue to update.
-  $id: String!
-  # A partial issue object to update the issue with.
-  $input: IssueUpdateInput!
-) {
-  issueUpdate(id: $id, input: $input) {
-    ...IssuePayload
-  }
-}
-# Join an organization from onboarding.
-mutation joinOrganizationFromOnboarding(
-  # Organization details for the organization to join.
-  $input: JoinOrganizationInput!
-) {
-  joinOrganizationFromOnboarding(input: $input) {
-    ...CreateOrJoinOrganizationResponse
-  }
-}
-# Leave an organization.
-mutation leaveOrganization(
-  # ID of the organization to leave.
-  $organizationId: String!
-) {
-  leaveOrganization(organizationId: $organizationId) {
-    ...CreateOrJoinOrganizationResponse
-  }
-}
-# Logout of all clients.
-mutation logout {
-  logout {
-    ...LogoutResponse
-  }
-}
-# Migrates milestones to roadmaps
-mutation migrateMilestonesToRoadmaps(
-  # Ids for milestones to migrate and milestones to delete
-  $input: MilestonesMigrateInput!
-) {
-  migrateMilestonesToRoadmaps(input: $input) {
-    ...MilestoneMigrationPayload
-  }
-}
-# Creates a new milestone.
-mutation createMilestone(
-  # The issue object to create.
-  $input: MilestoneCreateInput!
-) {
-  milestoneCreate(input: $input) {
-    ...MilestonePayload
-  }
-}
-# Deletes a milestone.
-mutation deleteMilestone(
-  # The identifier of the milestone to delete.
-  $id: String!
-) {
-  milestoneDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates a milestone.
-mutation updateMilestone(
-  # The identifier of the milestone to update.
-  $id: String!
-  # A partial milestone object to update the milestone with.
-  $input: MilestoneUpdateInput!
-) {
-  milestoneUpdate(id: $id, input: $input) {
-    ...MilestonePayload
-  }
-}
-# Archives a notification.
-mutation archiveNotification(
-  # The id of the notification to archive.
-  $id: String!
-) {
-  notificationArchive(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Creates a new notification subscription for a team or a project.
-mutation createNotificationSubscription(
-  # The subscription object to create.
-  $input: NotificationSubscriptionCreateInput!
-) {
-  notificationSubscriptionCreate(input: $input) {
-    ...NotificationSubscriptionPayload
-  }
-}
-# Deletes a notification subscription reference.
-mutation deleteNotificationSubscription(
-  # The identifier of the notification subscription reference to delete.
-  $id: String!
-) {
-  notificationSubscriptionDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates a notification subscription.
-mutation updateNotificationSubscription(
-  # The identifier of the notification subscription to update.
-  $id: String!
-  # A partial notification subscription object to update the notification subscription with.
-  $input: NotificationSubscriptionUpdateInput!
-) {
-  notificationSubscriptionUpdate(id: $id, input: $input) {
-    ...NotificationSubscriptionPayload
-  }
-}
-# Unarchives a notification.
-mutation unarchiveNotification(
-  # The id of the notification to archive.
-  $id: String!
-) {
-  notificationUnarchive(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates a notification.
-mutation updateNotification(
-  # The identifier of the notification to update.
-  $id: String!
-  # A partial notification object to update the notification with.
-  $input: NotificationUpdateInput!
-) {
-  notificationUpdate(id: $id, input: $input) {
-    ...NotificationPayload
-  }
-}
-# Cancels the deletion of an organization. Administrator privileges required.
-mutation deleteOrganizationCancel {
-  organizationCancelDelete {
-    ...OrganizationCancelDeletePayload
-  }
-}
-# Delete's an organization. Administrator privileges required.
-mutation deleteOrganization(
-  # Information required to delete an organization.
-  $input: DeleteOrganizationInput!
-) {
-  organizationDelete(input: $input) {
-    ...OrganizationDeletePayload
-  }
-}
-# Get an organization's delete confirmation token. Administrator privileges required.
-mutation organizationDeleteChallenge {
-  organizationDeleteChallenge {
-    ...OrganizationDeletePayload
-  }
-}
-# Deletes a domain.
-mutation deleteOrganizationDomain(
-  # The identifier of the domain to delete.
-  $id: String!
-) {
-  organizationDomainDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Creates a new organization invite.
-mutation createOrganizationInvite(
-  # The organization invite object to create.
-  $input: OrganizationInviteCreateInput!
-) {
-  organizationInviteCreate(input: $input) {
-    ...OrganizationInvitePayload
-  }
-}
-# Deletes an organization invite.
-mutation deleteOrganizationInvite(
-  # The identifier of the organization invite to delete.
-  $id: String!
-) {
-  organizationInviteDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates an organization invite.
-mutation updateOrganizationInvite(
-  # The identifier of the organization invite to update.
-  $id: String!
-  # The updates to make to the organization invite object.
-  $input: OrganizationInviteUpdateInput!
-) {
-  organizationInviteUpdate(id: $id, input: $input) {
-    ...OrganizationInvitePayload
-  }
-}
-# Updates the user's organization.
-mutation updateOrganization(
-  # A partial organization object to update the organization with.
-  $input: UpdateOrganizationInput!
-) {
-  organizationUpdate(input: $input) {
-    ...OrganizationPayload
-  }
-}
-# Archives a project.
-mutation archiveProject(
-  # The identifier of the project to archive. Also the identifier from the URL is accepted.
-  $id: String!
-) {
-  projectArchive(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Creates a new project.
-mutation createProject(
-  # The issue object to create.
-  $input: ProjectCreateInput!
-) {
-  projectCreate(input: $input) {
-    ...ProjectPayload
-  }
-}
-# Deletes a project. All issues will be disassociated from the deleted project.
-mutation deleteProject(
-  # The identifier of the project to delete. Also the identifier from the URL is accepted.
-  $id: String!
-) {
-  projectDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Creates a new project link.
-mutation createProjectLink(
-  # The project link object to create.
-  $input: ProjectLinkCreateInput!
-) {
-  projectLinkCreate(input: $input) {
-    ...ProjectLinkPayload
-  }
-}
-# Deletes a project link.
-mutation deleteProjectLink(
-  # The identifier of the project link to delete.
-  $id: String!
-) {
-  projectLinkDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates a project link.
-mutation updateProjectLink(
-  # The identifier of the project link to update.
-  $id: String!
-  # The project link object to update.
-  $input: ProjectLinkUpdateInput!
-) {
-  projectLinkUpdate(id: $id, input: $input) {
-    ...ProjectLinkPayload
-  }
-}
-# Unarchives a project.
-mutation unarchiveProject(
-  # The identifier of the project to restore. Also the identifier from the URL is accepted.
-  $id: String!
-) {
-  projectUnarchive(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates a project.
-mutation updateProject(
-  # The identifier of the project to update. Also the identifier from the URL is accepted.
-  $id: String!
-  # A partial project object to update the project with.
-  $input: ProjectUpdateInput!
-) {
-  projectUpdate(id: $id, input: $input) {
-    ...ProjectPayload
-  }
-}
-# Creates a new project update.
-mutation createProjectUpdate(
-  # Data for the project update to create.
-  $input: ProjectUpdateCreateInput!
-) {
-  projectUpdateCreate(input: $input) {
-    ...ProjectUpdatePayload
-  }
-}
-# Deletes a project update.
-mutation deleteProjectUpdate(
-  # The identifier of the project update to delete.
-  $id: String!
-) {
-  projectUpdateDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Creates a new interaction on a project update.
-mutation createProjectUpdateInteraction(
-  # Data for the project update interaction to create.
-  $input: ProjectUpdateInteractionCreateInput!
-) {
-  projectUpdateInteractionCreate(input: $input) {
-    ...ProjectUpdateInteractionPayload
-  }
-}
-# Mark a project update as read.
-mutation projectUpdateMarkAsRead(
-  # The identifier of the project update.
-  $id: String!
-) {
-  projectUpdateMarkAsRead(id: $id) {
-    ...ProjectUpdateWithInteractionPayload
-  }
-}
-# Updates a project update.
-mutation updateProjectUpdate(
-  # The identifier of the project update to update.
-  $id: String!
-  # A data to update the project update with.
-  $input: ProjectUpdateUpdateInput!
-) {
-  projectUpdateUpdate(id: $id, input: $input) {
-    ...ProjectUpdatePayload
-  }
-}
-# Creates a push subscription.
-mutation createPushSubscription(
-  # The push subscription to create.
-  $input: PushSubscriptionCreateInput!
-) {
-  pushSubscriptionCreate(input: $input) {
-    ...PushSubscriptionPayload
-  }
-}
-# Deletes a push subscription.
-mutation deletePushSubscription(
-  # The identifier of the push subscription to delete.
-  $id: String!
-) {
-  pushSubscriptionDelete(id: $id) {
-    ...PushSubscriptionPayload
-  }
-}
-# Creates a new reaction.
-mutation createReaction(
-  # The reaction object to create.
-  $input: ReactionCreateInput!
-) {
-  reactionCreate(input: $input) {
-    ...ReactionPayload
-  }
-}
-# Deletes a reaction.
-mutation deleteReaction(
-  # The identifier of the reaction to delete.
-  $id: String!
-) {
-  reactionDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Manually update Google Sheets data.
-mutation refreshGoogleSheetsData(
-  # The identifier of the Google Sheets integration to update.
-  $id: String!
-) {
-  refreshGoogleSheetsData(id: $id) {
-    ...IntegrationPayload
-  }
-}
-# Re-send an organization invite.
-mutation resendOrganizationInvite(
-  # The identifier of the organization invite to be re-send.
-  $id: String!
-) {
-  resendOrganizationInvite(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Creates a new roadmap.
-mutation createRoadmap(
-  # The properties of the roadmap to create.
-  $input: RoadmapCreateInput!
-) {
-  roadmapCreate(input: $input) {
-    ...RoadmapPayload
-  }
-}
-# Deletes a roadmap.
-mutation deleteRoadmap(
-  # The identifier of the roadmap to delete.
-  $id: String!
-) {
-  roadmapDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Creates a new roadmapToProject join.
-mutation createRoadmapToProject(
-  # The properties of the roadmapToProject to create.
-  $input: RoadmapToProjectCreateInput!
-) {
-  roadmapToProjectCreate(input: $input) {
-    ...RoadmapToProjectPayload
-  }
-}
-# Deletes a roadmapToProject.
-mutation deleteRoadmapToProject(
-  # The identifier of the roadmapToProject to delete.
-  $id: String!
-) {
-  roadmapToProjectDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates a roadmapToProject.
-mutation updateRoadmapToProject(
-  # The identifier of the roadmapToProject to update.
-  $id: String!
-  # The properties of the roadmapToProject to update.
-  $input: RoadmapToProjectUpdateInput!
-) {
-  roadmapToProjectUpdate(id: $id, input: $input) {
-    ...RoadmapToProjectPayload
-  }
-}
-# Updates a roadmap.
-mutation updateRoadmap(
-  # The identifier of the roadmap to update.
-  $id: String!
-  # The properties of the roadmap to update.
-  $input: RoadmapUpdateInput!
-) {
-  roadmapUpdate(id: $id, input: $input) {
-    ...RoadmapPayload
-  }
-}
-# Authenticates a user account via email and authentication token for SAML.
-mutation samlTokenUserAccountAuth(
-  # The data used for token authentication.
-  $input: TokenUserAccountAuthInput!
-) {
-  samlTokenUserAccountAuth(input: $input) {
-    ...AuthResolverResponse
-  }
-}
-# Creates a new team. The user who creates the team will automatically be added as a member to the
-# newly created team.
-mutation createTeam(
-  # The team id to copy settings from.
-  $copySettingsFromTeamId: String
-  # The team object to create.
-  $input: TeamCreateInput!
-) {
-  teamCreate(copySettingsFromTeamId: $copySettingsFromTeamId, input: $input) {
-    ...TeamPayload
-  }
-}
-# Deletes team's cycles data
-mutation deleteTeamCycles(
-  # The identifier of the team, which cycles will be deleted.
-  $id: String!
-) {
-  teamCyclesDelete(id: $id) {
-    ...TeamPayload
-  }
-}
-# Deletes a team.
-mutation deleteTeam(
-  # The identifier of the team to delete.
-  $id: String!
-) {
-  teamDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Deletes a previously used team key.
-mutation deleteTeamKey(
-  # The identifier of the team key to delete.
-  $id: String!
-) {
-  teamKeyDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Creates a new team membership.
-mutation createTeamMembership(
-  # The team membership object to create.
-  $input: TeamMembershipCreateInput!
-) {
-  teamMembershipCreate(input: $input) {
-    ...TeamMembershipPayload
-  }
-}
-# Deletes a team membership.
-mutation deleteTeamMembership(
-  # The identifier of the team membership to delete.
-  $id: String!
-) {
-  teamMembershipDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates a team membership.
-mutation updateTeamMembership(
-  # The identifier of the team membership to update.
-  $id: String!
-  # A partial team membership object to update the team membership with.
-  $input: TeamMembershipUpdateInput!
-) {
-  teamMembershipUpdate(id: $id, input: $input) {
-    ...TeamMembershipPayload
-  }
-}
-# Updates a team.
-mutation updateTeam(
-  # The identifier of the team to update.
-  $id: String!
-  # A partial team object to update the team with.
-  $input: TeamUpdateInput!
-) {
-  teamUpdate(id: $id, input: $input) {
-    ...TeamPayload
-  }
-}
-# Creates a new template.
-mutation createTemplate(
-  # The template object to create.
-  $input: TemplateCreateInput!
-) {
-  templateCreate(input: $input) {
-    ...TemplatePayload
-  }
-}
-# Deletes a template.
-mutation deleteTemplate(
-  # The identifier of the template to delete.
-  $id: String!
-) {
-  templateDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates an existing template.
-mutation updateTemplate(
-  # The identifier of the template.
-  $id: String!
-  # The properties of the template to update.
-  $input: TemplateUpdateInput!
-) {
-  templateUpdate(id: $id, input: $input) {
-    ...TemplatePayload
-  }
-}
-# Makes user a regular user. Can only be called by an admin.
-mutation userDemoteAdmin(
-  # The identifier of the user to make a regular user.
-  $id: String!
-) {
-  userDemoteAdmin(id: $id) {
-    ...UserAdminPayload
-  }
-}
-# Makes user a guest. Can only be called by an admin.
-mutation userDemoteMember(
-  # The identifier of the user to make a guest.
-  $id: String!
-) {
-  userDemoteMember(id: $id) {
-    ...UserAdminPayload
-  }
-}
-# Connects the Discord user to this Linear account via OAuth2.
-mutation userDiscordConnect(
-  # The Discord OAuth code.
-  $code: String!
-  # The Discord OAuth redirect URI.
-  $redirectUri: String!
-) {
-  userDiscordConnect(code: $code, redirectUri: $redirectUri) {
-    ...UserPayload
-  }
-}
-# Disconnects the external user from this Linear account.
-mutation userExternalUserDisconnect(
-  # The external service to disconnect
-  $service: String!
-) {
-  userExternalUserDisconnect(service: $service) {
-    ...UserPayload
-  }
-}
-# Updates a user's settings flag.
-mutation updateUserFlag(
-  # Settings flag to increment.
-  $flag: UserFlagType!
-  # Flag operation to perform
-  $operation: UserFlagUpdateOperation!
-) {
-  userFlagUpdate(flag: $flag, operation: $operation) {
-    ...UserSettingsFlagPayload
-  }
-}
-# Connects the GitHub user to this Linear account via OAuth2.
-mutation userGitHubConnect(
-  # The GitHub OAuth code.
-  $code: String!
-) {
-  userGitHubConnect(code: $code) {
-    ...UserPayload
-  }
-}
-# Connects the Google Calendar to the user to this Linear account via OAuth2.
-mutation userGoogleCalendarConnect(
-  # [Internal] The Google OAuth code.
-  $code: String!
-) {
-  userGoogleCalendarConnect(code: $code) {
-    ...UserPayload
-  }
-}
-# Makes user an admin. Can only be called by an admin.
-mutation userPromoteAdmin(
-  # The identifier of the user to make an admin.
-  $id: String!
-) {
-  userPromoteAdmin(id: $id) {
-    ...UserAdminPayload
-  }
-}
-# Makes user a regular user. Can only be called by an admin.
-mutation userPromoteMember(
-  # The identifier of the user to make a regular user.
-  $id: String!
-) {
-  userPromoteMember(id: $id) {
-    ...UserAdminPayload
-  }
-}
-# [Deprecated] Updates a user's settings flag.
-mutation userSettingsFlagIncrement(
-  # Flag to increment.
-  $flag: String!
-) {
-  userSettingsFlagIncrement(flag: $flag) {
-    ...UserSettingsFlagPayload
-  }
-}
-# Resets user's setting flags.
-mutation userSettingsFlagsReset(
-  # The flags to reset. If not provided all flags will be reset.
-  $flags: [UserFlagType!]
-) {
-  userSettingsFlagsReset(flags: $flags) {
-    ...UserSettingsFlagsResetPayload
-  }
-}
-# Updates the user's settings.
-mutation updateUserSettings(
-  # The identifier of the userSettings to update.
-  $id: String!
-  # A partial notification object to update the settings with.
-  $input: UserSettingsUpdateInput!
-) {
-  userSettingsUpdate(id: $id, input: $input) {
-    ...UserSettingsPayload
-  }
-}
-# Suspends a user. Can only be called by an admin.
-mutation suspendUser(
-  # The identifier of the user to suspend.
-  $id: String!
-) {
-  userSuspend(id: $id) {
-    ...UserAdminPayload
-  }
-}
-# Un-suspends a user. Can only be called by an admin.
-mutation unsuspendUser(
-  # The identifier of the user to unsuspend.
-  $id: String!
-) {
-  userUnsuspend(id: $id) {
-    ...UserAdminPayload
-  }
-}
-# Updates a user. Only available to organization admins and the user themselves.
-mutation updateUser(
-  # The identifier of the user to update. Use `me` to reference currently authenticated user.
-  $id: String!
-  # A partial user object to update the user with.
-  $input: UpdateUserInput!
-) {
-  userUpdate(id: $id, input: $input) {
-    ...UserPayload
-  }
-}
-# Creates a new ViewPreferences object.
-mutation createViewPreferences(
-  # The ViewPreferences object to create.
-  $input: ViewPreferencesCreateInput!
-) {
-  viewPreferencesCreate(input: $input) {
-    ...ViewPreferencesPayload
-  }
-}
-# Deletes a ViewPreferences.
-mutation deleteViewPreferences(
-  # The identifier of the ViewPreferences to delete.
-  $id: String!
-) {
-  viewPreferencesDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates an existing ViewPreferences object.
-mutation updateViewPreferences(
-  # The identifier of the ViewPreferences object.
-  $id: String!
-  # The properties of the view preferences.
-  $input: ViewPreferencesUpdateInput!
-) {
-  viewPreferencesUpdate(id: $id, input: $input) {
-    ...ViewPreferencesPayload
-  }
-}
-# Creates a new webhook.
-mutation createWebhook(
-  # The webhook object to create.
-  $input: WebhookCreateInput!
-) {
-  webhookCreate(input: $input) {
-    ...WebhookPayload
-  }
-}
-# Deletes a Webhook.
-mutation deleteWebhook(
-  # The identifier of the Webhook to delete.
-  $id: String!
-) {
-  webhookDelete(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Updates an existing Webhook.
-mutation updateWebhook(
-  # The identifier of the Webhook.
-  $id: String!
-  # The properties of the Webhook.
-  $input: WebhookUpdateInput!
-) {
-  webhookUpdate(id: $id, input: $input) {
-    ...WebhookPayload
-  }
-}
-# Archives a state. Only states with issues that have all been archived can be archived.
-mutation archiveWorkflowState(
-  # The identifier of the state to archive.
-  $id: String!
-) {
-  workflowStateArchive(id: $id) {
-    ...ArchivePayload
-  }
-}
-# Creates a new state, adding it to the workflow of a team.
-mutation createWorkflowState(
-  # The state to create.
-  $input: WorkflowStateCreateInput!
-) {
-  workflowStateCreate(input: $input) {
-    ...WorkflowStatePayload
-  }
-}
-# Updates a state.
-mutation updateWorkflowState(
-  # The identifier of the state to update.
-  $id: String!
-  # A partial state object to update.
-  $input: WorkflowStateUpdateInput!
-) {
-  workflowStateUpdate(id: $id, input: $input) {
-    ...WorkflowStatePayload
   }
 }

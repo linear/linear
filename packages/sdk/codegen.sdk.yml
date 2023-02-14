@@ -9,7 +9,6 @@ config:
   skipComments:
     - "[Internal]"
     - "[INTERNAL]"
-    - "[ALPHA]"
   skipFields:
     - integrationResource
     - integrationResources

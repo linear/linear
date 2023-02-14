@@ -183,7 +183,7 @@ export type AttachmentCollectionFilter = {
   /** Filters that needs to be matched by some attachments. */
   some?: Maybe<AttachmentFilter>;
   /** Comparator for the source type. */
-  sourceType?: Maybe<NestedStringComparator>;
+  sourceType?: Maybe<SourceTypeComparator>;
   /** Comparator for the subtitle. */
   subtitle?: Maybe<NullableStringComparator>;
   /** Comparator for the title. */
@@ -246,7 +246,7 @@ export type AttachmentFilter = {
   /** Compound filters, one of which need to be matched by the attachment. */
   or?: Maybe<Array<AttachmentFilter>>;
   /** Comparator for the source type. */
-  sourceType?: Maybe<NestedStringComparator>;
+  sourceType?: Maybe<SourceTypeComparator>;
   /** Comparator for the subtitle. */
   subtitle?: Maybe<NullableStringComparator>;
   /** Comparator for the title. */
@@ -297,6 +297,8 @@ export type AuditEntry = Node & {
   ip?: Maybe<Scalars["String"]>;
   /** Additional metadata related to the audit entry. */
   metadata?: Maybe<Scalars["JSONObject"]>;
+  /** The organization the audit log belongs to. */
+  organization?: Maybe<Organization>;
   /** Additional information related to the request which performed the action. */
   requestInformation?: Maybe<Scalars["JSONObject"]>;
   type: Scalars["String"];
@@ -419,7 +421,7 @@ export type Comment = Node & {
   id: Scalars["ID"];
   /** The issue that the comment is associated with. */
   issue: Issue;
-  /** The parent of the comment. */
+  /** The parent comment under which the current comment is nested. */
   parent?: Maybe<Comment>;
   /** Emoji reaction summary, grouped by emoji type */
   reactionData: Scalars["JSONObject"];
@@ -490,11 +492,13 @@ export type CommentCreateInput = {
   createdAt?: Maybe<Scalars["DateTime"]>;
   /** Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode. */
   displayIconUrl?: Maybe<Scalars["String"]>;
+  /** Flag to prevent auto subscription to the issue the comment is created on. */
+  doNotSubscribeToIssue?: Maybe<Scalars["Boolean"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
   /** The issue to associate the comment with. */
   issueId: Scalars["String"];
-  /** [Internal] The parent under which to nest the comment. */
+  /** The parent comment under which to nest a current comment. */
   parentId?: Maybe<Scalars["String"]>;
 };
 
@@ -1472,47 +1476,6 @@ export type ImageUploadFromUrlPayload = {
   url?: Maybe<Scalars["String"]>;
 };
 
-/** A initiative that contains projects. */
-export type Initiative = Node & {
-  __typename?: "Initiative";
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The time at which the entity was created. */
-  createdAt: Scalars["DateTime"];
-  /** The initiative's description. */
-  description?: Maybe<Scalars["String"]>;
-  /** The unique identifier of the entity. */
-  id: Scalars["ID"];
-  /** The name of the initiative. */
-  name: Scalars["String"];
-  /** The organization that the initiative belongs to. */
-  organization: Organization;
-  /** The sort order for the initiative. */
-  sortOrder: Scalars["Float"];
-  /** The estimated completion date of the initiative. */
-  targetDate?: Maybe<Scalars["TimelessDate"]>;
-  /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  updatedAt: Scalars["DateTime"];
-};
-
-export type InitiativeConnection = {
-  __typename?: "InitiativeConnection";
-  edges: Array<InitiativeEdge>;
-  nodes: Array<Initiative>;
-  pageInfo: PageInfo;
-};
-
-export type InitiativeEdge = {
-  __typename?: "InitiativeEdge";
-  /** Used in `before` and `after` args */
-  cursor: Scalars["String"];
-  node: Initiative;
-};
-
 /** An integration with an external service. */
 export type Integration = Node & {
   __typename?: "Integration";
@@ -1639,6 +1602,7 @@ export type IntegrationSettings = {
   googleSheets?: Maybe<GoogleSheetsSettings>;
   intercom?: Maybe<IntercomSettings>;
   jira?: Maybe<JiraSettings>;
+  notion?: Maybe<NotionSettings>;
   sentry?: Maybe<SentrySettings>;
   slackOrgProjectUpdatesPost?: Maybe<SlackPostSettings>;
   slackPost?: Maybe<SlackPostSettings>;
@@ -1652,6 +1616,7 @@ export type IntegrationSettingsInput = {
   googleSheets?: Maybe<GoogleSheetsSettingsInput>;
   intercom?: Maybe<IntercomSettingsInput>;
   jira?: Maybe<JiraSettingsInput>;
+  notion?: Maybe<NotionSettingsInput>;
   sentry?: Maybe<SentrySettingsInput>;
   slackOrgProjectUpdatesPost?: Maybe<SlackPostSettingsInput>;
   slackPost?: Maybe<SlackPostSettingsInput>;
@@ -1724,18 +1689,22 @@ export type IntegrationsSettings = Node & {
   id: Scalars["ID"];
   /** Project which those settings apply to. */
   project?: Maybe<Project>;
+  /** Whether to send a Slack message when a new issue is added to triage. */
+  slackIssueAddedToTriage?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a new issue is created for the project or the team. */
   slackIssueCreated?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a comment is created on any of the project or team's issues. */
   slackIssueNewComment?: Maybe<Scalars["Boolean"]>;
+  /** Whether to send a Slack message when an SLA is breached */
+  slackIssueSlaBreached?: Maybe<Scalars["Boolean"]>;
+  /** Whether to send a Slack message when an SLA is at high risk */
+  slackIssueSlaHighRisk?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when any of the project or team's issues has a change in status. */
   slackIssueStatusChangedAll?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when any of the project or team's issues change to completed or cancelled. */
   slackIssueStatusChangedDone?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a project update is created. */
   slackProjectUpdateCreated?: Maybe<Scalars["Boolean"]>;
-  /** Whether to send a new project update to milestone Slack channels. */
-  slackProjectUpdateCreatedToMilestone?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a new project update to team Slack channels. */
   slackProjectUpdateCreatedToTeam?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a new project update to workspace Slack channel. */
@@ -1762,18 +1731,22 @@ export type IntegrationsSettingsCreateInput = {
   id?: Maybe<Scalars["String"]>;
   /** The identifier of the project to create settings for. */
   projectId?: Maybe<Scalars["String"]>;
+  /** Whether to send a Slack message when a new issue is added to triage. */
+  slackIssueAddedToTriage?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a new issue is created for the project or the team. */
   slackIssueCreated?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a comment is created on any of the project or team's issues. */
   slackIssueNewComment?: Maybe<Scalars["Boolean"]>;
+  /** Whether to receive notification when an SLA has breached on Slack. */
+  slackIssueSlaBreached?: Maybe<Scalars["Boolean"]>;
+  /** Whether to send a Slack message when an SLA is at high risk */
+  slackIssueSlaHighRisk?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when any of the project or team's issues has a change in status. */
   slackIssueStatusChangedAll?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when any of the project or team's issues change to completed or cancelled. */
   slackIssueStatusChangedDone?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a project update is created. */
   slackProjectUpdateCreated?: Maybe<Scalars["Boolean"]>;
-  /** Whether to send a Slack message when a project update is created to milestone channels. */
-  slackProjectUpdateCreatedToMilestone?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a project update is created to team channels. */
   slackProjectUpdateCreatedToTeam?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a project update is created to workspace channel. */
@@ -1800,18 +1773,22 @@ export type IntegrationsSettingsPayload = {
 };
 
 export type IntegrationsSettingsUpdateInput = {
+  /** Whether to send a Slack message when a new issue is added to triage. */
+  slackIssueAddedToTriage?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a new issue is created for the project or the team. */
   slackIssueCreated?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a comment is created on any of the project or team's issues. */
   slackIssueNewComment?: Maybe<Scalars["Boolean"]>;
+  /** Whether to receive notification when an SLA has breached on Slack. */
+  slackIssueSlaBreached?: Maybe<Scalars["Boolean"]>;
+  /** Whether to send a Slack message when an SLA is at high risk */
+  slackIssueSlaHighRisk?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when any of the project or team's issues has a change in status. */
   slackIssueStatusChangedAll?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when any of the project or team's issues change to completed or cancelled. */
   slackIssueStatusChangedDone?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a project update is created. */
   slackProjectUpdateCreated?: Maybe<Scalars["Boolean"]>;
-  /** Whether to send a Slack message when a project update is created to milestone channels. */
-  slackProjectUpdateCreatedToMilestone?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a project update is created to team channels. */
   slackProjectUpdateCreatedToTeam?: Maybe<Scalars["Boolean"]>;
   /** Whether to send a Slack message when a project update is created to workspace channel. */
@@ -1917,8 +1894,14 @@ export type Issue = Node & {
   priorityLabel: Scalars["String"];
   /** The project that the issue is associated with. */
   project?: Maybe<Project>;
+  /** [ALPHA] The projectMilestone that the issue is associated with. */
+  projectMilestone?: Maybe<ProjectMilestone>;
   /** Relations associated with this issue. */
   relations: IssueRelationConnection;
+  /** [Internal] The time at which the issue's SLA will breach. */
+  slaBreachesAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] The time at which the issue's SLA began. */
+  slaStartedAt?: Maybe<Scalars["DateTime"]>;
   /** The user who snoozed the issue. */
   snoozedBy?: Maybe<User>;
   /** The time until an issue will be snoozed in Triage view. */
@@ -1927,6 +1910,8 @@ export type Issue = Node & {
   sortOrder: Scalars["Float"];
   /** The time at which the issue was moved into started state. */
   startedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the issue entered triage. */
+  startedTriageAt?: Maybe<Scalars["DateTime"]>;
   /** The workflow state that the issue is associated with. */
   state: WorkflowState;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
@@ -2117,6 +2102,8 @@ export type IssueCollectionFilter = {
   project?: Maybe<NullableProjectFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: Maybe<ContentComparator>;
+  /** Comparator for the issues sla status. */
+  slaStatus?: Maybe<SlaStatusComparator>;
   /** Filters that the issues snoozer must satisfy. */
   snoozedBy?: Maybe<NullableUserFilter>;
   /** Comparator for the issues snoozed until date. */
@@ -2175,6 +2162,8 @@ export type IssueCreateInput = {
   priority?: Maybe<Scalars["Int"]>;
   /** The project associated with the issue. */
   projectId?: Maybe<Scalars["String"]>;
+  /** [ALPHA] The project milestone associated with the issue. */
+  projectMilestoneId?: Maybe<Scalars["String"]>;
   /** The comment the issue is referencing. */
   referenceCommentId?: Maybe<Scalars["String"]>;
   /** The position of the issue related to other issues. */
@@ -2189,6 +2178,57 @@ export type IssueCreateInput = {
   teamId: Scalars["String"];
   /** The title of the issue. */
   title: Scalars["String"];
+};
+
+/** [Internal] A draft issue. */
+export type IssueDraft = Node & {
+  __typename?: "IssueDraft";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The user assigned to the draft. */
+  assigneeId?: Maybe<Scalars["String"]>;
+  /** Serialized array of JSONs representing attachments. */
+  attachments: Scalars["JSONObject"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The user who created the draft. */
+  creator: User;
+  /** The cycle associated with the draft. */
+  cycleId?: Maybe<Scalars["String"]>;
+  /** The draft's description in markdown format. */
+  description?: Maybe<Scalars["String"]>;
+  /** [Internal] The draft's description as a Prosemirror document. */
+  descriptionData?: Maybe<Scalars["JSON"]>;
+  /** The date at which the issue would be due. */
+  dueDate?: Maybe<Scalars["TimelessDate"]>;
+  /** The estimate of the complexity of the draft. */
+  estimate?: Maybe<Scalars["Float"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The parent draft of the draft. */
+  parent?: Maybe<IssueDraft>;
+  /** The parent issue of the draft. */
+  parentIssue?: Maybe<Issue>;
+  /** The priority of the draft. */
+  priority: Scalars["Float"];
+  /** Label for the priority. */
+  priorityLabel: Scalars["String"];
+  /** The project associated with the draft. */
+  projectId?: Maybe<Scalars["String"]>;
+  /** The workflow state associated with the draft. */
+  stateId: Scalars["String"];
+  /** The order of items in the sub-draft list. Only set if the draft has `parent` set. */
+  subIssueSortOrder?: Maybe<Scalars["Float"]>;
+  /** The team associated with the draft. */
+  teamId: Scalars["String"];
+  /** The draft's title. */
+  title: Scalars["String"];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
 };
 
 export type IssueEdge = {
@@ -2254,6 +2294,8 @@ export type IssueFilter = {
   project?: Maybe<NullableProjectFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: Maybe<ContentComparator>;
+  /** Comparator for the issues sla status. */
+  slaStatus?: Maybe<SlaStatusComparator>;
   /** Filters that the issues snoozer must satisfy. */
   snoozedBy?: Maybe<NullableUserFilter>;
   /** Comparator for the issues snoozed until date. */
@@ -2293,6 +2335,8 @@ export type IssueHistory = Node & {
   autoArchived?: Maybe<Scalars["Boolean"]>;
   /** Whether the issue was auto-closed. */
   autoClosed?: Maybe<Scalars["Boolean"]>;
+  /** [Internal] Serialized JSON representing changes for certain non-relational properties. */
+  changes?: Maybe<Scalars["JSONObject"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The user from whom the issue was re-assigned from. */
@@ -2790,6 +2834,10 @@ export type IssueUpdateInput = {
   priority?: Maybe<Scalars["Int"]>;
   /** The project associated with the issue. */
   projectId?: Maybe<Scalars["String"]>;
+  /** [ALPHA] The project milestone associated with the issue. */
+  projectMilestoneId?: Maybe<Scalars["String"]>;
+  /** [Internal] The timestamp at which an issue will be considered in breach of SLA. */
+  slaBreachesAt?: Maybe<Scalars["DateTime"]>;
   /** The identifier of the user who snoozed the issue. */
   snoozedById?: Maybe<Scalars["String"]>;
   /** The time until an issue will be snoozed in Triage view. */
@@ -2882,116 +2930,6 @@ export type LogoutResponse = {
   __typename?: "LogoutResponse";
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
-};
-
-/** A milestone that contains projects. */
-export type Milestone = Node & {
-  __typename?: "Milestone";
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The time at which the entity was created. */
-  createdAt: Scalars["DateTime"];
-  /** [ALPHA] The milestone's description. */
-  description?: Maybe<Scalars["String"]>;
-  /** The unique identifier of the entity. */
-  id: Scalars["ID"];
-  /** The name of the milestone. */
-  name: Scalars["String"];
-  /** The organization that the milestone belongs to. */
-  organization: Organization;
-  /**
-   * Projects associated with the milestone.
-   * @deprecated Milestones will be removed. Use roadmaps instead.
-   */
-  projects: ProjectConnection;
-  /** The sort order for the milestone. */
-  sortOrder: Scalars["Float"];
-  /** [ALPHA] The estimated completion date of the initiative. */
-  targetDate?: Maybe<Scalars["TimelessDate"]>;
-  /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  updatedAt: Scalars["DateTime"];
-};
-
-/** A milestone that contains projects. */
-export type MilestoneProjectsArgs = {
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  filter?: Maybe<ProjectFilter>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-};
-
-export type MilestoneConnection = {
-  __typename?: "MilestoneConnection";
-  edges: Array<MilestoneEdge>;
-  nodes: Array<Milestone>;
-  pageInfo: PageInfo;
-};
-
-export type MilestoneCreateInput = {
-  /** [ALPHA] The description for the milestone. */
-  description?: Maybe<Scalars["String"]>;
-  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
-  id?: Maybe<Scalars["String"]>;
-  /** The name of the milestone. */
-  name: Scalars["String"];
-  /** The sort order of the milestone. */
-  sortOrder?: Maybe<Scalars["Float"]>;
-  /** [ALPHA] The planned target date of the milestone. */
-  targetDate?: Maybe<Scalars["TimelessDate"]>;
-  /** [ALPHA] The identifiers of the teams this milestone is associated with. */
-  teamIds?: Maybe<Array<Scalars["String"]>>;
-};
-
-export type MilestoneEdge = {
-  __typename?: "MilestoneEdge";
-  /** Used in `before` and `after` args */
-  cursor: Scalars["String"];
-  node: Milestone;
-};
-
-export type MilestoneMigrationPayload = {
-  __typename?: "MilestoneMigrationPayload";
-  /** The identifier of the last sync operation. */
-  lastSyncId: Scalars["Float"];
-  /** Whether the operation was successful. */
-  success: Scalars["Boolean"];
-};
-
-export type MilestonePayload = {
-  __typename?: "MilestonePayload";
-  /** The identifier of the last sync operation. */
-  lastSyncId: Scalars["Float"];
-  /** The milesteone that was created or updated. */
-  milestone?: Maybe<Milestone>;
-  /** Whether the operation was successful. */
-  success: Scalars["Boolean"];
-};
-
-export type MilestoneUpdateInput = {
-  /** [ALPHA] The description for the milestone. */
-  description?: Maybe<Scalars["String"]>;
-  /** The name of the milestone. */
-  name?: Maybe<Scalars["String"]>;
-  /** The sort order of the milestone. */
-  sortOrder?: Maybe<Scalars["Float"]>;
-  /** [ALPHA] The planned target date of the milestone. */
-  targetDate?: Maybe<Scalars["TimelessDate"]>;
-  /** [ALPHA] The identifiers of the teams this milestone is associated with. */
-  teamIds?: Maybe<Array<Scalars["String"]>>;
-};
-
-export type MilestonesMigrateInput = {
-  /** IDs of the milestones to delete. */
-  milestonesToDelete?: Maybe<Array<Scalars["String"]>>;
-  /** IDs of the milestones to migrate. */
-  milestonesToMigrate?: Maybe<Array<Scalars["String"]>>;
 };
 
 export type Mutation = {
@@ -3154,6 +3092,8 @@ export type Mutation = {
   issueCreate: IssuePayload;
   /** Deletes (trashes) an issue. */
   issueDelete: ArchivePayload;
+  /** [INTERNAL] Updates an issue description from the Front app to handle Front attachments correctly. */
+  issueDescriptionUpdateFromFront: IssuePayload;
   /** Kicks off an Asana import job. */
   issueImportCreateAsana: IssueImportPayload;
   /** Kicks off a Shortcut (formerly Clubhouse) import job. */
@@ -3199,23 +3139,6 @@ export type Mutation = {
   leaveOrganization: CreateOrJoinOrganizationResponse;
   /** Logout of all clients. */
   logout: LogoutResponse;
-  /** Migrates milestones to roadmaps */
-  migrateMilestonesToRoadmaps: MilestoneMigrationPayload;
-  /**
-   * Creates a new milestone.
-   * @deprecated Milestones will be removed. Use roadmaps instead.
-   */
-  milestoneCreate: MilestonePayload;
-  /**
-   * Deletes a milestone.
-   * @deprecated Milestones will be removed. Use roadmaps instead.
-   */
-  milestoneDelete: ArchivePayload;
-  /**
-   * Updates a milestone.
-   * @deprecated Milestones will be removed. Use roadmaps instead.
-   */
-  milestoneUpdate: MilestonePayload;
   /** Archives a notification. */
   notificationArchive: ArchivePayload;
   /** Creates a new notification subscription for a team or a project. */
@@ -3265,6 +3188,12 @@ export type Mutation = {
   projectLinkDelete: ArchivePayload;
   /** Updates a project link. */
   projectLinkUpdate: ProjectLinkPayload;
+  /** Creates a new project milestone. */
+  projectMilestoneCreate: ProjectMilestonePayload;
+  /** Deletes a project milestone. */
+  projectMilestoneDelete: ArchivePayload;
+  /** Updates a project milestone. */
+  projectMilestoneUpdate: ProjectMilestonePayload;
   /** Unarchives a project. */
   projectUnarchive: ArchivePayload;
   /** Updates a project. */
@@ -3327,12 +3256,6 @@ export type Mutation = {
   templateDelete: ArchivePayload;
   /** Updates an existing template. */
   templateUpdate: TemplatePayload;
-  /** [INTERNAL] Cancels an ongoing email change for the user account */
-  userAccountEmailChangeCancel: UserAccountEmailVerificationPayload;
-  /** [INTERNAL] Creates an email verification challenge from the app for a user account that wants to change email. */
-  userAccountEmailChangeCreate: UserAccountEmailVerificationPayload;
-  /** [INTERNAL] Verifies the email address and code for a user account that wants to change email. */
-  userAccountEmailChangeVerifyCode: UserAccountEmailChangeVerifyCodePayload;
   /** Makes user a regular user. Can only be called by an admin. */
   userDemoteAdmin: UserAdminPayload;
   /** Makes user a guest. Can only be called by an admin. */
@@ -3430,6 +3353,7 @@ export type MutationAttachmentLinkJiraIssueArgs = {
 };
 
 export type MutationAttachmentLinkUrlArgs = {
+  id?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
   title?: Maybe<Scalars["String"]>;
   url: Scalars["String"];
@@ -3709,6 +3633,11 @@ export type MutationIssueDeleteArgs = {
   id: Scalars["String"];
 };
 
+export type MutationIssueDescriptionUpdateFromFrontArgs = {
+  description: Scalars["String"];
+  id: Scalars["String"];
+};
+
 export type MutationIssueImportCreateAsanaArgs = {
   asanaTeamName: Scalars["String"];
   asanaToken: Scalars["String"];
@@ -3828,23 +3757,6 @@ export type MutationLeaveOrganizationArgs = {
   organizationId: Scalars["String"];
 };
 
-export type MutationMigrateMilestonesToRoadmapsArgs = {
-  input: MilestonesMigrateInput;
-};
-
-export type MutationMilestoneCreateArgs = {
-  input: MilestoneCreateInput;
-};
-
-export type MutationMilestoneDeleteArgs = {
-  id: Scalars["String"];
-};
-
-export type MutationMilestoneUpdateArgs = {
-  id: Scalars["String"];
-  input: MilestoneUpdateInput;
-};
-
 export type MutationNotificationArchiveArgs = {
   id: Scalars["String"];
 };
@@ -3932,6 +3844,19 @@ export type MutationProjectLinkDeleteArgs = {
 export type MutationProjectLinkUpdateArgs = {
   id: Scalars["String"];
   input: ProjectLinkUpdateInput;
+};
+
+export type MutationProjectMilestoneCreateArgs = {
+  input: ProjectMilestoneCreateInput;
+};
+
+export type MutationProjectMilestoneDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationProjectMilestoneUpdateArgs = {
+  id: Scalars["String"];
+  input: ProjectMilestoneUpdateInput;
 };
 
 export type MutationProjectUnarchiveArgs = {
@@ -4066,21 +3991,6 @@ export type MutationTemplateUpdateArgs = {
   input: TemplateUpdateInput;
 };
 
-export type MutationUserAccountEmailChangeCancelArgs = {
-  id: Scalars["String"];
-};
-
-export type MutationUserAccountEmailChangeCreateArgs = {
-  hasExistingAccount: Scalars["Boolean"];
-  id: Scalars["String"];
-  newEmail: Scalars["String"];
-};
-
-export type MutationUserAccountEmailChangeVerifyCodeArgs = {
-  code: Scalars["String"];
-  email: Scalars["String"];
-};
-
 export type MutationUserDemoteAdminArgs = {
   id: Scalars["String"];
 };
@@ -4182,38 +4092,6 @@ export type MutationWorkflowStateCreateArgs = {
 export type MutationWorkflowStateUpdateArgs = {
   id: Scalars["String"];
   input: WorkflowStateUpdateInput;
-};
-
-/** Comparator for strings. */
-export type NestedStringComparator = {
-  /** Contains constraint. Matches any values that contain the given string. */
-  contains?: Maybe<Scalars["String"]>;
-  /** Contains case insensitive constraint. Matches any values that contain the given string case insensitive. */
-  containsIgnoreCase?: Maybe<Scalars["String"]>;
-  /** Ends with constraint. Matches any values that end with the given string. */
-  endsWith?: Maybe<Scalars["String"]>;
-  /** Equals constraint. */
-  eq?: Maybe<Scalars["String"]>;
-  /** Equals case insensitive. Matches any values that matches the given string case insensitive. */
-  eqIgnoreCase?: Maybe<Scalars["String"]>;
-  /** In-array constraint. */
-  in?: Maybe<Array<Scalars["String"]>>;
-  /** Not-equals constraint. */
-  neq?: Maybe<Scalars["String"]>;
-  /** Not-equals case insensitive. Matches any values that don't match the given string case insensitive. */
-  neqIgnoreCase?: Maybe<Scalars["String"]>;
-  /** Not-in-array constraint. */
-  nin?: Maybe<Array<Scalars["String"]>>;
-  /** Doesn't contain constraint. Matches any values that don't contain the given string. */
-  notContains?: Maybe<Scalars["String"]>;
-  /** Doesn't contain case insensitive constraint. Matches any values that don't contain the given string case insensitive. */
-  notContainsIgnoreCase?: Maybe<Scalars["String"]>;
-  /** Doesn't end with constraint. Matches any values that don't end with the given string. */
-  notEndsWith?: Maybe<Scalars["String"]>;
-  /** Doesn't start with constraint. Matches any values that don't start with the given string. */
-  notStartsWith?: Maybe<Scalars["String"]>;
-  /** Starts with constraint. Matches any values that start with the given string. */
-  startsWith?: Maybe<Scalars["String"]>;
 };
 
 export type Node = {
@@ -4318,6 +4196,8 @@ export type NotificationSubscriptionCreateInput = {
   projectNotificationSubscriptionType?: Maybe<ProjectNotificationSubscriptionType>;
   /** The identifier of the team to subscribe to. */
   teamId?: Maybe<Scalars["String"]>;
+  /** The types of notifications of the team subscription. */
+  teamNotificationSubscriptionTypes?: Maybe<Array<Scalars["String"]>>;
 };
 
 export type NotificationSubscriptionEdge = {
@@ -4339,7 +4219,9 @@ export type NotificationSubscriptionPayload = {
 
 export type NotificationSubscriptionUpdateInput = {
   /** The type of the project subscription. */
-  projectNotificationSubscriptionType: ProjectNotificationSubscriptionType;
+  projectNotificationSubscriptionType?: Maybe<ProjectNotificationSubscriptionType>;
+  /** The types of notifications of the team subscription. */
+  teamNotificationSubscriptionTypes?: Maybe<Array<Scalars["String"]>>;
 };
 
 export type NotificationUpdateInput = {
@@ -4349,6 +4231,22 @@ export type NotificationUpdateInput = {
   readAt?: Maybe<Scalars["DateTime"]>;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
   snoozedUntilAt?: Maybe<Scalars["DateTime"]>;
+};
+
+/** Notion specific settings. */
+export type NotionSettings = {
+  __typename?: "NotionSettings";
+  /** The ID of the Notion workspace being connected. */
+  workspaceId: Scalars["String"];
+  /** The name of the Notion workspace being connected. */
+  workspaceName: Scalars["String"];
+};
+
+export type NotionSettingsInput = {
+  /** The ID of the Notion workspace being connected. */
+  workspaceId: Scalars["String"];
+  /** The name of the Notion workspace being connected. */
+  workspaceName: Scalars["String"];
 };
 
 /** Cycle filtering options. */
@@ -4471,6 +4369,8 @@ export type NullableIssueFilter = {
   project?: Maybe<NullableProjectFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: Maybe<ContentComparator>;
+  /** Comparator for the issues sla status. */
+  slaStatus?: Maybe<SlaStatusComparator>;
   /** Filters that the issues snoozer must satisfy. */
   snoozedBy?: Maybe<NullableUserFilter>;
   /** Comparator for the issues snoozed until date. */
@@ -5138,7 +5038,7 @@ export type PaidSubscription = Node & {
   pendingChangeType?: Maybe<Scalars["String"]>;
   /** The number of seats in the subscription. */
   seats: Scalars["Float"];
-  /** The maximum number of seats that can be added to the subscription. */
+  /** The maximum number of seats that will be billed in the subscription. */
   seatsMaximum?: Maybe<Scalars["Float"]>;
   /** The minimum number of seats that will be billed in the subscription. */
   seatsMinimum?: Maybe<Scalars["Float"]>;
@@ -5150,6 +5050,27 @@ export type PaidSubscription = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+};
+
+/** A personal note for a user */
+export type PersonalNote = Node & {
+  __typename?: "PersonalNote";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The note content as JSON. */
+  contentData?: Maybe<Scalars["JSONObject"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** The user that owns the note. */
+  user: User;
 };
 
 /** A project. */
@@ -5185,8 +5106,6 @@ export type Project = Node & {
   id: Scalars["ID"];
   /** The number of in progress estimation points after each week. */
   inProgressScopeHistory: Array<Scalars["Float"]>;
-  /** The initiative that this project is associated with. */
-  initiative?: Maybe<Initiative>;
   /** Settings for all integrations associated with that project. */
   integrationsSettings?: Maybe<IntegrationsSettings>;
   /** The total number of issues in the project after each week. */
@@ -5199,15 +5118,12 @@ export type Project = Node & {
   links: ProjectLinkConnection;
   /** Users that are members of the project. */
   members: UserConnection;
-  /**
-   * The milestone that this project is associated with.
-   * @deprecated Milestones will be removed. Use roadmaps instead.
-   */
-  milestone?: Maybe<Milestone>;
   /** The project's name. */
   name: Scalars["String"];
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   progress: Scalars["Float"];
+  /** [ALPHA] Milestones associated with the project. */
+  projectMilestones: ProjectMilestoneConnection;
   /** The time until which project update reminders are paused. */
   projectUpdateRemindersPausedUntilAt?: Maybe<Scalars["DateTime"]>;
   /** Project updates associated with the project. */
@@ -5224,7 +5140,7 @@ export type Project = Node & {
   slackNewIssue: Scalars["Boolean"];
   /** The project's unique URL slug. */
   slugId: Scalars["String"];
-  /** The sort order for the project within its milestone/initiative. */
+  /** The sort order for the project within the organizion. */
   sortOrder: Scalars["Float"];
   /** [Internal] The estimated start date of the project. */
   startDate?: Maybe<Scalars["TimelessDate"]>;
@@ -5285,6 +5201,16 @@ export type ProjectMembersArgs = {
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   includeDisabled?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** A project. */
+export type ProjectProjectMilestonesArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 };
@@ -5372,8 +5298,6 @@ export type ProjectCreateInput = {
   leadId?: Maybe<Scalars["String"]>;
   /** The identifiers of the members of this project. */
   memberIds?: Maybe<Array<Scalars["String"]>>;
-  /** The identifier of the milestone to associate the project with. */
-  milestoneId?: Maybe<Scalars["String"]>;
   /** The name of the project. */
   name: Scalars["String"];
   /** The sort order for the project within shared views. */
@@ -5494,6 +5418,79 @@ export type ProjectLinkUpdateInput = {
   label?: Maybe<Scalars["String"]>;
   /** The URL of the link. */
   url?: Maybe<Scalars["String"]>;
+};
+
+/** A milestone for a project. */
+export type ProjectMilestone = Node & {
+  __typename?: "ProjectMilestone";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The description of the project milestone. */
+  description?: Maybe<Scalars["String"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The name of the project milestone. */
+  name: Scalars["String"];
+  /** The project of the milestone. */
+  project: Project;
+  /** The planned completion date of the milestone. */
+  targetDate?: Maybe<Scalars["TimelessDate"]>;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+export type ProjectMilestoneConnection = {
+  __typename?: "ProjectMilestoneConnection";
+  edges: Array<ProjectMilestoneEdge>;
+  nodes: Array<ProjectMilestone>;
+  pageInfo: PageInfo;
+};
+
+export type ProjectMilestoneCreateInput = {
+  /** The description of the project milestone. */
+  description?: Maybe<Scalars["String"]>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: Maybe<Scalars["String"]>;
+  /** The name of the project milestone. */
+  name: Scalars["String"];
+  /** Related project for the project milestone. */
+  projectId: Scalars["String"];
+  /** The planned target date of the project milestone. */
+  targetDate?: Maybe<Scalars["TimelessDate"]>;
+};
+
+export type ProjectMilestoneEdge = {
+  __typename?: "ProjectMilestoneEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: ProjectMilestone;
+};
+
+export type ProjectMilestonePayload = {
+  __typename?: "ProjectMilestonePayload";
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** The project milestone that was created or updated. */
+  projectMilestone: ProjectMilestone;
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+export type ProjectMilestoneUpdateInput = {
+  /** The description of the project milestone. */
+  description?: Maybe<Scalars["String"]>;
+  /** The name of the project milestone. */
+  name?: Maybe<Scalars["String"]>;
+  /** Related project for the project milestone. */
+  projectId?: Maybe<Scalars["String"]>;
+  /** The planned target date of the project milestone. */
+  targetDate?: Maybe<Scalars["TimelessDate"]>;
 };
 
 /** A project related notification */
@@ -5662,8 +5659,6 @@ export type ProjectUpdateInput = {
   leadId?: Maybe<Scalars["String"]>;
   /** The identifiers of the members of this project. */
   memberIds?: Maybe<Array<Scalars["String"]>>;
-  /** The identifier of the milestone to associate the project with. */
-  milestoneId?: Maybe<Scalars["String"]>;
   /** The name of the project. */
   name?: Maybe<Scalars["String"]>;
   /** The time until which project update reminders are paused. */
@@ -5883,6 +5878,10 @@ export enum PushSubscriptionType {
 
 export type Query = {
   __typename?: "Query";
+  /** One specific project milestone. */
+  ProjectMilestone: ProjectMilestone;
+  /** All milestones for the project. */
+  ProjectMilestones: ProjectMilestoneConnection;
   /** All teams you the user can administrate. Administrable teams are teams whose settings the user can change, but to whose issues the user doesn't necessarily have access to. */
   administrableTeams: TeamConnection;
   /** All API keys for the user. */
@@ -5985,16 +5984,6 @@ export type Query = {
   issueVcsBranchSearch?: Maybe<Issue>;
   /** All issues. */
   issues: IssueConnection;
-  /**
-   * One specific milestone.
-   * @deprecated Milestones will be removed. Use roadmaps instead.
-   */
-  milestone: Milestone;
-  /**
-   * All milestones.
-   * @deprecated Milestones will be removed. Use roadmaps instead.
-   */
-  milestones: MilestoneConnection;
   /** One specific notification. */
   notification: Notification;
   /** One specific notification subscription. */
@@ -6059,8 +6048,6 @@ export type Query = {
   templates: Array<Template>;
   /** One specific user. */
   user: User;
-  /** [INTERNAL] Checks if there's a currently active email verification challenge for a user account. */
-  userAccountEmailChangeFind: UserAccountEmailChangeFindPayload;
   /** Finds a user account by email. */
   userAccountExists?: Maybe<UserAccountExistsPayload>;
   /** The user's settings. */
@@ -6079,6 +6066,19 @@ export type Query = {
   workflowStates: WorkflowStateConnection;
   /** [INTERNAL] Get all authorized applications (with limited fields) for a workspace */
   workspaceAuthorizedApplications: Array<WorkspaceAuthorizedApplication>;
+};
+
+export type QueryProjectMilestoneArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryProjectMilestonesArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
 };
 
 export type QueryAdministrableTeamsArgs = {
@@ -6341,19 +6341,6 @@ export type QueryIssuesArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
-export type QueryMilestoneArgs = {
-  id: Scalars["String"];
-};
-
-export type QueryMilestonesArgs = {
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-};
-
 export type QueryNotificationArgs = {
   id: Scalars["String"];
 };
@@ -6522,10 +6509,6 @@ export type QueryTemplateArgs = {
 
 export type QueryUserArgs = {
   id: Scalars["String"];
-};
-
-export type QueryUserAccountEmailChangeFindArgs = {
-  email: Scalars["String"];
 };
 
 export type QueryUserAccountExistsArgs = {
@@ -6818,7 +6801,7 @@ export type RoadmapToProjectCreateInput = {
   projectId: Scalars["String"];
   /** The identifier of the roadmap. */
   roadmapId: Scalars["String"];
-  /** The sort order for the project within its milestone. */
+  /** The sort order for the project within its organization. */
   sortOrder?: Maybe<Scalars["Float"]>;
 };
 
@@ -6840,7 +6823,7 @@ export type RoadmapToProjectPayload = {
 };
 
 export type RoadmapToProjectUpdateInput = {
-  /** The sort order for the project within its milestone. */
+  /** The sort order for the project within its organization. */
   sortOrder?: Maybe<Scalars["Float"]>;
 };
 
@@ -6932,6 +6915,28 @@ export type SentrySettingsInput = {
   organizationSlug: Scalars["String"];
 };
 
+export enum SlaStatus {
+  Breached = "Breached",
+  Completed = "Completed",
+  HighRisk = "HighRisk",
+  LowRisk = "LowRisk",
+  MediumRisk = "MediumRisk",
+}
+
+/** Comparator for sla status. */
+export type SlaStatusComparator = {
+  /** Equals constraint. */
+  eq?: Maybe<SlaStatus>;
+  /** In-array constraint. */
+  in?: Maybe<Array<SlaStatus>>;
+  /** Not-equals constraint. */
+  neq?: Maybe<SlaStatus>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<SlaStatus>>;
+  /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
+  null?: Maybe<Scalars["Boolean"]>;
+};
+
 /** Slack notification specific settings. */
 export type SlackPostSettings = {
   __typename?: "SlackPostSettings";
@@ -6944,6 +6949,38 @@ export type SlackPostSettingsInput = {
   channel: Scalars["String"];
   channelId: Scalars["String"];
   configurationUrl: Scalars["String"];
+};
+
+/** Comparator for `sourceType` field. */
+export type SourceTypeComparator = {
+  /** Contains constraint. Matches any values that contain the given string. */
+  contains?: Maybe<Scalars["String"]>;
+  /** Contains case insensitive constraint. Matches any values that contain the given string case insensitive. */
+  containsIgnoreCase?: Maybe<Scalars["String"]>;
+  /** Ends with constraint. Matches any values that end with the given string. */
+  endsWith?: Maybe<Scalars["String"]>;
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["String"]>;
+  /** Equals case insensitive. Matches any values that matches the given string case insensitive. */
+  eqIgnoreCase?: Maybe<Scalars["String"]>;
+  /** In-array constraint. */
+  in?: Maybe<Array<Scalars["String"]>>;
+  /** Not-equals constraint. */
+  neq?: Maybe<Scalars["String"]>;
+  /** Not-equals case insensitive. Matches any values that don't match the given string case insensitive. */
+  neqIgnoreCase?: Maybe<Scalars["String"]>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<Scalars["String"]>>;
+  /** Doesn't contain constraint. Matches any values that don't contain the given string. */
+  notContains?: Maybe<Scalars["String"]>;
+  /** Doesn't contain case insensitive constraint. Matches any values that don't contain the given string case insensitive. */
+  notContainsIgnoreCase?: Maybe<Scalars["String"]>;
+  /** Doesn't end with constraint. Matches any values that don't end with the given string. */
+  notEndsWith?: Maybe<Scalars["String"]>;
+  /** Doesn't start with constraint. Matches any values that don't start with the given string. */
+  notStartsWith?: Maybe<Scalars["String"]>;
+  /** Starts with constraint. Matches any values that start with the given string. */
+  startsWith?: Maybe<Scalars["String"]>;
 };
 
 export type SsoUrlFromEmailResponse = {
@@ -7115,6 +7152,8 @@ export type Team = Node & {
   private: Scalars["Boolean"];
   /** Projects associated with the team. */
   projects: ProjectConnection;
+  /** Whether an issue needs to have a priority set before leaving triage */
+  requirePriorityToLeaveTriage: Scalars["Boolean"];
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
   reviewWorkflowState?: Maybe<WorkflowState>;
   /** Whether to send new issue comment notifications to Slack. */
@@ -7671,6 +7710,8 @@ export type UpdateOrganizationInput = {
   reducedPersonalInformation?: Maybe<Scalars["Boolean"]>;
   /** Whether the organization is using roadmap. */
   roadmapEnabled?: Maybe<Scalars["Boolean"]>;
+  /** Internal. Whether SLA's have been enabled for the organization. */
+  slaEnabled?: Maybe<Scalars["Boolean"]>;
   /** The URL key of the organization. */
   urlKey?: Maybe<Scalars["String"]>;
 };
@@ -7885,35 +7926,6 @@ export type UserAccountEmailChange = {
   oldEmailVerifiedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the model was updated. */
   updatedAt: Scalars["DateTime"];
-};
-
-/** [INTERNAL] Result of searching for a verification challenge for a user account. */
-export type UserAccountEmailChangeFindPayload = {
-  __typename?: "UserAccountEmailChangeFindPayload";
-  /** [INTERNAL] Whether there is a currently active change. */
-  hasChangeActive: Scalars["Boolean"];
-  /** The identifier of the last sync operation. */
-  lastSyncId: Scalars["Float"];
-};
-
-/** [INTERNAL] Result of verifying an email and code. */
-export type UserAccountEmailChangeVerifyCodePayload = {
-  __typename?: "UserAccountEmailChangeVerifyCodePayload";
-  /** [INTERNAL] Reason why the operation was not successful. */
-  failureReason?: Maybe<Scalars["Float"]>;
-  /** [INTERNAL] Whether the operation was successful. */
-  success: Scalars["Boolean"];
-};
-
-/** [INTERNAL] Result of creating or cancelling a verification challenge for email change. */
-export type UserAccountEmailVerificationPayload = {
-  __typename?: "UserAccountEmailVerificationPayload";
-  /** [INTERNAL] Reason why the operation was not successful. */
-  failureReason?: Maybe<Scalars["Float"]>;
-  /** The identifier of the last sync operation. */
-  lastSyncId: Scalars["Float"];
-  /** [INTERNAL] Whether the operation was successful. */
-  success: Scalars["Boolean"];
 };
 
 /** [INTERNAL] Result of looking up a user account by email. */
@@ -8233,8 +8245,10 @@ export enum ViewType {
   Inbox = "inbox",
   Label = "label",
   MyIssues = "myIssues",
+  MyIssuesActivity = "myIssuesActivity",
   MyIssuesCreatedByMe = "myIssuesCreatedByMe",
   MyIssuesSubscribedTo = "myIssuesSubscribedTo",
+  MyIssuesTouchedByMe = "myIssuesTouchedByMe",
   Project = "project",
   Projects = "projects",
   ProjectsAll = "projectsAll",
@@ -8340,10 +8354,12 @@ export type WebhookUpdateInput = {
   url?: Maybe<Scalars["String"]>;
 };
 
-/** The conditions to match different events, which need to be true for workflow to be started. */
-export type WorkflowConditions = {
-  /** The conditions to match triggers based on issue (creation, update, deletion). */
-  issue: WorkflowEntityPropertyMatcher;
+/** A condition to match for the workflow to be triggered. */
+export type WorkflowCondition = {
+  /** Trigger the workflow when an issue matches the filter. Can only be used when the trigger type is `Issue`. */
+  issueFilter?: Maybe<IssueFilter>;
+  /** Triggers the workflow when a project matches the filter. Can only be used when the trigger type is `Project`. */
+  projectFilter?: Maybe<ProjectFilter>;
 };
 
 export type WorkflowDefinition = Node & {
@@ -8352,28 +8368,32 @@ export type WorkflowDefinition = Node & {
   activities: Scalars["JSONObject"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** One or more conditions that need to be true for workflow to be triggered. */
+  /** The conditions that need to be match for the workflow to be triggered. */
   conditions: Scalars["JSONObject"];
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The user who created the workflow. */
   creator: User;
-  /** The workflow description. */
+  /** The description of the workflow. */
   description?: Maybe<Scalars["String"]>;
   enabled: Scalars["Boolean"];
+  /** The name of the group that the workflow belongs to. */
+  groupName?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The name of the workflow. */
   name: Scalars["String"];
-  /** The organization where workflow was created. */
-  organization: Organization;
   /** Cron schedule which is used to execute the workflow. Only applicable for cron based workflows. */
   schedule: Scalars["JSONObject"];
-  /** The team associated with the workflow. */
-  team: Team;
-  /** The type of the trigger that kicks off the workflow. */
-  trigger: WorkflowTriggerType;
-  /** The type of the workflow */
+  /** The sort order of the workflow definition within its siblings. */
+  sortOrder: Scalars["String"];
+  /** The team associated with the workflow. If not set, the workflow is associated with the entire organization. */
+  team?: Maybe<Team>;
+  /** The type of the event that triggers off the workflow. */
+  trigger: WorkflowTrigger;
+  /** The object type (e.g. Issue) that triggers this workflow. */
+  triggerType: WorkflowTriggerType;
+  /** The type of the workflow. */
   type: WorkflowType;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -8383,18 +8403,18 @@ export type WorkflowDefinition = Node & {
   updatedAt: Scalars["DateTime"];
 };
 
-/** Object to provide conditions to match an entity change. */
-export type WorkflowEntityPropertyMatcher = {
-  /** The optional list of property matchers that all have to match. */
-  and?: Maybe<Array<WorkflowEntityPropertyMatcher>>;
-  /** The initial value of the property to match. */
-  fromValue?: Maybe<Scalars["String"]>;
-  /** The optional list of property matchers where at least one have to match. */
-  or?: Maybe<Array<WorkflowEntityPropertyMatcher>>;
-  /** The property to check for matching. */
-  property: Scalars["String"];
-  /** The new value of the property to match. */
-  toValue?: Maybe<Scalars["String"]>;
+export type WorkflowDefinitionConnection = {
+  __typename?: "WorkflowDefinitionConnection";
+  edges: Array<WorkflowDefinitionEdge>;
+  nodes: Array<WorkflowDefinition>;
+  pageInfo: PageInfo;
+};
+
+export type WorkflowDefinitionEdge = {
+  __typename?: "WorkflowDefinitionEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: WorkflowDefinition;
 };
 
 /** A state in a team workflow. */
@@ -8517,16 +8537,24 @@ export type WorkflowStateUpdateInput = {
   position?: Maybe<Scalars["Float"]>;
 };
 
-export enum WorkflowTriggerType {
+export enum WorkflowTrigger {
   Cron = "cron",
-  IssueCreated = "issueCreated",
-  IssueDeleted = "issueDeleted",
-  IssueUpdated = "issueUpdated",
+  EntityCreated = "entityCreated",
+  EntityCreatedOrUpdated = "entityCreatedOrUpdated",
+  EntityRemoved = "entityRemoved",
+  EntityUnarchived = "entityUnarchived",
+  EntityUpdated = "entityUpdated",
+}
+
+export enum WorkflowTriggerType {
+  Issue = "issue",
+  Project = "project",
 }
 
 export enum WorkflowType {
   Custom = "custom",
   RecurringIssue = "recurringIssue",
+  Sla = "sla",
 }
 
 /** [INTERNAL] Public information of the OAuth application, plus the userIds and scopes for those users. */
@@ -8660,15 +8688,10 @@ export type DocumentFragment = { __typename: "Document" } & Pick<
     updatedBy: { __typename?: "User" } & Pick<User, "id">;
   };
 
-export type InitiativeFragment = { __typename: "Initiative" } & Pick<
-  Initiative,
-  "targetDate" | "description" | "updatedAt" | "name" | "sortOrder" | "archivedAt" | "createdAt" | "id"
->;
-
-export type MilestoneFragment = { __typename: "Milestone" } & Pick<
-  Milestone,
-  "updatedAt" | "name" | "sortOrder" | "archivedAt" | "createdAt" | "id"
->;
+export type ProjectMilestoneFragment = { __typename: "ProjectMilestone" } & Pick<
+  ProjectMilestone,
+  "description" | "updatedAt" | "name" | "targetDate" | "archivedAt" | "createdAt" | "id"
+> & { project: { __typename?: "Project" } & Pick<Project, "id"> };
 
 type Notification_IssueNotification_Fragment = { __typename: "IssueNotification" } & Pick<
   IssueNotification,
@@ -8698,6 +8721,11 @@ export type NotificationFragment =
   | Notification_IssueNotification_Fragment
   | Notification_OauthClientApprovalNotification_Fragment
   | Notification_ProjectNotification_Fragment;
+
+export type PersonalNoteFragment = { __typename: "PersonalNote" } & Pick<
+  PersonalNote,
+  "updatedAt" | "contentData" | "archivedAt" | "createdAt" | "id"
+> & { user: { __typename?: "User" } & Pick<User, "id"> };
 
 export type ProjectNotificationSubscriptionFragment = { __typename: "ProjectNotificationSubscription" } & Pick<
   ProjectNotificationSubscription,
@@ -8750,8 +8778,6 @@ export type ProjectFragment = { __typename: "Project" } & Pick<
   | "slackIssueStatuses"
 > & {
     integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
-    initiative?: Maybe<{ __typename?: "Initiative" } & InitiativeFragment>;
-    milestone?: Maybe<{ __typename?: "Milestone" } & Pick<Milestone, "id">>;
     lead?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     convertedFromIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     creator: { __typename?: "User" } & Pick<User, "id">;
@@ -9023,6 +9049,7 @@ export type IssueFragment = { __typename: "Issue" } & Pick<
   | "priority"
   | "archivedAt"
   | "createdAt"
+  | "startedTriageAt"
   | "triagedAt"
   | "autoArchivedAt"
   | "autoClosedAt"
@@ -9040,6 +9067,7 @@ export type IssueFragment = { __typename: "Issue" } & Pick<
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     snoozedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     state: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
+    projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
   };
 
 export type OauthClientApprovalNotificationFragment = { __typename: "OauthClientApprovalNotification" } & Pick<
@@ -9103,6 +9131,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "id"
   | "inviteHash"
   | "defaultIssueEstimate"
+  | "requirePriorityToLeaveTriage"
   | "issueOrderingNoPriorityFirst"
   | "private"
   | "cyclesEnabled"
@@ -9271,6 +9300,11 @@ export type NotificationSubscriptionFragment =
   | NotificationSubscription_ProjectNotificationSubscription_Fragment
   | NotificationSubscription_TeamNotificationSubscription_Fragment;
 
+export type NotionSettingsFragment = { __typename: "NotionSettings" } & Pick<
+  NotionSettings,
+  "workspaceId" | "workspaceName"
+>;
+
 export type OauthClientFragment = { __typename: "OauthClient" } & Pick<
   OauthClient,
   | "imageUrl"
@@ -9395,11 +9429,13 @@ export type IntegrationsSettingsFragment = { __typename: "IntegrationsSettings" 
   | "createdAt"
   | "id"
   | "slackIssueNewComment"
+  | "slackIssueAddedToTriage"
   | "slackIssueCreated"
   | "slackProjectUpdateCreated"
+  | "slackIssueSlaHighRisk"
+  | "slackIssueSlaBreached"
   | "slackIssueStatusChangedDone"
   | "slackIssueStatusChangedAll"
-  | "slackProjectUpdateCreatedToMilestone"
   | "slackProjectUpdateCreatedToTeam"
   | "slackProjectUpdateCreatedToWorkspace"
 > & {
@@ -9413,6 +9449,7 @@ export type IntegrationSettingsFragment = { __typename: "IntegrationSettings" } 
   googleSheets?: Maybe<{ __typename?: "GoogleSheetsSettings" } & GoogleSheetsSettingsFragment>;
   intercom?: Maybe<{ __typename?: "IntercomSettings" } & IntercomSettingsFragment>;
   jira?: Maybe<{ __typename?: "JiraSettings" } & JiraSettingsFragment>;
+  notion?: Maybe<{ __typename?: "NotionSettings" } & NotionSettingsFragment>;
   sentry?: Maybe<{ __typename?: "SentrySettings" } & SentrySettingsFragment>;
   slackOrgProjectUpdatesPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
   slackPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
@@ -9643,11 +9680,6 @@ export type ImageUploadFromUrlPayloadFragment = { __typename: "ImageUploadFromUr
   "url" | "lastSyncId" | "success"
 >;
 
-export type InitiativeConnectionFragment = { __typename: "InitiativeConnection" } & {
-  nodes: Array<{ __typename?: "Initiative" } & InitiativeFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
 export type IntegrationConnectionFragment = { __typename: "IntegrationConnection" } & {
   nodes: Array<{ __typename?: "Integration" } & IntegrationFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
@@ -9744,21 +9776,6 @@ export type IssueRelationPayloadFragment = { __typename: "IssueRelationPayload" 
 
 export type LogoutResponseFragment = { __typename: "LogoutResponse" } & Pick<LogoutResponse, "success">;
 
-export type MilestoneConnectionFragment = { __typename: "MilestoneConnection" } & {
-  nodes: Array<{ __typename?: "Milestone" } & MilestoneFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
-export type MilestoneMigrationPayloadFragment = { __typename: "MilestoneMigrationPayload" } & Pick<
-  MilestoneMigrationPayload,
-  "lastSyncId" | "success"
->;
-
-export type MilestonePayloadFragment = { __typename: "MilestonePayload" } & Pick<
-  MilestonePayload,
-  "lastSyncId" | "success"
-> & { milestone?: Maybe<{ __typename?: "Milestone" } & Pick<Milestone, "id">> };
-
 type Node_ApiKey_Fragment = { __typename: "ApiKey" } & Pick<ApiKey, "id">;
 
 type Node_Attachment_Fragment = { __typename: "Attachment" } & Pick<Attachment, "id">;
@@ -9777,8 +9794,6 @@ type Node_Emoji_Fragment = { __typename: "Emoji" } & Pick<Emoji, "id">;
 
 type Node_Favorite_Fragment = { __typename: "Favorite" } & Pick<Favorite, "id">;
 
-type Node_Initiative_Fragment = { __typename: "Initiative" } & Pick<Initiative, "id">;
-
 type Node_Integration_Fragment = { __typename: "Integration" } & Pick<Integration, "id">;
 
 type Node_IntegrationResource_Fragment = { __typename: "IntegrationResource" } & Pick<IntegrationResource, "id">;
@@ -9789,6 +9804,8 @@ type Node_IntegrationsSettings_Fragment = { __typename: "IntegrationsSettings" }
 
 type Node_Issue_Fragment = { __typename: "Issue" } & Pick<Issue, "id">;
 
+type Node_IssueDraft_Fragment = { __typename: "IssueDraft" } & Pick<IssueDraft, "id">;
+
 type Node_IssueHistory_Fragment = { __typename: "IssueHistory" } & Pick<IssueHistory, "id">;
 
 type Node_IssueImport_Fragment = { __typename: "IssueImport" } & Pick<IssueImport, "id">;
@@ -9798,8 +9815,6 @@ type Node_IssueLabel_Fragment = { __typename: "IssueLabel" } & Pick<IssueLabel, 
 type Node_IssueNotification_Fragment = { __typename: "IssueNotification" } & Pick<IssueNotification, "id">;
 
 type Node_IssueRelation_Fragment = { __typename: "IssueRelation" } & Pick<IssueRelation, "id">;
-
-type Node_Milestone_Fragment = { __typename: "Milestone" } & Pick<Milestone, "id">;
 
 type Node_OauthClient_Fragment = { __typename: "OauthClient" } & Pick<OauthClient, "id">;
 
@@ -9818,9 +9833,13 @@ type Node_OrganizationInvite_Fragment = { __typename: "OrganizationInvite" } & P
 
 type Node_PaidSubscription_Fragment = { __typename: "PaidSubscription" } & Pick<PaidSubscription, "id">;
 
+type Node_PersonalNote_Fragment = { __typename: "PersonalNote" } & Pick<PersonalNote, "id">;
+
 type Node_Project_Fragment = { __typename: "Project" } & Pick<Project, "id">;
 
 type Node_ProjectLink_Fragment = { __typename: "ProjectLink" } & Pick<ProjectLink, "id">;
+
+type Node_ProjectMilestone_Fragment = { __typename: "ProjectMilestone" } & Pick<ProjectMilestone, "id">;
 
 type Node_ProjectNotification_Fragment = { __typename: "ProjectNotification" } & Pick<ProjectNotification, "id">;
 
@@ -9877,18 +9896,17 @@ export type NodeFragment =
   | Node_Document_Fragment
   | Node_Emoji_Fragment
   | Node_Favorite_Fragment
-  | Node_Initiative_Fragment
   | Node_Integration_Fragment
   | Node_IntegrationResource_Fragment
   | Node_IntegrationTemplate_Fragment
   | Node_IntegrationsSettings_Fragment
   | Node_Issue_Fragment
+  | Node_IssueDraft_Fragment
   | Node_IssueHistory_Fragment
   | Node_IssueImport_Fragment
   | Node_IssueLabel_Fragment
   | Node_IssueNotification_Fragment
   | Node_IssueRelation_Fragment
-  | Node_Milestone_Fragment
   | Node_OauthClient_Fragment
   | Node_OauthClientApproval_Fragment
   | Node_OauthClientApprovalNotification_Fragment
@@ -9896,8 +9914,10 @@ export type NodeFragment =
   | Node_OrganizationDomain_Fragment
   | Node_OrganizationInvite_Fragment
   | Node_PaidSubscription_Fragment
+  | Node_PersonalNote_Fragment
   | Node_Project_Fragment
   | Node_ProjectLink_Fragment
+  | Node_ProjectMilestone_Fragment
   | Node_ProjectNotification_Fragment
   | Node_ProjectNotificationSubscription_Fragment
   | Node_ProjectUpdate_Fragment
@@ -10020,6 +10040,16 @@ export type ProjectLinkPayloadFragment = { __typename: "ProjectLinkPayload" } & 
   ProjectLinkPayload,
   "lastSyncId" | "success"
 > & { projectLink: { __typename?: "ProjectLink" } & Pick<ProjectLink, "id"> };
+
+export type ProjectMilestoneConnectionFragment = { __typename: "ProjectMilestoneConnection" } & {
+  nodes: Array<{ __typename?: "ProjectMilestone" } & ProjectMilestoneFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
+export type ProjectMilestonePayloadFragment = { __typename: "ProjectMilestonePayload" } & Pick<
+  ProjectMilestonePayload,
+  "lastSyncId" | "success"
+> & { projectMilestone: { __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id"> };
 
 export type ProjectPayloadFragment = { __typename: "ProjectPayload" } & Pick<
   ProjectPayload,
@@ -10204,14 +10234,21 @@ export type WorkflowDefinitionFragment = { __typename: "WorkflowDefinition" } & 
   | "activities"
   | "schedule"
   | "conditions"
+  | "description"
   | "updatedAt"
+  | "groupName"
   | "name"
+  | "sortOrder"
   | "archivedAt"
   | "createdAt"
   | "id"
-  | "description"
   | "enabled"
-> & { team: { __typename?: "Team" } & Pick<Team, "id">; creator: { __typename?: "User" } & Pick<User, "id"> };
+> & { team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>; creator: { __typename?: "User" } & Pick<User, "id"> };
+
+export type WorkflowDefinitionConnectionFragment = { __typename: "WorkflowDefinitionConnection" } & {
+  nodes: Array<{ __typename?: "WorkflowDefinition" } & WorkflowDefinitionFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
 
 export type WorkflowStateConnectionFragment = { __typename: "WorkflowStateConnection" } & {
   nodes: Array<{ __typename?: "WorkflowState" } & WorkflowStateFragment>;
@@ -10222,6 +10259,1482 @@ export type WorkflowStatePayloadFragment = { __typename: "WorkflowStatePayload" 
   WorkflowStatePayload,
   "lastSyncId" | "success"
 > & { workflowState: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id"> };
+
+export type AirbyteIntegrationConnectMutationVariables = Exact<{
+  input: AirbyteConfigurationInput;
+}>;
+
+export type AirbyteIntegrationConnectMutation = { __typename?: "Mutation" } & {
+  airbyteIntegrationConnect: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type CreateApiKeyMutationVariables = Exact<{
+  input: ApiKeyCreateInput;
+}>;
+
+export type CreateApiKeyMutation = { __typename?: "Mutation" } & {
+  apiKeyCreate: { __typename?: "ApiKeyPayload" } & ApiKeyPayloadFragment;
+};
+
+export type DeleteApiKeyMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteApiKeyMutation = { __typename?: "Mutation" } & {
+  apiKeyDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type ArchiveAttachmentMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ArchiveAttachmentMutation = { __typename?: "Mutation" } & {
+  attachmentArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type CreateAttachmentMutationVariables = Exact<{
+  input: AttachmentCreateInput;
+}>;
+
+export type CreateAttachmentMutation = { __typename?: "Mutation" } & {
+  attachmentCreate: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
+};
+
+export type DeleteAttachmentMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteAttachmentMutation = { __typename?: "Mutation" } & {
+  attachmentDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type AttachmentLinkDiscordMutationVariables = Exact<{
+  channelId: Scalars["String"];
+  issueId: Scalars["String"];
+  messageId: Scalars["String"];
+  url: Scalars["String"];
+}>;
+
+export type AttachmentLinkDiscordMutation = { __typename?: "Mutation" } & {
+  attachmentLinkDiscord: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
+};
+
+export type AttachmentLinkFrontMutationVariables = Exact<{
+  conversationId: Scalars["String"];
+  issueId: Scalars["String"];
+}>;
+
+export type AttachmentLinkFrontMutation = { __typename?: "Mutation" } & {
+  attachmentLinkFront: { __typename?: "FrontAttachmentPayload" } & FrontAttachmentPayloadFragment;
+};
+
+export type AttachmentLinkIntercomMutationVariables = Exact<{
+  conversationId: Scalars["String"];
+  issueId: Scalars["String"];
+}>;
+
+export type AttachmentLinkIntercomMutation = { __typename?: "Mutation" } & {
+  attachmentLinkIntercom: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
+};
+
+export type AttachmentLinkJiraIssueMutationVariables = Exact<{
+  issueId: Scalars["String"];
+  jiraIssueId: Scalars["String"];
+}>;
+
+export type AttachmentLinkJiraIssueMutation = { __typename?: "Mutation" } & {
+  attachmentLinkJiraIssue: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
+};
+
+export type AttachmentLinkUrlMutationVariables = Exact<{
+  id?: Maybe<Scalars["String"]>;
+  issueId: Scalars["String"];
+  title?: Maybe<Scalars["String"]>;
+  url: Scalars["String"];
+}>;
+
+export type AttachmentLinkUrlMutation = { __typename?: "Mutation" } & {
+  attachmentLinkURL: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
+};
+
+export type AttachmentLinkZendeskMutationVariables = Exact<{
+  issueId: Scalars["String"];
+  ticketId: Scalars["String"];
+}>;
+
+export type AttachmentLinkZendeskMutation = { __typename?: "Mutation" } & {
+  attachmentLinkZendesk: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
+};
+
+export type UpdateAttachmentMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: AttachmentUpdateInput;
+}>;
+
+export type UpdateAttachmentMutation = { __typename?: "Mutation" } & {
+  attachmentUpdate: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
+};
+
+export type CreateCommentMutationVariables = Exact<{
+  input: CommentCreateInput;
+}>;
+
+export type CreateCommentMutation = { __typename?: "Mutation" } & {
+  commentCreate: { __typename?: "CommentPayload" } & CommentPayloadFragment;
+};
+
+export type DeleteCommentMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteCommentMutation = { __typename?: "Mutation" } & {
+  commentDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateCommentMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: CommentUpdateInput;
+}>;
+
+export type UpdateCommentMutation = { __typename?: "Mutation" } & {
+  commentUpdate: { __typename?: "CommentPayload" } & CommentPayloadFragment;
+};
+
+export type CreateContactMutationVariables = Exact<{
+  input: ContactCreateInput;
+}>;
+
+export type CreateContactMutation = { __typename?: "Mutation" } & {
+  contactCreate: { __typename?: "ContactPayload" } & ContactPayloadFragment;
+};
+
+export type CreateCsvExportReportMutationVariables = Exact<{
+  includePrivateTeamIds?: Maybe<Array<Scalars["String"]> | Scalars["String"]>;
+}>;
+
+export type CreateCsvExportReportMutation = { __typename?: "Mutation" } & {
+  createCsvExportReport: { __typename?: "CreateCsvExportReportPayload" } & CreateCsvExportReportPayloadFragment;
+};
+
+export type CreateOrganizationFromOnboardingMutationVariables = Exact<{
+  input: CreateOrganizationInput;
+  survey?: Maybe<OnboardingCustomerSurvey>;
+}>;
+
+export type CreateOrganizationFromOnboardingMutation = { __typename?: "Mutation" } & {
+  createOrganizationFromOnboarding: {
+    __typename?: "CreateOrJoinOrganizationResponse";
+  } & CreateOrJoinOrganizationResponseFragment;
+};
+
+export type CreateCustomViewMutationVariables = Exact<{
+  input: CustomViewCreateInput;
+}>;
+
+export type CreateCustomViewMutation = { __typename?: "Mutation" } & {
+  customViewCreate: { __typename?: "CustomViewPayload" } & CustomViewPayloadFragment;
+};
+
+export type DeleteCustomViewMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteCustomViewMutation = { __typename?: "Mutation" } & {
+  customViewDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateCustomViewMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: CustomViewUpdateInput;
+}>;
+
+export type UpdateCustomViewMutation = { __typename?: "Mutation" } & {
+  customViewUpdate: { __typename?: "CustomViewPayload" } & CustomViewPayloadFragment;
+};
+
+export type ArchiveCycleMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ArchiveCycleMutation = { __typename?: "Mutation" } & {
+  cycleArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type CreateCycleMutationVariables = Exact<{
+  input: CycleCreateInput;
+}>;
+
+export type CreateCycleMutation = { __typename?: "Mutation" } & {
+  cycleCreate: { __typename?: "CyclePayload" } & CyclePayloadFragment;
+};
+
+export type UpdateCycleMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: CycleUpdateInput;
+}>;
+
+export type UpdateCycleMutation = { __typename?: "Mutation" } & {
+  cycleUpdate: { __typename?: "CyclePayload" } & CyclePayloadFragment;
+};
+
+export type CreateDocumentMutationVariables = Exact<{
+  input: DocumentCreateInput;
+}>;
+
+export type CreateDocumentMutation = { __typename?: "Mutation" } & {
+  documentCreate: { __typename?: "DocumentPayload" } & DocumentPayloadFragment;
+};
+
+export type DeleteDocumentMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteDocumentMutation = { __typename?: "Mutation" } & {
+  documentDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateDocumentMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: DocumentUpdateInput;
+}>;
+
+export type UpdateDocumentMutation = { __typename?: "Mutation" } & {
+  documentUpdate: { __typename?: "DocumentPayload" } & DocumentPayloadFragment;
+};
+
+export type EmailTokenUserAccountAuthMutationVariables = Exact<{
+  input: TokenUserAccountAuthInput;
+}>;
+
+export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
+  emailTokenUserAccountAuth: { __typename?: "AuthResolverResponse" } & AuthResolverResponseFragment;
+};
+
+export type EmailUnsubscribeMutationVariables = Exact<{
+  input: EmailUnsubscribeInput;
+}>;
+
+export type EmailUnsubscribeMutation = { __typename?: "Mutation" } & {
+  emailUnsubscribe: { __typename?: "EmailUnsubscribePayload" } & EmailUnsubscribePayloadFragment;
+};
+
+export type EmailUserAccountAuthChallengeMutationVariables = Exact<{
+  input: EmailUserAccountAuthChallengeInput;
+}>;
+
+export type EmailUserAccountAuthChallengeMutation = { __typename?: "Mutation" } & {
+  emailUserAccountAuthChallenge: {
+    __typename?: "EmailUserAccountAuthChallengeResponse";
+  } & EmailUserAccountAuthChallengeResponseFragment;
+};
+
+export type CreateEmojiMutationVariables = Exact<{
+  input: EmojiCreateInput;
+}>;
+
+export type CreateEmojiMutation = { __typename?: "Mutation" } & {
+  emojiCreate: { __typename?: "EmojiPayload" } & EmojiPayloadFragment;
+};
+
+export type DeleteEmojiMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteEmojiMutation = { __typename?: "Mutation" } & {
+  emojiDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type CreateEventMutationVariables = Exact<{
+  input: EventCreateInput;
+}>;
+
+export type CreateEventMutation = { __typename?: "Mutation" } & {
+  eventCreate: { __typename?: "EventPayload" } & EventPayloadFragment;
+};
+
+export type CreateFavoriteMutationVariables = Exact<{
+  input: FavoriteCreateInput;
+}>;
+
+export type CreateFavoriteMutation = { __typename?: "Mutation" } & {
+  favoriteCreate: { __typename?: "FavoritePayload" } & FavoritePayloadFragment;
+};
+
+export type DeleteFavoriteMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteFavoriteMutation = { __typename?: "Mutation" } & {
+  favoriteDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateFavoriteMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: FavoriteUpdateInput;
+}>;
+
+export type UpdateFavoriteMutation = { __typename?: "Mutation" } & {
+  favoriteUpdate: { __typename?: "FavoritePayload" } & FavoritePayloadFragment;
+};
+
+export type FileUploadMutationVariables = Exact<{
+  contentType: Scalars["String"];
+  filename: Scalars["String"];
+  makePublic?: Maybe<Scalars["Boolean"]>;
+  metaData?: Maybe<Scalars["JSON"]>;
+  size: Scalars["Int"];
+}>;
+
+export type FileUploadMutation = { __typename?: "Mutation" } & {
+  fileUpload: { __typename?: "UploadPayload" } & UploadPayloadFragment;
+};
+
+export type GoogleUserAccountAuthMutationVariables = Exact<{
+  input: GoogleUserAccountAuthInput;
+}>;
+
+export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
+  googleUserAccountAuth: { __typename?: "AuthResolverResponse" } & AuthResolverResponseFragment;
+};
+
+export type ImageUploadFromUrlMutationVariables = Exact<{
+  url: Scalars["String"];
+}>;
+
+export type ImageUploadFromUrlMutation = { __typename?: "Mutation" } & {
+  imageUploadFromUrl: { __typename?: "ImageUploadFromUrlPayload" } & ImageUploadFromUrlPayloadFragment;
+};
+
+export type DeleteIntegrationMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteIntegrationMutation = { __typename?: "Mutation" } & {
+  integrationDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type IntegrationDiscordMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationDiscordMutation = { __typename?: "Mutation" } & {
+  integrationDiscord: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationFigmaMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationFigmaMutation = { __typename?: "Mutation" } & {
+  integrationFigma: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationFrontMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationFrontMutation = { __typename?: "Mutation" } & {
+  integrationFront: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type CreateIntegrationGithubCommitMutationVariables = Exact<{ [key: string]: never }>;
+
+export type CreateIntegrationGithubCommitMutation = { __typename?: "Mutation" } & {
+  integrationGithubCommitCreate: {
+    __typename?: "GitHubCommitIntegrationPayload";
+  } & GitHubCommitIntegrationPayloadFragment;
+};
+
+export type IntegrationGithubConnectMutationVariables = Exact<{
+  installationId: Scalars["String"];
+}>;
+
+export type IntegrationGithubConnectMutation = { __typename?: "Mutation" } & {
+  integrationGithubConnect: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationGitlabConnectMutationVariables = Exact<{
+  accessToken: Scalars["String"];
+  gitlabUrl: Scalars["String"];
+}>;
+
+export type IntegrationGitlabConnectMutation = { __typename?: "Mutation" } & {
+  integrationGitlabConnect: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationGoogleSheetsMutationVariables = Exact<{
+  code: Scalars["String"];
+}>;
+
+export type IntegrationGoogleSheetsMutation = { __typename?: "Mutation" } & {
+  integrationGoogleSheets: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationIntercomMutationVariables = Exact<{
+  code: Scalars["String"];
+  domainUrl?: Maybe<Scalars["String"]>;
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationIntercomMutation = { __typename?: "Mutation" } & {
+  integrationIntercom: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type DeleteIntegrationIntercomMutationVariables = Exact<{ [key: string]: never }>;
+
+export type DeleteIntegrationIntercomMutation = { __typename?: "Mutation" } & {
+  integrationIntercomDelete: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type UpdateIntegrationIntercomSettingsMutationVariables = Exact<{
+  input: IntercomSettingsInput;
+}>;
+
+export type UpdateIntegrationIntercomSettingsMutation = { __typename?: "Mutation" } & {
+  integrationIntercomSettingsUpdate: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationLoomMutationVariables = Exact<{ [key: string]: never }>;
+
+export type IntegrationLoomMutation = { __typename?: "Mutation" } & {
+  integrationLoom: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationRequestMutationVariables = Exact<{
+  input: IntegrationRequestInput;
+}>;
+
+export type IntegrationRequestMutation = { __typename?: "Mutation" } & {
+  integrationRequest: { __typename?: "IntegrationRequestPayload" } & IntegrationRequestPayloadFragment;
+};
+
+export type ArchiveIntegrationResourceMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ArchiveIntegrationResourceMutation = { __typename?: "Mutation" } & {
+  integrationResourceArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type IntegrationSentryConnectMutationVariables = Exact<{
+  code: Scalars["String"];
+  installationId: Scalars["String"];
+  organizationSlug: Scalars["String"];
+}>;
+
+export type IntegrationSentryConnectMutation = { __typename?: "Mutation" } & {
+  integrationSentryConnect: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationSlackMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+  shouldUseV2Auth?: Maybe<Scalars["Boolean"]>;
+}>;
+
+export type IntegrationSlackMutation = { __typename?: "Mutation" } & {
+  integrationSlack: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationSlackImportEmojisMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationSlackImportEmojisMutation = { __typename?: "Mutation" } & {
+  integrationSlackImportEmojis: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationSlackOrgProjectUpdatesPostMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationSlackOrgProjectUpdatesPostMutation = { __typename?: "Mutation" } & {
+  integrationSlackOrgProjectUpdatesPost: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationSlackPersonalMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationSlackPersonalMutation = { __typename?: "Mutation" } & {
+  integrationSlackPersonal: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationSlackPostMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+  shouldUseV2Auth?: Maybe<Scalars["Boolean"]>;
+  teamId: Scalars["String"];
+}>;
+
+export type IntegrationSlackPostMutation = { __typename?: "Mutation" } & {
+  integrationSlackPost: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationSlackProjectPostMutationVariables = Exact<{
+  code: Scalars["String"];
+  projectId: Scalars["String"];
+  redirectUri: Scalars["String"];
+  service: Scalars["String"];
+}>;
+
+export type IntegrationSlackProjectPostMutation = { __typename?: "Mutation" } & {
+  integrationSlackProjectPost: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type CreateIntegrationTemplateMutationVariables = Exact<{
+  input: IntegrationTemplateCreateInput;
+}>;
+
+export type CreateIntegrationTemplateMutation = { __typename?: "Mutation" } & {
+  integrationTemplateCreate: { __typename?: "IntegrationTemplatePayload" } & IntegrationTemplatePayloadFragment;
+};
+
+export type DeleteIntegrationTemplateMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteIntegrationTemplateMutation = { __typename?: "Mutation" } & {
+  integrationTemplateDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type IntegrationZendeskMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+  scope: Scalars["String"];
+  subdomain: Scalars["String"];
+}>;
+
+export type IntegrationZendeskMutation = { __typename?: "Mutation" } & {
+  integrationZendesk: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type CreateIntegrationsSettingsMutationVariables = Exact<{
+  input: IntegrationsSettingsCreateInput;
+}>;
+
+export type CreateIntegrationsSettingsMutation = { __typename?: "Mutation" } & {
+  integrationsSettingsCreate: { __typename?: "IntegrationsSettingsPayload" } & IntegrationsSettingsPayloadFragment;
+};
+
+export type UpdateIntegrationsSettingsMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: IntegrationsSettingsUpdateInput;
+}>;
+
+export type UpdateIntegrationsSettingsMutation = { __typename?: "Mutation" } & {
+  integrationsSettingsUpdate: { __typename?: "IntegrationsSettingsPayload" } & IntegrationsSettingsPayloadFragment;
+};
+
+export type ArchiveIssueMutationVariables = Exact<{
+  id: Scalars["String"];
+  trash?: Maybe<Scalars["Boolean"]>;
+}>;
+
+export type ArchiveIssueMutation = { __typename?: "Mutation" } & {
+  issueArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateIssueBatchMutationVariables = Exact<{
+  ids: Array<Scalars["UUID"]> | Scalars["UUID"];
+  input: IssueUpdateInput;
+}>;
+
+export type UpdateIssueBatchMutation = { __typename?: "Mutation" } & {
+  issueBatchUpdate: { __typename?: "IssueBatchPayload" } & IssueBatchPayloadFragment;
+};
+
+export type CreateIssueMutationVariables = Exact<{
+  input: IssueCreateInput;
+}>;
+
+export type CreateIssueMutation = { __typename?: "Mutation" } & {
+  issueCreate: { __typename?: "IssuePayload" } & IssuePayloadFragment;
+};
+
+export type DeleteIssueMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteIssueMutation = { __typename?: "Mutation" } & {
+  issueDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type IssueImportCreateAsanaMutationVariables = Exact<{
+  asanaTeamName: Scalars["String"];
+  asanaToken: Scalars["String"];
+  id?: Maybe<Scalars["String"]>;
+  includeClosedIssues?: Maybe<Scalars["Boolean"]>;
+  instantProcess?: Maybe<Scalars["Boolean"]>;
+  organizationId?: Maybe<Scalars["String"]>;
+  teamId?: Maybe<Scalars["String"]>;
+  teamName?: Maybe<Scalars["String"]>;
+}>;
+
+export type IssueImportCreateAsanaMutation = { __typename?: "Mutation" } & {
+  issueImportCreateAsana: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
+};
+
+export type IssueImportCreateClubhouseMutationVariables = Exact<{
+  clubhouseTeamName: Scalars["String"];
+  clubhouseToken: Scalars["String"];
+  id?: Maybe<Scalars["String"]>;
+  includeClosedIssues?: Maybe<Scalars["Boolean"]>;
+  instantProcess?: Maybe<Scalars["Boolean"]>;
+  organizationId?: Maybe<Scalars["String"]>;
+  teamId?: Maybe<Scalars["String"]>;
+  teamName?: Maybe<Scalars["String"]>;
+}>;
+
+export type IssueImportCreateClubhouseMutation = { __typename?: "Mutation" } & {
+  issueImportCreateClubhouse: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
+};
+
+export type IssueImportCreateGithubMutationVariables = Exact<{
+  githubRepoName: Scalars["String"];
+  githubRepoOwner: Scalars["String"];
+  githubShouldImportOrgProjects?: Maybe<Scalars["Boolean"]>;
+  githubToken: Scalars["String"];
+  id?: Maybe<Scalars["String"]>;
+  includeClosedIssues?: Maybe<Scalars["Boolean"]>;
+  instantProcess?: Maybe<Scalars["Boolean"]>;
+  organizationId?: Maybe<Scalars["String"]>;
+  teamId?: Maybe<Scalars["String"]>;
+  teamName?: Maybe<Scalars["String"]>;
+}>;
+
+export type IssueImportCreateGithubMutation = { __typename?: "Mutation" } & {
+  issueImportCreateGithub: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
+};
+
+export type IssueImportCreateJiraMutationVariables = Exact<{
+  id?: Maybe<Scalars["String"]>;
+  includeClosedIssues?: Maybe<Scalars["Boolean"]>;
+  instantProcess?: Maybe<Scalars["Boolean"]>;
+  jiraEmail: Scalars["String"];
+  jiraHostname: Scalars["String"];
+  jiraProject: Scalars["String"];
+  jiraToken: Scalars["String"];
+  organizationId?: Maybe<Scalars["String"]>;
+  teamId?: Maybe<Scalars["String"]>;
+  teamName?: Maybe<Scalars["String"]>;
+}>;
+
+export type IssueImportCreateJiraMutation = { __typename?: "Mutation" } & {
+  issueImportCreateJira: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
+};
+
+export type DeleteIssueImportMutationVariables = Exact<{
+  issueImportId: Scalars["String"];
+}>;
+
+export type DeleteIssueImportMutation = { __typename?: "Mutation" } & {
+  issueImportDelete: { __typename?: "IssueImportDeletePayload" } & IssueImportDeletePayloadFragment;
+};
+
+export type IssueImportProcessMutationVariables = Exact<{
+  issueImportId: Scalars["String"];
+  mapping: Scalars["JSONObject"];
+}>;
+
+export type IssueImportProcessMutation = { __typename?: "Mutation" } & {
+  issueImportProcess: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
+};
+
+export type UpdateIssueImportMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: IssueImportUpdateInput;
+}>;
+
+export type UpdateIssueImportMutation = { __typename?: "Mutation" } & {
+  issueImportUpdate: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
+};
+
+export type ArchiveIssueLabelMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ArchiveIssueLabelMutation = { __typename?: "Mutation" } & {
+  issueLabelArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type CreateIssueLabelMutationVariables = Exact<{
+  input: IssueLabelCreateInput;
+  replaceTeamLabels?: Maybe<Scalars["Boolean"]>;
+}>;
+
+export type CreateIssueLabelMutation = { __typename?: "Mutation" } & {
+  issueLabelCreate: { __typename?: "IssueLabelPayload" } & IssueLabelPayloadFragment;
+};
+
+export type DeleteIssueLabelMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteIssueLabelMutation = { __typename?: "Mutation" } & {
+  issueLabelDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateIssueLabelMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: IssueLabelUpdateInput;
+}>;
+
+export type UpdateIssueLabelMutation = { __typename?: "Mutation" } & {
+  issueLabelUpdate: { __typename?: "IssueLabelPayload" } & IssueLabelPayloadFragment;
+};
+
+export type CreateIssueRelationMutationVariables = Exact<{
+  input: IssueRelationCreateInput;
+}>;
+
+export type CreateIssueRelationMutation = { __typename?: "Mutation" } & {
+  issueRelationCreate: { __typename?: "IssueRelationPayload" } & IssueRelationPayloadFragment;
+};
+
+export type DeleteIssueRelationMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteIssueRelationMutation = { __typename?: "Mutation" } & {
+  issueRelationDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateIssueRelationMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: IssueRelationUpdateInput;
+}>;
+
+export type UpdateIssueRelationMutation = { __typename?: "Mutation" } & {
+  issueRelationUpdate: { __typename?: "IssueRelationPayload" } & IssueRelationPayloadFragment;
+};
+
+export type IssueReminderMutationVariables = Exact<{
+  id: Scalars["String"];
+  reminderAt: Scalars["DateTime"];
+}>;
+
+export type IssueReminderMutation = { __typename?: "Mutation" } & {
+  issueReminder: { __typename?: "IssuePayload" } & IssuePayloadFragment;
+};
+
+export type UnarchiveIssueMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UnarchiveIssueMutation = { __typename?: "Mutation" } & {
+  issueUnarchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateIssueMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: IssueUpdateInput;
+}>;
+
+export type UpdateIssueMutation = { __typename?: "Mutation" } & {
+  issueUpdate: { __typename?: "IssuePayload" } & IssuePayloadFragment;
+};
+
+export type JoinOrganizationFromOnboardingMutationVariables = Exact<{
+  input: JoinOrganizationInput;
+}>;
+
+export type JoinOrganizationFromOnboardingMutation = { __typename?: "Mutation" } & {
+  joinOrganizationFromOnboarding: {
+    __typename?: "CreateOrJoinOrganizationResponse";
+  } & CreateOrJoinOrganizationResponseFragment;
+};
+
+export type LeaveOrganizationMutationVariables = Exact<{
+  organizationId: Scalars["String"];
+}>;
+
+export type LeaveOrganizationMutation = { __typename?: "Mutation" } & {
+  leaveOrganization: { __typename?: "CreateOrJoinOrganizationResponse" } & CreateOrJoinOrganizationResponseFragment;
+};
+
+export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
+
+export type LogoutMutation = { __typename?: "Mutation" } & {
+  logout: { __typename?: "LogoutResponse" } & LogoutResponseFragment;
+};
+
+export type ArchiveNotificationMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
+  notificationArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type CreateNotificationSubscriptionMutationVariables = Exact<{
+  input: NotificationSubscriptionCreateInput;
+}>;
+
+export type CreateNotificationSubscriptionMutation = { __typename?: "Mutation" } & {
+  notificationSubscriptionCreate: {
+    __typename?: "NotificationSubscriptionPayload";
+  } & NotificationSubscriptionPayloadFragment;
+};
+
+export type DeleteNotificationSubscriptionMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteNotificationSubscriptionMutation = { __typename?: "Mutation" } & {
+  notificationSubscriptionDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateNotificationSubscriptionMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: NotificationSubscriptionUpdateInput;
+}>;
+
+export type UpdateNotificationSubscriptionMutation = { __typename?: "Mutation" } & {
+  notificationSubscriptionUpdate: {
+    __typename?: "NotificationSubscriptionPayload";
+  } & NotificationSubscriptionPayloadFragment;
+};
+
+export type UnarchiveNotificationMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
+  notificationUnarchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateNotificationMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: NotificationUpdateInput;
+}>;
+
+export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
+  notificationUpdate: { __typename?: "NotificationPayload" } & NotificationPayloadFragment;
+};
+
+export type DeleteOrganizationCancelMutationVariables = Exact<{ [key: string]: never }>;
+
+export type DeleteOrganizationCancelMutation = { __typename?: "Mutation" } & {
+  organizationCancelDelete: {
+    __typename?: "OrganizationCancelDeletePayload";
+  } & OrganizationCancelDeletePayloadFragment;
+};
+
+export type DeleteOrganizationMutationVariables = Exact<{
+  input: DeleteOrganizationInput;
+}>;
+
+export type DeleteOrganizationMutation = { __typename?: "Mutation" } & {
+  organizationDelete: { __typename?: "OrganizationDeletePayload" } & OrganizationDeletePayloadFragment;
+};
+
+export type OrganizationDeleteChallengeMutationVariables = Exact<{ [key: string]: never }>;
+
+export type OrganizationDeleteChallengeMutation = { __typename?: "Mutation" } & {
+  organizationDeleteChallenge: { __typename?: "OrganizationDeletePayload" } & OrganizationDeletePayloadFragment;
+};
+
+export type DeleteOrganizationDomainMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteOrganizationDomainMutation = { __typename?: "Mutation" } & {
+  organizationDomainDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type CreateOrganizationInviteMutationVariables = Exact<{
+  input: OrganizationInviteCreateInput;
+}>;
+
+export type CreateOrganizationInviteMutation = { __typename?: "Mutation" } & {
+  organizationInviteCreate: { __typename?: "OrganizationInvitePayload" } & OrganizationInvitePayloadFragment;
+};
+
+export type DeleteOrganizationInviteMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteOrganizationInviteMutation = { __typename?: "Mutation" } & {
+  organizationInviteDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateOrganizationInviteMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: OrganizationInviteUpdateInput;
+}>;
+
+export type UpdateOrganizationInviteMutation = { __typename?: "Mutation" } & {
+  organizationInviteUpdate: { __typename?: "OrganizationInvitePayload" } & OrganizationInvitePayloadFragment;
+};
+
+export type UpdateOrganizationMutationVariables = Exact<{
+  input: UpdateOrganizationInput;
+}>;
+
+export type UpdateOrganizationMutation = { __typename?: "Mutation" } & {
+  organizationUpdate: { __typename?: "OrganizationPayload" } & OrganizationPayloadFragment;
+};
+
+export type ArchiveProjectMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ArchiveProjectMutation = { __typename?: "Mutation" } & {
+  projectArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type CreateProjectMutationVariables = Exact<{
+  input: ProjectCreateInput;
+}>;
+
+export type CreateProjectMutation = { __typename?: "Mutation" } & {
+  projectCreate: { __typename?: "ProjectPayload" } & ProjectPayloadFragment;
+};
+
+export type DeleteProjectMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteProjectMutation = { __typename?: "Mutation" } & {
+  projectDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type CreateProjectLinkMutationVariables = Exact<{
+  input: ProjectLinkCreateInput;
+}>;
+
+export type CreateProjectLinkMutation = { __typename?: "Mutation" } & {
+  projectLinkCreate: { __typename?: "ProjectLinkPayload" } & ProjectLinkPayloadFragment;
+};
+
+export type DeleteProjectLinkMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteProjectLinkMutation = { __typename?: "Mutation" } & {
+  projectLinkDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateProjectLinkMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: ProjectLinkUpdateInput;
+}>;
+
+export type UpdateProjectLinkMutation = { __typename?: "Mutation" } & {
+  projectLinkUpdate: { __typename?: "ProjectLinkPayload" } & ProjectLinkPayloadFragment;
+};
+
+export type CreateProjectMilestoneMutationVariables = Exact<{
+  input: ProjectMilestoneCreateInput;
+}>;
+
+export type CreateProjectMilestoneMutation = { __typename?: "Mutation" } & {
+  projectMilestoneCreate: { __typename?: "ProjectMilestonePayload" } & ProjectMilestonePayloadFragment;
+};
+
+export type DeleteProjectMilestoneMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteProjectMilestoneMutation = { __typename?: "Mutation" } & {
+  projectMilestoneDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateProjectMilestoneMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: ProjectMilestoneUpdateInput;
+}>;
+
+export type UpdateProjectMilestoneMutation = { __typename?: "Mutation" } & {
+  projectMilestoneUpdate: { __typename?: "ProjectMilestonePayload" } & ProjectMilestonePayloadFragment;
+};
+
+export type UnarchiveProjectMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UnarchiveProjectMutation = { __typename?: "Mutation" } & {
+  projectUnarchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateProjectMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: ProjectUpdateInput;
+}>;
+
+export type UpdateProjectMutation = { __typename?: "Mutation" } & {
+  projectUpdate: { __typename?: "ProjectPayload" } & ProjectPayloadFragment;
+};
+
+export type CreateProjectUpdateMutationVariables = Exact<{
+  input: ProjectUpdateCreateInput;
+}>;
+
+export type CreateProjectUpdateMutation = { __typename?: "Mutation" } & {
+  projectUpdateCreate: { __typename?: "ProjectUpdatePayload" } & ProjectUpdatePayloadFragment;
+};
+
+export type DeleteProjectUpdateMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteProjectUpdateMutation = { __typename?: "Mutation" } & {
+  projectUpdateDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type CreateProjectUpdateInteractionMutationVariables = Exact<{
+  input: ProjectUpdateInteractionCreateInput;
+}>;
+
+export type CreateProjectUpdateInteractionMutation = { __typename?: "Mutation" } & {
+  projectUpdateInteractionCreate: {
+    __typename?: "ProjectUpdateInteractionPayload";
+  } & ProjectUpdateInteractionPayloadFragment;
+};
+
+export type ProjectUpdateMarkAsReadMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ProjectUpdateMarkAsReadMutation = { __typename?: "Mutation" } & {
+  projectUpdateMarkAsRead: {
+    __typename?: "ProjectUpdateWithInteractionPayload";
+  } & ProjectUpdateWithInteractionPayloadFragment;
+};
+
+export type UpdateProjectUpdateMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: ProjectUpdateUpdateInput;
+}>;
+
+export type UpdateProjectUpdateMutation = { __typename?: "Mutation" } & {
+  projectUpdateUpdate: { __typename?: "ProjectUpdatePayload" } & ProjectUpdatePayloadFragment;
+};
+
+export type CreatePushSubscriptionMutationVariables = Exact<{
+  input: PushSubscriptionCreateInput;
+}>;
+
+export type CreatePushSubscriptionMutation = { __typename?: "Mutation" } & {
+  pushSubscriptionCreate: { __typename?: "PushSubscriptionPayload" } & PushSubscriptionPayloadFragment;
+};
+
+export type DeletePushSubscriptionMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeletePushSubscriptionMutation = { __typename?: "Mutation" } & {
+  pushSubscriptionDelete: { __typename?: "PushSubscriptionPayload" } & PushSubscriptionPayloadFragment;
+};
+
+export type CreateReactionMutationVariables = Exact<{
+  input: ReactionCreateInput;
+}>;
+
+export type CreateReactionMutation = { __typename?: "Mutation" } & {
+  reactionCreate: { __typename?: "ReactionPayload" } & ReactionPayloadFragment;
+};
+
+export type DeleteReactionMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteReactionMutation = { __typename?: "Mutation" } & {
+  reactionDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type RefreshGoogleSheetsDataMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type RefreshGoogleSheetsDataMutation = { __typename?: "Mutation" } & {
+  refreshGoogleSheetsData: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type ResendOrganizationInviteMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ResendOrganizationInviteMutation = { __typename?: "Mutation" } & {
+  resendOrganizationInvite: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type CreateRoadmapMutationVariables = Exact<{
+  input: RoadmapCreateInput;
+}>;
+
+export type CreateRoadmapMutation = { __typename?: "Mutation" } & {
+  roadmapCreate: { __typename?: "RoadmapPayload" } & RoadmapPayloadFragment;
+};
+
+export type DeleteRoadmapMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteRoadmapMutation = { __typename?: "Mutation" } & {
+  roadmapDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type CreateRoadmapToProjectMutationVariables = Exact<{
+  input: RoadmapToProjectCreateInput;
+}>;
+
+export type CreateRoadmapToProjectMutation = { __typename?: "Mutation" } & {
+  roadmapToProjectCreate: { __typename?: "RoadmapToProjectPayload" } & RoadmapToProjectPayloadFragment;
+};
+
+export type DeleteRoadmapToProjectMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteRoadmapToProjectMutation = { __typename?: "Mutation" } & {
+  roadmapToProjectDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateRoadmapToProjectMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: RoadmapToProjectUpdateInput;
+}>;
+
+export type UpdateRoadmapToProjectMutation = { __typename?: "Mutation" } & {
+  roadmapToProjectUpdate: { __typename?: "RoadmapToProjectPayload" } & RoadmapToProjectPayloadFragment;
+};
+
+export type UpdateRoadmapMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: RoadmapUpdateInput;
+}>;
+
+export type UpdateRoadmapMutation = { __typename?: "Mutation" } & {
+  roadmapUpdate: { __typename?: "RoadmapPayload" } & RoadmapPayloadFragment;
+};
+
+export type SamlTokenUserAccountAuthMutationVariables = Exact<{
+  input: TokenUserAccountAuthInput;
+}>;
+
+export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
+  samlTokenUserAccountAuth: { __typename?: "AuthResolverResponse" } & AuthResolverResponseFragment;
+};
+
+export type CreateTeamMutationVariables = Exact<{
+  copySettingsFromTeamId?: Maybe<Scalars["String"]>;
+  input: TeamCreateInput;
+}>;
+
+export type CreateTeamMutation = { __typename?: "Mutation" } & {
+  teamCreate: { __typename?: "TeamPayload" } & TeamPayloadFragment;
+};
+
+export type DeleteTeamCyclesMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteTeamCyclesMutation = { __typename?: "Mutation" } & {
+  teamCyclesDelete: { __typename?: "TeamPayload" } & TeamPayloadFragment;
+};
+
+export type DeleteTeamMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteTeamMutation = { __typename?: "Mutation" } & {
+  teamDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type DeleteTeamKeyMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteTeamKeyMutation = { __typename?: "Mutation" } & {
+  teamKeyDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type CreateTeamMembershipMutationVariables = Exact<{
+  input: TeamMembershipCreateInput;
+}>;
+
+export type CreateTeamMembershipMutation = { __typename?: "Mutation" } & {
+  teamMembershipCreate: { __typename?: "TeamMembershipPayload" } & TeamMembershipPayloadFragment;
+};
+
+export type DeleteTeamMembershipMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteTeamMembershipMutation = { __typename?: "Mutation" } & {
+  teamMembershipDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateTeamMembershipMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: TeamMembershipUpdateInput;
+}>;
+
+export type UpdateTeamMembershipMutation = { __typename?: "Mutation" } & {
+  teamMembershipUpdate: { __typename?: "TeamMembershipPayload" } & TeamMembershipPayloadFragment;
+};
+
+export type UpdateTeamMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: TeamUpdateInput;
+}>;
+
+export type UpdateTeamMutation = { __typename?: "Mutation" } & {
+  teamUpdate: { __typename?: "TeamPayload" } & TeamPayloadFragment;
+};
+
+export type CreateTemplateMutationVariables = Exact<{
+  input: TemplateCreateInput;
+}>;
+
+export type CreateTemplateMutation = { __typename?: "Mutation" } & {
+  templateCreate: { __typename?: "TemplatePayload" } & TemplatePayloadFragment;
+};
+
+export type DeleteTemplateMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteTemplateMutation = { __typename?: "Mutation" } & {
+  templateDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateTemplateMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: TemplateUpdateInput;
+}>;
+
+export type UpdateTemplateMutation = { __typename?: "Mutation" } & {
+  templateUpdate: { __typename?: "TemplatePayload" } & TemplatePayloadFragment;
+};
+
+export type UserDemoteAdminMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UserDemoteAdminMutation = { __typename?: "Mutation" } & {
+  userDemoteAdmin: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
+};
+
+export type UserDemoteMemberMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UserDemoteMemberMutation = { __typename?: "Mutation" } & {
+  userDemoteMember: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
+};
+
+export type UserDiscordConnectMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type UserDiscordConnectMutation = { __typename?: "Mutation" } & {
+  userDiscordConnect: { __typename?: "UserPayload" } & UserPayloadFragment;
+};
+
+export type UserExternalUserDisconnectMutationVariables = Exact<{
+  service: Scalars["String"];
+}>;
+
+export type UserExternalUserDisconnectMutation = { __typename?: "Mutation" } & {
+  userExternalUserDisconnect: { __typename?: "UserPayload" } & UserPayloadFragment;
+};
+
+export type UpdateUserFlagMutationVariables = Exact<{
+  flag: UserFlagType;
+  operation: UserFlagUpdateOperation;
+}>;
+
+export type UpdateUserFlagMutation = { __typename?: "Mutation" } & {
+  userFlagUpdate: { __typename?: "UserSettingsFlagPayload" } & UserSettingsFlagPayloadFragment;
+};
+
+export type UserGitHubConnectMutationVariables = Exact<{
+  code: Scalars["String"];
+}>;
+
+export type UserGitHubConnectMutation = { __typename?: "Mutation" } & {
+  userGitHubConnect: { __typename?: "UserPayload" } & UserPayloadFragment;
+};
+
+export type UserGoogleCalendarConnectMutationVariables = Exact<{
+  code: Scalars["String"];
+}>;
+
+export type UserGoogleCalendarConnectMutation = { __typename?: "Mutation" } & {
+  userGoogleCalendarConnect: { __typename?: "UserPayload" } & UserPayloadFragment;
+};
+
+export type UserPromoteAdminMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UserPromoteAdminMutation = { __typename?: "Mutation" } & {
+  userPromoteAdmin: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
+};
+
+export type UserPromoteMemberMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UserPromoteMemberMutation = { __typename?: "Mutation" } & {
+  userPromoteMember: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
+};
+
+export type UserSettingsFlagIncrementMutationVariables = Exact<{
+  flag: Scalars["String"];
+}>;
+
+export type UserSettingsFlagIncrementMutation = { __typename?: "Mutation" } & {
+  userSettingsFlagIncrement: { __typename?: "UserSettingsFlagPayload" } & UserSettingsFlagPayloadFragment;
+};
+
+export type UserSettingsFlagsResetMutationVariables = Exact<{
+  flags?: Maybe<Array<UserFlagType> | UserFlagType>;
+}>;
+
+export type UserSettingsFlagsResetMutation = { __typename?: "Mutation" } & {
+  userSettingsFlagsReset: { __typename?: "UserSettingsFlagsResetPayload" } & UserSettingsFlagsResetPayloadFragment;
+};
+
+export type UpdateUserSettingsMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: UserSettingsUpdateInput;
+}>;
+
+export type UpdateUserSettingsMutation = { __typename?: "Mutation" } & {
+  userSettingsUpdate: { __typename?: "UserSettingsPayload" } & UserSettingsPayloadFragment;
+};
+
+export type SuspendUserMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type SuspendUserMutation = { __typename?: "Mutation" } & {
+  userSuspend: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
+};
+
+export type UnsuspendUserMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UnsuspendUserMutation = { __typename?: "Mutation" } & {
+  userUnsuspend: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
+};
+
+export type UpdateUserMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: UpdateUserInput;
+}>;
+
+export type UpdateUserMutation = { __typename?: "Mutation" } & {
+  userUpdate: { __typename?: "UserPayload" } & UserPayloadFragment;
+};
+
+export type CreateViewPreferencesMutationVariables = Exact<{
+  input: ViewPreferencesCreateInput;
+}>;
+
+export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
+  viewPreferencesCreate: { __typename?: "ViewPreferencesPayload" } & ViewPreferencesPayloadFragment;
+};
+
+export type DeleteViewPreferencesMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteViewPreferencesMutation = { __typename?: "Mutation" } & {
+  viewPreferencesDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateViewPreferencesMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: ViewPreferencesUpdateInput;
+}>;
+
+export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
+  viewPreferencesUpdate: { __typename?: "ViewPreferencesPayload" } & ViewPreferencesPayloadFragment;
+};
+
+export type CreateWebhookMutationVariables = Exact<{
+  input: WebhookCreateInput;
+}>;
+
+export type CreateWebhookMutation = { __typename?: "Mutation" } & {
+  webhookCreate: { __typename?: "WebhookPayload" } & WebhookPayloadFragment;
+};
+
+export type DeleteWebhookMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteWebhookMutation = { __typename?: "Mutation" } & {
+  webhookDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type UpdateWebhookMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: WebhookUpdateInput;
+}>;
+
+export type UpdateWebhookMutation = { __typename?: "Mutation" } & {
+  webhookUpdate: { __typename?: "WebhookPayload" } & WebhookPayloadFragment;
+};
+
+export type ArchiveWorkflowStateMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ArchiveWorkflowStateMutation = { __typename?: "Mutation" } & {
+  workflowStateArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type CreateWorkflowStateMutationVariables = Exact<{
+  input: WorkflowStateCreateInput;
+}>;
+
+export type CreateWorkflowStateMutation = { __typename?: "Mutation" } & {
+  workflowStateCreate: { __typename?: "WorkflowStatePayload" } & WorkflowStatePayloadFragment;
+};
+
+export type UpdateWorkflowStateMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: WorkflowStateUpdateInput;
+}>;
+
+export type UpdateWorkflowStateMutation = { __typename?: "Mutation" } & {
+  workflowStateUpdate: { __typename?: "WorkflowStatePayload" } & WorkflowStatePayloadFragment;
+};
+
+export type ProjectMilestoneQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ProjectMilestoneQuery = { __typename?: "Query" } & {
+  ProjectMilestone: { __typename?: "ProjectMilestone" } & ProjectMilestoneFragment;
+};
+
+export type ProjectMilestonesQueryVariables = Exact<{
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type ProjectMilestonesQuery = { __typename?: "Query" } & {
+  ProjectMilestones: { __typename?: "ProjectMilestoneConnection" } & ProjectMilestoneConnectionFragment;
+};
 
 export type AdministrableTeamsQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
@@ -10945,6 +12458,21 @@ export type IssueRelationsQuery = { __typename?: "Query" } & {
   issueRelations: { __typename?: "IssueRelationConnection" } & IssueRelationConnectionFragment;
 };
 
+export type IssueSearchQueryVariables = Exact<{
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+  query: Scalars["String"];
+}>;
+
+export type IssueSearchQuery = { __typename?: "Query" } & {
+  issueSearch: { __typename?: "IssueConnection" } & IssueConnectionFragment;
+};
+
 export type IssueVcsBranchSearchQueryVariables = Exact<{
   branchName: Scalars["String"];
 }>;
@@ -11103,42 +12631,6 @@ export type IssuesQueryVariables = Exact<{
 
 export type IssuesQuery = { __typename?: "Query" } & {
   issues: { __typename?: "IssueConnection" } & IssueConnectionFragment;
-};
-
-export type MilestoneQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type MilestoneQuery = { __typename?: "Query" } & { milestone: { __typename?: "Milestone" } & MilestoneFragment };
-
-export type Milestone_ProjectsQueryVariables = Exact<{
-  id: Scalars["String"];
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  filter?: Maybe<ProjectFilter>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type Milestone_ProjectsQuery = { __typename?: "Query" } & {
-  milestone: { __typename?: "Milestone" } & {
-    projects: { __typename?: "ProjectConnection" } & ProjectConnectionFragment;
-  };
-};
-
-export type MilestonesQueryVariables = Exact<{
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type MilestonesQuery = { __typename?: "Query" } & {
-  milestones: { __typename?: "MilestoneConnection" } & MilestoneConnectionFragment;
 };
 
 export type NotificationQueryVariables = Exact<{
@@ -11343,14 +12835,6 @@ export type Project_DocumentsQuery = { __typename?: "Query" } & {
   };
 };
 
-export type Project_InitiativeQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type Project_InitiativeQuery = { __typename?: "Query" } & {
-  project: { __typename?: "Project" } & { initiative?: Maybe<{ __typename?: "Initiative" } & InitiativeFragment> };
-};
-
 export type Project_IssuesQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
@@ -11396,6 +12880,22 @@ export type Project_MembersQueryVariables = Exact<{
 
 export type Project_MembersQuery = { __typename?: "Query" } & {
   project: { __typename?: "Project" } & { members: { __typename?: "UserConnection" } & UserConnectionFragment };
+};
+
+export type Project_ProjectMilestonesQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type Project_ProjectMilestonesQuery = { __typename?: "Query" } & {
+  project: { __typename?: "Project" } & {
+    projectMilestones: { __typename?: "ProjectMilestoneConnection" } & ProjectMilestoneConnectionFragment;
+  };
 };
 
 export type Project_ProjectUpdatesQueryVariables = Exact<{
@@ -11981,1468 +13481,6 @@ export type WorkflowStatesQuery = { __typename?: "Query" } & {
   workflowStates: { __typename?: "WorkflowStateConnection" } & WorkflowStateConnectionFragment;
 };
 
-export type AirbyteIntegrationConnectMutationVariables = Exact<{
-  input: AirbyteConfigurationInput;
-}>;
-
-export type AirbyteIntegrationConnectMutation = { __typename?: "Mutation" } & {
-  airbyteIntegrationConnect: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type CreateApiKeyMutationVariables = Exact<{
-  input: ApiKeyCreateInput;
-}>;
-
-export type CreateApiKeyMutation = { __typename?: "Mutation" } & {
-  apiKeyCreate: { __typename?: "ApiKeyPayload" } & ApiKeyPayloadFragment;
-};
-
-export type DeleteApiKeyMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteApiKeyMutation = { __typename?: "Mutation" } & {
-  apiKeyDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type ArchiveAttachmentMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type ArchiveAttachmentMutation = { __typename?: "Mutation" } & {
-  attachmentArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type CreateAttachmentMutationVariables = Exact<{
-  input: AttachmentCreateInput;
-}>;
-
-export type CreateAttachmentMutation = { __typename?: "Mutation" } & {
-  attachmentCreate: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
-};
-
-export type DeleteAttachmentMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteAttachmentMutation = { __typename?: "Mutation" } & {
-  attachmentDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type AttachmentLinkDiscordMutationVariables = Exact<{
-  channelId: Scalars["String"];
-  issueId: Scalars["String"];
-  messageId: Scalars["String"];
-  url: Scalars["String"];
-}>;
-
-export type AttachmentLinkDiscordMutation = { __typename?: "Mutation" } & {
-  attachmentLinkDiscord: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
-};
-
-export type AttachmentLinkFrontMutationVariables = Exact<{
-  conversationId: Scalars["String"];
-  issueId: Scalars["String"];
-}>;
-
-export type AttachmentLinkFrontMutation = { __typename?: "Mutation" } & {
-  attachmentLinkFront: { __typename?: "FrontAttachmentPayload" } & FrontAttachmentPayloadFragment;
-};
-
-export type AttachmentLinkIntercomMutationVariables = Exact<{
-  conversationId: Scalars["String"];
-  issueId: Scalars["String"];
-}>;
-
-export type AttachmentLinkIntercomMutation = { __typename?: "Mutation" } & {
-  attachmentLinkIntercom: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
-};
-
-export type AttachmentLinkJiraIssueMutationVariables = Exact<{
-  issueId: Scalars["String"];
-  jiraIssueId: Scalars["String"];
-}>;
-
-export type AttachmentLinkJiraIssueMutation = { __typename?: "Mutation" } & {
-  attachmentLinkJiraIssue: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
-};
-
-export type AttachmentLinkUrlMutationVariables = Exact<{
-  issueId: Scalars["String"];
-  title?: Maybe<Scalars["String"]>;
-  url: Scalars["String"];
-}>;
-
-export type AttachmentLinkUrlMutation = { __typename?: "Mutation" } & {
-  attachmentLinkURL: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
-};
-
-export type AttachmentLinkZendeskMutationVariables = Exact<{
-  issueId: Scalars["String"];
-  ticketId: Scalars["String"];
-}>;
-
-export type AttachmentLinkZendeskMutation = { __typename?: "Mutation" } & {
-  attachmentLinkZendesk: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
-};
-
-export type UpdateAttachmentMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: AttachmentUpdateInput;
-}>;
-
-export type UpdateAttachmentMutation = { __typename?: "Mutation" } & {
-  attachmentUpdate: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
-};
-
-export type CreateCommentMutationVariables = Exact<{
-  input: CommentCreateInput;
-}>;
-
-export type CreateCommentMutation = { __typename?: "Mutation" } & {
-  commentCreate: { __typename?: "CommentPayload" } & CommentPayloadFragment;
-};
-
-export type DeleteCommentMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteCommentMutation = { __typename?: "Mutation" } & {
-  commentDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateCommentMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: CommentUpdateInput;
-}>;
-
-export type UpdateCommentMutation = { __typename?: "Mutation" } & {
-  commentUpdate: { __typename?: "CommentPayload" } & CommentPayloadFragment;
-};
-
-export type CreateContactMutationVariables = Exact<{
-  input: ContactCreateInput;
-}>;
-
-export type CreateContactMutation = { __typename?: "Mutation" } & {
-  contactCreate: { __typename?: "ContactPayload" } & ContactPayloadFragment;
-};
-
-export type CreateCsvExportReportMutationVariables = Exact<{
-  includePrivateTeamIds?: Maybe<Array<Scalars["String"]> | Scalars["String"]>;
-}>;
-
-export type CreateCsvExportReportMutation = { __typename?: "Mutation" } & {
-  createCsvExportReport: { __typename?: "CreateCsvExportReportPayload" } & CreateCsvExportReportPayloadFragment;
-};
-
-export type CreateOrganizationFromOnboardingMutationVariables = Exact<{
-  input: CreateOrganizationInput;
-  survey?: Maybe<OnboardingCustomerSurvey>;
-}>;
-
-export type CreateOrganizationFromOnboardingMutation = { __typename?: "Mutation" } & {
-  createOrganizationFromOnboarding: {
-    __typename?: "CreateOrJoinOrganizationResponse";
-  } & CreateOrJoinOrganizationResponseFragment;
-};
-
-export type CreateCustomViewMutationVariables = Exact<{
-  input: CustomViewCreateInput;
-}>;
-
-export type CreateCustomViewMutation = { __typename?: "Mutation" } & {
-  customViewCreate: { __typename?: "CustomViewPayload" } & CustomViewPayloadFragment;
-};
-
-export type DeleteCustomViewMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteCustomViewMutation = { __typename?: "Mutation" } & {
-  customViewDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateCustomViewMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: CustomViewUpdateInput;
-}>;
-
-export type UpdateCustomViewMutation = { __typename?: "Mutation" } & {
-  customViewUpdate: { __typename?: "CustomViewPayload" } & CustomViewPayloadFragment;
-};
-
-export type ArchiveCycleMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type ArchiveCycleMutation = { __typename?: "Mutation" } & {
-  cycleArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type CreateCycleMutationVariables = Exact<{
-  input: CycleCreateInput;
-}>;
-
-export type CreateCycleMutation = { __typename?: "Mutation" } & {
-  cycleCreate: { __typename?: "CyclePayload" } & CyclePayloadFragment;
-};
-
-export type UpdateCycleMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: CycleUpdateInput;
-}>;
-
-export type UpdateCycleMutation = { __typename?: "Mutation" } & {
-  cycleUpdate: { __typename?: "CyclePayload" } & CyclePayloadFragment;
-};
-
-export type CreateDocumentMutationVariables = Exact<{
-  input: DocumentCreateInput;
-}>;
-
-export type CreateDocumentMutation = { __typename?: "Mutation" } & {
-  documentCreate: { __typename?: "DocumentPayload" } & DocumentPayloadFragment;
-};
-
-export type DeleteDocumentMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteDocumentMutation = { __typename?: "Mutation" } & {
-  documentDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateDocumentMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: DocumentUpdateInput;
-}>;
-
-export type UpdateDocumentMutation = { __typename?: "Mutation" } & {
-  documentUpdate: { __typename?: "DocumentPayload" } & DocumentPayloadFragment;
-};
-
-export type EmailTokenUserAccountAuthMutationVariables = Exact<{
-  input: TokenUserAccountAuthInput;
-}>;
-
-export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
-  emailTokenUserAccountAuth: { __typename?: "AuthResolverResponse" } & AuthResolverResponseFragment;
-};
-
-export type EmailUnsubscribeMutationVariables = Exact<{
-  input: EmailUnsubscribeInput;
-}>;
-
-export type EmailUnsubscribeMutation = { __typename?: "Mutation" } & {
-  emailUnsubscribe: { __typename?: "EmailUnsubscribePayload" } & EmailUnsubscribePayloadFragment;
-};
-
-export type EmailUserAccountAuthChallengeMutationVariables = Exact<{
-  input: EmailUserAccountAuthChallengeInput;
-}>;
-
-export type EmailUserAccountAuthChallengeMutation = { __typename?: "Mutation" } & {
-  emailUserAccountAuthChallenge: {
-    __typename?: "EmailUserAccountAuthChallengeResponse";
-  } & EmailUserAccountAuthChallengeResponseFragment;
-};
-
-export type CreateEmojiMutationVariables = Exact<{
-  input: EmojiCreateInput;
-}>;
-
-export type CreateEmojiMutation = { __typename?: "Mutation" } & {
-  emojiCreate: { __typename?: "EmojiPayload" } & EmojiPayloadFragment;
-};
-
-export type DeleteEmojiMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteEmojiMutation = { __typename?: "Mutation" } & {
-  emojiDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type CreateEventMutationVariables = Exact<{
-  input: EventCreateInput;
-}>;
-
-export type CreateEventMutation = { __typename?: "Mutation" } & {
-  eventCreate: { __typename?: "EventPayload" } & EventPayloadFragment;
-};
-
-export type CreateFavoriteMutationVariables = Exact<{
-  input: FavoriteCreateInput;
-}>;
-
-export type CreateFavoriteMutation = { __typename?: "Mutation" } & {
-  favoriteCreate: { __typename?: "FavoritePayload" } & FavoritePayloadFragment;
-};
-
-export type DeleteFavoriteMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteFavoriteMutation = { __typename?: "Mutation" } & {
-  favoriteDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateFavoriteMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: FavoriteUpdateInput;
-}>;
-
-export type UpdateFavoriteMutation = { __typename?: "Mutation" } & {
-  favoriteUpdate: { __typename?: "FavoritePayload" } & FavoritePayloadFragment;
-};
-
-export type FileUploadMutationVariables = Exact<{
-  contentType: Scalars["String"];
-  filename: Scalars["String"];
-  makePublic?: Maybe<Scalars["Boolean"]>;
-  metaData?: Maybe<Scalars["JSON"]>;
-  size: Scalars["Int"];
-}>;
-
-export type FileUploadMutation = { __typename?: "Mutation" } & {
-  fileUpload: { __typename?: "UploadPayload" } & UploadPayloadFragment;
-};
-
-export type GoogleUserAccountAuthMutationVariables = Exact<{
-  input: GoogleUserAccountAuthInput;
-}>;
-
-export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
-  googleUserAccountAuth: { __typename?: "AuthResolverResponse" } & AuthResolverResponseFragment;
-};
-
-export type ImageUploadFromUrlMutationVariables = Exact<{
-  url: Scalars["String"];
-}>;
-
-export type ImageUploadFromUrlMutation = { __typename?: "Mutation" } & {
-  imageUploadFromUrl: { __typename?: "ImageUploadFromUrlPayload" } & ImageUploadFromUrlPayloadFragment;
-};
-
-export type DeleteIntegrationMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteIntegrationMutation = { __typename?: "Mutation" } & {
-  integrationDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type IntegrationDiscordMutationVariables = Exact<{
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-}>;
-
-export type IntegrationDiscordMutation = { __typename?: "Mutation" } & {
-  integrationDiscord: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationFigmaMutationVariables = Exact<{
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-}>;
-
-export type IntegrationFigmaMutation = { __typename?: "Mutation" } & {
-  integrationFigma: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationFrontMutationVariables = Exact<{
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-}>;
-
-export type IntegrationFrontMutation = { __typename?: "Mutation" } & {
-  integrationFront: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type CreateIntegrationGithubCommitMutationVariables = Exact<{ [key: string]: never }>;
-
-export type CreateIntegrationGithubCommitMutation = { __typename?: "Mutation" } & {
-  integrationGithubCommitCreate: {
-    __typename?: "GitHubCommitIntegrationPayload";
-  } & GitHubCommitIntegrationPayloadFragment;
-};
-
-export type IntegrationGithubConnectMutationVariables = Exact<{
-  installationId: Scalars["String"];
-}>;
-
-export type IntegrationGithubConnectMutation = { __typename?: "Mutation" } & {
-  integrationGithubConnect: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationGitlabConnectMutationVariables = Exact<{
-  accessToken: Scalars["String"];
-  gitlabUrl: Scalars["String"];
-}>;
-
-export type IntegrationGitlabConnectMutation = { __typename?: "Mutation" } & {
-  integrationGitlabConnect: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationGoogleSheetsMutationVariables = Exact<{
-  code: Scalars["String"];
-}>;
-
-export type IntegrationGoogleSheetsMutation = { __typename?: "Mutation" } & {
-  integrationGoogleSheets: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationIntercomMutationVariables = Exact<{
-  code: Scalars["String"];
-  domainUrl?: Maybe<Scalars["String"]>;
-  redirectUri: Scalars["String"];
-}>;
-
-export type IntegrationIntercomMutation = { __typename?: "Mutation" } & {
-  integrationIntercom: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type DeleteIntegrationIntercomMutationVariables = Exact<{ [key: string]: never }>;
-
-export type DeleteIntegrationIntercomMutation = { __typename?: "Mutation" } & {
-  integrationIntercomDelete: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type UpdateIntegrationIntercomSettingsMutationVariables = Exact<{
-  input: IntercomSettingsInput;
-}>;
-
-export type UpdateIntegrationIntercomSettingsMutation = { __typename?: "Mutation" } & {
-  integrationIntercomSettingsUpdate: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationLoomMutationVariables = Exact<{ [key: string]: never }>;
-
-export type IntegrationLoomMutation = { __typename?: "Mutation" } & {
-  integrationLoom: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationRequestMutationVariables = Exact<{
-  input: IntegrationRequestInput;
-}>;
-
-export type IntegrationRequestMutation = { __typename?: "Mutation" } & {
-  integrationRequest: { __typename?: "IntegrationRequestPayload" } & IntegrationRequestPayloadFragment;
-};
-
-export type ArchiveIntegrationResourceMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type ArchiveIntegrationResourceMutation = { __typename?: "Mutation" } & {
-  integrationResourceArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type IntegrationSentryConnectMutationVariables = Exact<{
-  code: Scalars["String"];
-  installationId: Scalars["String"];
-  organizationSlug: Scalars["String"];
-}>;
-
-export type IntegrationSentryConnectMutation = { __typename?: "Mutation" } & {
-  integrationSentryConnect: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationSlackMutationVariables = Exact<{
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-  shouldUseV2Auth?: Maybe<Scalars["Boolean"]>;
-}>;
-
-export type IntegrationSlackMutation = { __typename?: "Mutation" } & {
-  integrationSlack: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationSlackImportEmojisMutationVariables = Exact<{
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-}>;
-
-export type IntegrationSlackImportEmojisMutation = { __typename?: "Mutation" } & {
-  integrationSlackImportEmojis: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationSlackOrgProjectUpdatesPostMutationVariables = Exact<{
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-}>;
-
-export type IntegrationSlackOrgProjectUpdatesPostMutation = { __typename?: "Mutation" } & {
-  integrationSlackOrgProjectUpdatesPost: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationSlackPersonalMutationVariables = Exact<{
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-}>;
-
-export type IntegrationSlackPersonalMutation = { __typename?: "Mutation" } & {
-  integrationSlackPersonal: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationSlackPostMutationVariables = Exact<{
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-  shouldUseV2Auth?: Maybe<Scalars["Boolean"]>;
-  teamId: Scalars["String"];
-}>;
-
-export type IntegrationSlackPostMutation = { __typename?: "Mutation" } & {
-  integrationSlackPost: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationSlackProjectPostMutationVariables = Exact<{
-  code: Scalars["String"];
-  projectId: Scalars["String"];
-  redirectUri: Scalars["String"];
-  service: Scalars["String"];
-}>;
-
-export type IntegrationSlackProjectPostMutation = { __typename?: "Mutation" } & {
-  integrationSlackProjectPost: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type CreateIntegrationTemplateMutationVariables = Exact<{
-  input: IntegrationTemplateCreateInput;
-}>;
-
-export type CreateIntegrationTemplateMutation = { __typename?: "Mutation" } & {
-  integrationTemplateCreate: { __typename?: "IntegrationTemplatePayload" } & IntegrationTemplatePayloadFragment;
-};
-
-export type DeleteIntegrationTemplateMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteIntegrationTemplateMutation = { __typename?: "Mutation" } & {
-  integrationTemplateDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type IntegrationZendeskMutationVariables = Exact<{
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-  scope: Scalars["String"];
-  subdomain: Scalars["String"];
-}>;
-
-export type IntegrationZendeskMutation = { __typename?: "Mutation" } & {
-  integrationZendesk: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type CreateIntegrationsSettingsMutationVariables = Exact<{
-  input: IntegrationsSettingsCreateInput;
-}>;
-
-export type CreateIntegrationsSettingsMutation = { __typename?: "Mutation" } & {
-  integrationsSettingsCreate: { __typename?: "IntegrationsSettingsPayload" } & IntegrationsSettingsPayloadFragment;
-};
-
-export type UpdateIntegrationsSettingsMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: IntegrationsSettingsUpdateInput;
-}>;
-
-export type UpdateIntegrationsSettingsMutation = { __typename?: "Mutation" } & {
-  integrationsSettingsUpdate: { __typename?: "IntegrationsSettingsPayload" } & IntegrationsSettingsPayloadFragment;
-};
-
-export type ArchiveIssueMutationVariables = Exact<{
-  id: Scalars["String"];
-  trash?: Maybe<Scalars["Boolean"]>;
-}>;
-
-export type ArchiveIssueMutation = { __typename?: "Mutation" } & {
-  issueArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateIssueBatchMutationVariables = Exact<{
-  ids: Array<Scalars["UUID"]> | Scalars["UUID"];
-  input: IssueUpdateInput;
-}>;
-
-export type UpdateIssueBatchMutation = { __typename?: "Mutation" } & {
-  issueBatchUpdate: { __typename?: "IssueBatchPayload" } & IssueBatchPayloadFragment;
-};
-
-export type CreateIssueMutationVariables = Exact<{
-  input: IssueCreateInput;
-}>;
-
-export type CreateIssueMutation = { __typename?: "Mutation" } & {
-  issueCreate: { __typename?: "IssuePayload" } & IssuePayloadFragment;
-};
-
-export type DeleteIssueMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteIssueMutation = { __typename?: "Mutation" } & {
-  issueDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type IssueImportCreateAsanaMutationVariables = Exact<{
-  asanaTeamName: Scalars["String"];
-  asanaToken: Scalars["String"];
-  id?: Maybe<Scalars["String"]>;
-  includeClosedIssues?: Maybe<Scalars["Boolean"]>;
-  instantProcess?: Maybe<Scalars["Boolean"]>;
-  organizationId?: Maybe<Scalars["String"]>;
-  teamId?: Maybe<Scalars["String"]>;
-  teamName?: Maybe<Scalars["String"]>;
-}>;
-
-export type IssueImportCreateAsanaMutation = { __typename?: "Mutation" } & {
-  issueImportCreateAsana: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
-};
-
-export type IssueImportCreateClubhouseMutationVariables = Exact<{
-  clubhouseTeamName: Scalars["String"];
-  clubhouseToken: Scalars["String"];
-  id?: Maybe<Scalars["String"]>;
-  includeClosedIssues?: Maybe<Scalars["Boolean"]>;
-  instantProcess?: Maybe<Scalars["Boolean"]>;
-  organizationId?: Maybe<Scalars["String"]>;
-  teamId?: Maybe<Scalars["String"]>;
-  teamName?: Maybe<Scalars["String"]>;
-}>;
-
-export type IssueImportCreateClubhouseMutation = { __typename?: "Mutation" } & {
-  issueImportCreateClubhouse: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
-};
-
-export type IssueImportCreateGithubMutationVariables = Exact<{
-  githubRepoName: Scalars["String"];
-  githubRepoOwner: Scalars["String"];
-  githubShouldImportOrgProjects?: Maybe<Scalars["Boolean"]>;
-  githubToken: Scalars["String"];
-  id?: Maybe<Scalars["String"]>;
-  includeClosedIssues?: Maybe<Scalars["Boolean"]>;
-  instantProcess?: Maybe<Scalars["Boolean"]>;
-  organizationId?: Maybe<Scalars["String"]>;
-  teamId?: Maybe<Scalars["String"]>;
-  teamName?: Maybe<Scalars["String"]>;
-}>;
-
-export type IssueImportCreateGithubMutation = { __typename?: "Mutation" } & {
-  issueImportCreateGithub: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
-};
-
-export type IssueImportCreateJiraMutationVariables = Exact<{
-  id?: Maybe<Scalars["String"]>;
-  includeClosedIssues?: Maybe<Scalars["Boolean"]>;
-  instantProcess?: Maybe<Scalars["Boolean"]>;
-  jiraEmail: Scalars["String"];
-  jiraHostname: Scalars["String"];
-  jiraProject: Scalars["String"];
-  jiraToken: Scalars["String"];
-  organizationId?: Maybe<Scalars["String"]>;
-  teamId?: Maybe<Scalars["String"]>;
-  teamName?: Maybe<Scalars["String"]>;
-}>;
-
-export type IssueImportCreateJiraMutation = { __typename?: "Mutation" } & {
-  issueImportCreateJira: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
-};
-
-export type DeleteIssueImportMutationVariables = Exact<{
-  issueImportId: Scalars["String"];
-}>;
-
-export type DeleteIssueImportMutation = { __typename?: "Mutation" } & {
-  issueImportDelete: { __typename?: "IssueImportDeletePayload" } & IssueImportDeletePayloadFragment;
-};
-
-export type IssueImportProcessMutationVariables = Exact<{
-  issueImportId: Scalars["String"];
-  mapping: Scalars["JSONObject"];
-}>;
-
-export type IssueImportProcessMutation = { __typename?: "Mutation" } & {
-  issueImportProcess: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
-};
-
-export type UpdateIssueImportMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: IssueImportUpdateInput;
-}>;
-
-export type UpdateIssueImportMutation = { __typename?: "Mutation" } & {
-  issueImportUpdate: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
-};
-
-export type ArchiveIssueLabelMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type ArchiveIssueLabelMutation = { __typename?: "Mutation" } & {
-  issueLabelArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type CreateIssueLabelMutationVariables = Exact<{
-  input: IssueLabelCreateInput;
-  replaceTeamLabels?: Maybe<Scalars["Boolean"]>;
-}>;
-
-export type CreateIssueLabelMutation = { __typename?: "Mutation" } & {
-  issueLabelCreate: { __typename?: "IssueLabelPayload" } & IssueLabelPayloadFragment;
-};
-
-export type DeleteIssueLabelMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteIssueLabelMutation = { __typename?: "Mutation" } & {
-  issueLabelDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateIssueLabelMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: IssueLabelUpdateInput;
-}>;
-
-export type UpdateIssueLabelMutation = { __typename?: "Mutation" } & {
-  issueLabelUpdate: { __typename?: "IssueLabelPayload" } & IssueLabelPayloadFragment;
-};
-
-export type CreateIssueRelationMutationVariables = Exact<{
-  input: IssueRelationCreateInput;
-}>;
-
-export type CreateIssueRelationMutation = { __typename?: "Mutation" } & {
-  issueRelationCreate: { __typename?: "IssueRelationPayload" } & IssueRelationPayloadFragment;
-};
-
-export type DeleteIssueRelationMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteIssueRelationMutation = { __typename?: "Mutation" } & {
-  issueRelationDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateIssueRelationMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: IssueRelationUpdateInput;
-}>;
-
-export type UpdateIssueRelationMutation = { __typename?: "Mutation" } & {
-  issueRelationUpdate: { __typename?: "IssueRelationPayload" } & IssueRelationPayloadFragment;
-};
-
-export type IssueReminderMutationVariables = Exact<{
-  id: Scalars["String"];
-  reminderAt: Scalars["DateTime"];
-}>;
-
-export type IssueReminderMutation = { __typename?: "Mutation" } & {
-  issueReminder: { __typename?: "IssuePayload" } & IssuePayloadFragment;
-};
-
-export type UnarchiveIssueMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type UnarchiveIssueMutation = { __typename?: "Mutation" } & {
-  issueUnarchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateIssueMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: IssueUpdateInput;
-}>;
-
-export type UpdateIssueMutation = { __typename?: "Mutation" } & {
-  issueUpdate: { __typename?: "IssuePayload" } & IssuePayloadFragment;
-};
-
-export type JoinOrganizationFromOnboardingMutationVariables = Exact<{
-  input: JoinOrganizationInput;
-}>;
-
-export type JoinOrganizationFromOnboardingMutation = { __typename?: "Mutation" } & {
-  joinOrganizationFromOnboarding: {
-    __typename?: "CreateOrJoinOrganizationResponse";
-  } & CreateOrJoinOrganizationResponseFragment;
-};
-
-export type LeaveOrganizationMutationVariables = Exact<{
-  organizationId: Scalars["String"];
-}>;
-
-export type LeaveOrganizationMutation = { __typename?: "Mutation" } & {
-  leaveOrganization: { __typename?: "CreateOrJoinOrganizationResponse" } & CreateOrJoinOrganizationResponseFragment;
-};
-
-export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
-
-export type LogoutMutation = { __typename?: "Mutation" } & {
-  logout: { __typename?: "LogoutResponse" } & LogoutResponseFragment;
-};
-
-export type MigrateMilestonesToRoadmapsMutationVariables = Exact<{
-  input: MilestonesMigrateInput;
-}>;
-
-export type MigrateMilestonesToRoadmapsMutation = { __typename?: "Mutation" } & {
-  migrateMilestonesToRoadmaps: { __typename?: "MilestoneMigrationPayload" } & MilestoneMigrationPayloadFragment;
-};
-
-export type CreateMilestoneMutationVariables = Exact<{
-  input: MilestoneCreateInput;
-}>;
-
-export type CreateMilestoneMutation = { __typename?: "Mutation" } & {
-  milestoneCreate: { __typename?: "MilestonePayload" } & MilestonePayloadFragment;
-};
-
-export type DeleteMilestoneMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteMilestoneMutation = { __typename?: "Mutation" } & {
-  milestoneDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateMilestoneMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: MilestoneUpdateInput;
-}>;
-
-export type UpdateMilestoneMutation = { __typename?: "Mutation" } & {
-  milestoneUpdate: { __typename?: "MilestonePayload" } & MilestonePayloadFragment;
-};
-
-export type ArchiveNotificationMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
-  notificationArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type CreateNotificationSubscriptionMutationVariables = Exact<{
-  input: NotificationSubscriptionCreateInput;
-}>;
-
-export type CreateNotificationSubscriptionMutation = { __typename?: "Mutation" } & {
-  notificationSubscriptionCreate: {
-    __typename?: "NotificationSubscriptionPayload";
-  } & NotificationSubscriptionPayloadFragment;
-};
-
-export type DeleteNotificationSubscriptionMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteNotificationSubscriptionMutation = { __typename?: "Mutation" } & {
-  notificationSubscriptionDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateNotificationSubscriptionMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: NotificationSubscriptionUpdateInput;
-}>;
-
-export type UpdateNotificationSubscriptionMutation = { __typename?: "Mutation" } & {
-  notificationSubscriptionUpdate: {
-    __typename?: "NotificationSubscriptionPayload";
-  } & NotificationSubscriptionPayloadFragment;
-};
-
-export type UnarchiveNotificationMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
-  notificationUnarchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateNotificationMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: NotificationUpdateInput;
-}>;
-
-export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
-  notificationUpdate: { __typename?: "NotificationPayload" } & NotificationPayloadFragment;
-};
-
-export type DeleteOrganizationCancelMutationVariables = Exact<{ [key: string]: never }>;
-
-export type DeleteOrganizationCancelMutation = { __typename?: "Mutation" } & {
-  organizationCancelDelete: {
-    __typename?: "OrganizationCancelDeletePayload";
-  } & OrganizationCancelDeletePayloadFragment;
-};
-
-export type DeleteOrganizationMutationVariables = Exact<{
-  input: DeleteOrganizationInput;
-}>;
-
-export type DeleteOrganizationMutation = { __typename?: "Mutation" } & {
-  organizationDelete: { __typename?: "OrganizationDeletePayload" } & OrganizationDeletePayloadFragment;
-};
-
-export type OrganizationDeleteChallengeMutationVariables = Exact<{ [key: string]: never }>;
-
-export type OrganizationDeleteChallengeMutation = { __typename?: "Mutation" } & {
-  organizationDeleteChallenge: { __typename?: "OrganizationDeletePayload" } & OrganizationDeletePayloadFragment;
-};
-
-export type DeleteOrganizationDomainMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteOrganizationDomainMutation = { __typename?: "Mutation" } & {
-  organizationDomainDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type CreateOrganizationInviteMutationVariables = Exact<{
-  input: OrganizationInviteCreateInput;
-}>;
-
-export type CreateOrganizationInviteMutation = { __typename?: "Mutation" } & {
-  organizationInviteCreate: { __typename?: "OrganizationInvitePayload" } & OrganizationInvitePayloadFragment;
-};
-
-export type DeleteOrganizationInviteMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteOrganizationInviteMutation = { __typename?: "Mutation" } & {
-  organizationInviteDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateOrganizationInviteMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: OrganizationInviteUpdateInput;
-}>;
-
-export type UpdateOrganizationInviteMutation = { __typename?: "Mutation" } & {
-  organizationInviteUpdate: { __typename?: "OrganizationInvitePayload" } & OrganizationInvitePayloadFragment;
-};
-
-export type UpdateOrganizationMutationVariables = Exact<{
-  input: UpdateOrganizationInput;
-}>;
-
-export type UpdateOrganizationMutation = { __typename?: "Mutation" } & {
-  organizationUpdate: { __typename?: "OrganizationPayload" } & OrganizationPayloadFragment;
-};
-
-export type ArchiveProjectMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type ArchiveProjectMutation = { __typename?: "Mutation" } & {
-  projectArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type CreateProjectMutationVariables = Exact<{
-  input: ProjectCreateInput;
-}>;
-
-export type CreateProjectMutation = { __typename?: "Mutation" } & {
-  projectCreate: { __typename?: "ProjectPayload" } & ProjectPayloadFragment;
-};
-
-export type DeleteProjectMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteProjectMutation = { __typename?: "Mutation" } & {
-  projectDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type CreateProjectLinkMutationVariables = Exact<{
-  input: ProjectLinkCreateInput;
-}>;
-
-export type CreateProjectLinkMutation = { __typename?: "Mutation" } & {
-  projectLinkCreate: { __typename?: "ProjectLinkPayload" } & ProjectLinkPayloadFragment;
-};
-
-export type DeleteProjectLinkMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteProjectLinkMutation = { __typename?: "Mutation" } & {
-  projectLinkDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateProjectLinkMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: ProjectLinkUpdateInput;
-}>;
-
-export type UpdateProjectLinkMutation = { __typename?: "Mutation" } & {
-  projectLinkUpdate: { __typename?: "ProjectLinkPayload" } & ProjectLinkPayloadFragment;
-};
-
-export type UnarchiveProjectMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type UnarchiveProjectMutation = { __typename?: "Mutation" } & {
-  projectUnarchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateProjectMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: ProjectUpdateInput;
-}>;
-
-export type UpdateProjectMutation = { __typename?: "Mutation" } & {
-  projectUpdate: { __typename?: "ProjectPayload" } & ProjectPayloadFragment;
-};
-
-export type CreateProjectUpdateMutationVariables = Exact<{
-  input: ProjectUpdateCreateInput;
-}>;
-
-export type CreateProjectUpdateMutation = { __typename?: "Mutation" } & {
-  projectUpdateCreate: { __typename?: "ProjectUpdatePayload" } & ProjectUpdatePayloadFragment;
-};
-
-export type DeleteProjectUpdateMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteProjectUpdateMutation = { __typename?: "Mutation" } & {
-  projectUpdateDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type CreateProjectUpdateInteractionMutationVariables = Exact<{
-  input: ProjectUpdateInteractionCreateInput;
-}>;
-
-export type CreateProjectUpdateInteractionMutation = { __typename?: "Mutation" } & {
-  projectUpdateInteractionCreate: {
-    __typename?: "ProjectUpdateInteractionPayload";
-  } & ProjectUpdateInteractionPayloadFragment;
-};
-
-export type ProjectUpdateMarkAsReadMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type ProjectUpdateMarkAsReadMutation = { __typename?: "Mutation" } & {
-  projectUpdateMarkAsRead: {
-    __typename?: "ProjectUpdateWithInteractionPayload";
-  } & ProjectUpdateWithInteractionPayloadFragment;
-};
-
-export type UpdateProjectUpdateMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: ProjectUpdateUpdateInput;
-}>;
-
-export type UpdateProjectUpdateMutation = { __typename?: "Mutation" } & {
-  projectUpdateUpdate: { __typename?: "ProjectUpdatePayload" } & ProjectUpdatePayloadFragment;
-};
-
-export type CreatePushSubscriptionMutationVariables = Exact<{
-  input: PushSubscriptionCreateInput;
-}>;
-
-export type CreatePushSubscriptionMutation = { __typename?: "Mutation" } & {
-  pushSubscriptionCreate: { __typename?: "PushSubscriptionPayload" } & PushSubscriptionPayloadFragment;
-};
-
-export type DeletePushSubscriptionMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeletePushSubscriptionMutation = { __typename?: "Mutation" } & {
-  pushSubscriptionDelete: { __typename?: "PushSubscriptionPayload" } & PushSubscriptionPayloadFragment;
-};
-
-export type CreateReactionMutationVariables = Exact<{
-  input: ReactionCreateInput;
-}>;
-
-export type CreateReactionMutation = { __typename?: "Mutation" } & {
-  reactionCreate: { __typename?: "ReactionPayload" } & ReactionPayloadFragment;
-};
-
-export type DeleteReactionMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteReactionMutation = { __typename?: "Mutation" } & {
-  reactionDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type RefreshGoogleSheetsDataMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type RefreshGoogleSheetsDataMutation = { __typename?: "Mutation" } & {
-  refreshGoogleSheetsData: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type ResendOrganizationInviteMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type ResendOrganizationInviteMutation = { __typename?: "Mutation" } & {
-  resendOrganizationInvite: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type CreateRoadmapMutationVariables = Exact<{
-  input: RoadmapCreateInput;
-}>;
-
-export type CreateRoadmapMutation = { __typename?: "Mutation" } & {
-  roadmapCreate: { __typename?: "RoadmapPayload" } & RoadmapPayloadFragment;
-};
-
-export type DeleteRoadmapMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteRoadmapMutation = { __typename?: "Mutation" } & {
-  roadmapDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type CreateRoadmapToProjectMutationVariables = Exact<{
-  input: RoadmapToProjectCreateInput;
-}>;
-
-export type CreateRoadmapToProjectMutation = { __typename?: "Mutation" } & {
-  roadmapToProjectCreate: { __typename?: "RoadmapToProjectPayload" } & RoadmapToProjectPayloadFragment;
-};
-
-export type DeleteRoadmapToProjectMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteRoadmapToProjectMutation = { __typename?: "Mutation" } & {
-  roadmapToProjectDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateRoadmapToProjectMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: RoadmapToProjectUpdateInput;
-}>;
-
-export type UpdateRoadmapToProjectMutation = { __typename?: "Mutation" } & {
-  roadmapToProjectUpdate: { __typename?: "RoadmapToProjectPayload" } & RoadmapToProjectPayloadFragment;
-};
-
-export type UpdateRoadmapMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: RoadmapUpdateInput;
-}>;
-
-export type UpdateRoadmapMutation = { __typename?: "Mutation" } & {
-  roadmapUpdate: { __typename?: "RoadmapPayload" } & RoadmapPayloadFragment;
-};
-
-export type SamlTokenUserAccountAuthMutationVariables = Exact<{
-  input: TokenUserAccountAuthInput;
-}>;
-
-export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
-  samlTokenUserAccountAuth: { __typename?: "AuthResolverResponse" } & AuthResolverResponseFragment;
-};
-
-export type CreateTeamMutationVariables = Exact<{
-  copySettingsFromTeamId?: Maybe<Scalars["String"]>;
-  input: TeamCreateInput;
-}>;
-
-export type CreateTeamMutation = { __typename?: "Mutation" } & {
-  teamCreate: { __typename?: "TeamPayload" } & TeamPayloadFragment;
-};
-
-export type DeleteTeamCyclesMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteTeamCyclesMutation = { __typename?: "Mutation" } & {
-  teamCyclesDelete: { __typename?: "TeamPayload" } & TeamPayloadFragment;
-};
-
-export type DeleteTeamMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteTeamMutation = { __typename?: "Mutation" } & {
-  teamDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type DeleteTeamKeyMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteTeamKeyMutation = { __typename?: "Mutation" } & {
-  teamKeyDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type CreateTeamMembershipMutationVariables = Exact<{
-  input: TeamMembershipCreateInput;
-}>;
-
-export type CreateTeamMembershipMutation = { __typename?: "Mutation" } & {
-  teamMembershipCreate: { __typename?: "TeamMembershipPayload" } & TeamMembershipPayloadFragment;
-};
-
-export type DeleteTeamMembershipMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteTeamMembershipMutation = { __typename?: "Mutation" } & {
-  teamMembershipDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateTeamMembershipMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: TeamMembershipUpdateInput;
-}>;
-
-export type UpdateTeamMembershipMutation = { __typename?: "Mutation" } & {
-  teamMembershipUpdate: { __typename?: "TeamMembershipPayload" } & TeamMembershipPayloadFragment;
-};
-
-export type UpdateTeamMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: TeamUpdateInput;
-}>;
-
-export type UpdateTeamMutation = { __typename?: "Mutation" } & {
-  teamUpdate: { __typename?: "TeamPayload" } & TeamPayloadFragment;
-};
-
-export type CreateTemplateMutationVariables = Exact<{
-  input: TemplateCreateInput;
-}>;
-
-export type CreateTemplateMutation = { __typename?: "Mutation" } & {
-  templateCreate: { __typename?: "TemplatePayload" } & TemplatePayloadFragment;
-};
-
-export type DeleteTemplateMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteTemplateMutation = { __typename?: "Mutation" } & {
-  templateDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateTemplateMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: TemplateUpdateInput;
-}>;
-
-export type UpdateTemplateMutation = { __typename?: "Mutation" } & {
-  templateUpdate: { __typename?: "TemplatePayload" } & TemplatePayloadFragment;
-};
-
-export type UserDemoteAdminMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type UserDemoteAdminMutation = { __typename?: "Mutation" } & {
-  userDemoteAdmin: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
-};
-
-export type UserDemoteMemberMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type UserDemoteMemberMutation = { __typename?: "Mutation" } & {
-  userDemoteMember: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
-};
-
-export type UserDiscordConnectMutationVariables = Exact<{
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-}>;
-
-export type UserDiscordConnectMutation = { __typename?: "Mutation" } & {
-  userDiscordConnect: { __typename?: "UserPayload" } & UserPayloadFragment;
-};
-
-export type UserExternalUserDisconnectMutationVariables = Exact<{
-  service: Scalars["String"];
-}>;
-
-export type UserExternalUserDisconnectMutation = { __typename?: "Mutation" } & {
-  userExternalUserDisconnect: { __typename?: "UserPayload" } & UserPayloadFragment;
-};
-
-export type UpdateUserFlagMutationVariables = Exact<{
-  flag: UserFlagType;
-  operation: UserFlagUpdateOperation;
-}>;
-
-export type UpdateUserFlagMutation = { __typename?: "Mutation" } & {
-  userFlagUpdate: { __typename?: "UserSettingsFlagPayload" } & UserSettingsFlagPayloadFragment;
-};
-
-export type UserGitHubConnectMutationVariables = Exact<{
-  code: Scalars["String"];
-}>;
-
-export type UserGitHubConnectMutation = { __typename?: "Mutation" } & {
-  userGitHubConnect: { __typename?: "UserPayload" } & UserPayloadFragment;
-};
-
-export type UserGoogleCalendarConnectMutationVariables = Exact<{
-  code: Scalars["String"];
-}>;
-
-export type UserGoogleCalendarConnectMutation = { __typename?: "Mutation" } & {
-  userGoogleCalendarConnect: { __typename?: "UserPayload" } & UserPayloadFragment;
-};
-
-export type UserPromoteAdminMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type UserPromoteAdminMutation = { __typename?: "Mutation" } & {
-  userPromoteAdmin: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
-};
-
-export type UserPromoteMemberMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type UserPromoteMemberMutation = { __typename?: "Mutation" } & {
-  userPromoteMember: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
-};
-
-export type UserSettingsFlagIncrementMutationVariables = Exact<{
-  flag: Scalars["String"];
-}>;
-
-export type UserSettingsFlagIncrementMutation = { __typename?: "Mutation" } & {
-  userSettingsFlagIncrement: { __typename?: "UserSettingsFlagPayload" } & UserSettingsFlagPayloadFragment;
-};
-
-export type UserSettingsFlagsResetMutationVariables = Exact<{
-  flags?: Maybe<Array<UserFlagType> | UserFlagType>;
-}>;
-
-export type UserSettingsFlagsResetMutation = { __typename?: "Mutation" } & {
-  userSettingsFlagsReset: { __typename?: "UserSettingsFlagsResetPayload" } & UserSettingsFlagsResetPayloadFragment;
-};
-
-export type UpdateUserSettingsMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: UserSettingsUpdateInput;
-}>;
-
-export type UpdateUserSettingsMutation = { __typename?: "Mutation" } & {
-  userSettingsUpdate: { __typename?: "UserSettingsPayload" } & UserSettingsPayloadFragment;
-};
-
-export type SuspendUserMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type SuspendUserMutation = { __typename?: "Mutation" } & {
-  userSuspend: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
-};
-
-export type UnsuspendUserMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type UnsuspendUserMutation = { __typename?: "Mutation" } & {
-  userUnsuspend: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
-};
-
-export type UpdateUserMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: UpdateUserInput;
-}>;
-
-export type UpdateUserMutation = { __typename?: "Mutation" } & {
-  userUpdate: { __typename?: "UserPayload" } & UserPayloadFragment;
-};
-
-export type CreateViewPreferencesMutationVariables = Exact<{
-  input: ViewPreferencesCreateInput;
-}>;
-
-export type CreateViewPreferencesMutation = { __typename?: "Mutation" } & {
-  viewPreferencesCreate: { __typename?: "ViewPreferencesPayload" } & ViewPreferencesPayloadFragment;
-};
-
-export type DeleteViewPreferencesMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteViewPreferencesMutation = { __typename?: "Mutation" } & {
-  viewPreferencesDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateViewPreferencesMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: ViewPreferencesUpdateInput;
-}>;
-
-export type UpdateViewPreferencesMutation = { __typename?: "Mutation" } & {
-  viewPreferencesUpdate: { __typename?: "ViewPreferencesPayload" } & ViewPreferencesPayloadFragment;
-};
-
-export type CreateWebhookMutationVariables = Exact<{
-  input: WebhookCreateInput;
-}>;
-
-export type CreateWebhookMutation = { __typename?: "Mutation" } & {
-  webhookCreate: { __typename?: "WebhookPayload" } & WebhookPayloadFragment;
-};
-
-export type DeleteWebhookMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type DeleteWebhookMutation = { __typename?: "Mutation" } & {
-  webhookDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type UpdateWebhookMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: WebhookUpdateInput;
-}>;
-
-export type UpdateWebhookMutation = { __typename?: "Mutation" } & {
-  webhookUpdate: { __typename?: "WebhookPayload" } & WebhookPayloadFragment;
-};
-
-export type ArchiveWorkflowStateMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type ArchiveWorkflowStateMutation = { __typename?: "Mutation" } & {
-  workflowStateArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
-};
-
-export type CreateWorkflowStateMutationVariables = Exact<{
-  input: WorkflowStateCreateInput;
-}>;
-
-export type CreateWorkflowStateMutation = { __typename?: "Mutation" } & {
-  workflowStateCreate: { __typename?: "WorkflowStatePayload" } & WorkflowStatePayloadFragment;
-};
-
-export type UpdateWorkflowStateMutationVariables = Exact<{
-  id: Scalars["String"];
-  input: WorkflowStateUpdateInput;
-}>;
-
-export type UpdateWorkflowStateMutation = { __typename?: "Mutation" } & {
-  workflowStateUpdate: { __typename?: "WorkflowStatePayload" } & WorkflowStatePayloadFragment;
-};
-
 export const EntityFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -13463,6 +13501,35 @@ export const EntityFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<EntityFragment, unknown>;
+export const PersonalNoteFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "PersonalNote" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PersonalNote" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "contentData" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<PersonalNoteFragment, unknown>;
 export const ProjectNotificationSubscriptionFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -14038,6 +14105,24 @@ export const JiraSettingsFragmentDoc = {
     ...JiraLinearMappingFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<JiraSettingsFragment, unknown>;
+export const NotionSettingsFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "NotionSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "NotionSettings" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "workspaceId" } },
+          { kind: "Field", name: { kind: "Name", value: "workspaceName" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<NotionSettingsFragment, unknown>;
 export const SentrySettingsFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -14151,6 +14236,14 @@ export const IntegrationSettingsFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "notion" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotionSettings" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "sentry" },
             selectionSet: {
               kind: "SelectionSet",
@@ -14197,6 +14290,7 @@ export const IntegrationSettingsFragmentDoc = {
     ...GoogleSheetsSettingsFragmentDoc.definitions,
     ...IntercomSettingsFragmentDoc.definitions,
     ...JiraSettingsFragmentDoc.definitions,
+    ...NotionSettingsFragmentDoc.definitions,
     ...SentrySettingsFragmentDoc.definitions,
     ...SlackPostSettingsFragmentDoc.definitions,
     ...ZendeskSettingsFragmentDoc.definitions,
@@ -15634,64 +15728,6 @@ export const ImageUploadFromUrlPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<ImageUploadFromUrlPayloadFragment, unknown>;
-export const InitiativeFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Initiative" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Initiative" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "targetDate" } },
-          { kind: "Field", name: { kind: "Name", value: "description" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<InitiativeFragment, unknown>;
-export const InitiativeConnectionFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "InitiativeConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "InitiativeConnection" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Initiative" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...InitiativeFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<InitiativeConnectionFragment, unknown>;
 export const IntegrationFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -16187,11 +16223,13 @@ export const IntegrationsSettingsFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "slackIssueNewComment" } },
+          { kind: "Field", name: { kind: "Name", value: "slackIssueAddedToTriage" } },
           { kind: "Field", name: { kind: "Name", value: "slackIssueCreated" } },
           { kind: "Field", name: { kind: "Name", value: "slackProjectUpdateCreated" } },
+          { kind: "Field", name: { kind: "Name", value: "slackIssueSlaHighRisk" } },
+          { kind: "Field", name: { kind: "Name", value: "slackIssueSlaBreached" } },
           { kind: "Field", name: { kind: "Name", value: "slackIssueStatusChangedDone" } },
           { kind: "Field", name: { kind: "Name", value: "slackIssueStatusChangedAll" } },
-          { kind: "Field", name: { kind: "Name", value: "slackProjectUpdateCreatedToMilestone" } },
           { kind: "Field", name: { kind: "Name", value: "slackProjectUpdateCreatedToTeam" } },
           { kind: "Field", name: { kind: "Name", value: "slackProjectUpdateCreatedToWorkspace" } },
         ],
@@ -16321,6 +16359,7 @@ export const IssueFragmentDoc = {
           },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "startedTriageAt" } },
           { kind: "Field", name: { kind: "Name", value: "triagedAt" } },
           { kind: "Field", name: { kind: "Name", value: "autoArchivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "autoClosedAt" } },
@@ -16356,6 +16395,14 @@ export const IssueFragmentDoc = {
           {
             kind: "Field",
             name: { kind: "Name", value: "state" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectMilestone" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
@@ -17021,106 +17068,6 @@ export const LogoutResponseFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<LogoutResponseFragment, unknown>;
-export const MilestoneFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Milestone" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Milestone" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<MilestoneFragment, unknown>;
-export const MilestoneConnectionFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "MilestoneConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "MilestoneConnection" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Milestone" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...MilestoneFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<MilestoneConnectionFragment, unknown>;
-export const MilestoneMigrationPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "MilestoneMigrationPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "MilestoneMigrationPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
-          { kind: "Field", name: { kind: "Name", value: "success" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<MilestoneMigrationPayloadFragment, unknown>;
-export const MilestonePayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "MilestonePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "MilestonePayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "milestone" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "success" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<MilestonePayloadFragment, unknown>;
 export const NodeFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -17790,23 +17737,7 @@ export const ProjectFragmentDoc = {
           },
           { kind: "Field", name: { kind: "Name", value: "targetDate" } },
           { kind: "Field", name: { kind: "Name", value: "icon" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "initiative" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Initiative" } }],
-            },
-          },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "milestone" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
           { kind: "Field", name: { kind: "Name", value: "completedScopeHistory" } },
           { kind: "Field", name: { kind: "Name", value: "completedIssueCountHistory" } },
           { kind: "Field", name: { kind: "Name", value: "inProgressScopeHistory" } },
@@ -17858,7 +17789,6 @@ export const ProjectFragmentDoc = {
         ],
       },
     },
-    ...InitiativeFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectFragment, unknown>;
 export const ProjectConnectionFragmentDoc = {
@@ -17993,6 +17923,97 @@ export const ProjectLinkPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<ProjectLinkPayloadFragment, unknown>;
+export const ProjectMilestoneFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectMilestone" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectMilestone" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "targetDate" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ProjectMilestoneFragment, unknown>;
+export const ProjectMilestoneConnectionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectMilestoneConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectMilestoneConnection" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectMilestone" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectMilestoneFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ProjectMilestoneConnectionFragment, unknown>;
+export const ProjectMilestonePayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectMilestonePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectMilestonePayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectMilestone" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ProjectMilestonePayloadFragment, unknown>;
 export const ProjectPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -18854,6 +18875,7 @@ export const TeamFragmentDoc = {
           },
           { kind: "Field", name: { kind: "Name", value: "inviteHash" } },
           { kind: "Field", name: { kind: "Name", value: "defaultIssueEstimate" } },
+          { kind: "Field", name: { kind: "Name", value: "requirePriorityToLeaveTriage" } },
           { kind: "Field", name: { kind: "Name", value: "issueOrderingNoPriorityFirst" } },
           { kind: "Field", name: { kind: "Name", value: "private" } },
           { kind: "Field", name: { kind: "Name", value: "cyclesEnabled" } },
@@ -19453,8 +19475,11 @@ export const WorkflowDefinitionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "activities" } },
           { kind: "Field", name: { kind: "Name", value: "schedule" } },
           { kind: "Field", name: { kind: "Name", value: "conditions" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "groupName" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
@@ -19474,13 +19499,46 @@ export const WorkflowDefinitionFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "enabled" } },
         ],
       },
     },
   ],
 } as unknown as DocumentNode<WorkflowDefinitionFragment, unknown>;
+export const WorkflowDefinitionConnectionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "WorkflowDefinitionConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WorkflowDefinitionConnection" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowDefinition" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...WorkflowDefinitionFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<WorkflowDefinitionConnectionFragment, unknown>;
 export const WorkflowStateFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -19574,6 +19632,7713 @@ export const WorkflowStatePayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<WorkflowStatePayloadFragment, unknown>;
+export const AirbyteIntegrationConnectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "airbyteIntegrationConnect" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "AirbyteConfigurationInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "airbyteIntegrationConnect" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<AirbyteIntegrationConnectMutation, AirbyteIntegrationConnectMutationVariables>;
+export const CreateApiKeyDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createApiKey" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ApiKeyCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "apiKeyCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKeyPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ApiKeyPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateApiKeyMutation, CreateApiKeyMutationVariables>;
+export const DeleteApiKeyDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteApiKey" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "apiKeyDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteApiKeyMutation, DeleteApiKeyMutationVariables>;
+export const ArchiveAttachmentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "archiveAttachment" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentArchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ArchiveAttachmentMutation, ArchiveAttachmentMutationVariables>;
+export const CreateAttachmentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createAttachment" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "AttachmentCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateAttachmentMutation, CreateAttachmentMutationVariables>;
+export const DeleteAttachmentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteAttachment" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteAttachmentMutation, DeleteAttachmentMutationVariables>;
+export const AttachmentLinkDiscordDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "attachmentLinkDiscord" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "channelId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "messageId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "url" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentLinkDiscord" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "channelId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "channelId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "messageId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "messageId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "url" },
+                value: { kind: "Variable", name: { kind: "Name", value: "url" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<AttachmentLinkDiscordMutation, AttachmentLinkDiscordMutationVariables>;
+export const AttachmentLinkFrontDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "attachmentLinkFront" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentLinkFront" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "conversationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FrontAttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...FrontAttachmentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<AttachmentLinkFrontMutation, AttachmentLinkFrontMutationVariables>;
+export const AttachmentLinkIntercomDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "attachmentLinkIntercom" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentLinkIntercom" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "conversationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<AttachmentLinkIntercomMutation, AttachmentLinkIntercomMutationVariables>;
+export const AttachmentLinkJiraIssueDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "attachmentLinkJiraIssue" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "jiraIssueId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentLinkJiraIssue" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "jiraIssueId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "jiraIssueId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<AttachmentLinkJiraIssueMutation, AttachmentLinkJiraIssueMutationVariables>;
+export const AttachmentLinkUrlDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "attachmentLinkURL" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "title" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "url" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentLinkURL" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "title" },
+                value: { kind: "Variable", name: { kind: "Name", value: "title" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "url" },
+                value: { kind: "Variable", name: { kind: "Name", value: "url" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<AttachmentLinkUrlMutation, AttachmentLinkUrlMutationVariables>;
+export const AttachmentLinkZendeskDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "attachmentLinkZendesk" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "ticketId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentLinkZendesk" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "ticketId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "ticketId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<AttachmentLinkZendeskMutation, AttachmentLinkZendeskMutationVariables>;
+export const UpdateAttachmentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateAttachment" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "AttachmentUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateAttachmentMutation, UpdateAttachmentMutationVariables>;
+export const CreateCommentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createComment" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "CommentCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "commentCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...CommentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateCommentMutation, CreateCommentMutationVariables>;
+export const DeleteCommentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteComment" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "commentDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteCommentMutation, DeleteCommentMutationVariables>;
+export const UpdateCommentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateComment" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "CommentUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "commentUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...CommentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateCommentMutation, UpdateCommentMutationVariables>;
+export const CreateContactDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createContact" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ContactCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "contactCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ContactPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ContactPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateContactMutation, CreateContactMutationVariables>;
+export const CreateCsvExportReportDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createCsvExportReport" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includePrivateTeamIds" } },
+          type: {
+            kind: "ListType",
+            type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "createCsvExportReport" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includePrivateTeamIds" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includePrivateTeamIds" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CreateCsvExportReportPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...CreateCsvExportReportPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateCsvExportReportMutation, CreateCsvExportReportMutationVariables>;
+export const CreateOrganizationFromOnboardingDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createOrganizationFromOnboarding" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "CreateOrganizationInput" } },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "survey" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "OnboardingCustomerSurvey" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "createOrganizationFromOnboarding" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "survey" },
+                value: { kind: "Variable", name: { kind: "Name", value: "survey" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...CreateOrJoinOrganizationResponseFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<
+  CreateOrganizationFromOnboardingMutation,
+  CreateOrganizationFromOnboardingMutationVariables
+>;
+export const CreateCustomViewDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createCustomView" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "CustomViewCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "customViewCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomViewPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...CustomViewPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateCustomViewMutation, CreateCustomViewMutationVariables>;
+export const DeleteCustomViewDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteCustomView" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "customViewDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteCustomViewMutation, DeleteCustomViewMutationVariables>;
+export const UpdateCustomViewDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateCustomView" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "CustomViewUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "customViewUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomViewPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...CustomViewPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateCustomViewMutation, UpdateCustomViewMutationVariables>;
+export const ArchiveCycleDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "archiveCycle" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "cycleArchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ArchiveCycleMutation, ArchiveCycleMutationVariables>;
+export const CreateCycleDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createCycle" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "CycleCreateInput" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "cycleCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CyclePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...CyclePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateCycleMutation, CreateCycleMutationVariables>;
+export const UpdateCycleDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateCycle" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "CycleUpdateInput" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "cycleUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CyclePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...CyclePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateCycleMutation, UpdateCycleMutationVariables>;
+export const CreateDocumentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createDocument" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "DocumentCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "documentCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DocumentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...DocumentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateDocumentMutation, CreateDocumentMutationVariables>;
+export const DeleteDocumentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteDocument" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "documentDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteDocumentMutation, DeleteDocumentMutationVariables>;
+export const UpdateDocumentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateDocument" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "DocumentUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "documentUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DocumentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...DocumentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateDocumentMutation, UpdateDocumentMutationVariables>;
+export const EmailTokenUserAccountAuthDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "emailTokenUserAccountAuth" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "TokenUserAccountAuthInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "emailTokenUserAccountAuth" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AuthResolverResponseFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<EmailTokenUserAccountAuthMutation, EmailTokenUserAccountAuthMutationVariables>;
+export const EmailUnsubscribeDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "emailUnsubscribe" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "EmailUnsubscribeInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "emailUnsubscribe" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EmailUnsubscribePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...EmailUnsubscribePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<EmailUnsubscribeMutation, EmailUnsubscribeMutationVariables>;
+export const EmailUserAccountAuthChallengeDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "emailUserAccountAuthChallenge" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "EmailUserAccountAuthChallengeInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "emailUserAccountAuthChallenge" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "EmailUserAccountAuthChallengeResponse" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...EmailUserAccountAuthChallengeResponseFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<EmailUserAccountAuthChallengeMutation, EmailUserAccountAuthChallengeMutationVariables>;
+export const CreateEmojiDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createEmoji" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "EmojiCreateInput" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "emojiCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EmojiPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...EmojiPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateEmojiMutation, CreateEmojiMutationVariables>;
+export const DeleteEmojiDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteEmoji" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "emojiDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteEmojiMutation, DeleteEmojiMutationVariables>;
+export const CreateEventDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createEvent" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "EventCreateInput" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "eventCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EventPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...EventPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateEventMutation, CreateEventMutationVariables>;
+export const CreateFavoriteDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createFavorite" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "FavoriteCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "favoriteCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FavoritePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...FavoritePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateFavoriteMutation, CreateFavoriteMutationVariables>;
+export const DeleteFavoriteDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteFavorite" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "favoriteDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteFavoriteMutation, DeleteFavoriteMutationVariables>;
+export const UpdateFavoriteDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateFavorite" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "FavoriteUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "favoriteUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FavoritePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...FavoritePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateFavoriteMutation, UpdateFavoriteMutationVariables>;
+export const FileUploadDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "fileUpload" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "contentType" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filename" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "makePublic" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "metaData" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "JSON" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "size" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "fileUpload" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "contentType" },
+                value: { kind: "Variable", name: { kind: "Name", value: "contentType" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filename" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filename" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "makePublic" },
+                value: { kind: "Variable", name: { kind: "Name", value: "makePublic" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "metaData" },
+                value: { kind: "Variable", name: { kind: "Name", value: "metaData" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "size" },
+                value: { kind: "Variable", name: { kind: "Name", value: "size" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UploadPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UploadPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<FileUploadMutation, FileUploadMutationVariables>;
+export const GoogleUserAccountAuthDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "googleUserAccountAuth" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "GoogleUserAccountAuthInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "googleUserAccountAuth" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AuthResolverResponseFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<GoogleUserAccountAuthMutation, GoogleUserAccountAuthMutationVariables>;
+export const ImageUploadFromUrlDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "imageUploadFromUrl" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "url" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "imageUploadFromUrl" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "url" },
+                value: { kind: "Variable", name: { kind: "Name", value: "url" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ImageUploadFromUrlPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ImageUploadFromUrlPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ImageUploadFromUrlMutation, ImageUploadFromUrlMutationVariables>;
+export const DeleteIntegrationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteIntegration" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteIntegrationMutation, DeleteIntegrationMutationVariables>;
+export const IntegrationDiscordDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationDiscord" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationDiscord" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationDiscordMutation, IntegrationDiscordMutationVariables>;
+export const IntegrationFigmaDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationFigma" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationFigma" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationFigmaMutation, IntegrationFigmaMutationVariables>;
+export const IntegrationFrontDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationFront" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationFront" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationFrontMutation, IntegrationFrontMutationVariables>;
+export const CreateIntegrationGithubCommitDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createIntegrationGithubCommit" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationGithubCommitCreate" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "GitHubCommitIntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...GitHubCommitIntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateIntegrationGithubCommitMutation, CreateIntegrationGithubCommitMutationVariables>;
+export const IntegrationGithubConnectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationGithubConnect" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "installationId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationGithubConnect" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "installationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "installationId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationGithubConnectMutation, IntegrationGithubConnectMutationVariables>;
+export const IntegrationGitlabConnectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationGitlabConnect" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "accessToken" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "gitlabUrl" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationGitlabConnect" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "accessToken" },
+                value: { kind: "Variable", name: { kind: "Name", value: "accessToken" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "gitlabUrl" },
+                value: { kind: "Variable", name: { kind: "Name", value: "gitlabUrl" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationGitlabConnectMutation, IntegrationGitlabConnectMutationVariables>;
+export const IntegrationGoogleSheetsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationGoogleSheets" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationGoogleSheets" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationGoogleSheetsMutation, IntegrationGoogleSheetsMutationVariables>;
+export const IntegrationIntercomDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationIntercom" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "domainUrl" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationIntercom" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "domainUrl" },
+                value: { kind: "Variable", name: { kind: "Name", value: "domainUrl" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationIntercomMutation, IntegrationIntercomMutationVariables>;
+export const DeleteIntegrationIntercomDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteIntegrationIntercom" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationIntercomDelete" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteIntegrationIntercomMutation, DeleteIntegrationIntercomMutationVariables>;
+export const UpdateIntegrationIntercomSettingsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateIntegrationIntercomSettings" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "IntercomSettingsInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationIntercomSettingsUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<
+  UpdateIntegrationIntercomSettingsMutation,
+  UpdateIntegrationIntercomSettingsMutationVariables
+>;
+export const IntegrationLoomDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationLoom" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationLoom" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationLoomMutation, IntegrationLoomMutationVariables>;
+export const IntegrationRequestDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationRequest" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "IntegrationRequestInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationRequest" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationRequestPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationRequestPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationRequestMutation, IntegrationRequestMutationVariables>;
+export const ArchiveIntegrationResourceDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "archiveIntegrationResource" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationResourceArchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ArchiveIntegrationResourceMutation, ArchiveIntegrationResourceMutationVariables>;
+export const IntegrationSentryConnectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationSentryConnect" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "installationId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "organizationSlug" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationSentryConnect" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "installationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "installationId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "organizationSlug" },
+                value: { kind: "Variable", name: { kind: "Name", value: "organizationSlug" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationSentryConnectMutation, IntegrationSentryConnectMutationVariables>;
+export const IntegrationSlackDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationSlack" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "shouldUseV2Auth" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationSlack" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "shouldUseV2Auth" },
+                value: { kind: "Variable", name: { kind: "Name", value: "shouldUseV2Auth" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationSlackMutation, IntegrationSlackMutationVariables>;
+export const IntegrationSlackImportEmojisDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationSlackImportEmojis" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationSlackImportEmojis" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationSlackImportEmojisMutation, IntegrationSlackImportEmojisMutationVariables>;
+export const IntegrationSlackOrgProjectUpdatesPostDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationSlackOrgProjectUpdatesPost" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationSlackOrgProjectUpdatesPost" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<
+  IntegrationSlackOrgProjectUpdatesPostMutation,
+  IntegrationSlackOrgProjectUpdatesPostMutationVariables
+>;
+export const IntegrationSlackPersonalDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationSlackPersonal" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationSlackPersonal" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationSlackPersonalMutation, IntegrationSlackPersonalMutationVariables>;
+export const IntegrationSlackPostDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationSlackPost" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "shouldUseV2Auth" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationSlackPost" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "shouldUseV2Auth" },
+                value: { kind: "Variable", name: { kind: "Name", value: "shouldUseV2Auth" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationSlackPostMutation, IntegrationSlackPostMutationVariables>;
+export const IntegrationSlackProjectPostDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationSlackProjectPost" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "service" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationSlackProjectPost" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "projectId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "service" },
+                value: { kind: "Variable", name: { kind: "Name", value: "service" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationSlackProjectPostMutation, IntegrationSlackProjectPostMutationVariables>;
+export const CreateIntegrationTemplateDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createIntegrationTemplate" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "IntegrationTemplateCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationTemplateCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationTemplatePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationTemplatePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateIntegrationTemplateMutation, CreateIntegrationTemplateMutationVariables>;
+export const DeleteIntegrationTemplateDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteIntegrationTemplate" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationTemplateDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteIntegrationTemplateMutation, DeleteIntegrationTemplateMutationVariables>;
+export const IntegrationZendeskDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationZendesk" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "scope" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "subdomain" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationZendesk" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "scope" },
+                value: { kind: "Variable", name: { kind: "Name", value: "scope" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "subdomain" },
+                value: { kind: "Variable", name: { kind: "Name", value: "subdomain" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationZendeskMutation, IntegrationZendeskMutationVariables>;
+export const CreateIntegrationsSettingsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createIntegrationsSettings" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "IntegrationsSettingsCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationsSettingsCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationsSettingsPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationsSettingsPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateIntegrationsSettingsMutation, CreateIntegrationsSettingsMutationVariables>;
+export const UpdateIntegrationsSettingsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateIntegrationsSettings" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "IntegrationsSettingsUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationsSettingsUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationsSettingsPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationsSettingsPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateIntegrationsSettingsMutation, UpdateIntegrationsSettingsMutationVariables>;
+export const ArchiveIssueDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "archiveIssue" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "trash" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueArchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "trash" },
+                value: { kind: "Variable", name: { kind: "Name", value: "trash" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ArchiveIssueMutation, ArchiveIssueMutationVariables>;
+export const UpdateIssueBatchDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateIssueBatch" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "ids" } },
+          type: {
+            kind: "NonNullType",
+            type: {
+              kind: "ListType",
+              type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "UUID" } } },
+            },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "IssueUpdateInput" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueBatchUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "ids" },
+                value: { kind: "Variable", name: { kind: "Name", value: "ids" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueBatchPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueBatchPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateIssueBatchMutation, UpdateIssueBatchMutationVariables>;
+export const CreateIssueDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createIssue" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "IssueCreateInput" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssuePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssuePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateIssueMutation, CreateIssueMutationVariables>;
+export const DeleteIssueDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteIssue" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteIssueMutation, DeleteIssueMutationVariables>;
+export const IssueImportCreateAsanaDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "issueImportCreateAsana" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "asanaTeamName" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "asanaToken" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportCreateAsana" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "asanaTeamName" },
+                value: { kind: "Variable", name: { kind: "Name", value: "asanaTeamName" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "asanaToken" },
+                value: { kind: "Variable", name: { kind: "Name", value: "asanaToken" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeClosedIssues" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "instantProcess" },
+                value: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "organizationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamName" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueImportPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IssueImportCreateAsanaMutation, IssueImportCreateAsanaMutationVariables>;
+export const IssueImportCreateClubhouseDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "issueImportCreateClubhouse" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "clubhouseTeamName" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "clubhouseToken" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportCreateClubhouse" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "clubhouseTeamName" },
+                value: { kind: "Variable", name: { kind: "Name", value: "clubhouseTeamName" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "clubhouseToken" },
+                value: { kind: "Variable", name: { kind: "Name", value: "clubhouseToken" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeClosedIssues" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "instantProcess" },
+                value: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "organizationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamName" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueImportPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IssueImportCreateClubhouseMutation, IssueImportCreateClubhouseMutationVariables>;
+export const IssueImportCreateGithubDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "issueImportCreateGithub" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "githubRepoName" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "githubRepoOwner" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "githubShouldImportOrgProjects" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "githubToken" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportCreateGithub" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "githubRepoName" },
+                value: { kind: "Variable", name: { kind: "Name", value: "githubRepoName" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "githubRepoOwner" },
+                value: { kind: "Variable", name: { kind: "Name", value: "githubRepoOwner" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "githubShouldImportOrgProjects" },
+                value: { kind: "Variable", name: { kind: "Name", value: "githubShouldImportOrgProjects" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "githubToken" },
+                value: { kind: "Variable", name: { kind: "Name", value: "githubToken" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeClosedIssues" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "instantProcess" },
+                value: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "organizationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamName" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueImportPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IssueImportCreateGithubMutation, IssueImportCreateGithubMutationVariables>;
+export const IssueImportCreateJiraDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "issueImportCreateJira" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "jiraEmail" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "jiraHostname" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "jiraProject" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "jiraToken" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportCreateJira" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeClosedIssues" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "instantProcess" },
+                value: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "jiraEmail" },
+                value: { kind: "Variable", name: { kind: "Name", value: "jiraEmail" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "jiraHostname" },
+                value: { kind: "Variable", name: { kind: "Name", value: "jiraHostname" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "jiraProject" },
+                value: { kind: "Variable", name: { kind: "Name", value: "jiraProject" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "jiraToken" },
+                value: { kind: "Variable", name: { kind: "Name", value: "jiraToken" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "organizationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamName" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueImportPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IssueImportCreateJiraMutation, IssueImportCreateJiraMutationVariables>;
+export const DeleteIssueImportDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteIssueImport" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueImportId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueImportId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueImportId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportDeletePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueImportDeletePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteIssueImportMutation, DeleteIssueImportMutationVariables>;
+export const IssueImportProcessDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "issueImportProcess" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueImportId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "mapping" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "JSONObject" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportProcess" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueImportId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueImportId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "mapping" },
+                value: { kind: "Variable", name: { kind: "Name", value: "mapping" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueImportPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IssueImportProcessMutation, IssueImportProcessMutationVariables>;
+export const UpdateIssueImportDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateIssueImport" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "IssueImportUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueImportPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateIssueImportMutation, UpdateIssueImportMutationVariables>;
+export const ArchiveIssueLabelDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "archiveIssueLabel" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueLabelArchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ArchiveIssueLabelMutation, ArchiveIssueLabelMutationVariables>;
+export const CreateIssueLabelDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createIssueLabel" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelCreateInput" } },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "replaceTeamLabels" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueLabelCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "replaceTeamLabels" },
+                value: { kind: "Variable", name: { kind: "Name", value: "replaceTeamLabels" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueLabelPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateIssueLabelMutation, CreateIssueLabelMutationVariables>;
+export const DeleteIssueLabelDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteIssueLabel" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueLabelDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteIssueLabelMutation, DeleteIssueLabelMutationVariables>;
+export const UpdateIssueLabelDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateIssueLabel" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueLabelUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueLabelPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateIssueLabelMutation, UpdateIssueLabelMutationVariables>;
+export const CreateIssueRelationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createIssueRelation" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "IssueRelationCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueRelationCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueRelationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateIssueRelationMutation, CreateIssueRelationMutationVariables>;
+export const DeleteIssueRelationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteIssueRelation" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueRelationDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteIssueRelationMutation, DeleteIssueRelationMutationVariables>;
+export const UpdateIssueRelationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateIssueRelation" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "IssueRelationUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueRelationUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueRelationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateIssueRelationMutation, UpdateIssueRelationMutationVariables>;
+export const IssueReminderDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "issueReminder" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "reminderAt" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "DateTime" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueReminder" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "reminderAt" },
+                value: { kind: "Variable", name: { kind: "Name", value: "reminderAt" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssuePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssuePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IssueReminderMutation, IssueReminderMutationVariables>;
+export const UnarchiveIssueDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "unarchiveIssue" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueUnarchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UnarchiveIssueMutation, UnarchiveIssueMutationVariables>;
+export const UpdateIssueDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateIssue" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "IssueUpdateInput" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssuePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssuePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateIssueMutation, UpdateIssueMutationVariables>;
+export const JoinOrganizationFromOnboardingDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "joinOrganizationFromOnboarding" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "JoinOrganizationInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "joinOrganizationFromOnboarding" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...CreateOrJoinOrganizationResponseFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<JoinOrganizationFromOnboardingMutation, JoinOrganizationFromOnboardingMutationVariables>;
+export const LeaveOrganizationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "leaveOrganization" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "leaveOrganization" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "organizationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...CreateOrJoinOrganizationResponseFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<LeaveOrganizationMutation, LeaveOrganizationMutationVariables>;
+export const LogoutDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "logout" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "logout" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "LogoutResponse" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...LogoutResponseFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<LogoutMutation, LogoutMutationVariables>;
+export const ArchiveNotificationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "archiveNotification" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notificationArchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ArchiveNotificationMutation, ArchiveNotificationMutationVariables>;
+export const CreateNotificationSubscriptionDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createNotificationSubscription" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "NotificationSubscriptionCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notificationSubscriptionCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "NotificationSubscriptionPayload" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...NotificationSubscriptionPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateNotificationSubscriptionMutation, CreateNotificationSubscriptionMutationVariables>;
+export const DeleteNotificationSubscriptionDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteNotificationSubscription" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notificationSubscriptionDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteNotificationSubscriptionMutation, DeleteNotificationSubscriptionMutationVariables>;
+export const UpdateNotificationSubscriptionDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateNotificationSubscription" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "NotificationSubscriptionUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notificationSubscriptionUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "NotificationSubscriptionPayload" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...NotificationSubscriptionPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateNotificationSubscriptionMutation, UpdateNotificationSubscriptionMutationVariables>;
+export const UnarchiveNotificationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "unarchiveNotification" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notificationUnarchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UnarchiveNotificationMutation, UnarchiveNotificationMutationVariables>;
+export const UpdateNotificationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateNotification" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "NotificationUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notificationUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotificationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...NotificationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateNotificationMutation, UpdateNotificationMutationVariables>;
+export const DeleteOrganizationCancelDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteOrganizationCancel" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "organizationCancelDelete" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationCancelDeletePayload" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...OrganizationCancelDeletePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteOrganizationCancelMutation, DeleteOrganizationCancelMutationVariables>;
+export const DeleteOrganizationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteOrganization" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "DeleteOrganizationInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "organizationDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDeletePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...OrganizationDeletePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteOrganizationMutation, DeleteOrganizationMutationVariables>;
+export const OrganizationDeleteChallengeDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "organizationDeleteChallenge" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "organizationDeleteChallenge" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDeletePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...OrganizationDeletePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<OrganizationDeleteChallengeMutation, OrganizationDeleteChallengeMutationVariables>;
+export const DeleteOrganizationDomainDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteOrganizationDomain" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "organizationDomainDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteOrganizationDomainMutation, DeleteOrganizationDomainMutationVariables>;
+export const CreateOrganizationInviteDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createOrganizationInvite" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "OrganizationInviteCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "organizationInviteCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationInvitePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...OrganizationInvitePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateOrganizationInviteMutation, CreateOrganizationInviteMutationVariables>;
+export const DeleteOrganizationInviteDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteOrganizationInvite" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "organizationInviteDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteOrganizationInviteMutation, DeleteOrganizationInviteMutationVariables>;
+export const UpdateOrganizationInviteDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateOrganizationInvite" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "OrganizationInviteUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "organizationInviteUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationInvitePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...OrganizationInvitePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateOrganizationInviteMutation, UpdateOrganizationInviteMutationVariables>;
+export const UpdateOrganizationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateOrganization" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "UpdateOrganizationInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "organizationUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...OrganizationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateOrganizationMutation, UpdateOrganizationMutationVariables>;
+export const ArchiveProjectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "archiveProject" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectArchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ArchiveProjectMutation, ArchiveProjectMutationVariables>;
+export const CreateProjectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createProject" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateProjectMutation, CreateProjectMutationVariables>;
+export const DeleteProjectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteProject" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteProjectMutation, DeleteProjectMutationVariables>;
+export const CreateProjectLinkDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createProjectLink" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectLinkCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectLinkCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLinkPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectLinkPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateProjectLinkMutation, CreateProjectLinkMutationVariables>;
+export const DeleteProjectLinkDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteProjectLink" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectLinkDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteProjectLinkMutation, DeleteProjectLinkMutationVariables>;
+export const UpdateProjectLinkDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateProjectLink" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectLinkUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectLinkUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLinkPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectLinkPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateProjectLinkMutation, UpdateProjectLinkMutationVariables>;
+export const CreateProjectMilestoneDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createProjectMilestone" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectMilestoneCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectMilestoneCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectMilestonePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectMilestonePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateProjectMilestoneMutation, CreateProjectMilestoneMutationVariables>;
+export const DeleteProjectMilestoneDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteProjectMilestone" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectMilestoneDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteProjectMilestoneMutation, DeleteProjectMilestoneMutationVariables>;
+export const UpdateProjectMilestoneDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateProjectMilestone" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectMilestoneUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectMilestoneUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectMilestonePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectMilestonePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateProjectMilestoneMutation, UpdateProjectMilestoneMutationVariables>;
+export const UnarchiveProjectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "unarchiveProject" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectUnarchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UnarchiveProjectMutation, UnarchiveProjectMutationVariables>;
+export const UpdateProjectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateProject" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateProjectMutation, UpdateProjectMutationVariables>;
+export const CreateProjectUpdateDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createProjectUpdate" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectUpdateCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectUpdateCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectUpdatePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectUpdatePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateProjectUpdateMutation, CreateProjectUpdateMutationVariables>;
+export const DeleteProjectUpdateDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteProjectUpdate" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectUpdateDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteProjectUpdateMutation, DeleteProjectUpdateMutationVariables>;
+export const CreateProjectUpdateInteractionDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createProjectUpdateInteraction" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectUpdateInteractionCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectUpdateInteractionCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectUpdateInteractionPayload" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectUpdateInteractionPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateProjectUpdateInteractionMutation, CreateProjectUpdateInteractionMutationVariables>;
+export const ProjectUpdateMarkAsReadDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "projectUpdateMarkAsRead" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectUpdateMarkAsRead" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectUpdateWithInteractionPayload" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectUpdateWithInteractionPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ProjectUpdateMarkAsReadMutation, ProjectUpdateMarkAsReadMutationVariables>;
+export const UpdateProjectUpdateDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateProjectUpdate" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectUpdateUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectUpdateUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectUpdatePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectUpdatePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateProjectUpdateMutation, UpdateProjectUpdateMutationVariables>;
+export const CreatePushSubscriptionDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createPushSubscription" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "PushSubscriptionCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pushSubscriptionCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscriptionPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...PushSubscriptionPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreatePushSubscriptionMutation, CreatePushSubscriptionMutationVariables>;
+export const DeletePushSubscriptionDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deletePushSubscription" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pushSubscriptionDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscriptionPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...PushSubscriptionPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeletePushSubscriptionMutation, DeletePushSubscriptionMutationVariables>;
+export const CreateReactionDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createReaction" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ReactionCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "reactionCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ReactionPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ReactionPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateReactionMutation, CreateReactionMutationVariables>;
+export const DeleteReactionDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteReaction" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "reactionDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteReactionMutation, DeleteReactionMutationVariables>;
+export const RefreshGoogleSheetsDataDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "refreshGoogleSheetsData" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "refreshGoogleSheetsData" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<RefreshGoogleSheetsDataMutation, RefreshGoogleSheetsDataMutationVariables>;
+export const ResendOrganizationInviteDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "resendOrganizationInvite" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "resendOrganizationInvite" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ResendOrganizationInviteMutation, ResendOrganizationInviteMutationVariables>;
+export const CreateRoadmapDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createRoadmap" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "RoadmapCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "roadmapCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "RoadmapPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...RoadmapPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateRoadmapMutation, CreateRoadmapMutationVariables>;
+export const DeleteRoadmapDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteRoadmap" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "roadmapDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteRoadmapMutation, DeleteRoadmapMutationVariables>;
+export const CreateRoadmapToProjectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createRoadmapToProject" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "RoadmapToProjectCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "roadmapToProjectCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "RoadmapToProjectPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...RoadmapToProjectPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateRoadmapToProjectMutation, CreateRoadmapToProjectMutationVariables>;
+export const DeleteRoadmapToProjectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteRoadmapToProject" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "roadmapToProjectDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteRoadmapToProjectMutation, DeleteRoadmapToProjectMutationVariables>;
+export const UpdateRoadmapToProjectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateRoadmapToProject" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "RoadmapToProjectUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "roadmapToProjectUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "RoadmapToProjectPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...RoadmapToProjectPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateRoadmapToProjectMutation, UpdateRoadmapToProjectMutationVariables>;
+export const UpdateRoadmapDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateRoadmap" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "RoadmapUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "roadmapUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "RoadmapPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...RoadmapPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateRoadmapMutation, UpdateRoadmapMutationVariables>;
+export const SamlTokenUserAccountAuthDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "samlTokenUserAccountAuth" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "TokenUserAccountAuthInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "samlTokenUserAccountAuth" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AuthResolverResponseFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<SamlTokenUserAccountAuthMutation, SamlTokenUserAccountAuthMutationVariables>;
+export const CreateTeamDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createTeam" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "copySettingsFromTeamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "TeamCreateInput" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "teamCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "copySettingsFromTeamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "copySettingsFromTeamId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TeamPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateTeamMutation, CreateTeamMutationVariables>;
+export const DeleteTeamCyclesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteTeamCycles" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "teamCyclesDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TeamPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteTeamCyclesMutation, DeleteTeamCyclesMutationVariables>;
+export const DeleteTeamDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteTeam" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "teamDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteTeamMutation, DeleteTeamMutationVariables>;
+export const DeleteTeamKeyDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteTeamKey" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "teamKeyDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteTeamKeyMutation, DeleteTeamKeyMutationVariables>;
+export const CreateTeamMembershipDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createTeamMembership" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "TeamMembershipCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "teamMembershipCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembershipPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TeamMembershipPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateTeamMembershipMutation, CreateTeamMembershipMutationVariables>;
+export const DeleteTeamMembershipDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteTeamMembership" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "teamMembershipDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteTeamMembershipMutation, DeleteTeamMembershipMutationVariables>;
+export const UpdateTeamMembershipDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateTeamMembership" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "TeamMembershipUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "teamMembershipUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembershipPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TeamMembershipPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateTeamMembershipMutation, UpdateTeamMembershipMutationVariables>;
+export const UpdateTeamDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateTeam" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "TeamUpdateInput" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "teamUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TeamPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateTeamMutation, UpdateTeamMutationVariables>;
+export const CreateTemplateDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createTemplate" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "TemplateCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "templateCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TemplatePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TemplatePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateTemplateMutation, CreateTemplateMutationVariables>;
+export const DeleteTemplateDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteTemplate" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "templateDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteTemplateMutation, DeleteTemplateMutationVariables>;
+export const UpdateTemplateDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateTemplate" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "TemplateUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "templateUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TemplatePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TemplatePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateTemplateMutation, UpdateTemplateMutationVariables>;
+export const UserDemoteAdminDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userDemoteAdmin" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userDemoteAdmin" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserAdminPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserDemoteAdminMutation, UserDemoteAdminMutationVariables>;
+export const UserDemoteMemberDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userDemoteMember" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userDemoteMember" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserAdminPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserDemoteMemberMutation, UserDemoteMemberMutationVariables>;
+export const UserDiscordConnectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userDiscordConnect" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userDiscordConnect" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserDiscordConnectMutation, UserDiscordConnectMutationVariables>;
+export const UserExternalUserDisconnectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userExternalUserDisconnect" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "service" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userExternalUserDisconnect" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "service" },
+                value: { kind: "Variable", name: { kind: "Name", value: "service" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserExternalUserDisconnectMutation, UserExternalUserDisconnectMutationVariables>;
+export const UpdateUserFlagDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateUserFlag" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "flag" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "UserFlagType" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "operation" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "UserFlagUpdateOperation" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userFlagUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "flag" },
+                value: { kind: "Variable", name: { kind: "Name", value: "flag" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "operation" },
+                value: { kind: "Variable", name: { kind: "Name", value: "operation" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsFlagPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserSettingsFlagPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateUserFlagMutation, UpdateUserFlagMutationVariables>;
+export const UserGitHubConnectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userGitHubConnect" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userGitHubConnect" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserGitHubConnectMutation, UserGitHubConnectMutationVariables>;
+export const UserGoogleCalendarConnectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userGoogleCalendarConnect" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userGoogleCalendarConnect" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserGoogleCalendarConnectMutation, UserGoogleCalendarConnectMutationVariables>;
+export const UserPromoteAdminDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userPromoteAdmin" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userPromoteAdmin" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserAdminPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserPromoteAdminMutation, UserPromoteAdminMutationVariables>;
+export const UserPromoteMemberDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userPromoteMember" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userPromoteMember" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserAdminPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserPromoteMemberMutation, UserPromoteMemberMutationVariables>;
+export const UserSettingsFlagIncrementDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userSettingsFlagIncrement" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "flag" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userSettingsFlagIncrement" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "flag" },
+                value: { kind: "Variable", name: { kind: "Name", value: "flag" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsFlagPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserSettingsFlagPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserSettingsFlagIncrementMutation, UserSettingsFlagIncrementMutationVariables>;
+export const UserSettingsFlagsResetDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userSettingsFlagsReset" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "flags" } },
+          type: {
+            kind: "ListType",
+            type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "UserFlagType" } } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userSettingsFlagsReset" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "flags" },
+                value: { kind: "Variable", name: { kind: "Name", value: "flags" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsFlagsResetPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserSettingsFlagsResetPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserSettingsFlagsResetMutation, UserSettingsFlagsResetMutationVariables>;
+export const UpdateUserSettingsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateUserSettings" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "UserSettingsUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userSettingsUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserSettingsPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateUserSettingsMutation, UpdateUserSettingsMutationVariables>;
+export const SuspendUserDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "suspendUser" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userSuspend" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserAdminPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<SuspendUserMutation, SuspendUserMutationVariables>;
+export const UnsuspendUserDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "unsuspendUser" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userUnsuspend" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserAdminPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UnsuspendUserMutation, UnsuspendUserMutationVariables>;
+export const UpdateUserDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateUser" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "UpdateUserInput" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateUserMutation, UpdateUserMutationVariables>;
+export const CreateViewPreferencesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createViewPreferences" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ViewPreferencesCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "viewPreferencesCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ViewPreferencesPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ViewPreferencesPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateViewPreferencesMutation, CreateViewPreferencesMutationVariables>;
+export const DeleteViewPreferencesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteViewPreferences" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "viewPreferencesDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteViewPreferencesMutation, DeleteViewPreferencesMutationVariables>;
+export const UpdateViewPreferencesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateViewPreferences" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ViewPreferencesUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "viewPreferencesUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ViewPreferencesPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ViewPreferencesPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateViewPreferencesMutation, UpdateViewPreferencesMutationVariables>;
+export const CreateWebhookDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createWebhook" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "WebhookCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "webhookCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WebhookPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...WebhookPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateWebhookMutation, CreateWebhookMutationVariables>;
+export const DeleteWebhookDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteWebhook" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "webhookDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteWebhookMutation, DeleteWebhookMutationVariables>;
+export const UpdateWebhookDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateWebhook" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "WebhookUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "webhookUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WebhookPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...WebhookPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateWebhookMutation, UpdateWebhookMutationVariables>;
+export const ArchiveWorkflowStateDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "archiveWorkflowState" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "workflowStateArchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ArchiveWorkflowStateMutation, ArchiveWorkflowStateMutationVariables>;
+export const CreateWorkflowStateDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createWorkflowState" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "WorkflowStateCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "workflowStateCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowStatePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...WorkflowStatePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateWorkflowStateMutation, CreateWorkflowStateMutationVariables>;
+export const UpdateWorkflowStateDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateWorkflowState" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "WorkflowStateUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "workflowStateUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowStatePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...WorkflowStatePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateWorkflowStateMutation, UpdateWorkflowStateMutationVariables>;
+export const ProjectMilestoneDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "ProjectMilestone" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "ProjectMilestone" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectMilestone" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectMilestoneFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ProjectMilestoneQuery, ProjectMilestoneQueryVariables>;
+export const ProjectMilestonesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "ProjectMilestones" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "ProjectMilestones" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectMilestoneConnection" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectMilestoneConnectionFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ProjectMilestonesQuery, ProjectMilestonesQueryVariables>;
 export const AdministrableTeamsDocument = {
   kind: "Document",
   definitions: [
@@ -24391,6 +32156,114 @@ export const IssueRelationsDocument = {
     ...IssueRelationConnectionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueRelationsQuery, IssueRelationsQueryVariables>;
+export const IssueSearchDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "issueSearch" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "query" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueSearch" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "query" },
+                value: { kind: "Variable", name: { kind: "Name", value: "query" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueConnectionFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IssueSearchQuery, IssueSearchQueryVariables>;
 export const IssueVcsBranchSearchDocument = {
   kind: "Document",
   definitions: [
@@ -25462,251 +33335,6 @@ export const IssuesDocument = {
     ...IssueConnectionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssuesQuery, IssuesQueryVariables>;
-export const MilestoneDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "milestone" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "milestone" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Milestone" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...MilestoneFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<MilestoneQuery, MilestoneQueryVariables>;
-export const Milestone_ProjectsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "milestone_projects" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "ProjectFilter" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "milestone" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "projects" },
-                  arguments: [
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "after" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "before" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "filter" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "first" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "includeArchived" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "last" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "orderBy" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-                    },
-                  ],
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectConnection" } }],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...ProjectConnectionFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<Milestone_ProjectsQuery, Milestone_ProjectsQueryVariables>;
-export const MilestonesDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "milestones" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "milestones" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "MilestoneConnection" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...MilestoneConnectionFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<MilestonesQuery, MilestonesQueryVariables>;
 export const NotificationDocument = {
   kind: "Document",
   definitions: [
@@ -26884,53 +34512,6 @@ export const Project_DocumentsDocument = {
     ...DocumentConnectionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_DocumentsQuery, Project_DocumentsQueryVariables>;
-export const Project_InitiativeDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "project_initiative" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "project" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "initiative" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Initiative" } }],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...InitiativeFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<Project_InitiativeQuery, Project_InitiativeQueryVariables>;
 export const Project_IssuesDocument = {
   kind: "Document",
   definitions: [
@@ -27288,6 +34869,117 @@ export const Project_MembersDocument = {
     ...UserConnectionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_MembersQuery, Project_MembersQueryVariables>;
+export const Project_ProjectMilestonesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "project_projectMilestones" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "projectMilestones" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectMilestoneConnection" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectMilestoneConnectionFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<Project_ProjectMilestonesQuery, Project_ProjectMilestonesQueryVariables>;
 export const Project_ProjectUpdatesDocument = {
   kind: "Document",
   definitions: [
@@ -31295,7615 +38987,3 @@ export const WorkflowStatesDocument = {
     ...WorkflowStateConnectionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<WorkflowStatesQuery, WorkflowStatesQueryVariables>;
-export const AirbyteIntegrationConnectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "airbyteIntegrationConnect" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "AirbyteConfigurationInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "airbyteIntegrationConnect" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<AirbyteIntegrationConnectMutation, AirbyteIntegrationConnectMutationVariables>;
-export const CreateApiKeyDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createApiKey" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ApiKeyCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "apiKeyCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKeyPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ApiKeyPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateApiKeyMutation, CreateApiKeyMutationVariables>;
-export const DeleteApiKeyDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteApiKey" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "apiKeyDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteApiKeyMutation, DeleteApiKeyMutationVariables>;
-export const ArchiveAttachmentDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "archiveAttachment" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "attachmentArchive" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ArchiveAttachmentMutation, ArchiveAttachmentMutationVariables>;
-export const CreateAttachmentDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createAttachment" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "AttachmentCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "attachmentCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...AttachmentPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateAttachmentMutation, CreateAttachmentMutationVariables>;
-export const DeleteAttachmentDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteAttachment" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "attachmentDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteAttachmentMutation, DeleteAttachmentMutationVariables>;
-export const AttachmentLinkDiscordDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "attachmentLinkDiscord" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "channelId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "messageId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "url" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "attachmentLinkDiscord" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "channelId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "channelId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "issueId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "messageId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "messageId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "url" },
-                value: { kind: "Variable", name: { kind: "Name", value: "url" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...AttachmentPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<AttachmentLinkDiscordMutation, AttachmentLinkDiscordMutationVariables>;
-export const AttachmentLinkFrontDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "attachmentLinkFront" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "attachmentLinkFront" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "conversationId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "issueId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FrontAttachmentPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...FrontAttachmentPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<AttachmentLinkFrontMutation, AttachmentLinkFrontMutationVariables>;
-export const AttachmentLinkIntercomDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "attachmentLinkIntercom" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "attachmentLinkIntercom" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "conversationId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "issueId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...AttachmentPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<AttachmentLinkIntercomMutation, AttachmentLinkIntercomMutationVariables>;
-export const AttachmentLinkJiraIssueDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "attachmentLinkJiraIssue" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "jiraIssueId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "attachmentLinkJiraIssue" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "issueId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "jiraIssueId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "jiraIssueId" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...AttachmentPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<AttachmentLinkJiraIssueMutation, AttachmentLinkJiraIssueMutationVariables>;
-export const AttachmentLinkUrlDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "attachmentLinkURL" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "title" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "url" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "attachmentLinkURL" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "issueId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "title" },
-                value: { kind: "Variable", name: { kind: "Name", value: "title" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "url" },
-                value: { kind: "Variable", name: { kind: "Name", value: "url" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...AttachmentPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<AttachmentLinkUrlMutation, AttachmentLinkUrlMutationVariables>;
-export const AttachmentLinkZendeskDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "attachmentLinkZendesk" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "ticketId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "attachmentLinkZendesk" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "issueId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "ticketId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "ticketId" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...AttachmentPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<AttachmentLinkZendeskMutation, AttachmentLinkZendeskMutationVariables>;
-export const UpdateAttachmentDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateAttachment" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "AttachmentUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "attachmentUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...AttachmentPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateAttachmentMutation, UpdateAttachmentMutationVariables>;
-export const CreateCommentDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createComment" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "CommentCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "commentCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...CommentPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateCommentMutation, CreateCommentMutationVariables>;
-export const DeleteCommentDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteComment" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "commentDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteCommentMutation, DeleteCommentMutationVariables>;
-export const UpdateCommentDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateComment" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "CommentUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "commentUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...CommentPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateCommentMutation, UpdateCommentMutationVariables>;
-export const CreateContactDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createContact" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ContactCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "contactCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ContactPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ContactPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateContactMutation, CreateContactMutationVariables>;
-export const CreateCsvExportReportDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createCsvExportReport" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includePrivateTeamIds" } },
-          type: {
-            kind: "ListType",
-            type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "createCsvExportReport" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includePrivateTeamIds" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includePrivateTeamIds" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CreateCsvExportReportPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...CreateCsvExportReportPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateCsvExportReportMutation, CreateCsvExportReportMutationVariables>;
-export const CreateOrganizationFromOnboardingDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createOrganizationFromOnboarding" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "CreateOrganizationInput" } },
-          },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "survey" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "OnboardingCustomerSurvey" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "createOrganizationFromOnboarding" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "survey" },
-                value: { kind: "Variable", name: { kind: "Name", value: "survey" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...CreateOrJoinOrganizationResponseFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<
-  CreateOrganizationFromOnboardingMutation,
-  CreateOrganizationFromOnboardingMutationVariables
->;
-export const CreateCustomViewDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createCustomView" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "CustomViewCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "customViewCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomViewPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...CustomViewPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateCustomViewMutation, CreateCustomViewMutationVariables>;
-export const DeleteCustomViewDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteCustomView" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "customViewDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteCustomViewMutation, DeleteCustomViewMutationVariables>;
-export const UpdateCustomViewDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateCustomView" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "CustomViewUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "customViewUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomViewPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...CustomViewPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateCustomViewMutation, UpdateCustomViewMutationVariables>;
-export const ArchiveCycleDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "archiveCycle" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "cycleArchive" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ArchiveCycleMutation, ArchiveCycleMutationVariables>;
-export const CreateCycleDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createCycle" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "CycleCreateInput" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "cycleCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CyclePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...CyclePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateCycleMutation, CreateCycleMutationVariables>;
-export const UpdateCycleDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateCycle" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "CycleUpdateInput" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "cycleUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CyclePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...CyclePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateCycleMutation, UpdateCycleMutationVariables>;
-export const CreateDocumentDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createDocument" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "DocumentCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "documentCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DocumentPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...DocumentPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateDocumentMutation, CreateDocumentMutationVariables>;
-export const DeleteDocumentDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteDocument" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "documentDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteDocumentMutation, DeleteDocumentMutationVariables>;
-export const UpdateDocumentDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateDocument" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "DocumentUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "documentUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DocumentPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...DocumentPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateDocumentMutation, UpdateDocumentMutationVariables>;
-export const EmailTokenUserAccountAuthDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "emailTokenUserAccountAuth" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "TokenUserAccountAuthInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "emailTokenUserAccountAuth" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...AuthResolverResponseFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<EmailTokenUserAccountAuthMutation, EmailTokenUserAccountAuthMutationVariables>;
-export const EmailUnsubscribeDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "emailUnsubscribe" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "EmailUnsubscribeInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "emailUnsubscribe" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EmailUnsubscribePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...EmailUnsubscribePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<EmailUnsubscribeMutation, EmailUnsubscribeMutationVariables>;
-export const EmailUserAccountAuthChallengeDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "emailUserAccountAuthChallenge" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "EmailUserAccountAuthChallengeInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "emailUserAccountAuthChallenge" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "EmailUserAccountAuthChallengeResponse" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...EmailUserAccountAuthChallengeResponseFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<EmailUserAccountAuthChallengeMutation, EmailUserAccountAuthChallengeMutationVariables>;
-export const CreateEmojiDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createEmoji" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "EmojiCreateInput" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "emojiCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EmojiPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...EmojiPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateEmojiMutation, CreateEmojiMutationVariables>;
-export const DeleteEmojiDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteEmoji" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "emojiDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteEmojiMutation, DeleteEmojiMutationVariables>;
-export const CreateEventDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createEvent" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "EventCreateInput" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "eventCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EventPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...EventPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateEventMutation, CreateEventMutationVariables>;
-export const CreateFavoriteDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createFavorite" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "FavoriteCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "favoriteCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FavoritePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...FavoritePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateFavoriteMutation, CreateFavoriteMutationVariables>;
-export const DeleteFavoriteDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteFavorite" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "favoriteDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteFavoriteMutation, DeleteFavoriteMutationVariables>;
-export const UpdateFavoriteDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateFavorite" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "FavoriteUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "favoriteUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "FavoritePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...FavoritePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateFavoriteMutation, UpdateFavoriteMutationVariables>;
-export const FileUploadDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "fileUpload" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "contentType" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "filename" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "makePublic" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "metaData" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "JSON" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "size" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "fileUpload" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "contentType" },
-                value: { kind: "Variable", name: { kind: "Name", value: "contentType" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "filename" },
-                value: { kind: "Variable", name: { kind: "Name", value: "filename" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "makePublic" },
-                value: { kind: "Variable", name: { kind: "Name", value: "makePublic" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "metaData" },
-                value: { kind: "Variable", name: { kind: "Name", value: "metaData" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "size" },
-                value: { kind: "Variable", name: { kind: "Name", value: "size" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UploadPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UploadPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<FileUploadMutation, FileUploadMutationVariables>;
-export const GoogleUserAccountAuthDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "googleUserAccountAuth" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "GoogleUserAccountAuthInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "googleUserAccountAuth" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...AuthResolverResponseFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<GoogleUserAccountAuthMutation, GoogleUserAccountAuthMutationVariables>;
-export const ImageUploadFromUrlDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "imageUploadFromUrl" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "url" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "imageUploadFromUrl" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "url" },
-                value: { kind: "Variable", name: { kind: "Name", value: "url" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ImageUploadFromUrlPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ImageUploadFromUrlPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ImageUploadFromUrlMutation, ImageUploadFromUrlMutationVariables>;
-export const DeleteIntegrationDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteIntegration" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteIntegrationMutation, DeleteIntegrationMutationVariables>;
-export const IntegrationDiscordDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationDiscord" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationDiscord" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationDiscordMutation, IntegrationDiscordMutationVariables>;
-export const IntegrationFigmaDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationFigma" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationFigma" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationFigmaMutation, IntegrationFigmaMutationVariables>;
-export const IntegrationFrontDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationFront" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationFront" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationFrontMutation, IntegrationFrontMutationVariables>;
-export const CreateIntegrationGithubCommitDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createIntegrationGithubCommit" },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationGithubCommitCreate" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "GitHubCommitIntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...GitHubCommitIntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateIntegrationGithubCommitMutation, CreateIntegrationGithubCommitMutationVariables>;
-export const IntegrationGithubConnectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationGithubConnect" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "installationId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationGithubConnect" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "installationId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "installationId" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationGithubConnectMutation, IntegrationGithubConnectMutationVariables>;
-export const IntegrationGitlabConnectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationGitlabConnect" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "accessToken" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "gitlabUrl" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationGitlabConnect" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "accessToken" },
-                value: { kind: "Variable", name: { kind: "Name", value: "accessToken" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "gitlabUrl" },
-                value: { kind: "Variable", name: { kind: "Name", value: "gitlabUrl" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationGitlabConnectMutation, IntegrationGitlabConnectMutationVariables>;
-export const IntegrationGoogleSheetsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationGoogleSheets" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationGoogleSheets" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationGoogleSheetsMutation, IntegrationGoogleSheetsMutationVariables>;
-export const IntegrationIntercomDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationIntercom" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "domainUrl" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationIntercom" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "domainUrl" },
-                value: { kind: "Variable", name: { kind: "Name", value: "domainUrl" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationIntercomMutation, IntegrationIntercomMutationVariables>;
-export const DeleteIntegrationIntercomDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteIntegrationIntercom" },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationIntercomDelete" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteIntegrationIntercomMutation, DeleteIntegrationIntercomMutationVariables>;
-export const UpdateIntegrationIntercomSettingsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateIntegrationIntercomSettings" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "IntercomSettingsInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationIntercomSettingsUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<
-  UpdateIntegrationIntercomSettingsMutation,
-  UpdateIntegrationIntercomSettingsMutationVariables
->;
-export const IntegrationLoomDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationLoom" },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationLoom" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationLoomMutation, IntegrationLoomMutationVariables>;
-export const IntegrationRequestDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationRequest" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "IntegrationRequestInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationRequest" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationRequestPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationRequestPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationRequestMutation, IntegrationRequestMutationVariables>;
-export const ArchiveIntegrationResourceDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "archiveIntegrationResource" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationResourceArchive" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ArchiveIntegrationResourceMutation, ArchiveIntegrationResourceMutationVariables>;
-export const IntegrationSentryConnectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationSentryConnect" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "installationId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "organizationSlug" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationSentryConnect" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "installationId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "installationId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "organizationSlug" },
-                value: { kind: "Variable", name: { kind: "Name", value: "organizationSlug" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationSentryConnectMutation, IntegrationSentryConnectMutationVariables>;
-export const IntegrationSlackDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationSlack" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "shouldUseV2Auth" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationSlack" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "shouldUseV2Auth" },
-                value: { kind: "Variable", name: { kind: "Name", value: "shouldUseV2Auth" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationSlackMutation, IntegrationSlackMutationVariables>;
-export const IntegrationSlackImportEmojisDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationSlackImportEmojis" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationSlackImportEmojis" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationSlackImportEmojisMutation, IntegrationSlackImportEmojisMutationVariables>;
-export const IntegrationSlackOrgProjectUpdatesPostDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationSlackOrgProjectUpdatesPost" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationSlackOrgProjectUpdatesPost" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<
-  IntegrationSlackOrgProjectUpdatesPostMutation,
-  IntegrationSlackOrgProjectUpdatesPostMutationVariables
->;
-export const IntegrationSlackPersonalDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationSlackPersonal" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationSlackPersonal" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationSlackPersonalMutation, IntegrationSlackPersonalMutationVariables>;
-export const IntegrationSlackPostDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationSlackPost" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "shouldUseV2Auth" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationSlackPost" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "shouldUseV2Auth" },
-                value: { kind: "Variable", name: { kind: "Name", value: "shouldUseV2Auth" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "teamId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationSlackPostMutation, IntegrationSlackPostMutationVariables>;
-export const IntegrationSlackProjectPostDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationSlackProjectPost" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "service" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationSlackProjectPost" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "projectId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "service" },
-                value: { kind: "Variable", name: { kind: "Name", value: "service" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationSlackProjectPostMutation, IntegrationSlackProjectPostMutationVariables>;
-export const CreateIntegrationTemplateDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createIntegrationTemplate" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "IntegrationTemplateCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationTemplateCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationTemplatePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationTemplatePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateIntegrationTemplateMutation, CreateIntegrationTemplateMutationVariables>;
-export const DeleteIntegrationTemplateDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteIntegrationTemplate" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationTemplateDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteIntegrationTemplateMutation, DeleteIntegrationTemplateMutationVariables>;
-export const IntegrationZendeskDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationZendesk" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "scope" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "subdomain" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationZendesk" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "scope" },
-                value: { kind: "Variable", name: { kind: "Name", value: "scope" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "subdomain" },
-                value: { kind: "Variable", name: { kind: "Name", value: "subdomain" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationZendeskMutation, IntegrationZendeskMutationVariables>;
-export const CreateIntegrationsSettingsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createIntegrationsSettings" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "IntegrationsSettingsCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationsSettingsCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationsSettingsPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationsSettingsPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateIntegrationsSettingsMutation, CreateIntegrationsSettingsMutationVariables>;
-export const UpdateIntegrationsSettingsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateIntegrationsSettings" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "IntegrationsSettingsUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationsSettingsUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationsSettingsPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationsSettingsPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateIntegrationsSettingsMutation, UpdateIntegrationsSettingsMutationVariables>;
-export const ArchiveIssueDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "archiveIssue" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "trash" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueArchive" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "trash" },
-                value: { kind: "Variable", name: { kind: "Name", value: "trash" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ArchiveIssueMutation, ArchiveIssueMutationVariables>;
-export const UpdateIssueBatchDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateIssueBatch" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "ids" } },
-          type: {
-            kind: "NonNullType",
-            type: {
-              kind: "ListType",
-              type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "UUID" } } },
-            },
-          },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "IssueUpdateInput" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueBatchUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "ids" },
-                value: { kind: "Variable", name: { kind: "Name", value: "ids" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueBatchPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueBatchPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateIssueBatchMutation, UpdateIssueBatchMutationVariables>;
-export const CreateIssueDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createIssue" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "IssueCreateInput" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssuePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssuePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateIssueMutation, CreateIssueMutationVariables>;
-export const DeleteIssueDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteIssue" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteIssueMutation, DeleteIssueMutationVariables>;
-export const IssueImportCreateAsanaDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "issueImportCreateAsana" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "asanaTeamName" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "asanaToken" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueImportCreateAsana" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "asanaTeamName" },
-                value: { kind: "Variable", name: { kind: "Name", value: "asanaTeamName" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "asanaToken" },
-                value: { kind: "Variable", name: { kind: "Name", value: "asanaToken" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeClosedIssues" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "instantProcess" },
-                value: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "organizationId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "teamId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "teamName" },
-                value: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueImportPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IssueImportCreateAsanaMutation, IssueImportCreateAsanaMutationVariables>;
-export const IssueImportCreateClubhouseDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "issueImportCreateClubhouse" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "clubhouseTeamName" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "clubhouseToken" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueImportCreateClubhouse" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "clubhouseTeamName" },
-                value: { kind: "Variable", name: { kind: "Name", value: "clubhouseTeamName" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "clubhouseToken" },
-                value: { kind: "Variable", name: { kind: "Name", value: "clubhouseToken" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeClosedIssues" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "instantProcess" },
-                value: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "organizationId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "teamId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "teamName" },
-                value: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueImportPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IssueImportCreateClubhouseMutation, IssueImportCreateClubhouseMutationVariables>;
-export const IssueImportCreateGithubDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "issueImportCreateGithub" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "githubRepoName" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "githubRepoOwner" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "githubShouldImportOrgProjects" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "githubToken" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueImportCreateGithub" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "githubRepoName" },
-                value: { kind: "Variable", name: { kind: "Name", value: "githubRepoName" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "githubRepoOwner" },
-                value: { kind: "Variable", name: { kind: "Name", value: "githubRepoOwner" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "githubShouldImportOrgProjects" },
-                value: { kind: "Variable", name: { kind: "Name", value: "githubShouldImportOrgProjects" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "githubToken" },
-                value: { kind: "Variable", name: { kind: "Name", value: "githubToken" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeClosedIssues" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "instantProcess" },
-                value: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "organizationId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "teamId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "teamName" },
-                value: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueImportPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IssueImportCreateGithubMutation, IssueImportCreateGithubMutationVariables>;
-export const IssueImportCreateJiraDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "issueImportCreateJira" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "jiraEmail" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "jiraHostname" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "jiraProject" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "jiraToken" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueImportCreateJira" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeClosedIssues" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeClosedIssues" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "instantProcess" },
-                value: { kind: "Variable", name: { kind: "Name", value: "instantProcess" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "jiraEmail" },
-                value: { kind: "Variable", name: { kind: "Name", value: "jiraEmail" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "jiraHostname" },
-                value: { kind: "Variable", name: { kind: "Name", value: "jiraHostname" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "jiraProject" },
-                value: { kind: "Variable", name: { kind: "Name", value: "jiraProject" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "jiraToken" },
-                value: { kind: "Variable", name: { kind: "Name", value: "jiraToken" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "organizationId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "teamId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "teamName" },
-                value: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueImportPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IssueImportCreateJiraMutation, IssueImportCreateJiraMutationVariables>;
-export const DeleteIssueImportDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteIssueImport" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "issueImportId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueImportDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "issueImportId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "issueImportId" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportDeletePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueImportDeletePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteIssueImportMutation, DeleteIssueImportMutationVariables>;
-export const IssueImportProcessDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "issueImportProcess" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "issueImportId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "mapping" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "JSONObject" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueImportProcess" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "issueImportId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "issueImportId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "mapping" },
-                value: { kind: "Variable", name: { kind: "Name", value: "mapping" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueImportPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IssueImportProcessMutation, IssueImportProcessMutationVariables>;
-export const UpdateIssueImportDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateIssueImport" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "IssueImportUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueImportUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueImportPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateIssueImportMutation, UpdateIssueImportMutationVariables>;
-export const ArchiveIssueLabelDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "archiveIssueLabel" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueLabelArchive" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ArchiveIssueLabelMutation, ArchiveIssueLabelMutationVariables>;
-export const CreateIssueLabelDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createIssueLabel" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelCreateInput" } },
-          },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "replaceTeamLabels" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueLabelCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "replaceTeamLabels" },
-                value: { kind: "Variable", name: { kind: "Name", value: "replaceTeamLabels" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueLabelPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateIssueLabelMutation, CreateIssueLabelMutationVariables>;
-export const DeleteIssueLabelDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteIssueLabel" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueLabelDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteIssueLabelMutation, DeleteIssueLabelMutationVariables>;
-export const UpdateIssueLabelDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateIssueLabel" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueLabelUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueLabelPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateIssueLabelMutation, UpdateIssueLabelMutationVariables>;
-export const CreateIssueRelationDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createIssueRelation" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "IssueRelationCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueRelationCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueRelationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateIssueRelationMutation, CreateIssueRelationMutationVariables>;
-export const DeleteIssueRelationDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteIssueRelation" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueRelationDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteIssueRelationMutation, DeleteIssueRelationMutationVariables>;
-export const UpdateIssueRelationDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateIssueRelation" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "IssueRelationUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueRelationUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueRelationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueRelationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateIssueRelationMutation, UpdateIssueRelationMutationVariables>;
-export const IssueReminderDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "issueReminder" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "reminderAt" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "DateTime" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueReminder" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "reminderAt" },
-                value: { kind: "Variable", name: { kind: "Name", value: "reminderAt" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssuePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssuePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IssueReminderMutation, IssueReminderMutationVariables>;
-export const UnarchiveIssueDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "unarchiveIssue" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueUnarchive" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UnarchiveIssueMutation, UnarchiveIssueMutationVariables>;
-export const UpdateIssueDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateIssue" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "IssueUpdateInput" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssuePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssuePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateIssueMutation, UpdateIssueMutationVariables>;
-export const JoinOrganizationFromOnboardingDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "joinOrganizationFromOnboarding" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "JoinOrganizationInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "joinOrganizationFromOnboarding" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...CreateOrJoinOrganizationResponseFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<JoinOrganizationFromOnboardingMutation, JoinOrganizationFromOnboardingMutationVariables>;
-export const LeaveOrganizationDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "leaveOrganization" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "leaveOrganization" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "organizationId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "CreateOrJoinOrganizationResponse" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...CreateOrJoinOrganizationResponseFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<LeaveOrganizationMutation, LeaveOrganizationMutationVariables>;
-export const LogoutDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "logout" },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "logout" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "LogoutResponse" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...LogoutResponseFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<LogoutMutation, LogoutMutationVariables>;
-export const MigrateMilestonesToRoadmapsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "migrateMilestonesToRoadmaps" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "MilestonesMigrateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "migrateMilestonesToRoadmaps" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "MilestoneMigrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...MilestoneMigrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<MigrateMilestonesToRoadmapsMutation, MigrateMilestonesToRoadmapsMutationVariables>;
-export const CreateMilestoneDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createMilestone" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "MilestoneCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "milestoneCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "MilestonePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...MilestonePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateMilestoneMutation, CreateMilestoneMutationVariables>;
-export const DeleteMilestoneDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteMilestone" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "milestoneDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteMilestoneMutation, DeleteMilestoneMutationVariables>;
-export const UpdateMilestoneDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateMilestone" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "MilestoneUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "milestoneUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "MilestonePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...MilestonePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateMilestoneMutation, UpdateMilestoneMutationVariables>;
-export const ArchiveNotificationDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "archiveNotification" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "notificationArchive" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ArchiveNotificationMutation, ArchiveNotificationMutationVariables>;
-export const CreateNotificationSubscriptionDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createNotificationSubscription" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "NotificationSubscriptionCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "notificationSubscriptionCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "NotificationSubscriptionPayload" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...NotificationSubscriptionPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateNotificationSubscriptionMutation, CreateNotificationSubscriptionMutationVariables>;
-export const DeleteNotificationSubscriptionDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteNotificationSubscription" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "notificationSubscriptionDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteNotificationSubscriptionMutation, DeleteNotificationSubscriptionMutationVariables>;
-export const UpdateNotificationSubscriptionDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateNotificationSubscription" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "NotificationSubscriptionUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "notificationSubscriptionUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "NotificationSubscriptionPayload" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...NotificationSubscriptionPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateNotificationSubscriptionMutation, UpdateNotificationSubscriptionMutationVariables>;
-export const UnarchiveNotificationDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "unarchiveNotification" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "notificationUnarchive" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UnarchiveNotificationMutation, UnarchiveNotificationMutationVariables>;
-export const UpdateNotificationDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateNotification" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "NotificationUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "notificationUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotificationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...NotificationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateNotificationMutation, UpdateNotificationMutationVariables>;
-export const DeleteOrganizationCancelDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteOrganizationCancel" },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationCancelDelete" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationCancelDeletePayload" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationCancelDeletePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteOrganizationCancelMutation, DeleteOrganizationCancelMutationVariables>;
-export const DeleteOrganizationDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteOrganization" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "DeleteOrganizationInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDeletePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationDeletePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteOrganizationMutation, DeleteOrganizationMutationVariables>;
-export const OrganizationDeleteChallengeDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "organizationDeleteChallenge" },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationDeleteChallenge" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationDeletePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationDeletePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<OrganizationDeleteChallengeMutation, OrganizationDeleteChallengeMutationVariables>;
-export const DeleteOrganizationDomainDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteOrganizationDomain" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationDomainDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteOrganizationDomainMutation, DeleteOrganizationDomainMutationVariables>;
-export const CreateOrganizationInviteDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createOrganizationInvite" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "OrganizationInviteCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationInviteCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationInvitePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationInvitePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateOrganizationInviteMutation, CreateOrganizationInviteMutationVariables>;
-export const DeleteOrganizationInviteDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteOrganizationInvite" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationInviteDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteOrganizationInviteMutation, DeleteOrganizationInviteMutationVariables>;
-export const UpdateOrganizationInviteDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateOrganizationInvite" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "OrganizationInviteUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationInviteUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationInvitePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationInvitePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateOrganizationInviteMutation, UpdateOrganizationInviteMutationVariables>;
-export const UpdateOrganizationDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateOrganization" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "UpdateOrganizationInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateOrganizationMutation, UpdateOrganizationMutationVariables>;
-export const ArchiveProjectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "archiveProject" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectArchive" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ArchiveProjectMutation, ArchiveProjectMutationVariables>;
-export const CreateProjectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createProject" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ProjectPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateProjectMutation, CreateProjectMutationVariables>;
-export const DeleteProjectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteProject" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteProjectMutation, DeleteProjectMutationVariables>;
-export const CreateProjectLinkDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createProjectLink" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectLinkCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectLinkCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLinkPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ProjectLinkPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateProjectLinkMutation, CreateProjectLinkMutationVariables>;
-export const DeleteProjectLinkDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteProjectLink" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectLinkDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteProjectLinkMutation, DeleteProjectLinkMutationVariables>;
-export const UpdateProjectLinkDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateProjectLink" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectLinkUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectLinkUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLinkPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ProjectLinkPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateProjectLinkMutation, UpdateProjectLinkMutationVariables>;
-export const UnarchiveProjectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "unarchiveProject" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectUnarchive" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UnarchiveProjectMutation, UnarchiveProjectMutationVariables>;
-export const UpdateProjectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateProject" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ProjectPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateProjectMutation, UpdateProjectMutationVariables>;
-export const CreateProjectUpdateDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createProjectUpdate" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectUpdateCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectUpdateCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectUpdatePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ProjectUpdatePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateProjectUpdateMutation, CreateProjectUpdateMutationVariables>;
-export const DeleteProjectUpdateDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteProjectUpdate" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectUpdateDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteProjectUpdateMutation, DeleteProjectUpdateMutationVariables>;
-export const CreateProjectUpdateInteractionDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createProjectUpdateInteraction" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectUpdateInteractionCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectUpdateInteractionCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectUpdateInteractionPayload" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...ProjectUpdateInteractionPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateProjectUpdateInteractionMutation, CreateProjectUpdateInteractionMutationVariables>;
-export const ProjectUpdateMarkAsReadDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "projectUpdateMarkAsRead" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectUpdateMarkAsRead" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectUpdateWithInteractionPayload" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...ProjectUpdateWithInteractionPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ProjectUpdateMarkAsReadMutation, ProjectUpdateMarkAsReadMutationVariables>;
-export const UpdateProjectUpdateDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateProjectUpdate" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectUpdateUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectUpdateUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectUpdatePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ProjectUpdatePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateProjectUpdateMutation, UpdateProjectUpdateMutationVariables>;
-export const CreatePushSubscriptionDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createPushSubscription" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "PushSubscriptionCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pushSubscriptionCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscriptionPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...PushSubscriptionPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreatePushSubscriptionMutation, CreatePushSubscriptionMutationVariables>;
-export const DeletePushSubscriptionDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deletePushSubscription" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pushSubscriptionDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PushSubscriptionPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...PushSubscriptionPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeletePushSubscriptionMutation, DeletePushSubscriptionMutationVariables>;
-export const CreateReactionDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createReaction" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ReactionCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "reactionCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ReactionPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ReactionPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateReactionMutation, CreateReactionMutationVariables>;
-export const DeleteReactionDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteReaction" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "reactionDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteReactionMutation, DeleteReactionMutationVariables>;
-export const RefreshGoogleSheetsDataDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "refreshGoogleSheetsData" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "refreshGoogleSheetsData" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<RefreshGoogleSheetsDataMutation, RefreshGoogleSheetsDataMutationVariables>;
-export const ResendOrganizationInviteDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "resendOrganizationInvite" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "resendOrganizationInvite" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ResendOrganizationInviteMutation, ResendOrganizationInviteMutationVariables>;
-export const CreateRoadmapDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createRoadmap" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "RoadmapCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "roadmapCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "RoadmapPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...RoadmapPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateRoadmapMutation, CreateRoadmapMutationVariables>;
-export const DeleteRoadmapDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteRoadmap" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "roadmapDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteRoadmapMutation, DeleteRoadmapMutationVariables>;
-export const CreateRoadmapToProjectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createRoadmapToProject" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "RoadmapToProjectCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "roadmapToProjectCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "RoadmapToProjectPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...RoadmapToProjectPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateRoadmapToProjectMutation, CreateRoadmapToProjectMutationVariables>;
-export const DeleteRoadmapToProjectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteRoadmapToProject" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "roadmapToProjectDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteRoadmapToProjectMutation, DeleteRoadmapToProjectMutationVariables>;
-export const UpdateRoadmapToProjectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateRoadmapToProject" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "RoadmapToProjectUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "roadmapToProjectUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "RoadmapToProjectPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...RoadmapToProjectPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateRoadmapToProjectMutation, UpdateRoadmapToProjectMutationVariables>;
-export const UpdateRoadmapDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateRoadmap" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "RoadmapUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "roadmapUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "RoadmapPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...RoadmapPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateRoadmapMutation, UpdateRoadmapMutationVariables>;
-export const SamlTokenUserAccountAuthDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "samlTokenUserAccountAuth" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "TokenUserAccountAuthInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "samlTokenUserAccountAuth" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthResolverResponse" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...AuthResolverResponseFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<SamlTokenUserAccountAuthMutation, SamlTokenUserAccountAuthMutationVariables>;
-export const CreateTeamDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createTeam" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "copySettingsFromTeamId" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "TeamCreateInput" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "teamCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "copySettingsFromTeamId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "copySettingsFromTeamId" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...TeamPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateTeamMutation, CreateTeamMutationVariables>;
-export const DeleteTeamCyclesDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteTeamCycles" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "teamCyclesDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...TeamPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteTeamCyclesMutation, DeleteTeamCyclesMutationVariables>;
-export const DeleteTeamDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteTeam" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "teamDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteTeamMutation, DeleteTeamMutationVariables>;
-export const DeleteTeamKeyDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteTeamKey" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "teamKeyDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteTeamKeyMutation, DeleteTeamKeyMutationVariables>;
-export const CreateTeamMembershipDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createTeamMembership" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "TeamMembershipCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "teamMembershipCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembershipPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...TeamMembershipPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateTeamMembershipMutation, CreateTeamMembershipMutationVariables>;
-export const DeleteTeamMembershipDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteTeamMembership" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "teamMembershipDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteTeamMembershipMutation, DeleteTeamMembershipMutationVariables>;
-export const UpdateTeamMembershipDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateTeamMembership" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "TeamMembershipUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "teamMembershipUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamMembershipPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...TeamMembershipPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateTeamMembershipMutation, UpdateTeamMembershipMutationVariables>;
-export const UpdateTeamDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateTeam" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "TeamUpdateInput" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "teamUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...TeamPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateTeamMutation, UpdateTeamMutationVariables>;
-export const CreateTemplateDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createTemplate" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "TemplateCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "templateCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TemplatePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...TemplatePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateTemplateMutation, CreateTemplateMutationVariables>;
-export const DeleteTemplateDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteTemplate" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "templateDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteTemplateMutation, DeleteTemplateMutationVariables>;
-export const UpdateTemplateDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateTemplate" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "TemplateUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "templateUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TemplatePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...TemplatePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateTemplateMutation, UpdateTemplateMutationVariables>;
-export const UserDemoteAdminDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "userDemoteAdmin" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userDemoteAdmin" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserAdminPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UserDemoteAdminMutation, UserDemoteAdminMutationVariables>;
-export const UserDemoteMemberDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "userDemoteMember" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userDemoteMember" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserAdminPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UserDemoteMemberMutation, UserDemoteMemberMutationVariables>;
-export const UserDiscordConnectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "userDiscordConnect" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userDiscordConnect" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UserDiscordConnectMutation, UserDiscordConnectMutationVariables>;
-export const UserExternalUserDisconnectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "userExternalUserDisconnect" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "service" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userExternalUserDisconnect" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "service" },
-                value: { kind: "Variable", name: { kind: "Name", value: "service" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UserExternalUserDisconnectMutation, UserExternalUserDisconnectMutationVariables>;
-export const UpdateUserFlagDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateUserFlag" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "flag" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "UserFlagType" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "operation" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "UserFlagUpdateOperation" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userFlagUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "flag" },
-                value: { kind: "Variable", name: { kind: "Name", value: "flag" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "operation" },
-                value: { kind: "Variable", name: { kind: "Name", value: "operation" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsFlagPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserSettingsFlagPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateUserFlagMutation, UpdateUserFlagMutationVariables>;
-export const UserGitHubConnectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "userGitHubConnect" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userGitHubConnect" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UserGitHubConnectMutation, UserGitHubConnectMutationVariables>;
-export const UserGoogleCalendarConnectDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "userGoogleCalendarConnect" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userGoogleCalendarConnect" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UserGoogleCalendarConnectMutation, UserGoogleCalendarConnectMutationVariables>;
-export const UserPromoteAdminDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "userPromoteAdmin" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userPromoteAdmin" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserAdminPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UserPromoteAdminMutation, UserPromoteAdminMutationVariables>;
-export const UserPromoteMemberDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "userPromoteMember" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userPromoteMember" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserAdminPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UserPromoteMemberMutation, UserPromoteMemberMutationVariables>;
-export const UserSettingsFlagIncrementDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "userSettingsFlagIncrement" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "flag" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userSettingsFlagIncrement" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "flag" },
-                value: { kind: "Variable", name: { kind: "Name", value: "flag" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsFlagPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserSettingsFlagPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UserSettingsFlagIncrementMutation, UserSettingsFlagIncrementMutationVariables>;
-export const UserSettingsFlagsResetDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "userSettingsFlagsReset" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "flags" } },
-          type: {
-            kind: "ListType",
-            type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "UserFlagType" } } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userSettingsFlagsReset" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "flags" },
-                value: { kind: "Variable", name: { kind: "Name", value: "flags" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsFlagsResetPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserSettingsFlagsResetPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UserSettingsFlagsResetMutation, UserSettingsFlagsResetMutationVariables>;
-export const UpdateUserSettingsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateUserSettings" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "UserSettingsUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userSettingsUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserSettingsPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserSettingsPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateUserSettingsMutation, UpdateUserSettingsMutationVariables>;
-export const SuspendUserDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "suspendUser" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userSuspend" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserAdminPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<SuspendUserMutation, SuspendUserMutationVariables>;
-export const UnsuspendUserDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "unsuspendUser" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userUnsuspend" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserAdminPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UnsuspendUserMutation, UnsuspendUserMutationVariables>;
-export const UpdateUserDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateUser" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "UpdateUserInput" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "userUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...UserPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateUserMutation, UpdateUserMutationVariables>;
-export const CreateViewPreferencesDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createViewPreferences" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ViewPreferencesCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "viewPreferencesCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ViewPreferencesPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ViewPreferencesPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateViewPreferencesMutation, CreateViewPreferencesMutationVariables>;
-export const DeleteViewPreferencesDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteViewPreferences" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "viewPreferencesDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteViewPreferencesMutation, DeleteViewPreferencesMutationVariables>;
-export const UpdateViewPreferencesDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateViewPreferences" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ViewPreferencesUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "viewPreferencesUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ViewPreferencesPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ViewPreferencesPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateViewPreferencesMutation, UpdateViewPreferencesMutationVariables>;
-export const CreateWebhookDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createWebhook" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "WebhookCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "webhookCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WebhookPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...WebhookPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateWebhookMutation, CreateWebhookMutationVariables>;
-export const DeleteWebhookDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "deleteWebhook" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "webhookDelete" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<DeleteWebhookMutation, DeleteWebhookMutationVariables>;
-export const UpdateWebhookDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateWebhook" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "WebhookUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "webhookUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WebhookPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...WebhookPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateWebhookMutation, UpdateWebhookMutationVariables>;
-export const ArchiveWorkflowStateDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "archiveWorkflowState" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "workflowStateArchive" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ArchiveWorkflowStateMutation, ArchiveWorkflowStateMutationVariables>;
-export const CreateWorkflowStateDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createWorkflowState" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "WorkflowStateCreateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "workflowStateCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowStatePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...WorkflowStatePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateWorkflowStateMutation, CreateWorkflowStateMutationVariables>;
-export const UpdateWorkflowStateDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "updateWorkflowState" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "WorkflowStateUpdateInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "workflowStateUpdate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowStatePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...WorkflowStatePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<UpdateWorkflowStateMutation, UpdateWorkflowStateMutationVariables>;
