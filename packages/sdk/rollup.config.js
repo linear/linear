@@ -22,14 +22,17 @@ const browserPlugins = [
   }),
 ];
 
-const minPlugins = [
-  terser(),
-  gzip(),
-  gzip({
-    customCompression: content => brotliCompressSync(Buffer.from(content)),
-    fileName: ".br",
-  }),
-];
+const minPlugins =
+  process.env.NODE_ENV === "development"
+    ? []
+    : [
+        terser(),
+        gzip(),
+        gzip({
+          customCompression: content => brotliCompressSync(Buffer.from(content)),
+          fileName: ".br",
+        }),
+      ];
 
 export default [
   {
