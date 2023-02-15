@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.6.2
+
+### Patch Changes
+
+- e9489d3: chore(deps): update dependency patch versions
+- 4254b6a: Edit rollup config for dev
+- Updated dependencies [e9489d3]
+- Updated dependencies [8c5225b]
+- Updated dependencies [9917a58]
+- Updated dependencies [8c5225b]
+- Updated dependencies [8c5225b]
+- Updated dependencies [4254b6a]
+  - @linear/sdk@2.2.0
+
 ## 1.6.1
 
 ### Patch Changes

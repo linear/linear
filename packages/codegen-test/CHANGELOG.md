@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.10.0
+
+### Minor Changes
+
+- 8c5225b: Do not generate tests for skip comments
+
+### Patch Changes
+
+- e9489d3: chore(deps): update dependency patch versions
+- 4254b6a: Edit rollup config for dev
+
 ## 1.9.1
 
 ### Patch Changes
