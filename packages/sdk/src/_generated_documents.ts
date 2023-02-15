@@ -546,18 +546,6 @@ export type CommentUpdateInput = {
   bodyData?: Maybe<Scalars["JSON"]>;
 };
 
-/** GitHub's commit data */
-export type CommitPayload = {
-  __typename?: "CommitPayload";
-  added: Array<Scalars["String"]>;
-  id: Scalars["String"];
-  message: Scalars["String"];
-  modified: Array<Scalars["String"]>;
-  removed: Array<Scalars["String"]>;
-  timestamp: Scalars["String"];
-  url: Scalars["String"];
-};
-
 export type ContactCreateInput = {
   /** User's browser information. */
   browser?: Maybe<Scalars["String"]>;
@@ -1538,62 +1526,6 @@ export type IntegrationRequestPayload = {
   success: Scalars["Boolean"];
 };
 
-/** An integration resource created by an external service. */
-export type IntegrationResource = Node & {
-  __typename?: "IntegrationResource";
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The time at which the entity was created. */
-  createdAt: Scalars["DateTime"];
-  /** Detailed information about the external resource. */
-  data: IntegrationResourceData;
-  /** The unique identifier of the entity. */
-  id: Scalars["ID"];
-  /** The integration that the resource is associated with. */
-  integration?: Maybe<Integration>;
-  /** The issue that the resource is associated with. */
-  issue: Issue;
-  /** Pull request information for GitHub pull requests and GitLab merge requests. */
-  pullRequest: PullRequestPayload;
-  /** The external service resource ID. */
-  resourceId: Scalars["String"];
-  /** The integration's type. */
-  resourceType: Scalars["String"];
-  /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  updatedAt: Scalars["DateTime"];
-};
-
-export type IntegrationResourceConnection = {
-  __typename?: "IntegrationResourceConnection";
-  edges: Array<IntegrationResourceEdge>;
-  nodes: Array<IntegrationResource>;
-  pageInfo: PageInfo;
-};
-
-/** Integration resource's payload */
-export type IntegrationResourceData = {
-  __typename?: "IntegrationResourceData";
-  /** The payload for an IntegrationResource of type 'githubCommit' */
-  githubCommit?: Maybe<CommitPayload>;
-  /** The payload for an IntegrationResource of type 'githubPullRequest' */
-  githubPullRequest?: Maybe<PullRequestPayload>;
-  /** The payload for an IntegrationResource of type 'gitlabMergeRequest' */
-  gitlabMergeRequest?: Maybe<PullRequestPayload>;
-  /** The payload for an IntegrationResource of type 'sentryIssue' */
-  sentryIssue?: Maybe<SentryIssuePayload>;
-};
-
-export type IntegrationResourceEdge = {
-  __typename?: "IntegrationResourceEdge";
-  /** Used in `before` and `after` args */
-  cursor: Scalars["String"];
-  node: IntegrationResource;
-};
-
 /** The integration resource's settings */
 export type IntegrationSettings = {
   __typename?: "IntegrationSettings";
@@ -1873,11 +1805,6 @@ export type Issue = Node & {
   id: Scalars["ID"];
   /** Issue's human readable identifier (e.g. ENG-123). */
   identifier: Scalars["String"];
-  /**
-   * [DEPRECATED] Integration resources for this issue.
-   * @deprecated This field will soon be deprecated, please use `attachments` instead
-   */
-  integrationResources: IntegrationResourceConnection;
   /** Inverse relations associated with this issue. */
   inverseRelations: IssueRelationConnection;
   /** Labels associated with this issue. */
@@ -1971,16 +1898,6 @@ export type IssueCommentsArgs = {
 
 /** An issue. */
 export type IssueHistoryArgs = {
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-};
-
-/** An issue. */
-export type IssueIntegrationResourcesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -3053,11 +2970,6 @@ export type Mutation = {
   integrationLoom: IntegrationPayload;
   /** Requests a currently unavailable integration. */
   integrationRequest: IntegrationRequestPayload;
-  /**
-   * Archives an integration resource.
-   * @deprecated This query will soon be deprecated, please use `attachmentArchive` instead
-   */
-  integrationResourceArchive: ArchivePayload;
   /** Integrates the organization with Sentry. */
   integrationSentryConnect: IntegrationPayload;
   /** [INTERNAL] Updates the integration. */
@@ -3539,10 +3451,6 @@ export type MutationIntegrationIntercomSettingsUpdateArgs = {
 
 export type MutationIntegrationRequestArgs = {
   input: IntegrationRequestInput;
-};
-
-export type MutationIntegrationResourceArchiveArgs = {
-  id: Scalars["String"];
 };
 
 export type MutationIntegrationSentryConnectArgs = {
@@ -5775,45 +5683,6 @@ export type ProjectUpdateWithInteractionPayload = {
   success: Scalars["Boolean"];
 };
 
-/** Pull request data */
-export type PullRequestPayload = {
-  __typename?: "PullRequestPayload";
-  branch: Scalars["String"];
-  closedAt: Scalars["String"];
-  createdAt: Scalars["String"];
-  draft: Scalars["Boolean"];
-  id: Scalars["String"];
-  mergedAt: Scalars["String"];
-  number: Scalars["Float"];
-  repoLogin: Scalars["String"];
-  repoName: Scalars["String"];
-  reviewers?: Maybe<Array<Scalars["String"]>>;
-  reviews?: Maybe<Array<PullRequestReview>>;
-  status: Scalars["String"];
-  title: Scalars["String"];
-  updatedAt: Scalars["String"];
-  url: Scalars["String"];
-  userId: Scalars["String"];
-  userLogin: Scalars["String"];
-};
-
-/** Pull request review data */
-export type PullRequestReview = {
-  __typename?: "PullRequestReview";
-  /** The ID of the review. */
-  id: Scalars["Float"];
-  /** [Internal] The reviewer's avatar URL. */
-  reviewerAvatarUrl?: Maybe<Scalars["String"]>;
-  /** The user ID of the reviewer. */
-  reviewerId: Scalars["Float"];
-  /** The login of the reviewer. */
-  reviewerLogin: Scalars["String"];
-  /** The state of the review. */
-  state: Scalars["String"];
-  /** The timestamp of review submission. */
-  submittedAt: Scalars["String"];
-};
-
 /** A user's web browser push notification subscription. */
 export type PushSubscription = Node & {
   __typename?: "PushSubscription";
@@ -5946,16 +5815,6 @@ export type Query = {
   figmaEmbedInfo: FigmaEmbedPayload;
   /** One specific integration. */
   integration: Integration;
-  /**
-   * One specific integration resource. (e.g. linked GitHub pull requests for an issue)
-   * @deprecated This query will soon be deprecated, please use `attachment` instead
-   */
-  integrationResource: IntegrationResource;
-  /**
-   * All integrations resources (e.g. linked GitHub pull requests for issues).
-   * @deprecated This query will soon be deprecated, please use `attachments` instead
-   */
-  integrationResources: IntegrationResourceConnection;
   /** One specific integrationTemplate. */
   integrationTemplate: IntegrationTemplate;
   /** Template and integration connections. */
@@ -6240,19 +6099,6 @@ export type QueryFigmaEmbedInfoArgs = {
 
 export type QueryIntegrationArgs = {
   id: Scalars["String"];
-};
-
-export type QueryIntegrationResourceArgs = {
-  id: Scalars["String"];
-};
-
-export type QueryIntegrationResourcesArgs = {
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
 };
 
 export type QueryIntegrationTemplateArgs = {
@@ -6874,33 +6720,6 @@ export type SamlConfigurationPayload = {
   ssoEndpoint?: Maybe<Scalars["String"]>;
   /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
   ssoSignAlgo?: Maybe<Scalars["String"]>;
-};
-
-/** Sentry issue data */
-export type SentryIssuePayload = {
-  __typename?: "SentryIssuePayload";
-  /** The Sentry identifier of the actor who created the issue. */
-  actorId: Scalars["Float"];
-  /** The name of the Sentry actor who created this issue. */
-  actorName: Scalars["String"];
-  /** The type of the actor who created the issue. */
-  actorType: Scalars["String"];
-  /** The date this issue was first seen. */
-  firstSeen: Scalars["String"];
-  /** The name of the first release version this issue appeared on, if available. */
-  firstVersion?: Maybe<Scalars["String"]>;
-  /** The Sentry identifier for the issue. */
-  issueId: Scalars["String"];
-  /** The title of the issue. */
-  issueTitle: Scalars["String"];
-  /** The Sentry identifier of the project this issue belongs to. */
-  projectId: Scalars["Float"];
-  /** The slug of the project this issue belongs to. */
-  projectSlug: Scalars["String"];
-  /** The shortId of the issue. */
-  shortId: Scalars["String"];
-  /** The description of the issue. */
-  webUrl: Scalars["String"];
 };
 
 /** Sentry specific settings. */
@@ -7714,7 +7533,7 @@ export type UpdateOrganizationInput = {
   reducedPersonalInformation?: Maybe<Scalars["Boolean"]>;
   /** Whether the organization is using roadmap. */
   roadmapEnabled?: Maybe<Scalars["Boolean"]>;
-  /** Internal. Whether SLA's have been enabled for the organization. */
+  /** Internal. Whether SLAs have been enabled for the organization. */
   slaEnabled?: Maybe<Scalars["Boolean"]>;
   /** The URL key of the organization. */
   urlKey?: Maybe<Scalars["String"]>;
@@ -8989,16 +8808,6 @@ export type IssueImportFragment = { __typename: "IssueImport" } & Pick<
   | "error"
 >;
 
-export type IntegrationResourceFragment = { __typename: "IntegrationResource" } & Pick<
-  IntegrationResource,
-  "resourceId" | "resourceType" | "updatedAt" | "archivedAt" | "createdAt" | "id"
-> & {
-    data: { __typename?: "IntegrationResourceData" } & IntegrationResourceDataFragment;
-    pullRequest: { __typename?: "PullRequestPayload" } & PullRequestPayloadFragment;
-    integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">>;
-    issue: { __typename?: "Issue" } & Pick<Issue, "id">;
-  };
-
 export type IntegrationFragment = { __typename: "Integration" } & Pick<
   Integration,
   "service" | "updatedAt" | "archivedAt" | "createdAt" | "id"
@@ -9189,11 +8998,6 @@ export type GithubOAuthTokenPayloadFragment = { __typename: "GithubOAuthTokenPay
   "token"
 > & { organizations?: Maybe<Array<{ __typename?: "GithubOrg" } & GithubOrgFragment>> };
 
-export type CommitPayloadFragment = { __typename: "CommitPayload" } & Pick<
-  CommitPayload,
-  "added" | "id" | "message" | "modified" | "removed" | "timestamp" | "url"
->;
-
 export type GoogleSheetsSettingsFragment = { __typename: "GoogleSheetsSettings" } & Pick<
   GoogleSheetsSettings,
   "sheetId" | "spreadsheetId" | "spreadsheetUrl" | "updatedIssuesAt"
@@ -9206,13 +9010,6 @@ export type ProjectUpdateInteractionFragment = { __typename: "ProjectUpdateInter
     projectUpdate: { __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">;
     user: { __typename?: "User" } & Pick<User, "id">;
   };
-
-export type IntegrationResourceDataFragment = { __typename: "IntegrationResourceData" } & {
-  githubCommit?: Maybe<{ __typename?: "CommitPayload" } & CommitPayloadFragment>;
-  githubPullRequest?: Maybe<{ __typename?: "PullRequestPayload" } & PullRequestPayloadFragment>;
-  gitlabMergeRequest?: Maybe<{ __typename?: "PullRequestPayload" } & PullRequestPayloadFragment>;
-  sentryIssue?: Maybe<{ __typename?: "SentryIssuePayload" } & SentryIssuePayloadFragment>;
-};
 
 export type IntercomSettingsFragment = { __typename: "IntercomSettings" } & Pick<
   IntercomSettings,
@@ -9357,31 +9154,6 @@ export type ApplicationFragment = { __typename: "Application" } & Pick<
   "name" | "imageUrl" | "description" | "developer" | "id" | "clientId" | "developerUrl"
 >;
 
-export type PullRequestPayloadFragment = { __typename: "PullRequestPayload" } & Pick<
-  PullRequestPayload,
-  | "branch"
-  | "closedAt"
-  | "createdAt"
-  | "draft"
-  | "id"
-  | "mergedAt"
-  | "number"
-  | "repoLogin"
-  | "repoName"
-  | "reviewers"
-  | "status"
-  | "title"
-  | "updatedAt"
-  | "url"
-  | "userId"
-  | "userLogin"
-> & { reviews?: Maybe<Array<{ __typename?: "PullRequestReview" } & PullRequestReviewFragment>> };
-
-export type PullRequestReviewFragment = { __typename: "PullRequestReview" } & Pick<
-  PullRequestReview,
-  "id" | "reviewerLogin" | "state" | "submittedAt" | "reviewerId"
->;
-
 export type GithubOrgFragment = { __typename: "GithubOrg" } & Pick<
   GithubOrg,
   "id" | "login" | "name" | "isPersonal"
@@ -9401,21 +9173,6 @@ export type OauthClientApprovalFragment = { __typename: "OauthClientApproval" } 
   | "createdAt"
   | "id"
   | "oauthClientId"
->;
-
-export type SentryIssuePayloadFragment = { __typename: "SentryIssuePayload" } & Pick<
-  SentryIssuePayload,
-  | "issueId"
-  | "actorId"
-  | "projectId"
-  | "firstSeen"
-  | "webUrl"
-  | "actorName"
-  | "firstVersion"
-  | "shortId"
-  | "projectSlug"
-  | "issueTitle"
-  | "actorType"
 >;
 
 export type SentrySettingsFragment = { __typename: "SentrySettings" } & Pick<SentrySettings, "organizationSlug">;
@@ -9698,11 +9455,6 @@ export type IntegrationRequestPayloadFragment = { __typename: "IntegrationReques
   "success"
 >;
 
-export type IntegrationResourceConnectionFragment = { __typename: "IntegrationResourceConnection" } & {
-  nodes: Array<{ __typename?: "IntegrationResource" } & IntegrationResourceFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
 export type IntegrationTemplateConnectionFragment = { __typename: "IntegrationTemplateConnection" } & {
   nodes: Array<{ __typename?: "IntegrationTemplate" } & IntegrationTemplateFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
@@ -9798,8 +9550,6 @@ type Node_Emoji_Fragment = { __typename: "Emoji" } & Pick<Emoji, "id">;
 type Node_Favorite_Fragment = { __typename: "Favorite" } & Pick<Favorite, "id">;
 
 type Node_Integration_Fragment = { __typename: "Integration" } & Pick<Integration, "id">;
-
-type Node_IntegrationResource_Fragment = { __typename: "IntegrationResource" } & Pick<IntegrationResource, "id">;
 
 type Node_IntegrationTemplate_Fragment = { __typename: "IntegrationTemplate" } & Pick<IntegrationTemplate, "id">;
 
@@ -9900,7 +9650,6 @@ export type NodeFragment =
   | Node_Emoji_Fragment
   | Node_Favorite_Fragment
   | Node_Integration_Fragment
-  | Node_IntegrationResource_Fragment
   | Node_IntegrationTemplate_Fragment
   | Node_IntegrationsSettings_Fragment
   | Node_Issue_Fragment
@@ -10712,14 +10461,6 @@ export type IntegrationRequestMutationVariables = Exact<{
 
 export type IntegrationRequestMutation = { __typename?: "Mutation" } & {
   integrationRequest: { __typename?: "IntegrationRequestPayload" } & IntegrationRequestPayloadFragment;
-};
-
-export type ArchiveIntegrationResourceMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type ArchiveIntegrationResourceMutation = { __typename?: "Mutation" } & {
-  integrationResourceArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
 };
 
 export type IntegrationSentryConnectMutationVariables = Exact<{
@@ -15814,259 +15555,6 @@ export const IntegrationRequestPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IntegrationRequestPayloadFragment, unknown>;
-export const CommitPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "CommitPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CommitPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "added" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "message" } },
-          { kind: "Field", name: { kind: "Name", value: "modified" } },
-          { kind: "Field", name: { kind: "Name", value: "removed" } },
-          { kind: "Field", name: { kind: "Name", value: "timestamp" } },
-          { kind: "Field", name: { kind: "Name", value: "url" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<CommitPayloadFragment, unknown>;
-export const PullRequestReviewFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "PullRequestReview" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PullRequestReview" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "reviewerLogin" } },
-          { kind: "Field", name: { kind: "Name", value: "state" } },
-          { kind: "Field", name: { kind: "Name", value: "submittedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "reviewerId" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<PullRequestReviewFragment, unknown>;
-export const PullRequestPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "PullRequestPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PullRequestPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "branch" } },
-          { kind: "Field", name: { kind: "Name", value: "closedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "draft" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "mergedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "number" } },
-          { kind: "Field", name: { kind: "Name", value: "repoLogin" } },
-          { kind: "Field", name: { kind: "Name", value: "repoName" } },
-          { kind: "Field", name: { kind: "Name", value: "reviewers" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "reviews" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestReview" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "status" } },
-          { kind: "Field", name: { kind: "Name", value: "title" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "url" } },
-          { kind: "Field", name: { kind: "Name", value: "userId" } },
-          { kind: "Field", name: { kind: "Name", value: "userLogin" } },
-        ],
-      },
-    },
-    ...PullRequestReviewFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<PullRequestPayloadFragment, unknown>;
-export const SentryIssuePayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "SentryIssuePayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SentryIssuePayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "issueId" } },
-          { kind: "Field", name: { kind: "Name", value: "actorId" } },
-          { kind: "Field", name: { kind: "Name", value: "projectId" } },
-          { kind: "Field", name: { kind: "Name", value: "firstSeen" } },
-          { kind: "Field", name: { kind: "Name", value: "webUrl" } },
-          { kind: "Field", name: { kind: "Name", value: "actorName" } },
-          { kind: "Field", name: { kind: "Name", value: "firstVersion" } },
-          { kind: "Field", name: { kind: "Name", value: "shortId" } },
-          { kind: "Field", name: { kind: "Name", value: "projectSlug" } },
-          { kind: "Field", name: { kind: "Name", value: "issueTitle" } },
-          { kind: "Field", name: { kind: "Name", value: "actorType" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<SentryIssuePayloadFragment, unknown>;
-export const IntegrationResourceDataFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IntegrationResourceData" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationResourceData" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "githubCommit" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommitPayload" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "githubPullRequest" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "gitlabMergeRequest" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "sentryIssue" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SentryIssuePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...CommitPayloadFragmentDoc.definitions,
-    ...PullRequestPayloadFragmentDoc.definitions,
-    ...SentryIssuePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationResourceDataFragment, unknown>;
-export const IntegrationResourceFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IntegrationResource" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationResource" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "data" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResourceData" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pullRequest" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PullRequestPayload" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "resourceId" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integration" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "resourceType" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issue" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-        ],
-      },
-    },
-    ...IntegrationResourceDataFragmentDoc.definitions,
-    ...PullRequestPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationResourceFragment, unknown>;
-export const IntegrationResourceConnectionFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IntegrationResourceConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationResourceConnection" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationResource" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationResourceFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationResourceConnectionFragment, unknown>;
 export const IntegrationTemplateFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -21911,44 +21399,6 @@ export const IntegrationRequestDocument = {
     ...IntegrationRequestPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationRequestMutation, IntegrationRequestMutationVariables>;
-export const ArchiveIntegrationResourceDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "archiveIntegrationResource" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationResourceArchive" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ArchivePayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ArchiveIntegrationResourceMutation, ArchiveIntegrationResourceMutationVariables>;
 export const IntegrationSentryConnectDocument = {
   kind: "Document",
   definitions: [

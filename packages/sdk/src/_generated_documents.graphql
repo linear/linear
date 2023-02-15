@@ -981,41 +981,6 @@ fragment IssueImport on IssueImport {
   error
 }
 
-# An integration resource created by an external service.
-fragment IntegrationResource on IntegrationResource {
-  __typename
-  # Detailed information about the external resource.
-  data {
-    ...IntegrationResourceData
-  }
-  # Pull request information for GitHub pull requests and GitLab merge requests.
-  pullRequest {
-    ...PullRequestPayload
-  }
-  # The external service resource ID.
-  resourceId
-  # The integration that the resource is associated with.
-  integration {
-    id
-  }
-  # The integration's type.
-  resourceType
-  # The issue that the resource is associated with.
-  issue {
-    id
-  }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The unique identifier of the entity.
-  id
-}
-
 # An integration with an external service.
 fragment Integration on Integration {
   __typename
@@ -1529,18 +1494,6 @@ fragment GithubOAuthTokenPayload on GithubOAuthTokenPayload {
   token
 }
 
-# GitHub's commit data
-fragment CommitPayload on CommitPayload {
-  __typename
-  added
-  id
-  message
-  modified
-  removed
-  timestamp
-  url
-}
-
 # Google Sheets specific settings.
 fragment GoogleSheetsSettings on GoogleSheetsSettings {
   __typename
@@ -1572,27 +1525,6 @@ fragment ProjectUpdateInteraction on ProjectUpdateInteraction {
   # The user that has interacted with the project update.
   user {
     id
-  }
-}
-
-# Integration resource's payload
-fragment IntegrationResourceData on IntegrationResourceData {
-  __typename
-  # The payload for an IntegrationResource of type 'githubCommit'
-  githubCommit {
-    ...CommitPayload
-  }
-  # The payload for an IntegrationResource of type 'githubPullRequest'
-  githubPullRequest {
-    ...PullRequestPayload
-  }
-  # The payload for an IntegrationResource of type 'gitlabMergeRequest'
-  gitlabMergeRequest {
-    ...PullRequestPayload
-  }
-  # The payload for an IntegrationResource of type 'sentryIssue'
-  sentryIssue {
-    ...SentryIssuePayload
   }
 }
 
@@ -1929,45 +1861,6 @@ fragment Application on Application {
   developerUrl
 }
 
-# Pull request data
-fragment PullRequestPayload on PullRequestPayload {
-  __typename
-  branch
-  closedAt
-  createdAt
-  draft
-  id
-  mergedAt
-  number
-  repoLogin
-  repoName
-  reviewers
-  reviews {
-    ...PullRequestReview
-  }
-  status
-  title
-  updatedAt
-  url
-  userId
-  userLogin
-}
-
-# Pull request review data
-fragment PullRequestReview on PullRequestReview {
-  __typename
-  # The ID of the review.
-  id
-  # The login of the reviewer.
-  reviewerLogin
-  # The state of the review.
-  state
-  # The timestamp of review submission.
-  submittedAt
-  # The user ID of the reviewer.
-  reviewerId
-}
-
 # Relevant information for the GitHub organization.
 fragment GithubOrg on GithubOrg {
   __typename
@@ -2019,33 +1912,6 @@ fragment OauthClientApproval on OauthClientApproval {
   id
   # The uuid of the OAuth client being requested for installation.
   oauthClientId
-}
-
-# Sentry issue data
-fragment SentryIssuePayload on SentryIssuePayload {
-  __typename
-  # The Sentry identifier for the issue.
-  issueId
-  # The Sentry identifier of the actor who created the issue.
-  actorId
-  # The Sentry identifier of the project this issue belongs to.
-  projectId
-  # The date this issue was first seen.
-  firstSeen
-  # The description of the issue.
-  webUrl
-  # The name of the Sentry actor who created this issue.
-  actorName
-  # The name of the first release version this issue appeared on, if available.
-  firstVersion
-  # The shortId of the issue.
-  shortId
-  # The slug of the project this issue belongs to.
-  projectSlug
-  # The title of the issue.
-  issueTitle
-  # The type of the actor who created the issue.
-  actorType
 }
 
 # Sentry specific settings.
@@ -2708,16 +2574,6 @@ fragment IntegrationRequestPayload on IntegrationRequestPayload {
   __typename
   # Whether the operation was successful.
   success
-}
-
-fragment IntegrationResourceConnection on IntegrationResourceConnection {
-  __typename
-  nodes {
-    ...IntegrationResource
-  }
-  pageInfo {
-    ...PageInfo
-  }
 }
 
 fragment IntegrationTemplateConnection on IntegrationTemplateConnection {
@@ -4058,15 +3914,6 @@ mutation integrationRequest(
 ) {
   integrationRequest(input: $input) {
     ...IntegrationRequestPayload
-  }
-}
-# Archives an integration resource.
-mutation archiveIntegrationResource(
-  # The identifier of the integration resource to archive.
-  $id: String!
-) {
-  integrationResourceArchive(id: $id) {
-    ...ArchivePayload
   }
 }
 # Integrates the organization with Sentry.

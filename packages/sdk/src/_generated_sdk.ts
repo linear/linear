@@ -715,32 +715,6 @@ export class CommentPayload extends Request {
   }
 }
 /**
- * GitHub's commit data
- *
- * @param request - function to call the graphql client
- * @param data - L.CommitPayloadFragment response data
- */
-export class CommitPayload extends Request {
-  public constructor(request: LinearRequest, data: L.CommitPayloadFragment) {
-    super(request);
-    this.added = data.added;
-    this.id = data.id;
-    this.message = data.message;
-    this.modified = data.modified;
-    this.removed = data.removed;
-    this.timestamp = data.timestamp;
-    this.url = data.url;
-  }
-
-  public added: string[];
-  public id: string;
-  public message: string;
-  public modified: string[];
-  public removed: string[];
-  public timestamp: string;
-  public url: string;
-}
-/**
  * ContactPayload model
  *
  * @param request - function to call the graphql client
@@ -1878,113 +1852,6 @@ export class IntegrationRequestPayload extends Request {
 
   /** Whether the operation was successful. */
   public success: boolean;
-}
-/**
- * An integration resource created by an external service.
- *
- * @param request - function to call the graphql client
- * @param data - L.IntegrationResourceFragment response data
- */
-export class IntegrationResource extends Request {
-  private _integration?: L.IntegrationResourceFragment["integration"];
-  private _issue: L.IntegrationResourceFragment["issue"];
-
-  public constructor(request: LinearRequest, data: L.IntegrationResourceFragment) {
-    super(request);
-    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.id = data.id;
-    this.resourceId = data.resourceId;
-    this.resourceType = data.resourceType;
-    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this.data = new IntegrationResourceData(request, data.data);
-    this.pullRequest = new PullRequestPayload(request, data.pullRequest);
-    this._integration = data.integration ?? undefined;
-    this._issue = data.issue;
-  }
-
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
-  /** The time at which the entity was created. */
-  public createdAt: Date;
-  /** The unique identifier of the entity. */
-  public id: string;
-  /** The external service resource ID. */
-  public resourceId: string;
-  /** The integration's type. */
-  public resourceType: string;
-  /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  public updatedAt: Date;
-  /** Detailed information about the external resource. */
-  public data: IntegrationResourceData;
-  /** Pull request information for GitHub pull requests and GitLab merge requests. */
-  public pullRequest: PullRequestPayload;
-  /** The integration that the resource is associated with. */
-  public get integration(): LinearFetch<Integration> | undefined {
-    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
-  }
-  /** The issue that the resource is associated with. */
-  public get issue(): LinearFetch<Issue> | undefined {
-    return new IssueQuery(this._request).fetch(this._issue.id);
-  }
-
-  /** Archives an integration resource. */
-  public archive() {
-    return new ArchiveIntegrationResourceMutation(this._request).fetch(this.id);
-  }
-}
-/**
- * IntegrationResourceConnection model
- *
- * @param request - function to call the graphql client
- * @param fetch - function to trigger a refetch of this IntegrationResourceConnection model
- * @param data - IntegrationResourceConnection response data
- */
-export class IntegrationResourceConnection extends Connection<IntegrationResource> {
-  public constructor(
-    request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IntegrationResource> | undefined>,
-    data: L.IntegrationResourceConnectionFragment
-  ) {
-    super(
-      request,
-      fetch,
-      data.nodes.map(node => new IntegrationResource(request, node)),
-      new PageInfo(request, data.pageInfo)
-    );
-  }
-}
-/**
- * Integration resource's payload
- *
- * @param request - function to call the graphql client
- * @param data - L.IntegrationResourceDataFragment response data
- */
-export class IntegrationResourceData extends Request {
-  public constructor(request: LinearRequest, data: L.IntegrationResourceDataFragment) {
-    super(request);
-    this.githubCommit = data.githubCommit ? new CommitPayload(request, data.githubCommit) : undefined;
-    this.githubPullRequest = data.githubPullRequest
-      ? new PullRequestPayload(request, data.githubPullRequest)
-      : undefined;
-    this.gitlabMergeRequest = data.gitlabMergeRequest
-      ? new PullRequestPayload(request, data.gitlabMergeRequest)
-      : undefined;
-    this.sentryIssue = data.sentryIssue ? new SentryIssuePayload(request, data.sentryIssue) : undefined;
-  }
-
-  /** The payload for an IntegrationResource of type 'githubCommit' */
-  public githubCommit?: CommitPayload;
-  /** The payload for an IntegrationResource of type 'githubPullRequest' */
-  public githubPullRequest?: PullRequestPayload;
-  /** The payload for an IntegrationResource of type 'gitlabMergeRequest' */
-  public gitlabMergeRequest?: PullRequestPayload;
-  /** The payload for an IntegrationResource of type 'sentryIssue' */
-  public sentryIssue?: SentryIssuePayload;
 }
 /**
  * The integration resource's settings
@@ -5058,79 +4925,6 @@ export class ProjectUpdateWithInteractionPayload extends Request {
   }
 }
 /**
- * Pull request data
- *
- * @param request - function to call the graphql client
- * @param data - L.PullRequestPayloadFragment response data
- */
-export class PullRequestPayload extends Request {
-  public constructor(request: LinearRequest, data: L.PullRequestPayloadFragment) {
-    super(request);
-    this.branch = data.branch;
-    this.closedAt = data.closedAt;
-    this.createdAt = data.createdAt;
-    this.draft = data.draft;
-    this.id = data.id;
-    this.mergedAt = data.mergedAt;
-    this.number = data.number;
-    this.repoLogin = data.repoLogin;
-    this.repoName = data.repoName;
-    this.reviewers = data.reviewers ?? undefined;
-    this.status = data.status;
-    this.title = data.title;
-    this.updatedAt = data.updatedAt;
-    this.url = data.url;
-    this.userId = data.userId;
-    this.userLogin = data.userLogin;
-    this.reviews = data.reviews ? data.reviews.map(node => new PullRequestReview(request, node)) : undefined;
-  }
-
-  public branch: string;
-  public closedAt: string;
-  public createdAt: string;
-  public draft: boolean;
-  public id: string;
-  public mergedAt: string;
-  public number: number;
-  public repoLogin: string;
-  public repoName: string;
-  public reviewers?: string[];
-  public status: string;
-  public title: string;
-  public updatedAt: string;
-  public url: string;
-  public userId: string;
-  public userLogin: string;
-  public reviews?: PullRequestReview[];
-}
-/**
- * Pull request review data
- *
- * @param request - function to call the graphql client
- * @param data - L.PullRequestReviewFragment response data
- */
-export class PullRequestReview extends Request {
-  public constructor(request: LinearRequest, data: L.PullRequestReviewFragment) {
-    super(request);
-    this.id = data.id;
-    this.reviewerId = data.reviewerId;
-    this.reviewerLogin = data.reviewerLogin;
-    this.state = data.state;
-    this.submittedAt = data.submittedAt;
-  }
-
-  /** The ID of the review. */
-  public id: number;
-  /** The user ID of the reviewer. */
-  public reviewerId: number;
-  /** The login of the reviewer. */
-  public reviewerLogin: string;
-  /** The state of the review. */
-  public state: string;
-  /** The timestamp of review submission. */
-  public submittedAt: string;
-}
-/**
  * A user's web browser push notification subscription.
  *
  * @param request - function to call the graphql client
@@ -5628,51 +5422,6 @@ export class SamlConfigurationPayload extends Request {
   public ssoEndpoint?: string;
   /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
   public ssoSignAlgo?: string;
-}
-/**
- * Sentry issue data
- *
- * @param request - function to call the graphql client
- * @param data - L.SentryIssuePayloadFragment response data
- */
-export class SentryIssuePayload extends Request {
-  public constructor(request: LinearRequest, data: L.SentryIssuePayloadFragment) {
-    super(request);
-    this.actorId = data.actorId;
-    this.actorName = data.actorName;
-    this.actorType = data.actorType;
-    this.firstSeen = data.firstSeen;
-    this.firstVersion = data.firstVersion ?? undefined;
-    this.issueId = data.issueId;
-    this.issueTitle = data.issueTitle;
-    this.projectId = data.projectId;
-    this.projectSlug = data.projectSlug;
-    this.shortId = data.shortId;
-    this.webUrl = data.webUrl;
-  }
-
-  /** The Sentry identifier of the actor who created the issue. */
-  public actorId: number;
-  /** The name of the Sentry actor who created this issue. */
-  public actorName: string;
-  /** The type of the actor who created the issue. */
-  public actorType: string;
-  /** The date this issue was first seen. */
-  public firstSeen: string;
-  /** The name of the first release version this issue appeared on, if available. */
-  public firstVersion?: string;
-  /** The Sentry identifier for the issue. */
-  public issueId: string;
-  /** The title of the issue. */
-  public issueTitle: string;
-  /** The Sentry identifier of the project this issue belongs to. */
-  public projectId: number;
-  /** The slug of the project this issue belongs to. */
-  public projectSlug: string;
-  /** The shortId of the issue. */
-  public shortId: string;
-  /** The description of the issue. */
-  public webUrl: string;
 }
 /**
  * Sentry specific settings.
@@ -8799,35 +8548,6 @@ export class IntegrationRequestMutation extends Request {
     const data = response.integrationRequest;
 
     return new IntegrationRequestPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable ArchiveIntegrationResource Mutation
- *
- * @param request - function to call the graphql client
- */
-export class ArchiveIntegrationResourceMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ArchiveIntegrationResource mutation and return a ArchivePayload
-   *
-   * @param id - required id to pass to archiveIntegrationResource
-   * @returns parsed response from ArchiveIntegrationResourceMutation
-   */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
-    const response = await this._request<
-      L.ArchiveIntegrationResourceMutation,
-      L.ArchiveIntegrationResourceMutationVariables
-    >(L.ArchiveIntegrationResourceDocument, {
-      id,
-    });
-    const data = response.integrationResourceArchive;
-
-    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -18257,15 +17977,6 @@ export class LinearSdk extends Request {
    */
   public integrationRequest(input: L.IntegrationRequestInput): LinearFetch<IntegrationRequestPayload> {
     return new IntegrationRequestMutation(this._request).fetch(input);
-  }
-  /**
-   * Archives an integration resource.
-   *
-   * @param id - required id to pass to archiveIntegrationResource
-   * @returns ArchivePayload
-   */
-  public archiveIntegrationResource(id: string): LinearFetch<ArchivePayload> {
-    return new ArchiveIntegrationResourceMutation(this._request).fetch(id);
   }
   /**
    * Integrates the organization with Sentry.

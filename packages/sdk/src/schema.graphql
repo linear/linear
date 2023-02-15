@@ -864,19 +864,6 @@ input CommentUpdateInput {
   bodyData: JSON
 }
 
-"""
-GitHub's commit data
-"""
-type CommitPayload {
-  added: [String!]!
-  id: String!
-  message: String!
-  modified: [String!]!
-  removed: [String!]!
-  timestamp: String!
-  url: String!
-}
-
 input ContactCreateInput {
   """
   User's browser information.
@@ -2492,90 +2479,6 @@ type IntegrationRequestPayload {
 }
 
 """
-An integration resource created by an external service.
-"""
-type IntegrationResource implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  Detailed information about the external resource.
-  """
-  data: IntegrationResourceData!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The integration that the resource is associated with.
-  """
-  integration: Integration
-  """
-  The issue that the resource is associated with.
-  """
-  issue: Issue!
-  """
-  Pull request information for GitHub pull requests and GitLab merge requests.
-  """
-  pullRequest: PullRequestPayload!
-  """
-  The external service resource ID.
-  """
-  resourceId: String!
-  """
-  The integration's type.
-  """
-  resourceType: String!
-  """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
-type IntegrationResourceConnection {
-  edges: [IntegrationResourceEdge!]!
-  nodes: [IntegrationResource!]!
-  pageInfo: PageInfo!
-}
-
-"""
-Integration resource's payload
-"""
-type IntegrationResourceData {
-  """
-  The payload for an IntegrationResource of type 'githubCommit'
-  """
-  githubCommit: CommitPayload
-  """
-  The payload for an IntegrationResource of type 'githubPullRequest'
-  """
-  githubPullRequest: PullRequestPayload
-  """
-  The payload for an IntegrationResource of type 'gitlabMergeRequest'
-  """
-  gitlabMergeRequest: PullRequestPayload
-  """
-  The payload for an IntegrationResource of type 'sentryIssue'
-  """
-  sentryIssue: SentryIssuePayload
-}
-
-type IntegrationResourceEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: IntegrationResource!
-}
-
-"""
 The integration resource's settings
 """
 type IntegrationSettings {
@@ -3134,36 +3037,6 @@ type Issue implements Node {
   Issue's human readable identifier (e.g. ENG-123).
   """
   identifier: String!
-  """
-  [DEPRECATED] Integration resources for this issue.
-  """
-  integrationResources(
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): IntegrationResourceConnection!
-    @deprecated(reason: "This field will soon be deprecated, please use `attachments` instead")
   """
   Inverse relations associated with this issue.
   """
@@ -5558,15 +5431,6 @@ type Mutation {
     """
     input: IntegrationRequestInput!
   ): IntegrationRequestPayload!
-  """
-  Archives an integration resource.
-  """
-  integrationResourceArchive(
-    """
-    The identifier of the integration resource to archive.
-    """
-    id: String!
-  ): ArchivePayload! @deprecated(reason: "This query will soon be deprecated, please use `attachmentArchive` instead")
   """
   Integrates the organization with Sentry.
   """
@@ -9889,59 +9753,6 @@ type ProjectUpdateWithInteractionPayload {
 }
 
 """
-Pull request data
-"""
-type PullRequestPayload {
-  branch: String!
-  closedAt: String!
-  createdAt: String!
-  draft: Boolean!
-  id: String!
-  mergedAt: String!
-  number: Float!
-  repoLogin: String!
-  repoName: String!
-  reviewers: [String!]
-  reviews: [PullRequestReview!]
-  status: String!
-  title: String!
-  updatedAt: String!
-  url: String!
-  userId: String!
-  userLogin: String!
-}
-
-"""
-Pull request review data
-"""
-type PullRequestReview {
-  """
-  The ID of the review.
-  """
-  id: Float!
-  """
-  [Internal] The reviewer's avatar URL.
-  """
-  reviewerAvatarUrl: String
-  """
-  The user ID of the reviewer.
-  """
-  reviewerId: Float!
-  """
-  The login of the reviewer.
-  """
-  reviewerLogin: String!
-  """
-  The state of the review.
-  """
-  state: String!
-  """
-  The timestamp of review submission.
-  """
-  submittedAt: String!
-}
-
-"""
 A user's web browser push notification subscription.
 """
 type PushSubscription implements Node {
@@ -10522,41 +10333,6 @@ type Query {
   One specific integration.
   """
   integration(id: String!): Integration!
-  """
-  One specific integration resource. (e.g. linked GitHub pull requests for an issue)
-  """
-  integrationResource(id: String!): IntegrationResource!
-    @deprecated(reason: "This query will soon be deprecated, please use `attachment` instead")
-  """
-  All integrations resources (e.g. linked GitHub pull requests for issues).
-  """
-  integrationResources(
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): IntegrationResourceConnection!
-    @deprecated(reason: "This query will soon be deprecated, please use `attachments` instead")
   """
   One specific integrationTemplate.
   """
@@ -11888,56 +11664,6 @@ type SamlConfigurationPayload {
   The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
   """
   ssoSignAlgo: String
-}
-
-"""
-Sentry issue data
-"""
-type SentryIssuePayload {
-  """
-  The Sentry identifier of the actor who created the issue.
-  """
-  actorId: Float!
-  """
-  The name of the Sentry actor who created this issue.
-  """
-  actorName: String!
-  """
-  The type of the actor who created the issue.
-  """
-  actorType: String!
-  """
-  The date this issue was first seen.
-  """
-  firstSeen: String!
-  """
-  The name of the first release version this issue appeared on, if available.
-  """
-  firstVersion: String
-  """
-  The Sentry identifier for the issue.
-  """
-  issueId: String!
-  """
-  The title of the issue.
-  """
-  issueTitle: String!
-  """
-  The Sentry identifier of the project this issue belongs to.
-  """
-  projectId: Float!
-  """
-  The slug of the project this issue belongs to.
-  """
-  projectSlug: String!
-  """
-  The shortId of the issue.
-  """
-  shortId: String!
-  """
-  The description of the issue.
-  """
-  webUrl: String!
 }
 
 """
@@ -13430,7 +13156,7 @@ input UpdateOrganizationInput {
   """
   roadmapEnabled: Boolean
   """
-  Internal. Whether SLA's have been enabled for the organization.
+  Internal. Whether SLAs have been enabled for the organization.
   """
   slaEnabled: Boolean
   """
