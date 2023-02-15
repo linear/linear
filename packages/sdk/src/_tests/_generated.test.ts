@@ -19,6 +19,43 @@ describe("generated", () => {
     stopClient();
   });
 
+  /** Test all ProjectMilestone queries */
+  describe("ProjectMilestones", () => {
+    let _ProjectMilestone: L.ProjectMilestone | undefined;
+    let _ProjectMilestone_id: string | undefined;
+
+    /** Test the root connection query for the ProjectMilestone */
+    it("ProjectMilestones", async () => {
+      const ProjectMilestones: L.ProjectMilestoneConnection | undefined = await client.ProjectMilestones();
+      const ProjectMilestone = ProjectMilestones?.nodes?.[0];
+      _ProjectMilestone_id = ProjectMilestone?.id;
+      expect(ProjectMilestones instanceof L.ProjectMilestoneConnection);
+    });
+
+    /** Test the root query for a single ProjectMilestone */
+    it("ProjectMilestone", async () => {
+      if (_ProjectMilestone_id) {
+        const ProjectMilestone: L.ProjectMilestone | undefined = await client.ProjectMilestone(_ProjectMilestone_id);
+        _ProjectMilestone = ProjectMilestone;
+        expect(ProjectMilestone instanceof L.ProjectMilestone);
+      } else {
+        console.warn(
+          "codegen-doc:print: No first ProjectMilestone found in connection - cannot test ProjectMilestone query"
+        );
+      }
+    });
+
+    /** Test the ProjectMilestone.project query for L.Project */
+    it("ProjectMilestone.project", async () => {
+      if (_ProjectMilestone) {
+        const ProjectMilestone_project: L.Project | undefined = await _ProjectMilestone.project;
+        expect(ProjectMilestone_project instanceof L.Project);
+      } else {
+        console.warn("codegen-doc:print: No ProjectMilestone found - cannot test ProjectMilestone.project query");
+      }
+    });
+  });
+
   /** Test all Team queries */
   describe("AdministrableTeams", () => {
     let _team: L.Team | undefined;
@@ -1495,51 +1532,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test all Milestone queries */
-  describe("Milestones", () => {
-    let _milestone: L.Milestone | undefined;
-    let _milestone_id: string | undefined;
-
-    /** Test the root connection query for the Milestone */
-    it("milestones", async () => {
-      const milestones: L.MilestoneConnection | undefined = await client.milestones();
-      const milestone = milestones?.nodes?.[0];
-      _milestone_id = milestone?.id;
-      expect(milestones instanceof L.MilestoneConnection);
-    });
-
-    /** Test the root query for a single Milestone */
-    it("milestone", async () => {
-      if (_milestone_id) {
-        const milestone: L.Milestone | undefined = await client.milestone(_milestone_id);
-        _milestone = milestone;
-        expect(milestone instanceof L.Milestone);
-      } else {
-        console.warn("codegen-doc:print: No first Milestone found in connection - cannot test milestone query");
-      }
-    });
-
-    /** Test the milestone connection query for the Project */
-    it("milestone.projects", async () => {
-      if (_milestone) {
-        const projects: L.ProjectConnection | undefined = await _milestone.projects();
-        expect(projects instanceof L.ProjectConnection);
-      } else {
-        console.warn("codegen-doc:print: No milestone found - cannot test _milestone.projects query");
-      }
-    });
-
-    /** Test the milestone.organization query for L.Organization */
-    it("milestone.organization", async () => {
-      if (_milestone) {
-        const milestone_organization: L.Organization | undefined = await _milestone.organization;
-        expect(milestone_organization instanceof L.Organization);
-      } else {
-        console.warn("codegen-doc:print: No Milestone found - cannot test milestone.organization query");
-      }
-    });
-  });
-
   /** Test all NotificationSubscription queries */
   describe("NotificationSubscriptions", () => {
     let _notificationSubscription:
@@ -2000,16 +1992,6 @@ describe("generated", () => {
       }
     });
 
-    /** Test the project model query for Project_Initiative */
-    it("project.initiative", async () => {
-      if (_project) {
-        const initiative: L.Initiative | undefined = _project.initiative;
-        expect(initiative instanceof L.Initiative);
-      } else {
-        console.warn("codegen-doc:print: No project found - cannot test _project.initiative query");
-      }
-    });
-
     /** Test the project connection query for the Issue */
     it("project.issues", async () => {
       if (_project) {
@@ -2097,16 +2079,6 @@ describe("generated", () => {
         expect(project_lead instanceof L.User);
       } else {
         console.warn("codegen-doc:print: No Project found - cannot test project.lead query");
-      }
-    });
-
-    /** Test the project.milestone query for L.Milestone */
-    it("project.milestone", async () => {
-      if (_project) {
-        const project_milestone: L.Milestone | undefined = await _project.milestone;
-        expect(project_milestone instanceof L.Milestone);
-      } else {
-        console.warn("codegen-doc:print: No Project found - cannot test project.milestone query");
       }
     });
   });

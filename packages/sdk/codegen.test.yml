@@ -4,6 +4,11 @@ documents: ./src/_generated_documents.graphql
 hooks:
   afterOneFileWrite:
     - prettier --write
+config:
+  skipComments:
+    - "[Internal]"
+    - "[INTERNAL]"
+    - "[ALPHA]"
 generates:
   src/_tests/_generated.test.ts:
     plugins:

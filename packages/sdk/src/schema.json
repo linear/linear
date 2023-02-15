@@ -1063,7 +1063,7 @@
             "description": "Comparator for the source type.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "NestedStringComparator",
+              "name": "SourceTypeComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -1519,7 +1519,7 @@
             "description": "Comparator for the source type.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "NestedStringComparator",
+              "name": "SourceTypeComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -1770,6 +1770,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "organization",
+            "description": "The organization the audit log belongs to.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Organization",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -2521,7 +2533,7 @@
           },
           {
             "name": "parent",
-            "description": "The parent of the comment.",
+            "description": "The parent comment under which the current comment is nested.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -3020,7 +3032,7 @@
           },
           {
             "name": "parentId",
-            "description": "[Internal] The parent under which to nest the comment.",
+            "description": "The parent comment under which to nest a current comment.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -3060,6 +3072,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "doNotSubscribeToIssue",
+            "description": "Flag to prevent auto subscription to the issue the comment is created on.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -9143,273 +9167,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "Initiative",
-        "description": "A initiative that contains projects.",
-        "fields": [
-          {
-            "name": "id",
-            "description": "The unique identifier of the entity.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "createdAt",
-            "description": "The time at which the entity was created.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "DateTime",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "updatedAt",
-            "description": "The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those\n    for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't\n    been updated after creation.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "DateTime",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "archivedAt",
-            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "DateTime",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "name",
-            "description": "The name of the initiative.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "organization",
-            "description": "The organization that the initiative belongs to.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Organization",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sortOrder",
-            "description": "The sort order for the initiative.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "description",
-            "description": "The initiative's description.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "targetDate",
-            "description": "The estimated completion date of the initiative.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "TimelessDate",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [
-          {
-            "kind": "INTERFACE",
-            "name": "Node",
-            "ofType": null
-          }
-        ],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "InitiativeConnection",
-        "description": null,
-        "fields": [
-          {
-            "name": "edges",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "InitiativeEdge",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "nodes",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "Initiative",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "pageInfo",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PageInfo",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "InitiativeEdge",
-        "description": null,
-        "fields": [
-          {
-            "name": "node",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Initiative",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "cursor",
-            "description": "Used in `before` and `after` args",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "Integration",
         "description": "An integration with an external service.",
         "fields": [
@@ -10254,6 +10011,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "notion",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "NotionSettings",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -10381,6 +10150,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "JiraSettingsInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notion",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NotionSettingsInput",
               "ofType": null
             },
             "defaultValue": null,
@@ -10871,8 +10652,8 @@
             "deprecationReason": null
           },
           {
-            "name": "slackProjectUpdateCreatedToMilestone",
-            "description": "Whether to send a new project update to milestone Slack channels.",
+            "name": "slackProjectUpdateCreatedToWorkspace",
+            "description": "Whether to send a new project update to workspace Slack channel.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -10883,8 +10664,32 @@
             "deprecationReason": null
           },
           {
-            "name": "slackProjectUpdateCreatedToWorkspace",
-            "description": "Whether to send a new project update to workspace Slack channel.",
+            "name": "slackIssueAddedToTriage",
+            "description": "Whether to send a Slack message when a new issue is added to triage.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackIssueSlaHighRisk",
+            "description": "Whether to send a Slack message when an SLA is at high risk",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackIssueSlaBreached",
+            "description": "Whether to send a Slack message when an SLA is breached",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -11084,8 +10889,8 @@
             "deprecationReason": null
           },
           {
-            "name": "slackProjectUpdateCreatedToMilestone",
-            "description": "Whether to send a Slack message when a project update is created to milestone channels.",
+            "name": "slackProjectUpdateCreatedToWorkspace",
+            "description": "Whether to send a Slack message when a project update is created to workspace channel.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -11096,8 +10901,32 @@
             "deprecationReason": null
           },
           {
-            "name": "slackProjectUpdateCreatedToWorkspace",
-            "description": "Whether to send a Slack message when a project update is created to workspace channel.",
+            "name": "slackIssueAddedToTriage",
+            "description": "Whether to send a Slack message when a new issue is added to triage.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackIssueSlaHighRisk",
+            "description": "Whether to send a Slack message when an SLA is at high risk",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackIssueSlaBreached",
+            "description": "Whether to receive notification when an SLA has breached on Slack.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -11329,8 +11158,8 @@
             "deprecationReason": null
           },
           {
-            "name": "slackProjectUpdateCreatedToMilestone",
-            "description": "Whether to send a Slack message when a project update is created to milestone channels.",
+            "name": "slackProjectUpdateCreatedToWorkspace",
+            "description": "Whether to send a Slack message when a project update is created to workspace channel.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -11341,8 +11170,32 @@
             "deprecationReason": null
           },
           {
-            "name": "slackProjectUpdateCreatedToWorkspace",
-            "description": "Whether to send a Slack message when a project update is created to workspace channel.",
+            "name": "slackIssueAddedToTriage",
+            "description": "Whether to send a Slack message when a new issue is added to triage.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackIssueSlaHighRisk",
+            "description": "Whether to send a Slack message when an SLA is at high risk",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackIssueSlaBreached",
+            "description": "Whether to receive notification when an SLA has breached on Slack.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -11693,6 +11546,18 @@
             "deprecationReason": null
           },
           {
+            "name": "startedTriageAt",
+            "description": "The time at which the issue entered triage.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "triagedAt",
             "description": "The time at which the issue left triage.",
             "args": [],
@@ -11747,6 +11612,30 @@
             "type": {
               "kind": "SCALAR",
               "name": "TimelessDate",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slaStartedAt",
+            "description": "[Internal] The time at which the issue's SLA began.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slaBreachesAt",
+            "description": "[Internal] The time at which the issue's SLA will breach.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
               "ofType": null
             },
             "isDeprecated": false,
@@ -11811,6 +11700,18 @@
             "type": {
               "kind": "OBJECT",
               "name": "Project",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectMilestone",
+            "description": "[ALPHA] The projectMilestone that the issue is associated with.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProjectMilestone",
               "ofType": null
             },
             "isDeprecated": false,
@@ -13363,6 +13264,18 @@
             "deprecationReason": null
           },
           {
+            "name": "slaStatus",
+            "description": "Comparator for the issues sla status.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "SlaStatusComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "and",
             "description": "Compound filters, all of which need to be matched by the issue.",
             "type": {
@@ -13705,6 +13618,18 @@
             "deprecationReason": null
           },
           {
+            "name": "projectMilestoneId",
+            "description": "[ALPHA] The project milestone associated with the issue.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "stateId",
             "description": "The team state of the issue.",
             "type": {
@@ -13814,6 +13739,315 @@
           }
         ],
         "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "IssueDraft",
+        "description": "[Internal] A draft issue.",
+        "fields": [
+          {
+            "name": "id",
+            "description": "The unique identifier of the entity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those\n    for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't\n    been updated after creation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "archivedAt",
+            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "title",
+            "description": "The draft's title.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": "The draft's description in markdown format.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "priority",
+            "description": "The priority of the draft.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "estimate",
+            "description": "The estimate of the complexity of the draft.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "dueDate",
+            "description": "The date at which the issue would be due.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDate",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamId",
+            "description": "The team associated with the draft.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cycleId",
+            "description": "The cycle associated with the draft.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectId",
+            "description": "The project associated with the draft.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "creator",
+            "description": "The user who created the draft.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "assigneeId",
+            "description": "The user assigned to the draft.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "stateId",
+            "description": "The workflow state associated with the draft.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parent",
+            "description": "The parent draft of the draft.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "IssueDraft",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parentIssue",
+            "description": "The parent issue of the draft.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Issue",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subIssueSortOrder",
+            "description": "The order of items in the sub-draft list. Only set if the draft has `parent` set.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "priorityLabel",
+            "description": "Label for the priority.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "descriptionData",
+            "description": "[Internal] The draft's description as a Prosemirror document.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "attachments",
+            "description": "Serialized array of JSONs representing attachments.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Node",
+            "ofType": null
+          }
+        ],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -14256,6 +14490,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "RelationExistsComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slaStatus",
+            "description": "Comparator for the issues sla status.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "SlaStatusComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -14971,6 +15217,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "TimelessDate",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "changes",
+            "description": "[Internal] Serialized JSON representing changes for certain non-relational properties.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
               "ofType": null
             },
             "isDeprecated": false,
@@ -17459,6 +17717,18 @@
             "deprecationReason": null
           },
           {
+            "name": "projectMilestoneId",
+            "description": "[ALPHA] The project milestone associated with the issue.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "stateId",
             "description": "The team state of the issue.",
             "type": {
@@ -17524,6 +17794,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slaBreachesAt",
+            "description": "[Internal] The timestamp at which an issue will be considered in breach of SLA.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
               "ofType": null
             },
             "defaultValue": null,
@@ -18020,697 +18302,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "Milestone",
-        "description": "A milestone that contains projects.",
-        "fields": [
-          {
-            "name": "id",
-            "description": "The unique identifier of the entity.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "createdAt",
-            "description": "The time at which the entity was created.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "DateTime",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "updatedAt",
-            "description": "The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those\n    for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't\n    been updated after creation.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "DateTime",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "archivedAt",
-            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "DateTime",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "name",
-            "description": "The name of the milestone.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "organization",
-            "description": "The organization that the milestone belongs to.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Organization",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sortOrder",
-            "description": "The sort order for the milestone.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "description",
-            "description": "[ALPHA] The milestone's description.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "targetDate",
-            "description": "[ALPHA] The estimated completion date of the initiative.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "TimelessDate",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "projects",
-            "description": "Projects associated with the milestone.",
-            "args": [
-              {
-                "name": "filter",
-                "description": "Filter returned projects.",
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "ProjectFilter",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "before",
-                "description": "A cursor to be used with last for backward pagination.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "after",
-                "description": "A cursor to be used with first for forward pagination",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "first",
-                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "last",
-                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "includeArchived",
-                "description": "Should archived resources be included (default: false)",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "orderBy",
-                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
-                "type": {
-                  "kind": "ENUM",
-                  "name": "PaginationOrderBy",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ProjectConnection",
-                "ofType": null
-              }
-            },
-            "isDeprecated": true,
-            "deprecationReason": "Milestones will be removed. Use roadmaps instead."
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [
-          {
-            "kind": "INTERFACE",
-            "name": "Node",
-            "ofType": null
-          }
-        ],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "MilestoneConnection",
-        "description": null,
-        "fields": [
-          {
-            "name": "edges",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "MilestoneEdge",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "nodes",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "Milestone",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "pageInfo",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PageInfo",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "MilestoneCreateInput",
-        "description": null,
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "id",
-            "description": "The identifier in UUID v4 format. If none is provided, the backend will generate one.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "name",
-            "description": "The name of the milestone.",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sortOrder",
-            "description": "The sort order of the milestone.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "description",
-            "description": "[ALPHA] The description for the milestone.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "targetDate",
-            "description": "[ALPHA] The planned target date of the milestone.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "TimelessDate",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "teamIds",
-            "description": "[ALPHA] The identifiers of the teams this milestone is associated with.",
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "MilestoneEdge",
-        "description": null,
-        "fields": [
-          {
-            "name": "node",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Milestone",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "cursor",
-            "description": "Used in `before` and `after` args",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "MilestoneMigrationPayload",
-        "description": null,
-        "fields": [
-          {
-            "name": "lastSyncId",
-            "description": "The identifier of the last sync operation.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "success",
-            "description": "Whether the operation was successful.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "MilestonePayload",
-        "description": null,
-        "fields": [
-          {
-            "name": "lastSyncId",
-            "description": "The identifier of the last sync operation.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "milestone",
-            "description": "The milesteone that was created or updated.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "Milestone",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "success",
-            "description": "Whether the operation was successful.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "MilestoneUpdateInput",
-        "description": null,
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "name",
-            "description": "The name of the milestone.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sortOrder",
-            "description": "The sort order of the milestone.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "description",
-            "description": "[ALPHA] The description for the milestone.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "targetDate",
-            "description": "[ALPHA] The planned target date of the milestone.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "TimelessDate",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "teamIds",
-            "description": "[ALPHA] The identifiers of the teams this milestone is associated with.",
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "MilestonesMigrateInput",
-        "description": null,
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "milestonesToMigrate",
-            "description": "IDs of the milestones to migrate.",
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "milestonesToDelete",
-            "description": "IDs of the milestones to delete.",
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "Mutation",
         "description": null,
         "fields": [
@@ -18902,6 +18493,18 @@
               {
                 "name": "title",
                 "description": "The title to use for the attachment.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "id",
+                "description": "The id for the attachment.",
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
@@ -21458,24 +21061,8 @@
             "description": "Integrates the organization with Zendesk.",
             "args": [
               {
-                "name": "redirectUri",
-                "description": "The Zendesk OAuth redirect URI.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "scope",
-                "description": "The Zendesk OAuth scopes.",
+                "name": "subdomain",
+                "description": "The Zendesk installation subdomain.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -21506,8 +21093,24 @@
                 "deprecationReason": null
               },
               {
-                "name": "subdomain",
-                "description": "The Zendesk installation subdomain.",
+                "name": "scope",
+                "description": "The Zendesk OAuth scopes.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "redirectUri",
+                "description": "The Zendesk OAuth redirect URI.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -23014,51 +22617,18 @@
             "deprecationReason": null
           },
           {
-            "name": "milestoneCreate",
-            "description": "Creates a new milestone.",
+            "name": "issueDescriptionUpdateFromFront",
+            "description": "[INTERNAL] Updates an issue description from the Front app to handle Front attachments correctly.",
             "args": [
               {
-                "name": "input",
-                "description": "The issue object to create.",
+                "name": "description",
+                "description": "Description to update the issue with. ",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "MilestoneCreateInput",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "MilestonePayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": true,
-            "deprecationReason": "Milestones will be removed. Use roadmaps instead."
-          },
-          {
-            "name": "milestoneUpdate",
-            "description": "Updates a milestone.",
-            "args": [
-              {
-                "name": "input",
-                "description": "A partial milestone object to update the milestone with.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "MilestoneUpdateInput",
+                    "kind": "SCALAR",
+                    "name": "String",
                     "ofType": null
                   }
                 },
@@ -23068,7 +22638,7 @@
               },
               {
                 "name": "id",
-                "description": "The identifier of the milestone to update.",
+                "description": "The identifier of the issue to update.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -23088,73 +22658,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "MilestonePayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": true,
-            "deprecationReason": "Milestones will be removed. Use roadmaps instead."
-          },
-          {
-            "name": "milestoneDelete",
-            "description": "Deletes a milestone.",
-            "args": [
-              {
-                "name": "id",
-                "description": "The identifier of the milestone to delete.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ArchivePayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": true,
-            "deprecationReason": "Milestones will be removed. Use roadmaps instead."
-          },
-          {
-            "name": "migrateMilestonesToRoadmaps",
-            "description": "Migrates milestones to roadmaps",
-            "args": [
-              {
-                "name": "input",
-                "description": "Ids for milestones to migrate and milestones to delete",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "MilestonesMigrateInput",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "MilestoneMigrationPayload",
+                "name": "IssuePayload",
                 "ofType": null
               }
             },
@@ -23870,6 +23374,121 @@
               {
                 "name": "id",
                 "description": "The identifier of the project link to delete.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ArchivePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectMilestoneCreate",
+            "description": "Creates a new project milestone.",
+            "args": [
+              {
+                "name": "input",
+                "description": "The project milestone to create.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "ProjectMilestoneCreateInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProjectMilestonePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectMilestoneUpdate",
+            "description": "Updates a project milestone.",
+            "args": [
+              {
+                "name": "input",
+                "description": "A partial object to update the project milestone with.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "ProjectMilestoneUpdateInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "id",
+                "description": "The identifier of the project milestone to update. Also the identifier from the URL is accepted.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProjectMilestonePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectMilestoneDelete",
+            "description": "Deletes a project milestone.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the project milestone to delete.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -25081,153 +24700,6 @@
             "deprecationReason": null
           },
           {
-            "name": "userAccountEmailChangeVerifyCode",
-            "description": "[INTERNAL] Verifies the email address and code for a user account that wants to change email.",
-            "args": [
-              {
-                "name": "code",
-                "description": "[INTERNAL] The code to verify.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "email",
-                "description": "[INTERNAL] The email to verify.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "UserAccountEmailChangeVerifyCodePayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "userAccountEmailChangeCreate",
-            "description": "[INTERNAL] Creates an email verification challenge from the app for a user account that wants to change email.",
-            "args": [
-              {
-                "name": "hasExistingAccount",
-                "description": "[INTERNAL] Whether an existing account exists for the new email address.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Boolean",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "newEmail",
-                "description": "[INTERNAL] The new email address the user wants to use.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "id",
-                "description": "[INTERNAL] The identifier of the user account that wants to change email.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "UserAccountEmailVerificationPayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "userAccountEmailChangeCancel",
-            "description": "[INTERNAL] Cancels an ongoing email change for the user account",
-            "args": [
-              {
-                "name": "id",
-                "description": "The id of the user account to cancel the change for.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "UserAccountEmailVerificationPayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "userUpdate",
             "description": "Updates a user. Only available to organization admins and the user themselves.",
             "args": [
@@ -26142,201 +25614,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "INPUT_OBJECT",
-        "name": "NestedStringComparator",
-        "description": "Comparator for strings.",
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "eq",
-            "description": "Equals constraint.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "neq",
-            "description": "Not-equals constraint.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "in",
-            "description": "In-array constraint.",
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "nin",
-            "description": "Not-in-array constraint.",
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "eqIgnoreCase",
-            "description": "Equals case insensitive. Matches any values that matches the given string case insensitive.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "neqIgnoreCase",
-            "description": "Not-equals case insensitive. Matches any values that don't match the given string case insensitive.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "startsWith",
-            "description": "Starts with constraint. Matches any values that start with the given string.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "notStartsWith",
-            "description": "Doesn't start with constraint. Matches any values that don't start with the given string.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "endsWith",
-            "description": "Ends with constraint. Matches any values that end with the given string.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "notEndsWith",
-            "description": "Doesn't end with constraint. Matches any values that don't end with the given string.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "contains",
-            "description": "Contains constraint. Matches any values that contain the given string.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "containsIgnoreCase",
-            "description": "Contains case insensitive constraint. Matches any values that contain the given string case insensitive.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "notContains",
-            "description": "Doesn't contain constraint. Matches any values that don't contain the given string.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "notContainsIgnoreCase",
-            "description": "Doesn't contain case insensitive constraint. Matches any values that don't contain the given string case insensitive.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
         "kind": "INTERFACE",
         "name": "Node",
         "description": null,
@@ -26409,11 +25686,6 @@
           },
           {
             "kind": "OBJECT",
-            "name": "Initiative",
-            "ofType": null
-          },
-          {
-            "kind": "OBJECT",
             "name": "Integration",
             "ofType": null
           },
@@ -26439,6 +25711,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "IssueDraft",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "IssueHistory",
             "ofType": null
           },
@@ -26460,11 +25737,6 @@
           {
             "kind": "OBJECT",
             "name": "IssueRelation",
-            "ofType": null
-          },
-          {
-            "kind": "OBJECT",
-            "name": "Milestone",
             "ofType": null
           },
           {
@@ -26504,12 +25776,22 @@
           },
           {
             "kind": "OBJECT",
+            "name": "PersonalNote",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "Project",
             "ofType": null
           },
           {
             "kind": "OBJECT",
             "name": "ProjectLink",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "ProjectMilestone",
             "ofType": null
           },
           {
@@ -27248,6 +26530,26 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "teamNotificationSubscriptionTypes",
+            "description": "The types of notifications of the team subscription.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -27366,12 +26668,28 @@
             "name": "projectNotificationSubscriptionType",
             "description": "The type of the project subscription.",
             "type": {
-              "kind": "NON_NULL",
+              "kind": "ENUM",
+              "name": "ProjectNotificationSubscriptionType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamNotificationSubscriptionTypes",
+            "description": "The types of notifications of the team subscription.",
+            "type": {
+              "kind": "LIST",
               "name": null,
               "ofType": {
-                "kind": "ENUM",
-                "name": "ProjectNotificationSubscriptionType",
-                "ofType": null
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
               }
             },
             "defaultValue": null,
@@ -27420,6 +26738,92 @@
               "kind": "SCALAR",
               "name": "String",
               "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "NotionSettings",
+        "description": "Notion specific settings.",
+        "fields": [
+          {
+            "name": "workspaceId",
+            "description": "The ID of the Notion workspace being connected.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "workspaceName",
+            "description": "The name of the Notion workspace being connected.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "NotionSettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "workspaceId",
+            "description": "The ID of the Notion workspace being connected.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "workspaceName",
+            "description": "The name of the Notion workspace being connected.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -28204,6 +27608,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "RelationExistsComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slaStatus",
+            "description": "Comparator for the issues sla status.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "SlaStatusComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -32259,7 +31675,7 @@
           },
           {
             "name": "seatsMaximum",
-            "description": "The maximum number of seats that can be added to the subscription.",
+            "description": "The maximum number of seats that will be billed in the subscription.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -32328,6 +31744,111 @@
             "type": {
               "kind": "SCALAR",
               "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Node",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PersonalNote",
+        "description": "A personal note for a user",
+        "fields": [
+          {
+            "name": "id",
+            "description": "The unique identifier of the entity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those\n    for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't\n    been updated after creation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "archivedAt",
+            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": "The user that owns the note.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "contentData",
+            "description": "The note content as JSON.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
               "ofType": null
             },
             "isDeprecated": false,
@@ -32531,30 +32052,6 @@
             "deprecationReason": null
           },
           {
-            "name": "milestone",
-            "description": "The milestone that this project is associated with.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "Milestone",
-              "ofType": null
-            },
-            "isDeprecated": true,
-            "deprecationReason": "Milestones will be removed. Use roadmaps instead."
-          },
-          {
-            "name": "initiative",
-            "description": "The initiative that this project is associated with.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "Initiative",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "projectUpdateRemindersPausedUntilAt",
             "description": "The time until which project update reminders are paused.",
             "args": [],
@@ -32640,7 +32137,7 @@
           },
           {
             "name": "sortOrder",
-            "description": "The sort order for the project within its milestone/initiative.",
+            "description": "The sort order for the project within the organizion.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -33236,6 +32733,95 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "DocumentConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectMilestones",
+            "description": "[ALPHA] Milestones associated with the project.",
+            "args": [
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProjectMilestoneConnection",
                 "ofType": null
               }
             },
@@ -33879,18 +33465,6 @@
           {
             "name": "description",
             "description": "The description for the project.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "milestoneId",
-            "description": "The identifier of the milestone to associate the project with.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -34669,6 +34243,454 @@
           {
             "name": "label",
             "description": "The label for the link.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProjectMilestone",
+        "description": "A milestone for a project.",
+        "fields": [
+          {
+            "name": "id",
+            "description": "The unique identifier of the entity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those\n    for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't\n    been updated after creation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "archivedAt",
+            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the project milestone.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": "The description of the project milestone.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "targetDate",
+            "description": "The planned completion date of the milestone.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDate",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "project",
+            "description": "The project of the milestone.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Project",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Node",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProjectMilestoneConnection",
+        "description": null,
+        "fields": [
+          {
+            "name": "edges",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ProjectMilestoneEdge",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nodes",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ProjectMilestone",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pageInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "ProjectMilestoneCreateInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "The identifier in UUID v4 format. If none is provided, the backend will generate one.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the project milestone.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": "The description of the project milestone.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "targetDate",
+            "description": "The planned target date of the project milestone.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDate",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectId",
+            "description": "Related project for the project milestone.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProjectMilestoneEdge",
+        "description": null,
+        "fields": [
+          {
+            "name": "node",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProjectMilestone",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cursor",
+            "description": "Used in `before` and `after` args",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProjectMilestonePayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "lastSyncId",
+            "description": "The identifier of the last sync operation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectMilestone",
+            "description": "The project milestone that was created or updated.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProjectMilestone",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "ProjectMilestoneUpdateInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "name",
+            "description": "The name of the project milestone.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": "The description of the project milestone.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "targetDate",
+            "description": "The planned target date of the project milestone.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDate",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectId",
+            "description": "Related project for the project milestone.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -35561,18 +35583,6 @@
           {
             "name": "description",
             "description": "The description for the project.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "milestoneId",
-            "description": "The identifier of the milestone to associate the project with.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -39745,128 +39755,6 @@
             "deprecationReason": null
           },
           {
-            "name": "milestones",
-            "description": "All milestones.",
-            "args": [
-              {
-                "name": "before",
-                "description": "A cursor to be used with last for backward pagination.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "after",
-                "description": "A cursor to be used with first for forward pagination",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "first",
-                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "last",
-                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "includeArchived",
-                "description": "Should archived resources be included (default: false)",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Boolean",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "orderBy",
-                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
-                "type": {
-                  "kind": "ENUM",
-                  "name": "PaginationOrderBy",
-                  "ofType": null
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "MilestoneConnection",
-                "ofType": null
-              }
-            },
-            "isDeprecated": true,
-            "deprecationReason": "Milestones will be removed. Use roadmaps instead."
-          },
-          {
-            "name": "milestone",
-            "description": "One specific milestone.",
-            "args": [
-              {
-                "name": "id",
-                "description": null,
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Milestone",
-                "ofType": null
-              }
-            },
-            "isDeprecated": true,
-            "deprecationReason": "Milestones will be removed. Use roadmaps instead."
-          },
-          {
             "name": "notifications",
             "description": "All notifications.",
             "args": [
@@ -40463,6 +40351,128 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "ProjectLink",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ProjectMilestones",
+            "description": "All milestones for the project.",
+            "args": [
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProjectMilestoneConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ProjectMilestone",
+            "description": "One specific project milestone.",
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProjectMilestone",
                 "ofType": null
               }
             },
@@ -41442,39 +41452,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Template",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "userAccountEmailChangeFind",
-            "description": "[INTERNAL] Checks if there's a currently active email verification challenge for a user account.",
-            "args": [
-              {
-                "name": "email",
-                "description": "[INTERNAL] The email of the user account.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "UserAccountEmailChangeFindPayload",
                 "ofType": null
               }
             },
@@ -43544,7 +43521,7 @@
           },
           {
             "name": "sortOrder",
-            "description": "The sort order for the project within its milestone.",
+            "description": "The sort order for the project within its organization.",
             "type": {
               "kind": "SCALAR",
               "name": "Float",
@@ -43669,7 +43646,7 @@
         "inputFields": [
           {
             "name": "sortOrder",
-            "description": "The sort order for the project within its milestone.",
+            "description": "The sort order for the project within its organization.",
             "type": {
               "kind": "SCALAR",
               "name": "Float",
@@ -44170,6 +44147,134 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "SlaStatus",
+        "description": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "Breached",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "HighRisk",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "MediumRisk",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "LowRisk",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "Completed",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "SlaStatusComparator",
+        "description": "Comparator for sla status.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "eq",
+            "description": "Equals constraint.",
+            "type": {
+              "kind": "ENUM",
+              "name": "SlaStatus",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "neq",
+            "description": "Not-equals constraint.",
+            "type": {
+              "kind": "ENUM",
+              "name": "SlaStatus",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "in",
+            "description": "In-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "SlaStatus",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nin",
+            "description": "Not-in-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "SlaStatus",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "null",
+            "description": "Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "SlackPostSettings",
         "description": "Slack notification specific settings.",
@@ -44277,6 +44382,201 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "SourceTypeComparator",
+        "description": "Comparator for `sourceType` field.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "eq",
+            "description": "Equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "neq",
+            "description": "Not-equals constraint.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "in",
+            "description": "In-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nin",
+            "description": "Not-in-array constraint.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "eqIgnoreCase",
+            "description": "Equals case insensitive. Matches any values that matches the given string case insensitive.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "neqIgnoreCase",
+            "description": "Not-equals case insensitive. Matches any values that don't match the given string case insensitive.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "startsWith",
+            "description": "Starts with constraint. Matches any values that start with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notStartsWith",
+            "description": "Doesn't start with constraint. Matches any values that don't start with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "endsWith",
+            "description": "Ends with constraint. Matches any values that end with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notEndsWith",
+            "description": "Doesn't end with constraint. Matches any values that don't end with the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "contains",
+            "description": "Contains constraint. Matches any values that contain the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "containsIgnoreCase",
+            "description": "Contains case insensitive constraint. Matches any values that contain the given string case insensitive.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notContains",
+            "description": "Doesn't contain constraint. Matches any values that don't contain the given string.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notContainsIgnoreCase",
+            "description": "Doesn't contain case insensitive constraint. Matches any values that don't contain the given string case insensitive.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -45051,6 +45351,22 @@
           {
             "name": "triageEnabled",
             "description": "Whether triage mode is enabled for the team or not.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "requirePriorityToLeaveTriage",
+            "description": "Whether an issue needs to have a priority set before leaving triage",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -46531,6 +46847,18 @@
             "deprecationReason": null
           },
           {
+            "name": "requirePriorityToLeaveTriage",
+            "description": "Whether an issue needs to have a priority set before leaving triage.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "timezone",
             "description": "The timezone of the team.",
             "type": {
@@ -47922,6 +48250,18 @@
             "deprecationReason": null
           },
           {
+            "name": "requirePriorityToLeaveTriage",
+            "description": "Whether an issue needs to have a priority set before leaving triage.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "defaultIssueStateId",
             "description": "Default status for newly created issues.",
             "type": {
@@ -48901,6 +49241,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slaEnabled",
+            "description": "Internal. Whether SLA's have been enabled for the organization.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -50299,143 +50651,6 @@
             "type": {
               "kind": "SCALAR",
               "name": "DateTime",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "UserAccountEmailChangeFindPayload",
-        "description": "[INTERNAL] Result of searching for a verification challenge for a user account.",
-        "fields": [
-          {
-            "name": "lastSyncId",
-            "description": "The identifier of the last sync operation.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "hasChangeActive",
-            "description": "[INTERNAL] Whether there is a currently active change.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "UserAccountEmailChangeVerifyCodePayload",
-        "description": "[INTERNAL] Result of verifying an email and code.",
-        "fields": [
-          {
-            "name": "success",
-            "description": "[INTERNAL] Whether the operation was successful.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "failureReason",
-            "description": "[INTERNAL] Reason why the operation was not successful.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "UserAccountEmailVerificationPayload",
-        "description": "[INTERNAL] Result of creating or cancelling a verification challenge for email change.",
-        "fields": [
-          {
-            "name": "lastSyncId",
-            "description": "The identifier of the last sync operation.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "success",
-            "description": "[INTERNAL] Whether the operation was successful.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "failureReason",
-            "description": "[INTERNAL] Reason why the operation was not successful.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
               "ofType": null
             },
             "isDeprecated": false,
@@ -52247,6 +52462,18 @@
             "deprecationReason": null
           },
           {
+            "name": "myIssuesTouchedByMe",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "myIssuesActivity",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "userProfile",
             "description": null,
             "isDeprecated": false,
@@ -52967,21 +53194,29 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "WorkflowConditions",
-        "description": "The conditions to match different events, which need to be true for workflow to be started.",
+        "name": "WorkflowCondition",
+        "description": "A condition to match for the workflow to be triggered.",
         "fields": null,
         "inputFields": [
           {
-            "name": "issue",
-            "description": "The conditions to match triggers based on issue (creation, update, deletion).",
+            "name": "issueFilter",
+            "description": "Trigger the workflow when an issue matches the filter. Can only be used when the trigger type is `Issue`.",
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "INPUT_OBJECT",
-                "name": "WorkflowEntityPropertyMatcher",
-                "ofType": null
-              }
+              "kind": "INPUT_OBJECT",
+              "name": "IssueFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectFilter",
+            "description": "Triggers the workflow when a project matches the filter. Can only be used when the trigger type is `Project`.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectFilter",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -53074,8 +53309,20 @@
             "deprecationReason": null
           },
           {
+            "name": "groupName",
+            "description": "The name of the group that the workflow belongs to.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "description",
-            "description": "The workflow description.",
+            "description": "The description of the workflow.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -53087,7 +53334,7 @@
           },
           {
             "name": "type",
-            "description": "The type of the workflow",
+            "description": "The type of the workflow.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -53103,7 +53350,23 @@
           },
           {
             "name": "trigger",
-            "description": "The type of the trigger that kicks off the workflow.",
+            "description": "The type of the event that triggers off the workflow.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "WorkflowTrigger",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "triggerType",
+            "description": "The object type (e.g. Issue) that triggers this workflow.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -53111,6 +53374,22 @@
               "ofType": {
                 "kind": "ENUM",
                 "name": "WorkflowTriggerType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "conditions",
+            "description": "The conditions that need to be match for the workflow to be triggered.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
                 "ofType": null
               }
             },
@@ -53134,33 +53413,13 @@
             "deprecationReason": null
           },
           {
-            "name": "organization",
-            "description": "The organization where workflow was created.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Organization",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "team",
-            "description": "The team associated with the workflow.",
+            "description": "The team associated with the workflow. If not set, the workflow is associated with the entire organization.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Team",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "Team",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -53175,22 +53434,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "User",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "conditions",
-            "description": "One or more conditions that need to be true for workflow to be triggered.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "JSONObject",
                 "ofType": null
               }
             },
@@ -53228,6 +53471,22 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "sortOrder",
+            "description": "The sort order of the workflow definition within its siblings.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -53242,14 +53501,105 @@
         "possibleTypes": null
       },
       {
-        "kind": "INPUT_OBJECT",
-        "name": "WorkflowEntityPropertyMatcher",
-        "description": "Object to provide conditions to match an entity change.",
-        "fields": null,
-        "inputFields": [
+        "kind": "OBJECT",
+        "name": "WorkflowDefinitionConnection",
+        "description": null,
+        "fields": [
           {
-            "name": "property",
-            "description": "The property to check for matching.",
+            "name": "edges",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "WorkflowDefinitionEdge",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nodes",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "WorkflowDefinition",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pageInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "WorkflowDefinitionEdge",
+        "description": null,
+        "fields": [
+          {
+            "name": "node",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "WorkflowDefinition",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cursor",
+            "description": "Used in `before` and `after` args",
+            "args": [],
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -53259,76 +53609,12 @@
                 "ofType": null
               }
             },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "fromValue",
-            "description": "The initial value of the property to match.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "toValue",
-            "description": "The new value of the property to match.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "and",
-            "description": "The optional list of property matchers that all have to match.",
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "WorkflowEntityPropertyMatcher",
-                  "ofType": null
-                }
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "or",
-            "description": "The optional list of property matchers where at least one have to match.",
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "WorkflowEntityPropertyMatcher",
-                  "ofType": null
-                }
-              }
-            },
-            "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
           }
         ],
-        "interfaces": null,
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -54110,7 +54396,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "WorkflowTriggerType",
+        "name": "WorkflowTrigger",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -54123,19 +54409,54 @@
             "deprecationReason": null
           },
           {
-            "name": "issueCreated",
+            "name": "entityCreated",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "issueUpdated",
+            "name": "entityUpdated",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "issueDeleted",
+            "name": "entityCreatedOrUpdated",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "entityRemoved",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "entityUnarchived",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "WorkflowTriggerType",
+        "description": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "issue",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "project",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -54153,6 +54474,12 @@
         "enumValues": [
           {
             "name": "recurringIssue",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sla",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
