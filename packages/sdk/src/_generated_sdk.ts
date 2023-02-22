@@ -6740,6 +6740,87 @@ export class WebhookPayload extends Request {
   }
 }
 /**
+ * WorkflowCronJobDefinition model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.WorkflowCronJobDefinitionFragment response data
+ */
+export class WorkflowCronJobDefinition extends Request {
+  private _creator: L.WorkflowCronJobDefinitionFragment["creator"];
+  private _team: L.WorkflowCronJobDefinitionFragment["team"];
+
+  public constructor(request: LinearRequest, data: L.WorkflowCronJobDefinitionFragment) {
+    super(request);
+    this.activities = parseJson(data.activities) ?? {};
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description ?? undefined;
+    this.enabled = data.enabled;
+    this.id = data.id;
+    this.name = data.name;
+    this.schedule = parseJson(data.schedule) ?? {};
+    this.sortOrder = data.sortOrder;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._creator = data.creator;
+    this._team = data.team;
+  }
+
+  /** An array of activities that will be executed as part of the workflow cron job. */
+  public activities: Record<string, unknown>;
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The description of the workflow cron job. */
+  public description?: string;
+  public enabled: boolean;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The name of the workflow cron job. */
+  public name: string;
+  /** Cron schedule which is used to execute the workflow cron job. */
+  public schedule: Record<string, unknown>;
+  /** The sort order of the workflow cron job definition within its siblings. */
+  public sortOrder: string;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The user who created the workflow cron job. */
+  public get creator(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._creator.id);
+  }
+  /** The team associated with the workflow cron job. */
+  public get team(): LinearFetch<Team> | undefined {
+    return new TeamQuery(this._request).fetch(this._team.id);
+  }
+}
+/**
+ * WorkflowCronJobDefinitionConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this WorkflowCronJobDefinitionConnection model
+ * @param data - WorkflowCronJobDefinitionConnection response data
+ */
+export class WorkflowCronJobDefinitionConnection extends Connection<WorkflowCronJobDefinition> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (
+      connection?: LinearConnectionVariables
+    ) => LinearFetch<LinearConnection<WorkflowCronJobDefinition> | undefined>,
+    data: L.WorkflowCronJobDefinitionConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new WorkflowCronJobDefinition(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
  * WorkflowDefinition model
  *
  * @param request - function to call the graphql client
@@ -6760,7 +6841,6 @@ export class WorkflowDefinition extends Request {
     this.groupName = data.groupName ?? undefined;
     this.id = data.id;
     this.name = data.name;
-    this.schedule = parseJson(data.schedule) ?? {};
     this.sortOrder = data.sortOrder;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator;
@@ -6784,8 +6864,6 @@ export class WorkflowDefinition extends Request {
   public id: string;
   /** The name of the workflow. */
   public name: string;
-  /** Cron schedule which is used to execute the workflow. Only applicable for cron based workflows. */
-  public schedule: Record<string, unknown>;
   /** The sort order of the workflow definition within its siblings. */
   public sortOrder: string;
   /**

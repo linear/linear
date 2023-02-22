@@ -3389,6 +3389,10 @@ input IssueCollectionFilter {
   """
   project: NullableProjectFilter
   """
+  [ALPHA] Filters that the issues project milestone must satisfy.
+  """
+  projectMilestone: NullableProjectMilestoneFilter
+  """
   [Internal] Comparator for the issues content.
   """
   searchableContent: ContentComparator
@@ -3743,6 +3747,10 @@ input IssueFilter {
   Filters that the issues project must satisfy.
   """
   project: NullableProjectFilter
+  """
+  [ALPHA] Filters that the issues project milestone must satisfy.
+  """
+  projectMilestone: NullableProjectMilestoneFilter
   """
   [Internal] Comparator for the issues content.
   """
@@ -7287,6 +7295,10 @@ input NullableIssueFilter {
   """
   project: NullableProjectFilter
   """
+  [ALPHA] Filters that the issues project milestone must satisfy.
+  """
+  projectMilestone: NullableProjectMilestoneFilter
+  """
   [Internal] Comparator for the issues content.
   """
   searchableContent: ContentComparator
@@ -7434,6 +7446,36 @@ input NullableProjectFilter {
   Comparator for the project target date.
   """
   targetDate: NullableDateComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+"""
+[ALPHA] Project milestone filtering options.
+"""
+input NullableProjectMilestoneFilter {
+  """
+  Compound filters, all of which need to be matched by the project milestone.
+  """
+  and: [NullableProjectMilestoneFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the project milestone.
+  """
+  or: [NullableProjectMilestoneFilter!]
   """
   Comparator for the updated at date.
   """
@@ -7970,6 +8012,10 @@ type Organization implements Node {
   The frequency at which to prompt for project updates.
   """
   projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency!
+  """
+  The feature release channel the organization belongs to.
+  """
+  releaseChannel: ReleaseChannel!
   """
   Whether the organization is using a roadmap.
   """
@@ -11276,6 +11322,16 @@ input RelationExistsComparator {
 }
 
 """
+Features release channel
+"""
+enum ReleaseChannel {
+  beta
+  internal
+  preRelease
+  public
+}
+
+"""
 A roadmap for projects.
 """
 type Roadmap implements Node {
@@ -14072,7 +14128,6 @@ enum ViewType {
   myIssuesActivity
   myIssuesCreatedByMe
   myIssuesSubscribedTo
-  myIssuesTouchedByMe
   project
   projects
   projectsAll
@@ -14246,6 +14301,70 @@ input WorkflowCondition {
   projectFilter: ProjectFilter
 }
 
+type WorkflowCronJobDefinition implements Node {
+  """
+  An array of activities that will be executed as part of the workflow cron job.
+  """
+  activities: JSONObject!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the workflow cron job.
+  """
+  creator: User!
+  """
+  The description of the workflow cron job.
+  """
+  description: String
+  enabled: Boolean!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The name of the workflow cron job.
+  """
+  name: String!
+  """
+  Cron schedule which is used to execute the workflow cron job.
+  """
+  schedule: JSONObject!
+  """
+  The sort order of the workflow cron job definition within its siblings.
+  """
+  sortOrder: String!
+  """
+  The team associated with the workflow cron job.
+  """
+  team: Team!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type WorkflowCronJobDefinitionConnection {
+  edges: [WorkflowCronJobDefinitionEdge!]!
+  nodes: [WorkflowCronJobDefinition!]!
+  pageInfo: PageInfo!
+}
+
+type WorkflowCronJobDefinitionEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: WorkflowCronJobDefinition!
+}
+
 type WorkflowDefinition implements Node {
   """
   An array of activities that will be executed as part of the workflow.
@@ -14284,10 +14403,6 @@ type WorkflowDefinition implements Node {
   The name of the workflow.
   """
   name: String!
-  """
-  Cron schedule which is used to execute the workflow. Only applicable for cron based workflows.
-  """
-  schedule: JSONObject!
   """
   The sort order of the workflow definition within its siblings.
   """
@@ -14541,7 +14656,6 @@ input WorkflowStateUpdateInput {
 }
 
 enum WorkflowTrigger {
-  cron
   entityCreated
   entityCreatedOrUpdated
   entityRemoved
@@ -14556,7 +14670,6 @@ enum WorkflowTriggerType {
 
 enum WorkflowType {
   custom
-  recurringIssue
   sla
 }
 
