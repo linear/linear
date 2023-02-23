@@ -26,7 +26,7 @@
     "build:clean": "npx rimraf -G dist .rollup-cache tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@linear/sdk": "^2.2.0",
+    "@linear/sdk": "^2.3.0",
     "chalk": "4.1.0",
     "csvtojson": "2.0.10",
     "date-fns": "^2.19.0",
