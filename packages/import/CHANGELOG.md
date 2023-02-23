@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.6.3
+
+### Patch Changes
+
+- 3b943fb: chore(deps): update dependency patch versions
+- bdf4a90: @linear/import is now using @linear/sdk@2.3.0
+- Updated dependencies [3b943fb]
+  - @linear/sdk@2.3.1
+
 ## 1.6.2
 
 ### Patch Changes
