@@ -2017,6 +2017,8 @@ export type IssueCollectionFilter = {
   priority?: Maybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: Maybe<NullableProjectFilter>;
+  /** [ALPHA] Filters that the issues project milestone must satisfy. */
+  projectMilestone?: Maybe<NullableProjectMilestoneFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: Maybe<ContentComparator>;
   /** Comparator for the issues sla status. */
@@ -2209,6 +2211,8 @@ export type IssueFilter = {
   priority?: Maybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: Maybe<NullableProjectFilter>;
+  /** [ALPHA] Filters that the issues project milestone must satisfy. */
+  projectMilestone?: Maybe<NullableProjectMilestoneFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: Maybe<ContentComparator>;
   /** Comparator for the issues sla status. */
@@ -4275,6 +4279,8 @@ export type NullableIssueFilter = {
   priority?: Maybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: Maybe<NullableProjectFilter>;
+  /** [ALPHA] Filters that the issues project milestone must satisfy. */
+  projectMilestone?: Maybe<NullableProjectMilestoneFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: Maybe<ContentComparator>;
   /** Comparator for the issues sla status. */
@@ -4351,6 +4357,22 @@ export type NullableProjectFilter = {
   state?: Maybe<StringComparator>;
   /** Comparator for the project target date. */
   targetDate?: Maybe<NullableDateComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
+/** [ALPHA] Project milestone filtering options. */
+export type NullableProjectMilestoneFilter = {
+  /** Compound filters, all of which need to be matched by the project milestone. */
+  and?: Maybe<Array<NullableProjectMilestoneFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Filter based on the existence of the relation. */
+  null?: Maybe<Scalars["Boolean"]>;
+  /** Compound filters, one of which need to be matched by the project milestone. */
+  or?: Maybe<Array<NullableProjectMilestoneFilter>>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -4623,6 +4645,8 @@ export type Organization = Node & {
   projectUpdateRemindersHour: Scalars["Float"];
   /** The frequency at which to prompt for project updates. */
   projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency;
+  /** The feature release channel the organization belongs to. */
+  releaseChannel: ReleaseChannel;
   /** Whether the organization is using a roadmap. */
   roadmapEnabled: Scalars["Boolean"];
   /** Whether SAML authentication is enabled for organization. */
@@ -6487,6 +6511,14 @@ export type RelationExistsComparator = {
   neq?: Maybe<Scalars["Boolean"]>;
 };
 
+/** Features release channel */
+export enum ReleaseChannel {
+  Beta = "beta",
+  Internal = "internal",
+  PreRelease = "preRelease",
+  Public = "public",
+}
+
 /** A roadmap for projects. */
 export type Roadmap = Node & {
   __typename?: "Roadmap";
@@ -8071,7 +8103,6 @@ export enum ViewType {
   MyIssuesActivity = "myIssuesActivity",
   MyIssuesCreatedByMe = "myIssuesCreatedByMe",
   MyIssuesSubscribedTo = "myIssuesSubscribedTo",
-  MyIssuesTouchedByMe = "myIssuesTouchedByMe",
   Project = "project",
   Projects = "projects",
   ProjectsAll = "projectsAll",
@@ -8185,6 +8216,51 @@ export type WorkflowCondition = {
   projectFilter?: Maybe<ProjectFilter>;
 };
 
+export type WorkflowCronJobDefinition = Node & {
+  __typename?: "WorkflowCronJobDefinition";
+  /** An array of activities that will be executed as part of the workflow cron job. */
+  activities: Scalars["JSONObject"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The user who created the workflow cron job. */
+  creator: User;
+  /** The description of the workflow cron job. */
+  description?: Maybe<Scalars["String"]>;
+  enabled: Scalars["Boolean"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The name of the workflow cron job. */
+  name: Scalars["String"];
+  /** Cron schedule which is used to execute the workflow cron job. */
+  schedule: Scalars["JSONObject"];
+  /** The sort order of the workflow cron job definition within its siblings. */
+  sortOrder: Scalars["String"];
+  /** The team associated with the workflow cron job. */
+  team: Team;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+export type WorkflowCronJobDefinitionConnection = {
+  __typename?: "WorkflowCronJobDefinitionConnection";
+  edges: Array<WorkflowCronJobDefinitionEdge>;
+  nodes: Array<WorkflowCronJobDefinition>;
+  pageInfo: PageInfo;
+};
+
+export type WorkflowCronJobDefinitionEdge = {
+  __typename?: "WorkflowCronJobDefinitionEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: WorkflowCronJobDefinition;
+};
+
 export type WorkflowDefinition = Node & {
   __typename?: "WorkflowDefinition";
   /** An array of activities that will be executed as part of the workflow. */
@@ -8206,8 +8282,6 @@ export type WorkflowDefinition = Node & {
   id: Scalars["ID"];
   /** The name of the workflow. */
   name: Scalars["String"];
-  /** Cron schedule which is used to execute the workflow. Only applicable for cron based workflows. */
-  schedule: Scalars["JSONObject"];
   /** The sort order of the workflow definition within its siblings. */
   sortOrder: Scalars["String"];
   /** The team associated with the workflow. If not set, the workflow is associated with the entire organization. */
@@ -8361,7 +8435,6 @@ export type WorkflowStateUpdateInput = {
 };
 
 export enum WorkflowTrigger {
-  Cron = "cron",
   EntityCreated = "entityCreated",
   EntityCreatedOrUpdated = "entityCreatedOrUpdated",
   EntityRemoved = "entityRemoved",
@@ -8376,7 +8449,6 @@ export enum WorkflowTriggerType {
 
 export enum WorkflowType {
   Custom = "custom",
-  RecurringIssue = "recurringIssue",
   Sla = "sla",
 }
 
@@ -9635,6 +9707,11 @@ type Node_ViewPreferences_Fragment = { __typename: "ViewPreferences" } & Pick<Vi
 
 type Node_Webhook_Fragment = { __typename: "Webhook" } & Pick<Webhook, "id">;
 
+type Node_WorkflowCronJobDefinition_Fragment = { __typename: "WorkflowCronJobDefinition" } & Pick<
+  WorkflowCronJobDefinition,
+  "id"
+>;
+
 type Node_WorkflowDefinition_Fragment = { __typename: "WorkflowDefinition" } & Pick<WorkflowDefinition, "id">;
 
 type Node_WorkflowState_Fragment = { __typename: "WorkflowState" } & Pick<WorkflowState, "id">;
@@ -9686,6 +9763,7 @@ export type NodeFragment =
   | Node_UserSettings_Fragment
   | Node_ViewPreferences_Fragment
   | Node_Webhook_Fragment
+  | Node_WorkflowCronJobDefinition_Fragment
   | Node_WorkflowDefinition_Fragment
   | Node_WorkflowState_Fragment;
 
@@ -9981,10 +10059,28 @@ export type WebhookPayloadFragment = { __typename: "WebhookPayload" } & Pick<
   "lastSyncId" | "success"
 > & { webhook: { __typename?: "Webhook" } & Pick<Webhook, "id"> };
 
+export type WorkflowCronJobDefinitionFragment = { __typename: "WorkflowCronJobDefinition" } & Pick<
+  WorkflowCronJobDefinition,
+  | "activities"
+  | "schedule"
+  | "description"
+  | "updatedAt"
+  | "name"
+  | "sortOrder"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
+  | "enabled"
+> & { team: { __typename?: "Team" } & Pick<Team, "id">; creator: { __typename?: "User" } & Pick<User, "id"> };
+
+export type WorkflowCronJobDefinitionConnectionFragment = { __typename: "WorkflowCronJobDefinitionConnection" } & {
+  nodes: Array<{ __typename?: "WorkflowCronJobDefinition" } & WorkflowCronJobDefinitionFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
 export type WorkflowDefinitionFragment = { __typename: "WorkflowDefinition" } & Pick<
   WorkflowDefinition,
   | "activities"
-  | "schedule"
   | "conditions"
   | "description"
   | "updatedAt"
@@ -18913,6 +19009,82 @@ export const WebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<WebhookPayloadFragment, unknown>;
+export const WorkflowCronJobDefinitionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "WorkflowCronJobDefinition" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WorkflowCronJobDefinition" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "activities" } },
+          { kind: "Field", name: { kind: "Name", value: "schedule" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "enabled" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<WorkflowCronJobDefinitionFragment, unknown>;
+export const WorkflowCronJobDefinitionConnectionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "WorkflowCronJobDefinitionConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WorkflowCronJobDefinitionConnection" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "WorkflowCronJobDefinition" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...WorkflowCronJobDefinitionFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<WorkflowCronJobDefinitionConnectionFragment, unknown>;
 export const WorkflowDefinitionFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -18925,7 +19097,6 @@ export const WorkflowDefinitionFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "activities" } },
-          { kind: "Field", name: { kind: "Name", value: "schedule" } },
           { kind: "Field", name: { kind: "Name", value: "conditions" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },

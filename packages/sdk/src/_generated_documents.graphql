@@ -3321,12 +3321,53 @@ fragment WebhookPayload on WebhookPayload {
   success
 }
 
+fragment WorkflowCronJobDefinition on WorkflowCronJobDefinition {
+  __typename
+  # An array of activities that will be executed as part of the workflow cron job.
+  activities
+  # Cron schedule which is used to execute the workflow cron job.
+  schedule
+  # The description of the workflow cron job.
+  description
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The name of the workflow cron job.
+  name
+  # The sort order of the workflow cron job definition within its siblings.
+  sortOrder
+  # The team associated with the workflow cron job.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the workflow cron job.
+  creator {
+    id
+  }
+  enabled
+}
+
+fragment WorkflowCronJobDefinitionConnection on WorkflowCronJobDefinitionConnection {
+  __typename
+  nodes {
+    ...WorkflowCronJobDefinition
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment WorkflowDefinition on WorkflowDefinition {
   __typename
   # An array of activities that will be executed as part of the workflow.
   activities
-  # Cron schedule which is used to execute the workflow. Only applicable for cron based workflows.
-  schedule
   # The conditions that need to be match for the workflow to be triggered.
   conditions
   # The description of the workflow.
