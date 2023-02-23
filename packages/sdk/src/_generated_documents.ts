@@ -5367,6 +5367,8 @@ export type ProjectMilestone = Node & {
   name: Scalars["String"];
   /** The project of the milestone. */
   project: Project;
+  /** The order of the milestone in relation to other milestones within a project. */
+  sortOrder: Scalars["Float"];
   /** The planned completion date of the milestone. */
   targetDate?: Maybe<Scalars["TimelessDate"]>;
   /**
@@ -8585,7 +8587,7 @@ export type DocumentFragment = { __typename: "Document" } & Pick<
 
 export type ProjectMilestoneFragment = { __typename: "ProjectMilestone" } & Pick<
   ProjectMilestone,
-  "description" | "updatedAt" | "name" | "targetDate" | "archivedAt" | "createdAt" | "id"
+  "description" | "updatedAt" | "name" | "sortOrder" | "targetDate" | "archivedAt" | "createdAt" | "id"
 > & { project: { __typename?: "Project" } & Pick<Project, "id"> };
 
 type Notification_IssueNotification_Fragment = { __typename: "IssueNotification" } & Pick<
@@ -17485,6 +17487,7 @@ export const ProjectMilestoneFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
           { kind: "Field", name: { kind: "Name", value: "targetDate" } },
           {
             kind: "Field",

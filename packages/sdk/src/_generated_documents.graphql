@@ -162,6 +162,8 @@ fragment ProjectMilestone on ProjectMilestone {
   updatedAt
   # The name of the project milestone.
   name
+  # The order of the milestone in relation to other milestones within a project.
+  sortOrder
   # The planned completion date of the milestone.
   targetDate
   # The project of the milestone.
