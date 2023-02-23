@@ -9280,6 +9280,10 @@ type ProjectMilestone implements Node {
   """
   project: Project!
   """
+  The order of the milestone in relation to other milestones within a project.
+  """
+  sortOrder: Float!
+  """
   The planned completion date of the milestone.
   """
   targetDate: TimelessDate

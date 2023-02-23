@@ -4454,6 +4454,7 @@ export class ProjectMilestone extends Request {
     this.description = data.description ?? undefined;
     this.id = data.id;
     this.name = data.name;
+    this.sortOrder = data.sortOrder;
     this.targetDate = data.targetDate ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._project = data.project;
@@ -4469,6 +4470,8 @@ export class ProjectMilestone extends Request {
   public id: string;
   /** The name of the project milestone. */
   public name: string;
+  /** The order of the milestone in relation to other milestones within a project. */
+  public sortOrder: number;
   /** The planned completion date of the milestone. */
   public targetDate?: L.Scalars["TimelessDate"];
   /**
