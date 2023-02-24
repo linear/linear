@@ -93,7 +93,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ["**/docs/**/*.js"],
+      files: ["**/docs/**/*.js", "**/bin/**/*.js"],
       rules: {
         "no-console": "off",
         "@typescript-eslint/explicit-module-boundary-types": "off",
