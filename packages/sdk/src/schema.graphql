@@ -3,27 +3,6 @@ schema {
   mutation: Mutation
 }
 
-input AdminJobConfiguration {
-  currentJob: String
-  delay: Float
-  enabled: Boolean!
-  param: String
-}
-
-type AdminJobConfigurationPayload {
-  currentJob: String
-  delay: Float!
-  enabled: Boolean!
-  param: String
-}
-
-type AdminJobStatusPayload {
-  availableJobs: [String!]!
-  configuration: AdminJobConfigurationPayload!
-  cursor: String
-  startedAt: DateTime
-}
-
 input AirbyteConfigurationInput {
   """
   Linear export API key.
@@ -3514,6 +3493,10 @@ input IssueCreateInput {
   """
   referenceCommentId: String
   """
+  [Internal] The timestamp at which an issue will be considered in breach of SLA.
+  """
+  slaBreachesAt: DateTime
+  """
   The position of the issue related to other issues.
   """
   sortOrder: Float
@@ -5490,6 +5473,19 @@ type Mutation {
   Imports custom emojis from your Slack workspace.
   """
   integrationSlackImportEmojis(
+    """
+    The Slack OAuth code.
+    """
+    code: String!
+    """
+    The Slack OAuth redirect URI.
+    """
+    redirectUri: String!
+  ): IntegrationPayload!
+  """
+  Integrates the organization with Slack for issue intake.
+  """
+  integrationSlackIntake(
     """
     The Slack OAuth code.
     """
@@ -7763,6 +7759,10 @@ type OauthClient implements Node {
   """
   webhookResourceTypes: [String!]!
   """
+  Webhook secret token for verifying the origin on the recipient side.
+  """
+  webhookSecret: String
+  """
   Webhook URL
   """
   webhookUrl: String
@@ -7875,6 +7875,20 @@ type OauthClientApprovalNotification implements Entity & Node & Notification {
   The user that received the notification.
   """
   user: User!
+}
+
+type OauthClientConnection {
+  edges: [OauthClientEdge!]!
+  nodes: [OauthClient!]!
+  pageInfo: PageInfo!
+}
+
+type OauthClientEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: OauthClient!
 }
 
 input OnboardingCustomerSurvey {
@@ -9319,6 +9333,10 @@ input ProjectMilestoneCreateInput {
   """
   projectId: String!
   """
+  The sort order for the project milestone within a project.
+  """
+  sortOrder: Float
+  """
   The planned target date of the project milestone.
   """
   targetDate: TimelessDate
@@ -9360,6 +9378,10 @@ input ProjectMilestoneUpdateInput {
   Related project for the project milestone.
   """
   projectId: String
+  """
+  The sort order for the project milestone within a project.
+  """
+  sortOrder: Float
   """
   The planned target date of the project milestone.
   """
@@ -14232,7 +14254,7 @@ input WebhookCreateInput {
   """
   resourceTypes: [String!]!
   """
-  An optional secret token used to sign the webhook payload.
+  A secret token used to sign the webhook payload.
   """
   secret: String
   """
@@ -14282,7 +14304,7 @@ input WebhookUpdateInput {
   """
   resourceTypes: [String!]
   """
-  An optional secret token used to sign the Webhook payload.
+  A secret token used to sign the webhook payload.
   """
   secret: String
   """

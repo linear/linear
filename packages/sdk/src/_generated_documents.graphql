@@ -1780,6 +1780,8 @@ fragment OauthClient on OauthClient {
   developerUrl
   # Webhook URL
   webhookUrl
+  # Webhook secret token for verifying the origin on the recipient side.
+  webhookSecret
   # Whether the OAuth application is publicly visible, or only visible to the creating workspace.
   publicEnabled
 }
@@ -2225,24 +2227,6 @@ fragment ZendeskSettings on ZendeskSettings {
   sendNoteOnStatusChange
   # Whether an internal message should be added when someone comments on an issue.
   sendNoteOnComment
-}
-
-fragment AdminJobConfigurationPayload on AdminJobConfigurationPayload {
-  __typename
-  currentJob
-  delay
-  enabled
-  param
-}
-
-fragment AdminJobStatusPayload on AdminJobStatusPayload {
-  __typename
-  availableJobs
-  configuration {
-    ...AdminJobConfigurationPayload
-  }
-  cursor
-  startedAt
 }
 
 fragment ApiKeyConnection on ApiKeyConnection {
@@ -2796,6 +2780,16 @@ fragment NotificationSubscriptionPayload on NotificationSubscriptionPayload {
   }
   # Whether the operation was successful.
   success
+}
+
+fragment OauthClientConnection on OauthClientConnection {
+  __typename
+  nodes {
+    ...OauthClient
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment OrganizationCancelDeletePayload on OrganizationCancelDeletePayload {
@@ -3993,6 +3987,17 @@ mutation integrationSlackImportEmojis(
   $redirectUri: String!
 ) {
   integrationSlackImportEmojis(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Integrates the organization with Slack for issue intake.
+mutation integrationSlackIntake(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationSlackIntake(code: $code, redirectUri: $redirectUri) {
     ...IntegrationPayload
   }
 }

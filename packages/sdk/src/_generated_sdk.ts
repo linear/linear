@@ -163,46 +163,6 @@ function parseJson(value?: any): Record<string, unknown> | undefined {
 }
 
 /**
- * AdminJobConfigurationPayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.AdminJobConfigurationPayloadFragment response data
- */
-export class AdminJobConfigurationPayload extends Request {
-  public constructor(request: LinearRequest, data: L.AdminJobConfigurationPayloadFragment) {
-    super(request);
-    this.currentJob = data.currentJob ?? undefined;
-    this.delay = data.delay;
-    this.enabled = data.enabled;
-    this.param = data.param ?? undefined;
-  }
-
-  public currentJob?: string;
-  public delay: number;
-  public enabled: boolean;
-  public param?: string;
-}
-/**
- * AdminJobStatusPayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.AdminJobStatusPayloadFragment response data
- */
-export class AdminJobStatusPayload extends Request {
-  public constructor(request: LinearRequest, data: L.AdminJobStatusPayloadFragment) {
-    super(request);
-    this.availableJobs = data.availableJobs;
-    this.cursor = data.cursor ?? undefined;
-    this.startedAt = parseDate(data.startedAt) ?? undefined;
-    this.configuration = new AdminJobConfigurationPayload(request, data.configuration);
-  }
-
-  public availableJobs: string[];
-  public cursor?: string;
-  public startedAt?: Date;
-  public configuration: AdminJobConfigurationPayload;
-}
-/**
  * An API key. Grants access to the user's resources.
  *
  * @param request - function to call the graphql client
@@ -3481,6 +3441,7 @@ export class OauthClient extends Request {
     this.redirectUris = data.redirectUris;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.webhookResourceTypes = data.webhookResourceTypes;
+    this.webhookSecret = data.webhookSecret ?? undefined;
     this.webhookUrl = data.webhookUrl ?? undefined;
     this._creator = data.creator;
   }
@@ -3517,6 +3478,8 @@ export class OauthClient extends Request {
   public updatedAt: Date;
   /** The resource types to request when creating new webhooks. */
   public webhookResourceTypes: string[];
+  /** Webhook secret token for verifying the origin on the recipient side. */
+  public webhookSecret?: string;
   /** Webhook URL */
   public webhookUrl?: string;
   /** The user who created the OAuthClient. */
@@ -3634,6 +3597,27 @@ export class OauthClientApprovalNotification extends Request {
   /** The user that received the notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+}
+/**
+ * OauthClientConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this OauthClientConnection model
+ * @param data - OauthClientConnection response data
+ */
+export class OauthClientConnection extends Connection<OauthClient> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<OauthClient> | undefined>,
+    data: L.OauthClientConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new OauthClient(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
   }
 }
 /**
@@ -8728,6 +8712,37 @@ export class IntegrationSlackImportEmojisMutation extends Request {
       redirectUri,
     });
     const data = response.integrationSlackImportEmojis;
+
+    return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationSlackIntake Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationSlackIntakeMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationSlackIntake mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationSlackIntake
+   * @param redirectUri - required redirectUri to pass to integrationSlackIntake
+   * @returns parsed response from IntegrationSlackIntakeMutation
+   */
+  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<L.IntegrationSlackIntakeMutation, L.IntegrationSlackIntakeMutationVariables>(
+      L.IntegrationSlackIntakeDocument,
+      {
+        code,
+        redirectUri,
+      }
+    );
+    const data = response.integrationSlackIntake;
 
     return new IntegrationPayload(this._request, data);
   }
@@ -18098,6 +18113,16 @@ export class LinearSdk extends Request {
    */
   public integrationSlackImportEmojis(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
     return new IntegrationSlackImportEmojisMutation(this._request).fetch(code, redirectUri);
+  }
+  /**
+   * Integrates the organization with Slack for issue intake.
+   *
+   * @param code - required code to pass to integrationSlackIntake
+   * @param redirectUri - required redirectUri to pass to integrationSlackIntake
+   * @returns IntegrationPayload
+   */
+  public integrationSlackIntake(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationSlackIntakeMutation(this._request).fetch(code, redirectUri);
   }
   /**
    * Slack integration for organization level project update notifications.
