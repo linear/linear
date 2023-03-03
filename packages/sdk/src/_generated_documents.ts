@@ -22,29 +22,6 @@ export type Scalars = {
   UUID: any;
 };
 
-export type AdminJobConfiguration = {
-  currentJob?: Maybe<Scalars["String"]>;
-  delay?: Maybe<Scalars["Float"]>;
-  enabled: Scalars["Boolean"];
-  param?: Maybe<Scalars["String"]>;
-};
-
-export type AdminJobConfigurationPayload = {
-  __typename?: "AdminJobConfigurationPayload";
-  currentJob?: Maybe<Scalars["String"]>;
-  delay: Scalars["Float"];
-  enabled: Scalars["Boolean"];
-  param?: Maybe<Scalars["String"]>;
-};
-
-export type AdminJobStatusPayload = {
-  __typename?: "AdminJobStatusPayload";
-  availableJobs: Array<Scalars["String"]>;
-  configuration: AdminJobConfigurationPayload;
-  cursor?: Maybe<Scalars["String"]>;
-  startedAt?: Maybe<Scalars["DateTime"]>;
-};
-
 export type AirbyteConfigurationInput = {
   /** Linear export API key. */
   apiKey: Scalars["String"];
@@ -2085,6 +2062,8 @@ export type IssueCreateInput = {
   projectMilestoneId?: Maybe<Scalars["String"]>;
   /** The comment the issue is referencing. */
   referenceCommentId?: Maybe<Scalars["String"]>;
+  /** [Internal] The timestamp at which an issue will be considered in breach of SLA. */
+  slaBreachesAt?: Maybe<Scalars["DateTime"]>;
   /** The position of the issue related to other issues. */
   sortOrder?: Maybe<Scalars["Float"]>;
   /** The team state of the issue. */
@@ -2982,6 +2961,8 @@ export type Mutation = {
   integrationSlack: IntegrationPayload;
   /** Imports custom emojis from your Slack workspace. */
   integrationSlackImportEmojis: IntegrationPayload;
+  /** Integrates the organization with Slack for issue intake. */
+  integrationSlackIntake: IntegrationPayload;
   /** Slack integration for organization level project update notifications. */
   integrationSlackOrgProjectUpdatesPost: IntegrationPayload;
   /** Integrates your personal notifications with Slack. */
@@ -3475,6 +3456,11 @@ export type MutationIntegrationSlackArgs = {
 };
 
 export type MutationIntegrationSlackImportEmojisArgs = {
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+};
+
+export type MutationIntegrationSlackIntakeArgs = {
   code: Scalars["String"];
   redirectUri: Scalars["String"];
 };
@@ -4528,6 +4514,8 @@ export type OauthClient = Node & {
   updatedAt: Scalars["DateTime"];
   /** The resource types to request when creating new webhooks. */
   webhookResourceTypes: Array<Scalars["String"]>;
+  /** Webhook secret token for verifying the origin on the recipient side. */
+  webhookSecret?: Maybe<Scalars["String"]>;
   /** Webhook URL */
   webhookUrl?: Maybe<Scalars["String"]>;
 };
@@ -4600,6 +4588,20 @@ export type OauthClientApprovalNotification = Entity &
     /** The user that received the notification. */
     user: User;
   };
+
+export type OauthClientConnection = {
+  __typename?: "OauthClientConnection";
+  edges: Array<OauthClientEdge>;
+  nodes: Array<OauthClient>;
+  pageInfo: PageInfo;
+};
+
+export type OauthClientEdge = {
+  __typename?: "OauthClientEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: OauthClient;
+};
 
 export type OnboardingCustomerSurvey = {
   companyRole?: Maybe<Scalars["String"]>;
@@ -5395,6 +5397,8 @@ export type ProjectMilestoneCreateInput = {
   name: Scalars["String"];
   /** Related project for the project milestone. */
   projectId: Scalars["String"];
+  /** The sort order for the project milestone within a project. */
+  sortOrder?: Maybe<Scalars["Float"]>;
   /** The planned target date of the project milestone. */
   targetDate?: Maybe<Scalars["TimelessDate"]>;
 };
@@ -5423,6 +5427,8 @@ export type ProjectMilestoneUpdateInput = {
   name?: Maybe<Scalars["String"]>;
   /** Related project for the project milestone. */
   projectId?: Maybe<Scalars["String"]>;
+  /** The sort order for the project milestone within a project. */
+  sortOrder?: Maybe<Scalars["Float"]>;
   /** The planned target date of the project milestone. */
   targetDate?: Maybe<Scalars["TimelessDate"]>;
 };
@@ -8172,7 +8178,7 @@ export type WebhookCreateInput = {
   label?: Maybe<Scalars["String"]>;
   /** List of resources the webhook should subscribe to. */
   resourceTypes: Array<Scalars["String"]>;
-  /** An optional secret token used to sign the webhook payload. */
+  /** A secret token used to sign the webhook payload. */
   secret?: Maybe<Scalars["String"]>;
   /** The identifier or key of the team associated with the Webhook. */
   teamId?: Maybe<Scalars["String"]>;
@@ -8204,7 +8210,7 @@ export type WebhookUpdateInput = {
   label?: Maybe<Scalars["String"]>;
   /** List of resources the webhook should subscribe to. */
   resourceTypes?: Maybe<Array<Scalars["String"]>>;
-  /** An optional secret token used to sign the Webhook payload. */
+  /** A secret token used to sign the webhook payload. */
   secret?: Maybe<Scalars["String"]>;
   /** The URL that will be called on data changes. */
   url?: Maybe<Scalars["String"]>;
@@ -9195,6 +9201,7 @@ export type OauthClientFragment = { __typename: "OauthClient" } & Pick<
   | "id"
   | "developerUrl"
   | "webhookUrl"
+  | "webhookSecret"
   | "publicEnabled"
 > & { creator: { __typename?: "User" } & Pick<User, "id"> };
 
@@ -9368,16 +9375,6 @@ export type ZendeskSettingsFragment = { __typename: "ZendeskSettings" } & Pick<
   | "sendNoteOnStatusChange"
   | "sendNoteOnComment"
 >;
-
-export type AdminJobConfigurationPayloadFragment = { __typename: "AdminJobConfigurationPayload" } & Pick<
-  AdminJobConfigurationPayload,
-  "currentJob" | "delay" | "enabled" | "param"
->;
-
-export type AdminJobStatusPayloadFragment = { __typename: "AdminJobStatusPayload" } & Pick<
-  AdminJobStatusPayload,
-  "availableJobs" | "cursor" | "startedAt"
-> & { configuration: { __typename?: "AdminJobConfigurationPayload" } & AdminJobConfigurationPayloadFragment };
 
 export type ApiKeyConnectionFragment = { __typename: "ApiKeyConnection" } & {
   nodes: Array<{ __typename?: "ApiKey" } & ApiKeyFragment>;
@@ -9810,6 +9807,11 @@ export type NotificationSubscriptionPayloadFragment = { __typename: "Notificatio
           __typename?: "TeamNotificationSubscription";
         } & NotificationSubscription_TeamNotificationSubscription_Fragment);
   };
+
+export type OauthClientConnectionFragment = { __typename: "OauthClientConnection" } & {
+  nodes: Array<{ __typename?: "OauthClient" } & OauthClientFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
 
 export type OrganizationCancelDeletePayloadFragment = { __typename: "OrganizationCancelDeletePayload" } & Pick<
   OrganizationCancelDeletePayload,
@@ -10588,6 +10590,15 @@ export type IntegrationSlackImportEmojisMutationVariables = Exact<{
 
 export type IntegrationSlackImportEmojisMutation = { __typename?: "Mutation" } & {
   integrationSlackImportEmojis: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationSlackIntakeMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationSlackIntakeMutation = { __typename?: "Mutation" } & {
+  integrationSlackIntake: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
 export type IntegrationSlackOrgProjectUpdatesPostMutationVariables = Exact<{
@@ -13676,45 +13687,6 @@ export const GithubOAuthTokenPayloadFragmentDoc = {
     ...GithubOrgFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<GithubOAuthTokenPayloadFragment, unknown>;
-export const OauthClientFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OauthClient" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthClient" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
-          { kind: "Field", name: { kind: "Name", value: "description" } },
-          { kind: "Field", name: { kind: "Name", value: "redirectUris" } },
-          { kind: "Field", name: { kind: "Name", value: "developer" } },
-          { kind: "Field", name: { kind: "Name", value: "clientId" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          { kind: "Field", name: { kind: "Name", value: "clientSecret" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "webhookResourceTypes" } },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "developerUrl" } },
-          { kind: "Field", name: { kind: "Name", value: "webhookUrl" } },
-          { kind: "Field", name: { kind: "Name", value: "publicEnabled" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<OauthClientFragment, unknown>;
 export const UserAuthorizedApplicationFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -14157,54 +14129,6 @@ export const UserSettingsFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<UserSettingsFragment, unknown>;
-export const AdminJobConfigurationPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AdminJobConfigurationPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AdminJobConfigurationPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "currentJob" } },
-          { kind: "Field", name: { kind: "Name", value: "delay" } },
-          { kind: "Field", name: { kind: "Name", value: "enabled" } },
-          { kind: "Field", name: { kind: "Name", value: "param" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<AdminJobConfigurationPayloadFragment, unknown>;
-export const AdminJobStatusPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AdminJobStatusPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AdminJobStatusPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "availableJobs" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "configuration" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AdminJobConfigurationPayload" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "cursor" } },
-          { kind: "Field", name: { kind: "Name", value: "startedAt" } },
-        ],
-      },
-    },
-    ...AdminJobConfigurationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<AdminJobStatusPayloadFragment, unknown>;
 export const ApiKeyFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -17071,6 +16995,80 @@ export const NotificationSubscriptionPayloadFragmentDoc = {
     ...NotificationSubscriptionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationSubscriptionPayloadFragment, unknown>;
+export const OauthClientFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OauthClient" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthClient" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "imageUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "redirectUris" } },
+          { kind: "Field", name: { kind: "Name", value: "developer" } },
+          { kind: "Field", name: { kind: "Name", value: "clientId" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "clientSecret" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookResourceTypes" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "developerUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookSecret" } },
+          { kind: "Field", name: { kind: "Name", value: "publicEnabled" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<OauthClientFragment, unknown>;
+export const OauthClientConnectionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OauthClientConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthClientConnection" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OauthClient" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...OauthClientFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<OauthClientConnectionFragment, unknown>;
 export const OrganizationCancelDeletePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -21737,6 +21735,54 @@ export const IntegrationSlackImportEmojisDocument = {
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationSlackImportEmojisMutation, IntegrationSlackImportEmojisMutationVariables>;
+export const IntegrationSlackIntakeDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationSlackIntake" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationSlackIntake" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationSlackIntakeMutation, IntegrationSlackIntakeMutationVariables>;
 export const IntegrationSlackOrgProjectUpdatesPostDocument = {
   kind: "Document",
   definitions: [
