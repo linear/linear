@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.7.0
+
+### Minor Changes
+
+- df6d97e: Add --version command argument
+
+### Patch Changes
+
+- 5ab451c: chore(deps): update dependency patch versions
+- Updated dependencies [5ab451c]
+- Updated dependencies [08697ed]
+- Updated dependencies [e9e1c69]
+  - @linear/sdk@2.5.0
+
 ## 1.6.3
 
 ### Patch Changes
