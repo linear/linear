@@ -15,7 +15,7 @@ export class LinearWebhooks {
    * @param signature The signature to verify.
    * @param timestamp The `webhookTimestamp` field from the request parsed body.
    */
-  public verify(rawBody: Buffer, signature: string, timestamp: number): boolean {
+  public verify(rawBody: Buffer, signature: string, timestamp?: number): boolean {
     const verificationBuffer = Buffer.from(crypto.createHmac("sha256", this.secret).update(rawBody).digest("hex"));
     const signatureBuffer = Buffer.from(signature);
 
@@ -27,10 +27,12 @@ export class LinearWebhooks {
       throw new Error("Invalid webhook signature");
     }
 
-    const timeDiff = Math.abs(new Date().getTime() - timestamp);
-    // Throw error if more than one minute delta between provided ts and current time
-    if (timeDiff > 1000 * 60) {
-      throw new Error("Invalid webhook timestamp");
+    if (timestamp) {
+      const timeDiff = Math.abs(new Date().getTime() - timestamp);
+      // Throw error if more than one minute delta between provided ts and current time
+      if (timeDiff > 1000 * 60) {
+        throw new Error("Invalid webhook timestamp");
+      }
     }
 
     return true;
