@@ -1257,6 +1257,8 @@ fragment Organization on Organization {
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The time at which the trial of the plus plan will end.
+  trialEndsAt
   # The unique identifier of the entity.
   id
   # Whether SAML authentication is enabled for organization.

@@ -3646,6 +3646,7 @@ export class Organization extends Request {
     this.roadmapEnabled = data.roadmapEnabled;
     this.samlEnabled = data.samlEnabled;
     this.scimEnabled = data.scimEnabled;
+    this.trialEndsAt = parseDate(data.trialEndsAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.urlKey = data.urlKey;
     this.userCount = data.userCount;
@@ -3686,6 +3687,8 @@ export class Organization extends Request {
   public samlEnabled: boolean;
   /** Whether SCIM provisioning is enabled for organization. */
   public scimEnabled: boolean;
+  /** The time at which the trial of the plus plan will end. */
+  public trialEndsAt?: Date;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't

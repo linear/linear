@@ -4661,6 +4661,8 @@ export type Organization = Node & {
   teams: TeamConnection;
   /** Templates associated with the organization. */
   templates: TemplateConnection;
+  /** The time at which the trial of the plus plan will end. */
+  trialEndsAt?: Maybe<Scalars["DateTime"]>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -6202,7 +6204,7 @@ export type QueryIssueSearchArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
-  query: Scalars["String"];
+  query?: Maybe<Scalars["String"]>;
 };
 
 export type QueryIssueVcsBranchSearchArgs = {
@@ -8987,6 +8989,7 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "deletionRequestedAt"
   | "archivedAt"
   | "createdAt"
+  | "trialEndsAt"
   | "id"
   | "samlEnabled"
   | "scimEnabled"
@@ -14506,6 +14509,7 @@ export const OrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "deletionRequestedAt" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "trialEndsAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "samlEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "scimEnabled" } },

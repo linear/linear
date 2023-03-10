@@ -8109,6 +8109,10 @@ type Organization implements Node {
     orderBy: PaginationOrderBy
   ): TemplateConnection!
   """
+  The time at which the trial of the plus plan will end.
+  """
+  trialEndsAt: DateTime
+  """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -10593,7 +10597,7 @@ type Query {
     """
     [Deprecated] Search string to look for.
     """
-    query: String!
+    query: String
   ): IssueConnection!
   """
   Find issue based on the VCS branch name.

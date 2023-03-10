@@ -29226,6 +29226,18 @@
             "deprecationReason": null
           },
           {
+            "name": "trialEndsAt",
+            "description": "The time at which the trial of the plus plan will end.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "previousUrlKeys",
             "description": "Previously used URL keys for the organization (last 3 are kept and redirected).",
             "args": [],
@@ -38722,13 +38734,9 @@
                 "name": "query",
                 "description": "[Deprecated] Search string to look for.",
                 "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
