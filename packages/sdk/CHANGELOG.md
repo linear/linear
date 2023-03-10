@@ -1,5 +1,19 @@
 # Change Log
 
+## 2.6.0
+
+### Minor Changes
+
+- 1b163bc: feat(schema): [non_breaking] Field 'trialEndsAt' was added to object type 'Organization' (Organization.trialEndsAt)
+
+  feat(schema): [non_breaking] Type for argument 'query' on field 'Query.issueSearch' changed from 'String!' to 'String' (Query.issueSearch.query)
+
+- 3b08e37: Make webhooks timestamp check optional
+
+### Patch Changes
+
+- 658d50f: chore(deps): update dependency patch versions
+
 ## 2.5.0
 
 ### Minor Changes
