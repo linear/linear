@@ -3068,6 +3068,8 @@ export type Mutation = {
   organizationInviteDelete: ArchivePayload;
   /** Updates an organization invite. */
   organizationInviteUpdate: OrganizationInvitePayload;
+  /** Starts a plus trial for the organization. Administrator privileges required. */
+  organizationStartPlusTrial: OrganizationStartPlusTrialPayload;
   /** Updates the user's organization. */
   organizationUpdate: OrganizationPayload;
   /**
@@ -3117,6 +3119,8 @@ export type Mutation = {
   refreshGoogleSheetsData: IntegrationPayload;
   /** Re-send an organization invite. */
   resendOrganizationInvite: ArchivePayload;
+  /** Archives a roadmap. */
+  roadmapArchive: ArchivePayload;
   /** Creates a new roadmap. */
   roadmapCreate: RoadmapPayload;
   /** Deletes a roadmap. */
@@ -3127,6 +3131,8 @@ export type Mutation = {
   roadmapToProjectDelete: ArchivePayload;
   /** Updates a roadmapToProject. */
   roadmapToProjectUpdate: RoadmapToProjectPayload;
+  /** Unarchives a roadmap. */
+  roadmapUnarchive: ArchivePayload;
   /** Updates a roadmap. */
   roadmapUpdate: RoadmapPayload;
   /** Authenticates a user account via email and authentication token for SAML. */
@@ -3811,6 +3817,10 @@ export type MutationResendOrganizationInviteArgs = {
   id: Scalars["String"];
 };
 
+export type MutationRoadmapArchiveArgs = {
+  id: Scalars["String"];
+};
+
 export type MutationRoadmapCreateArgs = {
   input: RoadmapCreateInput;
 };
@@ -3830,6 +3840,10 @@ export type MutationRoadmapToProjectDeleteArgs = {
 export type MutationRoadmapToProjectUpdateArgs = {
   id: Scalars["String"];
   input: RoadmapToProjectUpdateInput;
+};
+
+export type MutationRoadmapUnarchiveArgs = {
+  id: Scalars["String"];
 };
 
 export type MutationRoadmapUpdateArgs = {
@@ -4935,6 +4949,12 @@ export type OrganizationPayload = {
   success: Scalars["Boolean"];
 };
 
+export type OrganizationStartPlusTrialPayload = {
+  __typename?: "OrganizationStartPlusTrialPayload";
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
 export type PageInfo = {
   __typename?: "PageInfo";
   /** Cursor representing the last result in the paginated results. */
@@ -5076,7 +5096,7 @@ export type Project = Node & {
   slackNewIssue: Scalars["Boolean"];
   /** The project's unique URL slug. */
   slugId: Scalars["String"];
-  /** The sort order for the project within the organizion. */
+  /** The sort order for the project within the organization. */
   sortOrder: Scalars["Float"];
   /** [Internal] The estimated start date of the project. */
   startDate?: Maybe<Scalars["TimelessDate"]>;
@@ -6552,6 +6572,8 @@ export type Roadmap = Node & {
   projects: ProjectConnection;
   /** The roadmap's unique URL slug. */
   slugId: Scalars["String"];
+  /** The sort order of the roadmap within the organization. */
+  sortOrder: Scalars["Float"];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -6613,6 +6635,8 @@ export type RoadmapCreateInput = {
   name: Scalars["String"];
   /** The owner of the roadmap */
   ownerId?: Maybe<Scalars["String"]>;
+  /** The sort order of the roadmap within the organization. */
+  sortOrder?: Maybe<Scalars["Float"]>;
 };
 
 export type RoadmapEdge = {
@@ -6722,6 +6746,8 @@ export type RoadmapUpdateInput = {
   name?: Maybe<Scalars["String"]>;
   /** The owner of the roadmap */
   ownerId?: Maybe<Scalars["String"]>;
+  /** The sort order of the roadmap within the organization. */
+  sortOrder?: Maybe<Scalars["Float"]>;
 };
 
 export type SamlConfiguration = {
@@ -6779,6 +6805,7 @@ export type SentrySettingsInput = {
 export enum SlaStatus {
   Breached = "Breached",
   Completed = "Completed",
+  Failed = "Failed",
   HighRisk = "HighRisk",
   LowRisk = "LowRisk",
   MediumRisk = "MediumRisk",
@@ -8122,6 +8149,7 @@ export enum ViewType {
   RoadmapAll = "roadmapAll",
   RoadmapBacklog = "roadmapBacklog",
   RoadmapClosed = "roadmapClosed",
+  Roadmaps = "roadmaps",
   Search = "search",
   Teams = "teams",
   Triage = "triage",
@@ -8759,7 +8787,7 @@ export type IssueRelationFragment = { __typename: "IssueRelation" } & Pick<
 
 export type RoadmapFragment = { __typename: "Roadmap" } & Pick<
   Roadmap,
-  "description" | "updatedAt" | "name" | "slugId" | "archivedAt" | "createdAt" | "id"
+  "description" | "updatedAt" | "name" | "slugId" | "sortOrder" | "archivedAt" | "createdAt" | "id"
 > & { creator: { __typename?: "User" } & Pick<User, "id">; owner: { __typename?: "User" } & Pick<User, "id"> };
 
 export type CycleFragment = { __typename: "Cycle" } & Pick<
@@ -9856,6 +9884,11 @@ export type OrganizationInvitePayloadFragment = { __typename: "OrganizationInvit
 export type OrganizationPayloadFragment = { __typename: "OrganizationPayload" } & Pick<
   OrganizationPayload,
   "lastSyncId" | "success"
+>;
+
+export type OrganizationStartPlusTrialPayloadFragment = { __typename: "OrganizationStartPlusTrialPayload" } & Pick<
+  OrganizationStartPlusTrialPayload,
+  "success"
 >;
 
 export type PageInfoFragment = { __typename: "PageInfo" } & Pick<
@@ -11030,6 +11063,14 @@ export type UpdateOrganizationInviteMutation = { __typename?: "Mutation" } & {
   organizationInviteUpdate: { __typename?: "OrganizationInvitePayload" } & OrganizationInvitePayloadFragment;
 };
 
+export type OrganizationStartPlusTrialMutationVariables = Exact<{ [key: string]: never }>;
+
+export type OrganizationStartPlusTrialMutation = { __typename?: "Mutation" } & {
+  organizationStartPlusTrial: {
+    __typename?: "OrganizationStartPlusTrialPayload";
+  } & OrganizationStartPlusTrialPayloadFragment;
+};
+
 export type UpdateOrganizationMutationVariables = Exact<{
   input: UpdateOrganizationInput;
 }>;
@@ -11222,6 +11263,14 @@ export type ResendOrganizationInviteMutation = { __typename?: "Mutation" } & {
   resendOrganizationInvite: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
 };
 
+export type ArchiveRoadmapMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ArchiveRoadmapMutation = { __typename?: "Mutation" } & {
+  roadmapArchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
 export type CreateRoadmapMutationVariables = Exact<{
   input: RoadmapCreateInput;
 }>;
@@ -11261,6 +11310,14 @@ export type UpdateRoadmapToProjectMutationVariables = Exact<{
 
 export type UpdateRoadmapToProjectMutation = { __typename?: "Mutation" } & {
   roadmapToProjectUpdate: { __typename?: "RoadmapToProjectPayload" } & RoadmapToProjectPayloadFragment;
+};
+
+export type UnarchiveRoadmapMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UnarchiveRoadmapMutation = { __typename?: "Mutation" } & {
+  roadmapUnarchive: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
 };
 
 export type UpdateRoadmapMutationVariables = Exact<{
@@ -17267,6 +17324,23 @@ export const OrganizationPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<OrganizationPayloadFragment, unknown>;
+export const OrganizationStartPlusTrialPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OrganizationStartPlusTrialPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationStartPlusTrialPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<OrganizationStartPlusTrialPayloadFragment, unknown>;
 export const ProjectFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -18066,6 +18140,7 @@ export const RoadmapFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "slugId" } },
+          { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
@@ -24117,6 +24192,32 @@ export const UpdateOrganizationInviteDocument = {
     ...OrganizationInvitePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateOrganizationInviteMutation, UpdateOrganizationInviteMutationVariables>;
+export const OrganizationStartPlusTrialDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "organizationStartPlusTrial" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "organizationStartPlusTrial" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationStartPlusTrialPayload" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...OrganizationStartPlusTrialPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<OrganizationStartPlusTrialMutation, OrganizationStartPlusTrialMutationVariables>;
 export const UpdateOrganizationDocument = {
   kind: "Document",
   definitions: [
@@ -25071,6 +25172,44 @@ export const ResendOrganizationInviteDocument = {
     ...ArchivePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ResendOrganizationInviteMutation, ResendOrganizationInviteMutationVariables>;
+export const ArchiveRoadmapDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "archiveRoadmap" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "roadmapArchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ArchiveRoadmapMutation, ArchiveRoadmapMutationVariables>;
 export const CreateRoadmapDocument = {
   kind: "Document",
   definitions: [
@@ -25280,6 +25419,44 @@ export const UpdateRoadmapToProjectDocument = {
     ...RoadmapToProjectPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateRoadmapToProjectMutation, UpdateRoadmapToProjectMutationVariables>;
+export const UnarchiveRoadmapDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "unarchiveRoadmap" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "roadmapUnarchive" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ArchivePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ArchivePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UnarchiveRoadmapMutation, UnarchiveRoadmapMutationVariables>;
 export const UpdateRoadmapDocument = {
   kind: "Document",
   definitions: [

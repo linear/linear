@@ -4006,6 +4006,21 @@ export class OrganizationPayload extends Request {
   }
 }
 /**
+ * OrganizationStartPlusTrialPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OrganizationStartPlusTrialPayloadFragment response data
+ */
+export class OrganizationStartPlusTrialPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OrganizationStartPlusTrialPayloadFragment) {
+    super(request);
+    this.success = data.success;
+  }
+
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
  * PageInfo model
  *
  * @param request - function to call the graphql client
@@ -4219,7 +4234,7 @@ export class Project extends Request {
   public slackNewIssue: boolean;
   /** The project's unique URL slug. */
   public slugId: string;
-  /** The sort order for the project within the organizion. */
+  /** The sort order for the project within the organization. */
   public sortOrder: number;
   /** The time at which the project was moved into started state. */
   public startedAt?: Date;
@@ -5161,6 +5176,7 @@ export class Roadmap extends Request {
     this.id = data.id;
     this.name = data.name;
     this.slugId = data.slugId;
+    this.sortOrder = data.sortOrder;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator;
     this._owner = data.owner;
@@ -5178,6 +5194,8 @@ export class Roadmap extends Request {
   public name: string;
   /** The roadmap's unique URL slug. */
   public slugId: string;
+  /** The sort order of the roadmap within the organization. */
+  public sortOrder: number;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -5200,6 +5218,10 @@ export class Roadmap extends Request {
   public projects(variables?: Omit<L.Roadmap_ProjectsQueryVariables, "id">) {
     return new Roadmap_ProjectsQuery(this._request, this.id, variables).fetch(variables);
   }
+  /** Archives a roadmap. */
+  public archive() {
+    return new ArchiveRoadmapMutation(this._request).fetch(this.id);
+  }
   /** Creates a new roadmap. */
   public create(input: L.RoadmapCreateInput) {
     return new CreateRoadmapMutation(this._request).fetch(input);
@@ -5207,6 +5229,10 @@ export class Roadmap extends Request {
   /** Deletes a roadmap. */
   public delete() {
     return new DeleteRoadmapMutation(this._request).fetch(this.id);
+  }
+  /** Unarchives a roadmap. */
+  public unarchive() {
+    return new UnarchiveRoadmapMutation(this._request).fetch(this.id);
   }
   /** Updates a roadmap. */
   public update(input: L.RoadmapUpdateInput) {
@@ -10178,6 +10204,32 @@ export class UpdateOrganizationInviteMutation extends Request {
 }
 
 /**
+ * A fetchable OrganizationStartPlusTrial Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class OrganizationStartPlusTrialMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the OrganizationStartPlusTrial mutation and return a OrganizationStartPlusTrialPayload
+   *
+   * @returns parsed response from OrganizationStartPlusTrialMutation
+   */
+  public async fetch(): LinearFetch<OrganizationStartPlusTrialPayload> {
+    const response = await this._request<
+      L.OrganizationStartPlusTrialMutation,
+      L.OrganizationStartPlusTrialMutationVariables
+    >(L.OrganizationStartPlusTrialDocument, {});
+    const data = response.organizationStartPlusTrial;
+
+    return new OrganizationStartPlusTrialPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UpdateOrganization Mutation
  *
  * @param request - function to call the graphql client
@@ -10853,6 +10905,35 @@ export class ResendOrganizationInviteMutation extends Request {
 }
 
 /**
+ * A fetchable ArchiveRoadmap Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ArchiveRoadmapMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ArchiveRoadmap mutation and return a ArchivePayload
+   *
+   * @param id - required id to pass to archiveRoadmap
+   * @returns parsed response from ArchiveRoadmapMutation
+   */
+  public async fetch(id: string): LinearFetch<ArchivePayload> {
+    const response = await this._request<L.ArchiveRoadmapMutation, L.ArchiveRoadmapMutationVariables>(
+      L.ArchiveRoadmapDocument,
+      {
+        id,
+      }
+    );
+    const data = response.roadmapArchive;
+
+    return new ArchivePayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable CreateRoadmap Mutation
  *
  * @param request - function to call the graphql client
@@ -10996,6 +11077,35 @@ export class UpdateRoadmapToProjectMutation extends Request {
     const data = response.roadmapToProjectUpdate;
 
     return new RoadmapToProjectPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UnarchiveRoadmap Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UnarchiveRoadmapMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UnarchiveRoadmap mutation and return a ArchivePayload
+   *
+   * @param id - required id to pass to unarchiveRoadmap
+   * @returns parsed response from UnarchiveRoadmapMutation
+   */
+  public async fetch(id: string): LinearFetch<ArchivePayload> {
+    const response = await this._request<L.UnarchiveRoadmapMutation, L.UnarchiveRoadmapMutationVariables>(
+      L.UnarchiveRoadmapDocument,
+      {
+        id,
+      }
+    );
+    const data = response.roadmapUnarchive;
+
+    return new ArchivePayload(this._request, data);
   }
 }
 
@@ -18641,6 +18751,14 @@ export class LinearSdk extends Request {
     return new UpdateOrganizationInviteMutation(this._request).fetch(id, input);
   }
   /**
+   * Starts a plus trial for the organization. Administrator privileges required.
+   *
+   * @returns OrganizationStartPlusTrialPayload
+   */
+  public get organizationStartPlusTrial(): LinearFetch<OrganizationStartPlusTrialPayload> {
+    return new OrganizationStartPlusTrialMutation(this._request).fetch();
+  }
+  /**
    * Updates the user's organization.
    *
    * @param input - required input to pass to updateOrganization
@@ -18857,6 +18975,15 @@ export class LinearSdk extends Request {
     return new ResendOrganizationInviteMutation(this._request).fetch(id);
   }
   /**
+   * Archives a roadmap.
+   *
+   * @param id - required id to pass to archiveRoadmap
+   * @returns ArchivePayload
+   */
+  public archiveRoadmap(id: string): LinearFetch<ArchivePayload> {
+    return new ArchiveRoadmapMutation(this._request).fetch(id);
+  }
+  /**
    * Creates a new roadmap.
    *
    * @param input - required input to pass to createRoadmap
@@ -18904,6 +19031,15 @@ export class LinearSdk extends Request {
     input: L.RoadmapToProjectUpdateInput
   ): LinearFetch<RoadmapToProjectPayload> {
     return new UpdateRoadmapToProjectMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Unarchives a roadmap.
+   *
+   * @param id - required id to pass to unarchiveRoadmap
+   * @returns ArchivePayload
+   */
+  public unarchiveRoadmap(id: string): LinearFetch<ArchivePayload> {
+    return new UnarchiveRoadmapMutation(this._request).fetch(id);
   }
   /**
    * Updates a roadmap.
