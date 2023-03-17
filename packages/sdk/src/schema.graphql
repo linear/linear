@@ -6172,6 +6172,10 @@ type Mutation {
     input: OrganizationInviteUpdateInput!
   ): OrganizationInvitePayload!
   """
+  Starts a plus trial for the organization. Administrator privileges required.
+  """
+  organizationStartPlusTrial: OrganizationStartPlusTrialPayload!
+  """
   Updates the user's organization.
   """
   organizationUpdate(
@@ -6395,6 +6399,15 @@ type Mutation {
     id: String!
   ): ArchivePayload!
   """
+  Archives a roadmap.
+  """
+  roadmapArchive(
+    """
+    The identifier of the roadmap to archive.
+    """
+    id: String!
+  ): ArchivePayload!
+  """
   Creates a new roadmap.
   """
   roadmapCreate(
@@ -6443,6 +6456,15 @@ type Mutation {
     """
     input: RoadmapToProjectUpdateInput!
   ): RoadmapToProjectPayload!
+  """
+  Unarchives a roadmap.
+  """
+  roadmapUnarchive(
+    """
+    The identifier of the roadmap to unarchive.
+    """
+    id: String!
+  ): ArchivePayload!
   """
   Updates a roadmap.
   """
@@ -8479,6 +8501,13 @@ type OrganizationPayload {
   success: Boolean!
 }
 
+type OrganizationStartPlusTrialPayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 type PageInfo {
   """
   Cursor representing the last result in the paginated results.
@@ -8893,7 +8922,7 @@ type Project implements Node {
   """
   slugId: String!
   """
-  The sort order for the project within the organizion.
+  The sort order for the project within the organization.
   """
   sortOrder: Float!
   """
@@ -11435,6 +11464,10 @@ type Roadmap implements Node {
   """
   slugId: String!
   """
+  The sort order of the roadmap within the organization.
+  """
+  sortOrder: Float!
+  """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -11515,6 +11548,10 @@ input RoadmapCreateInput {
   The owner of the roadmap
   """
   ownerId: String
+  """
+  The sort order of the roadmap within the organization.
+  """
+  sortOrder: Float
 }
 
 type RoadmapEdge {
@@ -11682,6 +11719,10 @@ input RoadmapUpdateInput {
   The owner of the roadmap
   """
   ownerId: String
+  """
+  The sort order of the roadmap within the organization.
+  """
+  sortOrder: Float
 }
 
 type SamlConfiguration {
@@ -11772,6 +11813,7 @@ input SentrySettingsInput {
 enum SlaStatus {
   Breached
   Completed
+  Failed
   HighRisk
   LowRisk
   MediumRisk
@@ -14167,6 +14209,7 @@ enum ViewType {
   roadmapAll
   roadmapBacklog
   roadmapClosed
+  roadmaps
   search
   teams
   triage

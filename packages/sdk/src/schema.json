@@ -22551,6 +22551,22 @@
             "deprecationReason": null
           },
           {
+            "name": "organizationStartPlusTrial",
+            "description": "Starts a plus trial for the organization. Administrator privileges required.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "OrganizationStartPlusTrialPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "projectLinkCreate",
             "description": "Creates a new project link.",
             "args": [
@@ -23387,6 +23403,72 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "RoadmapPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "roadmapArchive",
+            "description": "Archives a roadmap.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the roadmap to archive.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ArchivePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "roadmapUnarchive",
+            "description": "Unarchives a roadmap.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the roadmap to unarchive.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ArchivePayload",
                 "ofType": null
               }
             },
@@ -31010,6 +31092,33 @@
       },
       {
         "kind": "OBJECT",
+        "name": "OrganizationStartPlusTrialPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "PageInfo",
         "description": null,
         "fields": [
@@ -31671,7 +31780,7 @@
           },
           {
             "name": "sortOrder",
-            "description": "The sort order for the project within the organizion.",
+            "description": "The sort order for the project within the organization.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -41724,6 +41833,22 @@
             "deprecationReason": null
           },
           {
+            "name": "sortOrder",
+            "description": "The sort order of the roadmap within the organization.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "projects",
             "description": "Projects associated with the roadmap.",
             "args": [
@@ -42122,6 +42247,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sortOrder",
+            "description": "The sort order of the roadmap within the organization.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
               "ofType": null
             },
             "defaultValue": null,
@@ -42791,6 +42928,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "sortOrder",
+            "description": "The sort order of the roadmap within the organization.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -43086,6 +43235,12 @@
           },
           {
             "name": "Completed",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "Failed",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -51453,6 +51608,12 @@
           },
           {
             "name": "roadmap",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "roadmaps",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

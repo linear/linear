@@ -359,7 +359,7 @@ fragment Project on Project {
   name
   # The project's unique URL slug.
   slugId
-  # The sort order for the project within the organizion.
+  # The sort order for the project within the organization.
   sortOrder
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
@@ -601,6 +601,8 @@ fragment Roadmap on Roadmap {
   name
   # The roadmap's unique URL slug.
   slugId
+  # The sort order of the roadmap within the organization.
+  sortOrder
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -2864,6 +2866,12 @@ fragment OrganizationPayload on OrganizationPayload {
   success
 }
 
+fragment OrganizationStartPlusTrialPayload on OrganizationStartPlusTrialPayload {
+  __typename
+  # Whether the operation was successful.
+  success
+}
+
 fragment PageInfo on PageInfo {
   __typename
   # Cursor representing the first result in the paginated results.
@@ -4561,6 +4569,12 @@ mutation updateOrganizationInvite(
     ...OrganizationInvitePayload
   }
 }
+# Starts a plus trial for the organization. Administrator privileges required.
+mutation organizationStartPlusTrial {
+  organizationStartPlusTrial {
+    ...OrganizationStartPlusTrialPayload
+  }
+}
 # Updates the user's organization.
 mutation updateOrganization(
   # A partial organization object to update the organization with.
@@ -4776,6 +4790,15 @@ mutation resendOrganizationInvite(
     ...ArchivePayload
   }
 }
+# Archives a roadmap.
+mutation archiveRoadmap(
+  # The identifier of the roadmap to archive.
+  $id: String!
+) {
+  roadmapArchive(id: $id) {
+    ...ArchivePayload
+  }
+}
 # Creates a new roadmap.
 mutation createRoadmap(
   # The properties of the roadmap to create.
@@ -4821,6 +4844,15 @@ mutation updateRoadmapToProject(
 ) {
   roadmapToProjectUpdate(id: $id, input: $input) {
     ...RoadmapToProjectPayload
+  }
+}
+# Unarchives a roadmap.
+mutation unarchiveRoadmap(
+  # The identifier of the roadmap to unarchive.
+  $id: String!
+) {
+  roadmapUnarchive(id: $id) {
+    ...ArchivePayload
   }
 }
 # Updates a roadmap.
