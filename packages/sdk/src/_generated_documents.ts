@@ -2016,6 +2016,8 @@ export type IssueCollectionFilter = {
   team?: Maybe<TeamFilter>;
   /** Comparator for the issues title. */
   title?: Maybe<StringComparator>;
+  /** Comparator for the issues triaged at date. */
+  triagedAt?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -2210,6 +2212,8 @@ export type IssueFilter = {
   team?: Maybe<TeamFilter>;
   /** Comparator for the issues title. */
   title?: Maybe<StringComparator>;
+  /** Comparator for the issues triaged at date. */
+  triagedAt?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -4299,6 +4303,8 @@ export type NullableIssueFilter = {
   team?: Maybe<TeamFilter>;
   /** Comparator for the issues title. */
   title?: Maybe<StringComparator>;
+  /** Comparator for the issues triaged at date. */
+  triagedAt?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };

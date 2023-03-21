@@ -3412,6 +3412,10 @@ input IssueCollectionFilter {
   """
   title: StringComparator
   """
+  Comparator for the issues triaged at date.
+  """
+  triagedAt: NullableDateComparator
+  """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
@@ -3770,6 +3774,10 @@ input IssueFilter {
   Comparator for the issues title.
   """
   title: StringComparator
+  """
+  Comparator for the issues triaged at date.
+  """
+  triagedAt: NullableDateComparator
   """
   Comparator for the updated at date.
   """
@@ -7352,6 +7360,10 @@ input NullableIssueFilter {
   Comparator for the issues title.
   """
   title: StringComparator
+  """
+  Comparator for the issues triaged at date.
+  """
+  triagedAt: NullableDateComparator
   """
   Comparator for the updated at date.
   """

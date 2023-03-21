@@ -12189,6 +12189,18 @@
             "deprecationReason": null
           },
           {
+            "name": "triagedAt",
+            "description": "Comparator for the issues triaged at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "completedAt",
             "description": "Comparator for the issues completed at date.",
             "type": {
@@ -13436,6 +13448,18 @@
           {
             "name": "startedAt",
             "description": "Comparator for the issues started at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "triagedAt",
+            "description": "Comparator for the issues triaged at date.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableDateComparator",
@@ -26664,6 +26688,18 @@
           {
             "name": "startedAt",
             "description": "Comparator for the issues started at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "triagedAt",
+            "description": "Comparator for the issues triaged at date.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableDateComparator",
