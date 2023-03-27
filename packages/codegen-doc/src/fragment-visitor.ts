@@ -58,7 +58,7 @@ export class FragmentVisitor {
       const node = _node as unknown as NamedFields<ObjectTypeDefinitionNode>;
 
       /** Process non empty object definitions */
-      if (isValidObject(this._context, node)) {
+      if (isValidObject(this._context, node, this._fragments)) {
         /** Record fragment on context */
         this._fragments = [...this._fragments, node];
 

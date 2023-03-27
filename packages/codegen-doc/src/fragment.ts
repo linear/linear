@@ -4,9 +4,9 @@ import {
   ObjectTypeDefinitionNode,
   OperationTypeDefinitionNode,
 } from "graphql";
-import { isEdge, isOperationRoot } from "./object";
+import { getObjectName, isConnection, isEdge, isOperationRoot } from "./object";
 import { printTypescriptType } from "./print";
-import { Named, NamedFields, PluginContext } from "./types";
+import { Fragment, Named, NamedFields, PluginContext } from "./types";
 
 /**
  * Get the fragment object type matching the name arg
@@ -25,8 +25,24 @@ export function findFragment(
 /**
  * Check whether this object has valid content and is not a connection, edge, root or has a skip comment.
  */
-export function isValidObject(context: PluginContext, fragment: NamedFields<ObjectTypeDefinitionNode>): boolean {
+export function isValidObject(
+  context: PluginContext,
+  fragment: NamedFields<ObjectTypeDefinitionNode>,
+  previousFragments: Fragment[]
+): boolean {
   const hasFields = (fragment.fields ?? []).filter(Boolean).length;
   const skipComment = context.config.skipComments?.some(comment => fragment.description?.value.includes(comment));
-  return Boolean(hasFields && !isEdge(fragment) && !isOperationRoot(context, fragment) && !skipComment);
+  const skip = Boolean(hasFields && !isEdge(fragment) && !isOperationRoot(context, fragment) && !skipComment);
+
+  const connection = isConnection(fragment);
+  if (connection) {
+    // Check we have accepted a fragment for the type of this connection
+    const rootTypeName = getObjectName(fragment).replace("Connection", "");
+    const hasSkippedRootType = !previousFragments.some(f => f.name === rootTypeName);
+    if (hasSkippedRootType) {
+      return false;
+    }
+  }
+
+  return skip;
 }

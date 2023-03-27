@@ -27,6 +27,15 @@ export function isConnectionModel(model?: SdkModel): boolean {
     : false;
 }
 
+/** Determines whether this connection model is valid by ensuring
+ * the entity it is referring to has been considered valid as well.
+ * @param model The model that is being checked
+ */
+export function isValidConnectionModel(context: SdkPluginContext, sdkModel: SdkModel): boolean {
+  const rootType = sdkModel?.name.replace("Connection", "");
+  return context.models?.some(model => model.name === rootType);
+}
+
 /**
  * Print an abstract class for identifying connection models
  */

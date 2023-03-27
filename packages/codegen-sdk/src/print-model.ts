@@ -14,7 +14,7 @@ import {
 } from "@linear/codegen-doc";
 import { Sdk } from "./constants";
 import { findMutations, getMutationTypeFromPrefixedName } from "./mutation";
-import { isConnectionModel, printConnectionModel } from "./print-connection";
+import { isConnectionModel, isValidConnectionModel, printConnectionModel } from "./print-connection";
 import { getRequestArg } from "./print-request";
 import { printModelScalar } from "./print-scalar";
 import { SdkModel, SdkModelField, SdkPluginContext } from "./types";
@@ -44,7 +44,11 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
 
   /** Handle connection models separately */
   if (isConnectionModel(model)) {
-    return printConnectionModel(context, model);
+    if (isValidConnectionModel(context, model)) {
+      return printConnectionModel(context, model);
+    } else {
+      return "";
+    }
   }
 
   const args = getArgList([
