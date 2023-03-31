@@ -9,7 +9,9 @@ import { SdkOperation, SdkPluginContext } from "./types";
 export function printSdk(context: SdkPluginContext): string {
   const rootOperations = context.sdkDefinitions[""];
 
-  const operations = printLines(rootOperations.operations.map(printSdkOperation));
+  const operations = printLines(
+    rootOperations.operations.filter(operation => operation.print.model !== Sdk.UNKNOWN_MODEL).map(printSdkOperation)
+  );
 
   const args = getArgList([getRequestArg()]);
 

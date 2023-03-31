@@ -19,7 +19,12 @@ import { SdkOperation, SdkPluginContext } from "./types";
  */
 export function printOperations(context: SdkPluginContext): string {
   const returnTypes = Object.values(context.sdkDefinitions).reduce<string[]>((acc, definition) => {
-    return [...acc, ...definition.operations.map(operation => printOperation(context, operation))];
+    return [
+      ...acc,
+      ...definition.operations
+        .filter(operation => operation.print.model !== Sdk.UNKNOWN_MODEL)
+        .map(operation => printOperation(context, operation)),
+    ];
   }, []);
 
   return printLines(returnTypes);

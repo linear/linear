@@ -26,6 +26,7 @@ export const Sdk = {
   RESPONSE_TYPE: "Response",
   SDK_CLASS: "LinearSdk",
   UNDEFINED: "undefined",
+  UNKNOWN_MODEL: "UnknownModel",
   VARIABLE_NAME: "variables",
   VARIABLE_TYPE: "Variables",
 };
