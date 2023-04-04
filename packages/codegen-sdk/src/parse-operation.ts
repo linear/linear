@@ -109,7 +109,7 @@ export function parseOperations(
 
     /** Find a matching model */
     const model = models.find(b => b.name === fragment?.name.value);
-    const modelName = model?.name ?? "UNKNOWN_MODEL";
+    const modelName = model?.name ?? Sdk.UNKNOWN_MODEL;
 
     /** Find a parent operation */
     const parentSdkKey = sdkPath.slice(0, -1).join("_");

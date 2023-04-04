@@ -34,7 +34,7 @@ export function findInterface(
  * Get the string value of the object name
  */
 export function getObjectName(
-  object: ObjectTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode> | string
+  object: ObjectTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode> | InterfaceTypeDefinitionNode | string
 ): string {
   return typeof object === "string" ? object : typeof object.name === "string" ? object.name : object.name.value;
 }
@@ -43,7 +43,7 @@ export function getObjectName(
  * Is the object a connection type
  */
 export function isConnection(
-  object?: ObjectTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode> | string
+  object?: ObjectTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode> | InterfaceTypeDefinitionNode | string
 ): boolean {
   return object ? getObjectName(object).endsWith("Connection") : false;
 }
