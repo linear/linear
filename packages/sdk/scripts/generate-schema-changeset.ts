@@ -13,9 +13,16 @@ const levelOrder = {
   [CriticalityLevel.NonBreaking]: 0,
 };
 
+const criticalityToSemver = {
+  [CriticalityLevel.Breaking]: "major",
+  [CriticalityLevel.Dangerous]: "minor",
+  [CriticalityLevel.NonBreaking]: "patch",
+};
+
 const filename = path.resolve(`../../.changeset/_generated_schema_${Math.ceil(Math.random() * 100000000)}.md`);
 
-const changeset = printLines(["---", '"@linear/sdk": minor', "---"]);
+const changeset = (criticality: CriticalityLevel) =>
+  printLines(["---", `"@linear/sdk": ${criticalityToSemver[criticality]}`, "---"]);
 
 /**
  * Generate a changeset file by diffing the current schema with the master branch
@@ -44,7 +51,7 @@ async function generateSchemaChangeset() {
     await promisify(writeFile)(
       filename,
       printLines([
-        changeset,
+        changeset(changes[0].criticality.level),
         "\n",
         changes
           .map(
