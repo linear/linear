@@ -713,7 +713,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "JSONObject",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -2351,6 +2351,18 @@
             "deprecationReason": null
           },
           {
+            "name": "externalUser",
+            "description": "[ALPHA] The external user who wrote the comment.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ExternalUser",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "editedAt",
             "description": "The time user edited the comment.",
             "args": [],
@@ -3713,6 +3725,18 @@
             "deprecationReason": null
           },
           {
+            "name": "projectFilterData",
+            "description": "[ALPHA] The filter applied to projects in the custom view.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "shared",
             "description": "Whether the custom view is shared with everyone in the organization.",
             "args": [],
@@ -3922,6 +3946,18 @@
             "deprecationReason": null
           },
           {
+            "name": "projectFilterData",
+            "description": "[ALPHA] The project filter applied to issues in the custom view.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "shared",
             "description": "Whether the custom view is shared with everyone in the organization.",
             "type": {
@@ -4041,6 +4077,53 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "CustomViewSuggestionPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "suggestedName",
+            "description": "The suggested view name.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestedDescription",
+            "description": "The suggested view description.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestedIcon",
+            "description": "The suggested view icon.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "CustomViewUpdateInput",
         "description": null,
@@ -4121,6 +4204,18 @@
           {
             "name": "filterData",
             "description": "The filter applied to issues in the custom view.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectFilterData",
+            "description": "[ALPHA] The project filter applied to issues in the custom view.",
             "type": {
               "kind": "SCALAR",
               "name": "JSONObject",
@@ -7044,6 +7139,289 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ExternalUser",
+        "description": "[ALPHA] An external authenticated (e.g., through Slack) user which doesn't have a Linear account, but can create and update entities in Linear from the external system that authenticated them.",
+        "fields": [
+          {
+            "name": "id",
+            "description": "The unique identifier of the entity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those\n    for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't\n    been updated after creation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "archivedAt",
+            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The external user's full name.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "displayName",
+            "description": "The external user's display name. Unique within each organization. Can match the display name of an actual user.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "email",
+            "description": "The external user's email address.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "avatarUrl",
+            "description": "An URL to the external user's avatar image.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "organization",
+            "description": "Organization the external user belongs to.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Organization",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lastSeen",
+            "description": "The last time the external user was seen interacting with Linear.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Node",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ExternalUserConnection",
+        "description": null,
+        "fields": [
+          {
+            "name": "edges",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ExternalUserEdge",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nodes",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ExternalUser",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pageInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ExternalUserEdge",
+        "description": null,
+        "fields": [
+          {
+            "name": "node",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExternalUser",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cursor",
+            "description": "Used in `before` and `after` args",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -10752,20 +11130,8 @@
             "deprecationReason": null
           },
           {
-            "name": "description",
-            "description": "The issue's description in markdown format.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "priority",
-            "description": "The priority of the issue.",
+            "description": "The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -11009,7 +11375,7 @@
           },
           {
             "name": "projectMilestone",
-            "description": "[ALPHA] The projectMilestone that the issue is associated with.",
+            "description": "The projectMilestone that the issue is associated with.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -11050,6 +11416,18 @@
             "type": {
               "kind": "OBJECT",
               "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "externalUserCreator",
+            "description": "[ALPHA] The external user who created the issue.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ExternalUser",
               "ofType": null
             },
             "isDeprecated": false,
@@ -11131,18 +11509,6 @@
                 "name": "String",
                 "ofType": null
               }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "descriptionData",
-            "description": "[Internal] The issue's description as a Prosemirror document.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "JSON",
-              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -11994,6 +12360,30 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": "The issue's description in markdown format.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "descriptionData",
+            "description": "[Internal] The issue's description as a Prosemirror document.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -12189,6 +12579,18 @@
             "deprecationReason": null
           },
           {
+            "name": "triagedAt",
+            "description": "Comparator for the issues triaged at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "completedAt",
             "description": "Comparator for the issues completed at date.",
             "type": {
@@ -12346,7 +12748,7 @@
           },
           {
             "name": "projectMilestone",
-            "description": "[ALPHA] Filters that the issues project milestone must satisfy.",
+            "description": "Filters that the issues project milestone must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableProjectMilestoneFilter",
@@ -12740,7 +13142,7 @@
           },
           {
             "name": "priority",
-            "description": "The priority of the issue.",
+            "description": "The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.",
             "type": {
               "kind": "SCALAR",
               "name": "Int",
@@ -12844,7 +13246,7 @@
           },
           {
             "name": "projectMilestoneId",
-            "description": "[ALPHA] The project milestone associated with the issue.",
+            "description": "The project milestone associated with the issue.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -13153,6 +13555,18 @@
             "deprecationReason": null
           },
           {
+            "name": "projectMilestoneId",
+            "description": "The project milestone associated with the draft.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "creator",
             "description": "The user who created the draft.",
             "args": [],
@@ -13446,6 +13860,18 @@
             "deprecationReason": null
           },
           {
+            "name": "triagedAt",
+            "description": "Comparator for the issues triaged at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "completedAt",
             "description": "Comparator for the issues completed at date.",
             "type": {
@@ -13603,7 +14029,7 @@
           },
           {
             "name": "projectMilestone",
-            "description": "[ALPHA] Filters that the issues project milestone must satisfy.",
+            "description": "Filters that the issues project milestone must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableProjectMilestoneFilter",
@@ -16867,7 +17293,7 @@
           },
           {
             "name": "priority",
-            "description": "The priority of the issue.",
+            "description": "The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.",
             "type": {
               "kind": "SCALAR",
               "name": "Int",
@@ -16967,7 +17393,7 @@
           },
           {
             "name": "projectMilestoneId",
-            "description": "[ALPHA] The project milestone associated with the issue.",
+            "description": "The project milestone associated with the issue.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -25028,6 +25454,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "ExternalUser",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "Favorite",
             "ofType": null
           },
@@ -26674,6 +27105,18 @@
             "deprecationReason": null
           },
           {
+            "name": "triagedAt",
+            "description": "Comparator for the issues triaged at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "completedAt",
             "description": "Comparator for the issues completed at date.",
             "type": {
@@ -26831,7 +27274,7 @@
           },
           {
             "name": "projectMilestone",
-            "description": "[ALPHA] Filters that the issues project milestone must satisfy.",
+            "description": "Filters that the issues project milestone must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableProjectMilestoneFilter",
@@ -27399,7 +27842,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "NullableProjectMilestoneFilter",
-        "description": "[ALPHA] Project milestone filtering options.",
+        "description": "Project milestone filtering options.",
         "fields": null,
         "inputFields": [
           {
@@ -32384,7 +32827,7 @@
           },
           {
             "name": "projectMilestones",
-            "description": "[ALPHA] Milestones associated with the project.",
+            "description": "Milestones associated with the project.",
             "args": [
               {
                 "name": "before",
@@ -37418,6 +37861,39 @@
             "deprecationReason": null
           },
           {
+            "name": "customViewSuggestion",
+            "description": "[INTERNAL] Suggests metadata for a view based on it's filters.",
+            "args": [
+              {
+                "name": "filter",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "JSONObject",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "CustomViewSuggestionPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "cycles",
             "description": "All cycles.",
             "args": [
@@ -37789,6 +38265,128 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Emoji",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "externalUsers",
+            "description": "All external users for the organization.",
+            "args": [
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExternalUserConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "externalUser",
+            "description": "One specific external user.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the external user to retrieve.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ExternalUser",
                 "ofType": null
               }
             },
@@ -41346,13 +41944,9 @@
             "description": "The user who reacted.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "User",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -41849,6 +42443,18 @@
             "deprecationReason": null
           },
           {
+            "name": "color",
+            "description": "The roadmap's color.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "projects",
             "description": "Projects associated with the roadmap.",
             "args": [
@@ -42259,6 +42865,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "color",
+            "description": "The roadmap's color.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null,
@@ -42935,6 +43553,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "color",
+            "description": "The roadmap's color.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null,
@@ -48847,7 +49477,7 @@
           },
           {
             "name": "calendarHash",
-            "description": "Hash for the user to be used in calendar URLs.",
+            "description": "[DEPRECATED] Hash for the user to be used in calendar URLs.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -50553,6 +51183,12 @@
             "deprecationReason": null
           },
           {
+            "name": "insightsHelpDismissed",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "figmaPromptDismissed",
             "description": null,
             "isDeprecated": false,
@@ -50620,6 +51256,12 @@
           },
           {
             "name": "threadedCommentsNudgeIsSeen",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "milestoneOnboardingIsSeenAndDismissed",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -50869,6 +51511,18 @@
                 "name": "User",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "calendarHash",
+            "description": "Hash for the user to be used in calendar URLs.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null

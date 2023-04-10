@@ -166,7 +166,7 @@ type Attachment implements Node {
   """
   An accessor helper to source.type, defines the source type of the attachment.
   """
-  sourceType: JSONObject
+  sourceType: String
   """
   Content for the subtitle line in the Linear attachment widget.
   """
@@ -645,6 +645,10 @@ type Comment implements Node {
   """
   editedAt: DateTime
   """
+  [ALPHA] The external user who wrote the comment.
+  """
+  externalUser: ExternalUser
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -997,6 +1001,10 @@ type CustomView implements Node {
   """
   organization: Organization!
   """
+  [ALPHA] The filter applied to projects in the custom view.
+  """
+  projectFilterData: JSONObject
+  """
   Whether the custom view is shared with everyone in the organization.
   """
   shared: Boolean!
@@ -1048,6 +1056,10 @@ input CustomViewCreateInput {
   """
   name: String!
   """
+  [ALPHA] The project filter applied to issues in the custom view.
+  """
+  projectFilterData: JSONObject
+  """
   Whether the custom view is shared with everyone in the organization.
   """
   shared: Boolean
@@ -1080,6 +1092,21 @@ type CustomViewPayload {
   success: Boolean!
 }
 
+type CustomViewSuggestionPayload {
+  """
+  The suggested view description.
+  """
+  suggestedDescription: String
+  """
+  The suggested view icon.
+  """
+  suggestedIcon: String
+  """
+  The suggested view name.
+  """
+  suggestedName: String
+}
+
 input CustomViewUpdateInput {
   """
   The color of the icon of the custom view.
@@ -1105,6 +1132,10 @@ input CustomViewUpdateInput {
   The name of the custom view.
   """
   name: String
+  """
+  [ALPHA] The project filter applied to issues in the custom view.
+  """
+  projectFilterData: JSONObject
   """
   Whether the custom view is shared with everyone in the organization.
   """
@@ -1884,6 +1915,68 @@ type EventPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+[ALPHA] An external authenticated (e.g., through Slack) user which doesn't have a Linear account, but can create and update entities in Linear from the external system that authenticated them.
+"""
+type ExternalUser implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  An URL to the external user's avatar image.
+  """
+  avatarUrl: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The external user's display name. Unique within each organization. Can match the display name of an actual user.
+  """
+  displayName: String!
+  """
+  The external user's email address.
+  """
+  email: String!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The last time the external user was seen interacting with Linear.
+  """
+  lastSeen: DateTime
+  """
+  The external user's full name.
+  """
+  name: String!
+  """
+  Organization the external user belongs to.
+  """
+  organization: Organization!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type ExternalUserConnection {
+  edges: [ExternalUserEdge!]!
+  nodes: [ExternalUser!]!
+  pageInfo: PageInfo!
+}
+
+type ExternalUserEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: ExternalUser!
 }
 
 """
@@ -2980,6 +3073,10 @@ type Issue implements Node {
   """
   estimate: Float
   """
+  [ALPHA] The external user who created the issue.
+  """
+  externalUserCreator: ExternalUser
+  """
   History entries associated with the issue.
   """
   history(
@@ -3091,7 +3188,7 @@ type Issue implements Node {
   """
   previousIdentifiers: [String!]!
   """
-  The priority of the issue.
+  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
   """
   priority: Float!
   """
@@ -3103,7 +3200,7 @@ type Issue implements Node {
   """
   project: Project
   """
-  [ALPHA] The projectMilestone that the issue is associated with.
+  The projectMilestone that the issue is associated with.
   """
   projectMilestone: ProjectMilestone
   """
@@ -3368,7 +3465,7 @@ input IssueCollectionFilter {
   """
   project: NullableProjectFilter
   """
-  [ALPHA] Filters that the issues project milestone must satisfy.
+  Filters that the issues project milestone must satisfy.
   """
   projectMilestone: NullableProjectMilestoneFilter
   """
@@ -3411,6 +3508,10 @@ input IssueCollectionFilter {
   Comparator for the issues title.
   """
   title: StringComparator
+  """
+  Comparator for the issues triaged at date.
+  """
+  triagedAt: NullableDateComparator
   """
   Comparator for the updated at date.
   """
@@ -3477,7 +3578,7 @@ input IssueCreateInput {
   """
   parentId: String
   """
-  The priority of the issue.
+  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
   """
   priority: Int
   """
@@ -3485,7 +3586,7 @@ input IssueCreateInput {
   """
   projectId: String
   """
-  [ALPHA] The project milestone associated with the issue.
+  The project milestone associated with the issue.
   """
   projectMilestoneId: String
   """
@@ -3590,6 +3691,10 @@ type IssueDraft implements Node {
   The project associated with the draft.
   """
   projectId: String
+  """
+  The project milestone associated with the draft.
+  """
+  projectMilestoneId: String
   """
   The workflow state associated with the draft.
   """
@@ -3731,7 +3836,7 @@ input IssueFilter {
   """
   project: NullableProjectFilter
   """
-  [ALPHA] Filters that the issues project milestone must satisfy.
+  Filters that the issues project milestone must satisfy.
   """
   projectMilestone: NullableProjectMilestoneFilter
   """
@@ -3770,6 +3875,10 @@ input IssueFilter {
   Comparator for the issues title.
   """
   title: StringComparator
+  """
+  Comparator for the issues triaged at date.
+  """
+  triagedAt: NullableDateComparator
   """
   Comparator for the updated at date.
   """
@@ -4658,7 +4767,7 @@ input IssueUpdateInput {
   """
   parentId: String
   """
-  The priority of the issue.
+  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
   """
   priority: Int
   """
@@ -4666,7 +4775,7 @@ input IssueUpdateInput {
   """
   projectId: String
   """
-  [ALPHA] The project milestone associated with the issue.
+  The project milestone associated with the issue.
   """
   projectMilestoneId: String
   """
@@ -7313,7 +7422,7 @@ input NullableIssueFilter {
   """
   project: NullableProjectFilter
   """
-  [ALPHA] Filters that the issues project milestone must satisfy.
+  Filters that the issues project milestone must satisfy.
   """
   projectMilestone: NullableProjectMilestoneFilter
   """
@@ -7352,6 +7461,10 @@ input NullableIssueFilter {
   Comparator for the issues title.
   """
   title: StringComparator
+  """
+  Comparator for the issues triaged at date.
+  """
+  triagedAt: NullableDateComparator
   """
   Comparator for the updated at date.
   """
@@ -7471,7 +7584,7 @@ input NullableProjectFilter {
 }
 
 """
-[ALPHA] Project milestone filtering options.
+Project milestone filtering options.
 """
 input NullableProjectMilestoneFilter {
   """
@@ -8836,7 +8949,7 @@ type Project implements Node {
   """
   progress: Float!
   """
-  [ALPHA] Milestones associated with the project.
+  Milestones associated with the project.
   """
   projectMilestones(
     """
@@ -10252,6 +10365,10 @@ type Query {
   """
   customView(id: String!): CustomView!
   """
+  [INTERNAL] Suggests metadata for a view based on it's filters.
+  """
+  customViewSuggestion(filter: JSONObject!): CustomViewSuggestionPayload!
+  """
   Custom views for the user.
   """
   customViews(
@@ -10388,6 +10505,44 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): EmojiConnection!
+  """
+  One specific external user.
+  """
+  externalUser(
+    """
+    The identifier of the external user to retrieve.
+    """
+    id: String!
+  ): ExternalUser!
+  """
+  All external users for the organization.
+  """
+  externalUsers(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ExternalUserConnection!
   """
   One specific favorite.
   """
@@ -11321,7 +11476,7 @@ type Reaction implements Node {
   """
   The user who reacted.
   """
-  user: User!
+  user: User
 }
 
 type ReactionConnection {
@@ -11398,6 +11553,10 @@ type Roadmap implements Node {
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
+  """
+  The roadmap's color.
+  """
+  color: String
   """
   The time at which the entity was created.
   """
@@ -11532,6 +11691,10 @@ type RoadmapConnection {
 }
 
 input RoadmapCreateInput {
+  """
+  The roadmap's color.
+  """
+  color: String
   """
   The description of the roadmap.
   """
@@ -11707,6 +11870,10 @@ input RoadmapToProjectUpdateInput {
 }
 
 input RoadmapUpdateInput {
+  """
+  The roadmap's color.
+  """
+  color: String
   """
   The description of the roadmap.
   """
@@ -13448,7 +13615,7 @@ type User implements Node {
   """
   avatarUrl: String
   """
-  Hash for the user to be used in calendar URLs.
+  [DEPRECATED] Hash for the user to be used in calendar URLs.
   """
   calendarHash: String
   """
@@ -13926,12 +14093,14 @@ enum UserFlagType {
   emptyMyIssuesDismissed
   figmaPromptDismissed
   importBannerDismissed
+  insightsHelpDismissed
   insightsWelcomeDismissed
   issueLabelSuggestionUsed
   issueMovePromptCompleted
   joinTeamIntroductionDismissed
   listSelectionTip
   migrateThemePreference
+  milestoneOnboardingIsSeenAndDismissed
   projectBacklogWelcomeDismissed
   projectUpdatesWelcomeDismissed
   projectWelcomeDismissed
@@ -13984,6 +14153,10 @@ type UserSettings implements Node {
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
+  """
+  Hash for the user to be used in calendar URLs.
+  """
+  calendarHash: String
   """
   The time at which the entity was created.
   """
