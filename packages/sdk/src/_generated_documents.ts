@@ -126,7 +126,7 @@ export type Attachment = Node & {
   /** Information about the source which created the attachment. */
   source?: Maybe<Scalars["JSONObject"]>;
   /** An accessor helper to source.type, defines the source type of the attachment. */
-  sourceType?: Maybe<Scalars["JSONObject"]>;
+  sourceType?: Maybe<Scalars["String"]>;
   /** Content for the subtitle line in the Linear attachment widget. */
   subtitle?: Maybe<Scalars["String"]>;
   /** Content for the title line in the Linear attachment widget. */
@@ -394,6 +394,8 @@ export type Comment = Node & {
   createdAt: Scalars["DateTime"];
   /** The time user edited the comment. */
   editedAt?: Maybe<Scalars["DateTime"]>;
+  /** [ALPHA] The external user who wrote the comment. */
+  externalUser?: Maybe<ExternalUser>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The issue that the comment is associated with. */
@@ -617,6 +619,8 @@ export type CustomView = Node & {
   name: Scalars["String"];
   /** The organization of the custom view. */
   organization: Organization;
+  /** [ALPHA] The filter applied to projects in the custom view. */
+  projectFilterData?: Maybe<Scalars["JSONObject"]>;
   /** Whether the custom view is shared with everyone in the organization. */
   shared: Scalars["Boolean"];
   /** The team associated with the custom view. */
@@ -651,6 +655,8 @@ export type CustomViewCreateInput = {
   id?: Maybe<Scalars["String"]>;
   /** The name of the custom view. */
   name: Scalars["String"];
+  /** [ALPHA] The project filter applied to issues in the custom view. */
+  projectFilterData?: Maybe<Scalars["JSONObject"]>;
   /** Whether the custom view is shared with everyone in the organization. */
   shared?: Maybe<Scalars["Boolean"]>;
   /** The id of the team associated with the custom view. */
@@ -674,6 +680,16 @@ export type CustomViewPayload = {
   success: Scalars["Boolean"];
 };
 
+export type CustomViewSuggestionPayload = {
+  __typename?: "CustomViewSuggestionPayload";
+  /** The suggested view description. */
+  suggestedDescription?: Maybe<Scalars["String"]>;
+  /** The suggested view icon. */
+  suggestedIcon?: Maybe<Scalars["String"]>;
+  /** The suggested view name. */
+  suggestedName?: Maybe<Scalars["String"]>;
+};
+
 export type CustomViewUpdateInput = {
   /** The color of the icon of the custom view. */
   color?: Maybe<Scalars["String"]>;
@@ -687,6 +703,8 @@ export type CustomViewUpdateInput = {
   icon?: Maybe<Scalars["String"]>;
   /** The name of the custom view. */
   name?: Maybe<Scalars["String"]>;
+  /** [ALPHA] The project filter applied to issues in the custom view. */
+  projectFilterData?: Maybe<Scalars["JSONObject"]>;
   /** Whether the custom view is shared with everyone in the organization. */
   shared?: Maybe<Scalars["Boolean"]>;
   /** The id of the team associated with the custom view. */
@@ -1147,6 +1165,49 @@ export type EventPayload = {
   __typename?: "EventPayload";
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
+};
+
+/** [ALPHA] An external authenticated (e.g., through Slack) user which doesn't have a Linear account, but can create and update entities in Linear from the external system that authenticated them. */
+export type ExternalUser = Node & {
+  __typename?: "ExternalUser";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** An URL to the external user's avatar image. */
+  avatarUrl?: Maybe<Scalars["String"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The external user's display name. Unique within each organization. Can match the display name of an actual user. */
+  displayName: Scalars["String"];
+  /** The external user's email address. */
+  email: Scalars["String"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The last time the external user was seen interacting with Linear. */
+  lastSeen?: Maybe<Scalars["DateTime"]>;
+  /** The external user's full name. */
+  name: Scalars["String"];
+  /** Organization the external user belongs to. */
+  organization: Organization;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+export type ExternalUserConnection = {
+  __typename?: "ExternalUserConnection";
+  edges: Array<ExternalUserEdge>;
+  nodes: Array<ExternalUser>;
+  pageInfo: PageInfo;
+};
+
+export type ExternalUserEdge = {
+  __typename?: "ExternalUserEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: ExternalUser;
 };
 
 /** User favorites presented in the sidebar. */
@@ -1776,6 +1837,8 @@ export type Issue = Node & {
   dueDate?: Maybe<Scalars["TimelessDate"]>;
   /** The estimate of the complexity of the issue.. */
   estimate?: Maybe<Scalars["Float"]>;
+  /** [ALPHA] The external user who created the issue. */
+  externalUserCreator?: Maybe<ExternalUser>;
   /** History entries associated with the issue. */
   history: IssueHistoryConnection;
   /** The unique identifier of the entity. */
@@ -1792,13 +1855,13 @@ export type Issue = Node & {
   parent?: Maybe<Issue>;
   /** Previous identifiers of the issue if it has been moved between teams. */
   previousIdentifiers: Array<Scalars["String"]>;
-  /** The priority of the issue. */
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
   priority: Scalars["Float"];
   /** Label for the priority. */
   priorityLabel: Scalars["String"];
   /** The project that the issue is associated with. */
   project?: Maybe<Project>;
-  /** [ALPHA] The projectMilestone that the issue is associated with. */
+  /** The projectMilestone that the issue is associated with. */
   projectMilestone?: Maybe<ProjectMilestone>;
   /** Relations associated with this issue. */
   relations: IssueRelationConnection;
@@ -1994,7 +2057,7 @@ export type IssueCollectionFilter = {
   priority?: Maybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: Maybe<NullableProjectFilter>;
-  /** [ALPHA] Filters that the issues project milestone must satisfy. */
+  /** Filters that the issues project milestone must satisfy. */
   projectMilestone?: Maybe<NullableProjectMilestoneFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: Maybe<ContentComparator>;
@@ -2016,6 +2079,8 @@ export type IssueCollectionFilter = {
   team?: Maybe<TeamFilter>;
   /** Comparator for the issues title. */
   title?: Maybe<StringComparator>;
+  /** Comparator for the issues triaged at date. */
+  triagedAt?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -2054,11 +2119,11 @@ export type IssueCreateInput = {
   labelIds?: Maybe<Array<Scalars["String"]>>;
   /** The identifier of the parent issue. */
   parentId?: Maybe<Scalars["String"]>;
-  /** The priority of the issue. */
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
   priority?: Maybe<Scalars["Int"]>;
   /** The project associated with the issue. */
   projectId?: Maybe<Scalars["String"]>;
-  /** [ALPHA] The project milestone associated with the issue. */
+  /** The project milestone associated with the issue. */
   projectMilestoneId?: Maybe<Scalars["String"]>;
   /** The comment the issue is referencing. */
   referenceCommentId?: Maybe<Scalars["String"]>;
@@ -2113,6 +2178,8 @@ export type IssueDraft = Node & {
   priorityLabel: Scalars["String"];
   /** The project associated with the draft. */
   projectId?: Maybe<Scalars["String"]>;
+  /** The project milestone associated with the draft. */
+  projectMilestoneId?: Maybe<Scalars["String"]>;
   /** The workflow state associated with the draft. */
   stateId: Scalars["String"];
   /** The order of items in the sub-draft list. Only set if the draft has `parent` set. */
@@ -2190,7 +2257,7 @@ export type IssueFilter = {
   priority?: Maybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: Maybe<NullableProjectFilter>;
-  /** [ALPHA] Filters that the issues project milestone must satisfy. */
+  /** Filters that the issues project milestone must satisfy. */
   projectMilestone?: Maybe<NullableProjectMilestoneFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: Maybe<ContentComparator>;
@@ -2210,6 +2277,8 @@ export type IssueFilter = {
   team?: Maybe<TeamFilter>;
   /** Comparator for the issues title. */
   title?: Maybe<StringComparator>;
+  /** Comparator for the issues triaged at date. */
+  triagedAt?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -2730,11 +2799,11 @@ export type IssueUpdateInput = {
   labelIds?: Maybe<Array<Scalars["String"]>>;
   /** The identifier of the parent issue. */
   parentId?: Maybe<Scalars["String"]>;
-  /** The priority of the issue. */
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
   priority?: Maybe<Scalars["Int"]>;
   /** The project associated with the issue. */
   projectId?: Maybe<Scalars["String"]>;
-  /** [ALPHA] The project milestone associated with the issue. */
+  /** The project milestone associated with the issue. */
   projectMilestoneId?: Maybe<Scalars["String"]>;
   /** [Internal] The timestamp at which an issue will be considered in breach of SLA. */
   slaBreachesAt?: Maybe<Scalars["DateTime"]>;
@@ -4279,7 +4348,7 @@ export type NullableIssueFilter = {
   priority?: Maybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: Maybe<NullableProjectFilter>;
-  /** [ALPHA] Filters that the issues project milestone must satisfy. */
+  /** Filters that the issues project milestone must satisfy. */
   projectMilestone?: Maybe<NullableProjectMilestoneFilter>;
   /** [Internal] Comparator for the issues content. */
   searchableContent?: Maybe<ContentComparator>;
@@ -4299,6 +4368,8 @@ export type NullableIssueFilter = {
   team?: Maybe<TeamFilter>;
   /** Comparator for the issues title. */
   title?: Maybe<StringComparator>;
+  /** Comparator for the issues triaged at date. */
+  triagedAt?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -4361,7 +4432,7 @@ export type NullableProjectFilter = {
   updatedAt?: Maybe<DateComparator>;
 };
 
-/** [ALPHA] Project milestone filtering options. */
+/** Project milestone filtering options. */
 export type NullableProjectMilestoneFilter = {
   /** Compound filters, all of which need to be matched by the project milestone. */
   and?: Maybe<Array<NullableProjectMilestoneFilter>>;
@@ -5078,7 +5149,7 @@ export type Project = Node & {
   name: Scalars["String"];
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   progress: Scalars["Float"];
-  /** [ALPHA] Milestones associated with the project. */
+  /** Milestones associated with the project. */
   projectMilestones: ProjectMilestoneConnection;
   /** The time until which project update reminders are paused. */
   projectUpdateRemindersPausedUntilAt?: Maybe<Scalars["DateTime"]>;
@@ -5847,6 +5918,8 @@ export type Query = {
   comments: CommentConnection;
   /** One specific custom view. */
   customView: CustomView;
+  /** [INTERNAL] Suggests metadata for a view based on it's filters. */
+  customViewSuggestion: CustomViewSuggestionPayload;
   /** Custom views for the user. */
   customViews: CustomViewConnection;
   /** One specific cycle. */
@@ -5861,6 +5934,10 @@ export type Query = {
   emoji: Emoji;
   /** All custom emojis. */
   emojis: EmojiConnection;
+  /** One specific external user. */
+  externalUser: ExternalUser;
+  /** All external users for the organization. */
+  externalUsers: ExternalUserConnection;
   /** One specific favorite. */
   favorite: Favorite;
   /** The user's favorites. */
@@ -6084,6 +6161,10 @@ export type QueryCustomViewArgs = {
   id: Scalars["String"];
 };
 
+export type QueryCustomViewSuggestionArgs = {
+  filter: Scalars["JSONObject"];
+};
+
 export type QueryCustomViewsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
@@ -6125,6 +6206,19 @@ export type QueryEmojiArgs = {
 };
 
 export type QueryEmojisArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type QueryExternalUserArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryExternalUsersArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
@@ -6497,7 +6591,7 @@ export type Reaction = Node & {
    */
   updatedAt: Scalars["DateTime"];
   /** The user who reacted. */
-  user: User;
+  user?: Maybe<User>;
 };
 
 export type ReactionConnection = {
@@ -6554,6 +6648,8 @@ export type Roadmap = Node & {
   __typename?: "Roadmap";
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The roadmap's color. */
+  color?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The user who created the roadmap. */
@@ -6627,6 +6723,8 @@ export type RoadmapConnection = {
 };
 
 export type RoadmapCreateInput = {
+  /** The roadmap's color. */
+  color?: Maybe<Scalars["String"]>;
   /** The description of the roadmap. */
   description?: Maybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
@@ -6740,6 +6838,8 @@ export type RoadmapToProjectUpdateInput = {
 };
 
 export type RoadmapUpdateInput = {
+  /** The roadmap's color. */
+  color?: Maybe<Scalars["String"]>;
   /** The description of the roadmap. */
   description?: Maybe<Scalars["String"]>;
   /** The name of the roadmap. */
@@ -7681,7 +7781,7 @@ export type User = Node & {
   assignedIssues: IssueConnection;
   /** An URL to the user's avatar image. */
   avatarUrl?: Maybe<Scalars["String"]>;
-  /** Hash for the user to be used in calendar URLs. */
+  /** [DEPRECATED] Hash for the user to be used in calendar URLs. */
   calendarHash?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
@@ -7953,12 +8053,14 @@ export enum UserFlagType {
   EmptyMyIssuesDismissed = "emptyMyIssuesDismissed",
   FigmaPromptDismissed = "figmaPromptDismissed",
   ImportBannerDismissed = "importBannerDismissed",
+  InsightsHelpDismissed = "insightsHelpDismissed",
   InsightsWelcomeDismissed = "insightsWelcomeDismissed",
   IssueLabelSuggestionUsed = "issueLabelSuggestionUsed",
   IssueMovePromptCompleted = "issueMovePromptCompleted",
   JoinTeamIntroductionDismissed = "joinTeamIntroductionDismissed",
   ListSelectionTip = "listSelectionTip",
   MigrateThemePreference = "migrateThemePreference",
+  MilestoneOnboardingIsSeenAndDismissed = "milestoneOnboardingIsSeenAndDismissed",
   ProjectBacklogWelcomeDismissed = "projectBacklogWelcomeDismissed",
   ProjectUpdatesWelcomeDismissed = "projectUpdatesWelcomeDismissed",
   ProjectWelcomeDismissed = "projectWelcomeDismissed",
@@ -7999,6 +8101,8 @@ export type UserSettings = Node & {
   __typename?: "UserSettings";
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** Hash for the user to be used in calendar URLs. */
+  calendarHash?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
@@ -8719,7 +8823,7 @@ export type ProjectFragment = { __typename: "Project" } & Pick<
 export type ReactionFragment = { __typename: "Reaction" } & Pick<
   Reaction,
   "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"
-> & { user: { __typename?: "User" } & Pick<User, "id"> };
+> & { user?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
 export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
   IssueHistory,
@@ -8787,7 +8891,7 @@ export type IssueRelationFragment = { __typename: "IssueRelation" } & Pick<
 
 export type RoadmapFragment = { __typename: "Roadmap" } & Pick<
   Roadmap,
-  "description" | "updatedAt" | "name" | "slugId" | "sortOrder" | "archivedAt" | "createdAt" | "id"
+  "description" | "updatedAt" | "name" | "color" | "slugId" | "sortOrder" | "archivedAt" | "createdAt" | "id"
 > & { creator: { __typename?: "User" } & Pick<User, "id">; owner: { __typename?: "User" } & Pick<User, "id"> };
 
 export type CycleFragment = { __typename: "Cycle" } & Pick<
@@ -8849,7 +8953,6 @@ export type UserFragment = { __typename: "User" } & Pick<
   | "statusUntilAt"
   | "description"
   | "avatarUrl"
-  | "calendarHash"
   | "createdIssueCount"
   | "disableReason"
   | "statusEmoji"
@@ -8869,6 +8972,7 @@ export type UserFragment = { __typename: "User" } & Pick<
   | "guest"
   | "admin"
   | "isMe"
+  | "calendarHash"
 >;
 
 export type PushSubscriptionFragment = { __typename: "PushSubscription" } & Pick<
@@ -8985,6 +9089,7 @@ export type IssueFragment = { __typename: "Issue" } & Pick<
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     parent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
     team: { __typename?: "Team" } & Pick<Team, "id">;
     assignee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -9351,7 +9456,7 @@ export type PaidSubscriptionFragment = { __typename: "PaidSubscription" } & Pick
 
 export type UserSettingsFragment = { __typename: "UserSettings" } & Pick<
   UserSettings,
-  "unsubscribedFrom" | "updatedAt" | "notificationPreferences" | "archivedAt" | "createdAt" | "id"
+  "calendarHash" | "unsubscribedFrom" | "updatedAt" | "notificationPreferences" | "archivedAt" | "createdAt" | "id"
 > & { user: { __typename?: "User" } & Pick<User, "id"> };
 
 export type JiraLinearMappingFragment = { __typename: "JiraLinearMapping" } & Pick<
@@ -9473,6 +9578,11 @@ export type CustomViewPayloadFragment = { __typename: "CustomViewPayload" } & Pi
   CustomViewPayload,
   "lastSyncId" | "success"
 > & { customView: { __typename?: "CustomView" } & Pick<CustomView, "id"> };
+
+export type CustomViewSuggestionPayloadFragment = { __typename: "CustomViewSuggestionPayload" } & Pick<
+  CustomViewSuggestionPayload,
+  "suggestedDescription" | "suggestedIcon" | "suggestedName"
+>;
 
 export type CycleConnectionFragment = { __typename: "CycleConnection" } & {
   nodes: Array<{ __typename?: "Cycle" } & CycleFragment>;
@@ -9649,6 +9759,8 @@ type Node_Document_Fragment = { __typename: "Document" } & Pick<Document, "id">;
 
 type Node_Emoji_Fragment = { __typename: "Emoji" } & Pick<Emoji, "id">;
 
+type Node_ExternalUser_Fragment = { __typename: "ExternalUser" } & Pick<ExternalUser, "id">;
+
 type Node_Favorite_Fragment = { __typename: "Favorite" } & Pick<Favorite, "id">;
 
 type Node_Integration_Fragment = { __typename: "Integration" } & Pick<Integration, "id">;
@@ -9755,6 +9867,7 @@ export type NodeFragment =
   | Node_Cycle_Fragment
   | Node_Document_Fragment
   | Node_Emoji_Fragment
+  | Node_ExternalUser_Fragment
   | Node_Favorite_Fragment
   | Node_Integration_Fragment
   | Node_IntegrationTemplate_Fragment
@@ -12045,6 +12158,38 @@ export type EmojisQuery = { __typename?: "Query" } & {
   emojis: { __typename?: "EmojiConnection" } & EmojiConnectionFragment;
 };
 
+export type ExternalUserQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ExternalUserQuery = { __typename?: "Query" } & {
+  externalUser: { __typename?: "ExternalUser" } & Pick<
+    ExternalUser,
+    "archivedAt" | "avatarUrl" | "createdAt" | "displayName" | "email" | "id" | "lastSeen" | "name" | "updatedAt"
+  > & { organization: { __typename?: "Organization" } & OrganizationFragment };
+};
+
+export type ExternalUsersQueryVariables = Exact<{
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type ExternalUsersQuery = { __typename?: "Query" } & {
+  externalUsers: { __typename?: "ExternalUserConnection" } & {
+    nodes: Array<
+      { __typename?: "ExternalUser" } & Pick<
+        ExternalUser,
+        "archivedAt" | "avatarUrl" | "createdAt" | "displayName" | "email" | "id" | "lastSeen" | "name" | "updatedAt"
+      > & { organization: { __typename?: "Organization" } & OrganizationFragment }
+    >;
+    pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+  };
+};
+
 export type FavoriteQueryVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -12778,6 +12923,22 @@ export type Project_MembersQueryVariables = Exact<{
 
 export type Project_MembersQuery = { __typename?: "Query" } & {
   project: { __typename?: "Project" } & { members: { __typename?: "UserConnection" } & UserConnectionFragment };
+};
+
+export type Project_ProjectMilestonesQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type Project_ProjectMilestonesQuery = { __typename?: "Query" } & {
+  project: { __typename?: "Project" } & {
+    projectMilestones: { __typename?: "ProjectMilestoneConnection" } & ProjectMilestoneConnectionFragment;
+  };
 };
 
 export type Project_ProjectUpdatesQueryVariables = Exact<{
@@ -13564,7 +13725,6 @@ export const UserFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "statusUntilAt" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-          { kind: "Field", name: { kind: "Name", value: "calendarHash" } },
           { kind: "Field", name: { kind: "Name", value: "createdIssueCount" } },
           { kind: "Field", name: { kind: "Name", value: "disableReason" } },
           { kind: "Field", name: { kind: "Name", value: "statusEmoji" } },
@@ -13584,6 +13744,7 @@ export const UserFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "guest" } },
           { kind: "Field", name: { kind: "Name", value: "admin" } },
           { kind: "Field", name: { kind: "Name", value: "isMe" } },
+          { kind: "Field", name: { kind: "Name", value: "calendarHash" } },
         ],
       },
     },
@@ -14170,6 +14331,7 @@ export const UserSettingsFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "calendarHash" } },
           { kind: "Field", name: { kind: "Name", value: "unsubscribedFrom" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "notificationPreferences" } },
@@ -14888,6 +15050,25 @@ export const CustomViewPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<CustomViewPayloadFragment, unknown>;
+export const CustomViewSuggestionPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "CustomViewSuggestionPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CustomViewSuggestionPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "suggestedDescription" } },
+          { kind: "Field", name: { kind: "Name", value: "suggestedIcon" } },
+          { kind: "Field", name: { kind: "Name", value: "suggestedName" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CustomViewSuggestionPayloadFragment, unknown>;
 export const CycleFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -15887,6 +16068,14 @@ export const IssueFragmentDoc = {
           {
             kind: "Field",
             name: { kind: "Name", value: "project" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectMilestone" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
@@ -18139,6 +18328,7 @@ export const RoadmapFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "color" } },
           { kind: "Field", name: { kind: "Name", value: "slugId" } },
           { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
@@ -29809,6 +29999,186 @@ export const EmojisDocument = {
     ...EmojiConnectionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<EmojisQuery, EmojisQueryVariables>;
+export const ExternalUserDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "externalUser" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "externalUser" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+                { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
+                { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                { kind: "Field", name: { kind: "Name", value: "displayName" } },
+                { kind: "Field", name: { kind: "Name", value: "email" } },
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                { kind: "Field", name: { kind: "Name", value: "lastSeen" } },
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "organization" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Organization" } }],
+                  },
+                },
+                { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...OrganizationFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ExternalUserQuery, ExternalUserQueryVariables>;
+export const ExternalUsersDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "externalUsers" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "externalUsers" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "nodes" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+                      { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
+                      { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                      { kind: "Field", name: { kind: "Name", value: "displayName" } },
+                      { kind: "Field", name: { kind: "Name", value: "email" } },
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "lastSeen" } },
+                      { kind: "Field", name: { kind: "Name", value: "name" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "organization" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Organization" } }],
+                        },
+                      },
+                      { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+                    ],
+                  },
+                },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "pageInfo" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...OrganizationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ExternalUsersQuery, ExternalUsersQueryVariables>;
 export const FavoriteDocument = {
   kind: "Document",
   definitions: [
@@ -34576,6 +34946,117 @@ export const Project_MembersDocument = {
     ...UserConnectionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_MembersQuery, Project_MembersQueryVariables>;
+export const Project_ProjectMilestonesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "project_projectMilestones" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "projectMilestones" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectMilestoneConnection" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectMilestoneConnectionFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<Project_ProjectMilestonesQuery, Project_ProjectMilestonesQueryVariables>;
 export const Project_ProjectUpdatesDocument = {
   kind: "Document",
   definitions: [
