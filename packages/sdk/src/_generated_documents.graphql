@@ -599,6 +599,8 @@ fragment Roadmap on Roadmap {
   updatedAt
   # The name of the roadmap.
   name
+  # The roadmap's color.
+  color
   # The roadmap's unique URL slug.
   slugId
   # The sort order of the roadmap within the organization.
@@ -818,8 +820,6 @@ fragment User on User {
   description
   # An URL to the user's avatar image.
   avatarUrl
-  # Hash for the user to be used in calendar URLs.
-  calendarHash
   # Number of issues created.
   createdIssueCount
   # Reason why is the account disabled.
@@ -860,6 +860,8 @@ fragment User on User {
   admin
   # Whether the user is the currently authenticated user.
   isMe
+  # [DEPRECATED] Hash for the user to be used in calendar URLs.
+  calendarHash
 }
 
 # A user's web browser push notification subscription.
@@ -1134,10 +1136,14 @@ fragment Issue on Issue {
   parent {
     id
   }
-  # The priority of the issue.
+  # The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
   priority
   # The project that the issue is associated with.
   project {
+    id
+  }
+  # The projectMilestone that the issue is associated with.
+  projectMilestone {
     id
   }
   # The team that the issue is associated with.
@@ -2067,6 +2073,8 @@ fragment PaidSubscription on PaidSubscription {
 # The settings of a user as a JSON object.
 fragment UserSettings on UserSettings {
   __typename
+  # Hash for the user to be used in calendar URLs.
+  calendarHash
   # The email types the user has unsubscribed from.
   unsubscribedFrom
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -2386,6 +2394,16 @@ fragment CustomViewPayload on CustomViewPayload {
   lastSyncId
   # Whether the operation was successful.
   success
+}
+
+fragment CustomViewSuggestionPayload on CustomViewSuggestionPayload {
+  __typename
+  # The suggested view description.
+  suggestedDescription
+  # The suggested view icon.
+  suggestedIcon
+  # The suggested view name.
+  suggestedName
 }
 
 fragment CycleConnection on CycleConnection {
@@ -5969,6 +5987,70 @@ query emojis(
     ...EmojiConnection
   }
 }
+# One specific external user.
+query externalUser(
+  # The identifier of the external user to retrieve.
+  $id: String!
+) {
+  externalUser(id: $id) {
+    archivedAt
+    avatarUrl
+    createdAt
+    displayName
+    email
+    id
+    lastSeen
+    name
+    # Organization the external user belongs to.
+    organization {
+      ...Organization
+    }
+    updatedAt
+  }
+}
+# All external users for the organization.
+query externalUsers(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  externalUsers(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      avatarUrl
+      createdAt
+      displayName
+      email
+      id
+      lastSeen
+      name
+      # Organization the external user belongs to.
+      organization {
+        ...Organization
+      }
+      updatedAt
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
 # One specific favorite.
 query favorite($id: String!) {
   favorite(id: $id) {
@@ -7221,6 +7303,35 @@ query project_members(
       orderBy: $orderBy
     ) {
       ...UserConnection
+    }
+  }
+}
+# Milestones associated with the project.
+query project_projectMilestones(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  project(id: $id) {
+    projectMilestones(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ProjectMilestoneConnection
     }
   }
 }

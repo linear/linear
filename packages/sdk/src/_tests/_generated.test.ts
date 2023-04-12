@@ -806,6 +806,10 @@ describe("generated", () => {
     });
   });
 
+  // ExternalUser - no model for query
+
+  // ExternalUsers - no model for query
+
   /** Test all Favorite queries */
   describe("Favorites", () => {
     let _favorite: L.Favorite | undefined;
@@ -1501,6 +1505,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue.projectMilestone query for L.ProjectMilestone */
+    it("issue.projectMilestone", async () => {
+      if (_issue) {
+        const issue_projectMilestone: L.ProjectMilestone | undefined = await _issue.projectMilestone;
+        expect(issue_projectMilestone instanceof L.ProjectMilestone);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.projectMilestone query");
+      }
+    });
+
     /** Test the issue.snoozedBy query for L.User */
     it("issue.snoozedBy", async () => {
       if (_issue) {
@@ -2019,6 +2033,16 @@ describe("generated", () => {
         expect(members instanceof L.UserConnection);
       } else {
         console.warn("codegen-doc:print: No project found - cannot test _project.members query");
+      }
+    });
+
+    /** Test the project connection query for the ProjectMilestone */
+    it("project.projectMilestones", async () => {
+      if (_project) {
+        const projectMilestones: L.ProjectMilestoneConnection | undefined = await _project.projectMilestones();
+        expect(projectMilestones instanceof L.ProjectMilestoneConnection);
+      } else {
+        console.warn("codegen-doc:print: No project found - cannot test _project.projectMilestones query");
       }
     });
 

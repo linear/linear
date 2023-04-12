@@ -313,7 +313,7 @@ export class Attachment extends Request {
     this.id = data.id;
     this.metadata = parseJson(data.metadata) ?? {};
     this.source = parseJson(data.source) ?? undefined;
-    this.sourceType = parseJson(data.sourceType) ?? undefined;
+    this.sourceType = data.sourceType ?? undefined;
     this.subtitle = data.subtitle ?? undefined;
     this.title = data.title;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -335,7 +335,7 @@ export class Attachment extends Request {
   /** Information about the source which created the attachment. */
   public source?: Record<string, unknown>;
   /** An accessor helper to source.type, defines the source type of the attachment. */
-  public sourceType?: Record<string, unknown>;
+  public sourceType?: string;
   /** Content for the subtitle line in the Linear attachment widget. */
   public subtitle?: string;
   /** Content for the title line in the Linear attachment widget. */
@@ -849,6 +849,27 @@ export class CustomViewPayload extends Request {
   public get customView(): LinearFetch<CustomView> | undefined {
     return new CustomViewQuery(this._request).fetch(this._customView.id);
   }
+}
+/**
+ * CustomViewSuggestionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CustomViewSuggestionPayloadFragment response data
+ */
+export class CustomViewSuggestionPayload extends Request {
+  public constructor(request: LinearRequest, data: L.CustomViewSuggestionPayloadFragment) {
+    super(request);
+    this.suggestedDescription = data.suggestedDescription ?? undefined;
+    this.suggestedIcon = data.suggestedIcon ?? undefined;
+    this.suggestedName = data.suggestedName ?? undefined;
+  }
+
+  /** The suggested view description. */
+  public suggestedDescription?: string;
+  /** The suggested view icon. */
+  public suggestedIcon?: string;
+  /** The suggested view name. */
+  public suggestedName?: string;
 }
 /**
  * A set of issues to be resolved in a specified amount of time.
@@ -2110,6 +2131,7 @@ export class Issue extends Request {
   private _cycle?: L.IssueFragment["cycle"];
   private _parent?: L.IssueFragment["parent"];
   private _project?: L.IssueFragment["project"];
+  private _projectMilestone?: L.IssueFragment["projectMilestone"];
   private _snoozedBy?: L.IssueFragment["snoozedBy"];
   private _state: L.IssueFragment["state"];
   private _team: L.IssueFragment["team"];
@@ -2149,6 +2171,7 @@ export class Issue extends Request {
     this._cycle = data.cycle ?? undefined;
     this._parent = data.parent ?? undefined;
     this._project = data.project ?? undefined;
+    this._projectMilestone = data.projectMilestone ?? undefined;
     this._snoozedBy = data.snoozedBy ?? undefined;
     this._state = data.state;
     this._team = data.team;
@@ -2186,7 +2209,7 @@ export class Issue extends Request {
   public number: number;
   /** Previous identifiers of the issue if it has been moved between teams. */
   public previousIdentifiers: string[];
-  /** The priority of the issue. */
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
   public priority: number;
   /** Label for the priority. */
   public priorityLabel: string;
@@ -2233,6 +2256,12 @@ export class Issue extends Request {
   /** The project that the issue is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The projectMilestone that the issue is associated with. */
+  public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
+    return this._projectMilestone?.id
+      ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
+      : undefined;
   }
   /** The user who snoozed the issue. */
   public get snoozedBy(): LinearFetch<User> | undefined {
@@ -4284,6 +4313,10 @@ export class Project extends Request {
   public members(variables?: Omit<L.Project_MembersQueryVariables, "id">) {
     return new Project_MembersQuery(this._request, this.id, variables).fetch(variables);
   }
+  /** Milestones associated with the project. */
+  public projectMilestones(variables?: Omit<L.Project_ProjectMilestonesQueryVariables, "id">) {
+    return new Project_ProjectMilestonesQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Project updates associated with the project. */
   public projectUpdates(variables?: Omit<L.Project_ProjectUpdatesQueryVariables, "id">) {
     return new Project_ProjectUpdatesQuery(this._request, this.id, variables).fetch(variables);
@@ -5078,7 +5111,7 @@ export class RateLimitResultPayload extends Request {
  * @param data - L.ReactionFragment response data
  */
 export class Reaction extends Request {
-  private _user: L.ReactionFragment["user"];
+  private _user?: L.ReactionFragment["user"];
 
   public constructor(request: LinearRequest, data: L.ReactionFragment) {
     super(request);
@@ -5087,7 +5120,7 @@ export class Reaction extends Request {
     this.emoji = data.emoji;
     this.id = data.id;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this._user = data.user;
+    this._user = data.user ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -5106,7 +5139,7 @@ export class Reaction extends Request {
   public updatedAt: Date;
   /** The user who reacted. */
   public get user(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._user.id);
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 
   /** Creates a new reaction. */
@@ -5171,6 +5204,7 @@ export class Roadmap extends Request {
   public constructor(request: LinearRequest, data: L.RoadmapFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.color = data.color ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
     this.id = data.id;
@@ -5184,6 +5218,8 @@ export class Roadmap extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
+  /** The roadmap's color. */
+  public color?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The description of the roadmap. */
@@ -6242,7 +6278,7 @@ export class User extends Request {
   public archivedAt?: Date;
   /** An URL to the user's avatar image. */
   public avatarUrl?: string;
-  /** Hash for the user to be used in calendar URLs. */
+  /** [DEPRECATED] Hash for the user to be used in calendar URLs. */
   public calendarHash?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
@@ -6471,6 +6507,7 @@ export class UserSettings extends Request {
   public constructor(request: LinearRequest, data: L.UserSettingsFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.calendarHash = data.calendarHash ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.notificationPreferences = parseJson(data.notificationPreferences) ?? {};
@@ -6481,6 +6518,8 @@ export class UserSettings extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
+  /** Hash for the user to be used in calendar URLs. */
+  public calendarHash?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -16664,6 +16703,61 @@ export class Project_MembersQuery extends Request {
     const data = response.project.members;
 
     return new UserConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Project_ProjectMilestones Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to project
+ * @param variables - variables without 'id' to pass into the Project_ProjectMilestonesQuery
+ */
+export class Project_ProjectMilestonesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Project_ProjectMilestonesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.Project_ProjectMilestonesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Project_ProjectMilestones query and return a ProjectMilestoneConnection
+   *
+   * @param variables - variables without 'id' to pass into the Project_ProjectMilestonesQuery
+   * @returns parsed response from Project_ProjectMilestonesQuery
+   */
+  public async fetch(
+    variables?: Omit<L.Project_ProjectMilestonesQueryVariables, "id">
+  ): LinearFetch<ProjectMilestoneConnection> {
+    const response = await this._request<L.Project_ProjectMilestonesQuery, L.Project_ProjectMilestonesQueryVariables>(
+      L.Project_ProjectMilestonesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.project.projectMilestones;
+
+    return new ProjectMilestoneConnection(
       this._request,
       connection =>
         this.fetch(
