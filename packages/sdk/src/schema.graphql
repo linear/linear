@@ -14086,6 +14086,7 @@ enum UserFlagType {
   cycleWelcomeDismissed
   desktopDownloadToastDismissed
   desktopInstalled
+  desktopTabsOnboardingDismissed
   dueDateShortcutMigration
   emptyActiveIssuesDismissed
   emptyBacklogDismissed
