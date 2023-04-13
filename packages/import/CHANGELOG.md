@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.7.2
+
+### Patch Changes
+
+- 3da83aa: chore(deps): update dependency patch versions
+- Updated dependencies [3da83aa]
+- Updated dependencies [38e9a81]
+- Updated dependencies [db79eac]
+- Updated dependencies [a61a9f9]
+- Updated dependencies [cc8b57b]
+  - @linear/sdk@3.0.0
+
 ## 1.7.1
 
 ### Patch Changes

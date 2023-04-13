@@ -1,7 +1,7 @@
 {
   "name": "@linear/import",
   "description": "Import helpers for uploading issues to Linear",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
@@ -26,7 +26,7 @@
     "build:clean": "npx rimraf -G dist .rollup-cache tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@linear/sdk": "^2.6.0",
+    "@linear/sdk": "^3.0.0",
     "chalk": "4.1.0",
     "csvtojson": "2.0.10",
     "date-fns": "^2.19.0",
