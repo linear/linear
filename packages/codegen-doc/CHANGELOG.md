@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.13.0
+
+### Minor Changes
+
+- 857bb9f: Check if Connection type is valid or not
+
+### Patch Changes
+
+- 3da83aa: chore(deps): update dependency patch versions
+
 ## 1.12.4
 
 ### Patch Changes
