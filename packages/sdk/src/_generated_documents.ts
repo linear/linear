@@ -8046,6 +8046,7 @@ export enum UserFlagType {
   CycleWelcomeDismissed = "cycleWelcomeDismissed",
   DesktopDownloadToastDismissed = "desktopDownloadToastDismissed",
   DesktopInstalled = "desktopInstalled",
+  DesktopTabsOnboardingDismissed = "desktopTabsOnboardingDismissed",
   DueDateShortcutMigration = "dueDateShortcutMigration",
   EmptyActiveIssuesDismissed = "emptyActiveIssuesDismissed",
   EmptyBacklogDismissed = "emptyBacklogDismissed",
