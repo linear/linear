@@ -4136,6 +4136,10 @@ type IssueImport implements Node {
   """
   creatorId: String!
   """
+  File URL for the uploaded CSV for the import, if there is one.
+  """
+  csvFileUrl: String
+  """
   User readable error message, if one has occurred during the import.
   """
   error: String
@@ -4169,6 +4173,13 @@ type IssueImport implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+}
+
+type IssueImportCheckPayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 type IssueImportDeletePayload {
@@ -5405,6 +5416,27 @@ type Mutation {
     url: String!
   ): ImageUploadFromUrlPayload!
   """
+  XHR request payload to upload a file for import, directly to Linear's cloud storage.
+  """
+  importFileUpload(
+    """
+    MIME type of the uploaded file.
+    """
+    contentType: String!
+    """
+    Filename of the uploaded file.
+    """
+    filename: String!
+    """
+    Optional metadata.
+    """
+    metaData: JSON
+    """
+    File size of the uploaded file.
+    """
+    size: Int!
+  ): UploadPayload!
+  """
   Deletes an integration.
   """
   integrationDelete(
@@ -5820,6 +5852,39 @@ type Mutation {
     organizationId: String
     """
     ID of the team into which to import data.
+    """
+    teamId: String
+    """
+    Name of new team. When teamId is not set.
+    """
+    teamName: String
+  ): IssueImportPayload!
+  """
+  Kicks off a Jira import job from a CSV.
+  """
+  issueImportCreateCSVJira(
+    """
+    URL for the CSV.
+    """
+    csvUrl: String!
+    """
+    Jira user account email.
+    """
+    jiraEmail: String
+    """
+    Jira installation or cloud hostname.
+    """
+    jiraHostname: String
+    """
+    Jira personal access token to access Jira REST API.
+    """
+    jiraToken: String
+    """
+    ID of the organization into which to import data.
+    """
+    organizationId: String
+    """
+    ID of the team into which to import data. Empty to create new team.
     """
     teamId: String
     """
@@ -10664,6 +10729,19 @@ type Query {
   """
   issue(id: String!): Issue!
   """
+  Checks a CSV file validity against a specific import service.
+  """
+  issueImportCheckCSV(
+    """
+    CSV storage url
+    """
+    csvUrl: String!
+    """
+    The service the CSV containing data from
+    """
+    service: String!
+  ): IssueImportCheckPayload!
+  """
   Fetches the GitHub token, completing the OAuth flow.
   """
   issueImportFinishGithubOAuth(
@@ -14292,6 +14370,10 @@ input ViewPreferencesCreateInput {
   """
   id: String
   """
+  The default parameters for the insight on that view.
+  """
+  insights: JSONObject
+  """
   The label these view preferences are associated with.
   """
   labelId: String
@@ -14350,9 +14432,13 @@ enum ViewPreferencesType {
 
 input ViewPreferencesUpdateInput {
   """
+  The default parameters for the insight on that view.
+  """
+  insights: JSONObject
+  """
   View preferences.
   """
-  preferences: JSONObject!
+  preferences: JSONObject
 }
 
 """

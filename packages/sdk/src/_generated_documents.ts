@@ -2421,6 +2421,8 @@ export type IssueImport = Node & {
   createdAt: Scalars["DateTime"];
   /** The id for the user that started the job. */
   creatorId: Scalars["String"];
+  /** File URL for the uploaded CSV for the import, if there is one. */
+  csvFileUrl?: Maybe<Scalars["String"]>;
   /** User readable error message, if one has occurred during the import. */
   error?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
@@ -2441,6 +2443,12 @@ export type IssueImport = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+};
+
+export type IssueImportCheckPayload = {
+  __typename?: "IssueImportCheckPayload";
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
 };
 
 export type IssueImportDeletePayload = {
@@ -2990,6 +2998,8 @@ export type Mutation = {
   googleUserAccountAuth: AuthResolverResponse;
   /** Upload an image from an URL to Linear. */
   imageUploadFromUrl: ImageUploadFromUrlPayload;
+  /** XHR request payload to upload a file for import, directly to Linear's cloud storage. */
+  importFileUpload: UploadPayload;
   /** Deletes an integration. */
   integrationDelete: ArchivePayload;
   /** Integrates the organization with Discord. */
@@ -3062,6 +3072,8 @@ export type Mutation = {
   issueDescriptionUpdateFromFront: IssuePayload;
   /** Kicks off an Asana import job. */
   issueImportCreateAsana: IssueImportPayload;
+  /** Kicks off a Jira import job from a CSV. */
+  issueImportCreateCSVJira: IssueImportPayload;
   /** Kicks off a Shortcut (formerly Clubhouse) import job. */
   issueImportCreateClubhouse: IssueImportPayload;
   /** Kicks off a GitHub import job. */
@@ -3467,6 +3479,13 @@ export type MutationImageUploadFromUrlArgs = {
   url: Scalars["String"];
 };
 
+export type MutationImportFileUploadArgs = {
+  contentType: Scalars["String"];
+  filename: Scalars["String"];
+  metaData?: Maybe<Scalars["JSON"]>;
+  size: Scalars["Int"];
+};
+
 export type MutationIntegrationDeleteArgs = {
   id: Scalars["String"];
 };
@@ -3617,6 +3636,16 @@ export type MutationIssueImportCreateAsanaArgs = {
   id?: Maybe<Scalars["String"]>;
   includeClosedIssues?: Maybe<Scalars["Boolean"]>;
   instantProcess?: Maybe<Scalars["Boolean"]>;
+  organizationId?: Maybe<Scalars["String"]>;
+  teamId?: Maybe<Scalars["String"]>;
+  teamName?: Maybe<Scalars["String"]>;
+};
+
+export type MutationIssueImportCreateCsvJiraArgs = {
+  csvUrl: Scalars["String"];
+  jiraEmail?: Maybe<Scalars["String"]>;
+  jiraHostname?: Maybe<Scalars["String"]>;
+  jiraToken?: Maybe<Scalars["String"]>;
   organizationId?: Maybe<Scalars["String"]>;
   teamId?: Maybe<Scalars["String"]>;
   teamName?: Maybe<Scalars["String"]>;
@@ -5956,6 +5985,8 @@ export type Query = {
   integrationsSettings: IntegrationsSettings;
   /** One specific issue. */
   issue: Issue;
+  /** Checks a CSV file validity against a specific import service. */
+  issueImportCheckCSV: IssueImportCheckPayload;
   /** Fetches the GitHub token, completing the OAuth flow. */
   issueImportFinishGithubOAuth: GithubOAuthTokenPayload;
   /** One specific label. */
@@ -6277,6 +6308,11 @@ export type QueryIntegrationsSettingsArgs = {
 
 export type QueryIssueArgs = {
   id: Scalars["String"];
+};
+
+export type QueryIssueImportCheckCsvArgs = {
+  csvUrl: Scalars["String"];
+  service: Scalars["String"];
 };
 
 export type QueryIssueImportFinishGithubOAuthArgs = {
@@ -8189,6 +8225,8 @@ export type ViewPreferencesCreateInput = {
   cycleId?: Maybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
+  /** The default parameters for the insight on that view. */
+  insights?: Maybe<Scalars["JSONObject"]>;
   /** The label these view preferences are associated with. */
   labelId?: Maybe<Scalars["String"]>;
   /** View preferences object. */
@@ -8224,8 +8262,10 @@ export enum ViewPreferencesType {
 }
 
 export type ViewPreferencesUpdateInput = {
+  /** The default parameters for the insight on that view. */
+  insights?: Maybe<Scalars["JSONObject"]>;
   /** View preferences. */
-  preferences: Scalars["JSONObject"];
+  preferences?: Maybe<Scalars["JSONObject"]>;
 };
 
 /** The client view this custom view is targeting. */
@@ -9011,6 +9051,7 @@ export type ProjectLinkFragment = { __typename: "ProjectLink" } & Pick<
 export type IssueImportFragment = { __typename: "IssueImport" } & Pick<
   IssueImport,
   | "progress"
+  | "csvFileUrl"
   | "teamName"
   | "mapping"
   | "creatorId"
@@ -9702,6 +9743,11 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
   nodes: Array<{ __typename?: "IssueHistory" } & IssueHistoryFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
+
+export type IssueImportCheckPayloadFragment = { __typename: "IssueImportCheckPayload" } & Pick<
+  IssueImportCheckPayload,
+  "success"
+>;
 
 export type IssueImportDeletePayloadFragment = { __typename: "IssueImportDeletePayload" } & Pick<
   IssueImportDeletePayload,
@@ -10607,6 +10653,17 @@ export type ImageUploadFromUrlMutation = { __typename?: "Mutation" } & {
   imageUploadFromUrl: { __typename?: "ImageUploadFromUrlPayload" } & ImageUploadFromUrlPayloadFragment;
 };
 
+export type ImportFileUploadMutationVariables = Exact<{
+  contentType: Scalars["String"];
+  filename: Scalars["String"];
+  metaData?: Maybe<Scalars["JSON"]>;
+  size: Scalars["Int"];
+}>;
+
+export type ImportFileUploadMutation = { __typename?: "Mutation" } & {
+  importFileUpload: { __typename?: "UploadPayload" } & UploadPayloadFragment;
+};
+
 export type DeleteIntegrationMutationVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -10882,6 +10939,20 @@ export type IssueImportCreateAsanaMutationVariables = Exact<{
 
 export type IssueImportCreateAsanaMutation = { __typename?: "Mutation" } & {
   issueImportCreateAsana: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
+};
+
+export type IssueImportCreateCsvJiraMutationVariables = Exact<{
+  csvUrl: Scalars["String"];
+  jiraEmail?: Maybe<Scalars["String"]>;
+  jiraHostname?: Maybe<Scalars["String"]>;
+  jiraToken?: Maybe<Scalars["String"]>;
+  organizationId?: Maybe<Scalars["String"]>;
+  teamId?: Maybe<Scalars["String"]>;
+  teamName?: Maybe<Scalars["String"]>;
+}>;
+
+export type IssueImportCreateCsvJiraMutation = { __typename?: "Mutation" } & {
+  issueImportCreateCSVJira: { __typename?: "IssueImportPayload" } & IssueImportPayloadFragment;
 };
 
 export type IssueImportCreateClubhouseMutationVariables = Exact<{
@@ -12426,6 +12497,15 @@ export type Issue_SubscribersQueryVariables = Exact<{
 
 export type Issue_SubscribersQuery = { __typename?: "Query" } & {
   issue: { __typename?: "Issue" } & { subscribers: { __typename?: "UserConnection" } & UserConnectionFragment };
+};
+
+export type IssueImportCheckCsvQueryVariables = Exact<{
+  csvUrl: Scalars["String"];
+  service: Scalars["String"];
+}>;
+
+export type IssueImportCheckCsvQuery = { __typename?: "Query" } & {
+  issueImportCheckCSV: { __typename?: "IssueImportCheckPayload" } & IssueImportCheckPayloadFragment;
 };
 
 export type IssueImportFinishGithubOAuthQueryVariables = Exact<{
@@ -16229,6 +16309,7 @@ export const IssueImportFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "progress" } },
+          { kind: "Field", name: { kind: "Name", value: "csvFileUrl" } },
           { kind: "Field", name: { kind: "Name", value: "teamName" } },
           { kind: "Field", name: { kind: "Name", value: "mapping" } },
           { kind: "Field", name: { kind: "Name", value: "creatorId" } },
@@ -16474,6 +16555,23 @@ export const IssueHistoryConnectionFragmentDoc = {
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueHistoryConnectionFragment, unknown>;
+export const IssueImportCheckPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueImportCheckPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueImportCheckPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<IssueImportCheckPayloadFragment, unknown>;
 export const IssueImportDeletePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -21320,6 +21418,74 @@ export const ImageUploadFromUrlDocument = {
     ...ImageUploadFromUrlPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ImageUploadFromUrlMutation, ImageUploadFromUrlMutationVariables>;
+export const ImportFileUploadDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "importFileUpload" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "contentType" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filename" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "metaData" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "JSON" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "size" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "importFileUpload" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "contentType" },
+                value: { kind: "Variable", name: { kind: "Name", value: "contentType" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filename" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filename" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "metaData" },
+                value: { kind: "Variable", name: { kind: "Name", value: "metaData" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "size" },
+                value: { kind: "Variable", name: { kind: "Name", value: "size" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UploadPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UploadPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ImportFileUploadMutation, ImportFileUploadMutationVariables>;
 export const DeleteIntegrationDocument = {
   kind: "Document",
   definitions: [
@@ -22813,6 +22979,104 @@ export const IssueImportCreateAsanaDocument = {
     ...IssueImportPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueImportCreateAsanaMutation, IssueImportCreateAsanaMutationVariables>;
+export const IssueImportCreateCsvJiraDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "issueImportCreateCSVJira" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "csvUrl" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "jiraEmail" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "jiraHostname" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "jiraToken" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportCreateCSVJira" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "csvUrl" },
+                value: { kind: "Variable", name: { kind: "Name", value: "csvUrl" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "jiraEmail" },
+                value: { kind: "Variable", name: { kind: "Name", value: "jiraEmail" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "jiraHostname" },
+                value: { kind: "Variable", name: { kind: "Name", value: "jiraHostname" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "jiraToken" },
+                value: { kind: "Variable", name: { kind: "Name", value: "jiraToken" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "organizationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "organizationId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamName" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamName" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueImportPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IssueImportCreateCsvJiraMutation, IssueImportCreateCsvJiraMutationVariables>;
 export const IssueImportCreateClubhouseDocument = {
   kind: "Document",
   definitions: [
@@ -31780,6 +32044,54 @@ export const Issue_SubscribersDocument = {
     ...UserConnectionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Issue_SubscribersQuery, Issue_SubscribersQueryVariables>;
+export const IssueImportCheckCsvDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "issueImportCheckCSV" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "csvUrl" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "service" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueImportCheckCSV" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "csvUrl" },
+                value: { kind: "Variable", name: { kind: "Name", value: "csvUrl" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "service" },
+                value: { kind: "Variable", name: { kind: "Name", value: "service" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueImportCheckPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueImportCheckPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IssueImportCheckCsvQuery, IssueImportCheckCsvQueryVariables>;
 export const IssueImportFinishGithubOAuthDocument = {
   kind: "Document",
   definitions: [

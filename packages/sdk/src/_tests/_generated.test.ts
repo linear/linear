@@ -1094,6 +1094,18 @@ describe("generated", () => {
     });
   });
 
+  /** Test IssueImportCheckCsv query */
+  describe("IssueImportCheckCsv", () => {
+    /** Test the root model query for IssueImportCheckCsv */
+    it("issueImportCheckCSV", async () => {
+      const issueImportCheckCSV: L.IssueImportCheckPayload | undefined = await client.issueImportCheckCSV(
+        "mock-csvUrl",
+        "mock-service"
+      );
+      expect(issueImportCheckCSV instanceof L.IssueImportCheckPayload);
+    });
+  });
+
   /** Test IssueImportFinishGithubOAuth query */
   describe("IssueImportFinishGithubOAuth", () => {
     /** Test the root model query for IssueImportFinishGithubOAuth */

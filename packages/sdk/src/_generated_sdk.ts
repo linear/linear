@@ -2628,6 +2628,7 @@ export class IssueImport extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.creatorId = data.creatorId;
+    this.csvFileUrl = data.csvFileUrl ?? undefined;
     this.error = data.error ?? undefined;
     this.id = data.id;
     this.mapping = parseJson(data.mapping) ?? undefined;
@@ -2644,6 +2645,8 @@ export class IssueImport extends Request {
   public createdAt: Date;
   /** The id for the user that started the job. */
   public creatorId: string;
+  /** File URL for the uploaded CSV for the import, if there is one. */
+  public csvFileUrl?: string;
   /** User readable error message, if one has occurred during the import. */
   public error?: string;
   /** The unique identifier of the entity. */
@@ -2673,6 +2676,21 @@ export class IssueImport extends Request {
   public update(input: L.IssueImportUpdateInput) {
     return new UpdateIssueImportMutation(this._request).fetch(this.id, input);
   }
+}
+/**
+ * IssueImportCheckPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueImportCheckPayloadFragment response data
+ */
+export class IssueImportCheckPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IssueImportCheckPayloadFragment) {
+    super(request);
+    this.success = data.success;
+  }
+
+  /** Whether the operation was successful. */
+  public success: boolean;
 }
 /**
  * IssueImportDeletePayload model
@@ -8301,6 +8319,46 @@ export class ImageUploadFromUrlMutation extends Request {
 }
 
 /**
+ * A fetchable ImportFileUpload Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ImportFileUploadMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ImportFileUpload mutation and return a UploadPayload
+   *
+   * @param contentType - required contentType to pass to importFileUpload
+   * @param filename - required filename to pass to importFileUpload
+   * @param size - required size to pass to importFileUpload
+   * @param variables - variables without 'contentType', 'filename', 'size' to pass into the ImportFileUploadMutation
+   * @returns parsed response from ImportFileUploadMutation
+   */
+  public async fetch(
+    contentType: string,
+    filename: string,
+    size: number,
+    variables?: Omit<L.ImportFileUploadMutationVariables, "contentType" | "filename" | "size">
+  ): LinearFetch<UploadPayload> {
+    const response = await this._request<L.ImportFileUploadMutation, L.ImportFileUploadMutationVariables>(
+      L.ImportFileUploadDocument,
+      {
+        contentType,
+        filename,
+        size,
+        ...variables,
+      }
+    );
+    const data = response.importFileUpload;
+
+    return new UploadPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable DeleteIntegration Mutation
  *
  * @param request - function to call the graphql client
@@ -9262,6 +9320,40 @@ export class IssueImportCreateAsanaMutation extends Request {
       }
     );
     const data = response.issueImportCreateAsana;
+
+    return new IssueImportPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueImportCreateCsvJira Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueImportCreateCsvJiraMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueImportCreateCsvJira mutation and return a IssueImportPayload
+   *
+   * @param csvUrl - required csvUrl to pass to issueImportCreateCSVJira
+   * @param variables - variables without 'csvUrl' to pass into the IssueImportCreateCsvJiraMutation
+   * @returns parsed response from IssueImportCreateCsvJiraMutation
+   */
+  public async fetch(
+    csvUrl: string,
+    variables?: Omit<L.IssueImportCreateCsvJiraMutationVariables, "csvUrl">
+  ): LinearFetch<IssueImportPayload> {
+    const response = await this._request<
+      L.IssueImportCreateCsvJiraMutation,
+      L.IssueImportCreateCsvJiraMutationVariables
+    >(L.IssueImportCreateCsvJiraDocument, {
+      csvUrl,
+      ...variables,
+    });
+    const data = response.issueImportCreateCSVJira;
 
     return new IssueImportPayload(this._request, data);
   }
@@ -13242,6 +13334,37 @@ export class IssueQuery extends Request {
     const data = response.issue;
 
     return new Issue(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueImportCheckCsv Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueImportCheckCsvQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueImportCheckCsv query and return a IssueImportCheckPayload
+   *
+   * @param csvUrl - required csvUrl to pass to issueImportCheckCSV
+   * @param service - required service to pass to issueImportCheckCSV
+   * @returns parsed response from IssueImportCheckCsvQuery
+   */
+  public async fetch(csvUrl: string, service: string): LinearFetch<IssueImportCheckPayload> {
+    const response = await this._request<L.IssueImportCheckCsvQuery, L.IssueImportCheckCsvQueryVariables>(
+      L.IssueImportCheckCsvDocument,
+      {
+        csvUrl,
+        service,
+      }
+    );
+    const data = response.issueImportCheckCSV;
+
+    return new IssueImportCheckPayload(this._request, data);
   }
 }
 
@@ -18158,6 +18281,23 @@ export class LinearSdk extends Request {
     return new ImageUploadFromUrlMutation(this._request).fetch(url);
   }
   /**
+   * XHR request payload to upload a file for import, directly to Linear's cloud storage.
+   *
+   * @param contentType - required contentType to pass to importFileUpload
+   * @param filename - required filename to pass to importFileUpload
+   * @param size - required size to pass to importFileUpload
+   * @param variables - variables without 'contentType', 'filename', 'size' to pass into the ImportFileUploadMutation
+   * @returns UploadPayload
+   */
+  public importFileUpload(
+    contentType: string,
+    filename: string,
+    size: number,
+    variables?: Omit<L.ImportFileUploadMutationVariables, "contentType" | "filename" | "size">
+  ): LinearFetch<UploadPayload> {
+    return new ImportFileUploadMutation(this._request).fetch(contentType, filename, size, variables);
+  }
+  /**
    * Deletes an integration.
    *
    * @param id - required id to pass to deleteIntegration
@@ -18499,6 +18639,19 @@ export class LinearSdk extends Request {
     variables?: Omit<L.IssueImportCreateAsanaMutationVariables, "asanaTeamName" | "asanaToken">
   ): LinearFetch<IssueImportPayload> {
     return new IssueImportCreateAsanaMutation(this._request).fetch(asanaTeamName, asanaToken, variables);
+  }
+  /**
+   * Kicks off a Jira import job from a CSV.
+   *
+   * @param csvUrl - required csvUrl to pass to issueImportCreateCSVJira
+   * @param variables - variables without 'csvUrl' to pass into the IssueImportCreateCsvJiraMutation
+   * @returns IssueImportPayload
+   */
+  public issueImportCreateCSVJira(
+    csvUrl: string,
+    variables?: Omit<L.IssueImportCreateCsvJiraMutationVariables, "csvUrl">
+  ): LinearFetch<IssueImportPayload> {
+    return new IssueImportCreateCsvJiraMutation(this._request).fetch(csvUrl, variables);
   }
   /**
    * Kicks off a Shortcut (formerly Clubhouse) import job.
@@ -19792,6 +19945,16 @@ export class LinearSdk extends Request {
    */
   public issue(id: string): LinearFetch<Issue> {
     return new IssueQuery(this._request).fetch(id);
+  }
+  /**
+   * Checks a CSV file validity against a specific import service.
+   *
+   * @param csvUrl - required csvUrl to pass to issueImportCheckCSV
+   * @param service - required service to pass to issueImportCheckCSV
+   * @returns IssueImportCheckPayload
+   */
+  public issueImportCheckCSV(csvUrl: string, service: string): LinearFetch<IssueImportCheckPayload> {
+    return new IssueImportCheckCsvQuery(this._request).fetch(csvUrl, service);
   }
   /**
    * Fetches the GitHub token, completing the OAuth flow.
