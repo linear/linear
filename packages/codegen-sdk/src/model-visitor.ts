@@ -1,9 +1,12 @@
 import {
   findObject,
   findQuery,
+  getObjectName,
   isConnection,
+  isEdge,
   isScalarField,
   isValidField,
+  isValidObject,
   lowerFirst,
   OperationType,
   PluginContext,
@@ -37,14 +40,27 @@ import {
 } from "./types";
 
 /**
- * Ensure the models is not a root operation, a edge, or has a skip comment.
+ * Ensure the models is not a root operation, an edge, or has a skip comment.
  */
-function isValidModel(model: ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode, context: PluginContext) {
+function isValidModel(model: ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode, context: PluginContext): boolean {
   const skipComment = context.config.skipComments?.some(comment => model.description?.value.includes(comment));
+  let skipConnection = false;
+
+  const connection = isConnection(model);
+  if (connection && model) {
+    // Check the type of this connection is valid
+    const rootTypeName = getObjectName(model).replace("Connection", "");
+    skipConnection = !isValidObject(
+      context,
+      context.objects.find(obj => rootTypeName === obj.name.value)
+    );
+  }
+
   return (
     !Object.keys(OperationType).includes(lowerFirst(model.name.value)) &&
-    !model.name.value.endsWith("Edge") &&
-    !skipComment
+    !isEdge(model) &&
+    !skipComment &&
+    !skipConnection
   );
 }
 

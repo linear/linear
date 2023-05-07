@@ -32,9 +32,7 @@ describe("webhooks", () => {
   it("incorrect signature, should fail verification", async () => {
     const webhook = new LinearWebhooks("SECRET");
     const signature = crypto.createHmac("sha256", "WRONG_SECRET").update(rawBody).digest("hex");
-    expect(() => webhook.verify(rawBody, signature)).toThrowError(
-      "Invalid webhook signature"
-    );
+    expect(() => webhook.verify(rawBody, signature)).toThrowError("Invalid webhook signature");
   });
 
   it("correct signature, incorrect timestamp should fail verification", async () => {

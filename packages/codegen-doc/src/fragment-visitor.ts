@@ -11,7 +11,7 @@ import {
 } from "graphql";
 import { getRequiredArgs } from "./args";
 import { isValidField } from "./field";
-import { isValidObject } from "./fragment";
+import { isValidFragment } from "./fragment";
 import { findInterface, findObject, isConnection } from "./object";
 import { printGraphqlComment, printGraphqlDebug, printGraphqlDescription, printLines } from "./print";
 import { findQuery } from "./query";
@@ -58,7 +58,7 @@ export class FragmentVisitor {
       const node = _node as unknown as NamedFields<ObjectTypeDefinitionNode>;
 
       /** Process non empty object definitions */
-      if (isValidObject(this._context, node, this._fragments)) {
+      if (isValidFragment(this._context, node)) {
         /** Record fragment on context */
         this._fragments = [...this._fragments, node];
 
