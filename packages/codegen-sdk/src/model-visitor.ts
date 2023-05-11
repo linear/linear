@@ -7,6 +7,7 @@ import {
   isScalarField,
   isValidField,
   isValidObject,
+  isValidQuery,
   lowerFirst,
   OperationType,
   PluginContext,
@@ -115,15 +116,19 @@ export class ModelVisitor {
               description: `${arg.name.value} to be passed to ${query.name.value}`,
             })) ?? [];
 
-          return {
-            __typename: SdkModelFieldType.query,
-            node,
-            name,
-            type,
-            query,
-            args,
-            nonNull,
-          };
+          if (isValidQuery(this._context, query)) {
+            return {
+              __typename: SdkModelFieldType.query,
+              node,
+              name,
+              type,
+              query,
+              args,
+              nonNull,
+            };
+          } else {
+            return null;
+          }
         }
 
         /** Identify scalar fields */

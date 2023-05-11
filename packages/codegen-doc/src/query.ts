@@ -42,3 +42,11 @@ export function findQuery(
     ) ?? matchingQueries[0]
   );
 }
+
+/**
+ * Check whether this query does not have a skip comment.
+ */
+export function isValidQuery(context: PluginContext, query: FieldDefinitionNode): boolean {
+  const skipComment = context.config.skipComments?.some(comment => query?.description?.value.includes(comment));
+  return !skipComment;
+}
