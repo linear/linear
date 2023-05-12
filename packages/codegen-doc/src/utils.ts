@@ -1,4 +1,14 @@
-import { Kind, ListTypeNode, NamedTypeNode, NameNode, NonNullTypeNode } from "graphql";
+import {
+  FieldDefinitionNode,
+  InterfaceTypeDefinitionNode,
+  Kind,
+  ListTypeNode,
+  NamedTypeNode,
+  NameNode,
+  NonNullTypeNode,
+  ObjectTypeDefinitionNode,
+} from "graphql";
+import { NamedFields, PluginContext } from "./types";
 
 const log = "codegen-doc:utils:";
 
@@ -107,4 +117,20 @@ export function getLast<Type>(arr: Type[] = []): Type | undefined {
 export function getKeyByValue<Key extends string, Value>(obj: Record<Key, Value>, value: Value): Key | undefined {
   const keys = Object.keys(obj) as Key[];
   return keys.find(key => obj[key] === value);
+}
+
+/**
+ * Check whether a node has a skip comment.
+ * @param context The plugin context
+ * @param node The node to check
+ */
+export function nodeHasSkipComment(
+  context: PluginContext,
+  node?:
+    | FieldDefinitionNode
+    | ObjectTypeDefinitionNode
+    | InterfaceTypeDefinitionNode
+    | NamedFields<ObjectTypeDefinitionNode>
+): boolean {
+  return context.config.skipComments?.some(comment => node?.description?.value.includes(comment)) ?? false;
 }

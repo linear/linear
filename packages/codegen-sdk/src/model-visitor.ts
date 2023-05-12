@@ -9,6 +9,7 @@ import {
   isValidObject,
   isValidQuery,
   lowerFirst,
+  nodeHasSkipComment,
   OperationType,
   PluginContext,
   printTypescriptType,
@@ -44,7 +45,7 @@ import {
  * Ensure the models is not a root operation, an edge, or has a skip comment.
  */
 function isValidModel(model: ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode, context: PluginContext): boolean {
-  const skipComment = context.config.skipComments?.some(comment => model.description?.value.includes(comment));
+  const skipComment = nodeHasSkipComment(context, model);
   let skipConnection = false;
 
   const connection = isConnection(model);

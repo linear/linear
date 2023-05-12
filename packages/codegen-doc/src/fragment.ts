@@ -7,6 +7,7 @@ import {
 import { getObjectName, isConnection, isEdge, isOperationRoot, isValidObject } from "./object";
 import { printTypescriptType } from "./print";
 import { Named, NamedFields, PluginContext } from "./types";
+import { nodeHasSkipComment } from "./utils";
 
 /**
  * Get the fragment object type matching the name arg
@@ -27,7 +28,7 @@ export function findFragment(
  */
 export function isValidFragment(context: PluginContext, fragment: NamedFields<ObjectTypeDefinitionNode>): boolean {
   const hasFields = (fragment.fields ?? []).filter(Boolean).length;
-  const skipComment = context.config.skipComments?.some(comment => fragment.description?.value.includes(comment));
+  const skipComment = nodeHasSkipComment(context, fragment);
   const isValid = Boolean(hasFields && !isEdge(fragment) && !isOperationRoot(context, fragment) && !skipComment);
 
   const connection = isConnection(fragment);

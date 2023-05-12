@@ -1,6 +1,6 @@
 import { FieldDefinitionNode, InterfaceTypeDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 import { Named, NamedFields, PluginContext } from "./types";
-import { reduceTypeName } from "./utils";
+import { nodeHasSkipComment, reduceTypeName } from "./utils";
 
 /**
  * Get the object type matching the name arg
@@ -73,7 +73,7 @@ export function isOperationRoot(
  * Use config skipComments to skip fields with comments containing specific strings
  */
 export function isValidObject(context: PluginContext, object?: ObjectTypeDefinitionNode): boolean {
-  const skipComment = context.config.skipComments?.some(comment => object?.description?.value.includes(comment));
+  const skipComment = nodeHasSkipComment(context, object);
 
   const connection = isConnection(object);
   if (connection && object) {
