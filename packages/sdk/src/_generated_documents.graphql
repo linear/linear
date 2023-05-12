@@ -108,8 +108,35 @@ fragment CustomView on CustomView {
   creator {
     id
   }
+  # The user who owns the custom view.
+  owner {
+    id
+  }
   # Whether the custom view is shared with everyone in the organization.
   shared
+}
+
+# A document content for a project.
+fragment DocumentContent on DocumentContent {
+  __typename
+  # The document content as JSON.
+  contentData
+  # The document content in markdown format.
+  content
+  # The issue that the document is associated with.
+  issue {
+    id
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
 }
 
 # A document for a project.
@@ -202,7 +229,7 @@ fragment Notification on Notification {
   snoozedUntilAt
   # The unique identifier of the entity.
   id
-  # The user that caused the notification. If empty it's Linear itself.
+  # The user that caused the notification.
   actor {
     id
   }
@@ -221,27 +248,6 @@ fragment Notification on Notification {
 
   ... on ProjectNotification {
     ...ProjectNotification
-  }
-}
-
-# A personal note for a user
-fragment PersonalNote on PersonalNote {
-  __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The note content as JSON.
-  contentData
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The unique identifier of the entity.
-  id
-  # The user that owns the note.
-  user {
-    id
   }
 }
 
@@ -306,7 +312,7 @@ fragment ProjectNotification on ProjectNotification {
   snoozedUntilAt
   # The unique identifier of the entity.
   id
-  # The user that caused the notification. If empty it's Linear itself.
+  # The user that caused the notification.
   actor {
     id
   }
@@ -963,6 +969,10 @@ fragment IssueImport on IssueImport {
   __typename
   # Current step progress in % (0-100).
   progress
+  # Error code and metadata, if one has occurred during the import
+  errorMetadata
+  # File URL for the uploaded CSV for the import, if there is one.
+  csvFileUrl
   # New team's name in cases when teamId not set
   teamName
   # The data mapping configuration for the import job.
@@ -1081,7 +1091,7 @@ fragment IssueNotification on IssueNotification {
   snoozedUntilAt
   # The unique identifier of the entity.
   id
-  # The user that caused the notification. If empty it's Linear itself.
+  # The user that caused the notification.
   actor {
     id
   }
@@ -1184,6 +1194,10 @@ fragment Issue on Issue {
   snoozedBy {
     id
   }
+  # The users favorite associated with this issue.
+  favorite {
+    id
+  }
   # The workflow state that the issue is associated with.
   state {
     id
@@ -1218,7 +1232,7 @@ fragment OauthClientApprovalNotification on OauthClientApprovalNotification {
   snoozedUntilAt
   # The unique identifier of the entity.
   id
-  # The user that caused the notification. If empty it's Linear itself.
+  # The user that caused the notification.
   actor {
     id
   }
@@ -1424,6 +1438,19 @@ fragment SyncResponse on SyncResponse {
   subscribedSyncGroups
   # The version of the remote database. Incremented by 1 for each migration run on the database.
   databaseVersion
+}
+
+# Contains requested archived model objects.
+fragment ArchiveResponse on ArchiveResponse {
+  __typename
+  # A JSON serialized collection of model objects loaded from the archive
+  archive
+  # The total number of entities in the archive.
+  totalCount
+  # The version of the remote database. Incremented by 1 for each migration run on the database.
+  databaseVersion
+  # Whether the dependencies for the model objects are included in the archive.
+  includesDependencies
 }
 
 # Defines the membership of a user to a team.
@@ -2155,7 +2182,7 @@ fragment Favorite on Favorite {
   parent {
     id
   }
-  # The team of the favorited predefiend view.
+  # The team of the favorited predefined view.
   predefinedViewTeam {
     id
   }
@@ -2163,7 +2190,7 @@ fragment Favorite on Favorite {
   archivedAt
   # The time at which the entity was created.
   createdAt
-  # The type of favorited predefiend view.
+  # The type of favorited predefined view.
   predefinedViewType
   # The type of the favorite.
   type
@@ -2399,11 +2426,11 @@ fragment CustomViewPayload on CustomViewPayload {
 fragment CustomViewSuggestionPayload on CustomViewSuggestionPayload {
   __typename
   # The suggested view description.
-  suggestedDescription
+  description
   # The suggested view icon.
-  suggestedIcon
+  icon
   # The suggested view name.
-  suggestedName
+  name
 }
 
 fragment CycleConnection on CycleConnection {
@@ -2448,6 +2475,72 @@ fragment DocumentPayload on DocumentPayload {
   lastSyncId
   # Whether the operation was successful.
   success
+}
+
+fragment DocumentSearchPayload on DocumentSearchPayload {
+  __typename
+  # Archived entities matching the search term along with all their dependencies.
+  archivePayload {
+    ...ArchiveResponse
+  }
+  # Total number of results for query without filters applied.
+  totalCount
+  nodes {
+    ...DocumentSearchResult
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment DocumentSearchResult on DocumentSearchResult {
+  __typename
+  # Metadata related to search result
+  metadata
+  # The color of the icon.
+  color
+  # The document content as JSON.
+  contentData
+  # The document content in markdown format.
+  content
+  # The document title.
+  title
+  # The document's unique URL slug.
+  slugId
+  # The icon of the document.
+  icon
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The project that the document is associated with.
+  project {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the document.
+  creator {
+    id
+  }
+  # The user who last updated the document.
+  updatedBy {
+    id
+  }
+}
+
+fragment DocumentSearchResultConnection on DocumentSearchResultConnection {
+  __typename
+  nodes {
+    ...DocumentSearchResult
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment EmailUnsubscribePayload on EmailUnsubscribePayload {
@@ -2650,6 +2743,12 @@ fragment IssueConnection on IssueConnection {
   }
 }
 
+fragment IssueFilterSuggestionPayload on IssueFilterSuggestionPayload {
+  __typename
+  # The json filter that is suggested.
+  filter
+}
+
 fragment IssueHistoryConnection on IssueHistoryConnection {
   __typename
   nodes {
@@ -2658,6 +2757,12 @@ fragment IssueHistoryConnection on IssueHistoryConnection {
   pageInfo {
     ...PageInfo
   }
+}
+
+fragment IssueImportCheckPayload on IssueImportCheckPayload {
+  __typename
+  # Whether the operation was successful.
+  success
 }
 
 fragment IssueImportDeletePayload on IssueImportDeletePayload {
@@ -2746,6 +2851,136 @@ fragment IssueRelationPayload on IssueRelationPayload {
   }
   # Whether the operation was successful.
   success
+}
+
+fragment IssueSearchPayload on IssueSearchPayload {
+  __typename
+  # Archived entities matching the search term along with all their dependencies.
+  archivePayload {
+    ...ArchiveResponse
+  }
+  # Total number of results for query without filters applied.
+  totalCount
+  nodes {
+    ...IssueSearchResult
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment IssueSearchResult on IssueSearchResult {
+  __typename
+  # A flag that indicates whether the issue is in the trash bin.
+  trashed
+  # Issue URL.
+  url
+  # Issue's human readable identifier (e.g. ENG-123).
+  identifier
+  # Label for the priority.
+  priorityLabel
+  # Metadata related to search result
+  metadata
+  # Previous identifiers of the issue if it has been moved between teams.
+  previousIdentifiers
+  # Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk).
+  customerTicketCount
+  # Suggested branch name for the issue.
+  branchName
+  # The cycle that the issue is associated with.
+  cycle {
+    id
+  }
+  # The date at which the issue is due.
+  dueDate
+  # The estimate of the complexity of the issue..
+  estimate
+  # The issue's description in markdown format.
+  description
+  # The issue's title.
+  title
+  # The issue's unique number.
+  number
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The order of the item in its column on the board.
+  boardOrder
+  # The order of the item in relation to other items in the organization.
+  sortOrder
+  # The order of the item in the sub-issue list. Only set if the issue has a parent.
+  subIssueSortOrder
+  # The parent of the issue.
+  parent {
+    id
+  }
+  # The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  priority
+  # The project that the issue is associated with.
+  project {
+    id
+  }
+  # The projectMilestone that the issue is associated with.
+  projectMilestone {
+    id
+  }
+  # The team that the issue is associated with.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the issue entered triage.
+  startedTriageAt
+  # The time at which the issue left triage.
+  triagedAt
+  # The time at which the issue was automatically archived by the auto pruning process.
+  autoArchivedAt
+  # The time at which the issue was automatically closed by the auto pruning process.
+  autoClosedAt
+  # The time at which the issue was moved into canceled state.
+  canceledAt
+  # The time at which the issue was moved into completed state.
+  completedAt
+  # The time at which the issue was moved into started state.
+  startedAt
+  # The time until an issue will be snoozed in Triage view.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user to whom the issue is assigned to.
+  assignee {
+    id
+  }
+  # The user who created the issue.
+  creator {
+    id
+  }
+  # The user who snoozed the issue.
+  snoozedBy {
+    id
+  }
+  # The users favorite associated with this issue.
+  favorite {
+    id
+  }
+  # The workflow state that the issue is associated with.
+  state {
+    id
+  }
+}
+
+fragment IssueSearchResultConnection on IssueSearchResultConnection {
+  __typename
+  nodes {
+    ...IssueSearchResult
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment LogoutResponse on LogoutResponse {
@@ -2912,6 +3147,12 @@ fragment ProjectConnection on ProjectConnection {
   }
 }
 
+fragment ProjectFilterSuggestionPayload on ProjectFilterSuggestionPayload {
+  __typename
+  # The json filter that is suggested.
+  filter
+}
+
 fragment ProjectLinkConnection on ProjectLinkConnection {
   __typename
   nodes {
@@ -2966,6 +3207,112 @@ fragment ProjectPayload on ProjectPayload {
   }
   # Whether the operation was successful.
   success
+}
+
+fragment ProjectSearchPayload on ProjectSearchPayload {
+  __typename
+  # Archived entities matching the search term along with all their dependencies.
+  archivePayload {
+    ...ArchiveResponse
+  }
+  # Total number of results for query without filters applied.
+  totalCount
+  nodes {
+    ...ProjectSearchResult
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ProjectSearchResult on ProjectSearchResult {
+  __typename
+  # Metadata related to search result
+  metadata
+  # Project URL.
+  url
+  # Settings for all integrations associated with that project.
+  integrationsSettings {
+    id
+  }
+  # The estimated completion date of the project.
+  targetDate
+  # The icon of the project.
+  icon
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The number of completed estimation points after each week.
+  completedScopeHistory
+  # The number of completed issues in the project after each week.
+  completedIssueCountHistory
+  # The number of in progress estimation points after each week.
+  inProgressScopeHistory
+  # The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
+  progress
+  # The overall scope (total estimate points) of the project.
+  scope
+  # The project lead.
+  lead {
+    id
+  }
+  # The project was created based on this issue.
+  convertedFromIssue {
+    id
+  }
+  # The project's color.
+  color
+  # The project's description.
+  description
+  # The project's name.
+  name
+  # The project's unique URL slug.
+  slugId
+  # The sort order for the project within the organization.
+  sortOrder
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the project was automatically archived by the auto pruning process.
+  autoArchivedAt
+  # The time at which the project was moved into canceled state.
+  canceledAt
+  # The time at which the project was moved into completed state.
+  completedAt
+  # The time at which the project was moved into started state.
+  startedAt
+  # The time until which project update reminders are paused.
+  projectUpdateRemindersPausedUntilAt
+  # The total number of estimation points after each week.
+  scopeHistory
+  # The total number of issues in the project after each week.
+  issueCountHistory
+  # The type of the state.
+  state
+  # The unique identifier of the entity.
+  id
+  # The user who created the project.
+  creator {
+    id
+  }
+  # Whether to send new issue comment notifications to Slack.
+  slackIssueComments
+  # Whether to send new issue notifications to Slack.
+  slackNewIssue
+  # Whether to send new issue status updates to Slack.
+  slackIssueStatuses
+}
+
+fragment ProjectSearchResultConnection on ProjectSearchResultConnection {
+  __typename
+  nodes {
+    ...ProjectSearchResult
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment ProjectUpdateConnection on ProjectUpdateConnection {
@@ -3861,6 +4208,21 @@ mutation imageUploadFromUrl(
     ...ImageUploadFromUrlPayload
   }
 }
+# XHR request payload to upload a file for import, directly to Linear's cloud storage.
+mutation importFileUpload(
+  # MIME type of the uploaded file.
+  $contentType: String!
+  # Filename of the uploaded file.
+  $filename: String!
+  # Optional metadata.
+  $metaData: JSON
+  # File size of the uploaded file.
+  $size: Int!
+) {
+  importFileUpload(contentType: $contentType, filename: $filename, metaData: $metaData, size: $size) {
+    ...UploadPayload
+  }
+}
 # Deletes an integration.
 mutation deleteIntegration(
   # The identifier of the integration to delete.
@@ -4206,10 +4568,39 @@ mutation issueImportCreateAsana(
     ...IssueImportPayload
   }
 }
+# Kicks off a Jira import job from a CSV.
+mutation issueImportCreateCSVJira(
+  # URL for the CSV.
+  $csvUrl: String!
+  # Jira user account email.
+  $jiraEmail: String
+  # Jira installation or cloud hostname.
+  $jiraHostname: String
+  # Jira personal access token to access Jira REST API.
+  $jiraToken: String
+  # ID of the organization into which to import data.
+  $organizationId: String
+  # ID of the team into which to import data. Empty to create new team.
+  $teamId: String
+  # Name of new team. When teamId is not set.
+  $teamName: String
+) {
+  issueImportCreateCSVJira(
+    csvUrl: $csvUrl
+    jiraEmail: $jiraEmail
+    jiraHostname: $jiraHostname
+    jiraToken: $jiraToken
+    organizationId: $organizationId
+    teamId: $teamId
+    teamName: $teamName
+  ) {
+    ...IssueImportPayload
+  }
+}
 # Kicks off a Shortcut (formerly Clubhouse) import job.
 mutation issueImportCreateClubhouse(
-  # Shortcut (formerly Clubhouse) team name to choose which issues we should import.
-  $clubhouseTeamName: String!
+  # Shortcut (formerly Clubhouse) group name to choose which issues we should import.
+  $clubhouseGroupName: String!
   # Shortcut (formerly Clubhouse) token to fetch information from the Clubhouse API.
   $clubhouseToken: String!
   # ID of issue import. If not provided it will be generated.
@@ -4226,7 +4617,7 @@ mutation issueImportCreateClubhouse(
   $teamName: String
 ) {
   issueImportCreateClubhouse(
-    clubhouseTeamName: $clubhouseTeamName
+    clubhouseGroupName: $clubhouseGroupName
     clubhouseToken: $clubhouseToken
     id: $id
     includeClosedIssues: $includeClosedIssues
@@ -5987,70 +6378,6 @@ query emojis(
     ...EmojiConnection
   }
 }
-# One specific external user.
-query externalUser(
-  # The identifier of the external user to retrieve.
-  $id: String!
-) {
-  externalUser(id: $id) {
-    archivedAt
-    avatarUrl
-    createdAt
-    displayName
-    email
-    id
-    lastSeen
-    name
-    # Organization the external user belongs to.
-    organization {
-      ...Organization
-    }
-    updatedAt
-  }
-}
-# All external users for the organization.
-query externalUsers(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  externalUsers(
-    after: $after
-    before: $before
-    first: $first
-    includeArchived: $includeArchived
-    last: $last
-    orderBy: $orderBy
-  ) {
-    nodes {
-      archivedAt
-      avatarUrl
-      createdAt
-      displayName
-      email
-      id
-      lastSeen
-      name
-      # Organization the external user belongs to.
-      organization {
-        ...Organization
-      }
-      updatedAt
-    }
-    pageInfo {
-      ...PageInfo
-    }
-  }
-}
 # One specific favorite.
 query favorite($id: String!) {
   favorite(id: $id) {
@@ -6460,6 +6787,52 @@ query issue_subscribers(
     ) {
       ...UserConnection
     }
+  }
+}
+# Find issues that are related to a given Figma file key.
+query issueFigmaFileKeySearch(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The Figma file key.
+  $fileKey: String!
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issueFigmaFileKeySearch(
+    after: $after
+    before: $before
+    fileKey: $fileKey
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...IssueConnection
+  }
+}
+# Suggests filters for an issue view based on a text prompt.
+query issueFilterSuggestion($prompt: String!) {
+  issueFilterSuggestion(prompt: $prompt) {
+    ...IssueFilterSuggestionPayload
+  }
+}
+# Checks a CSV file validity against a specific import service.
+query issueImportCheckCSV(
+  # CSV storage url
+  $csvUrl: String!
+  # The service the CSV containing data from
+  $service: String!
+) {
+  issueImportCheckCSV(csvUrl: $csvUrl, service: $service) {
+    ...IssueImportCheckPayload
   }
 }
 # Fetches the GitHub token, completing the OAuth flow.
@@ -7396,6 +7769,12 @@ query project_teams(
     }
   }
 }
+# Suggests filters for a project view based on a text prompt.
+query projectFilterSuggestion($prompt: String!) {
+  projectFilterSuggestion(prompt: $prompt) {
+    ...ProjectFilterSuggestionPayload
+  }
+}
 # One specific project link.
 query projectLink($id: String!) {
   projectLink(id: $id) {
@@ -7633,6 +8012,192 @@ query roadmaps(
     orderBy: $orderBy
   ) {
     ...RoadmapConnection
+  }
+}
+# Search documents.
+query searchDocuments(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # Search string to look for.
+  $term: String!
+) {
+  searchDocuments(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    term: $term
+  ) {
+    ...DocumentSearchPayload
+  }
+}
+# Archived entities matching the search term along with all their dependencies.
+query searchDocuments_archivePayload(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # Search string to look for.
+  $term: String!
+) {
+  searchDocuments(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    term: $term
+  ) {
+    archivePayload {
+      ...ArchiveResponse
+    }
+  }
+}
+# Search issues.
+query searchIssues(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # Search string to look for.
+  $term: String!
+) {
+  searchIssues(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    term: $term
+  ) {
+    ...IssueSearchPayload
+  }
+}
+# Archived entities matching the search term along with all their dependencies.
+query searchIssues_archivePayload(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # Search string to look for.
+  $term: String!
+) {
+  searchIssues(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    term: $term
+  ) {
+    archivePayload {
+      ...ArchiveResponse
+    }
+  }
+}
+# Search projects.
+query searchProjects(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # Search string to look for.
+  $term: String!
+) {
+  searchProjects(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    term: $term
+  ) {
+    ...ProjectSearchPayload
+  }
+}
+# Archived entities matching the search term along with all their dependencies.
+query searchProjects_archivePayload(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # Search string to look for.
+  $term: String!
+) {
+  searchProjects(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    term: $term
+  ) {
+    archivePayload {
+      ...ArchiveResponse
+    }
   }
 }
 # Fetch SSO login URL for the email provided.
