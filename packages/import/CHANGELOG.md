@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.7.3
+
+### Patch Changes
+
+- f133224: chore(deps): update dependency patch versions
+- Updated dependencies [f133224]
+- Updated dependencies [5bf2b65]
+  - @linear/sdk@4.0.0
+
 ## 1.7.2
 
 ### Patch Changes

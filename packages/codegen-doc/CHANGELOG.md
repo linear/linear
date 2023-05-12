@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.14.0
+
+### Minor Changes
+
+- 30f4d22: Check validity of field types
+
+### Patch Changes
+
+- f133224: chore(deps): update dependency patch versions
+
 ## 1.13.0
 
 ### Minor Changes
