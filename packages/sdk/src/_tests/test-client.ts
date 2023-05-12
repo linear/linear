@@ -39,7 +39,7 @@ export async function startClient(Client: typeof LinearClient = LinearClient): P
     }
 
     /** Wait for mock server to start */
-    await sleep(1000);
+    await sleep(5000);
 
     /** Create Linear client with mock server endpoint */
     return new Client({
