@@ -1,6 +1,7 @@
 import { FieldDefinitionNode } from "graphql";
 import { PluginContext } from "./types";
 import { reduceTypeName } from "./utils";
+import { findObject, isValidObject } from "./object";
 
 /**
  * Determine whether the node is a scalar field
@@ -23,7 +24,8 @@ export function isValidField(context: PluginContext, field?: FieldDefinitionNode
     const skipDirective = field?.directives?.find(directive =>
       context.config.skipDirectives?.includes(directive.name.value)
     );
-    return Boolean(!skipDirective && !skipFieldName && !skipComment);
+    const skipType = !isValidObject(context, findObject(context, field));
+    return Boolean(!skipDirective && !skipFieldName && !skipComment && !skipType);
   } else {
     return false;
   }

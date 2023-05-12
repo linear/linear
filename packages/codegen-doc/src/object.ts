@@ -1,6 +1,6 @@
 import { FieldDefinitionNode, InterfaceTypeDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 import { Named, NamedFields, PluginContext } from "./types";
-import { reduceTypeName } from "./utils";
+import { nodeHasSkipComment, reduceTypeName } from "./utils";
 
 /**
  * Get the object type matching the name arg
@@ -51,7 +51,9 @@ export function isConnection(
 /**
  * Is the object an edge type
  */
-export function isEdge(object?: ObjectTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode>): boolean {
+export function isEdge(
+  object?: ObjectTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode> | InterfaceTypeDefinitionNode
+): boolean {
   return object ? getObjectName(object).endsWith("Edge") : false;
 }
 
@@ -63,4 +65,28 @@ export function isOperationRoot(
   object?: ObjectTypeDefinitionNode | NamedFields<ObjectTypeDefinitionNode>
 ): boolean {
   return object ? Object.values(context.operationMap).includes(getObjectName(object)) : false;
+}
+
+/**
+ * Determine whether the object is valid to be output
+ *
+ * Use config skipComments to skip fields with comments containing specific strings
+ */
+export function isValidObject(context: PluginContext, object?: ObjectTypeDefinitionNode): boolean {
+  const skipComment = nodeHasSkipComment(context, object);
+
+  const connection = isConnection(object);
+  if (connection && object) {
+    // Check the type of this connection is valid
+    const rootTypeName = getObjectName(object).replace("Connection", "");
+    return (
+      !skipComment &&
+      isValidObject(
+        context,
+        context.objects.find(obj => rootTypeName === obj.name.value)
+      )
+    );
+  }
+
+  return !skipComment;
 }

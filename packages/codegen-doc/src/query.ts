@@ -1,7 +1,7 @@
 import { FieldDefinitionNode } from "graphql";
 import { getRequiredArgs } from "./args";
 import { Named, PluginContext } from "./types";
-import { reduceListType, reduceTypeName } from "./utils";
+import { nodeHasSkipComment, reduceListType, reduceTypeName } from "./utils";
 
 /**
  * Find a query that can return this field
@@ -41,4 +41,12 @@ export function findQuery(
       [fieldName.toLowerCase(), type.toLowerCase(), listType?.toLowerCase()].includes(query.name.value.toLowerCase())
     ) ?? matchingQueries[0]
   );
+}
+
+/**
+ * Check whether this query does not have a skip comment.
+ */
+export function isValidQuery(context: PluginContext, query: FieldDefinitionNode): boolean {
+  const skipComment = nodeHasSkipComment(context, query);
+  return !skipComment;
 }
