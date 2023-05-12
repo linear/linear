@@ -128,6 +128,28 @@ type ArchivePayload {
 }
 
 """
+Contains requested archived model objects.
+"""
+type ArchiveResponse {
+  """
+  A JSON serialized collection of model objects loaded from the archive
+  """
+  archive: String!
+  """
+  The version of the remote database. Incremented by 1 for each migration run on the database.
+  """
+  databaseVersion: Float!
+  """
+  Whether the dependencies for the model objects are included in the archive.
+  """
+  includesDependencies: Boolean!
+  """
+  The total number of entities in the archive.
+  """
+  totalCount: Float!
+}
+
+"""
 Issue attachment (e.g. support ticket, pull request).
 """
 type Attachment implements Node {
@@ -1001,6 +1023,10 @@ type CustomView implements Node {
   """
   organization: Organization!
   """
+  The user who owns the custom view.
+  """
+  owner: User!
+  """
   [ALPHA] The filter applied to projects in the custom view.
   """
   projectFilterData: JSONObject
@@ -1056,6 +1082,10 @@ input CustomViewCreateInput {
   """
   name: String!
   """
+  The owner of the custom view
+  """
+  ownerId: String
+  """
   [ALPHA] The project filter applied to issues in the custom view.
   """
   projectFilterData: JSONObject
@@ -1096,15 +1126,15 @@ type CustomViewSuggestionPayload {
   """
   The suggested view description.
   """
-  suggestedDescription: String
+  description: String
   """
   The suggested view icon.
   """
-  suggestedIcon: String
+  icon: String
   """
   The suggested view name.
   """
-  suggestedName: String
+  name: String
 }
 
 input CustomViewUpdateInput {
@@ -1132,6 +1162,10 @@ input CustomViewUpdateInput {
   The name of the custom view.
   """
   name: String
+  """
+  The owner of the custom view
+  """
+  ownerId: String
   """
   [ALPHA] The project filter applied to issues in the custom view.
   """
@@ -1578,6 +1612,42 @@ type DocumentConnection {
   pageInfo: PageInfo!
 }
 
+"""
+A document content for a project.
+"""
+type DocumentContent implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The document content in markdown format.
+  """
+  content: String
+  """
+  The document content as JSON.
+  """
+  contentData: JSONObject
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The issue that the document is associated with.
+  """
+  issue: Issue
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
 input DocumentCreateInput {
   """
   The color of the icon.
@@ -1630,6 +1700,95 @@ type DocumentPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+type DocumentSearchPayload {
+  """
+  Archived entities matching the search term along with all their dependencies.
+  """
+  archivePayload: ArchiveResponse!
+  edges: [DocumentSearchResultEdge!]!
+  nodes: [DocumentSearchResult!]!
+  pageInfo: PageInfo!
+  """
+  Total number of results for query without filters applied.
+  """
+  totalCount: Float!
+}
+
+type DocumentSearchResult implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The color of the icon.
+  """
+  color: String
+  """
+  The document content in markdown format.
+  """
+  content: String
+  """
+  The document content as JSON.
+  """
+  contentData: JSONObject
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the document.
+  """
+  creator: User!
+  """
+  The icon of the document.
+  """
+  icon: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Metadata related to search result
+  """
+  metadata: JSONObject!
+  """
+  The project that the document is associated with.
+  """
+  project: Project!
+  """
+  The document's unique URL slug.
+  """
+  slugId: String!
+  """
+  The document title.
+  """
+  title: String!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user who last updated the document.
+  """
+  updatedBy: User!
+}
+
+type DocumentSearchResultConnection {
+  edges: [DocumentSearchResultEdge!]!
+  nodes: [DocumentSearchResult!]!
+  pageInfo: PageInfo!
+}
+
+type DocumentSearchResultEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: DocumentSearchResult!
 }
 
 input DocumentUpdateInput {
@@ -2053,11 +2212,11 @@ type Favorite implements Node {
   """
   parent: Favorite
   """
-  The team of the favorited predefiend view.
+  The team of the favorited predefined view.
   """
   predefinedViewTeam: Team
   """
-  The type of favorited predefiend view.
+  The type of favorited predefined view.
   """
   predefinedViewType: String
   """
@@ -3077,6 +3236,10 @@ type Issue implements Node {
   """
   externalUserCreator: ExternalUser
   """
+  The users favorite associated with this issue.
+  """
+  favorite: Favorite
+  """
   History entries associated with the issue.
   """
   history(
@@ -3885,6 +4048,13 @@ input IssueFilter {
   updatedAt: DateComparator
 }
 
+type IssueFilterSuggestionPayload {
+  """
+  The json filter that is suggested.
+  """
+  filter: JSONObject
+}
+
 """
 A record of changes to an issue.
 """
@@ -4136,9 +4306,17 @@ type IssueImport implements Node {
   """
   creatorId: String!
   """
+  File URL for the uploaded CSV for the import, if there is one.
+  """
+  csvFileUrl: String
+  """
   User readable error message, if one has occurred during the import.
   """
   error: String
+  """
+  Error code and metadata, if one has occurred during the import
+  """
+  errorMetadata: JSONObject
   """
   The unique identifier of the entity.
   """
@@ -4169,6 +4347,13 @@ type IssueImport implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+}
+
+type IssueImportCheckPayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 type IssueImportDeletePayload {
@@ -4517,7 +4702,7 @@ An issue related notification
 """
 type IssueNotification implements Entity & Node & Notification {
   """
-  The user that caused the notification. If empty it's Linear itself.
+  The user that caused the notification.
   """
   actor: User
   """
@@ -4537,6 +4722,10 @@ type IssueNotification implements Entity & Node & Notification {
       reminder has been sent.
   """
   emailedAt: DateTime
+  """
+  The external user that caused the notification.
+  """
+  externalUserActor: ExternalUser
   """
   The unique identifier of the entity.
   """
@@ -4727,6 +4916,467 @@ input IssueRelationUpdateInput {
   The type of relation of the issue to the related issue.
   """
   type: String
+}
+
+type IssueSearchPayload {
+  """
+  Archived entities matching the search term along with all their dependencies.
+  """
+  archivePayload: ArchiveResponse!
+  edges: [IssueSearchResultEdge!]!
+  nodes: [IssueSearchResult!]!
+  pageInfo: PageInfo!
+  """
+  Total number of results for query without filters applied.
+  """
+  totalCount: Float!
+}
+
+type IssueSearchResult implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The user to whom the issue is assigned to.
+  """
+  assignee: User
+  """
+  Attachments associated with the issue.
+  """
+  attachments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned attachments.
+    """
+    filter: AttachmentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AttachmentConnection!
+  """
+  The time at which the issue was automatically archived by the auto pruning process.
+  """
+  autoArchivedAt: DateTime
+  """
+  The time at which the issue was automatically closed by the auto pruning process.
+  """
+  autoClosedAt: DateTime
+  """
+  The order of the item in its column on the board.
+  """
+  boardOrder: Float! @deprecated(reason: "Will be removed in near future, please use `sortOrder` instead")
+  """
+  Suggested branch name for the issue.
+  """
+  branchName: String!
+  """
+  The time at which the issue was moved into canceled state.
+  """
+  canceledAt: DateTime
+  """
+  Children of the issue.
+  """
+  children(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned issues.
+    """
+    filter: IssueFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueConnection!
+  """
+  Comments associated with the issue.
+  """
+  comments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned comments.
+    """
+    filter: CommentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CommentConnection!
+  """
+  The time at which the issue was moved into completed state.
+  """
+  completedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the issue.
+  """
+  creator: User
+  """
+  Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk).
+  """
+  customerTicketCount: Int!
+  """
+  The cycle that the issue is associated with.
+  """
+  cycle: Cycle
+  """
+  The issue's description in markdown format.
+  """
+  description: String
+  """
+  [Internal] The issue's description as a Prosemirror document.
+  """
+  descriptionData: JSON
+  """
+  The date at which the issue is due.
+  """
+  dueDate: TimelessDate
+  """
+  The estimate of the complexity of the issue..
+  """
+  estimate: Float
+  """
+  [ALPHA] The external user who created the issue.
+  """
+  externalUserCreator: ExternalUser
+  """
+  The users favorite associated with this issue.
+  """
+  favorite: Favorite
+  """
+  History entries associated with the issue.
+  """
+  history(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueHistoryConnection!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Issue's human readable identifier (e.g. ENG-123).
+  """
+  identifier: String!
+  """
+  Inverse relations associated with this issue.
+  """
+  inverseRelations(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueRelationConnection!
+  """
+  Labels associated with this issue.
+  """
+  labels(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned issue labels.
+    """
+    filter: IssueLabelFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueLabelConnection!
+  """
+  Metadata related to search result
+  """
+  metadata: JSONObject!
+  """
+  The issue's unique number.
+  """
+  number: Float!
+  """
+  The parent of the issue.
+  """
+  parent: Issue
+  """
+  Previous identifiers of the issue if it has been moved between teams.
+  """
+  previousIdentifiers: [String!]!
+  """
+  The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  """
+  priority: Float!
+  """
+  Label for the priority.
+  """
+  priorityLabel: String!
+  """
+  The project that the issue is associated with.
+  """
+  project: Project
+  """
+  The projectMilestone that the issue is associated with.
+  """
+  projectMilestone: ProjectMilestone
+  """
+  Relations associated with this issue.
+  """
+  relations(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueRelationConnection!
+  """
+  [Internal] The time at which the issue's SLA will breach.
+  """
+  slaBreachesAt: DateTime
+  """
+  [Internal] The time at which the issue's SLA began.
+  """
+  slaStartedAt: DateTime
+  """
+  The user who snoozed the issue.
+  """
+  snoozedBy: User
+  """
+  The time until an issue will be snoozed in Triage view.
+  """
+  snoozedUntilAt: DateTime
+  """
+  The order of the item in relation to other items in the organization.
+  """
+  sortOrder: Float!
+  """
+  The time at which the issue was moved into started state.
+  """
+  startedAt: DateTime
+  """
+  The time at which the issue entered triage.
+  """
+  startedTriageAt: DateTime
+  """
+  The workflow state that the issue is associated with.
+  """
+  state: WorkflowState!
+  """
+  The order of the item in the sub-issue list. Only set if the issue has a parent.
+  """
+  subIssueSortOrder: Float
+  """
+  Users who are subscribed to the issue.
+  """
+  subscribers(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned subscribers.
+    """
+    filter: UserFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    Should query return disabled/suspended users (default: false).
+    """
+    includeDisabled: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): UserConnection!
+  """
+  The team that the issue is associated with.
+  """
+  team: Team!
+  """
+  The issue's title.
+  """
+  title: String!
+  """
+  A flag that indicates whether the issue is in the trash bin.
+  """
+  trashed: Boolean
+  """
+  The time at which the issue left triage.
+  """
+  triagedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  Issue URL.
+  """
+  url: String!
+}
+
+type IssueSearchResultConnection {
+  edges: [IssueSearchResultEdge!]!
+  nodes: [IssueSearchResult!]!
+  pageInfo: PageInfo!
+}
+
+type IssueSearchResultEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: IssueSearchResult!
 }
 
 input IssueUpdateInput {
@@ -5405,6 +6055,27 @@ type Mutation {
     url: String!
   ): ImageUploadFromUrlPayload!
   """
+  XHR request payload to upload a file for import, directly to Linear's cloud storage.
+  """
+  importFileUpload(
+    """
+    MIME type of the uploaded file.
+    """
+    contentType: String!
+    """
+    Filename of the uploaded file.
+    """
+    filename: String!
+    """
+    Optional metadata.
+    """
+    metaData: JSON
+    """
+    File size of the uploaded file.
+    """
+    size: Int!
+  ): UploadPayload!
+  """
   Deletes an integration.
   """
   integrationDelete(
@@ -5828,13 +6499,46 @@ type Mutation {
     teamName: String
   ): IssueImportPayload!
   """
+  Kicks off a Jira import job from a CSV.
+  """
+  issueImportCreateCSVJira(
+    """
+    URL for the CSV.
+    """
+    csvUrl: String!
+    """
+    Jira user account email.
+    """
+    jiraEmail: String
+    """
+    Jira installation or cloud hostname.
+    """
+    jiraHostname: String
+    """
+    Jira personal access token to access Jira REST API.
+    """
+    jiraToken: String
+    """
+    ID of the organization into which to import data.
+    """
+    organizationId: String
+    """
+    ID of the team into which to import data. Empty to create new team.
+    """
+    teamId: String
+    """
+    Name of new team. When teamId is not set.
+    """
+    teamName: String
+  ): IssueImportPayload!
+  """
   Kicks off a Shortcut (formerly Clubhouse) import job.
   """
   issueImportCreateClubhouse(
     """
-    Shortcut (formerly Clubhouse) team name to choose which issues we should import.
+    Shortcut (formerly Clubhouse) group name to choose which issues we should import.
     """
-    clubhouseTeamName: String!
+    clubhouseGroupName: String!
     """
     Shortcut (formerly Clubhouse) token to fetch information from the Clubhouse API.
     """
@@ -6969,7 +7673,7 @@ A notification sent to a user.
 """
 interface Notification implements Entity & Node {
   """
-  The user that caused the notification. If empty it's Linear itself.
+  The user that caused the notification.
   """
   actor: User
   """
@@ -6985,6 +7689,10 @@ interface Notification implements Entity & Node {
       reminder has been sent.
   """
   emailedAt: DateTime
+  """
+  The external user that caused the notification.
+  """
+  externalUserActor: ExternalUser
   """
   The unique identifier of the entity.
   """
@@ -7522,6 +8230,10 @@ input NullableProjectFilter {
   """
   and: [NullableProjectFilter!]
   """
+  Comparator for the project completion date.
+  """
+  completedAt: NullableDateComparator
+  """
   Comparator for the created at date.
   """
   createdAt: DateComparator
@@ -7561,6 +8273,10 @@ input NullableProjectFilter {
   Filters that the projects roadmaps must satisfy.
   """
   roadmaps: RoadmapCollectionFilter
+  """
+  [Internal] Comparator for the projects content.
+  """
+  searchableContent: ContentComparator
   """
   Comparator for the project slug ID.
   """
@@ -7677,6 +8393,10 @@ input NullableStringComparator {
   Starts with constraint. Matches any values that start with the given string.
   """
   startsWith: String
+  """
+  Starts with case insensitive constraint. Matches any values that start with the given string.
+  """
+  startsWithIgnoreCase: String
 }
 
 input NullableTimelessDateComparator {
@@ -7960,7 +8680,7 @@ An oauth client approval related notification
 """
 type OauthClientApprovalNotification implements Entity & Node & Notification {
   """
-  The user that caused the notification. If empty it's Linear itself.
+  The user that caused the notification.
   """
   actor: User
   """
@@ -7976,6 +8696,10 @@ type OauthClientApprovalNotification implements Entity & Node & Notification {
       reminder has been sent.
   """
   emailedAt: DateTime
+  """
+  The external user that caused the notification.
+  """
+  externalUserActor: ExternalUser
   """
   The unique identifier of the entity.
   """
@@ -8709,38 +9433,6 @@ type PaidSubscription implements Node {
 }
 
 """
-A personal note for a user
-"""
-type PersonalNote implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The note content as JSON.
-  """
-  contentData: JSONObject
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The user that owns the note.
-  """
-  user: User!
-}
-
-"""
 A project.
 """
 type Project implements Node {
@@ -9108,6 +9800,10 @@ input ProjectCollectionFilter {
   """
   and: [ProjectCollectionFilter!]
   """
+  Comparator for the project completion date.
+  """
+  completedAt: NullableDateComparator
+  """
   Comparator for the created at date.
   """
   createdAt: DateComparator
@@ -9151,6 +9847,10 @@ input ProjectCollectionFilter {
   Filters that the projects roadmaps must satisfy.
   """
   roadmaps: RoadmapCollectionFilter
+  """
+  [Internal] Comparator for the projects content.
+  """
+  searchableContent: ContentComparator
   """
   Comparator for the project slug ID.
   """
@@ -9255,6 +9955,10 @@ input ProjectFilter {
   """
   and: [ProjectFilter!]
   """
+  Comparator for the project completion date.
+  """
+  completedAt: NullableDateComparator
+  """
   Comparator for the created at date.
   """
   createdAt: DateComparator
@@ -9291,6 +9995,10 @@ input ProjectFilter {
   """
   roadmaps: RoadmapCollectionFilter
   """
+  [Internal] Comparator for the projects content.
+  """
+  searchableContent: ContentComparator
+  """
   Comparator for the project slug ID.
   """
   slugId: StringComparator
@@ -9310,6 +10018,13 @@ input ProjectFilter {
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+}
+
+type ProjectFilterSuggestionPayload {
+  """
+  The json filter that is suggested.
+  """
+  filter: JSONObject
 }
 
 """
@@ -9539,7 +10254,7 @@ A project related notification
 """
 type ProjectNotification implements Entity & Node & Notification {
   """
-  The user that caused the notification. If empty it's Linear itself.
+  The user that caused the notification.
   """
   actor: User
   """
@@ -9555,6 +10270,10 @@ type ProjectNotification implements Entity & Node & Notification {
       reminder has been sent.
   """
   emailedAt: DateTime
+  """
+  The external user that caused the notification.
+  """
+  externalUserActor: ExternalUser
   """
   The unique identifier of the entity.
   """
@@ -9661,6 +10380,394 @@ type ProjectPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+type ProjectSearchPayload {
+  """
+  Archived entities matching the search term along with all their dependencies.
+  """
+  archivePayload: ArchiveResponse!
+  edges: [ProjectSearchResultEdge!]!
+  nodes: [ProjectSearchResult!]!
+  pageInfo: PageInfo!
+  """
+  Total number of results for query without filters applied.
+  """
+  totalCount: Float!
+}
+
+type ProjectSearchResult implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the project was automatically archived by the auto pruning process.
+  """
+  autoArchivedAt: DateTime
+  """
+  The time at which the project was moved into canceled state.
+  """
+  canceledAt: DateTime
+  """
+  The project's color.
+  """
+  color: String!
+  """
+  The time at which the project was moved into completed state.
+  """
+  completedAt: DateTime
+  """
+  The number of completed issues in the project after each week.
+  """
+  completedIssueCountHistory: [Float!]!
+  """
+  The number of completed estimation points after each week.
+  """
+  completedScopeHistory: [Float!]!
+  """
+  The project was created based on this issue.
+  """
+  convertedFromIssue: Issue
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the project.
+  """
+  creator: User!
+  """
+  The project's description.
+  """
+  description: String!
+  """
+  Documents associated with the project.
+  """
+  documents(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): DocumentConnection!
+  """
+  The icon of the project.
+  """
+  icon: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The number of in progress estimation points after each week.
+  """
+  inProgressScopeHistory: [Float!]!
+  """
+  Settings for all integrations associated with that project.
+  """
+  integrationsSettings: IntegrationsSettings
+  """
+  The total number of issues in the project after each week.
+  """
+  issueCountHistory: [Float!]!
+  """
+  Issues associated with the project.
+  """
+  issues(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned issues.
+    """
+    filter: IssueFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueConnection!
+  """
+  The project lead.
+  """
+  lead: User
+  """
+  Links associated with the project.
+  """
+  links(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectLinkConnection!
+  """
+  Users that are members of the project.
+  """
+  members(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned users.
+    """
+    filter: UserFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    Should query return disabled/suspended users (default: false).
+    """
+    includeDisabled: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): UserConnection!
+  """
+  Metadata related to search result
+  """
+  metadata: JSONObject!
+  """
+  The project's name.
+  """
+  name: String!
+  """
+  The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
+  """
+  progress: Float!
+  """
+  Milestones associated with the project.
+  """
+  projectMilestones(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectMilestoneConnection!
+  """
+  The time until which project update reminders are paused.
+  """
+  projectUpdateRemindersPausedUntilAt: DateTime
+  """
+  Project updates associated with the project.
+  """
+  projectUpdates(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectUpdateConnection!
+  """
+  The overall scope (total estimate points) of the project.
+  """
+  scope: Float!
+  """
+  The total number of estimation points after each week.
+  """
+  scopeHistory: [Float!]!
+  """
+  Whether to send new issue comment notifications to Slack.
+  """
+  slackIssueComments: Boolean!
+  """
+  Whether to send new issue status updates to Slack.
+  """
+  slackIssueStatuses: Boolean!
+  """
+  Whether to send new issue notifications to Slack.
+  """
+  slackNewIssue: Boolean!
+  """
+  The project's unique URL slug.
+  """
+  slugId: String!
+  """
+  The sort order for the project within the organization.
+  """
+  sortOrder: Float!
+  """
+  [Internal] The estimated start date of the project.
+  """
+  startDate: TimelessDate
+  """
+  The time at which the project was moved into started state.
+  """
+  startedAt: DateTime
+  """
+  The type of the state.
+  """
+  state: String!
+  """
+  The estimated completion date of the project.
+  """
+  targetDate: TimelessDate
+  """
+  Teams associated with this project.
+  """
+  teams(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned teams.
+    """
+    filter: TeamFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): TeamConnection!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  Project URL.
+  """
+  url: String!
+}
+
+type ProjectSearchResultConnection {
+  edges: [ProjectSearchResultEdge!]!
+  nodes: [ProjectSearchResult!]!
+  pageInfo: PageInfo!
+}
+
+type ProjectSearchResultEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: ProjectSearchResult!
 }
 
 """
@@ -10367,7 +11474,7 @@ type Query {
   """
   [INTERNAL] Suggests metadata for a view based on it's filters.
   """
-  customViewSuggestion(filter: JSONObject!): CustomViewSuggestionPayload!
+  customViewDetailsSuggestion(filter: JSONObject!): CustomViewSuggestionPayload!
   """
   Custom views for the user.
   """
@@ -10664,6 +11771,56 @@ type Query {
   """
   issue(id: String!): Issue!
   """
+  Find issues that are related to a given Figma file key.
+  """
+  issueFigmaFileKeySearch(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The Figma file key.
+    """
+    fileKey: String!
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueConnection!
+  """
+  Suggests filters for an issue view based on a text prompt.
+  """
+  issueFilterSuggestion(prompt: String!): IssueFilterSuggestionPayload!
+  """
+  Checks a CSV file validity against a specific import service.
+  """
+  issueImportCheckCSV(
+    """
+    CSV storage url
+    """
+    csvUrl: String!
+    """
+    The service the CSV containing data from
+    """
+    service: String!
+  ): IssueImportCheckPayload!
+  """
   Fetches the GitHub token, completing the OAuth flow.
   """
   issueImportFinishGithubOAuth(
@@ -10950,6 +12107,10 @@ type Query {
   """
   project(id: String!): Project!
   """
+  Suggests filters for a project view based on a text prompt.
+  """
+  projectFilterSuggestion(prompt: String!): ProjectFilterSuggestionPayload!
+  """
   One specific project link.
   """
   projectLink(id: String!): ProjectLink!
@@ -11165,6 +12326,109 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): RoadmapConnection!
+  """
+  Search documents.
+  """
+  searchDocuments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+    """
+    Search string to look for.
+    """
+    term: String!
+  ): DocumentSearchPayload!
+  """
+  Search issues.
+  """
+  searchIssues(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned issues.
+    """
+    filter: IssueFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+    """
+    Search string to look for.
+    """
+    term: String!
+  ): IssueSearchPayload!
+  """
+  Search projects.
+  """
+  searchProjects(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+    """
+    Search string to look for.
+    """
+    term: String!
+  ): ProjectSearchPayload!
   """
   Fetch SSO login URL for the email provided.
   """
@@ -12087,6 +13351,10 @@ input SourceTypeComparator {
   Starts with constraint. Matches any values that start with the given string.
   """
   startsWith: String
+  """
+  Starts with case insensitive constraint. Matches any values that start with the given string.
+  """
+  startsWithIgnoreCase: String
 }
 
 type SsoUrlFromEmailResponse {
@@ -12160,6 +13428,10 @@ input StringComparator {
   Starts with constraint. Matches any values that start with the given string.
   """
   startsWith: String
+  """
+  Starts with case insensitive constraint. Matches any values that start with the given string.
+  """
+  startsWithIgnoreCase: String
 }
 
 """
@@ -14292,6 +15564,10 @@ input ViewPreferencesCreateInput {
   """
   id: String
   """
+  The default parameters for the insight on that view.
+  """
+  insights: JSONObject
+  """
   The label these view preferences are associated with.
   """
   labelId: String
@@ -14350,9 +15626,13 @@ enum ViewPreferencesType {
 
 input ViewPreferencesUpdateInput {
   """
+  The default parameters for the insight on that view.
+  """
+  insights: JSONObject
+  """
   View preferences.
   """
-  preferences: JSONObject!
+  preferences: JSONObject
 }
 
 """
@@ -14379,6 +15659,7 @@ enum ViewType {
   projectsAll
   projectsBacklog
   projectsClosed
+  quickView
   roadmap
   roadmapAll
   roadmapBacklog

@@ -640,6 +640,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the customView.owner query for L.User */
+    it("customView.owner", async () => {
+      if (_customView) {
+        const customView_owner: L.User | undefined = await _customView.owner;
+        expect(customView_owner instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No CustomView found - cannot test customView.owner query");
+      }
+    });
+
     /** Test the customView.team query for L.Team */
     it("customView.team", async () => {
       if (_customView) {
@@ -805,10 +815,6 @@ describe("generated", () => {
       }
     });
   });
-
-  // ExternalUser - no model for query
-
-  // ExternalUsers - no model for query
 
   /** Test all Favorite queries */
   describe("Favorites", () => {
@@ -1091,6 +1097,236 @@ describe("generated", () => {
     it("integrationsSettings", async () => {
       const integrationsSettings: L.IntegrationsSettings | undefined = await client.integrationsSettings("mock-id");
       expect(integrationsSettings instanceof L.IntegrationsSettings);
+    });
+  });
+
+  /** Test all Issue queries */
+  describe("IssueFigmaFileKeySearch", () => {
+    let _issue: L.Issue | undefined;
+    let _issue_id: string | undefined;
+
+    /** Test the root connection query for the Issue */
+    it("issueFigmaFileKeySearch", async () => {
+      const issueFigmaFileKeySearch: L.IssueConnection | undefined = await client.issueFigmaFileKeySearch(
+        "mock-fileKey"
+      );
+      const issue = issueFigmaFileKeySearch?.nodes?.[0];
+      _issue_id = issue?.id;
+      expect(issueFigmaFileKeySearch instanceof L.IssueConnection);
+    });
+
+    /** Test the root query for a single Issue */
+    it("issue", async () => {
+      if (_issue_id) {
+        const issue: L.Issue | undefined = await client.issue(_issue_id);
+        _issue = issue;
+        expect(issue instanceof L.Issue);
+      } else {
+        console.warn("codegen-doc:print: No first Issue found in connection - cannot test issue query");
+      }
+    });
+
+    /** Test the issue connection query for the Attachment */
+    it("issue.attachments", async () => {
+      if (_issue) {
+        const attachments: L.AttachmentConnection | undefined = await _issue.attachments();
+        expect(attachments instanceof L.AttachmentConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.attachments query");
+      }
+    });
+
+    /** Test the issue connection query for the Issue */
+    it("issue.children", async () => {
+      if (_issue) {
+        const children: L.IssueConnection | undefined = await _issue.children();
+        expect(children instanceof L.IssueConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.children query");
+      }
+    });
+
+    /** Test the issue connection query for the Comment */
+    it("issue.comments", async () => {
+      if (_issue) {
+        const comments: L.CommentConnection | undefined = await _issue.comments();
+        expect(comments instanceof L.CommentConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.comments query");
+      }
+    });
+
+    /** Test the issue connection query for the IssueHistory */
+    it("issue.history", async () => {
+      if (_issue) {
+        const history: L.IssueHistoryConnection | undefined = await _issue.history();
+        expect(history instanceof L.IssueHistoryConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.history query");
+      }
+    });
+
+    /** Test the issue connection query for the IssueRelation */
+    it("issue.inverseRelations", async () => {
+      if (_issue) {
+        const inverseRelations: L.IssueRelationConnection | undefined = await _issue.inverseRelations();
+        expect(inverseRelations instanceof L.IssueRelationConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.inverseRelations query");
+      }
+    });
+
+    /** Test the issue connection query for the IssueLabel */
+    it("issue.labels", async () => {
+      if (_issue) {
+        const labels: L.IssueLabelConnection | undefined = await _issue.labels();
+        expect(labels instanceof L.IssueLabelConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.labels query");
+      }
+    });
+
+    /** Test the issue connection query for the IssueRelation */
+    it("issue.relations", async () => {
+      if (_issue) {
+        const relations: L.IssueRelationConnection | undefined = await _issue.relations();
+        expect(relations instanceof L.IssueRelationConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.relations query");
+      }
+    });
+
+    /** Test the issue connection query for the User */
+    it("issue.subscribers", async () => {
+      if (_issue) {
+        const subscribers: L.UserConnection | undefined = await _issue.subscribers();
+        expect(subscribers instanceof L.UserConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.subscribers query");
+      }
+    });
+
+    /** Test the issue.assignee query for L.User */
+    it("issue.assignee", async () => {
+      if (_issue) {
+        const issue_assignee: L.User | undefined = await _issue.assignee;
+        expect(issue_assignee instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.assignee query");
+      }
+    });
+
+    /** Test the issue.creator query for L.User */
+    it("issue.creator", async () => {
+      if (_issue) {
+        const issue_creator: L.User | undefined = await _issue.creator;
+        expect(issue_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.creator query");
+      }
+    });
+
+    /** Test the issue.cycle query for L.Cycle */
+    it("issue.cycle", async () => {
+      if (_issue) {
+        const issue_cycle: L.Cycle | undefined = await _issue.cycle;
+        expect(issue_cycle instanceof L.Cycle);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.cycle query");
+      }
+    });
+
+    /** Test the issue.favorite query for L.Favorite */
+    it("issue.favorite", async () => {
+      if (_issue) {
+        const issue_favorite: L.Favorite | undefined = await _issue.favorite;
+        expect(issue_favorite instanceof L.Favorite);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.favorite query");
+      }
+    });
+
+    /** Test the issue.parent query for L.Issue */
+    it("issue.parent", async () => {
+      if (_issue) {
+        const issue_parent: L.Issue | undefined = await _issue.parent;
+        expect(issue_parent instanceof L.Issue);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.parent query");
+      }
+    });
+
+    /** Test the issue.project query for L.Project */
+    it("issue.project", async () => {
+      if (_issue) {
+        const issue_project: L.Project | undefined = await _issue.project;
+        expect(issue_project instanceof L.Project);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.project query");
+      }
+    });
+
+    /** Test the issue.projectMilestone query for L.ProjectMilestone */
+    it("issue.projectMilestone", async () => {
+      if (_issue) {
+        const issue_projectMilestone: L.ProjectMilestone | undefined = await _issue.projectMilestone;
+        expect(issue_projectMilestone instanceof L.ProjectMilestone);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.projectMilestone query");
+      }
+    });
+
+    /** Test the issue.snoozedBy query for L.User */
+    it("issue.snoozedBy", async () => {
+      if (_issue) {
+        const issue_snoozedBy: L.User | undefined = await _issue.snoozedBy;
+        expect(issue_snoozedBy instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.snoozedBy query");
+      }
+    });
+
+    /** Test the issue.state query for L.WorkflowState */
+    it("issue.state", async () => {
+      if (_issue) {
+        const issue_state: L.WorkflowState | undefined = await _issue.state;
+        expect(issue_state instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.state query");
+      }
+    });
+
+    /** Test the issue.team query for L.Team */
+    it("issue.team", async () => {
+      if (_issue) {
+        const issue_team: L.Team | undefined = await _issue.team;
+        expect(issue_team instanceof L.Team);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.team query");
+      }
+    });
+  });
+
+  /** Test IssueFilterSuggestion query */
+  describe("IssueFilterSuggestion", () => {
+    /** Test the root model query for IssueFilterSuggestion */
+    it("issueFilterSuggestion", async () => {
+      const issueFilterSuggestion: L.IssueFilterSuggestionPayload | undefined = await client.issueFilterSuggestion(
+        "mock-prompt"
+      );
+      expect(issueFilterSuggestion instanceof L.IssueFilterSuggestionPayload);
+    });
+  });
+
+  /** Test IssueImportCheckCsv query */
+  describe("IssueImportCheckCsv", () => {
+    /** Test the root model query for IssueImportCheckCsv */
+    it("issueImportCheckCSV", async () => {
+      const issueImportCheckCSV: L.IssueImportCheckPayload | undefined = await client.issueImportCheckCSV(
+        "mock-csvUrl",
+        "mock-service"
+      );
+      expect(issueImportCheckCSV instanceof L.IssueImportCheckPayload);
     });
   });
 
@@ -1485,6 +1721,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue.favorite query for L.Favorite */
+    it("issue.favorite", async () => {
+      if (_issue) {
+        const issue_favorite: L.Favorite | undefined = await _issue.favorite;
+        expect(issue_favorite instanceof L.Favorite);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.favorite query");
+      }
+    });
+
     /** Test the issue.parent query for L.Issue */
     it("issue.parent", async () => {
       if (_issue) {
@@ -1824,6 +2070,16 @@ describe("generated", () => {
           "codegen-doc:print: No OrganizationInvite found - cannot test organizationInvite.organization query"
         );
       }
+    });
+  });
+
+  /** Test ProjectFilterSuggestion query */
+  describe("ProjectFilterSuggestion", () => {
+    /** Test the root model query for ProjectFilterSuggestion */
+    it("projectFilterSuggestion", async () => {
+      const projectFilterSuggestion: L.ProjectFilterSuggestionPayload | undefined =
+        await client.projectFilterSuggestion("mock-prompt");
+      expect(projectFilterSuggestion instanceof L.ProjectFilterSuggestionPayload);
     });
   });
 
@@ -2234,6 +2490,33 @@ describe("generated", () => {
       } else {
         console.warn("codegen-doc:print: No Roadmap found - cannot test roadmap.owner query");
       }
+    });
+  });
+
+  /** Test all DocumentSearchResult queries */
+  describe("SearchDocuments", () => {
+    /** Test the root connection query for the DocumentSearchResult */
+    it("searchDocuments", async () => {
+      const searchDocuments: L.DocumentSearchPayload | undefined = await client.searchDocuments("mock-term");
+      expect(searchDocuments instanceof L.DocumentSearchPayload);
+    });
+  });
+
+  /** Test all IssueSearchResult queries */
+  describe("SearchIssues", () => {
+    /** Test the root connection query for the IssueSearchResult */
+    it("searchIssues", async () => {
+      const searchIssues: L.IssueSearchPayload | undefined = await client.searchIssues("mock-term");
+      expect(searchIssues instanceof L.IssueSearchPayload);
+    });
+  });
+
+  /** Test all ProjectSearchResult queries */
+  describe("SearchProjects", () => {
+    /** Test the root connection query for the ProjectSearchResult */
+    it("searchProjects", async () => {
+      const searchProjects: L.ProjectSearchPayload | undefined = await client.searchProjects("mock-term");
+      expect(searchProjects instanceof L.ProjectSearchPayload);
     });
   });
 
