@@ -2,4 +2,4 @@
 "@linear/sdk": patch
 ---
 
-fix: increase mock server start delay
+fix: add retry mechanism for mock server in test startup sequence
