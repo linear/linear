@@ -2,8 +2,8 @@
 import dotenv from "dotenv";
 import execa, { ExecaChildProcess } from "execa";
 import getPort from "get-port";
-import { promisify } from "util";
 import { LinearClient } from "../index";
+import * as net from "net";
 
 const log = "client:test-client";
 
@@ -23,28 +23,48 @@ export async function startClient(Client: typeof LinearClient = LinearClient): P
       apiKey: process.env.API_KEY,
     });
   } else {
-    /** Create sleep function */
-    const sleep = promisify(setTimeout);
-
     /** Get a port for the mock server */
-    const port = await getPort();
+    const serverPort = await getPort();
 
     /** Start the mock server */
     try {
-      console.log(log, `Using mock server on http://localhost:${port}/graphql`);
-      mockServer = execa("npx", ["graphql-faker", "packages/sdk/src/schema.graphql", `-p ${port}`]);
+      console.log(log, `Using mock server on http://localhost:${serverPort}/graphql`);
+      mockServer = execa("npx", ["graphql-faker", "packages/sdk/src/schema.graphql", `-p ${serverPort}`]);
     } catch (error) {
       console.error(log, error);
       throw new Error(`${log} Failed to start the mock server`);
     }
 
     /** Wait for mock server to start */
-    await sleep(1000);
+    const timeout = 100;
+    async function clientReady(port: number, attempts: number): Promise<void> {
+      return new Promise((resolve, reject) => {
+        const connection = net
+          .createConnection({ port, timeout })
+          .on("error", (e: NodeJS.ErrnoException) => {
+            if (e.code === "ECONNREFUSED" && attempts > 1) {
+              setTimeout(() => resolve(clientReady(port, attempts - 1)), timeout);
+            } else {
+              connection.end();
+              reject(new Error(`Failed to connect: ${e}`));
+            }
+          })
+          .on("timeout", () => {
+            connection.end();
+            reject(new Error(`Timed out connecting to port ${port} after ${timeout} milliseconds`));
+          })
+          .on("connect", () => {
+            connection.end();
+            resolve();
+          });
+      });
+    }
+    await clientReady(serverPort, 50);
 
     /** Create Linear client with mock server endpoint */
     return new Client({
       apiKey: "test",
-      apiUrl: `http://localhost:${port}/graphql`,
+      apiUrl: `http://localhost:${serverPort}/graphql`,
     });
   }
 }
