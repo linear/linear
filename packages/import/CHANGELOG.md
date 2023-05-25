@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.7.4
+
+### Patch Changes
+
+- e485d5f: chore(deps): update dependency patch versions
+- Updated dependencies [e485d5f]
+- Updated dependencies [fa27be6]
+- Updated dependencies [8ffdc08]
+  - @linear/sdk@5.0.0
+
 ## 1.7.3
 
 ### Patch Changes
