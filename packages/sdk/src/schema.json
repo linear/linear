@@ -7927,13 +7927,9 @@
             "description": "The external user's email address.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -27209,6 +27205,39 @@
             "deprecationReason": null
           },
           {
+            "name": "userJiraConnect",
+            "description": "Connects the Jira user to this Linear account via OAuth2.",
+            "args": [
+              {
+                "name": "code",
+                "description": "The Jira OAuth code.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "UserPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "userExternalUserDisconnect",
             "description": "Disconnects the external user from this Linear account.",
             "args": [
@@ -30406,6 +30435,42 @@
             "deprecationReason": null
           },
           {
+            "name": "projectMilestones",
+            "description": "Filters that the project's milestones must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectMilestoneCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "completedProjectMilestones",
+            "description": "Filters that the project's completed milestones must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectMilestoneCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nextProjectMilestone",
+            "description": "Filters that the project's next milestone must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectMilestoneFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "null",
             "description": "Filter based on the existence of the relation.",
             "type": {
@@ -30498,6 +30563,30 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "Comparator for the project milestone name.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "targetDate",
+            "description": "Comparator for the project milestone target date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -32988,6 +33077,33 @@
       },
       {
         "kind": "OBJECT",
+        "name": "OrganizationAcceptedOrExpiredInviteDetailsPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "status",
+            "description": "The status of the invite",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "OrganizationInviteStatus",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "OrganizationCancelDeletePayload",
         "description": null,
         "fields": [
@@ -33838,10 +33954,90 @@
         "possibleTypes": null
       },
       {
-        "kind": "OBJECT",
+        "kind": "UNION",
         "name": "OrganizationInviteDetailsPayload",
         "description": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "OrganizationInviteFullDetailsPayload",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "OrganizationAcceptedOrExpiredInviteDetailsPayload",
+            "ofType": null
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OrganizationInviteEdge",
+        "description": null,
         "fields": [
+          {
+            "name": "node",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "OrganizationInvite",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cursor",
+            "description": "Used in `before` and `after` args",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OrganizationInviteFullDetailsPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "status",
+            "description": "The status of the invite",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "OrganizationInviteStatus",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "inviter",
             "description": "The name of the inviter",
@@ -33990,49 +34186,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "OrganizationInviteEdge",
-        "description": null,
-        "fields": [
-          {
-            "name": "node",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "OrganizationInvite",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "cursor",
-            "description": "Used in `before` and `after` args",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "OrganizationInvitePayload",
         "description": null,
         "fields": [
@@ -34088,6 +34241,35 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "OrganizationInviteStatus",
+        "description": "The different statuses possible for an organization invite.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "pending",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "accepted",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "expired",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
         "possibleTypes": null
       },
       {
@@ -35889,6 +36071,42 @@
             "deprecationReason": null
           },
           {
+            "name": "projectMilestones",
+            "description": "Filters that the project's milestones must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectMilestoneCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "completedProjectMilestones",
+            "description": "Filters that the project's completed milestones must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectMilestoneCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nextProjectMilestone",
+            "description": "Filters that the project's next milestone must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectMilestoneFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "and",
             "description": "Compound filters, all of which need to be matched by the project.",
             "type": {
@@ -36458,6 +36676,42 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "RoadmapCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectMilestones",
+            "description": "Filters that the project's milestones must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectMilestoneCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "completedProjectMilestones",
+            "description": "Filters that the project's completed milestones must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectMilestoneCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nextProjectMilestone",
+            "description": "Filters that the project's next milestone must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectMilestoneFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -37106,6 +37360,153 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "ProjectMilestoneCollectionFilter",
+        "description": "Milestone collection filtering options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "Comparator for the identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "Comparator for the created at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "Comparator for the updated at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "Comparator for the project milestone name.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "targetDate",
+            "description": "Comparator for the project milestone target date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "and",
+            "description": "Compound filters, all of which need to be matched by the milestone.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "ProjectMilestoneCollectionFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "or",
+            "description": "Compound filters, one of which need to be matched by the milestone.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "ProjectMilestoneCollectionFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "some",
+            "description": "Filters that needs to be matched by some milestones.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectMilestoneFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "every",
+            "description": "Filters that needs to be matched by all milestones.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectMilestoneFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "length",
+            "description": "Comparator for the collection length.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NumberComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "ProjectMilestoneConnection",
         "description": null,
@@ -37311,6 +37712,117 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "ProjectMilestoneFilter",
+        "description": "Project milestone filtering options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "Comparator for the identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "Comparator for the created at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "Comparator for the updated at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "Comparator for the project milestone name.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "targetDate",
+            "description": "Comparator for the project milestone target date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "and",
+            "description": "Compound filters, all of which need to be matched by the project milestone.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "ProjectMilestoneFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "or",
+            "description": "Compound filters, one of which need to be matched by the project milestone.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "ProjectMilestoneFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -39495,6 +40007,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "infoSnapshot",
+            "description": "[Internal] Serialized JSON representing current state of the project properties when posting the project update.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
               "ofType": null
             },
             "isDeprecated": false,
@@ -44200,7 +44724,7 @@
               "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "OBJECT",
+                "kind": "UNION",
                 "name": "OrganizationInviteDetailsPayload",
                 "ofType": null
               }
@@ -44383,6 +44907,18 @@
             "name": "ProjectMilestones",
             "description": "All milestones for the project.",
             "args": [
+              {
+                "name": "filter",
+                "description": "Filter returned project milestones.",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "ProjectMilestoneFilter",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "before",
                 "description": "A cursor to be used with last for backward pagination.",
@@ -49590,7 +50126,7 @@
           },
           {
             "name": "issueEstimationType",
-            "description": "The issue estimation type to use.",
+            "description": "The issue estimation type to use. Must be one of \"notUsed\", \"exponential\", \"fibonacci\", \"linear\", \"tShirt\".",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -51220,7 +51756,7 @@
           },
           {
             "name": "issueEstimationType",
-            "description": "The issue estimation type to use.",
+            "description": "The issue estimation type to use. Must be one of \"notUsed\", \"exponential\", \"fibonacci\", \"linear\", \"tShirt\".",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -52383,7 +52919,7 @@
           },
           {
             "name": "issueEstimationType",
-            "description": "The issue estimation type to use.",
+            "description": "The issue estimation type to use. Must be one of \"notUsed\", \"exponential\", \"fibonacci\", \"linear\", \"tShirt\".",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -56174,6 +56710,22 @@
               "kind": "SCALAR",
               "name": "String",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "showFullUserNames",
+            "description": "Whether to show full user names instead of display names.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null

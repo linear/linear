@@ -4385,13 +4385,13 @@ export class OrganizationInviteConnection extends Connection<OrganizationInvite>
   }
 }
 /**
- * OrganizationInviteDetailsPayload model
+ * OrganizationInviteFullDetailsPayload model
  *
  * @param request - function to call the graphql client
- * @param data - L.OrganizationInviteDetailsPayloadFragment response data
+ * @param data - L.OrganizationInviteFullDetailsPayloadFragment response data
  */
-export class OrganizationInviteDetailsPayload extends Request {
-  public constructor(request: LinearRequest, data: L.OrganizationInviteDetailsPayloadFragment) {
+export class OrganizationInviteFullDetailsPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OrganizationInviteFullDetailsPayloadFragment) {
     super(request);
     this.accepted = data.accepted;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
@@ -6278,7 +6278,7 @@ export class Team extends Request {
   public issueEstimationAllowZero: boolean;
   /** Whether to add additional points to the estimate scale. */
   public issueEstimationExtended: boolean;
-  /** The issue estimation type to use. */
+  /** The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt". */
   public issueEstimationType: string;
   /** Whether issues without priority should be sorted first. */
   public issueOrderingNoPriorityFirst: boolean;
@@ -7094,6 +7094,7 @@ export class UserSettings extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.notificationPreferences = parseJson(data.notificationPreferences) ?? {};
+    this.showFullUserNames = data.showFullUserNames;
     this.unsubscribedFrom = data.unsubscribedFrom;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._user = data.user;
@@ -7109,6 +7110,8 @@ export class UserSettings extends Request {
   public id: string;
   /** The notification channel settings the user has selected. */
   public notificationPreferences: Record<string, unknown>;
+  /** Whether to show full user names instead of display names. */
+  public showFullUserNames: boolean;
   /** The email types the user has unsubscribed from. */
   public unsubscribedFrom: string[];
   /**
@@ -12394,6 +12397,35 @@ export class UserGoogleCalendarConnectMutation extends Request {
 }
 
 /**
+ * A fetchable UserJiraConnect Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserJiraConnectMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserJiraConnect mutation and return a UserPayload
+   *
+   * @param code - required code to pass to userJiraConnect
+   * @returns parsed response from UserJiraConnectMutation
+   */
+  public async fetch(code: string): LinearFetch<UserPayload> {
+    const response = await this._request<L.UserJiraConnectMutation, L.UserJiraConnectMutationVariables>(
+      L.UserJiraConnectDocument,
+      {
+        code,
+      }
+    );
+    const data = response.userJiraConnect;
+
+    return new UserPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UserPromoteAdmin Mutation
  *
  * @param request - function to call the graphql client
@@ -14484,35 +14516,6 @@ export class OrganizationInviteQuery extends Request {
     const data = response.organizationInvite;
 
     return new OrganizationInvite(this._request, data);
-  }
-}
-
-/**
- * A fetchable OrganizationInviteDetails Query
- *
- * @param request - function to call the graphql client
- */
-export class OrganizationInviteDetailsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the OrganizationInviteDetails query and return a OrganizationInviteDetailsPayload
-   *
-   * @param id - required id to pass to organizationInviteDetails
-   * @returns parsed response from OrganizationInviteDetailsQuery
-   */
-  public async fetch(id: string): LinearFetch<OrganizationInviteDetailsPayload> {
-    const response = await this._request<L.OrganizationInviteDetailsQuery, L.OrganizationInviteDetailsQueryVariables>(
-      L.OrganizationInviteDetailsDocument,
-      {
-        id,
-      }
-    );
-    const data = response.organizationInviteDetails;
-
-    return new OrganizationInviteDetailsPayload(this._request, data);
   }
 }
 
@@ -20381,6 +20384,15 @@ export class LinearSdk extends Request {
     return new UserGoogleCalendarConnectMutation(this._request).fetch(code);
   }
   /**
+   * Connects the Jira user to this Linear account via OAuth2.
+   *
+   * @param code - required code to pass to userJiraConnect
+   * @returns UserPayload
+   */
+  public userJiraConnect(code: string): LinearFetch<UserPayload> {
+    return new UserJiraConnectMutation(this._request).fetch(code);
+  }
+  /**
    * Makes user an admin. Can only be called by an admin.
    *
    * @param id - required id to pass to userPromoteAdmin
@@ -21015,15 +21027,6 @@ export class LinearSdk extends Request {
    */
   public organizationInvite(id: string): LinearFetch<OrganizationInvite> {
     return new OrganizationInviteQuery(this._request).fetch(id);
-  }
-  /**
-   * One specific organization invite.
-   *
-   * @param id - required id to pass to organizationInviteDetails
-   * @returns OrganizationInviteDetailsPayload
-   */
-  public organizationInviteDetails(id: string): LinearFetch<OrganizationInviteDetailsPayload> {
-    return new OrganizationInviteDetailsQuery(this._request).fetch(id);
   }
   /**
    * All invites for the organization.

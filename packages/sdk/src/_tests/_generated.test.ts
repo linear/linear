@@ -2002,16 +2002,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test OrganizationInviteDetails query */
-  describe("OrganizationInviteDetails", () => {
-    /** Test the root model query for OrganizationInviteDetails */
-    it("organizationInviteDetails", async () => {
-      const organizationInviteDetails: L.OrganizationInviteDetailsPayload | undefined =
-        await client.organizationInviteDetails("mock-id");
-      expect(organizationInviteDetails instanceof L.OrganizationInviteDetailsPayload);
-    });
-  });
-
   /** Test all OrganizationInvite queries */
   describe("OrganizationInvites", () => {
     let _organizationInvite: L.OrganizationInvite | undefined;

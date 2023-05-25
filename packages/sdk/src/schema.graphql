@@ -2099,7 +2099,7 @@ type ExternalUser implements Node {
   """
   The external user's email address.
   """
-  email: String!
+  email: String
   """
   The unique identifier of the entity.
   """
@@ -7487,6 +7487,15 @@ type Mutation {
     code: String!
   ): UserPayload!
   """
+  Connects the Jira user to this Linear account via OAuth2.
+  """
+  userJiraConnect(
+    """
+    The Jira OAuth code.
+    """
+    code: String!
+  ): UserPayload!
+  """
   Makes user an admin. Can only be called by an admin.
   """
   userPromoteAdmin(
@@ -8234,6 +8243,10 @@ input NullableProjectFilter {
   """
   completedAt: NullableDateComparator
   """
+  Filters that the project's completed milestones must satisfy.
+  """
+  completedProjectMilestones: ProjectMilestoneCollectionFilter
+  """
   Comparator for the created at date.
   """
   createdAt: DateComparator
@@ -8262,6 +8275,10 @@ input NullableProjectFilter {
   """
   name: StringComparator
   """
+  Filters that the project's next milestone must satisfy.
+  """
+  nextProjectMilestone: ProjectMilestoneFilter
+  """
   Filter based on the existence of the relation.
   """
   null: Boolean
@@ -8269,6 +8286,10 @@ input NullableProjectFilter {
   Compound filters, one of which need to be matched by the project.
   """
   or: [NullableProjectFilter!]
+  """
+  Filters that the project's milestones must satisfy.
+  """
+  projectMilestones: ProjectMilestoneCollectionFilter
   """
   Filters that the projects roadmaps must satisfy.
   """
@@ -8316,6 +8337,10 @@ input NullableProjectMilestoneFilter {
   """
   id: IDComparator
   """
+  Comparator for the project milestone name.
+  """
+  name: StringComparator
+  """
   Filter based on the existence of the relation.
   """
   null: Boolean
@@ -8323,6 +8348,10 @@ input NullableProjectMilestoneFilter {
   Compound filters, one of which need to be matched by the project milestone.
   """
   or: [NullableProjectMilestoneFilter!]
+  """
+  Comparator for the project milestone target date.
+  """
+  targetDate: NullableDateComparator
   """
   Comparator for the updated at date.
   """
@@ -9020,6 +9049,13 @@ type Organization implements Node {
   ): UserConnection!
 }
 
+type OrganizationAcceptedOrExpiredInviteDetailsPayload {
+  """
+  The status of the invite
+  """
+  status: OrganizationInviteStatus!
+}
+
 type OrganizationCancelDeletePayload {
   """
   Whether the operation was successful.
@@ -9254,7 +9290,19 @@ input OrganizationInviteCreateInput {
   teamIds: [String!]
 }
 
-type OrganizationInviteDetailsPayload {
+union OrganizationInviteDetailsPayload =
+    OrganizationAcceptedOrExpiredInviteDetailsPayload
+  | OrganizationInviteFullDetailsPayload
+
+type OrganizationInviteEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: OrganizationInvite!
+}
+
+type OrganizationInviteFullDetailsPayload {
   """
   Whether the invite has already been accepted.
   """
@@ -9291,14 +9339,10 @@ type OrganizationInviteDetailsPayload {
   What user role the invite should grant.
   """
   role: UserRoleType!
-}
-
-type OrganizationInviteEdge {
   """
-  Used in `before` and `after` args
+  The status of the invite
   """
-  cursor: String!
-  node: OrganizationInvite!
+  status: OrganizationInviteStatus!
 }
 
 type OrganizationInvitePayload {
@@ -9314,6 +9358,15 @@ type OrganizationInvitePayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+The different statuses possible for an organization invite.
+"""
+enum OrganizationInviteStatus {
+  accepted
+  expired
+  pending
 }
 
 input OrganizationInviteUpdateInput {
@@ -9804,6 +9857,10 @@ input ProjectCollectionFilter {
   """
   completedAt: NullableDateComparator
   """
+  Filters that the project's completed milestones must satisfy.
+  """
+  completedProjectMilestones: ProjectMilestoneCollectionFilter
+  """
   Comparator for the created at date.
   """
   createdAt: DateComparator
@@ -9840,9 +9897,17 @@ input ProjectCollectionFilter {
   """
   name: StringComparator
   """
+  Filters that the project's next milestone must satisfy.
+  """
+  nextProjectMilestone: ProjectMilestoneFilter
+  """
   Compound filters, one of which need to be matched by the project.
   """
   or: [ProjectCollectionFilter!]
+  """
+  Filters that the project's milestones must satisfy.
+  """
+  projectMilestones: ProjectMilestoneCollectionFilter
   """
   Filters that the projects roadmaps must satisfy.
   """
@@ -9959,6 +10024,10 @@ input ProjectFilter {
   """
   completedAt: NullableDateComparator
   """
+  Filters that the project's completed milestones must satisfy.
+  """
+  completedProjectMilestones: ProjectMilestoneCollectionFilter
+  """
   Comparator for the created at date.
   """
   createdAt: DateComparator
@@ -9987,9 +10056,17 @@ input ProjectFilter {
   """
   name: StringComparator
   """
+  Filters that the project's next milestone must satisfy.
+  """
+  nextProjectMilestone: ProjectMilestoneFilter
+  """
   Compound filters, one of which need to be matched by the project.
   """
   or: [ProjectFilter!]
+  """
+  Filters that the project's milestones must satisfy.
+  """
+  projectMilestones: ProjectMilestoneCollectionFilter
   """
   Filters that the projects roadmaps must satisfy.
   """
@@ -10170,6 +10247,52 @@ type ProjectMilestone implements Node {
   updatedAt: DateTime!
 }
 
+"""
+Milestone collection filtering options.
+"""
+input ProjectMilestoneCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the milestone.
+  """
+  and: [ProjectMilestoneCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that needs to be matched by all milestones.
+  """
+  every: ProjectMilestoneFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Comparator for the project milestone name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the milestone.
+  """
+  or: [ProjectMilestoneCollectionFilter!]
+  """
+  Filters that needs to be matched by some milestones.
+  """
+  some: ProjectMilestoneFilter
+  """
+  Comparator for the project milestone target date.
+  """
+  targetDate: NullableDateComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 type ProjectMilestoneConnection {
   edges: [ProjectMilestoneEdge!]!
   nodes: [ProjectMilestone!]!
@@ -10209,6 +10332,40 @@ type ProjectMilestoneEdge {
   """
   cursor: String!
   node: ProjectMilestone!
+}
+
+"""
+Project milestone filtering options.
+"""
+input ProjectMilestoneFilter {
+  """
+  Compound filters, all of which need to be matched by the project milestone.
+  """
+  and: [ProjectMilestoneFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the project milestone name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the project milestone.
+  """
+  or: [ProjectMilestoneFilter!]
+  """
+  Comparator for the project milestone target date.
+  """
+  targetDate: NullableDateComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 type ProjectMilestonePayload {
@@ -10799,6 +10956,10 @@ type ProjectUpdate implements Node {
   """
   id: ID!
   """
+  [Internal] Serialized JSON representing current state of the project properties when posting the project update.
+  """
+  infoSnapshot: JSONObject
+  """
   The project that the update is associated with.
   """
   project: Project!
@@ -11177,6 +11338,10 @@ type Query {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    Filter returned project milestones.
+    """
+    filter: ProjectMilestoneFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -13628,7 +13793,7 @@ type Team implements Node {
   """
   issueEstimationExtended: Boolean!
   """
-  The issue estimation type to use.
+  The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt".
   """
   issueEstimationType: String!
   """
@@ -14055,7 +14220,7 @@ input TeamCreateInput {
   """
   issueEstimationExtended: Boolean
   """
-  The issue estimation type to use.
+  The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt".
   """
   issueEstimationType: String
   """
@@ -14402,7 +14567,7 @@ input TeamUpdateInput {
   """
   issueEstimationExtended: Boolean
   """
-  The issue estimation type to use.
+  The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt".
   """
   issueEstimationType: String
   """
@@ -15442,6 +15607,10 @@ type UserSettings implements Node {
   The notification channel settings the user has selected.
   """
   notificationPreferences: JSONObject!
+  """
+  Whether to show full user names instead of display names.
+  """
+  showFullUserNames: Boolean!
   """
   The email types the user has unsubscribed from.
   """
