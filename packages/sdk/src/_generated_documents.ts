@@ -1282,7 +1282,7 @@ export type ExternalUser = Node & {
   /** The external user's display name. Unique within each organization. Can match the display name of an actual user. */
   displayName: Scalars["String"];
   /** The external user's email address. */
-  email: Scalars["String"];
+  email?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The last time the external user was seen interacting with Linear. */
@@ -3585,6 +3585,8 @@ export type Mutation = {
   userGitHubConnect: UserPayload;
   /** Connects the Google Calendar to the user to this Linear account via OAuth2. */
   userGoogleCalendarConnect: UserPayload;
+  /** Connects the Jira user to this Linear account via OAuth2. */
+  userJiraConnect: UserPayload;
   /** Makes user an admin. Can only be called by an admin. */
   userPromoteAdmin: UserAdminPayload;
   /** Makes user a regular user. Can only be called by an admin. */
@@ -4362,6 +4364,10 @@ export type MutationUserGoogleCalendarConnectArgs = {
   code: Scalars["String"];
 };
 
+export type MutationUserJiraConnectArgs = {
+  code: Scalars["String"];
+};
+
 export type MutationUserPromoteAdminArgs = {
   id: Scalars["String"];
 };
@@ -4764,6 +4770,8 @@ export type NullableProjectFilter = {
   and?: Maybe<Array<NullableProjectFilter>>;
   /** Comparator for the project completion date. */
   completedAt?: Maybe<NullableDateComparator>;
+  /** Filters that the project's completed milestones must satisfy. */
+  completedProjectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Comparator for the created at date. */
   createdAt?: Maybe<DateComparator>;
   /** Filters that the projects creator must satisfy. */
@@ -4778,10 +4786,14 @@ export type NullableProjectFilter = {
   members?: Maybe<UserFilter>;
   /** Comparator for the project name. */
   name?: Maybe<StringComparator>;
+  /** Filters that the project's next milestone must satisfy. */
+  nextProjectMilestone?: Maybe<ProjectMilestoneFilter>;
   /** Filter based on the existence of the relation. */
   null?: Maybe<Scalars["Boolean"]>;
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<NullableProjectFilter>>;
+  /** Filters that the project's milestones must satisfy. */
+  projectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Filters that the projects roadmaps must satisfy. */
   roadmaps?: Maybe<RoadmapCollectionFilter>;
   /** [Internal] Comparator for the projects content. */
@@ -4806,10 +4818,14 @@ export type NullableProjectMilestoneFilter = {
   createdAt?: Maybe<DateComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Comparator for the project milestone name. */
+  name?: Maybe<StringComparator>;
   /** Filter based on the existence of the relation. */
   null?: Maybe<Scalars["Boolean"]>;
   /** Compound filters, one of which need to be matched by the project milestone. */
   or?: Maybe<Array<NullableProjectMilestoneFilter>>;
+  /** Comparator for the project milestone target date. */
+  targetDate?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -5185,6 +5201,12 @@ export type OrganizationUsersArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
+export type OrganizationAcceptedOrExpiredInviteDetailsPayload = {
+  __typename?: "OrganizationAcceptedOrExpiredInviteDetailsPayload";
+  /** The status of the invite */
+  status: OrganizationInviteStatus;
+};
+
 export type OrganizationCancelDeletePayload = {
   __typename?: "OrganizationCancelDeletePayload";
   /** Whether the operation was successful. */
@@ -5336,8 +5358,19 @@ export type OrganizationInviteCreateInput = {
   teamIds?: Maybe<Array<Scalars["String"]>>;
 };
 
-export type OrganizationInviteDetailsPayload = {
-  __typename?: "OrganizationInviteDetailsPayload";
+export type OrganizationInviteDetailsPayload =
+  | OrganizationAcceptedOrExpiredInviteDetailsPayload
+  | OrganizationInviteFullDetailsPayload;
+
+export type OrganizationInviteEdge = {
+  __typename?: "OrganizationInviteEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: OrganizationInvite;
+};
+
+export type OrganizationInviteFullDetailsPayload = {
+  __typename?: "OrganizationInviteFullDetailsPayload";
   /** Whether the invite has already been accepted. */
   accepted: Scalars["Boolean"];
   /** When the invite was created. */
@@ -5356,13 +5389,8 @@ export type OrganizationInviteDetailsPayload = {
   organizationName: Scalars["String"];
   /** What user role the invite should grant. */
   role: UserRoleType;
-};
-
-export type OrganizationInviteEdge = {
-  __typename?: "OrganizationInviteEdge";
-  /** Used in `before` and `after` args */
-  cursor: Scalars["String"];
-  node: OrganizationInvite;
+  /** The status of the invite */
+  status: OrganizationInviteStatus;
 };
 
 export type OrganizationInvitePayload = {
@@ -5374,6 +5402,13 @@ export type OrganizationInvitePayload = {
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
 };
+
+/** The different statuses possible for an organization invite. */
+export enum OrganizationInviteStatus {
+  Accepted = "accepted",
+  Expired = "expired",
+  Pending = "pending",
+}
 
 export type OrganizationInviteUpdateInput = {
   /** The teams that the user has been invited to. */
@@ -5618,6 +5653,8 @@ export type ProjectCollectionFilter = {
   and?: Maybe<Array<ProjectCollectionFilter>>;
   /** Comparator for the project completion date. */
   completedAt?: Maybe<NullableDateComparator>;
+  /** Filters that the project's completed milestones must satisfy. */
+  completedProjectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Comparator for the created at date. */
   createdAt?: Maybe<DateComparator>;
   /** Filters that the projects creator must satisfy. */
@@ -5636,8 +5673,12 @@ export type ProjectCollectionFilter = {
   members?: Maybe<UserFilter>;
   /** Comparator for the project name. */
   name?: Maybe<StringComparator>;
+  /** Filters that the project's next milestone must satisfy. */
+  nextProjectMilestone?: Maybe<ProjectMilestoneFilter>;
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<ProjectCollectionFilter>>;
+  /** Filters that the project's milestones must satisfy. */
+  projectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Filters that the projects roadmaps must satisfy. */
   roadmaps?: Maybe<RoadmapCollectionFilter>;
   /** [Internal] Comparator for the projects content. */
@@ -5705,6 +5746,8 @@ export type ProjectFilter = {
   and?: Maybe<Array<ProjectFilter>>;
   /** Comparator for the project completion date. */
   completedAt?: Maybe<NullableDateComparator>;
+  /** Filters that the project's completed milestones must satisfy. */
+  completedProjectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Comparator for the created at date. */
   createdAt?: Maybe<DateComparator>;
   /** Filters that the projects creator must satisfy. */
@@ -5719,8 +5762,12 @@ export type ProjectFilter = {
   members?: Maybe<UserFilter>;
   /** Comparator for the project name. */
   name?: Maybe<StringComparator>;
+  /** Filters that the project's next milestone must satisfy. */
+  nextProjectMilestone?: Maybe<ProjectMilestoneFilter>;
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<ProjectFilter>>;
+  /** Filters that the project's milestones must satisfy. */
+  projectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Filters that the projects roadmaps must satisfy. */
   roadmaps?: Maybe<RoadmapCollectionFilter>;
   /** [Internal] Comparator for the projects content. */
@@ -5837,6 +5884,30 @@ export type ProjectMilestone = Node & {
   updatedAt: Scalars["DateTime"];
 };
 
+/** Milestone collection filtering options. */
+export type ProjectMilestoneCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the milestone. */
+  and?: Maybe<Array<ProjectMilestoneCollectionFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that needs to be matched by all milestones. */
+  every?: Maybe<ProjectMilestoneFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the collection length. */
+  length?: Maybe<NumberComparator>;
+  /** Comparator for the project milestone name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the milestone. */
+  or?: Maybe<Array<ProjectMilestoneCollectionFilter>>;
+  /** Filters that needs to be matched by some milestones. */
+  some?: Maybe<ProjectMilestoneFilter>;
+  /** Comparator for the project milestone target date. */
+  targetDate?: Maybe<NullableDateComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
 export type ProjectMilestoneConnection = {
   __typename?: "ProjectMilestoneConnection";
   edges: Array<ProjectMilestoneEdge>;
@@ -5864,6 +5935,24 @@ export type ProjectMilestoneEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: ProjectMilestone;
+};
+
+/** Project milestone filtering options. */
+export type ProjectMilestoneFilter = {
+  /** Compound filters, all of which need to be matched by the project milestone. */
+  and?: Maybe<Array<ProjectMilestoneFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the project milestone name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the project milestone. */
+  or?: Maybe<Array<ProjectMilestoneFilter>>;
+  /** Comparator for the project milestone target date. */
+  targetDate?: Maybe<NullableDateComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 export type ProjectMilestonePayload = {
@@ -6174,6 +6263,8 @@ export type ProjectUpdate = Node & {
   health: ProjectUpdateHealthType;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** [Internal] Serialized JSON representing current state of the project properties when posting the project update. */
+  infoSnapshot?: Maybe<Scalars["JSONObject"]>;
   /** The project that the update is associated with. */
   project: Project;
   /**
@@ -6626,6 +6717,7 @@ export type QueryProjectMilestoneArgs = {
 export type QueryProjectMilestonesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<ProjectMilestoneFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -7731,7 +7823,7 @@ export type Team = Node & {
   issueEstimationAllowZero: Scalars["Boolean"];
   /** Whether to add additional points to the estimate scale. */
   issueEstimationExtended: Scalars["Boolean"];
-  /** The issue estimation type to use. */
+  /** The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt". */
   issueEstimationType: Scalars["String"];
   /** Whether issues without priority should be sorted first. */
   issueOrderingNoPriorityFirst: Scalars["Boolean"];
@@ -7938,7 +8030,7 @@ export type TeamCreateInput = {
   issueEstimationAllowZero?: Maybe<Scalars["Boolean"]>;
   /** Whether to add additional points to the estimate scale. */
   issueEstimationExtended?: Maybe<Scalars["Boolean"]>;
-  /** The issue estimation type to use. */
+  /** The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt". */
   issueEstimationType?: Maybe<Scalars["String"]>;
   /** Whether issues without priority should be sorted first. */
   issueOrderingNoPriorityFirst?: Maybe<Scalars["Boolean"]>;
@@ -8144,7 +8236,7 @@ export type TeamUpdateInput = {
   issueEstimationAllowZero?: Maybe<Scalars["Boolean"]>;
   /** Whether to add additional points to the estimate scale. */
   issueEstimationExtended?: Maybe<Scalars["Boolean"]>;
-  /** The issue estimation type to use. */
+  /** The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt". */
   issueEstimationType?: Maybe<Scalars["String"]>;
   /** Whether issues without priority should be sorted first. */
   issueOrderingNoPriorityFirst?: Maybe<Scalars["Boolean"]>;
@@ -8729,6 +8821,8 @@ export type UserSettings = Node & {
   id: Scalars["ID"];
   /** The notification channel settings the user has selected. */
   notificationPreferences: Scalars["JSONObject"];
+  /** Whether to show full user names instead of display names. */
+  showFullUserNames: Scalars["Boolean"];
   /** The email types the user has unsubscribed from. */
   unsubscribedFrom: Array<Scalars["String"]>;
   /**
@@ -10093,7 +10187,14 @@ export type PaidSubscriptionFragment = { __typename: "PaidSubscription" } & Pick
 
 export type UserSettingsFragment = { __typename: "UserSettings" } & Pick<
   UserSettings,
-  "calendarHash" | "unsubscribedFrom" | "updatedAt" | "notificationPreferences" | "archivedAt" | "createdAt" | "id"
+  | "calendarHash"
+  | "unsubscribedFrom"
+  | "updatedAt"
+  | "notificationPreferences"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
+  | "showFullUserNames"
 > & { user: { __typename?: "User" } & Pick<User, "id"> };
 
 export type JiraLinearMappingFragment = { __typename: "JiraLinearMapping" } & Pick<
@@ -10724,8 +10825,10 @@ export type OrganizationInviteConnectionFragment = { __typename: "OrganizationIn
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type OrganizationInviteDetailsPayloadFragment = { __typename: "OrganizationInviteDetailsPayload" } & Pick<
-  OrganizationInviteDetailsPayload,
+export type OrganizationInviteFullDetailsPayloadFragment = {
+  __typename: "OrganizationInviteFullDetailsPayload";
+} & Pick<
+  OrganizationInviteFullDetailsPayload,
   | "organizationId"
   | "organizationName"
   | "email"
@@ -12429,6 +12532,14 @@ export type UserGoogleCalendarConnectMutation = { __typename?: "Mutation" } & {
   userGoogleCalendarConnect: { __typename?: "UserPayload" } & UserPayloadFragment;
 };
 
+export type UserJiraConnectMutationVariables = Exact<{
+  code: Scalars["String"];
+}>;
+
+export type UserJiraConnectMutation = { __typename?: "Mutation" } & {
+  userJiraConnect: { __typename?: "UserPayload" } & UserPayloadFragment;
+};
+
 export type UserPromoteAdminMutationVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -12581,6 +12692,7 @@ export type ProjectMilestoneQuery = { __typename?: "Query" } & {
 export type ProjectMilestonesQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<ProjectMilestoneFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -13659,16 +13771,6 @@ export type OrganizationInviteQueryVariables = Exact<{
 
 export type OrganizationInviteQuery = { __typename?: "Query" } & {
   organizationInvite: { __typename?: "OrganizationInvite" } & OrganizationInviteFragment;
-};
-
-export type OrganizationInviteDetailsQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type OrganizationInviteDetailsQuery = { __typename?: "Query" } & {
-  organizationInviteDetails: {
-    __typename?: "OrganizationInviteDetailsPayload";
-  } & OrganizationInviteDetailsPayloadFragment;
 };
 
 export type OrganizationInvitesQueryVariables = Exact<{
@@ -15275,6 +15377,7 @@ export const UserSettingsFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "showFullUserNames" } },
         ],
       },
     },
@@ -18778,13 +18881,13 @@ export const OrganizationInviteConnectionFragmentDoc = {
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<OrganizationInviteConnectionFragment, unknown>;
-export const OrganizationInviteDetailsPayloadFragmentDoc = {
+export const OrganizationInviteFullDetailsPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "OrganizationInviteDetailsPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationInviteDetailsPayload" } },
+      name: { kind: "Name", value: "OrganizationInviteFullDetailsPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OrganizationInviteFullDetailsPayload" } },
       selectionSet: {
         kind: "SelectionSet",
         selections: [
@@ -18801,7 +18904,7 @@ export const OrganizationInviteDetailsPayloadFragmentDoc = {
       },
     },
   ],
-} as unknown as DocumentNode<OrganizationInviteDetailsPayloadFragment, unknown>;
+} as unknown as DocumentNode<OrganizationInviteFullDetailsPayloadFragment, unknown>;
 export const OrganizationInvitePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -28169,6 +28272,44 @@ export const UserGoogleCalendarConnectDocument = {
     ...UserPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UserGoogleCalendarConnectMutation, UserGoogleCalendarConnectMutationVariables>;
+export const UserJiraConnectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userJiraConnect" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userJiraConnect" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserJiraConnectMutation, UserJiraConnectMutationVariables>;
 export const UserPromoteAdminDocument = {
   kind: "Document",
   definitions: [
@@ -28947,6 +29088,11 @@ export const ProjectMilestonesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "ProjectMilestoneFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -28982,6 +29128,11 @@ export const ProjectMilestonesDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",
@@ -35989,46 +36140,6 @@ export const OrganizationInviteDocument = {
     ...OrganizationInviteFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<OrganizationInviteQuery, OrganizationInviteQueryVariables>;
-export const OrganizationInviteDetailsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "organizationInviteDetails" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationInviteDetails" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationInviteDetailsPayload" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationInviteDetailsPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<OrganizationInviteDetailsQuery, OrganizationInviteDetailsQueryVariables>;
 export const OrganizationInvitesDocument = {
   kind: "Document",
   definitions: [

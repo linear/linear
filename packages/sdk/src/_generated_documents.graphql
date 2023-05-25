@@ -1346,7 +1346,7 @@ fragment Team on Team {
   defaultTemplateForMembersId
   # The id of the default template to use for new issues created by non-members of the team.
   defaultTemplateForNonMembersId
-  # The issue estimation type to use.
+  # The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt".
   issueEstimationType
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -2120,6 +2120,8 @@ fragment UserSettings on UserSettings {
   user {
     id
   }
+  # Whether to show full user names instead of display names.
+  showFullUserNames
 }
 
 # Tuple for mapping Jira projects to Linear teams.
@@ -3079,7 +3081,7 @@ fragment OrganizationInviteConnection on OrganizationInviteConnection {
   }
 }
 
-fragment OrganizationInviteDetailsPayload on OrganizationInviteDetailsPayload {
+fragment OrganizationInviteFullDetailsPayload on OrganizationInviteFullDetailsPayload {
   __typename
   # ID of the workspace the invite is for.
   organizationId
@@ -5459,6 +5461,15 @@ mutation userGoogleCalendarConnect(
     ...UserPayload
   }
 }
+# Connects the Jira user to this Linear account via OAuth2.
+mutation userJiraConnect(
+  # The Jira OAuth code.
+  $code: String!
+) {
+  userJiraConnect(code: $code) {
+    ...UserPayload
+  }
+}
 # Makes user an admin. Can only be called by an admin.
 mutation userPromoteAdmin(
   # The identifier of the user to make an admin.
@@ -5634,6 +5645,8 @@ query ProjectMilestones(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # Filter returned project milestones.
+  $filter: ProjectMilestoneFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -5646,6 +5659,7 @@ query ProjectMilestones(
   ProjectMilestones(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -7514,12 +7528,6 @@ query organizationExists($urlKey: String!) {
 query organizationInvite($id: String!) {
   organizationInvite(id: $id) {
     ...OrganizationInvite
-  }
-}
-# One specific organization invite.
-query organizationInviteDetails($id: String!) {
-  organizationInviteDetails(id: $id) {
-    ...OrganizationInviteDetailsPayload
   }
 }
 # All invites for the organization.
