@@ -9,7 +9,7 @@ yarn global add @linear/import
 or
 
 ```
-npm i -g @linear/import
+npm i --location=global @linear/import
 ```
 
 Run interactive importer:
