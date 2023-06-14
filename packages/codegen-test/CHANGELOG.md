@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.10.7
+
+### Patch Changes
+
+- 8806bf1: chore(deps): update dependency patch versions
+
 ## 1.10.6
 
 ### Patch Changes
