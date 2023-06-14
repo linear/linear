@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.7.5
+
+### Patch Changes
+
+- 8806bf1: chore(deps): update dependency patch versions
+- Updated dependencies [8806bf1]
+- Updated dependencies [e76fab7]
+  - @linear/sdk@6.0.0
+
 ## 1.7.4
 
 ### Patch Changes
