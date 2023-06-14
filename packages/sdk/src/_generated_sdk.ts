@@ -699,6 +699,81 @@ export class CommentPayload extends Request {
   }
 }
 /**
+ * A company related to issue's origin.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CompanyFragment response data
+ */
+export class Company extends Request {
+  private _creator: L.CompanyFragment["creator"];
+
+  public constructor(request: LinearRequest, data: L.CompanyFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.companyProperties = parseJson(data.companyProperties) ?? {};
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.externalId = data.externalId;
+    this.id = data.id;
+    this.logoUrl = data.logoUrl ?? undefined;
+    this.name = data.name;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.websiteUrl = data.websiteUrl ?? undefined;
+    this._creator = data.creator;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** Custom company properties. */
+  public companyProperties: Record<string, unknown>;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** Company ID in an external system. */
+  public externalId: string;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Company logo URL. */
+  public logoUrl?: string;
+  /** Company name. */
+  public name: string;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** Company website URL. */
+  public websiteUrl?: string;
+  /** The user who added the company. */
+  public get creator(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._creator.id);
+  }
+  /** The organization of the customer. */
+  public get organization(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+}
+/**
+ * CompanyConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this CompanyConnection model
+ * @param data - CompanyConnection response data
+ */
+export class CompanyConnection extends Connection<Company> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Company> | undefined>,
+    data: L.CompanyConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new Company(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
  * ContactPayload model
  *
  * @param request - function to call the graphql client
@@ -812,7 +887,7 @@ export class CustomView extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** The user who owns the custom view. */
+  /** [Deprecated] The user who owns the custom view. */
   public get owner(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._owner.id);
   }
@@ -2659,7 +2734,7 @@ export class IssueHistory extends Request {
   public actorId?: string;
   /** ID's of labels that were added. */
   public addedLabelIds?: string[];
-  /** Whether the issue was archived or un-archived. */
+  /** Whether the issue is archived at the time of this history entry. */
   public archived?: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
@@ -9639,6 +9714,37 @@ export class DeleteIntegrationTemplateMutation extends Request {
     const data = response.integrationTemplateDelete;
 
     return new ArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationUpdateSlack Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationUpdateSlackMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationUpdateSlack mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationUpdateSlack
+   * @param redirectUri - required redirectUri to pass to integrationUpdateSlack
+   * @returns parsed response from IntegrationUpdateSlackMutation
+   */
+  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<L.IntegrationUpdateSlackMutation, L.IntegrationUpdateSlackMutationVariables>(
+      L.IntegrationUpdateSlackDocument,
+      {
+        code,
+        redirectUri,
+      }
+    );
+    const data = response.integrationUpdateSlack;
+
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -19444,6 +19550,16 @@ export class LinearSdk extends Request {
    */
   public deleteIntegrationTemplate(id: string): LinearFetch<ArchivePayload> {
     return new DeleteIntegrationTemplateMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates the organization's Slack integration.
+   *
+   * @param code - required code to pass to integrationUpdateSlack
+   * @param redirectUri - required redirectUri to pass to integrationUpdateSlack
+   * @returns IntegrationPayload
+   */
+  public integrationUpdateSlack(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationUpdateSlackMutation(this._request).fetch(code, redirectUri);
   }
   /**
    * Integrates the organization with Zendesk.

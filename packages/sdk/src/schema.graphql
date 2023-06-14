@@ -869,6 +869,72 @@ input CommentUpdateInput {
   bodyData: JSON
 }
 
+"""
+A company related to issue's origin.
+"""
+type Company implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  Custom company properties.
+  """
+  companyProperties: JSONObject!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who added the company.
+  """
+  creator: User!
+  """
+  Company ID in an external system.
+  """
+  externalId: String!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Company logo URL.
+  """
+  logoUrl: String
+  """
+  Company name.
+  """
+  name: String!
+  """
+  The organization of the customer.
+  """
+  organization: Organization!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  Company website URL.
+  """
+  websiteUrl: String
+}
+
+type CompanyConnection {
+  edges: [CompanyEdge!]!
+  nodes: [Company!]!
+  pageInfo: PageInfo!
+}
+
+type CompanyEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: Company!
+}
+
 input ContactCreateInput {
   """
   User's browser information.
@@ -1023,7 +1089,7 @@ type CustomView implements Node {
   """
   organization: Organization!
   """
-  The user who owns the custom view.
+  [Deprecated] The user who owns the custom view.
   """
   owner: User!
   """
@@ -1081,10 +1147,6 @@ input CustomViewCreateInput {
   The name of the custom view.
   """
   name: String!
-  """
-  The owner of the custom view
-  """
-  ownerId: String
   """
   [ALPHA] The project filter applied to issues in the custom view.
   """
@@ -1162,10 +1224,6 @@ input CustomViewUpdateInput {
   The name of the custom view.
   """
   name: String
-  """
-  The owner of the custom view
-  """
-  ownerId: String
   """
   [ALPHA] The project filter applied to issues in the custom view.
   """
@@ -4072,7 +4130,7 @@ type IssueHistory implements Node {
   """
   addedLabelIds: [String!]
   """
-  Whether the issue was archived or un-archived.
+  Whether the issue is archived at the time of this history entry.
   """
   archived: Boolean
   """
@@ -5389,6 +5447,10 @@ input IssueUpdateInput {
   """
   boardOrder: Float
   """
+  The identifiers of the companies associated with this ticket.
+  """
+  companyIds: [String!]
+  """
   The cycle associated with the issue.
   """
   cycleId: String
@@ -6361,6 +6423,19 @@ type Mutation {
     """
     id: String!
   ): ArchivePayload!
+  """
+  Updates the organization's Slack integration.
+  """
+  integrationUpdateSlack(
+    """
+    The Slack OAuth code.
+    """
+    code: String!
+    """
+    The Slack OAuth redirect URI.
+    """
+    redirectUri: String!
+  ): IntegrationPayload!
   """
   Integrates the organization with Zendesk.
   """
@@ -8255,6 +8330,10 @@ input NullableProjectFilter {
   """
   creator: UserFilter
   """
+  Comparator for the project health.
+  """
+  health: StringComparator
+  """
   Comparator for the identifier.
   """
   id: IDComparator
@@ -9873,6 +9952,10 @@ input ProjectCollectionFilter {
   """
   every: ProjectFilter
   """
+  Comparator for the project health.
+  """
+  health: StringComparator
+  """
   Comparator for the identifier.
   """
   id: IDComparator
@@ -10035,6 +10118,10 @@ input ProjectFilter {
   Filters that the projects creator must satisfy.
   """
   creator: UserFilter
+  """
+  Comparator for the project health.
+  """
+  health: StringComparator
   """
   Comparator for the identifier.
   """
@@ -11639,7 +11726,7 @@ type Query {
   """
   [INTERNAL] Suggests metadata for a view based on it's filters.
   """
-  customViewDetailsSuggestion(filter: JSONObject!): CustomViewSuggestionPayload!
+  customViewDetailsSuggestion(filter: JSONObject!, modelName: String): CustomViewSuggestionPayload!
   """
   Custom views for the user.
   """

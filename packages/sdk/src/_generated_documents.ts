@@ -538,6 +538,51 @@ export type CommentUpdateInput = {
   bodyData?: Maybe<Scalars["JSON"]>;
 };
 
+/** A company related to issue's origin. */
+export type Company = Node & {
+  __typename?: "Company";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** Custom company properties. */
+  companyProperties: Scalars["JSONObject"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The user who added the company. */
+  creator: User;
+  /** Company ID in an external system. */
+  externalId: Scalars["String"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** Company logo URL. */
+  logoUrl?: Maybe<Scalars["String"]>;
+  /** Company name. */
+  name: Scalars["String"];
+  /** The organization of the customer. */
+  organization: Organization;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** Company website URL. */
+  websiteUrl?: Maybe<Scalars["String"]>;
+};
+
+export type CompanyConnection = {
+  __typename?: "CompanyConnection";
+  edges: Array<CompanyEdge>;
+  nodes: Array<Company>;
+  pageInfo: PageInfo;
+};
+
+export type CompanyEdge = {
+  __typename?: "CompanyEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: Company;
+};
+
 export type ContactCreateInput = {
   /** User's browser information. */
   browser?: Maybe<Scalars["String"]>;
@@ -632,7 +677,7 @@ export type CustomView = Node & {
   name: Scalars["String"];
   /** The organization of the custom view. */
   organization: Organization;
-  /** The user who owns the custom view. */
+  /** [Deprecated] The user who owns the custom view. */
   owner: User;
   /** [ALPHA] The filter applied to projects in the custom view. */
   projectFilterData?: Maybe<Scalars["JSONObject"]>;
@@ -670,8 +715,6 @@ export type CustomViewCreateInput = {
   id?: Maybe<Scalars["String"]>;
   /** The name of the custom view. */
   name: Scalars["String"];
-  /** The owner of the custom view */
-  ownerId?: Maybe<Scalars["String"]>;
   /** [ALPHA] The project filter applied to issues in the custom view. */
   projectFilterData?: Maybe<Scalars["JSONObject"]>;
   /** Whether the custom view is shared with everyone in the organization. */
@@ -720,8 +763,6 @@ export type CustomViewUpdateInput = {
   icon?: Maybe<Scalars["String"]>;
   /** The name of the custom view. */
   name?: Maybe<Scalars["String"]>;
-  /** The owner of the custom view */
-  ownerId?: Maybe<Scalars["String"]>;
   /** [ALPHA] The project filter applied to issues in the custom view. */
   projectFilterData?: Maybe<Scalars["JSONObject"]>;
   /** Whether the custom view is shared with everyone in the organization. */
@@ -2403,7 +2444,7 @@ export type IssueHistory = Node & {
   actorId?: Maybe<Scalars["String"]>;
   /** ID's of labels that were added. */
   addedLabelIds?: Maybe<Array<Scalars["String"]>>;
-  /** Whether the issue was archived or un-archived. */
+  /** Whether the issue is archived at the time of this history entry. */
   archived?: Maybe<Scalars["Boolean"]>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
@@ -3124,6 +3165,8 @@ export type IssueUpdateInput = {
   assigneeId?: Maybe<Scalars["String"]>;
   /** The position of the issue in its column on the board view. */
   boardOrder?: Maybe<Scalars["Float"]>;
+  /** The identifiers of the companies associated with this ticket. */
+  companyIds?: Maybe<Array<Scalars["String"]>>;
   /** The cycle associated with the issue. */
   cycleId?: Maybe<Scalars["String"]>;
   /** The issue description in markdown format. */
@@ -3385,6 +3428,8 @@ export type Mutation = {
   integrationTemplateCreate: IntegrationTemplatePayload;
   /** Deletes a integrationTemplate. */
   integrationTemplateDelete: ArchivePayload;
+  /** Updates the organization's Slack integration. */
+  integrationUpdateSlack: IntegrationPayload;
   /** Integrates the organization with Zendesk. */
   integrationZendesk: IntegrationPayload;
   /** Creates new settings for one or more integrations. */
@@ -3922,6 +3967,11 @@ export type MutationIntegrationTemplateCreateArgs = {
 
 export type MutationIntegrationTemplateDeleteArgs = {
   id: Scalars["String"];
+};
+
+export type MutationIntegrationUpdateSlackArgs = {
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
 };
 
 export type MutationIntegrationZendeskArgs = {
@@ -4776,6 +4826,8 @@ export type NullableProjectFilter = {
   createdAt?: Maybe<DateComparator>;
   /** Filters that the projects creator must satisfy. */
   creator?: Maybe<UserFilter>;
+  /** Comparator for the project health. */
+  health?: Maybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
   /** Filters that the projects issues must satisfy. */
@@ -5661,6 +5713,8 @@ export type ProjectCollectionFilter = {
   creator?: Maybe<UserFilter>;
   /** Filters that needs to be matched by all projects. */
   every?: Maybe<ProjectFilter>;
+  /** Comparator for the project health. */
+  health?: Maybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
   /** Filters that the projects issues must satisfy. */
@@ -5752,6 +5806,8 @@ export type ProjectFilter = {
   createdAt?: Maybe<DateComparator>;
   /** Filters that the projects creator must satisfy. */
   creator?: Maybe<UserFilter>;
+  /** Comparator for the project health. */
+  health?: Maybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
   /** Filters that the projects issues must satisfy. */
@@ -6816,6 +6872,7 @@ export type QueryCustomViewArgs = {
 
 export type QueryCustomViewDetailsSuggestionArgs = {
   filter: Scalars["JSONObject"];
+  modelName?: Maybe<Scalars["String"]>;
 };
 
 export type QueryCustomViewsArgs = {
@@ -9415,6 +9472,19 @@ export type CommentFragment = { __typename: "Comment" } & Pick<
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
+export type CompanyFragment = { __typename: "Company" } & Pick<
+  Company,
+  | "externalId"
+  | "logoUrl"
+  | "name"
+  | "websiteUrl"
+  | "companyProperties"
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
+> & { creator: { __typename?: "User" } & Pick<User, "id"> };
+
 export type EmojiFragment = { __typename: "Emoji" } & Pick<
   Emoji,
   "url" | "name" | "updatedAt" | "source" | "archivedAt" | "createdAt" | "id"
@@ -10296,6 +10366,11 @@ export type CommentPayloadFragment = { __typename: "CommentPayload" } & Pick<
   "lastSyncId" | "success"
 > & { comment: { __typename?: "Comment" } & Pick<Comment, "id"> };
 
+export type CompanyConnectionFragment = { __typename: "CompanyConnection" } & {
+  nodes: Array<{ __typename?: "Company" } & CompanyFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
 export type ContactPayloadFragment = { __typename: "ContactPayload" } & Pick<ContactPayload, "success">;
 
 export type CreateCsvExportReportPayloadFragment = { __typename: "CreateCsvExportReportPayload" } & Pick<
@@ -10590,6 +10665,8 @@ type Node_AuditEntry_Fragment = { __typename: "AuditEntry" } & Pick<AuditEntry, 
 
 type Node_Comment_Fragment = { __typename: "Comment" } & Pick<Comment, "id">;
 
+type Node_Company_Fragment = { __typename: "Company" } & Pick<Company, "id">;
+
 type Node_CustomView_Fragment = { __typename: "CustomView" } & Pick<CustomView, "id">;
 
 type Node_Cycle_Fragment = { __typename: "Cycle" } & Pick<Cycle, "id">;
@@ -10708,6 +10785,7 @@ export type NodeFragment =
   | Node_Attachment_Fragment
   | Node_AuditEntry_Fragment
   | Node_Comment_Fragment
+  | Node_Company_Fragment
   | Node_CustomView_Fragment
   | Node_Cycle_Fragment
   | Node_Document_Fragment
@@ -11722,6 +11800,15 @@ export type DeleteIntegrationTemplateMutationVariables = Exact<{
 
 export type DeleteIntegrationTemplateMutation = { __typename?: "Mutation" } & {
   integrationTemplateDelete: { __typename?: "ArchivePayload" } & ArchivePayloadFragment;
+};
+
+export type IntegrationUpdateSlackMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationUpdateSlackMutation = { __typename?: "Mutation" } & {
+  integrationUpdateSlack: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
 export type IntegrationZendeskMutationVariables = Exact<{
@@ -15921,6 +16008,73 @@ export const CommentPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<CommentPayloadFragment, unknown>;
+export const CompanyFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Company" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Company" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "externalId" } },
+          { kind: "Field", name: { kind: "Name", value: "logoUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "websiteUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "companyProperties" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CompanyFragment, unknown>;
+export const CompanyConnectionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "CompanyConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CompanyConnection" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Company" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...CompanyFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CompanyConnectionFragment, unknown>;
 export const ContactPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -16016,6 +16170,7 @@ export const CustomViewFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "shared" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "owner" },
@@ -16024,7 +16179,6 @@ export const CustomViewFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "shared" } },
         ],
       },
     },
@@ -24042,6 +24196,54 @@ export const DeleteIntegrationTemplateDocument = {
     ...ArchivePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DeleteIntegrationTemplateMutation, DeleteIntegrationTemplateMutationVariables>;
+export const IntegrationUpdateSlackDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationUpdateSlack" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationUpdateSlack" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationUpdateSlackMutation, IntegrationUpdateSlackMutationVariables>;
 export const IntegrationZendeskDocument = {
   kind: "Document",
   definitions: [

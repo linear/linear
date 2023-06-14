@@ -50,6 +50,35 @@ fragment Comment on Comment {
   }
 }
 
+# A company related to issue's origin.
+fragment Company on Company {
+  __typename
+  # Company ID in an external system.
+  externalId
+  # Company logo URL.
+  logoUrl
+  # Company name.
+  name
+  # Company website URL.
+  websiteUrl
+  # Custom company properties.
+  companyProperties
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who added the company.
+  creator {
+    id
+  }
+}
+
 # A custom emoji.
 fragment Emoji on Emoji {
   __typename
@@ -108,12 +137,12 @@ fragment CustomView on CustomView {
   creator {
     id
   }
-  # The user who owns the custom view.
+  # Whether the custom view is shared with everyone in the organization.
+  shared
+  # [Deprecated] The user who owns the custom view.
   owner {
     id
   }
-  # Whether the custom view is shared with everyone in the organization.
-  shared
 }
 
 # A document content for a project.
@@ -557,7 +586,7 @@ fragment IssueHistory on IssueHistory {
   fromTitle
   # What the title was changed to.
   toTitle
-  # Whether the issue was archived or un-archived.
+  # Whether the issue is archived at the time of this history entry.
   archived
   # Whether the issue was auto-archived.
   autoArchived
@@ -2382,6 +2411,16 @@ fragment CommentPayload on CommentPayload {
   lastSyncId
   # Whether the operation was successful.
   success
+}
+
+fragment CompanyConnection on CompanyConnection {
+  __typename
+  nodes {
+    ...Company
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment ContactPayload on ContactPayload {
@@ -4461,6 +4500,17 @@ mutation deleteIntegrationTemplate(
 ) {
   integrationTemplateDelete(id: $id) {
     ...ArchivePayload
+  }
+}
+# Updates the organization's Slack integration.
+mutation integrationUpdateSlack(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationUpdateSlack(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
   }
 }
 # Integrates the organization with Zendesk.
