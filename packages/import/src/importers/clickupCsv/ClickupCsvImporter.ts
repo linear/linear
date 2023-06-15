@@ -1,6 +1,7 @@
 import csv from "csvtojson";
 import { Importer, ImportResult } from "../../types";
 
+// enum of priority values in ClickUp, 0 - none, 1 - urgent, 2 - high, 3 - normal, 4 - low, etc
 type ClickupPriority = 0 | 1 | 2 | 3 | 4;
 
 type ClickupAttachment = {
@@ -8,10 +9,11 @@ type ClickupAttachment = {
   url: string;
 };
 
-type ClickupChecklist = Record<string, string>;
+// record of checklist names to checklist items
+type ClickupChecklist = Record<string, string[]>;
 
 type ClickupComment = {
-  // text contains task_ids for reference and mentions startwing with "@User Name", @assignees, @watchers
+  // text contains task_ids for reference and mentions starting with "@User Name", @assignees, @watchers
   text: string;
   // email of the user who created the comment
   by: string;
@@ -20,8 +22,10 @@ type ClickupComment = {
   resolved: string;
 };
 
+// csv schema
 interface ClickupTaskType {
   "Task ID": string;
+  "Task Custom ID": string;
   "Task Name": string;
   "Task Content": string;
   Status: string;
@@ -34,44 +38,49 @@ interface ClickupTaskType {
   "Parent ID": string;
   Attachments: ClickupAttachment[];
   Assignees: string[];
-  Tags: string;
+  Tags: string[];
   Priority: ClickupPriority;
   "List Name": string;
-  "Folder Name": string;
+  "Folder Name": string; // "hidden" if it doesn't belong to a folder
   "Space Name": string;
-  "Time Estimated": number;
+  "Time Estimated": number | null;
   "Time Estimated Text": string;
   Checklists: ClickupChecklist[];
   Comments: ClickupComment[];
-  "Assigned Comments": number;
+  "Assigned Comments": number; // seemingly always 0?
   "Time Spent": string;
   "Time Spent Text": string;
   "Rolled Up Time": string;
   "Rolled Up Time Text": string;
 }
 
-const parseAttachments = (str: string): ClickupAttachment[] => JSON.parse(str);
-const parseAssignees = (str: string): string[] =>
-  str
-    .slice(1, -1)
-    .split(",")
-    .filter(s => s.length);
-const parseChecklists = (str: string): ClickupChecklist[] => JSON.parse(str);
-const parseComments = (str: string): ClickupComment[] => JSON.parse(str);
-const parsePriority = (str: string): ClickupPriority => JSON.parse(str);
-const parseAssignedComments = (str: string): number => JSON.parse(str);
-
+// custom parsing
+// noinspection JSUnusedGlobalSymbols
 const colParser = {
-  Attachments: parseAttachments,
-  Assignees: parseAssignees,
-  Checklists: parseChecklists,
-  Comments: parseComments,
-  Priority: parsePriority,
-  "Assigned Comments": parseAssignedComments,
+  Attachments: (str: string): ClickupAttachment[] => JSON.parse(str),
+  Assignees: (str: string): string[] =>
+    str
+      .slice(1, -1)
+      .split(",")
+      .filter(s => s.length),
+  Checklists: (str: string): ClickupChecklist[] => JSON.parse(str),
+  Comments: (str: string): ClickupComment[] => JSON.parse(str),
+  Priority: (str: string): ClickupPriority => JSON.parse(str),
+  Tags: (str: string): string[] =>
+    str
+      .slice(1, -1)
+      .split(",")
+      .filter(s => s.length),
+  "Assigned Comments": (str: string): number => JSON.parse(str),
 };
 
 export class ClickupCsvImporter implements Importer {
-  public constructor(private filePath: string) {}
+  // Instance variables
+  private filePath: string;
+
+  public constructor(filePath: string) {
+    this.filePath = filePath;
+  }
 
   public get name(): string {
     return "ClickUp (CSV)";
@@ -101,26 +110,15 @@ export class ClickupCsvImporter implements Importer {
 
     for (const row of data) {
       const title = row["Task Name"];
-      if (!title) {
-        continue;
-      }
-
       const url = `https://app.clickup.com/t/${row["Task ID"]}`;
       const mdDesc = row["Task Content"];
-      const description = url ? `${mdDesc}\n\n[View original issue in Asana](${url})` : mdDesc;
-
-      const priority = mapPriority(row.Priority);
-
+      const description = url ? `${mdDesc}\n\n[View original issue in ClickUp](${url})` : mdDesc;
+      const priority = row.Priority;
       const dueDate = row["Due Date"] ? new Date(row["Due Date"]) : undefined;
-
-      const tags = row.Tags.slice(1, -1).split(",");
-
+      const tags = row.Tags;
       const assigneeId = row.Assignees[0] ?? undefined;
-
       const status = row.Status === "Closed" ? "Done" : "Todo";
-
       const labels = tags.filter(tag => !!tag);
-
       const createdAt = row["Date Created"] ? new Date(row["Date Created"]) : undefined;
 
       importData.issues.push({
@@ -147,13 +145,3 @@ export class ClickupCsvImporter implements Importer {
     return importData;
   };
 }
-
-const mapPriority = (input: ClickupPriority): number => {
-  const priorityMap = {
-    Urgent: 1,
-    High: 2,
-    Medium: 3,
-    Low: 4,
-  };
-  return priorityMap[input] || 0;
-};

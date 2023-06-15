@@ -6,13 +6,11 @@ const BASE_PATH = process.cwd();
 
 export const clickupCsvImport = async (): Promise<Importer> => {
   const answers = await inquirer.prompt<ClickupImportAnswers>(questions);
-  const asanaImporter = new ClickupCsvImporter(answers.asanaFilePath);
-  return asanaImporter;
+  return new ClickupCsvImporter(answers.clickupFilePath);
 };
 
 interface ClickupImportAnswers {
-  asanaFilePath: string;
-  asanaUrlName: string;
+  clickupFilePath: string;
 }
 
 const questions = [

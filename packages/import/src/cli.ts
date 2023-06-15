@@ -56,6 +56,10 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
             name: "Linear (CSV export)",
             value: "linearCsv",
           },
+          {
+            name: "ClickUp (CSV export)",
+            value: "clickupCsv",
+          },
         ],
       },
     ]);
