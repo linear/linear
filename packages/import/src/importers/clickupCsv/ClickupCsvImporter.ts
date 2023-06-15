@@ -77,9 +77,13 @@ const colParser = {
 export class ClickupCsvImporter implements Importer {
   // Instance variables
   private filePath: string;
+  private spaceFilter: string;
+  private ignoreSubtasks: boolean;
 
-  public constructor(filePath: string) {
+  public constructor(filePath: string, spaceFilter: string, ignoreSubtasks: boolean) {
     this.filePath = filePath;
+    this.spaceFilter = spaceFilter;
+    this.ignoreSubtasks = ignoreSubtasks;
   }
 
   public get name(): string {
@@ -109,6 +113,16 @@ export class ClickupCsvImporter implements Importer {
     }
 
     for (const row of data) {
+      // Check for space filter.
+      if (this.spaceFilter !== "" && row["Space Name"] !== this.spaceFilter) {
+        continue;
+      }
+
+      // Check for subtask
+      if (this.ignoreSubtasks && row["Parent ID"] !== "null") {
+        continue;
+      }
+
       const title = row["Task Name"];
       const url = `https://app.clickup.com/t/${row["Task ID"]}`;
       const mdDesc = row["Task Content"];
