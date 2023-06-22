@@ -1,3 +1,9 @@
+> **Note**
+> Linear now has a migration assistant for importing from Asana, Jira, Shortcut, and GitHub without using the CLI.
+>
+> Please see [the documentation](https://linear.app/docs/import-issues) for more information.
+> If you would like to import data from other services not listed above this CLI may still be useful.
+
 # linear-import
 
 Install the CLI:
