@@ -152,6 +152,7 @@ export class TrelloJsonImporter implements Importer {
         labels,
         comments: comments[card.id],
         status: this.mapListsToStatuses ? cardList?.name : undefined,
+        archived: card.closed || cardList?.closed,
       });
 
       const allLabels = card.labels.map(label => ({
