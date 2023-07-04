@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import chalk from "chalk";
 import * as inquirer from "inquirer";
+import { importIssues } from "./importIssues";
 import { asanaCsvImport } from "./importers/asanaCsv";
 import { githubImport } from "./importers/github";
 import { jiraCsvImport } from "./importers/jiraCsv";
@@ -9,7 +10,6 @@ import { linearCsvImporter } from "./importers/linearCsv";
 import { pivotalCsvImport } from "./importers/pivotalCsv";
 import { shortcutCsvImport } from "./importers/shortcutCsv";
 import { trelloJsonImport } from "./importers/trelloJson";
-import { importIssues } from "./importIssues";
 import { ImportAnswers } from "./types";
 
 inquirer.registerPrompt("filePath", require("inquirer-file-path"));
