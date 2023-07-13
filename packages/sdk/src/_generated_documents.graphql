@@ -104,6 +104,51 @@ fragment Emoji on Emoji {
   }
 }
 
+# A custom view notification subscription.
+fragment CustomViewNotificationSubscription on CustomViewNotificationSubscription {
+  __typename
+  # The contextual cycle view associated with the notification subscription.
+  cycle {
+    id
+  }
+  # The contextual label view associated with the notification subscription.
+  label {
+    id
+  }
+  # The contextual project view associated with the notification subscription.
+  project {
+    id
+  }
+  # The custom view subscribed to.
+  customView {
+    id
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The team associated with the notification subscription.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of subscription.
+  notificationSubscriptionTypes
+  # The unique identifier of the entity.
+  id
+  # The user that subscribed to receive notifications.
+  subscriber {
+    id
+  }
+  # The user view associated with the notification subscription.
+  user {
+    id
+  }
+}
+
 # A custom view that has been saved by a user.
 fragment CustomView on CustomView {
   __typename
@@ -141,6 +186,51 @@ fragment CustomView on CustomView {
   shared
   # [Deprecated] The user who owns the custom view.
   owner {
+    id
+  }
+}
+
+# A cycle notification subscription.
+fragment CycleNotificationSubscription on CycleNotificationSubscription {
+  __typename
+  # The contextual custom view associated with the notification subscription.
+  customView {
+    id
+  }
+  # The contextual label view associated with the notification subscription.
+  label {
+    id
+  }
+  # The contextual project view associated with the notification subscription.
+  project {
+    id
+  }
+  # The cycle subscribed to.
+  cycle {
+    id
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The team associated with the notification subscription.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of subscription.
+  notificationSubscriptionTypes
+  # The unique identifier of the entity.
+  id
+  # The user that subscribed to receive notifications.
+  subscriber {
+    id
+  }
+  # The user view associated with the notification subscription.
+  user {
     id
   }
 }
@@ -203,6 +293,194 @@ fragment Document on Document {
   }
   # The user who last updated the document.
   updatedBy {
+    id
+  }
+}
+
+# A generic payload return from entity archive mutations.
+fragment AttachmentArchivePayload on AttachmentArchivePayload {
+  __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
+fragment CycleArchivePayload on CycleArchivePayload {
+  __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
+fragment IssueArchivePayload on IssueArchivePayload {
+  __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
+fragment NotificationArchivePayload on NotificationArchivePayload {
+  __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    ...Notification
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
+fragment ProjectArchivePayload on ProjectArchivePayload {
+  __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
+fragment RoadmapArchivePayload on RoadmapArchivePayload {
+  __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
+fragment WorkflowStateArchivePayload on WorkflowStateArchivePayload {
+  __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive or deletion mutations.
+fragment ArchivePayload on ArchivePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+
+  ... on AttachmentArchivePayload {
+    ...AttachmentArchivePayload
+  }
+
+  ... on CycleArchivePayload {
+    ...CycleArchivePayload
+  }
+
+  ... on DeletePayload {
+    ...DeletePayload
+  }
+
+  ... on IssueArchivePayload {
+    ...IssueArchivePayload
+  }
+
+  ... on NotificationArchivePayload {
+    ...NotificationArchivePayload
+  }
+
+  ... on ProjectArchivePayload {
+    ...ProjectArchivePayload
+  }
+
+  ... on RoadmapArchivePayload {
+    ...RoadmapArchivePayload
+  }
+
+  ... on WorkflowStateArchivePayload {
+    ...WorkflowStateArchivePayload
+  }
+}
+
+# A generic payload return from entity deletion mutations.
+fragment DeletePayload on DeletePayload {
+  __typename
+  # The identifier of the deleted entity.
+  entityId
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A label notification subscription.
+fragment LabelNotificationSubscription on LabelNotificationSubscription {
+  __typename
+  # The contextual custom view associated with the notification subscription.
+  customView {
+    id
+  }
+  # The contextual cycle view associated with the notification subscription.
+  cycle {
+    id
+  }
+  # The contextual project view associated with the notification subscription.
+  project {
+    id
+  }
+  # The label subscribed to.
+  label {
+    id
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The team associated with the notification subscription.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of subscription.
+  notificationSubscriptionTypes
+  # The unique identifier of the entity.
+  id
+  # The user that subscribed to receive notifications.
+  subscriber {
+    id
+  }
+  # The user view associated with the notification subscription.
+  user {
     id
   }
 }
@@ -283,8 +561,16 @@ fragment Notification on Notification {
 # A project notification subscription.
 fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
   __typename
-  # Subscribed team.
-  team {
+  # The contextual custom view associated with the notification subscription.
+  customView {
+    id
+  }
+  # The contextual cycle view associated with the notification subscription.
+  cycle {
+    id
+  }
+  # The contextual label view associated with the notification subscription.
+  label {
     id
   }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -295,15 +581,23 @@ fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
   project {
     id
   }
+  # The team associated with the notification subscription.
+  team {
+    id
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
   createdAt
-  # The type of the subscription.
-  type
+  # The type of subscription.
+  notificationSubscriptionTypes
   # The unique identifier of the entity.
   id
-  # The user associated with notification subscriptions.
+  # The user that subscribed to receive notifications.
+  subscriber {
+    id
+  }
+  # The user view associated with the notification subscription.
   user {
     id
   }
@@ -656,6 +950,33 @@ fragment Roadmap on Roadmap {
   }
 }
 
+# A schedule for a team's first responder.
+fragment FirstResponderSchedule on FirstResponderSchedule {
+  __typename
+  # The current schedule and available schedules.
+  scheduleData
+  # The id of the integration schedule used for scheduling.
+  integrationScheduleId
+  # The integration used for scheduling.
+  integration {
+    id
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The team to which the schedule belongs to.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
 # A set of issues to be resolved in a specified amount of time.
 fragment Cycle on Cycle {
   __typename
@@ -733,7 +1054,19 @@ fragment WorkflowState on WorkflowState {
 # A team notification subscription.
 fragment TeamNotificationSubscription on TeamNotificationSubscription {
   __typename
-  # Subscribed project.
+  # The contextual custom view associated with the notification subscription.
+  customView {
+    id
+  }
+  # The contextual cycle view associated with the notification subscription.
+  cycle {
+    id
+  }
+  # The contextual label view associated with the notification subscription.
+  label {
+    id
+  }
+  # The contextual project view associated with the notification subscription.
   project {
     id
   }
@@ -749,11 +1082,15 @@ fragment TeamNotificationSubscription on TeamNotificationSubscription {
   archivedAt
   # The time at which the entity was created.
   createdAt
-  # The type of the subscription.
-  type
+  # The type of subscription.
+  notificationSubscriptionTypes
   # The unique identifier of the entity.
   id
-  # The user associated with notification subscriptions.
+  # The user that subscribed to receive notifications.
+  subscriber {
+    id
+  }
+  # The user view associated with the notification subscription.
   user {
     id
   }
@@ -1335,6 +1672,8 @@ fragment Team on Team {
   cycleCalenderUrl
   # How many upcoming cycles to create.
   upcomingCycleCount
+  # Number of issues in the team.
+  issueCount
   # Only allow issues issues with cycles in Active Issues.
   cycleLockToActive
   # Period after which automatically closed and completed issues are automatically archived in months.
@@ -1596,6 +1935,35 @@ fragment ProjectUpdateInteraction on ProjectUpdateInteraction {
   }
 }
 
+# Information for creating embedded content for the provided URL
+fragment Embed on Embed {
+  __typename
+  # The HTML (video, rich)
+  html
+  # The URL of the thumbnail preview image
+  thumbnailUrl
+  # The asset URL (photo)
+  url
+  # The description of the content
+  description
+  # The height of embedded content (photo, video, rich)
+  height
+  # The height of the thumbnail preview image
+  thumbnailHeight
+  # The name of the author/owner of the resource
+  authorName
+  # The name of the provider
+  providerName
+  # The type of embed
+  type
+  # The width of embedded content (photo, video, rich)
+  width
+  # The width of the thumbnail preview image
+  thumbnailWidth
+  # Title for the returned embed view
+  title
+}
+
 # Intercom specific settings.
 fragment IntercomSettings on IntercomSettings {
   __typename
@@ -1774,27 +2142,41 @@ fragment GitHubSettings on GitHubSettings {
 # Notification subscriptions for models.
 fragment NotificationSubscription on NotificationSubscription {
   __typename
-  # Subscribed project.
-  project {
+  # The contextual custom view associated with the notification subscription.
+  customView {
     id
   }
-  # Subscribed team.
-  team {
+  # The contextual cycle view associated with the notification subscription.
+  cycle {
+    id
+  }
+  # The contextual label view associated with the notification subscription.
+  label {
+    id
+  }
+  # The contextual project view associated with the notification subscription.
+  project {
     id
   }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The team associated with the notification subscription.
+  team {
+    id
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
   createdAt
-  # The type of the subscription.
-  type
   # The unique identifier of the entity.
   id
-  # The user associated with notification subscriptions.
+  # The user that subscribed to receive notifications.
+  subscriber {
+    id
+  }
+  # The user view associated with the notification subscription.
   user {
     id
   }
@@ -1882,6 +2264,15 @@ fragment UploadFile on UploadFile {
     ...UploadFileHeader
   }
   metaData
+}
+
+# PagerDuty specific settings.
+fragment PagerDutySettings on PagerDutySettings {
+  __typename
+  # The mapping of PagerDuty schedule id to names.
+  scheduleMapping {
+    ...PagerDutyScheduleMapping
+  }
 }
 
 # Public information of the OAuth application, plus whether the application has been authorized for
@@ -2063,6 +2454,9 @@ fragment IntegrationSettings on IntegrationSettings {
   notion {
     ...NotionSettings
   }
+  pagerDuty {
+    ...PagerDutySettings
+  }
   sentry {
     ...SentrySettings
   }
@@ -2162,6 +2556,15 @@ fragment JiraLinearMapping on JiraLinearMapping {
   linearTeamId
 }
 
+# Tuple for mapping PagerDuty schedule id to names.
+fragment PagerDutyScheduleMapping on PagerDutyScheduleMapping {
+  __typename
+  # The PagerDuty schedule id.
+  scheduleId
+  # The PagerDuty schedule name.
+  scheduleName
+}
+
 # User favorites presented in the sidebar.
 fragment Favorite on Favorite {
   __typename
@@ -2197,6 +2600,10 @@ fragment Favorite on Favorite {
   projectTeam {
     id
   }
+  # The favorited user.
+  user {
+    id
+  }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -2206,7 +2613,7 @@ fragment Favorite on Favorite {
   # The order of the item in the favorites list.
   sortOrder
   # The owner of the favorite.
-  user {
+  owner {
     id
   }
   # The parent folder of the favorite.
@@ -2315,14 +2722,6 @@ fragment ApiKeyPayload on ApiKeyPayload {
   apiKey {
     ...ApiKey
   }
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
-fragment ArchivePayload on ArchivePayload {
-  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -2598,6 +2997,16 @@ fragment EmailUserAccountAuthChallengeResponse on EmailUserAccountAuthChallengeR
   success
 }
 
+fragment EmbedPayload on EmbedPayload {
+  __typename
+  # Embed information
+  embed {
+    ...Embed
+  }
+  # Whether the query was successful
+  success
+}
+
 fragment EmojiConnection on EmojiConnection {
   __typename
   nodes {
@@ -2656,6 +3065,16 @@ fragment FigmaEmbedPayload on FigmaEmbedPayload {
   }
   # Whether the operation was successful.
   success
+}
+
+fragment FirstResponderScheduleConnection on FirstResponderScheduleConnection {
+  __typename
+  nodes {
+    ...FirstResponderSchedule
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment FrontAttachmentPayload on FrontAttachmentPayload {
@@ -3782,6 +4201,26 @@ fragment WorkflowDefinition on WorkflowDefinition {
   activities
   # The conditions that need to be match for the workflow to be triggered.
   conditions
+  # The context custom view associated with the workflow.
+  customView {
+    id
+  }
+  # The contextual cycle view associated with the workflow.
+  cycle {
+    id
+  }
+  # The contextual label view associated with the workflow.
+  label {
+    id
+  }
+  # The contextual project view associated with the workflow.
+  project {
+    id
+  }
+  # The contextual user view associated with the workflow.
+  user {
+    id
+  }
   # The description of the workflow.
   description
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -3867,7 +4306,7 @@ mutation deleteApiKey(
   $id: String!
 ) {
   apiKeyDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # [DEPRECATED] Archives an issue attachment.
@@ -3876,7 +4315,7 @@ mutation archiveAttachment(
   $id: String!
 ) {
   attachmentArchive(id: $id) {
-    ...ArchivePayload
+    ...AttachmentArchivePayload
   }
 }
 # Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
@@ -3894,7 +4333,7 @@ mutation deleteAttachment(
   $id: String!
 ) {
   attachmentDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Link an existing Discord message to an issue.
@@ -3971,6 +4410,15 @@ mutation attachmentLinkZendesk(
     ...AttachmentPayload
   }
 }
+# Unsyncs an existing synced Slack attachment.
+mutation attachmentUnsyncSlack(
+  # The identifier of the attachment to unsync.
+  $id: String!
+) {
+  attachmentUnsyncSlack(id: $id) {
+    ...AttachmentPayload
+  }
+}
 # Updates an existing issue attachment.
 mutation updateAttachment(
   # The identifier of the attachment to update.
@@ -3997,7 +4445,7 @@ mutation deleteComment(
   $id: String!
 ) {
   commentDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates a comment.
@@ -4052,7 +4500,7 @@ mutation deleteCustomView(
   $id: String!
 ) {
   customViewDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates a custom view.
@@ -4072,7 +4520,7 @@ mutation archiveCycle(
   $id: String!
 ) {
   cycleArchive(id: $id) {
-    ...ArchivePayload
+    ...CycleArchivePayload
   }
 }
 # Creates a new cycle.
@@ -4110,7 +4558,7 @@ mutation deleteDocument(
   $id: String!
 ) {
   documentDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates a document.
@@ -4166,7 +4614,7 @@ mutation deleteEmoji(
   $id: String!
 ) {
   emojiDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # [Deprecated] Creates a new event.
@@ -4193,7 +4641,7 @@ mutation deleteFavorite(
   $id: String!
 ) {
   favoriteDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates a favorite.
@@ -4270,7 +4718,7 @@ mutation deleteIntegration(
   $id: String!
 ) {
   integrationDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Integrates the organization with Discord.
@@ -4499,7 +4947,7 @@ mutation deleteIntegrationTemplate(
   $id: String!
 ) {
   integrationTemplateDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates the organization's Slack integration.
@@ -4556,7 +5004,7 @@ mutation archiveIssue(
   $trash: Boolean
 ) {
   issueArchive(id: $id, trash: $trash) {
-    ...ArchivePayload
+    ...IssueArchivePayload
   }
 }
 # Updates multiple issues at once.
@@ -4585,7 +5033,7 @@ mutation deleteIssue(
   $id: String!
 ) {
   issueDelete(id: $id) {
-    ...ArchivePayload
+    ...IssueArchivePayload
   }
 }
 # Kicks off an Asana import job.
@@ -4788,15 +5236,6 @@ mutation updateIssueImport(
     ...IssueImportPayload
   }
 }
-# Deletes an issue label.
-mutation archiveIssueLabel(
-  # The identifier of the label to archive.
-  $id: String!
-) {
-  issueLabelArchive(id: $id) {
-    ...ArchivePayload
-  }
-}
 # Creates a new label.
 mutation createIssueLabel(
   # The issue label to create.
@@ -4814,7 +5253,7 @@ mutation deleteIssueLabel(
   $id: String!
 ) {
   issueLabelDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates an label.
@@ -4843,7 +5282,7 @@ mutation deleteIssueRelation(
   $id: String!
 ) {
   issueRelationDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates an issue relation.
@@ -4875,7 +5314,7 @@ mutation unarchiveIssue(
   $id: String!
 ) {
   issueUnarchive(id: $id) {
-    ...ArchivePayload
+    ...IssueArchivePayload
   }
 }
 # Updates an issue.
@@ -4919,10 +5358,10 @@ mutation archiveNotification(
   $id: String!
 ) {
   notificationArchive(id: $id) {
-    ...ArchivePayload
+    ...NotificationArchivePayload
   }
 }
-# Creates a new notification subscription for a team or a project.
+# Creates a new notification subscription for a cycle, custom view, label, project or team.
 mutation createNotificationSubscription(
   # The subscription object to create.
   $input: NotificationSubscriptionCreateInput!
@@ -4937,7 +5376,7 @@ mutation deleteNotificationSubscription(
   $id: String!
 ) {
   notificationSubscriptionDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates a notification subscription.
@@ -4957,7 +5396,7 @@ mutation unarchiveNotification(
   $id: String!
 ) {
   notificationUnarchive(id: $id) {
-    ...ArchivePayload
+    ...NotificationArchivePayload
   }
 }
 # Updates a notification.
@@ -4998,7 +5437,7 @@ mutation deleteOrganizationDomain(
   $id: String!
 ) {
   organizationDomainDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Creates a new organization invite.
@@ -5016,7 +5455,7 @@ mutation deleteOrganizationInvite(
   $id: String!
 ) {
   organizationInviteDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates an organization invite.
@@ -5051,7 +5490,7 @@ mutation archiveProject(
   $id: String!
 ) {
   projectArchive(id: $id) {
-    ...ArchivePayload
+    ...ProjectArchivePayload
   }
 }
 # Creates a new project.
@@ -5069,7 +5508,7 @@ mutation deleteProject(
   $id: String!
 ) {
   projectDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Creates a new project link.
@@ -5087,7 +5526,7 @@ mutation deleteProjectLink(
   $id: String!
 ) {
   projectLinkDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates a project link.
@@ -5116,7 +5555,7 @@ mutation deleteProjectMilestone(
   $id: String!
 ) {
   projectMilestoneDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates a project milestone.
@@ -5136,7 +5575,7 @@ mutation unarchiveProject(
   $id: String!
 ) {
   projectUnarchive(id: $id) {
-    ...ArchivePayload
+    ...ProjectArchivePayload
   }
 }
 # Updates a project.
@@ -5165,7 +5604,7 @@ mutation deleteProjectUpdate(
   $id: String!
 ) {
   projectUpdateDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Creates a new interaction on a project update.
@@ -5230,7 +5669,7 @@ mutation deleteReaction(
   $id: String!
 ) {
   reactionDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Manually update Google Sheets data.
@@ -5248,7 +5687,7 @@ mutation resendOrganizationInvite(
   $id: String!
 ) {
   resendOrganizationInvite(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Archives a roadmap.
@@ -5257,7 +5696,7 @@ mutation archiveRoadmap(
   $id: String!
 ) {
   roadmapArchive(id: $id) {
-    ...ArchivePayload
+    ...RoadmapArchivePayload
   }
 }
 # Creates a new roadmap.
@@ -5275,7 +5714,7 @@ mutation deleteRoadmap(
   $id: String!
 ) {
   roadmapDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Creates a new roadmapToProject join.
@@ -5293,7 +5732,7 @@ mutation deleteRoadmapToProject(
   $id: String!
 ) {
   roadmapToProjectDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates a roadmapToProject.
@@ -5313,7 +5752,7 @@ mutation unarchiveRoadmap(
   $id: String!
 ) {
   roadmapUnarchive(id: $id) {
-    ...ArchivePayload
+    ...RoadmapArchivePayload
   }
 }
 # Updates a roadmap.
@@ -5363,7 +5802,7 @@ mutation deleteTeam(
   $id: String!
 ) {
   teamDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Deletes a previously used team key.
@@ -5372,7 +5811,7 @@ mutation deleteTeamKey(
   $id: String!
 ) {
   teamKeyDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Creates a new team membership.
@@ -5390,7 +5829,7 @@ mutation deleteTeamMembership(
   $id: String!
 ) {
   teamMembershipDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates a team membership.
@@ -5430,7 +5869,7 @@ mutation deleteTemplate(
   $id: String!
 ) {
   templateDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates an existing template.
@@ -5611,7 +6050,7 @@ mutation deleteViewPreferences(
   $id: String!
 ) {
   viewPreferencesDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates an existing ViewPreferences object.
@@ -5640,7 +6079,7 @@ mutation deleteWebhook(
   $id: String!
 ) {
   webhookDelete(id: $id) {
-    ...ArchivePayload
+    ...DeletePayload
   }
 }
 # Updates an existing Webhook.
@@ -5660,7 +6099,7 @@ mutation archiveWorkflowState(
   $id: String!
 ) {
   workflowStateArchive(id: $id) {
-    ...ArchivePayload
+    ...WorkflowStateArchivePayload
   }
 }
 # Creates a new state, adding it to the workflow of a team.
@@ -6407,6 +6846,26 @@ query documents(
     ...DocumentConnection
   }
 }
+# Returns embed info for any url
+query embedInfo(
+  # The URL to lookup embed info for
+  $url: String!
+) {
+  embedInfo(url: $url) {
+    ...EmbedPayload
+  }
+}
+# Embed information
+query embedInfo_embed(
+  # The URL to lookup embed info for
+  $url: String!
+) {
+  embedInfo(url: $url) {
+    embed {
+      ...Embed
+    }
+  }
+}
 # A specific emoji.
 query emoji(
   # The identifier of the emoji to retrieve.
@@ -7043,6 +7502,39 @@ query issueRelations(
     orderBy: $orderBy
   ) {
     ...IssueRelationConnection
+  }
+}
+# [DEPRECATED] Search issues. This endpoint is deprecated and will be removed in the future – use
+# `searchIssues` instead.
+query issueSearch(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # [Deprecated] Search string to look for.
+  $query: String
+) {
+  issueSearch(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    query: $query
+  ) {
+    ...IssueConnection
   }
 }
 # Find issue based on the VCS branch name.
@@ -8631,6 +9123,15 @@ query template(
 # All templates from all users.
 query templates {
   templates {
+    ...Template
+  }
+}
+# Returns all templates that are associated with the integration type.
+query templatesForIntegration(
+  # The type of integration for which to return associated templates
+  $integrationType: String!
+) {
+  templatesForIntegration(integrationType: $integrationType) {
     ...Template
   }
 }

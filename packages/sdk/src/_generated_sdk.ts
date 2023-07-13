@@ -278,7 +278,7 @@ export class Application extends Request {
   public name: string;
 }
 /**
- * ArchivePayload model
+ * A generic payload return from entity archive or deletion mutations.
  *
  * @param request - function to call the graphql client
  * @param data - L.ArchivePayloadFragment response data
@@ -396,6 +396,31 @@ export class Attachment extends Request {
   /** Updates an existing issue attachment. */
   public update(input: L.AttachmentUpdateInput) {
     return new UpdateAttachmentMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * A generic payload return from entity archive mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AttachmentArchivePayloadFragment response data
+ */
+export class AttachmentArchivePayload extends Request {
+  private _entity?: L.AttachmentArchivePayloadFragment["entity"];
+
+  public constructor(request: LinearRequest, data: L.AttachmentArchivePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._entity = data.entity ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The archived/unarchived entity. Null if entity was deleted. */
+  public get entity(): LinearFetch<Attachment> | undefined {
+    return this._entity?.id ? new AttachmentQuery(this._request).fetch(this._entity?.id) : undefined;
   }
 }
 /**
@@ -931,6 +956,80 @@ export class CustomViewConnection extends Connection<CustomView> {
   }
 }
 /**
+ * A custom view notification subscription.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CustomViewNotificationSubscriptionFragment response data
+ */
+export class CustomViewNotificationSubscription extends Request {
+  private _customView: L.CustomViewNotificationSubscriptionFragment["customView"];
+  private _cycle?: L.CustomViewNotificationSubscriptionFragment["cycle"];
+  private _label?: L.CustomViewNotificationSubscriptionFragment["label"];
+  private _project?: L.CustomViewNotificationSubscriptionFragment["project"];
+  private _subscriber: L.CustomViewNotificationSubscriptionFragment["subscriber"];
+  private _team?: L.CustomViewNotificationSubscriptionFragment["team"];
+  private _user?: L.CustomViewNotificationSubscriptionFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.CustomViewNotificationSubscriptionFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._customView = data.customView;
+    this._cycle = data.cycle ?? undefined;
+    this._label = data.label ?? undefined;
+    this._project = data.project ?? undefined;
+    this._subscriber = data.subscriber;
+    this._team = data.team ?? undefined;
+    this._user = data.user ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The type of subscription. */
+  public notificationSubscriptionTypes: string[];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The custom view subscribed to. */
+  public get customView(): LinearFetch<CustomView> | undefined {
+    return new CustomViewQuery(this._request).fetch(this._customView.id);
+  }
+  /** The contextual cycle view associated with the notification subscription. */
+  public get cycle(): LinearFetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The contextual label view associated with the notification subscription. */
+  public get label(): LinearFetch<IssueLabel> | undefined {
+    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
+  }
+  /** The contextual project view associated with the notification subscription. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The user that subscribed to receive notifications. */
+  public get subscriber(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._subscriber.id);
+  }
+  /** The team associated with the notification subscription. */
+  public get team(): LinearFetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The user view associated with the notification subscription. */
+  public get user(): LinearFetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+}
+/**
  * CustomViewPayload model
  *
  * @param request - function to call the graphql client
@@ -1071,6 +1170,31 @@ export class Cycle extends Request {
   }
 }
 /**
+ * A generic payload return from entity archive mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CycleArchivePayloadFragment response data
+ */
+export class CycleArchivePayload extends Request {
+  private _entity?: L.CycleArchivePayloadFragment["entity"];
+
+  public constructor(request: LinearRequest, data: L.CycleArchivePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._entity = data.entity ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The archived/unarchived entity. Null if entity was deleted. */
+  public get entity(): LinearFetch<Cycle> | undefined {
+    return this._entity?.id ? new CycleQuery(this._request).fetch(this._entity?.id) : undefined;
+  }
+}
+/**
  * CycleConnection model
  *
  * @param request - function to call the graphql client
@@ -1089,6 +1213,80 @@ export class CycleConnection extends Connection<Cycle> {
       data.nodes.map(node => new Cycle(request, node)),
       new PageInfo(request, data.pageInfo)
     );
+  }
+}
+/**
+ * A cycle notification subscription.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CycleNotificationSubscriptionFragment response data
+ */
+export class CycleNotificationSubscription extends Request {
+  private _customView?: L.CycleNotificationSubscriptionFragment["customView"];
+  private _cycle: L.CycleNotificationSubscriptionFragment["cycle"];
+  private _label?: L.CycleNotificationSubscriptionFragment["label"];
+  private _project?: L.CycleNotificationSubscriptionFragment["project"];
+  private _subscriber: L.CycleNotificationSubscriptionFragment["subscriber"];
+  private _team?: L.CycleNotificationSubscriptionFragment["team"];
+  private _user?: L.CycleNotificationSubscriptionFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.CycleNotificationSubscriptionFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._customView = data.customView ?? undefined;
+    this._cycle = data.cycle;
+    this._label = data.label ?? undefined;
+    this._project = data.project ?? undefined;
+    this._subscriber = data.subscriber;
+    this._team = data.team ?? undefined;
+    this._user = data.user ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The type of subscription. */
+  public notificationSubscriptionTypes: string[];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The contextual custom view associated with the notification subscription. */
+  public get customView(): LinearFetch<CustomView> | undefined {
+    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
+  }
+  /** The cycle subscribed to. */
+  public get cycle(): LinearFetch<Cycle> | undefined {
+    return new CycleQuery(this._request).fetch(this._cycle.id);
+  }
+  /** The contextual label view associated with the notification subscription. */
+  public get label(): LinearFetch<IssueLabel> | undefined {
+    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
+  }
+  /** The contextual project view associated with the notification subscription. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The user that subscribed to receive notifications. */
+  public get subscriber(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._subscriber.id);
+  }
+  /** The team associated with the notification subscription. */
+  public get team(): LinearFetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The user view associated with the notification subscription. */
+  public get user(): LinearFetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
 /**
@@ -1115,6 +1313,27 @@ export class CyclePayload extends Request {
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
+}
+/**
+ * A generic payload return from entity deletion mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.DeletePayloadFragment response data
+ */
+export class DeletePayload extends Request {
+  public constructor(request: LinearRequest, data: L.DeletePayloadFragment) {
+    super(request);
+    this.entityId = data.entityId;
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the deleted entity. */
+  public entityId: string;
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
 }
 /**
  * A document for a project.
@@ -1426,6 +1645,72 @@ export class EmailUserAccountAuthChallengeResponse extends Request {
   public success: boolean;
 }
 /**
+ * Information for creating embedded content for the provided URL
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.EmbedFragment response data
+ */
+export class Embed extends Request {
+  public constructor(request: LinearRequest, data: L.EmbedFragment) {
+    super(request);
+    this.authorName = data.authorName ?? undefined;
+    this.description = data.description ?? undefined;
+    this.height = data.height ?? undefined;
+    this.html = data.html ?? undefined;
+    this.providerName = data.providerName ?? undefined;
+    this.thumbnailHeight = data.thumbnailHeight ?? undefined;
+    this.thumbnailUrl = data.thumbnailUrl ?? undefined;
+    this.thumbnailWidth = data.thumbnailWidth ?? undefined;
+    this.title = data.title ?? undefined;
+    this.type = data.type;
+    this.url = data.url ?? undefined;
+    this.width = data.width ?? undefined;
+  }
+
+  /** The name of the author/owner of the resource */
+  public authorName?: string;
+  /** The description of the content */
+  public description?: string;
+  /** The height of embedded content (photo, video, rich) */
+  public height?: number;
+  /** The HTML (video, rich) */
+  public html?: string;
+  /** The name of the provider */
+  public providerName?: string;
+  /** The height of the thumbnail preview image */
+  public thumbnailHeight?: number;
+  /** The URL of the thumbnail preview image */
+  public thumbnailUrl?: string;
+  /** The width of the thumbnail preview image */
+  public thumbnailWidth?: number;
+  /** Title for the returned embed view */
+  public title?: string;
+  /** The type of embed */
+  public type: string;
+  /** The asset URL (photo) */
+  public url?: string;
+  /** The width of embedded content (photo, video, rich) */
+  public width?: number;
+}
+/**
+ * EmbedPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.EmbedPayloadFragment response data
+ */
+export class EmbedPayload extends Request {
+  public constructor(request: LinearRequest, data: L.EmbedPayloadFragment) {
+    super(request);
+    this.success = data.success;
+    this.embed = data.embed ? new Embed(request, data.embed) : undefined;
+  }
+
+  /** Whether the query was successful */
+  public success: boolean;
+  /** Embed information */
+  public embed?: Embed;
+}
+/**
  * A custom emoji.
  *
  * @param request - function to call the graphql client
@@ -1583,12 +1868,13 @@ export class Favorite extends Request {
   private _document?: L.FavoriteFragment["document"];
   private _issue?: L.FavoriteFragment["issue"];
   private _label?: L.FavoriteFragment["label"];
+  private _owner: L.FavoriteFragment["owner"];
   private _parent?: L.FavoriteFragment["parent"];
   private _predefinedViewTeam?: L.FavoriteFragment["predefinedViewTeam"];
   private _project?: L.FavoriteFragment["project"];
   private _projectTeam?: L.FavoriteFragment["projectTeam"];
   private _roadmap?: L.FavoriteFragment["roadmap"];
-  private _user: L.FavoriteFragment["user"];
+  private _user?: L.FavoriteFragment["user"];
 
   public constructor(request: LinearRequest, data: L.FavoriteFragment) {
     super(request);
@@ -1605,12 +1891,13 @@ export class Favorite extends Request {
     this._document = data.document ?? undefined;
     this._issue = data.issue ?? undefined;
     this._label = data.label ?? undefined;
+    this._owner = data.owner;
     this._parent = data.parent ?? undefined;
     this._predefinedViewTeam = data.predefinedViewTeam ?? undefined;
     this._project = data.project ?? undefined;
     this._projectTeam = data.projectTeam ?? undefined;
     this._roadmap = data.roadmap ?? undefined;
-    this._user = data.user;
+    this._user = data.user ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -1653,6 +1940,10 @@ export class Favorite extends Request {
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
+  /** The owner of the favorite. */
+  public get owner(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._owner.id);
+  }
   /** The parent folder of the favorite. */
   public get parent(): LinearFetch<Favorite> | undefined {
     return this._parent?.id ? new FavoriteQuery(this._request).fetch(this._parent?.id) : undefined;
@@ -1673,9 +1964,9 @@ export class Favorite extends Request {
   public get roadmap(): LinearFetch<Roadmap> | undefined {
     return this._roadmap?.id ? new RoadmapQuery(this._request).fetch(this._roadmap?.id) : undefined;
   }
-  /** The owner of the favorite. */
+  /** The favorited user. */
   public get user(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._user.id);
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** Children of the favorite. Only applies to favorites of type folder. */
   public children(variables?: Omit<L.Favorite_ChildrenQueryVariables, "id">) {
@@ -1781,6 +2072,76 @@ export class FigmaEmbedPayload extends Request {
   public success: boolean;
   /** Figma embed information. */
   public figmaEmbed?: FigmaEmbed;
+}
+/**
+ * A schedule for a team's first responder.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.FirstResponderScheduleFragment response data
+ */
+export class FirstResponderSchedule extends Request {
+  private _integration: L.FirstResponderScheduleFragment["integration"];
+  private _team: L.FirstResponderScheduleFragment["team"];
+
+  public constructor(request: LinearRequest, data: L.FirstResponderScheduleFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.integrationScheduleId = data.integrationScheduleId ?? undefined;
+    this.scheduleData = parseJson(data.scheduleData) ?? {};
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._integration = data.integration;
+    this._team = data.team;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The id of the integration schedule used for scheduling. */
+  public integrationScheduleId?: string;
+  /** The current schedule and available schedules. */
+  public scheduleData: Record<string, unknown>;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The integration used for scheduling. */
+  public get integration(): LinearFetch<Integration> | undefined {
+    return new IntegrationQuery(this._request).fetch(this._integration.id);
+  }
+  /** The team to which the schedule belongs to. */
+  public get team(): LinearFetch<Team> | undefined {
+    return new TeamQuery(this._request).fetch(this._team.id);
+  }
+}
+/**
+ * FirstResponderScheduleConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this FirstResponderScheduleConnection model
+ * @param data - FirstResponderScheduleConnection response data
+ */
+export class FirstResponderScheduleConnection extends Connection<FirstResponderSchedule> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (
+      connection?: LinearConnectionVariables
+    ) => LinearFetch<LinearConnection<FirstResponderSchedule> | undefined>,
+    data: L.FirstResponderScheduleConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new FirstResponderSchedule(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
 }
 /**
  * FrontAttachmentPayload model
@@ -2106,6 +2467,7 @@ export class IntegrationSettings extends Request {
     this.intercom = data.intercom ? new IntercomSettings(request, data.intercom) : undefined;
     this.jira = data.jira ? new JiraSettings(request, data.jira) : undefined;
     this.notion = data.notion ? new NotionSettings(request, data.notion) : undefined;
+    this.pagerDuty = data.pagerDuty ? new PagerDutySettings(request, data.pagerDuty) : undefined;
     this.sentry = data.sentry ? new SentrySettings(request, data.sentry) : undefined;
     this.slackOrgProjectUpdatesPost = data.slackOrgProjectUpdatesPost
       ? new SlackPostSettings(request, data.slackOrgProjectUpdatesPost)
@@ -2121,6 +2483,7 @@ export class IntegrationSettings extends Request {
   public intercom?: IntercomSettings;
   public jira?: JiraSettings;
   public notion?: NotionSettings;
+  public pagerDuty?: PagerDutySettings;
   public sentry?: SentrySettings;
   public slackOrgProjectUpdatesPost?: SlackPostSettings;
   public slackPost?: SlackPostSettings;
@@ -2589,6 +2952,31 @@ export class Issue extends Request {
   /** Updates an issue. */
   public update(input: L.IssueUpdateInput) {
     return new UpdateIssueMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * A generic payload return from entity archive mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueArchivePayloadFragment response data
+ */
+export class IssueArchivePayload extends Request {
+  private _entity?: L.IssueArchivePayloadFragment["entity"];
+
+  public constructor(request: LinearRequest, data: L.IssueArchivePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._entity = data.entity ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The archived/unarchived entity. Null if entity was deleted. */
+  public get entity(): LinearFetch<Issue> | undefined {
+    return this._entity?.id ? new IssueQuery(this._request).fetch(this._entity?.id) : undefined;
   }
 }
 /**
@@ -3080,10 +3468,6 @@ export class IssueLabel extends Request {
   /** Issues associated with the label. */
   public issues(variables?: Omit<L.IssueLabel_IssuesQueryVariables, "id">) {
     return new IssueLabel_IssuesQuery(this._request, this.id, variables).fetch(variables);
-  }
-  /** Deletes an issue label. */
-  public archive() {
-    return new ArchiveIssueLabelMutation(this._request).fetch(this.id);
   }
   /** Creates a new label. */
   public create(input: L.IssueLabelCreateInput, variables?: Omit<L.CreateIssueLabelMutationVariables, "input">) {
@@ -3657,6 +4041,80 @@ export class JiraSettings extends Request {
   public projects: JiraProjectData[];
 }
 /**
+ * A label notification subscription.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.LabelNotificationSubscriptionFragment response data
+ */
+export class LabelNotificationSubscription extends Request {
+  private _customView?: L.LabelNotificationSubscriptionFragment["customView"];
+  private _cycle?: L.LabelNotificationSubscriptionFragment["cycle"];
+  private _label: L.LabelNotificationSubscriptionFragment["label"];
+  private _project?: L.LabelNotificationSubscriptionFragment["project"];
+  private _subscriber: L.LabelNotificationSubscriptionFragment["subscriber"];
+  private _team?: L.LabelNotificationSubscriptionFragment["team"];
+  private _user?: L.LabelNotificationSubscriptionFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.LabelNotificationSubscriptionFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._customView = data.customView ?? undefined;
+    this._cycle = data.cycle ?? undefined;
+    this._label = data.label;
+    this._project = data.project ?? undefined;
+    this._subscriber = data.subscriber;
+    this._team = data.team ?? undefined;
+    this._user = data.user ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The type of subscription. */
+  public notificationSubscriptionTypes: string[];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The contextual custom view associated with the notification subscription. */
+  public get customView(): LinearFetch<CustomView> | undefined {
+    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
+  }
+  /** The contextual cycle view associated with the notification subscription. */
+  public get cycle(): LinearFetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The label subscribed to. */
+  public get label(): LinearFetch<IssueLabel> | undefined {
+    return new IssueLabelQuery(this._request).fetch(this._label.id);
+  }
+  /** The contextual project view associated with the notification subscription. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The user that subscribed to receive notifications. */
+  public get subscriber(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._subscriber.id);
+  }
+  /** The team associated with the notification subscription. */
+  public get team(): LinearFetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The user view associated with the notification subscription. */
+  public get user(): LinearFetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+}
+/**
  * LogoutResponse model
  *
  * @param request - function to call the graphql client
@@ -3759,6 +4217,24 @@ export class Notification extends Request {
   }
 }
 /**
+ * A generic payload return from entity archive mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.NotificationArchivePayloadFragment response data
+ */
+export class NotificationArchivePayload extends Request {
+  public constructor(request: LinearRequest, data: L.NotificationArchivePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
  * NotificationConnection model
  *
  * @param request - function to call the graphql client
@@ -3823,20 +4299,27 @@ export class NotificationPayload extends Request {
  * @param data - L.NotificationSubscriptionFragment response data
  */
 export class NotificationSubscription extends Request {
+  private _customView?: L.NotificationSubscriptionFragment["customView"];
+  private _cycle?: L.NotificationSubscriptionFragment["cycle"];
+  private _label?: L.NotificationSubscriptionFragment["label"];
   private _project?: L.NotificationSubscriptionFragment["project"];
+  private _subscriber: L.NotificationSubscriptionFragment["subscriber"];
   private _team?: L.NotificationSubscriptionFragment["team"];
-  private _user: L.NotificationSubscriptionFragment["user"];
+  private _user?: L.NotificationSubscriptionFragment["user"];
 
   public constructor(request: LinearRequest, data: L.NotificationSubscriptionFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
-    this.type = data.type;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._customView = data.customView ?? undefined;
+    this._cycle = data.cycle ?? undefined;
+    this._label = data.label ?? undefined;
     this._project = data.project ?? undefined;
+    this._subscriber = data.subscriber;
     this._team = data.team ?? undefined;
-    this._user = data.user;
+    this._user = data.user ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -3845,28 +4328,42 @@ export class NotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The type of the subscription. */
-  public type: string;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** Subscribed project. */
+  /** The contextual custom view associated with the notification subscription. */
+  public get customView(): LinearFetch<CustomView> | undefined {
+    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
+  }
+  /** The contextual cycle view associated with the notification subscription. */
+  public get cycle(): LinearFetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The contextual label view associated with the notification subscription. */
+  public get label(): LinearFetch<IssueLabel> | undefined {
+    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
+  }
+  /** The contextual project view associated with the notification subscription. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** Subscribed team. */
+  /** The user that subscribed to receive notifications. */
+  public get subscriber(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._subscriber.id);
+  }
+  /** The team associated with the notification subscription. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The user associated with notification subscriptions. */
+  /** The user view associated with the notification subscription. */
   public get user(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._user.id);
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 
-  /** Creates a new notification subscription for a team or a project. */
+  /** Creates a new notification subscription for a cycle, custom view, label, project or team. */
   public create(input: L.NotificationSubscriptionCreateInput) {
     return new CreateNotificationSubscriptionMutation(this._request).fetch(input);
   }
@@ -3887,14 +4384,26 @@ export class NotificationSubscription extends Request {
  * @param data - NotificationSubscriptionConnection response data
  */
 export class NotificationSubscriptionConnection extends Connection<
-  ProjectNotificationSubscription | TeamNotificationSubscription | NotificationSubscription
+  | CustomViewNotificationSubscription
+  | CycleNotificationSubscription
+  | LabelNotificationSubscription
+  | ProjectNotificationSubscription
+  | TeamNotificationSubscription
+  | NotificationSubscription
 > {
   public constructor(
     request: LinearRequest,
     fetch: (
       connection?: LinearConnectionVariables
     ) => LinearFetch<
-      | LinearConnection<ProjectNotificationSubscription | TeamNotificationSubscription | NotificationSubscription>
+      | LinearConnection<
+          | CustomViewNotificationSubscription
+          | CycleNotificationSubscription
+          | LabelNotificationSubscription
+          | ProjectNotificationSubscription
+          | TeamNotificationSubscription
+          | NotificationSubscription
+        >
       | undefined
     >,
     data: L.NotificationSubscriptionConnectionFragment
@@ -3904,6 +4413,15 @@ export class NotificationSubscriptionConnection extends Connection<
       fetch,
       data.nodes.map(node => {
         switch (node.__typename) {
+          case "CustomViewNotificationSubscription":
+            return new CustomViewNotificationSubscription(
+              request,
+              node as L.CustomViewNotificationSubscriptionFragment
+            );
+          case "CycleNotificationSubscription":
+            return new CycleNotificationSubscription(request, node as L.CycleNotificationSubscriptionFragment);
+          case "LabelNotificationSubscription":
+            return new LabelNotificationSubscription(request, node as L.LabelNotificationSubscriptionFragment);
           case "ProjectNotificationSubscription":
             return new ProjectNotificationSubscription(request, node as L.ProjectNotificationSubscriptionFragment);
           case "TeamNotificationSubscription":
@@ -4582,6 +5100,39 @@ export class PageInfo extends Request {
   public startCursor?: string;
 }
 /**
+ * Tuple for mapping PagerDuty schedule id to names.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.PagerDutyScheduleMappingFragment response data
+ */
+export class PagerDutyScheduleMapping extends Request {
+  public constructor(request: LinearRequest, data: L.PagerDutyScheduleMappingFragment) {
+    super(request);
+    this.scheduleId = data.scheduleId;
+    this.scheduleName = data.scheduleName;
+  }
+
+  /** The PagerDuty schedule id. */
+  public scheduleId: string;
+  /** The PagerDuty schedule name. */
+  public scheduleName: string;
+}
+/**
+ * PagerDuty specific settings.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.PagerDutySettingsFragment response data
+ */
+export class PagerDutySettings extends Request {
+  public constructor(request: LinearRequest, data: L.PagerDutySettingsFragment) {
+    super(request);
+    this.scheduleMapping = data.scheduleMapping.map(node => new PagerDutyScheduleMapping(request, node));
+  }
+
+  /** The mapping of PagerDuty schedule id to names. */
+  public scheduleMapping: PagerDutyScheduleMapping[];
+}
+/**
  * The paid subscription of an organization.
  *
  * @param request - function to call the graphql client
@@ -4814,6 +5365,31 @@ export class Project extends Request {
   /** Updates a project. */
   public update(input: L.ProjectUpdateInput) {
     return new UpdateProjectMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * A generic payload return from entity archive mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectArchivePayloadFragment response data
+ */
+export class ProjectArchivePayload extends Request {
+  private _entity?: L.ProjectArchivePayloadFragment["entity"];
+
+  public constructor(request: LinearRequest, data: L.ProjectArchivePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._entity = data.entity ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The archived/unarchived entity. Null if entity was deleted. */
+  public get entity(): LinearFetch<Project> | undefined {
+    return this._entity?.id ? new ProjectQuery(this._request).fetch(this._entity?.id) : undefined;
   }
 }
 /**
@@ -5142,20 +5718,28 @@ export class ProjectNotification extends Request {
  * @param data - L.ProjectNotificationSubscriptionFragment response data
  */
 export class ProjectNotificationSubscription extends Request {
+  private _customView?: L.ProjectNotificationSubscriptionFragment["customView"];
+  private _cycle?: L.ProjectNotificationSubscriptionFragment["cycle"];
+  private _label?: L.ProjectNotificationSubscriptionFragment["label"];
   private _project: L.ProjectNotificationSubscriptionFragment["project"];
+  private _subscriber: L.ProjectNotificationSubscriptionFragment["subscriber"];
   private _team?: L.ProjectNotificationSubscriptionFragment["team"];
-  private _user: L.ProjectNotificationSubscriptionFragment["user"];
+  private _user?: L.ProjectNotificationSubscriptionFragment["user"];
 
   public constructor(request: LinearRequest, data: L.ProjectNotificationSubscriptionFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
-    this.type = data.type;
+    this.notificationSubscriptionTypes = data.notificationSubscriptionTypes ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._customView = data.customView ?? undefined;
+    this._cycle = data.cycle ?? undefined;
+    this._label = data.label ?? undefined;
     this._project = data.project;
+    this._subscriber = data.subscriber;
     this._team = data.team ?? undefined;
-    this._user = data.user;
+    this._user = data.user ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -5164,25 +5748,41 @@ export class ProjectNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The type of the subscription. */
-  public type: string;
+  /** The type of subscription. */
+  public notificationSubscriptionTypes?: string[];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The contextual custom view associated with the notification subscription. */
+  public get customView(): LinearFetch<CustomView> | undefined {
+    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
+  }
+  /** The contextual cycle view associated with the notification subscription. */
+  public get cycle(): LinearFetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The contextual label view associated with the notification subscription. */
+  public get label(): LinearFetch<IssueLabel> | undefined {
+    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
+  }
   /** The project subscribed to. */
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
-  /** Subscribed team. */
+  /** The user that subscribed to receive notifications. */
+  public get subscriber(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._subscriber.id);
+  }
+  /** The team associated with the notification subscription. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
-  /** The user associated with notification subscriptions. */
+  /** The user view associated with the notification subscription. */
   public get user(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._user.id);
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
 /**
@@ -5934,6 +6534,31 @@ export class Roadmap extends Request {
   }
 }
 /**
+ * A generic payload return from entity archive mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.RoadmapArchivePayloadFragment response data
+ */
+export class RoadmapArchivePayload extends Request {
+  private _entity?: L.RoadmapArchivePayloadFragment["entity"];
+
+  public constructor(request: LinearRequest, data: L.RoadmapArchivePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._entity = data.entity ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The archived/unarchived entity. Null if entity was deleted. */
+  public get entity(): LinearFetch<Roadmap> | undefined {
+    return this._entity?.id ? new RoadmapQuery(this._request).fetch(this._entity?.id) : undefined;
+  }
+}
+/**
  * RoadmapConnection model
  *
  * @param request - function to call the graphql client
@@ -6276,6 +6901,7 @@ export class Team extends Request {
     this.icon = data.icon ?? undefined;
     this.id = data.id;
     this.inviteHash = data.inviteHash;
+    this.issueCount = data.issueCount;
     this.issueEstimationAllowZero = data.issueEstimationAllowZero;
     this.issueEstimationExtended = data.issueEstimationExtended;
     this.issueEstimationType = data.issueEstimationType;
@@ -6349,6 +6975,8 @@ export class Team extends Request {
   public id: string;
   /** Unique hash for the team to be used in invite URLs. */
   public inviteHash: string;
+  /** Number of issues in the team. */
+  public issueCount: number;
   /** Whether to allow zeros in issues estimates. */
   public issueEstimationAllowZero: boolean;
   /** Whether to add additional points to the estimate scale. */
@@ -6638,20 +7266,28 @@ export class TeamMembershipPayload extends Request {
  * @param data - L.TeamNotificationSubscriptionFragment response data
  */
 export class TeamNotificationSubscription extends Request {
+  private _customView?: L.TeamNotificationSubscriptionFragment["customView"];
+  private _cycle?: L.TeamNotificationSubscriptionFragment["cycle"];
+  private _label?: L.TeamNotificationSubscriptionFragment["label"];
   private _project?: L.TeamNotificationSubscriptionFragment["project"];
+  private _subscriber: L.TeamNotificationSubscriptionFragment["subscriber"];
   private _team: L.TeamNotificationSubscriptionFragment["team"];
-  private _user: L.TeamNotificationSubscriptionFragment["user"];
+  private _user?: L.TeamNotificationSubscriptionFragment["user"];
 
   public constructor(request: LinearRequest, data: L.TeamNotificationSubscriptionFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
-    this.type = data.type;
+    this.notificationSubscriptionTypes = data.notificationSubscriptionTypes ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._customView = data.customView ?? undefined;
+    this._cycle = data.cycle ?? undefined;
+    this._label = data.label ?? undefined;
     this._project = data.project ?? undefined;
+    this._subscriber = data.subscriber;
     this._team = data.team;
-    this._user = data.user;
+    this._user = data.user ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -6660,25 +7296,41 @@ export class TeamNotificationSubscription extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The type of the subscription. */
-  public type: string;
+  /** The type of subscription. */
+  public notificationSubscriptionTypes?: string[];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** Subscribed project. */
+  /** The contextual custom view associated with the notification subscription. */
+  public get customView(): LinearFetch<CustomView> | undefined {
+    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
+  }
+  /** The contextual cycle view associated with the notification subscription. */
+  public get cycle(): LinearFetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The contextual label view associated with the notification subscription. */
+  public get label(): LinearFetch<IssueLabel> | undefined {
+    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
+  }
+  /** The contextual project view associated with the notification subscription. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The user that subscribed to receive notifications. */
+  public get subscriber(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._subscriber.id);
   }
   /** The team subscribed to. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
-  /** The user associated with notification subscriptions. */
+  /** The user view associated with the notification subscription. */
   public get user(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._user.id);
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
 /**
@@ -7544,7 +8196,12 @@ export class WorkflowCronJobDefinitionConnection extends Connection<WorkflowCron
  */
 export class WorkflowDefinition extends Request {
   private _creator: L.WorkflowDefinitionFragment["creator"];
+  private _customView?: L.WorkflowDefinitionFragment["customView"];
+  private _cycle?: L.WorkflowDefinitionFragment["cycle"];
+  private _label?: L.WorkflowDefinitionFragment["label"];
+  private _project?: L.WorkflowDefinitionFragment["project"];
   private _team?: L.WorkflowDefinitionFragment["team"];
+  private _user?: L.WorkflowDefinitionFragment["user"];
 
   public constructor(request: LinearRequest, data: L.WorkflowDefinitionFragment) {
     super(request);
@@ -7560,7 +8217,12 @@ export class WorkflowDefinition extends Request {
     this.sortOrder = data.sortOrder;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator;
+    this._customView = data.customView ?? undefined;
+    this._cycle = data.cycle ?? undefined;
+    this._label = data.label ?? undefined;
+    this._project = data.project ?? undefined;
     this._team = data.team ?? undefined;
+    this._user = data.user ?? undefined;
   }
 
   /** An array of activities that will be executed as part of the workflow. */
@@ -7592,9 +8254,29 @@ export class WorkflowDefinition extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
+  /** The context custom view associated with the workflow. */
+  public get customView(): LinearFetch<CustomView> | undefined {
+    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
+  }
+  /** The contextual cycle view associated with the workflow. */
+  public get cycle(): LinearFetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The contextual label view associated with the workflow. */
+  public get label(): LinearFetch<IssueLabel> | undefined {
+    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
+  }
+  /** The contextual project view associated with the workflow. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
   /** The team associated with the workflow. If not set, the workflow is associated with the entire organization. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The contextual user view associated with the workflow. */
+  public get user(): LinearFetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
 /**
@@ -7682,6 +8364,31 @@ export class WorkflowState extends Request {
   /** Updates a state. */
   public update(input: L.WorkflowStateUpdateInput) {
     return new UpdateWorkflowStateMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * A generic payload return from entity archive mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.WorkflowStateArchivePayloadFragment response data
+ */
+export class WorkflowStateArchivePayload extends Request {
+  private _entity?: L.WorkflowStateArchivePayloadFragment["entity"];
+
+  public constructor(request: LinearRequest, data: L.WorkflowStateArchivePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._entity = data.entity ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The archived/unarchived entity. Null if entity was deleted. */
+  public get entity(): LinearFetch<WorkflowState> | undefined {
+    return this._entity?.id ? new WorkflowStateQuery(this._request).fetch(this._entity?.id) : undefined;
   }
 }
 /**
@@ -7835,12 +8542,12 @@ export class DeleteApiKeyMutation extends Request {
   }
 
   /**
-   * Call the DeleteApiKey mutation and return a ArchivePayload
+   * Call the DeleteApiKey mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteApiKey
    * @returns parsed response from DeleteApiKeyMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteApiKeyMutation, L.DeleteApiKeyMutationVariables>(
       L.DeleteApiKeyDocument,
       {
@@ -7849,7 +8556,7 @@ export class DeleteApiKeyMutation extends Request {
     );
     const data = response.apiKeyDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -7864,12 +8571,12 @@ export class ArchiveAttachmentMutation extends Request {
   }
 
   /**
-   * Call the ArchiveAttachment mutation and return a ArchivePayload
+   * Call the ArchiveAttachment mutation and return a AttachmentArchivePayload
    *
    * @param id - required id to pass to archiveAttachment
    * @returns parsed response from ArchiveAttachmentMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<AttachmentArchivePayload> {
     const response = await this._request<L.ArchiveAttachmentMutation, L.ArchiveAttachmentMutationVariables>(
       L.ArchiveAttachmentDocument,
       {
@@ -7878,7 +8585,7 @@ export class ArchiveAttachmentMutation extends Request {
     );
     const data = response.attachmentArchive;
 
-    return new ArchivePayload(this._request, data);
+    return new AttachmentArchivePayload(this._request, data);
   }
 }
 
@@ -7922,12 +8629,12 @@ export class DeleteAttachmentMutation extends Request {
   }
 
   /**
-   * Call the DeleteAttachment mutation and return a ArchivePayload
+   * Call the DeleteAttachment mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteAttachment
    * @returns parsed response from DeleteAttachmentMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteAttachmentMutation, L.DeleteAttachmentMutationVariables>(
       L.DeleteAttachmentDocument,
       {
@@ -7936,7 +8643,7 @@ export class DeleteAttachmentMutation extends Request {
     );
     const data = response.attachmentDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -8142,6 +8849,35 @@ export class AttachmentLinkZendeskMutation extends Request {
 }
 
 /**
+ * A fetchable AttachmentUnsyncSlack Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentUnsyncSlackMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentUnsyncSlack mutation and return a AttachmentPayload
+   *
+   * @param id - required id to pass to attachmentUnsyncSlack
+   * @returns parsed response from AttachmentUnsyncSlackMutation
+   */
+  public async fetch(id: string): LinearFetch<AttachmentPayload> {
+    const response = await this._request<L.AttachmentUnsyncSlackMutation, L.AttachmentUnsyncSlackMutationVariables>(
+      L.AttachmentUnsyncSlackDocument,
+      {
+        id,
+      }
+    );
+    const data = response.attachmentUnsyncSlack;
+
+    return new AttachmentPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UpdateAttachment Mutation
  *
  * @param request - function to call the graphql client
@@ -8212,12 +8948,12 @@ export class DeleteCommentMutation extends Request {
   }
 
   /**
-   * Call the DeleteComment mutation and return a ArchivePayload
+   * Call the DeleteComment mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteComment
    * @returns parsed response from DeleteCommentMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteCommentMutation, L.DeleteCommentMutationVariables>(
       L.DeleteCommentDocument,
       {
@@ -8226,7 +8962,7 @@ export class DeleteCommentMutation extends Request {
     );
     const data = response.commentDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -8391,12 +9127,12 @@ export class DeleteCustomViewMutation extends Request {
   }
 
   /**
-   * Call the DeleteCustomView mutation and return a ArchivePayload
+   * Call the DeleteCustomView mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteCustomView
    * @returns parsed response from DeleteCustomViewMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteCustomViewMutation, L.DeleteCustomViewMutationVariables>(
       L.DeleteCustomViewDocument,
       {
@@ -8405,7 +9141,7 @@ export class DeleteCustomViewMutation extends Request {
     );
     const data = response.customViewDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -8451,12 +9187,12 @@ export class ArchiveCycleMutation extends Request {
   }
 
   /**
-   * Call the ArchiveCycle mutation and return a ArchivePayload
+   * Call the ArchiveCycle mutation and return a CycleArchivePayload
    *
    * @param id - required id to pass to archiveCycle
    * @returns parsed response from ArchiveCycleMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<CycleArchivePayload> {
     const response = await this._request<L.ArchiveCycleMutation, L.ArchiveCycleMutationVariables>(
       L.ArchiveCycleDocument,
       {
@@ -8465,7 +9201,7 @@ export class ArchiveCycleMutation extends Request {
     );
     const data = response.cycleArchive;
 
-    return new ArchivePayload(this._request, data);
+    return new CycleArchivePayload(this._request, data);
   }
 }
 
@@ -8563,12 +9299,12 @@ export class DeleteDocumentMutation extends Request {
   }
 
   /**
-   * Call the DeleteDocument mutation and return a ArchivePayload
+   * Call the DeleteDocument mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteDocument
    * @returns parsed response from DeleteDocumentMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteDocumentMutation, L.DeleteDocumentMutationVariables>(
       L.DeleteDocumentDocument,
       {
@@ -8577,7 +9313,7 @@ export class DeleteDocumentMutation extends Request {
     );
     const data = response.documentDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -8736,18 +9472,18 @@ export class DeleteEmojiMutation extends Request {
   }
 
   /**
-   * Call the DeleteEmoji mutation and return a ArchivePayload
+   * Call the DeleteEmoji mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteEmoji
    * @returns parsed response from DeleteEmojiMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteEmojiMutation, L.DeleteEmojiMutationVariables>(L.DeleteEmojiDocument, {
       id,
     });
     const data = response.emojiDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -8817,12 +9553,12 @@ export class DeleteFavoriteMutation extends Request {
   }
 
   /**
-   * Call the DeleteFavorite mutation and return a ArchivePayload
+   * Call the DeleteFavorite mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteFavorite
    * @returns parsed response from DeleteFavoriteMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteFavoriteMutation, L.DeleteFavoriteMutationVariables>(
       L.DeleteFavoriteDocument,
       {
@@ -8831,7 +9567,7 @@ export class DeleteFavoriteMutation extends Request {
     );
     const data = response.favoriteDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -9012,12 +9748,12 @@ export class DeleteIntegrationMutation extends Request {
   }
 
   /**
-   * Call the DeleteIntegration mutation and return a ArchivePayload
+   * Call the DeleteIntegration mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteIntegration
    * @returns parsed response from DeleteIntegrationMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteIntegrationMutation, L.DeleteIntegrationMutationVariables>(
       L.DeleteIntegrationDocument,
       {
@@ -9026,7 +9762,7 @@ export class DeleteIntegrationMutation extends Request {
     );
     const data = response.integrationDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -9699,12 +10435,12 @@ export class DeleteIntegrationTemplateMutation extends Request {
   }
 
   /**
-   * Call the DeleteIntegrationTemplate mutation and return a ArchivePayload
+   * Call the DeleteIntegrationTemplate mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteIntegrationTemplate
    * @returns parsed response from DeleteIntegrationTemplateMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<
       L.DeleteIntegrationTemplateMutation,
       L.DeleteIntegrationTemplateMutationVariables
@@ -9713,7 +10449,7 @@ export class DeleteIntegrationTemplateMutation extends Request {
     });
     const data = response.integrationTemplateDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -9859,13 +10595,16 @@ export class ArchiveIssueMutation extends Request {
   }
 
   /**
-   * Call the ArchiveIssue mutation and return a ArchivePayload
+   * Call the ArchiveIssue mutation and return a IssueArchivePayload
    *
    * @param id - required id to pass to archiveIssue
    * @param variables - variables without 'id' to pass into the ArchiveIssueMutation
    * @returns parsed response from ArchiveIssueMutation
    */
-  public async fetch(id: string, variables?: Omit<L.ArchiveIssueMutationVariables, "id">): LinearFetch<ArchivePayload> {
+  public async fetch(
+    id: string,
+    variables?: Omit<L.ArchiveIssueMutationVariables, "id">
+  ): LinearFetch<IssueArchivePayload> {
     const response = await this._request<L.ArchiveIssueMutation, L.ArchiveIssueMutationVariables>(
       L.ArchiveIssueDocument,
       {
@@ -9875,7 +10614,7 @@ export class ArchiveIssueMutation extends Request {
     );
     const data = response.issueArchive;
 
-    return new ArchivePayload(this._request, data);
+    return new IssueArchivePayload(this._request, data);
   }
 }
 
@@ -9947,18 +10686,18 @@ export class DeleteIssueMutation extends Request {
   }
 
   /**
-   * Call the DeleteIssue mutation and return a ArchivePayload
+   * Call the DeleteIssue mutation and return a IssueArchivePayload
    *
    * @param id - required id to pass to deleteIssue
    * @returns parsed response from DeleteIssueMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<IssueArchivePayload> {
     const response = await this._request<L.DeleteIssueMutation, L.DeleteIssueMutationVariables>(L.DeleteIssueDocument, {
       id,
     });
     const data = response.issueDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new IssueArchivePayload(this._request, data);
   }
 }
 
@@ -10248,35 +10987,6 @@ export class UpdateIssueImportMutation extends Request {
 }
 
 /**
- * A fetchable ArchiveIssueLabel Mutation
- *
- * @param request - function to call the graphql client
- */
-export class ArchiveIssueLabelMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ArchiveIssueLabel mutation and return a ArchivePayload
-   *
-   * @param id - required id to pass to archiveIssueLabel
-   * @returns parsed response from ArchiveIssueLabelMutation
-   */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
-    const response = await this._request<L.ArchiveIssueLabelMutation, L.ArchiveIssueLabelMutationVariables>(
-      L.ArchiveIssueLabelDocument,
-      {
-        id,
-      }
-    );
-    const data = response.issueLabelArchive;
-
-    return new ArchivePayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable CreateIssueLabel Mutation
  *
  * @param request - function to call the graphql client
@@ -10321,12 +11031,12 @@ export class DeleteIssueLabelMutation extends Request {
   }
 
   /**
-   * Call the DeleteIssueLabel mutation and return a ArchivePayload
+   * Call the DeleteIssueLabel mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteIssueLabel
    * @returns parsed response from DeleteIssueLabelMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteIssueLabelMutation, L.DeleteIssueLabelMutationVariables>(
       L.DeleteIssueLabelDocument,
       {
@@ -10335,7 +11045,7 @@ export class DeleteIssueLabelMutation extends Request {
     );
     const data = response.issueLabelDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -10410,12 +11120,12 @@ export class DeleteIssueRelationMutation extends Request {
   }
 
   /**
-   * Call the DeleteIssueRelation mutation and return a ArchivePayload
+   * Call the DeleteIssueRelation mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteIssueRelation
    * @returns parsed response from DeleteIssueRelationMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteIssueRelationMutation, L.DeleteIssueRelationMutationVariables>(
       L.DeleteIssueRelationDocument,
       {
@@ -10424,7 +11134,7 @@ export class DeleteIssueRelationMutation extends Request {
     );
     const data = response.issueRelationDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -10501,12 +11211,12 @@ export class UnarchiveIssueMutation extends Request {
   }
 
   /**
-   * Call the UnarchiveIssue mutation and return a ArchivePayload
+   * Call the UnarchiveIssue mutation and return a IssueArchivePayload
    *
    * @param id - required id to pass to unarchiveIssue
    * @returns parsed response from UnarchiveIssueMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<IssueArchivePayload> {
     const response = await this._request<L.UnarchiveIssueMutation, L.UnarchiveIssueMutationVariables>(
       L.UnarchiveIssueDocument,
       {
@@ -10515,7 +11225,7 @@ export class UnarchiveIssueMutation extends Request {
     );
     const data = response.issueUnarchive;
 
-    return new ArchivePayload(this._request, data);
+    return new IssueArchivePayload(this._request, data);
   }
 }
 
@@ -10639,12 +11349,12 @@ export class ArchiveNotificationMutation extends Request {
   }
 
   /**
-   * Call the ArchiveNotification mutation and return a ArchivePayload
+   * Call the ArchiveNotification mutation and return a NotificationArchivePayload
    *
    * @param id - required id to pass to archiveNotification
    * @returns parsed response from ArchiveNotificationMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<NotificationArchivePayload> {
     const response = await this._request<L.ArchiveNotificationMutation, L.ArchiveNotificationMutationVariables>(
       L.ArchiveNotificationDocument,
       {
@@ -10653,7 +11363,7 @@ export class ArchiveNotificationMutation extends Request {
     );
     const data = response.notificationArchive;
 
-    return new ArchivePayload(this._request, data);
+    return new NotificationArchivePayload(this._request, data);
   }
 }
 
@@ -10697,12 +11407,12 @@ export class DeleteNotificationSubscriptionMutation extends Request {
   }
 
   /**
-   * Call the DeleteNotificationSubscription mutation and return a ArchivePayload
+   * Call the DeleteNotificationSubscription mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteNotificationSubscription
    * @returns parsed response from DeleteNotificationSubscriptionMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<
       L.DeleteNotificationSubscriptionMutation,
       L.DeleteNotificationSubscriptionMutationVariables
@@ -10711,7 +11421,7 @@ export class DeleteNotificationSubscriptionMutation extends Request {
     });
     const data = response.notificationSubscriptionDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -10760,12 +11470,12 @@ export class UnarchiveNotificationMutation extends Request {
   }
 
   /**
-   * Call the UnarchiveNotification mutation and return a ArchivePayload
+   * Call the UnarchiveNotification mutation and return a NotificationArchivePayload
    *
    * @param id - required id to pass to unarchiveNotification
    * @returns parsed response from UnarchiveNotificationMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<NotificationArchivePayload> {
     const response = await this._request<L.UnarchiveNotificationMutation, L.UnarchiveNotificationMutationVariables>(
       L.UnarchiveNotificationDocument,
       {
@@ -10774,7 +11484,7 @@ export class UnarchiveNotificationMutation extends Request {
     );
     const data = response.notificationUnarchive;
 
-    return new ArchivePayload(this._request, data);
+    return new NotificationArchivePayload(this._request, data);
   }
 }
 
@@ -10901,12 +11611,12 @@ export class DeleteOrganizationDomainMutation extends Request {
   }
 
   /**
-   * Call the DeleteOrganizationDomain mutation and return a ArchivePayload
+   * Call the DeleteOrganizationDomain mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteOrganizationDomain
    * @returns parsed response from DeleteOrganizationDomainMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<
       L.DeleteOrganizationDomainMutation,
       L.DeleteOrganizationDomainMutationVariables
@@ -10915,7 +11625,7 @@ export class DeleteOrganizationDomainMutation extends Request {
     });
     const data = response.organizationDomainDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -10959,12 +11669,12 @@ export class DeleteOrganizationInviteMutation extends Request {
   }
 
   /**
-   * Call the DeleteOrganizationInvite mutation and return a ArchivePayload
+   * Call the DeleteOrganizationInvite mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteOrganizationInvite
    * @returns parsed response from DeleteOrganizationInviteMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<
       L.DeleteOrganizationInviteMutation,
       L.DeleteOrganizationInviteMutationVariables
@@ -10973,7 +11683,7 @@ export class DeleteOrganizationInviteMutation extends Request {
     });
     const data = response.organizationInviteDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -11074,12 +11784,12 @@ export class ArchiveProjectMutation extends Request {
   }
 
   /**
-   * Call the ArchiveProject mutation and return a ArchivePayload
+   * Call the ArchiveProject mutation and return a ProjectArchivePayload
    *
    * @param id - required id to pass to archiveProject
    * @returns parsed response from ArchiveProjectMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<ProjectArchivePayload> {
     const response = await this._request<L.ArchiveProjectMutation, L.ArchiveProjectMutationVariables>(
       L.ArchiveProjectDocument,
       {
@@ -11088,7 +11798,7 @@ export class ArchiveProjectMutation extends Request {
     );
     const data = response.projectArchive;
 
-    return new ArchivePayload(this._request, data);
+    return new ProjectArchivePayload(this._request, data);
   }
 }
 
@@ -11132,12 +11842,12 @@ export class DeleteProjectMutation extends Request {
   }
 
   /**
-   * Call the DeleteProject mutation and return a ArchivePayload
+   * Call the DeleteProject mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteProject
    * @returns parsed response from DeleteProjectMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteProjectMutation, L.DeleteProjectMutationVariables>(
       L.DeleteProjectDocument,
       {
@@ -11146,7 +11856,7 @@ export class DeleteProjectMutation extends Request {
     );
     const data = response.projectDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -11190,12 +11900,12 @@ export class DeleteProjectLinkMutation extends Request {
   }
 
   /**
-   * Call the DeleteProjectLink mutation and return a ArchivePayload
+   * Call the DeleteProjectLink mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteProjectLink
    * @returns parsed response from DeleteProjectLinkMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteProjectLinkMutation, L.DeleteProjectLinkMutationVariables>(
       L.DeleteProjectLinkDocument,
       {
@@ -11204,7 +11914,7 @@ export class DeleteProjectLinkMutation extends Request {
     );
     const data = response.projectLinkDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -11279,12 +11989,12 @@ export class DeleteProjectMilestoneMutation extends Request {
   }
 
   /**
-   * Call the DeleteProjectMilestone mutation and return a ArchivePayload
+   * Call the DeleteProjectMilestone mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteProjectMilestone
    * @returns parsed response from DeleteProjectMilestoneMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteProjectMilestoneMutation, L.DeleteProjectMilestoneMutationVariables>(
       L.DeleteProjectMilestoneDocument,
       {
@@ -11293,7 +12003,7 @@ export class DeleteProjectMilestoneMutation extends Request {
     );
     const data = response.projectMilestoneDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -11339,12 +12049,12 @@ export class UnarchiveProjectMutation extends Request {
   }
 
   /**
-   * Call the UnarchiveProject mutation and return a ArchivePayload
+   * Call the UnarchiveProject mutation and return a ProjectArchivePayload
    *
    * @param id - required id to pass to unarchiveProject
    * @returns parsed response from UnarchiveProjectMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<ProjectArchivePayload> {
     const response = await this._request<L.UnarchiveProjectMutation, L.UnarchiveProjectMutationVariables>(
       L.UnarchiveProjectDocument,
       {
@@ -11353,7 +12063,7 @@ export class UnarchiveProjectMutation extends Request {
     );
     const data = response.projectUnarchive;
 
-    return new ArchivePayload(this._request, data);
+    return new ProjectArchivePayload(this._request, data);
   }
 }
 
@@ -11428,12 +12138,12 @@ export class DeleteProjectUpdateMutation extends Request {
   }
 
   /**
-   * Call the DeleteProjectUpdate mutation and return a ArchivePayload
+   * Call the DeleteProjectUpdate mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteProjectUpdate
    * @returns parsed response from DeleteProjectUpdateMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteProjectUpdateMutation, L.DeleteProjectUpdateMutationVariables>(
       L.DeleteProjectUpdateDocument,
       {
@@ -11442,7 +12152,7 @@ export class DeleteProjectUpdateMutation extends Request {
     );
     const data = response.projectUpdateDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -11633,12 +12343,12 @@ export class DeleteReactionMutation extends Request {
   }
 
   /**
-   * Call the DeleteReaction mutation and return a ArchivePayload
+   * Call the DeleteReaction mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteReaction
    * @returns parsed response from DeleteReactionMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteReactionMutation, L.DeleteReactionMutationVariables>(
       L.DeleteReactionDocument,
       {
@@ -11647,7 +12357,7 @@ export class DeleteReactionMutation extends Request {
     );
     const data = response.reactionDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -11691,12 +12401,12 @@ export class ResendOrganizationInviteMutation extends Request {
   }
 
   /**
-   * Call the ResendOrganizationInvite mutation and return a ArchivePayload
+   * Call the ResendOrganizationInvite mutation and return a DeletePayload
    *
    * @param id - required id to pass to resendOrganizationInvite
    * @returns parsed response from ResendOrganizationInviteMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<
       L.ResendOrganizationInviteMutation,
       L.ResendOrganizationInviteMutationVariables
@@ -11705,7 +12415,7 @@ export class ResendOrganizationInviteMutation extends Request {
     });
     const data = response.resendOrganizationInvite;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -11720,12 +12430,12 @@ export class ArchiveRoadmapMutation extends Request {
   }
 
   /**
-   * Call the ArchiveRoadmap mutation and return a ArchivePayload
+   * Call the ArchiveRoadmap mutation and return a RoadmapArchivePayload
    *
    * @param id - required id to pass to archiveRoadmap
    * @returns parsed response from ArchiveRoadmapMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<RoadmapArchivePayload> {
     const response = await this._request<L.ArchiveRoadmapMutation, L.ArchiveRoadmapMutationVariables>(
       L.ArchiveRoadmapDocument,
       {
@@ -11734,7 +12444,7 @@ export class ArchiveRoadmapMutation extends Request {
     );
     const data = response.roadmapArchive;
 
-    return new ArchivePayload(this._request, data);
+    return new RoadmapArchivePayload(this._request, data);
   }
 }
 
@@ -11778,12 +12488,12 @@ export class DeleteRoadmapMutation extends Request {
   }
 
   /**
-   * Call the DeleteRoadmap mutation and return a ArchivePayload
+   * Call the DeleteRoadmap mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteRoadmap
    * @returns parsed response from DeleteRoadmapMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteRoadmapMutation, L.DeleteRoadmapMutationVariables>(
       L.DeleteRoadmapDocument,
       {
@@ -11792,7 +12502,7 @@ export class DeleteRoadmapMutation extends Request {
     );
     const data = response.roadmapDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -11836,12 +12546,12 @@ export class DeleteRoadmapToProjectMutation extends Request {
   }
 
   /**
-   * Call the DeleteRoadmapToProject mutation and return a ArchivePayload
+   * Call the DeleteRoadmapToProject mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteRoadmapToProject
    * @returns parsed response from DeleteRoadmapToProjectMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteRoadmapToProjectMutation, L.DeleteRoadmapToProjectMutationVariables>(
       L.DeleteRoadmapToProjectDocument,
       {
@@ -11850,7 +12560,7 @@ export class DeleteRoadmapToProjectMutation extends Request {
     );
     const data = response.roadmapToProjectDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -11896,12 +12606,12 @@ export class UnarchiveRoadmapMutation extends Request {
   }
 
   /**
-   * Call the UnarchiveRoadmap mutation and return a ArchivePayload
+   * Call the UnarchiveRoadmap mutation and return a RoadmapArchivePayload
    *
    * @param id - required id to pass to unarchiveRoadmap
    * @returns parsed response from UnarchiveRoadmapMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<RoadmapArchivePayload> {
     const response = await this._request<L.UnarchiveRoadmapMutation, L.UnarchiveRoadmapMutationVariables>(
       L.UnarchiveRoadmapDocument,
       {
@@ -11910,7 +12620,7 @@ export class UnarchiveRoadmapMutation extends Request {
     );
     const data = response.roadmapUnarchive;
 
-    return new ArchivePayload(this._request, data);
+    return new RoadmapArchivePayload(this._request, data);
   }
 }
 
@@ -12045,18 +12755,18 @@ export class DeleteTeamMutation extends Request {
   }
 
   /**
-   * Call the DeleteTeam mutation and return a ArchivePayload
+   * Call the DeleteTeam mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteTeam
    * @returns parsed response from DeleteTeamMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteTeamMutation, L.DeleteTeamMutationVariables>(L.DeleteTeamDocument, {
       id,
     });
     const data = response.teamDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -12071,12 +12781,12 @@ export class DeleteTeamKeyMutation extends Request {
   }
 
   /**
-   * Call the DeleteTeamKey mutation and return a ArchivePayload
+   * Call the DeleteTeamKey mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteTeamKey
    * @returns parsed response from DeleteTeamKeyMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteTeamKeyMutation, L.DeleteTeamKeyMutationVariables>(
       L.DeleteTeamKeyDocument,
       {
@@ -12085,7 +12795,7 @@ export class DeleteTeamKeyMutation extends Request {
     );
     const data = response.teamKeyDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -12129,12 +12839,12 @@ export class DeleteTeamMembershipMutation extends Request {
   }
 
   /**
-   * Call the DeleteTeamMembership mutation and return a ArchivePayload
+   * Call the DeleteTeamMembership mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteTeamMembership
    * @returns parsed response from DeleteTeamMembershipMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteTeamMembershipMutation, L.DeleteTeamMembershipMutationVariables>(
       L.DeleteTeamMembershipDocument,
       {
@@ -12143,7 +12853,7 @@ export class DeleteTeamMembershipMutation extends Request {
     );
     const data = response.teamMembershipDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -12246,12 +12956,12 @@ export class DeleteTemplateMutation extends Request {
   }
 
   /**
-   * Call the DeleteTemplate mutation and return a ArchivePayload
+   * Call the DeleteTemplate mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteTemplate
    * @returns parsed response from DeleteTemplateMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteTemplateMutation, L.DeleteTemplateMutationVariables>(
       L.DeleteTemplateDocument,
       {
@@ -12260,7 +12970,7 @@ export class DeleteTemplateMutation extends Request {
     );
     const data = response.templateDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -12801,12 +13511,12 @@ export class DeleteViewPreferencesMutation extends Request {
   }
 
   /**
-   * Call the DeleteViewPreferences mutation and return a ArchivePayload
+   * Call the DeleteViewPreferences mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteViewPreferences
    * @returns parsed response from DeleteViewPreferencesMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteViewPreferencesMutation, L.DeleteViewPreferencesMutationVariables>(
       L.DeleteViewPreferencesDocument,
       {
@@ -12815,7 +13525,7 @@ export class DeleteViewPreferencesMutation extends Request {
     );
     const data = response.viewPreferencesDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -12890,12 +13600,12 @@ export class DeleteWebhookMutation extends Request {
   }
 
   /**
-   * Call the DeleteWebhook mutation and return a ArchivePayload
+   * Call the DeleteWebhook mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteWebhook
    * @returns parsed response from DeleteWebhookMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteWebhookMutation, L.DeleteWebhookMutationVariables>(
       L.DeleteWebhookDocument,
       {
@@ -12904,7 +13614,7 @@ export class DeleteWebhookMutation extends Request {
     );
     const data = response.webhookDelete;
 
-    return new ArchivePayload(this._request, data);
+    return new DeletePayload(this._request, data);
   }
 }
 
@@ -12950,12 +13660,12 @@ export class ArchiveWorkflowStateMutation extends Request {
   }
 
   /**
-   * Call the ArchiveWorkflowState mutation and return a ArchivePayload
+   * Call the ArchiveWorkflowState mutation and return a WorkflowStateArchivePayload
    *
    * @param id - required id to pass to archiveWorkflowState
    * @returns parsed response from ArchiveWorkflowStateMutation
    */
-  public async fetch(id: string): LinearFetch<ArchivePayload> {
+  public async fetch(id: string): LinearFetch<WorkflowStateArchivePayload> {
     const response = await this._request<L.ArchiveWorkflowStateMutation, L.ArchiveWorkflowStateMutationVariables>(
       L.ArchiveWorkflowStateDocument,
       {
@@ -12964,7 +13674,7 @@ export class ArchiveWorkflowStateMutation extends Request {
     );
     const data = response.workflowStateArchive;
 
-    return new ArchivePayload(this._request, data);
+    return new WorkflowStateArchivePayload(this._request, data);
   }
 }
 
@@ -13703,6 +14413,32 @@ export class DocumentsQuery extends Request {
 }
 
 /**
+ * A fetchable EmbedInfo Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class EmbedInfoQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the EmbedInfo query and return a EmbedPayload
+   *
+   * @param url - required url to pass to embedInfo
+   * @returns parsed response from EmbedInfoQuery
+   */
+  public async fetch(url: string): LinearFetch<EmbedPayload> {
+    const response = await this._request<L.EmbedInfoQuery, L.EmbedInfoQueryVariables>(L.EmbedInfoDocument, {
+      url,
+    });
+    const data = response.embedInfo;
+
+    return new EmbedPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable Emoji Query
  *
  * @param request - function to call the graphql client
@@ -14329,6 +15065,43 @@ export class IssueRelationsQuery extends Request {
 }
 
 /**
+ * A fetchable IssueSearch Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueSearchQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueSearch query and return a IssueConnection
+   *
+   * @param variables - variables to pass into the IssueSearchQuery
+   * @returns parsed response from IssueSearchQuery
+   */
+  public async fetch(variables?: L.IssueSearchQueryVariables): LinearFetch<IssueConnection> {
+    const response = await this._request<L.IssueSearchQuery, L.IssueSearchQueryVariables>(
+      L.IssueSearchDocument,
+      variables
+    );
+    const data = response.issueSearch;
+
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable IssueVcsBranchSearch Query
  *
  * @param request - function to call the graphql client
@@ -14447,7 +15220,14 @@ export class NotificationSubscriptionQuery extends Request {
    */
   public async fetch(
     id: string
-  ): LinearFetch<ProjectNotificationSubscription | TeamNotificationSubscription | NotificationSubscription> {
+  ): LinearFetch<
+    | CustomViewNotificationSubscription
+    | CycleNotificationSubscription
+    | LabelNotificationSubscription
+    | ProjectNotificationSubscription
+    | TeamNotificationSubscription
+    | NotificationSubscription
+  > {
     const response = await this._request<L.NotificationSubscriptionQuery, L.NotificationSubscriptionQueryVariables>(
       L.NotificationSubscriptionDocument,
       {
@@ -14457,6 +15237,15 @@ export class NotificationSubscriptionQuery extends Request {
     const data = response.notificationSubscription;
 
     switch (data.__typename) {
+      case "CustomViewNotificationSubscription":
+        return new CustomViewNotificationSubscription(
+          this._request,
+          data as L.CustomViewNotificationSubscriptionFragment
+        );
+      case "CycleNotificationSubscription":
+        return new CycleNotificationSubscription(this._request, data as L.CycleNotificationSubscriptionFragment);
+      case "LabelNotificationSubscription":
+        return new LabelNotificationSubscription(this._request, data as L.LabelNotificationSubscriptionFragment);
       case "ProjectNotificationSubscription":
         return new ProjectNotificationSubscription(this._request, data as L.ProjectNotificationSubscriptionFragment);
       case "TeamNotificationSubscription":
@@ -15434,6 +16223,37 @@ export class TemplatesQuery extends Request {
 }
 
 /**
+ * A fetchable TemplatesForIntegration Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class TemplatesForIntegrationQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TemplatesForIntegration query and return a Template list
+   *
+   * @param integrationType - required integrationType to pass to templatesForIntegration
+   * @returns parsed response from TemplatesForIntegrationQuery
+   */
+  public async fetch(integrationType: string): LinearFetch<Template[]> {
+    const response = await this._request<L.TemplatesForIntegrationQuery, L.TemplatesForIntegrationQueryVariables>(
+      L.TemplatesForIntegrationDocument,
+      {
+        integrationType,
+      }
+    );
+    const data = response.templatesForIntegration;
+
+    return data.map(node => {
+      return new Template(this._request, node);
+    });
+  }
+}
+
+/**
  * A fetchable User Query
  *
  * @param request - function to call the graphql client
@@ -16243,6 +17063,38 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable EmbedInfo_Embed Query
+ *
+ * @param request - function to call the graphql client
+ * @param url - required url to pass to embedInfo
+ */
+export class EmbedInfo_EmbedQuery extends Request {
+  private _url: string;
+
+  public constructor(request: LinearRequest, url: string) {
+    super(request);
+    this._url = url;
+  }
+
+  /**
+   * Call the EmbedInfo_Embed query and return a Embed
+   *
+   * @returns parsed response from EmbedInfo_EmbedQuery
+   */
+  public async fetch(): LinearFetch<Embed | undefined> {
+    const response = await this._request<L.EmbedInfo_EmbedQuery, L.EmbedInfo_EmbedQueryVariables>(
+      L.EmbedInfo_EmbedDocument,
+      {
+        url: this._url,
+      }
+    );
+    const data = response.embedInfo.embed;
+
+    return data ? new Embed(this._request, data) : undefined;
   }
 }
 
@@ -18910,18 +19762,18 @@ export class LinearSdk extends Request {
    * Deletes an API key.
    *
    * @param id - required id to pass to deleteApiKey
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteApiKey(id: string): LinearFetch<ArchivePayload> {
+  public deleteApiKey(id: string): LinearFetch<DeletePayload> {
     return new DeleteApiKeyMutation(this._request).fetch(id);
   }
   /**
    * [DEPRECATED] Archives an issue attachment.
    *
    * @param id - required id to pass to archiveAttachment
-   * @returns ArchivePayload
+   * @returns AttachmentArchivePayload
    */
-  public archiveAttachment(id: string): LinearFetch<ArchivePayload> {
+  public archiveAttachment(id: string): LinearFetch<AttachmentArchivePayload> {
     return new ArchiveAttachmentMutation(this._request).fetch(id);
   }
   /**
@@ -18937,9 +19789,9 @@ export class LinearSdk extends Request {
    * Deletes an issue attachment.
    *
    * @param id - required id to pass to deleteAttachment
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteAttachment(id: string): LinearFetch<ArchivePayload> {
+  public deleteAttachment(id: string): LinearFetch<DeletePayload> {
     return new DeleteAttachmentMutation(this._request).fetch(id);
   }
   /**
@@ -19015,6 +19867,15 @@ export class LinearSdk extends Request {
     return new AttachmentLinkZendeskMutation(this._request).fetch(issueId, ticketId);
   }
   /**
+   * Unsyncs an existing synced Slack attachment.
+   *
+   * @param id - required id to pass to attachmentUnsyncSlack
+   * @returns AttachmentPayload
+   */
+  public attachmentUnsyncSlack(id: string): LinearFetch<AttachmentPayload> {
+    return new AttachmentUnsyncSlackMutation(this._request).fetch(id);
+  }
+  /**
    * Updates an existing issue attachment.
    *
    * @param id - required id to pass to updateAttachment
@@ -19037,9 +19898,9 @@ export class LinearSdk extends Request {
    * Deletes a comment.
    *
    * @param id - required id to pass to deleteComment
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteComment(id: string): LinearFetch<ArchivePayload> {
+  public deleteComment(id: string): LinearFetch<DeletePayload> {
     return new DeleteCommentMutation(this._request).fetch(id);
   }
   /**
@@ -19098,9 +19959,9 @@ export class LinearSdk extends Request {
    * Deletes a custom view.
    *
    * @param id - required id to pass to deleteCustomView
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteCustomView(id: string): LinearFetch<ArchivePayload> {
+  public deleteCustomView(id: string): LinearFetch<DeletePayload> {
     return new DeleteCustomViewMutation(this._request).fetch(id);
   }
   /**
@@ -19117,9 +19978,9 @@ export class LinearSdk extends Request {
    * Archives a cycle.
    *
    * @param id - required id to pass to archiveCycle
-   * @returns ArchivePayload
+   * @returns CycleArchivePayload
    */
-  public archiveCycle(id: string): LinearFetch<ArchivePayload> {
+  public archiveCycle(id: string): LinearFetch<CycleArchivePayload> {
     return new ArchiveCycleMutation(this._request).fetch(id);
   }
   /**
@@ -19154,9 +20015,9 @@ export class LinearSdk extends Request {
    * Deletes a document.
    *
    * @param id - required id to pass to deleteDocument
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteDocument(id: string): LinearFetch<ArchivePayload> {
+  public deleteDocument(id: string): LinearFetch<DeletePayload> {
     return new DeleteDocumentMutation(this._request).fetch(id);
   }
   /**
@@ -19211,9 +20072,9 @@ export class LinearSdk extends Request {
    * Deletes an emoji.
    *
    * @param id - required id to pass to deleteEmoji
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteEmoji(id: string): LinearFetch<ArchivePayload> {
+  public deleteEmoji(id: string): LinearFetch<DeletePayload> {
     return new DeleteEmojiMutation(this._request).fetch(id);
   }
   /**
@@ -19238,9 +20099,9 @@ export class LinearSdk extends Request {
    * Deletes a favorite reference.
    *
    * @param id - required id to pass to deleteFavorite
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteFavorite(id: string): LinearFetch<ArchivePayload> {
+  public deleteFavorite(id: string): LinearFetch<DeletePayload> {
     return new DeleteFavoriteMutation(this._request).fetch(id);
   }
   /**
@@ -19309,9 +20170,9 @@ export class LinearSdk extends Request {
    * Deletes an integration.
    *
    * @param id - required id to pass to deleteIntegration
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteIntegration(id: string): LinearFetch<ArchivePayload> {
+  public deleteIntegration(id: string): LinearFetch<DeletePayload> {
     return new DeleteIntegrationMutation(this._request).fetch(id);
   }
   /**
@@ -19546,9 +20407,9 @@ export class LinearSdk extends Request {
    * Deletes a integrationTemplate.
    *
    * @param id - required id to pass to deleteIntegrationTemplate
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteIntegrationTemplate(id: string): LinearFetch<ArchivePayload> {
+  public deleteIntegrationTemplate(id: string): LinearFetch<DeletePayload> {
     return new DeleteIntegrationTemplateMutation(this._request).fetch(id);
   }
   /**
@@ -19607,12 +20468,12 @@ export class LinearSdk extends Request {
    *
    * @param id - required id to pass to archiveIssue
    * @param variables - variables without 'id' to pass into the ArchiveIssueMutation
-   * @returns ArchivePayload
+   * @returns IssueArchivePayload
    */
   public archiveIssue(
     id: string,
     variables?: Omit<L.ArchiveIssueMutationVariables, "id">
-  ): LinearFetch<ArchivePayload> {
+  ): LinearFetch<IssueArchivePayload> {
     return new ArchiveIssueMutation(this._request).fetch(id, variables);
   }
   /**
@@ -19638,9 +20499,9 @@ export class LinearSdk extends Request {
    * Deletes (trashes) an issue.
    *
    * @param id - required id to pass to deleteIssue
-   * @returns ArchivePayload
+   * @returns IssueArchivePayload
    */
-  public deleteIssue(id: string): LinearFetch<ArchivePayload> {
+  public deleteIssue(id: string): LinearFetch<IssueArchivePayload> {
     return new DeleteIssueMutation(this._request).fetch(id);
   }
   /**
@@ -19766,15 +20627,6 @@ export class LinearSdk extends Request {
     return new UpdateIssueImportMutation(this._request).fetch(id, input);
   }
   /**
-   * Deletes an issue label.
-   *
-   * @param id - required id to pass to archiveIssueLabel
-   * @returns ArchivePayload
-   */
-  public archiveIssueLabel(id: string): LinearFetch<ArchivePayload> {
-    return new ArchiveIssueLabelMutation(this._request).fetch(id);
-  }
-  /**
    * Creates a new label.
    *
    * @param input - required input to pass to createIssueLabel
@@ -19791,9 +20643,9 @@ export class LinearSdk extends Request {
    * Deletes an issue label.
    *
    * @param id - required id to pass to deleteIssueLabel
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteIssueLabel(id: string): LinearFetch<ArchivePayload> {
+  public deleteIssueLabel(id: string): LinearFetch<DeletePayload> {
     return new DeleteIssueLabelMutation(this._request).fetch(id);
   }
   /**
@@ -19819,9 +20671,9 @@ export class LinearSdk extends Request {
    * Deletes an issue relation.
    *
    * @param id - required id to pass to deleteIssueRelation
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteIssueRelation(id: string): LinearFetch<ArchivePayload> {
+  public deleteIssueRelation(id: string): LinearFetch<DeletePayload> {
     return new DeleteIssueRelationMutation(this._request).fetch(id);
   }
   /**
@@ -19848,9 +20700,9 @@ export class LinearSdk extends Request {
    * Unarchives an issue.
    *
    * @param id - required id to pass to unarchiveIssue
-   * @returns ArchivePayload
+   * @returns IssueArchivePayload
    */
-  public unarchiveIssue(id: string): LinearFetch<ArchivePayload> {
+  public unarchiveIssue(id: string): LinearFetch<IssueArchivePayload> {
     return new UnarchiveIssueMutation(this._request).fetch(id);
   }
   /**
@@ -19893,13 +20745,13 @@ export class LinearSdk extends Request {
    * Archives a notification.
    *
    * @param id - required id to pass to archiveNotification
-   * @returns ArchivePayload
+   * @returns NotificationArchivePayload
    */
-  public archiveNotification(id: string): LinearFetch<ArchivePayload> {
+  public archiveNotification(id: string): LinearFetch<NotificationArchivePayload> {
     return new ArchiveNotificationMutation(this._request).fetch(id);
   }
   /**
-   * Creates a new notification subscription for a team or a project.
+   * Creates a new notification subscription for a cycle, custom view, label, project or team.
    *
    * @param input - required input to pass to createNotificationSubscription
    * @returns NotificationSubscriptionPayload
@@ -19913,9 +20765,9 @@ export class LinearSdk extends Request {
    * Deletes a notification subscription reference.
    *
    * @param id - required id to pass to deleteNotificationSubscription
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteNotificationSubscription(id: string): LinearFetch<ArchivePayload> {
+  public deleteNotificationSubscription(id: string): LinearFetch<DeletePayload> {
     return new DeleteNotificationSubscriptionMutation(this._request).fetch(id);
   }
   /**
@@ -19935,9 +20787,9 @@ export class LinearSdk extends Request {
    * Unarchives a notification.
    *
    * @param id - required id to pass to unarchiveNotification
-   * @returns ArchivePayload
+   * @returns NotificationArchivePayload
    */
-  public unarchiveNotification(id: string): LinearFetch<ArchivePayload> {
+  public unarchiveNotification(id: string): LinearFetch<NotificationArchivePayload> {
     return new UnarchiveNotificationMutation(this._request).fetch(id);
   }
   /**
@@ -19979,9 +20831,9 @@ export class LinearSdk extends Request {
    * Deletes a domain.
    *
    * @param id - required id to pass to deleteOrganizationDomain
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteOrganizationDomain(id: string): LinearFetch<ArchivePayload> {
+  public deleteOrganizationDomain(id: string): LinearFetch<DeletePayload> {
     return new DeleteOrganizationDomainMutation(this._request).fetch(id);
   }
   /**
@@ -19997,9 +20849,9 @@ export class LinearSdk extends Request {
    * Deletes an organization invite.
    *
    * @param id - required id to pass to deleteOrganizationInvite
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteOrganizationInvite(id: string): LinearFetch<ArchivePayload> {
+  public deleteOrganizationInvite(id: string): LinearFetch<DeletePayload> {
     return new DeleteOrganizationInviteMutation(this._request).fetch(id);
   }
   /**
@@ -20036,9 +20888,9 @@ export class LinearSdk extends Request {
    * Archives a project.
    *
    * @param id - required id to pass to archiveProject
-   * @returns ArchivePayload
+   * @returns ProjectArchivePayload
    */
-  public archiveProject(id: string): LinearFetch<ArchivePayload> {
+  public archiveProject(id: string): LinearFetch<ProjectArchivePayload> {
     return new ArchiveProjectMutation(this._request).fetch(id);
   }
   /**
@@ -20054,9 +20906,9 @@ export class LinearSdk extends Request {
    * Deletes a project. All issues will be disassociated from the deleted project.
    *
    * @param id - required id to pass to deleteProject
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteProject(id: string): LinearFetch<ArchivePayload> {
+  public deleteProject(id: string): LinearFetch<DeletePayload> {
     return new DeleteProjectMutation(this._request).fetch(id);
   }
   /**
@@ -20072,9 +20924,9 @@ export class LinearSdk extends Request {
    * Deletes a project link.
    *
    * @param id - required id to pass to deleteProjectLink
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteProjectLink(id: string): LinearFetch<ArchivePayload> {
+  public deleteProjectLink(id: string): LinearFetch<DeletePayload> {
     return new DeleteProjectLinkMutation(this._request).fetch(id);
   }
   /**
@@ -20100,9 +20952,9 @@ export class LinearSdk extends Request {
    * Deletes a project milestone.
    *
    * @param id - required id to pass to deleteProjectMilestone
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteProjectMilestone(id: string): LinearFetch<ArchivePayload> {
+  public deleteProjectMilestone(id: string): LinearFetch<DeletePayload> {
     return new DeleteProjectMilestoneMutation(this._request).fetch(id);
   }
   /**
@@ -20122,9 +20974,9 @@ export class LinearSdk extends Request {
    * Unarchives a project.
    *
    * @param id - required id to pass to unarchiveProject
-   * @returns ArchivePayload
+   * @returns ProjectArchivePayload
    */
-  public unarchiveProject(id: string): LinearFetch<ArchivePayload> {
+  public unarchiveProject(id: string): LinearFetch<ProjectArchivePayload> {
     return new UnarchiveProjectMutation(this._request).fetch(id);
   }
   /**
@@ -20150,9 +21002,9 @@ export class LinearSdk extends Request {
    * Deletes a project update.
    *
    * @param id - required id to pass to deleteProjectUpdate
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteProjectUpdate(id: string): LinearFetch<ArchivePayload> {
+  public deleteProjectUpdate(id: string): LinearFetch<DeletePayload> {
     return new DeleteProjectUpdateMutation(this._request).fetch(id);
   }
   /**
@@ -20216,9 +21068,9 @@ export class LinearSdk extends Request {
    * Deletes a reaction.
    *
    * @param id - required id to pass to deleteReaction
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteReaction(id: string): LinearFetch<ArchivePayload> {
+  public deleteReaction(id: string): LinearFetch<DeletePayload> {
     return new DeleteReactionMutation(this._request).fetch(id);
   }
   /**
@@ -20234,18 +21086,18 @@ export class LinearSdk extends Request {
    * Re-send an organization invite.
    *
    * @param id - required id to pass to resendOrganizationInvite
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public resendOrganizationInvite(id: string): LinearFetch<ArchivePayload> {
+  public resendOrganizationInvite(id: string): LinearFetch<DeletePayload> {
     return new ResendOrganizationInviteMutation(this._request).fetch(id);
   }
   /**
    * Archives a roadmap.
    *
    * @param id - required id to pass to archiveRoadmap
-   * @returns ArchivePayload
+   * @returns RoadmapArchivePayload
    */
-  public archiveRoadmap(id: string): LinearFetch<ArchivePayload> {
+  public archiveRoadmap(id: string): LinearFetch<RoadmapArchivePayload> {
     return new ArchiveRoadmapMutation(this._request).fetch(id);
   }
   /**
@@ -20261,9 +21113,9 @@ export class LinearSdk extends Request {
    * Deletes a roadmap.
    *
    * @param id - required id to pass to deleteRoadmap
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteRoadmap(id: string): LinearFetch<ArchivePayload> {
+  public deleteRoadmap(id: string): LinearFetch<DeletePayload> {
     return new DeleteRoadmapMutation(this._request).fetch(id);
   }
   /**
@@ -20279,9 +21131,9 @@ export class LinearSdk extends Request {
    * Deletes a roadmapToProject.
    *
    * @param id - required id to pass to deleteRoadmapToProject
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteRoadmapToProject(id: string): LinearFetch<ArchivePayload> {
+  public deleteRoadmapToProject(id: string): LinearFetch<DeletePayload> {
     return new DeleteRoadmapToProjectMutation(this._request).fetch(id);
   }
   /**
@@ -20301,9 +21153,9 @@ export class LinearSdk extends Request {
    * Unarchives a roadmap.
    *
    * @param id - required id to pass to unarchiveRoadmap
-   * @returns ArchivePayload
+   * @returns RoadmapArchivePayload
    */
-  public unarchiveRoadmap(id: string): LinearFetch<ArchivePayload> {
+  public unarchiveRoadmap(id: string): LinearFetch<RoadmapArchivePayload> {
     return new UnarchiveRoadmapMutation(this._request).fetch(id);
   }
   /**
@@ -20351,18 +21203,18 @@ export class LinearSdk extends Request {
    * Deletes a team.
    *
    * @param id - required id to pass to deleteTeam
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteTeam(id: string): LinearFetch<ArchivePayload> {
+  public deleteTeam(id: string): LinearFetch<DeletePayload> {
     return new DeleteTeamMutation(this._request).fetch(id);
   }
   /**
    * Deletes a previously used team key.
    *
    * @param id - required id to pass to deleteTeamKey
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteTeamKey(id: string): LinearFetch<ArchivePayload> {
+  public deleteTeamKey(id: string): LinearFetch<DeletePayload> {
     return new DeleteTeamKeyMutation(this._request).fetch(id);
   }
   /**
@@ -20378,9 +21230,9 @@ export class LinearSdk extends Request {
    * Deletes a team membership.
    *
    * @param id - required id to pass to deleteTeamMembership
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteTeamMembership(id: string): LinearFetch<ArchivePayload> {
+  public deleteTeamMembership(id: string): LinearFetch<DeletePayload> {
     return new DeleteTeamMembershipMutation(this._request).fetch(id);
   }
   /**
@@ -20416,9 +21268,9 @@ export class LinearSdk extends Request {
    * Deletes a template.
    *
    * @param id - required id to pass to deleteTemplate
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteTemplate(id: string): LinearFetch<ArchivePayload> {
+  public deleteTemplate(id: string): LinearFetch<DeletePayload> {
     return new DeleteTemplateMutation(this._request).fetch(id);
   }
   /**
@@ -20597,9 +21449,9 @@ export class LinearSdk extends Request {
    * Deletes a ViewPreferences.
    *
    * @param id - required id to pass to deleteViewPreferences
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteViewPreferences(id: string): LinearFetch<ArchivePayload> {
+  public deleteViewPreferences(id: string): LinearFetch<DeletePayload> {
     return new DeleteViewPreferencesMutation(this._request).fetch(id);
   }
   /**
@@ -20625,9 +21477,9 @@ export class LinearSdk extends Request {
    * Deletes a Webhook.
    *
    * @param id - required id to pass to deleteWebhook
-   * @returns ArchivePayload
+   * @returns DeletePayload
    */
-  public deleteWebhook(id: string): LinearFetch<ArchivePayload> {
+  public deleteWebhook(id: string): LinearFetch<DeletePayload> {
     return new DeleteWebhookMutation(this._request).fetch(id);
   }
   /**
@@ -20644,9 +21496,9 @@ export class LinearSdk extends Request {
    * Archives a state. Only states with issues that have all been archived can be archived.
    *
    * @param id - required id to pass to archiveWorkflowState
-   * @returns ArchivePayload
+   * @returns WorkflowStateArchivePayload
    */
-  public archiveWorkflowState(id: string): LinearFetch<ArchivePayload> {
+  public archiveWorkflowState(id: string): LinearFetch<WorkflowStateArchivePayload> {
     return new ArchiveWorkflowStateMutation(this._request).fetch(id);
   }
   /**
@@ -20869,6 +21721,15 @@ export class LinearSdk extends Request {
     return new DocumentsQuery(this._request).fetch(variables);
   }
   /**
+   * Returns embed info for any url
+   *
+   * @param url - required url to pass to embedInfo
+   * @returns EmbedPayload
+   */
+  public embedInfo(url: string): LinearFetch<EmbedPayload> {
+    return new EmbedInfoQuery(this._request).fetch(url);
+  }
+  /**
    * A specific emoji.
    *
    * @param id - required id to pass to emoji
@@ -21059,6 +21920,15 @@ export class LinearSdk extends Request {
     return new IssueRelationsQuery(this._request).fetch(variables);
   }
   /**
+   * [DEPRECATED] Search issues. This endpoint is deprecated and will be removed in the future – use `searchIssues` instead.
+   *
+   * @param variables - variables to pass into the IssueSearchQuery
+   * @returns IssueConnection
+   */
+  public issueSearch(variables?: L.IssueSearchQueryVariables): LinearFetch<IssueConnection> {
+    return new IssueSearchQuery(this._request).fetch(variables);
+  }
+  /**
    * Find issue based on the VCS branch name.
    *
    * @param branchName - required branchName to pass to issueVcsBranchSearch
@@ -21095,7 +21965,14 @@ export class LinearSdk extends Request {
    */
   public notificationSubscription(
     id: string
-  ): LinearFetch<ProjectNotificationSubscription | TeamNotificationSubscription | NotificationSubscription> {
+  ): LinearFetch<
+    | CustomViewNotificationSubscription
+    | CycleNotificationSubscription
+    | LabelNotificationSubscription
+    | ProjectNotificationSubscription
+    | TeamNotificationSubscription
+    | NotificationSubscription
+  > {
     return new NotificationSubscriptionQuery(this._request).fetch(id);
   }
   /**
@@ -21394,6 +22271,15 @@ export class LinearSdk extends Request {
    */
   public get templates(): LinearFetch<Template[]> {
     return new TemplatesQuery(this._request).fetch();
+  }
+  /**
+   * Returns all templates that are associated with the integration type.
+   *
+   * @param integrationType - required integrationType to pass to templatesForIntegration
+   * @returns Template[]
+   */
+  public templatesForIntegration(integrationType: string): LinearFetch<Template[]> {
+    return new TemplatesForIntegrationQuery(this._request).fetch(integrationType);
   }
   /**
    * One specific user.

@@ -116,7 +116,10 @@ type Application {
   name: String!
 }
 
-type ArchivePayload {
+"""
+A generic payload return from entity archive or deletion mutations.
+"""
+interface ArchivePayload {
   """
   The identifier of the last sync operation.
   """
@@ -207,6 +210,24 @@ type Attachment implements Node {
   Location of the attachment which is also used as an identifier.
   """
   url: String!
+}
+
+"""
+A generic payload return from entity archive mutations.
+"""
+type AttachmentArchivePayload implements ArchivePayload {
+  """
+  The archived/unarchived entity. Null if entity was deleted.
+  """
+  entity: Attachment
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 """
@@ -978,6 +999,10 @@ type ContactPayload {
 """
 input ContactSalesCreateInput {
   """
+  Size of the company.
+  """
+  companySize: String
+  """
   Work email of the person requesting information.
   """
   email: String!
@@ -1003,6 +1028,14 @@ input ContentComparator {
   [Internal] Not-contains constraint.
   """
   notContains: String
+}
+
+enum ContextViewType {
+  activeCycle
+  activeIssues
+  backlog
+  triage
+  upcomingCycle
 }
 
 type CreateCsvExportReportPayload {
@@ -1110,6 +1143,10 @@ type CustomView implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  [ALPHA] The user who last updated the custom view.
+  """
+  updatedBy: User!
 }
 
 type CustomViewConnection {
@@ -1167,6 +1204,70 @@ type CustomViewEdge {
   """
   cursor: String!
   node: CustomView!
+}
+
+"""
+A custom view notification subscription.
+"""
+type CustomViewNotificationSubscription implements Entity & Node & NotificationSubscription {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The type of view to which the notification subscription context is associated with.
+  """
+  contextViewType: ContextViewType
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The custom view subscribed to.
+  """
+  customView: CustomView!
+  """
+  The contextual cycle view associated with the notification subscription.
+  """
+  cycle: Cycle
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The contextual label view associated with the notification subscription.
+  """
+  label: IssueLabel
+  """
+  The type of subscription.
+  """
+  notificationSubscriptionTypes: [String!]!
+  """
+  The contextual project view associated with the notification subscription.
+  """
+  project: Project
+  """
+  The user that subscribed to receive notifications.
+  """
+  subscriber: User!
+  """
+  The team associated with the notification subscription.
+  """
+  team: Team
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user view associated with the notification subscription.
+  """
+  user: User
+  """
+  The type of user view to which the notification subscription context is associated with.
+  """
+  userContextViewType: UserContextViewType
 }
 
 type CustomViewPayload {
@@ -1384,6 +1485,24 @@ type Cycle implements Node {
   updatedAt: DateTime!
 }
 
+"""
+A generic payload return from entity archive mutations.
+"""
+type CycleArchivePayload implements ArchivePayload {
+  """
+  The archived/unarchived entity. Null if entity was deleted.
+  """
+  entity: Cycle
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 type CycleConnection {
   edges: [CycleEdge!]!
   nodes: [Cycle!]!
@@ -1503,6 +1622,70 @@ input CycleFilter {
   updatedAt: DateComparator
 }
 
+"""
+A cycle notification subscription.
+"""
+type CycleNotificationSubscription implements Entity & Node & NotificationSubscription {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The type of view to which the notification subscription context is associated with.
+  """
+  contextViewType: ContextViewType
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The contextual custom view associated with the notification subscription.
+  """
+  customView: CustomView
+  """
+  The cycle subscribed to.
+  """
+  cycle: Cycle!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The contextual label view associated with the notification subscription.
+  """
+  label: IssueLabel
+  """
+  The type of subscription.
+  """
+  notificationSubscriptionTypes: [String!]!
+  """
+  The contextual project view associated with the notification subscription.
+  """
+  project: Project
+  """
+  The user that subscribed to receive notifications.
+  """
+  subscriber: User!
+  """
+  The team associated with the notification subscription.
+  """
+  team: Team
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user view associated with the notification subscription.
+  """
+  user: User
+  """
+  The type of user view to which the notification subscription context is associated with.
+  """
+  userContextViewType: UserContextViewType
+}
+
 type CyclePayload {
   """
   The Cycle that was created or updated.
@@ -1602,6 +1785,24 @@ input DeleteOrganizationInput {
   The deletion code to confirm operation.
   """
   deletionCode: String!
+}
+
+"""
+A generic payload return from entity deletion mutations.
+"""
+type DeletePayload implements ArchivePayload {
+  """
+  The identifier of the deleted entity.
+  """
+  entityId: String!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 """
@@ -1943,6 +2144,71 @@ type EmailUserAccountAuthChallengeResponse {
 }
 
 """
+Information for creating embedded content for the provided URL
+"""
+type Embed {
+  """
+  The name of the author/owner of the resource
+  """
+  authorName: String
+  """
+  The description of the content
+  """
+  description: String
+  """
+  The height of embedded content (photo, video, rich)
+  """
+  height: Float
+  """
+  The HTML (video, rich)
+  """
+  html: String
+  """
+  The name of the provider
+  """
+  providerName: String
+  """
+  The height of the thumbnail preview image
+  """
+  thumbnailHeight: Float
+  """
+  The URL of the thumbnail preview image
+  """
+  thumbnailUrl: String
+  """
+  The width of the thumbnail preview image
+  """
+  thumbnailWidth: Float
+  """
+  Title for the returned embed view
+  """
+  title: String
+  """
+  The type of embed
+  """
+  type: String!
+  """
+  The asset URL (photo)
+  """
+  url: String
+  """
+  The width of embedded content (photo, video, rich)
+  """
+  width: Float
+}
+
+type EmbedPayload {
+  """
+  Embed information
+  """
+  embed: Embed
+  """
+  Whether the query was successful
+  """
+  success: Boolean!
+}
+
+"""
 A custom emoji.
 """
 type Emoji implements Node {
@@ -2266,6 +2532,10 @@ type Favorite implements Node {
   """
   label: IssueLabel
   """
+  The owner of the favorite.
+  """
+  owner: User!
+  """
   The parent folder of the favorite.
   """
   parent: Favorite
@@ -2304,9 +2574,9 @@ type Favorite implements Node {
   """
   updatedAt: DateTime!
   """
-  The owner of the favorite.
+  The favorited user.
   """
-  user: User!
+  user: User
 }
 
 type FavoriteConnection {
@@ -2372,6 +2642,10 @@ input FavoriteCreateInput {
   The position of the item in the favorites list.
   """
   sortOrder: Float
+  """
+  The identifier of the user to favorite.
+  """
+  userId: String
 }
 
 type FavoriteEdge {
@@ -2443,6 +2717,60 @@ type FigmaEmbedPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+A schedule for a team's first responder.
+"""
+type FirstResponderSchedule implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The integration used for scheduling.
+  """
+  integration: Integration!
+  """
+  The id of the integration schedule used for scheduling.
+  """
+  integrationScheduleId: String
+  """
+  The current schedule and available schedules.
+  """
+  scheduleData: JSONObject!
+  """
+  The team to which the schedule belongs to.
+  """
+  team: Team!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type FirstResponderScheduleConnection {
+  edges: [FirstResponderScheduleEdge!]!
+  nodes: [FirstResponderSchedule!]!
+  pageInfo: PageInfo!
+}
+
+type FirstResponderScheduleEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: FirstResponderSchedule!
 }
 
 type FrontAttachmentPayload {
@@ -2777,6 +3105,7 @@ type IntegrationSettings {
   intercom: IntercomSettings
   jira: JiraSettings
   notion: NotionSettings
+  pagerDuty: PagerDutySettings
   sentry: SentrySettings
   slackOrgProjectUpdatesPost: SlackPostSettings
   slackPost: SlackPostSettings
@@ -2791,6 +3120,7 @@ input IntegrationSettingsInput {
   intercom: IntercomSettingsInput
   jira: JiraSettingsInput
   notion: NotionSettingsInput
+  pagerDuty: PagerDutyInput
   sentry: SentrySettingsInput
   slackOrgProjectUpdatesPost: SlackPostSettingsInput
   slackPost: SlackPostSettingsInput
@@ -3554,6 +3884,24 @@ type Issue implements Node {
   url: String!
 }
 
+"""
+A generic payload return from entity archive mutations.
+"""
+type IssueArchivePayload implements ArchivePayload {
+  """
+  The archived/unarchived entity. Null if entity was deleted.
+  """
+  entity: Issue
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 type IssueBatchPayload {
   """
   The issues that were updated.
@@ -3839,9 +4187,13 @@ input IssueCreateInput {
   """
   teamId: String!
   """
+  The identifier of a template the issue should be created from. If other values are provided in the input, they will override template values.
+  """
+  templateId: String
+  """
   The title of the issue.
   """
-  title: String!
+  title: String
 }
 
 """
@@ -4631,7 +4983,7 @@ input IssueLabelCollectionFilter {
   """
   Filters that the issue labels team must satisfy.
   """
-  team: TeamFilter
+  team: NullableTeamFilter
   """
   Comparator for the updated at date.
   """
@@ -4714,7 +5066,7 @@ input IssueLabelFilter {
   """
   Filters that the issue labels team must satisfy.
   """
-  team: TeamFilter
+  team: NullableTeamFilter
   """
   Comparator for the updated at date.
   """
@@ -5651,6 +6003,70 @@ input JoinOrganizationInput {
   organizationId: String!
 }
 
+"""
+A label notification subscription.
+"""
+type LabelNotificationSubscription implements Entity & Node & NotificationSubscription {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The type of view to which the notification subscription context is associated with.
+  """
+  contextViewType: ContextViewType
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The contextual custom view associated with the notification subscription.
+  """
+  customView: CustomView
+  """
+  The contextual cycle view associated with the notification subscription.
+  """
+  cycle: Cycle
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The label subscribed to.
+  """
+  label: IssueLabel!
+  """
+  The type of subscription.
+  """
+  notificationSubscriptionTypes: [String!]!
+  """
+  The contextual project view associated with the notification subscription.
+  """
+  project: Project
+  """
+  The user that subscribed to receive notifications.
+  """
+  subscriber: User!
+  """
+  The team associated with the notification subscription.
+  """
+  team: Team
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user view associated with the notification subscription.
+  """
+  user: User
+  """
+  The type of user view to which the notification subscription context is associated with.
+  """
+  userContextViewType: UserContextViewType
+}
+
 type LogoutResponse {
   """
   Whether the operation was successful.
@@ -5685,7 +6101,7 @@ type Mutation {
     The identifier of the API key to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   [DEPRECATED] Archives an issue attachment.
   """
@@ -5694,7 +6110,7 @@ type Mutation {
     The identifier of the attachment to archive.
     """
     id: String!
-  ): ArchivePayload! @deprecated(reason: "This mutation is deprecated, please use `attachmentDelete` instead")
+  ): AttachmentArchivePayload! @deprecated(reason: "This mutation is deprecated, please use `attachmentDelete` instead")
   """
   Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
   """
@@ -5712,7 +6128,7 @@ type Mutation {
     The identifier of the attachment to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Link an existing Discord message to an issue.
   """
@@ -5808,6 +6224,15 @@ type Mutation {
     ticketId: String!
   ): AttachmentPayload!
   """
+  Unsyncs an existing synced Slack attachment.
+  """
+  attachmentUnsyncSlack(
+    """
+    The identifier of the attachment to unsync.
+    """
+    id: String!
+  ): AttachmentPayload!
+  """
   Updates an existing issue attachment.
   """
   attachmentUpdate(
@@ -5837,7 +6262,7 @@ type Mutation {
     The identifier of the comment to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates a comment.
   """
@@ -5903,7 +6328,7 @@ type Mutation {
     The identifier of the custom view to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates a custom view.
   """
@@ -5925,7 +6350,7 @@ type Mutation {
     The identifier of the cycle to archive.
     """
     id: String!
-  ): ArchivePayload!
+  ): CycleArchivePayload!
   """
   Creates a new cycle.
   """
@@ -5965,7 +6390,7 @@ type Mutation {
     The identifier of the document to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates a document.
   """
@@ -6032,7 +6457,7 @@ type Mutation {
     The identifier of the emoji to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   [Deprecated] Creates a new event.
   """
@@ -6059,7 +6484,7 @@ type Mutation {
     The identifier of the favorite reference to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates a favorite.
   """
@@ -6145,7 +6570,7 @@ type Mutation {
     The identifier of the integration to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Integrates the organization with Discord.
   """
@@ -6255,6 +6680,15 @@ type Mutation {
   Enables Loom integration for the organization.
   """
   integrationLoom: IntegrationPayload! @deprecated(reason: "Not available.")
+  """
+  [INTERNAL] Integrates the organization with PagerDuty.
+  """
+  integrationPageDutyConnect(
+    """
+    The PagerDuty API token.
+    """
+    apiToken: String!
+  ): IntegrationPayload!
   """
   Requests a currently unavailable integration.
   """
@@ -6422,7 +6856,7 @@ type Mutation {
     The identifier of the integrationTemplate to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates the organization's Slack integration.
   """
@@ -6491,7 +6925,7 @@ type Mutation {
     Whether to trash the issue
     """
     trash: Boolean
-  ): ArchivePayload!
+  ): IssueArchivePayload!
   """
   Updates multiple issues at once.
   """
@@ -6522,7 +6956,7 @@ type Mutation {
     The identifier of the issue to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): IssueArchivePayload!
   """
   [INTERNAL] Updates an issue description from the Front app to handle Front attachments correctly.
   """
@@ -6769,15 +7203,6 @@ type Mutation {
     input: IssueImportUpdateInput!
   ): IssueImportPayload!
   """
-  Deletes an issue label.
-  """
-  issueLabelArchive(
-    """
-    The identifier of the label to archive.
-    """
-    id: String!
-  ): ArchivePayload! @deprecated(reason: "Labels are deleted instead of archived now!")
-  """
   Creates a new label.
   """
   issueLabelCreate(
@@ -6798,7 +7223,7 @@ type Mutation {
     The identifier of the label to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates an label.
   """
@@ -6829,7 +7254,7 @@ type Mutation {
     The identifier of the issue relation to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates an issue relation.
   """
@@ -6864,7 +7289,7 @@ type Mutation {
     The identifier of the issue to archive.
     """
     id: String!
-  ): ArchivePayload!
+  ): IssueArchivePayload!
   """
   Updates an issue.
   """
@@ -6917,9 +7342,9 @@ type Mutation {
     The id of the notification to archive.
     """
     id: String!
-  ): ArchivePayload!
+  ): NotificationArchivePayload!
   """
-  Creates a new notification subscription for a team or a project.
+  Creates a new notification subscription for a cycle, custom view, label, project or team.
   """
   notificationSubscriptionCreate(
     """
@@ -6935,7 +7360,7 @@ type Mutation {
     The identifier of the notification subscription reference to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates a notification subscription.
   """
@@ -6957,7 +7382,7 @@ type Mutation {
     The id of the notification to archive.
     """
     id: String!
-  ): ArchivePayload!
+  ): NotificationArchivePayload!
   """
   Updates a notification.
   """
@@ -7018,7 +7443,7 @@ type Mutation {
     The identifier of the domain to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   [INTERNAL] Verifies a domain to be added to an organization.
   """
@@ -7045,7 +7470,7 @@ type Mutation {
     The identifier of the organization invite to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates an organization invite.
   """
@@ -7080,7 +7505,7 @@ type Mutation {
     The identifier of the project to archive. Also the identifier from the URL is accepted.
     """
     id: String!
-  ): ArchivePayload! @deprecated(reason: "Deprecated in favor of projectDelete.")
+  ): ProjectArchivePayload! @deprecated(reason: "Deprecated in favor of projectDelete.")
   """
   Creates a new project.
   """
@@ -7098,7 +7523,7 @@ type Mutation {
     The identifier of the project to delete. Also the identifier from the URL is accepted.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Creates a new project link.
   """
@@ -7116,7 +7541,7 @@ type Mutation {
     The identifier of the project link to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates a project link.
   """
@@ -7147,7 +7572,7 @@ type Mutation {
     The identifier of the project milestone to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates a project milestone.
   """
@@ -7169,7 +7594,7 @@ type Mutation {
     The identifier of the project to restore. Also the identifier from the URL is accepted.
     """
     id: String!
-  ): ArchivePayload!
+  ): ProjectArchivePayload!
   """
   Updates a project.
   """
@@ -7200,7 +7625,7 @@ type Mutation {
     The identifier of the project update to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Creates a new interaction on a project update.
   """
@@ -7267,7 +7692,7 @@ type Mutation {
     The identifier of the reaction to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Manually update Google Sheets data.
   """
@@ -7285,7 +7710,7 @@ type Mutation {
     The identifier of the organization invite to be re-send.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Archives a roadmap.
   """
@@ -7294,7 +7719,7 @@ type Mutation {
     The identifier of the roadmap to archive.
     """
     id: String!
-  ): ArchivePayload!
+  ): RoadmapArchivePayload!
   """
   Creates a new roadmap.
   """
@@ -7312,7 +7737,7 @@ type Mutation {
     The identifier of the roadmap to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Creates a new roadmapToProject join.
   """
@@ -7330,7 +7755,7 @@ type Mutation {
     The identifier of the roadmapToProject to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates a roadmapToProject.
   """
@@ -7352,7 +7777,7 @@ type Mutation {
     The identifier of the roadmap to unarchive.
     """
     id: String!
-  ): ArchivePayload!
+  ): RoadmapArchivePayload!
   """
   Updates a roadmap.
   """
@@ -7405,7 +7830,7 @@ type Mutation {
     The identifier of the team to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Deletes a previously used team key.
   """
@@ -7414,7 +7839,7 @@ type Mutation {
     The identifier of the team key to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Creates a new team membership.
   """
@@ -7432,7 +7857,7 @@ type Mutation {
     The identifier of the team membership to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates a team membership.
   """
@@ -7476,7 +7901,7 @@ type Mutation {
     The identifier of the template to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates an existing template.
   """
@@ -7667,7 +8092,7 @@ type Mutation {
     The identifier of the ViewPreferences to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates an existing ViewPreferences object.
   """
@@ -7698,7 +8123,7 @@ type Mutation {
     The identifier of the Webhook to delete.
     """
     id: String!
-  ): ArchivePayload!
+  ): DeletePayload!
   """
   Updates an existing Webhook.
   """
@@ -7720,7 +8145,7 @@ type Mutation {
     The identifier of the state to archive.
     """
     id: String!
-  ): ArchivePayload!
+  ): WorkflowStateArchivePayload!
   """
   Creates a new state, adding it to the workflow of a team.
   """
@@ -7809,6 +8234,24 @@ interface Notification implements Entity & Node {
   user: User!
 }
 
+"""
+A generic payload return from entity archive mutations.
+"""
+type NotificationArchivePayload implements ArchivePayload {
+  """
+  The archived/unarchived entity. Null if entity was deleted.
+  """
+  entity: Notification
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 type NotificationConnection {
   edges: [NotificationEdge!]!
   nodes: [Notification!]!
@@ -7847,25 +8290,41 @@ interface NotificationSubscription implements Entity & Node {
   """
   archivedAt: DateTime
   """
+  The type of view to which the notification subscription context is associated with.
+  """
+  contextViewType: ContextViewType
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  """
+  The contextual custom view associated with the notification subscription.
+  """
+  customView: CustomView
+  """
+  The contextual cycle view associated with the notification subscription.
+  """
+  cycle: Cycle
   """
   The unique identifier of the entity.
   """
   id: ID!
   """
-  Subscribed project.
+  The contextual label view associated with the notification subscription.
+  """
+  label: IssueLabel
+  """
+  The contextual project view associated with the notification subscription.
   """
   project: Project
   """
-  Subscribed team.
+  The user that subscribed to receive notifications.
+  """
+  subscriber: User!
+  """
+  The team associated with the notification subscription.
   """
   team: Team
-  """
-  The type of the subscription.
-  """
-  type: String!
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -7873,9 +8332,13 @@ interface NotificationSubscription implements Entity & Node {
   """
   updatedAt: DateTime!
   """
-  The user associated with notification subscriptions.
+  The user view associated with the notification subscription.
   """
-  user: User!
+  user: User
+  """
+  The type of user view to which the notification subscription context is associated with.
+  """
+  userContextViewType: UserContextViewType
 }
 
 type NotificationSubscriptionConnection {
@@ -7886,25 +8349,41 @@ type NotificationSubscriptionConnection {
 
 input NotificationSubscriptionCreateInput {
   """
+  The type of view to which the notification subscription context is associated with.
+  """
+  contextViewType: ContextViewType
+  """
+  The identifier of the custom view to subscribe to.
+  """
+  customViewId: String
+  """
+  The identifier of the cycle to subscribe to.
+  """
+  cycleId: String
+  """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  The identifier of the label to subscribe to.
+  """
+  labelId: String
+  """
+  The types of notifications of the subscription.
+  """
+  notificationSubscriptionTypes: [String!]
   """
   The identifier of the project to subscribe to.
   """
   projectId: String
   """
-  The type of the project subscription.
-  """
-  projectNotificationSubscriptionType: ProjectNotificationSubscriptionType
-  """
   The identifier of the team to subscribe to.
   """
   teamId: String
   """
-  The types of notifications of the team subscription.
+  The type of user view to which the notification subscription context is associated with.
   """
-  teamNotificationSubscriptionTypes: [String!]
+  userContextViewType: UserContextViewType
 }
 
 type NotificationSubscriptionEdge {
@@ -7932,13 +8411,9 @@ type NotificationSubscriptionPayload {
 
 input NotificationSubscriptionUpdateInput {
   """
-  The type of the project subscription.
+  The types of notifications of the subscription.
   """
-  projectNotificationSubscriptionType: ProjectNotificationSubscriptionType
-  """
-  The types of notifications of the team subscription.
-  """
-  teamNotificationSubscriptionTypes: [String!]
+  notificationSubscriptionTypes: [String!]
 }
 
 input NotificationUpdateInput {
@@ -8310,6 +8785,10 @@ Project filtering options.
 """
 input NullableProjectFilter {
   """
+  Filters that the project's team must satisfy.
+  """
+  accessibleTeams: TeamCollectionFilter
+  """
   Compound filters, all of which need to be matched by the project.
   """
   and: [NullableProjectFilter!]
@@ -8505,6 +8984,52 @@ input NullableStringComparator {
   Starts with case insensitive constraint. Matches any values that start with the given string.
   """
   startsWithIgnoreCase: String
+}
+
+"""
+Team filtering options.
+"""
+input NullableTeamFilter {
+  """
+  Compound filters, all of which need to be matched by the team.
+  """
+  and: [NullableTeamFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the team description.
+  """
+  description: NullableStringComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filters that the teams issues must satisfy.
+  """
+  issues: IssueCollectionFilter
+  """
+  Comparator for the team key.
+  """
+  key: StringComparator
+  """
+  Comparator for the team name.
+  """
+  name: StringComparator
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the team.
+  """
+  or: [NullableTeamFilter!]
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 input NullableTimelessDateComparator {
@@ -9496,6 +10021,48 @@ type PageInfo {
   startCursor: String
 }
 
+input PagerDutyInput {
+  """
+  The mapping of PagerDuty schedule id to names.
+  """
+  scheduleMapping: [PagerDutyScheduleMappingInput!]!
+}
+
+"""
+Tuple for mapping PagerDuty schedule id to names.
+"""
+type PagerDutyScheduleMapping {
+  """
+  The PagerDuty schedule id.
+  """
+  scheduleId: String!
+  """
+  The PagerDuty schedule name.
+  """
+  scheduleName: String!
+}
+
+input PagerDutyScheduleMappingInput {
+  """
+  The PagerDuty schedule id.
+  """
+  scheduleId: String!
+  """
+  The PagerDuty schedule name.
+  """
+  scheduleName: String!
+}
+
+"""
+PagerDuty specific settings.
+"""
+type PagerDutySettings {
+  """
+  The mapping of PagerDuty schedule id to names.
+  """
+  scheduleMapping: [PagerDutyScheduleMapping!]!
+}
+
 """
 By which field should the pagination order by
 """
@@ -9924,9 +10491,31 @@ type Project implements Node {
 }
 
 """
+A generic payload return from entity archive mutations.
+"""
+type ProjectArchivePayload implements ArchivePayload {
+  """
+  The archived/unarchived entity. Null if entity was deleted.
+  """
+  entity: Project
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
 Project filtering options.
 """
 input ProjectCollectionFilter {
+  """
+  Filters that the project's team must satisfy.
+  """
+  accessibleTeams: TeamCollectionFilter
   """
   Compound filters, all of which need to be matched by the project.
   """
@@ -10098,6 +10687,10 @@ type ProjectEdge {
 Project filtering options.
 """
 input ProjectFilter {
+  """
+  Filters that the project's team must satisfy.
+  """
+  accessibleTeams: TeamCollectionFilter
   """
   Compound filters, all of which need to be matched by the project.
   """
@@ -10567,29 +11160,45 @@ type ProjectNotificationSubscription implements Entity & Node & NotificationSubs
   """
   archivedAt: DateTime
   """
+  The type of view to which the notification subscription context is associated with.
+  """
+  contextViewType: ContextViewType
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  """
+  The contextual custom view associated with the notification subscription.
+  """
+  customView: CustomView
+  """
+  The contextual cycle view associated with the notification subscription.
+  """
+  cycle: Cycle
   """
   The unique identifier of the entity.
   """
   id: ID!
   """
+  The contextual label view associated with the notification subscription.
+  """
+  label: IssueLabel
+  """
+  The type of subscription.
+  """
+  notificationSubscriptionTypes: [String!]
+  """
   The project subscribed to.
   """
   project: Project!
   """
-  The type of the project subscription.
+  The user that subscribed to receive notifications.
   """
-  projectNotificationSubscriptionType: ProjectNotificationSubscriptionType!
+  subscriber: User!
   """
-  Subscribed team.
+  The team associated with the notification subscription.
   """
   team: Team
-  """
-  The type of the subscription.
-  """
-  type: String!
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -10597,18 +11206,13 @@ type ProjectNotificationSubscription implements Entity & Node & NotificationSubs
   """
   updatedAt: DateTime!
   """
-  The user associated with notification subscriptions.
+  The user view associated with the notification subscription.
   """
-  user: User!
-}
-
-"""
-The type of a project notification subscription.
-"""
-enum ProjectNotificationSubscriptionType {
-  all
-  custom
-  importantOnly
+  user: User
+  """
+  The type of user view to which the notification subscription context is associated with.
+  """
+  userContextViewType: UserContextViewType
 }
 
 type ProjectPayload {
@@ -11827,6 +12431,15 @@ type Query {
     orderBy: PaginationOrderBy
   ): DocumentConnection!
   """
+  Returns embed info for any url
+  """
+  embedInfo(
+    """
+    The URL to lookup embed info for
+    """
+    url: String!
+  ): EmbedPayload!
+  """
   A specific emoji.
   """
   emoji(
@@ -12156,7 +12769,7 @@ type Query {
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
   """
-  [ALPHA] Search issues. This query is experimental and is subject to change without notice.
+  [DEPRECATED] Search issues. This endpoint is deprecated and will be removed in the future – use `searchIssues` instead.
   """
   issueSearch(
     """
@@ -12778,6 +13391,15 @@ type Query {
   """
   templates: [Template!]!
   """
+  Returns all templates that are associated with the integration type.
+  """
+  templatesForIntegration(
+    """
+    The type of integration for which to return associated templates
+    """
+    integrationType: String!
+  ): [Template!]!
+  """
   One specific user.
   """
   user(
@@ -13148,6 +13770,24 @@ type Roadmap implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+}
+
+"""
+A generic payload return from entity archive mutations.
+"""
+type RoadmapArchivePayload implements ArchivePayload {
+  """
+  The archived/unarchived entity. Null if entity was deleted.
+  """
+  entity: Roadmap
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 """
@@ -13872,6 +14512,15 @@ type Team implements Node {
   """
   inviteHash: String!
   """
+  Number of issues in the team.
+  """
+  issueCount(
+    """
+    Include archived issues in the count.
+    """
+    includeArchived: Boolean = false
+  ): Int!
+  """
   Whether to allow zeros in issues estimates.
   """
   issueEstimationAllowZero: Boolean!
@@ -14219,6 +14868,44 @@ type Team implements Node {
   ): WebhookConnection!
 }
 
+"""
+Roadmap collection filtering options.
+"""
+input TeamCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the roadmap.
+  """
+  and: [TeamCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that needs to be matched by all roadmaps.
+  """
+  every: TeamFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Compound filters, one of which need to be matched by the roadmap.
+  """
+  or: [TeamCollectionFilter!]
+  """
+  Filters that needs to be matched by some roadmaps.
+  """
+  some: TeamFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 type TeamConnection {
   edges: [TeamEdge!]!
   nodes: [Team!]!
@@ -14518,25 +15205,45 @@ type TeamNotificationSubscription implements Entity & Node & NotificationSubscri
   """
   archivedAt: DateTime
   """
+  The type of view to which the notification subscription context is associated with.
+  """
+  contextViewType: ContextViewType
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  """
+  The contextual custom view associated with the notification subscription.
+  """
+  customView: CustomView
+  """
+  The contextual cycle view associated with the notification subscription.
+  """
+  cycle: Cycle
   """
   The unique identifier of the entity.
   """
   id: ID!
   """
-  Subscribed project.
+  The contextual label view associated with the notification subscription.
+  """
+  label: IssueLabel
+  """
+  The type of subscription.
+  """
+  notificationSubscriptionTypes: [String!]
+  """
+  The contextual project view associated with the notification subscription.
   """
   project: Project
+  """
+  The user that subscribed to receive notifications.
+  """
+  subscriber: User!
   """
   The team subscribed to.
   """
   team: Team!
-  """
-  The type of the subscription.
-  """
-  type: String!
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -14544,9 +15251,13 @@ type TeamNotificationSubscription implements Entity & Node & NotificationSubscri
   """
   updatedAt: DateTime!
   """
-  The user associated with notification subscriptions.
+  The user view associated with the notification subscription.
   """
-  user: User!
+  user: User
+  """
+  The type of user view to which the notification subscription context is associated with.
+  """
+  userContextViewType: UserContextViewType
 }
 
 type TeamPayload {
@@ -15536,6 +16247,10 @@ type UserConnection {
   pageInfo: PageInfo!
 }
 
+enum UserContextViewType {
+  assigned
+}
+
 type UserEdge {
   """
   Used in `before` and `after` args
@@ -15616,6 +16331,7 @@ enum UserFlagType {
   emptyBacklogDismissed
   emptyCustomViewsDismissed
   emptyMyIssuesDismissed
+  figmaPluginBannerDismissed
   figmaPromptDismissed
   importBannerDismissed
   insightsHelpDismissed
@@ -15627,6 +16343,7 @@ enum UserFlagType {
   migrateThemePreference
   milestoneOnboardingIsSeenAndDismissed
   projectBacklogWelcomeDismissed
+  projectBoardOnboardingIsSeenAndDismissed
   projectUpdatesWelcomeDismissed
   projectWelcomeDismissed
   rewindBannerDismissed
@@ -15634,6 +16351,7 @@ enum UserFlagType {
   teamsPageIntroductionDismissed
   threadedCommentsNudgeIsSeen
   triageWelcomeDismissed
+  updatedSlackThreadSyncIntegration
 }
 
 """
@@ -15772,6 +16490,10 @@ input UserSettingsUpdateInput {
   The types of emails the user has unsubscribed from.
   """
   unsubscribedFrom: [String!]
+  """
+  [Internal] The user's usage warning history.
+  """
+  usageWarningHistory: JSONObject
 }
 
 """
@@ -15903,6 +16625,7 @@ enum ViewType {
   completedCycle
   customRoadmap
   customView
+  customViews
   cycle
   inbox
   label
@@ -16163,6 +16886,10 @@ type WorkflowDefinition implements Node {
   """
   conditions: JSONObject!
   """
+  The type of view to which this workflow's context is associated with.
+  """
+  contextViewType: ContextViewType
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -16170,6 +16897,14 @@ type WorkflowDefinition implements Node {
   The user who created the workflow.
   """
   creator: User!
+  """
+  The context custom view associated with the workflow.
+  """
+  customView: CustomView
+  """
+  The contextual cycle view associated with the workflow.
+  """
+  cycle: Cycle
   """
   The description of the workflow.
   """
@@ -16184,9 +16919,17 @@ type WorkflowDefinition implements Node {
   """
   id: ID!
   """
+  The contextual label view associated with the workflow.
+  """
+  label: IssueLabel
+  """
   The name of the workflow.
   """
   name: String!
+  """
+  The contextual project view associated with the workflow.
+  """
+  project: Project
   """
   The sort order of the workflow definition within its siblings.
   """
@@ -16213,6 +16956,14 @@ type WorkflowDefinition implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  The contextual user view associated with the workflow.
+  """
+  user: User
+  """
+  The type of user view to which this workflow's context is associated with.
+  """
+  userContextViewType: UserContextViewType
 }
 
 type WorkflowDefinitionConnection {
@@ -16308,6 +17059,24 @@ type WorkflowState implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+}
+
+"""
+A generic payload return from entity archive mutations.
+"""
+type WorkflowStateArchivePayload implements ArchivePayload {
+  """
+  The archived/unarchived entity. Null if entity was deleted.
+  """
+  entity: WorkflowState
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 type WorkflowStateConnection {
@@ -16455,6 +17224,7 @@ enum WorkflowTriggerType {
 enum WorkflowType {
   custom
   sla
+  viewSubscription
 }
 
 """
