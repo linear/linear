@@ -37,7 +37,7 @@
     "@changesets/cli": "^2.14.1",
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
-    "@graphql-codegen/cli": "^1.19.1",
+    "@graphql-codegen/cli": "^4.0.1",
     "@octokit/core": "^3.2.1",
     "@rollup/plugin-typescript": "^8.1.1",
     "@types/express": "^4.17.8",
