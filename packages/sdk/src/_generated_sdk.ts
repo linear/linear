@@ -20,9 +20,6 @@ export class Request {
   }
 }
 
-/** Fetch return type wrapped in a promise */
-export type LinearFetch<Response> = Promise<Response>;
-
 /**
  * Variables required for pagination
  * Follows the Relay spec
@@ -71,11 +68,11 @@ export class LinearConnection<Node> extends Request {
  * @param pageInfo - The pagination information to initialize the connection
  */
 export class Connection<Node> extends LinearConnection<Node> {
-  private _fetch: (variables?: LinearConnectionVariables) => LinearFetch<LinearConnection<Node> | undefined>;
+  private _fetch: (variables?: LinearConnectionVariables) => Promise<LinearConnection<Node> | undefined>;
 
   public constructor(
     request: LinearRequest,
-    fetch: (variables?: LinearConnectionVariables) => LinearFetch<LinearConnection<Node> | undefined>,
+    fetch: (variables?: LinearConnectionVariables) => Promise<LinearConnection<Node> | undefined>,
     nodes: Node[],
     pageInfo: PageInfo
   ) {
@@ -212,7 +209,7 @@ export class ApiKey extends Request {
 export class ApiKeyConnection extends Connection<ApiKey> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ApiKey> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<ApiKey> | undefined>,
     data: L.ApiKeyConnectionFragment
   ) {
     super(
@@ -373,11 +370,11 @@ export class Attachment extends Request {
   /** Location of the attachment which is also used as an identifier. */
   public url: string;
   /** The creator of the attachment. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The issue this attachment belongs to. */
-  public get issue(): LinearFetch<Issue> | undefined {
+  public get issue(): Promise<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
   }
 
@@ -419,7 +416,7 @@ export class AttachmentArchivePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The archived/unarchived entity. Null if entity was deleted. */
-  public get entity(): LinearFetch<Attachment> | undefined {
+  public get entity(): Promise<Attachment> | undefined {
     return this._entity?.id ? new AttachmentQuery(this._request).fetch(this._entity?.id) : undefined;
   }
 }
@@ -433,7 +430,7 @@ export class AttachmentArchivePayload extends Request {
 export class AttachmentConnection extends Connection<Attachment> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Attachment> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Attachment> | undefined>,
     data: L.AttachmentConnectionFragment
   ) {
     super(
@@ -465,7 +462,7 @@ export class AttachmentPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The issue attachment that was created. */
-  public get attachment(): LinearFetch<Attachment> | undefined {
+  public get attachment(): Promise<Attachment> | undefined {
     return new AttachmentQuery(this._request).fetch(this._attachment.id);
   }
 }
@@ -517,11 +514,11 @@ export class AuditEntry extends Request {
    */
   public updatedAt: Date;
   /** The user that caused the audit entry to be created. */
-  public get actor(): LinearFetch<User> | undefined {
+  public get actor(): Promise<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
   /** The organization the audit log belongs to. */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -535,7 +532,7 @@ export class AuditEntry extends Request {
 export class AuditEntryConnection extends Connection<AuditEntry> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<AuditEntry> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<AuditEntry> | undefined>,
     data: L.AuditEntryConnectionFragment
   ) {
     super(
@@ -649,15 +646,15 @@ export class Comment extends Request {
   /** Comment's URL. */
   public url: string;
   /** The issue that the comment is associated with. */
-  public get issue(): LinearFetch<Issue> | undefined {
+  public get issue(): Promise<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
   }
   /** The parent comment under which the current comment is nested. */
-  public get parent(): LinearFetch<Comment> | undefined {
+  public get parent(): Promise<Comment> | undefined {
     return this._parent?.id ? new CommentQuery(this._request).fetch(this._parent?.id) : undefined;
   }
   /** The user who wrote the comment. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** The children of the comment. */
@@ -687,7 +684,7 @@ export class Comment extends Request {
 export class CommentConnection extends Connection<Comment> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Comment> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Comment> | undefined>,
     data: L.CommentConnectionFragment
   ) {
     super(
@@ -719,7 +716,7 @@ export class CommentPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The comment that was created or updated. */
-  public get comment(): LinearFetch<Comment> | undefined {
+  public get comment(): Promise<Comment> | undefined {
     return new CommentQuery(this._request).fetch(this._comment.id);
   }
 }
@@ -769,11 +766,11 @@ export class Company extends Request {
   /** Company website URL. */
   public websiteUrl?: string;
   /** The user who added the company. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The organization of the customer. */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -787,7 +784,7 @@ export class Company extends Request {
 export class CompanyConnection extends Connection<Company> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Company> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Company> | undefined>,
     data: L.CompanyConnectionFragment
   ) {
     super(
@@ -842,10 +839,10 @@ export class CreateOrJoinOrganizationResponse extends Request {
     this._user = data.user;
   }
 
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
 }
@@ -905,19 +902,19 @@ export class CustomView extends Request {
    */
   public updatedAt: Date;
   /** The user who created the custom view. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The organization of the custom view. */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
   /** [Deprecated] The user who owns the custom view. */
-  public get owner(): LinearFetch<User> | undefined {
+  public get owner(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._owner.id);
   }
   /** The team associated with the custom view. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 
@@ -944,7 +941,7 @@ export class CustomView extends Request {
 export class CustomViewConnection extends Connection<CustomView> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<CustomView> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<CustomView> | undefined>,
     data: L.CustomViewConnectionFragment
   ) {
     super(
@@ -1001,31 +998,31 @@ export class CustomViewNotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The custom view subscribed to. */
-  public get customView(): LinearFetch<CustomView> | undefined {
+  public get customView(): Promise<CustomView> | undefined {
     return new CustomViewQuery(this._request).fetch(this._customView.id);
   }
   /** The contextual cycle view associated with the notification subscription. */
-  public get cycle(): LinearFetch<Cycle> | undefined {
+  public get cycle(): Promise<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** The contextual label view associated with the notification subscription. */
-  public get label(): LinearFetch<IssueLabel> | undefined {
+  public get label(): Promise<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
   /** The contextual project view associated with the notification subscription. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** The user that subscribed to receive notifications. */
-  public get subscriber(): LinearFetch<User> | undefined {
+  public get subscriber(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
   /** The team associated with the notification subscription. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user view associated with the notification subscription. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
@@ -1050,7 +1047,7 @@ export class CustomViewPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The custom view that was created or updated. */
-  public get customView(): LinearFetch<CustomView> | undefined {
+  public get customView(): Promise<CustomView> | undefined {
     return new CustomViewQuery(this._request).fetch(this._customView.id);
   }
 }
@@ -1145,7 +1142,7 @@ export class Cycle extends Request {
    */
   public updatedAt: Date;
   /** The team that the cycle is associated with. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
   /** Issues associated with the cycle. */
@@ -1190,7 +1187,7 @@ export class CycleArchivePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The archived/unarchived entity. Null if entity was deleted. */
-  public get entity(): LinearFetch<Cycle> | undefined {
+  public get entity(): Promise<Cycle> | undefined {
     return this._entity?.id ? new CycleQuery(this._request).fetch(this._entity?.id) : undefined;
   }
 }
@@ -1204,7 +1201,7 @@ export class CycleArchivePayload extends Request {
 export class CycleConnection extends Connection<Cycle> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Cycle> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Cycle> | undefined>,
     data: L.CycleConnectionFragment
   ) {
     super(
@@ -1261,31 +1258,31 @@ export class CycleNotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The contextual custom view associated with the notification subscription. */
-  public get customView(): LinearFetch<CustomView> | undefined {
+  public get customView(): Promise<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
   /** The cycle subscribed to. */
-  public get cycle(): LinearFetch<Cycle> | undefined {
+  public get cycle(): Promise<Cycle> | undefined {
     return new CycleQuery(this._request).fetch(this._cycle.id);
   }
   /** The contextual label view associated with the notification subscription. */
-  public get label(): LinearFetch<IssueLabel> | undefined {
+  public get label(): Promise<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
   /** The contextual project view associated with the notification subscription. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** The user that subscribed to receive notifications. */
-  public get subscriber(): LinearFetch<User> | undefined {
+  public get subscriber(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
   /** The team associated with the notification subscription. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user view associated with the notification subscription. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
@@ -1310,7 +1307,7 @@ export class CyclePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The Cycle that was created or updated. */
-  public get cycle(): LinearFetch<Cycle> | undefined {
+  public get cycle(): Promise<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
 }
@@ -1388,15 +1385,15 @@ export class Document extends Request {
    */
   public updatedAt: Date;
   /** The user who created the document. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The project that the document is associated with. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
   /** The user who last updated the document. */
-  public get updatedBy(): LinearFetch<User> | undefined {
+  public get updatedBy(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._updatedBy.id);
   }
 
@@ -1423,7 +1420,7 @@ export class Document extends Request {
 export class DocumentConnection extends Connection<Document> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Document> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Document> | undefined>,
     data: L.DocumentConnectionFragment
   ) {
     super(
@@ -1471,7 +1468,7 @@ export class DocumentContent extends Request {
    */
   public updatedAt: Date;
   /** The issue that the document is associated with. */
-  public get issue(): LinearFetch<Issue> | undefined {
+  public get issue(): Promise<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
@@ -1496,7 +1493,7 @@ export class DocumentPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The document that was created or updated. */
-  public get document(): LinearFetch<Document> | undefined {
+  public get document(): Promise<Document> | undefined {
     return new DocumentQuery(this._request).fetch(this._document.id);
   }
 }
@@ -1578,15 +1575,15 @@ export class DocumentSearchResult extends Request {
    */
   public updatedAt: Date;
   /** The user who created the document. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The project that the document is associated with. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
   /** The user who last updated the document. */
-  public get updatedBy(): LinearFetch<User> | undefined {
+  public get updatedBy(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._updatedBy.id);
   }
 }
@@ -1600,7 +1597,7 @@ export class DocumentSearchResult extends Request {
 export class DocumentSearchResultConnection extends Connection<DocumentSearchResult> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<DocumentSearchResult> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<DocumentSearchResult> | undefined>,
     data: L.DocumentSearchResultConnectionFragment
   ) {
     super(
@@ -1750,11 +1747,11 @@ export class Emoji extends Request {
   /** The emoji image URL. */
   public url: string;
   /** The user who created the emoji. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The organization that the emoji belongs to. */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
 
@@ -1777,7 +1774,7 @@ export class Emoji extends Request {
 export class EmojiConnection extends Connection<Emoji> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Emoji> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Emoji> | undefined>,
     data: L.EmojiConnectionFragment
   ) {
     super(
@@ -1809,7 +1806,7 @@ export class EmojiPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The emoji that was created. */
-  public get emoji(): LinearFetch<Emoji> | undefined {
+  public get emoji(): Promise<Emoji> | undefined {
     return new EmojiQuery(this._request).fetch(this._emoji.id);
   }
 }
@@ -1921,51 +1918,51 @@ export class Favorite extends Request {
    */
   public updatedAt: Date;
   /** The favorited custom view. */
-  public get customView(): LinearFetch<CustomView> | undefined {
+  public get customView(): Promise<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
   /** The favorited cycle. */
-  public get cycle(): LinearFetch<Cycle> | undefined {
+  public get cycle(): Promise<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** The favorited document. */
-  public get document(): LinearFetch<Document> | undefined {
+  public get document(): Promise<Document> | undefined {
     return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
   }
   /** The favorited issue. */
-  public get issue(): LinearFetch<Issue> | undefined {
+  public get issue(): Promise<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The favorited label. */
-  public get label(): LinearFetch<IssueLabel> | undefined {
+  public get label(): Promise<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
   /** The owner of the favorite. */
-  public get owner(): LinearFetch<User> | undefined {
+  public get owner(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._owner.id);
   }
   /** The parent folder of the favorite. */
-  public get parent(): LinearFetch<Favorite> | undefined {
+  public get parent(): Promise<Favorite> | undefined {
     return this._parent?.id ? new FavoriteQuery(this._request).fetch(this._parent?.id) : undefined;
   }
   /** The team of the favorited predefined view. */
-  public get predefinedViewTeam(): LinearFetch<Team> | undefined {
+  public get predefinedViewTeam(): Promise<Team> | undefined {
     return this._predefinedViewTeam?.id ? new TeamQuery(this._request).fetch(this._predefinedViewTeam?.id) : undefined;
   }
   /** The favorited project. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** The favorited team of the project. */
-  public get projectTeam(): LinearFetch<Team> | undefined {
+  public get projectTeam(): Promise<Team> | undefined {
     return this._projectTeam?.id ? new TeamQuery(this._request).fetch(this._projectTeam?.id) : undefined;
   }
   /** The favorited roadmap. */
-  public get roadmap(): LinearFetch<Roadmap> | undefined {
+  public get roadmap(): Promise<Roadmap> | undefined {
     return this._roadmap?.id ? new RoadmapQuery(this._request).fetch(this._roadmap?.id) : undefined;
   }
   /** The favorited user. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
   /** Children of the favorite. Only applies to favorites of type folder. */
@@ -1995,7 +1992,7 @@ export class Favorite extends Request {
 export class FavoriteConnection extends Connection<Favorite> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Favorite> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Favorite> | undefined>,
     data: L.FavoriteConnectionFragment
   ) {
     super(
@@ -2027,7 +2024,7 @@ export class FavoritePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The object that was added as a favorite. */
-  public get favorite(): LinearFetch<Favorite> | undefined {
+  public get favorite(): Promise<Favorite> | undefined {
     return new FavoriteQuery(this._request).fetch(this._favorite.id);
   }
 }
@@ -2112,11 +2109,11 @@ export class FirstResponderSchedule extends Request {
    */
   public updatedAt: Date;
   /** The integration used for scheduling. */
-  public get integration(): LinearFetch<Integration> | undefined {
+  public get integration(): Promise<Integration> | undefined {
     return new IntegrationQuery(this._request).fetch(this._integration.id);
   }
   /** The team to which the schedule belongs to. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
 }
@@ -2132,7 +2129,7 @@ export class FirstResponderScheduleConnection extends Connection<FirstResponderS
     request: LinearRequest,
     fetch: (
       connection?: LinearConnectionVariables
-    ) => LinearFetch<LinearConnection<FirstResponderSchedule> | undefined>,
+    ) => Promise<LinearConnection<FirstResponderSchedule> | undefined>,
     data: L.FirstResponderScheduleConnectionFragment
   ) {
     super(
@@ -2212,7 +2209,7 @@ export class GitHubCommitIntegrationPayload extends Request {
   /** The webhook secret to provide to GitHub. */
   public webhookSecret: string;
   /** The integration that was created or updated. */
-  public get integration(): LinearFetch<Integration> | undefined {
+  public get integration(): Promise<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
 }
@@ -2374,15 +2371,15 @@ export class Integration extends Request {
    */
   public updatedAt: Date;
   /** The user that added the integration. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The organization that the integration is associated with. */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
   /** The team that the integration is associated with. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 
@@ -2401,7 +2398,7 @@ export class Integration extends Request {
 export class IntegrationConnection extends Connection<Integration> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Integration> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Integration> | undefined>,
     data: L.IntegrationConnectionFragment
   ) {
     super(
@@ -2433,7 +2430,7 @@ export class IntegrationPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The integration that was created or updated. */
-  public get integration(): LinearFetch<Integration> | undefined {
+  public get integration(): Promise<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
 }
@@ -2523,11 +2520,11 @@ export class IntegrationTemplate extends Request {
    */
   public updatedAt: Date;
   /** The integration that the template is associated with. */
-  public get integration(): LinearFetch<Integration> | undefined {
+  public get integration(): Promise<Integration> | undefined {
     return new IntegrationQuery(this._request).fetch(this._integration.id);
   }
   /** The template that the integration is associated with. */
-  public get template(): LinearFetch<Template> | undefined {
+  public get template(): Promise<Template> | undefined {
     return new TemplateQuery(this._request).fetch(this._template.id);
   }
 
@@ -2550,7 +2547,7 @@ export class IntegrationTemplate extends Request {
 export class IntegrationTemplateConnection extends Connection<IntegrationTemplate> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IntegrationTemplate> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<IntegrationTemplate> | undefined>,
     data: L.IntegrationTemplateConnectionFragment
   ) {
     super(
@@ -2582,7 +2579,7 @@ export class IntegrationTemplatePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The IntegrationTemplate that was created or updated. */
-  public get integrationTemplate(): LinearFetch<IntegrationTemplate> | undefined {
+  public get integrationTemplate(): Promise<IntegrationTemplate> | undefined {
     return new IntegrationTemplateQuery(this._request).fetch(this._integrationTemplate.id);
   }
 }
@@ -2649,11 +2646,11 @@ export class IntegrationsSettings extends Request {
    */
   public updatedAt: Date;
   /** Project which those settings apply to. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** Team which those settings apply to. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 
@@ -2676,7 +2673,7 @@ export class IntegrationsSettings extends Request {
 export class IntegrationsSettingsConnection extends Connection<IntegrationsSettings> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IntegrationsSettings> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<IntegrationsSettings> | undefined>,
     data: L.IntegrationsSettingsConnectionFragment
   ) {
     super(
@@ -2708,7 +2705,7 @@ export class IntegrationsSettingsPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The settings that were created or updated. */
-  public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
+  public get integrationsSettings(): Promise<IntegrationsSettings> | undefined {
     return new IntegrationsSettingsQuery(this._request).fetch(this._integrationsSettings.id);
   }
 }
@@ -2860,45 +2857,45 @@ export class Issue extends Request {
   /** Issue URL. */
   public url: string;
   /** The user to whom the issue is assigned to. */
-  public get assignee(): LinearFetch<User> | undefined {
+  public get assignee(): Promise<User> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
   }
   /** The user who created the issue. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The cycle that the issue is associated with. */
-  public get cycle(): LinearFetch<Cycle> | undefined {
+  public get cycle(): Promise<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** The users favorite associated with this issue. */
-  public get favorite(): LinearFetch<Favorite> | undefined {
+  public get favorite(): Promise<Favorite> | undefined {
     return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
   }
   /** The parent of the issue. */
-  public get parent(): LinearFetch<Issue> | undefined {
+  public get parent(): Promise<Issue> | undefined {
     return this._parent?.id ? new IssueQuery(this._request).fetch(this._parent?.id) : undefined;
   }
   /** The project that the issue is associated with. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** The projectMilestone that the issue is associated with. */
-  public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
+  public get projectMilestone(): Promise<ProjectMilestone> | undefined {
     return this._projectMilestone?.id
       ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
       : undefined;
   }
   /** The user who snoozed the issue. */
-  public get snoozedBy(): LinearFetch<User> | undefined {
+  public get snoozedBy(): Promise<User> | undefined {
     return this._snoozedBy?.id ? new UserQuery(this._request).fetch(this._snoozedBy?.id) : undefined;
   }
   /** The workflow state that the issue is associated with. */
-  public get state(): LinearFetch<WorkflowState> | undefined {
+  public get state(): Promise<WorkflowState> | undefined {
     return new WorkflowStateQuery(this._request).fetch(this._state.id);
   }
   /** The team that the issue is associated with. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
   /** Attachments associated with the issue. */
@@ -2975,7 +2972,7 @@ export class IssueArchivePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The archived/unarchived entity. Null if entity was deleted. */
-  public get entity(): LinearFetch<Issue> | undefined {
+  public get entity(): Promise<Issue> | undefined {
     return this._entity?.id ? new IssueQuery(this._request).fetch(this._entity?.id) : undefined;
   }
 }
@@ -3010,7 +3007,7 @@ export class IssueBatchPayload extends Request {
 export class IssueConnection extends Connection<Issue> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Issue> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Issue> | undefined>,
     data: L.IssueConnectionFragment
   ) {
     super(
@@ -3195,69 +3192,69 @@ export class IssueHistory extends Request {
   /** The import record. */
   public issueImport?: IssueImport;
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
-  public get actor(): LinearFetch<User> | undefined {
+  public get actor(): Promise<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
   /** The linked attachment. */
-  public get attachment(): LinearFetch<Attachment> | undefined {
+  public get attachment(): Promise<Attachment> | undefined {
     return this._attachment?.id ? new AttachmentQuery(this._request).fetch(this._attachment?.id) : undefined;
   }
   /** The user from whom the issue was re-assigned from. */
-  public get fromAssignee(): LinearFetch<User> | undefined {
+  public get fromAssignee(): Promise<User> | undefined {
     return this._fromAssignee?.id ? new UserQuery(this._request).fetch(this._fromAssignee?.id) : undefined;
   }
   /** The previous cycle of the issue. */
-  public get fromCycle(): LinearFetch<Cycle> | undefined {
+  public get fromCycle(): Promise<Cycle> | undefined {
     return this._fromCycle?.id ? new CycleQuery(this._request).fetch(this._fromCycle?.id) : undefined;
   }
   /** The previous parent of the issue. */
-  public get fromParent(): LinearFetch<Issue> | undefined {
+  public get fromParent(): Promise<Issue> | undefined {
     return this._fromParent?.id ? new IssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
   }
   /** The previous project of the issue. */
-  public get fromProject(): LinearFetch<Project> | undefined {
+  public get fromProject(): Promise<Project> | undefined {
     return this._fromProject?.id ? new ProjectQuery(this._request).fetch(this._fromProject?.id) : undefined;
   }
   /** The previous workflow state of the issue. */
-  public get fromState(): LinearFetch<WorkflowState> | undefined {
+  public get fromState(): Promise<WorkflowState> | undefined {
     return this._fromState?.id ? new WorkflowStateQuery(this._request).fetch(this._fromState?.id) : undefined;
   }
   /** The team from which the issue was moved from. */
-  public get fromTeam(): LinearFetch<Team> | undefined {
+  public get fromTeam(): Promise<Team> | undefined {
     return this._fromTeam?.id ? new TeamQuery(this._request).fetch(this._fromTeam?.id) : undefined;
   }
   /** The issue that was changed. */
-  public get issue(): LinearFetch<Issue> | undefined {
+  public get issue(): Promise<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
   }
   /** The user to whom the issue was assigned to. */
-  public get toAssignee(): LinearFetch<User> | undefined {
+  public get toAssignee(): Promise<User> | undefined {
     return this._toAssignee?.id ? new UserQuery(this._request).fetch(this._toAssignee?.id) : undefined;
   }
   /** The new project created from the issue. */
-  public get toConvertedProject(): LinearFetch<Project> | undefined {
+  public get toConvertedProject(): Promise<Project> | undefined {
     return this._toConvertedProject?.id
       ? new ProjectQuery(this._request).fetch(this._toConvertedProject?.id)
       : undefined;
   }
   /** The new cycle of the issue. */
-  public get toCycle(): LinearFetch<Cycle> | undefined {
+  public get toCycle(): Promise<Cycle> | undefined {
     return this._toCycle?.id ? new CycleQuery(this._request).fetch(this._toCycle?.id) : undefined;
   }
   /** The new parent of the issue. */
-  public get toParent(): LinearFetch<Issue> | undefined {
+  public get toParent(): Promise<Issue> | undefined {
     return this._toParent?.id ? new IssueQuery(this._request).fetch(this._toParent?.id) : undefined;
   }
   /** The new project of the issue. */
-  public get toProject(): LinearFetch<Project> | undefined {
+  public get toProject(): Promise<Project> | undefined {
     return this._toProject?.id ? new ProjectQuery(this._request).fetch(this._toProject?.id) : undefined;
   }
   /** The new workflow state of the issue. */
-  public get toState(): LinearFetch<WorkflowState> | undefined {
+  public get toState(): Promise<WorkflowState> | undefined {
     return this._toState?.id ? new WorkflowStateQuery(this._request).fetch(this._toState?.id) : undefined;
   }
   /** The team to which the issue was moved to. */
-  public get toTeam(): LinearFetch<Team> | undefined {
+  public get toTeam(): Promise<Team> | undefined {
     return this._toTeam?.id ? new TeamQuery(this._request).fetch(this._toTeam?.id) : undefined;
   }
 }
@@ -3271,7 +3268,7 @@ export class IssueHistory extends Request {
 export class IssueHistoryConnection extends Connection<IssueHistory> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueHistory> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<IssueHistory> | undefined>,
     data: L.IssueHistoryConnectionFragment
   ) {
     super(
@@ -3447,18 +3444,18 @@ export class IssueLabel extends Request {
    */
   public updatedAt: Date;
   /** The user who created the label. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
   /** The parent label. */
-  public get parent(): LinearFetch<IssueLabel> | undefined {
+  public get parent(): Promise<IssueLabel> | undefined {
     return this._parent?.id ? new IssueLabelQuery(this._request).fetch(this._parent?.id) : undefined;
   }
   /** The team that the label is associated with. If null, the label is associated with the global workspace. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** Children of the label. */
@@ -3492,7 +3489,7 @@ export class IssueLabel extends Request {
 export class IssueLabelConnection extends Connection<IssueLabel> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueLabel> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<IssueLabel> | undefined>,
     data: L.IssueLabelConnectionFragment
   ) {
     super(
@@ -3524,7 +3521,7 @@ export class IssueLabelPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The label that was created or updated. */
-  public get issueLabel(): LinearFetch<IssueLabel> | undefined {
+  public get issueLabel(): Promise<IssueLabel> | undefined {
     return new IssueLabelQuery(this._request).fetch(this._issueLabel.id);
   }
 }
@@ -3588,23 +3585,23 @@ export class IssueNotification extends Request {
    */
   public updatedAt: Date;
   /** The user that caused the notification. */
-  public get actor(): LinearFetch<User> | undefined {
+  public get actor(): Promise<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
   /** The comment related to the notification. */
-  public get comment(): LinearFetch<Comment> | undefined {
+  public get comment(): Promise<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
   }
   /** The issue related to the notification. */
-  public get issue(): LinearFetch<Issue> | undefined {
+  public get issue(): Promise<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
   }
   /** The team related to the notification. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
   /** The user that received the notification. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
 }
@@ -3629,7 +3626,7 @@ export class IssuePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The issue that was created or updated. */
-  public get issue(): LinearFetch<Issue> | undefined {
+  public get issue(): Promise<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
 }
@@ -3687,11 +3684,11 @@ export class IssueRelation extends Request {
    */
   public updatedAt: Date;
   /** The issue whose relationship is being described. */
-  public get issue(): LinearFetch<Issue> | undefined {
+  public get issue(): Promise<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
   }
   /** The related issue. */
-  public get relatedIssue(): LinearFetch<Issue> | undefined {
+  public get relatedIssue(): Promise<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._relatedIssue.id);
   }
 
@@ -3718,7 +3715,7 @@ export class IssueRelation extends Request {
 export class IssueRelationConnection extends Connection<IssueRelation> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueRelation> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<IssueRelation> | undefined>,
     data: L.IssueRelationConnectionFragment
   ) {
     super(
@@ -3768,7 +3765,7 @@ export class IssueRelationPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The issue relation that was created or updated. */
-  public get issueRelation(): LinearFetch<IssueRelation> | undefined {
+  public get issueRelation(): Promise<IssueRelation> | undefined {
     return new IssueRelationQuery(this._request).fetch(this._issueRelation.id);
   }
 }
@@ -3918,45 +3915,45 @@ export class IssueSearchResult extends Request {
   /** Issue URL. */
   public url: string;
   /** The user to whom the issue is assigned to. */
-  public get assignee(): LinearFetch<User> | undefined {
+  public get assignee(): Promise<User> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
   }
   /** The user who created the issue. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The cycle that the issue is associated with. */
-  public get cycle(): LinearFetch<Cycle> | undefined {
+  public get cycle(): Promise<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** The users favorite associated with this issue. */
-  public get favorite(): LinearFetch<Favorite> | undefined {
+  public get favorite(): Promise<Favorite> | undefined {
     return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
   }
   /** The parent of the issue. */
-  public get parent(): LinearFetch<Issue> | undefined {
+  public get parent(): Promise<Issue> | undefined {
     return this._parent?.id ? new IssueQuery(this._request).fetch(this._parent?.id) : undefined;
   }
   /** The project that the issue is associated with. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** The projectMilestone that the issue is associated with. */
-  public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
+  public get projectMilestone(): Promise<ProjectMilestone> | undefined {
     return this._projectMilestone?.id
       ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
       : undefined;
   }
   /** The user who snoozed the issue. */
-  public get snoozedBy(): LinearFetch<User> | undefined {
+  public get snoozedBy(): Promise<User> | undefined {
     return this._snoozedBy?.id ? new UserQuery(this._request).fetch(this._snoozedBy?.id) : undefined;
   }
   /** The workflow state that the issue is associated with. */
-  public get state(): LinearFetch<WorkflowState> | undefined {
+  public get state(): Promise<WorkflowState> | undefined {
     return new WorkflowStateQuery(this._request).fetch(this._state.id);
   }
   /** The team that the issue is associated with. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
 }
@@ -3970,7 +3967,7 @@ export class IssueSearchResult extends Request {
 export class IssueSearchResultConnection extends Connection<IssueSearchResult> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueSearchResult> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<IssueSearchResult> | undefined>,
     data: L.IssueSearchResultConnectionFragment
   ) {
     super(
@@ -4086,31 +4083,31 @@ export class LabelNotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The contextual custom view associated with the notification subscription. */
-  public get customView(): LinearFetch<CustomView> | undefined {
+  public get customView(): Promise<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
   /** The contextual cycle view associated with the notification subscription. */
-  public get cycle(): LinearFetch<Cycle> | undefined {
+  public get cycle(): Promise<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** The label subscribed to. */
-  public get label(): LinearFetch<IssueLabel> | undefined {
+  public get label(): Promise<IssueLabel> | undefined {
     return new IssueLabelQuery(this._request).fetch(this._label.id);
   }
   /** The contextual project view associated with the notification subscription. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** The user that subscribed to receive notifications. */
-  public get subscriber(): LinearFetch<User> | undefined {
+  public get subscriber(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
   /** The team associated with the notification subscription. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user view associated with the notification subscription. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
@@ -4195,11 +4192,11 @@ export class Notification extends Request {
    */
   public updatedAt: Date;
   /** The user that caused the notification. */
-  public get actor(): LinearFetch<User> | undefined {
+  public get actor(): Promise<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
   /** The user that received the notification. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
 
@@ -4248,7 +4245,7 @@ export class NotificationConnection extends Connection<
     request: LinearRequest,
     fetch: (
       connection?: LinearConnectionVariables
-    ) => LinearFetch<
+    ) => Promise<
       | LinearConnection<IssueNotification | OauthClientApprovalNotification | ProjectNotification | Notification>
       | undefined
     >,
@@ -4335,31 +4332,31 @@ export class NotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The contextual custom view associated with the notification subscription. */
-  public get customView(): LinearFetch<CustomView> | undefined {
+  public get customView(): Promise<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
   /** The contextual cycle view associated with the notification subscription. */
-  public get cycle(): LinearFetch<Cycle> | undefined {
+  public get cycle(): Promise<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** The contextual label view associated with the notification subscription. */
-  public get label(): LinearFetch<IssueLabel> | undefined {
+  public get label(): Promise<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
   /** The contextual project view associated with the notification subscription. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** The user that subscribed to receive notifications. */
-  public get subscriber(): LinearFetch<User> | undefined {
+  public get subscriber(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
   /** The team associated with the notification subscription. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user view associated with the notification subscription. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 
@@ -4395,7 +4392,7 @@ export class NotificationSubscriptionConnection extends Connection<
     request: LinearRequest,
     fetch: (
       connection?: LinearConnectionVariables
-    ) => LinearFetch<
+    ) => Promise<
       | LinearConnection<
           | CustomViewNotificationSubscription
           | CycleNotificationSubscription
@@ -4538,11 +4535,11 @@ export class OauthClient extends Request {
   /** Webhook URL */
   public webhookUrl?: string;
   /** The user who created the OAuthClient. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The organization that the OAuthClient is associated with. */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -4646,11 +4643,11 @@ export class OauthClientApprovalNotification extends Request {
   /** The OAuth client approval request related to the notification. */
   public oauthClientApproval: OauthClientApproval;
   /** The user that caused the notification. */
-  public get actor(): LinearFetch<User> | undefined {
+  public get actor(): Promise<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
   /** The user that received the notification. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
 }
@@ -4664,7 +4661,7 @@ export class OauthClientApprovalNotification extends Request {
 export class OauthClientConnection extends Connection<OauthClient> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<OauthClient> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<OauthClient> | undefined>,
     data: L.OauthClientConnectionFragment
   ) {
     super(
@@ -4859,7 +4856,7 @@ export class OrganizationDomain extends Request {
   /** Is this domain verified */
   public verified: boolean;
   /** The user who added the domain. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
 
@@ -4931,15 +4928,15 @@ export class OrganizationInvite extends Request {
    */
   public updatedAt: Date;
   /** The user who has accepted the invite. Null, if the invite hasn't been accepted. */
-  public get invitee(): LinearFetch<User> | undefined {
+  public get invitee(): Promise<User> | undefined {
     return this._invitee?.id ? new UserQuery(this._request).fetch(this._invitee?.id) : undefined;
   }
   /** The user who created the invitation. */
-  public get inviter(): LinearFetch<User> | undefined {
+  public get inviter(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._inviter.id);
   }
   /** The organization that the invite is associated with. */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
 
@@ -4966,7 +4963,7 @@ export class OrganizationInvite extends Request {
 export class OrganizationInviteConnection extends Connection<OrganizationInvite> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<OrganizationInvite> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<OrganizationInvite> | undefined>,
     data: L.OrganizationInviteConnectionFragment
   ) {
     super(
@@ -5034,7 +5031,7 @@ export class OrganizationInvitePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The organization invite that was created or updated. */
-  public get organizationInvite(): LinearFetch<OrganizationInvite> | undefined {
+  public get organizationInvite(): Promise<OrganizationInvite> | undefined {
     return new OrganizationInviteQuery(this._request).fetch(this._organizationInvite.id);
   }
 }
@@ -5056,7 +5053,7 @@ export class OrganizationPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The organization that was created or updated. */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -5184,11 +5181,11 @@ export class PaidSubscription extends Request {
    */
   public updatedAt: Date;
   /** The creator of the subscription. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the subscription is associated with. */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
 }
@@ -5301,21 +5298,21 @@ export class Project extends Request {
   /** Project URL. */
   public url: string;
   /** The project was created based on this issue. */
-  public get convertedFromIssue(): LinearFetch<Issue> | undefined {
+  public get convertedFromIssue(): Promise<Issue> | undefined {
     return this._convertedFromIssue?.id ? new IssueQuery(this._request).fetch(this._convertedFromIssue?.id) : undefined;
   }
   /** The user who created the project. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** Settings for all integrations associated with that project. */
-  public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
+  public get integrationsSettings(): Promise<IntegrationsSettings> | undefined {
     return this._integrationsSettings?.id
       ? new IntegrationsSettingsQuery(this._request).fetch(this._integrationsSettings?.id)
       : undefined;
   }
   /** The project lead. */
-  public get lead(): LinearFetch<User> | undefined {
+  public get lead(): Promise<User> | undefined {
     return this._lead?.id ? new UserQuery(this._request).fetch(this._lead?.id) : undefined;
   }
   /** Documents associated with the project. */
@@ -5388,7 +5385,7 @@ export class ProjectArchivePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The archived/unarchived entity. Null if entity was deleted. */
-  public get entity(): LinearFetch<Project> | undefined {
+  public get entity(): Promise<Project> | undefined {
     return this._entity?.id ? new ProjectQuery(this._request).fetch(this._entity?.id) : undefined;
   }
 }
@@ -5402,7 +5399,7 @@ export class ProjectArchivePayload extends Request {
 export class ProjectConnection extends Connection<Project> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Project> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Project> | undefined>,
     data: L.ProjectConnectionFragment
   ) {
     super(
@@ -5467,11 +5464,11 @@ export class ProjectLink extends Request {
   /** The link's URL. */
   public url: string;
   /** The user who created the link. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The project that the link is associated with. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
 
@@ -5498,7 +5495,7 @@ export class ProjectLink extends Request {
 export class ProjectLinkConnection extends Connection<ProjectLink> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ProjectLink> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<ProjectLink> | undefined>,
     data: L.ProjectLinkConnectionFragment
   ) {
     super(
@@ -5530,7 +5527,7 @@ export class ProjectLinkPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The project that was created or updated. */
-  public get projectLink(): LinearFetch<ProjectLink> | undefined {
+  public get projectLink(): Promise<ProjectLink> | undefined {
     return new ProjectLinkQuery(this._request).fetch(this._projectLink.id);
   }
 }
@@ -5577,7 +5574,7 @@ export class ProjectMilestone extends Request {
    */
   public updatedAt: Date;
   /** The project of the milestone. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
 
@@ -5604,7 +5601,7 @@ export class ProjectMilestone extends Request {
 export class ProjectMilestoneConnection extends Connection<ProjectMilestone> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ProjectMilestone> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<ProjectMilestone> | undefined>,
     data: L.ProjectMilestoneConnectionFragment
   ) {
     super(
@@ -5636,7 +5633,7 @@ export class ProjectMilestonePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The project milestone that was created or updated. */
-  public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
+  public get projectMilestone(): Promise<ProjectMilestone> | undefined {
     return new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone.id);
   }
 }
@@ -5695,19 +5692,19 @@ export class ProjectNotification extends Request {
    */
   public updatedAt: Date;
   /** The user that caused the notification. */
-  public get actor(): LinearFetch<User> | undefined {
+  public get actor(): Promise<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
   /** The project related to the notification. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
   /** The project update related to the notification. */
-  public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
+  public get projectUpdate(): Promise<ProjectUpdate> | undefined {
     return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
   }
   /** The user that received the notification. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
 }
@@ -5757,31 +5754,31 @@ export class ProjectNotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The contextual custom view associated with the notification subscription. */
-  public get customView(): LinearFetch<CustomView> | undefined {
+  public get customView(): Promise<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
   /** The contextual cycle view associated with the notification subscription. */
-  public get cycle(): LinearFetch<Cycle> | undefined {
+  public get cycle(): Promise<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** The contextual label view associated with the notification subscription. */
-  public get label(): LinearFetch<IssueLabel> | undefined {
+  public get label(): Promise<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
   /** The project subscribed to. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
   /** The user that subscribed to receive notifications. */
-  public get subscriber(): LinearFetch<User> | undefined {
+  public get subscriber(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
   /** The team associated with the notification subscription. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The user view associated with the notification subscription. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
@@ -5806,7 +5803,7 @@ export class ProjectPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The project that was created or updated. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
@@ -5944,21 +5941,21 @@ export class ProjectSearchResult extends Request {
   /** Project URL. */
   public url: string;
   /** The project was created based on this issue. */
-  public get convertedFromIssue(): LinearFetch<Issue> | undefined {
+  public get convertedFromIssue(): Promise<Issue> | undefined {
     return this._convertedFromIssue?.id ? new IssueQuery(this._request).fetch(this._convertedFromIssue?.id) : undefined;
   }
   /** The user who created the project. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** Settings for all integrations associated with that project. */
-  public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
+  public get integrationsSettings(): Promise<IntegrationsSettings> | undefined {
     return this._integrationsSettings?.id
       ? new IntegrationsSettingsQuery(this._request).fetch(this._integrationsSettings?.id)
       : undefined;
   }
   /** The project lead. */
-  public get lead(): LinearFetch<User> | undefined {
+  public get lead(): Promise<User> | undefined {
     return this._lead?.id ? new UserQuery(this._request).fetch(this._lead?.id) : undefined;
   }
 }
@@ -5972,7 +5969,7 @@ export class ProjectSearchResult extends Request {
 export class ProjectSearchResultConnection extends Connection<ProjectSearchResult> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ProjectSearchResult> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<ProjectSearchResult> | undefined>,
     data: L.ProjectSearchResultConnectionFragment
   ) {
     super(
@@ -6025,11 +6022,11 @@ export class ProjectUpdate extends Request {
   /** The URL to the project update. */
   public url: string;
   /** The project that the update is associated with. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
   /** The user who wrote the update. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
 
@@ -6056,7 +6053,7 @@ export class ProjectUpdate extends Request {
 export class ProjectUpdateConnection extends Connection<ProjectUpdate> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ProjectUpdate> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<ProjectUpdate> | undefined>,
     data: L.ProjectUpdateConnectionFragment
   ) {
     super(
@@ -6103,11 +6100,11 @@ export class ProjectUpdateInteraction extends Request {
    */
   public updatedAt: Date;
   /** The project update that has been interacted with. */
-  public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
+  public get projectUpdate(): Promise<ProjectUpdate> | undefined {
     return new ProjectUpdateQuery(this._request).fetch(this._projectUpdate.id);
   }
   /** The user that has interacted with the project update. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
 
@@ -6128,7 +6125,7 @@ export class ProjectUpdateInteractionConnection extends Connection<ProjectUpdate
     request: LinearRequest,
     fetch: (
       connection?: LinearConnectionVariables
-    ) => LinearFetch<LinearConnection<ProjectUpdateInteraction> | undefined>,
+    ) => Promise<LinearConnection<ProjectUpdateInteraction> | undefined>,
     data: L.ProjectUpdateInteractionConnectionFragment
   ) {
     super(
@@ -6160,7 +6157,7 @@ export class ProjectUpdateInteractionPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The project update interaction that was created or updated. */
-  public get projectUpdateInteraction(): LinearFetch<ProjectUpdateInteraction> | undefined {
+  public get projectUpdateInteraction(): Promise<ProjectUpdateInteraction> | undefined {
     return new ProjectUpdateInteractionQuery(this._request).fetch(this._projectUpdateInteraction.id);
   }
 }
@@ -6185,7 +6182,7 @@ export class ProjectUpdatePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The project update that was created or updated. */
-  public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
+  public get projectUpdate(): Promise<ProjectUpdate> | undefined {
     return new ProjectUpdateQuery(this._request).fetch(this._projectUpdate.id);
   }
 }
@@ -6212,11 +6209,11 @@ export class ProjectUpdateWithInteractionPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The project update that was created or updated. */
-  public get interaction(): LinearFetch<ProjectUpdateInteraction> | undefined {
+  public get interaction(): Promise<ProjectUpdateInteraction> | undefined {
     return new ProjectUpdateInteractionQuery(this._request).fetch(this._interaction.id);
   }
   /** The project update that was created or updated. */
-  public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
+  public get projectUpdate(): Promise<ProjectUpdate> | undefined {
     return new ProjectUpdateQuery(this._request).fetch(this._projectUpdate.id);
   }
 }
@@ -6267,7 +6264,7 @@ export class PushSubscription extends Request {
 export class PushSubscriptionConnection extends Connection<PushSubscription> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<PushSubscription> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<PushSubscription> | undefined>,
     data: L.PushSubscriptionConnectionFragment
   ) {
     super(
@@ -6396,7 +6393,7 @@ export class Reaction extends Request {
    */
   public updatedAt: Date;
   /** The user who reacted. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 
@@ -6419,7 +6416,7 @@ export class Reaction extends Request {
 export class ReactionConnection extends Connection<Reaction> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Reaction> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Reaction> | undefined>,
     data: L.ReactionConnectionFragment
   ) {
     super(
@@ -6497,15 +6494,15 @@ export class Roadmap extends Request {
    */
   public updatedAt: Date;
   /** The user who created the roadmap. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The organization of the roadmap. */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
   /** The user who owns the roadmap. */
-  public get owner(): LinearFetch<User> | undefined {
+  public get owner(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._owner.id);
   }
   /** Projects associated with the roadmap. */
@@ -6554,7 +6551,7 @@ export class RoadmapArchivePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The archived/unarchived entity. Null if entity was deleted. */
-  public get entity(): LinearFetch<Roadmap> | undefined {
+  public get entity(): Promise<Roadmap> | undefined {
     return this._entity?.id ? new RoadmapQuery(this._request).fetch(this._entity?.id) : undefined;
   }
 }
@@ -6568,7 +6565,7 @@ export class RoadmapArchivePayload extends Request {
 export class RoadmapConnection extends Connection<Roadmap> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Roadmap> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Roadmap> | undefined>,
     data: L.RoadmapConnectionFragment
   ) {
     super(
@@ -6600,7 +6597,7 @@ export class RoadmapPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The roadmap that was created or updated. */
-  public get roadmap(): LinearFetch<Roadmap> | undefined {
+  public get roadmap(): Promise<Roadmap> | undefined {
     return new RoadmapQuery(this._request).fetch(this._roadmap.id);
   }
 }
@@ -6640,11 +6637,11 @@ export class RoadmapToProject extends Request {
    */
   public updatedAt: Date;
   /** The project that the roadmap is associated with. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
   /** The roadmap that the project is associated with. */
-  public get roadmap(): LinearFetch<Roadmap> | undefined {
+  public get roadmap(): Promise<Roadmap> | undefined {
     return new RoadmapQuery(this._request).fetch(this._roadmap.id);
   }
 
@@ -6671,7 +6668,7 @@ export class RoadmapToProject extends Request {
 export class RoadmapToProjectConnection extends Connection<RoadmapToProject> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<RoadmapToProject> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<RoadmapToProject> | undefined>,
     data: L.RoadmapToProjectConnectionFragment
   ) {
     super(
@@ -6703,7 +6700,7 @@ export class RoadmapToProjectPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The roadmapToProject that was created or updated. */
-  public get roadmapToProject(): LinearFetch<RoadmapToProject> | undefined {
+  public get roadmapToProject(): Promise<RoadmapToProject> | undefined {
     return new RoadmapToProjectQuery(this._request).fetch(this._roadmapToProject.id);
   }
 }
@@ -7014,69 +7011,69 @@ export class Team extends Request {
    */
   public updatedAt: Date;
   /** Team's currently active cycle. */
-  public get activeCycle(): LinearFetch<Cycle> | undefined {
+  public get activeCycle(): Promise<Cycle> | undefined {
     return this._activeCycle?.id ? new CycleQuery(this._request).fetch(this._activeCycle?.id) : undefined;
   }
   /** The default workflow state into which issues are set when they are opened by team members. */
-  public get defaultIssueState(): LinearFetch<WorkflowState> | undefined {
+  public get defaultIssueState(): Promise<WorkflowState> | undefined {
     return this._defaultIssueState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._defaultIssueState?.id)
       : undefined;
   }
   /** The default template to use for new issues created by members of the team. */
-  public get defaultTemplateForMembers(): LinearFetch<Template> | undefined {
+  public get defaultTemplateForMembers(): Promise<Template> | undefined {
     return this._defaultTemplateForMembers?.id
       ? new TemplateQuery(this._request).fetch(this._defaultTemplateForMembers?.id)
       : undefined;
   }
   /** The default template to use for new issues created by non-members of the team. */
-  public get defaultTemplateForNonMembers(): LinearFetch<Template> | undefined {
+  public get defaultTemplateForNonMembers(): Promise<Template> | undefined {
     return this._defaultTemplateForNonMembers?.id
       ? new TemplateQuery(this._request).fetch(this._defaultTemplateForNonMembers?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been opened as draft. */
-  public get draftWorkflowState(): LinearFetch<WorkflowState> | undefined {
+  public get draftWorkflowState(): Promise<WorkflowState> | undefined {
     return this._draftWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._draftWorkflowState?.id)
       : undefined;
   }
   /** Settings for all integrations associated with that team. */
-  public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
+  public get integrationsSettings(): Promise<IntegrationsSettings> | undefined {
     return this._integrationsSettings?.id
       ? new IntegrationsSettingsQuery(this._request).fetch(this._integrationsSettings?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state. */
-  public get markedAsDuplicateWorkflowState(): LinearFetch<WorkflowState> | undefined {
+  public get markedAsDuplicateWorkflowState(): Promise<WorkflowState> | undefined {
     return this._markedAsDuplicateWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._markedAsDuplicateWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been merged. */
-  public get mergeWorkflowState(): LinearFetch<WorkflowState> | undefined {
+  public get mergeWorkflowState(): Promise<WorkflowState> | undefined {
     return this._mergeWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._mergeWorkflowState?.id)
       : undefined;
   }
   /** The organization that the team is associated with. */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
-  public get reviewWorkflowState(): LinearFetch<WorkflowState> | undefined {
+  public get reviewWorkflowState(): Promise<WorkflowState> | undefined {
     return this._reviewWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._reviewWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been opened. */
-  public get startWorkflowState(): LinearFetch<WorkflowState> | undefined {
+  public get startWorkflowState(): Promise<WorkflowState> | undefined {
     return this._startWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._startWorkflowState?.id)
       : undefined;
   }
   /** The workflow state into which issues are set when they are opened by non-team members or integrations if triage is enabled. */
-  public get triageIssueState(): LinearFetch<WorkflowState> | undefined {
+  public get triageIssueState(): Promise<WorkflowState> | undefined {
     return this._triageIssueState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._triageIssueState?.id)
       : undefined;
@@ -7140,7 +7137,7 @@ export class Team extends Request {
 export class TeamConnection extends Connection<Team> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Team> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Team> | undefined>,
     data: L.TeamConnectionFragment
   ) {
     super(
@@ -7190,11 +7187,11 @@ export class TeamMembership extends Request {
    */
   public updatedAt: Date;
   /** The team that the membership is associated with. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
   /** The user that the membership is associated with. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
 
@@ -7221,7 +7218,7 @@ export class TeamMembership extends Request {
 export class TeamMembershipConnection extends Connection<TeamMembership> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<TeamMembership> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<TeamMembership> | undefined>,
     data: L.TeamMembershipConnectionFragment
   ) {
     super(
@@ -7253,7 +7250,7 @@ export class TeamMembershipPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The team membership that was created or updated. */
-  public get teamMembership(): LinearFetch<TeamMembership> | undefined {
+  public get teamMembership(): Promise<TeamMembership> | undefined {
     return this._teamMembership?.id
       ? new TeamMembershipQuery(this._request).fetch(this._teamMembership?.id)
       : undefined;
@@ -7305,31 +7302,31 @@ export class TeamNotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The contextual custom view associated with the notification subscription. */
-  public get customView(): LinearFetch<CustomView> | undefined {
+  public get customView(): Promise<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
   /** The contextual cycle view associated with the notification subscription. */
-  public get cycle(): LinearFetch<Cycle> | undefined {
+  public get cycle(): Promise<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** The contextual label view associated with the notification subscription. */
-  public get label(): LinearFetch<IssueLabel> | undefined {
+  public get label(): Promise<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
   /** The contextual project view associated with the notification subscription. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** The user that subscribed to receive notifications. */
-  public get subscriber(): LinearFetch<User> | undefined {
+  public get subscriber(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
   /** The team subscribed to. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
   /** The user view associated with the notification subscription. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
@@ -7354,7 +7351,7 @@ export class TeamPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The team that was created or updated. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 }
@@ -7405,19 +7402,19 @@ export class Template extends Request {
    */
   public updatedAt: Date;
   /** The user who created the template. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The user who last updated the template. */
-  public get lastUpdatedBy(): LinearFetch<User> | undefined {
+  public get lastUpdatedBy(): Promise<User> | undefined {
     return this._lastUpdatedBy?.id ? new UserQuery(this._request).fetch(this._lastUpdatedBy?.id) : undefined;
   }
   /** The organization that the template is associated with. If null, the template is associated with a particular team. */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
   /** The team that the template is associated with. If null, the template is global to the workspace. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 
@@ -7447,7 +7444,7 @@ export class TemplateConnection extends Request {
   }
 
   public pageInfo: PageInfo;
-  public get nodes(): LinearFetch<Template[]> {
+  public get nodes(): Promise<Template[]> {
     return new TemplatesQuery(this._request).fetch();
   }
 }
@@ -7472,7 +7469,7 @@ export class TemplatePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The template that was created or updated. */
-  public get template(): LinearFetch<Template> | undefined {
+  public get template(): Promise<Template> | undefined {
     return new TemplateQuery(this._request).fetch(this._template.id);
   }
 }
@@ -7631,7 +7628,7 @@ export class User extends Request {
   /** User's profile URL. */
   public url: string;
   /** Organization the user belongs to. */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
   /** Issues assigned to the user. */
@@ -7769,7 +7766,7 @@ export class UserAuthorizedApplication extends Request {
 export class UserConnection extends Connection<User> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<User> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<User> | undefined>,
     data: L.UserConnectionFragment
   ) {
     super(
@@ -7801,7 +7798,7 @@ export class UserPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The user that was created or updated. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
@@ -7848,7 +7845,7 @@ export class UserSettings extends Request {
    */
   public updatedAt: Date;
   /** The user associated with these settings. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
 
@@ -7917,7 +7914,7 @@ export class UserSettingsPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The user's settings. */
-  public get userSettings(): LinearFetch<UserSettings> {
+  public get userSettings(): Promise<UserSettings> {
     return new UserSettingsQuery(this._request).fetch();
   }
 }
@@ -8040,11 +8037,11 @@ export class Webhook extends Request {
   /** Webhook URL */
   public url?: string;
   /** The user who created the webhook. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The team that the webhook is associated with. If null, the webhook is associated with all public teams of the organization. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
 
@@ -8071,7 +8068,7 @@ export class Webhook extends Request {
 export class WebhookConnection extends Connection<Webhook> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Webhook> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<Webhook> | undefined>,
     data: L.WebhookConnectionFragment
   ) {
     super(
@@ -8103,7 +8100,7 @@ export class WebhookPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The webhook entity being mutated. */
-  public get webhook(): LinearFetch<Webhook> | undefined {
+  public get webhook(): Promise<Webhook> | undefined {
     return new WebhookQuery(this._request).fetch(this._webhook.id);
   }
 }
@@ -8157,11 +8154,11 @@ export class WorkflowCronJobDefinition extends Request {
    */
   public updatedAt: Date;
   /** The user who created the workflow cron job. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The team associated with the workflow cron job. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
 }
@@ -8177,7 +8174,7 @@ export class WorkflowCronJobDefinitionConnection extends Connection<WorkflowCron
     request: LinearRequest,
     fetch: (
       connection?: LinearConnectionVariables
-    ) => LinearFetch<LinearConnection<WorkflowCronJobDefinition> | undefined>,
+    ) => Promise<LinearConnection<WorkflowCronJobDefinition> | undefined>,
     data: L.WorkflowCronJobDefinitionConnectionFragment
   ) {
     super(
@@ -8251,31 +8248,31 @@ export class WorkflowDefinition extends Request {
    */
   public updatedAt: Date;
   /** The user who created the workflow. */
-  public get creator(): LinearFetch<User> | undefined {
+  public get creator(): Promise<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
   /** The context custom view associated with the workflow. */
-  public get customView(): LinearFetch<CustomView> | undefined {
+  public get customView(): Promise<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
   /** The contextual cycle view associated with the workflow. */
-  public get cycle(): LinearFetch<Cycle> | undefined {
+  public get cycle(): Promise<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
   /** The contextual label view associated with the workflow. */
-  public get label(): LinearFetch<IssueLabel> | undefined {
+  public get label(): Promise<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
   /** The contextual project view associated with the workflow. */
-  public get project(): LinearFetch<Project> | undefined {
+  public get project(): Promise<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
   /** The team associated with the workflow. If not set, the workflow is associated with the entire organization. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The contextual user view associated with the workflow. */
-  public get user(): LinearFetch<User> | undefined {
+  public get user(): Promise<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
@@ -8289,7 +8286,7 @@ export class WorkflowDefinition extends Request {
 export class WorkflowDefinitionConnection extends Connection<WorkflowDefinition> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<WorkflowDefinition> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<WorkflowDefinition> | undefined>,
     data: L.WorkflowDefinitionConnectionFragment
   ) {
     super(
@@ -8346,7 +8343,7 @@ export class WorkflowState extends Request {
    */
   public updatedAt: Date;
   /** The team to which this state belongs to. */
-  public get team(): LinearFetch<Team> | undefined {
+  public get team(): Promise<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
   /** Issues belonging in this state. */
@@ -8387,7 +8384,7 @@ export class WorkflowStateArchivePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The archived/unarchived entity. Null if entity was deleted. */
-  public get entity(): LinearFetch<WorkflowState> | undefined {
+  public get entity(): Promise<WorkflowState> | undefined {
     return this._entity?.id ? new WorkflowStateQuery(this._request).fetch(this._entity?.id) : undefined;
   }
 }
@@ -8401,7 +8398,7 @@ export class WorkflowStateArchivePayload extends Request {
 export class WorkflowStateConnection extends Connection<WorkflowState> {
   public constructor(
     request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<WorkflowState> | undefined>,
+    fetch: (connection?: LinearConnectionVariables) => Promise<LinearConnection<WorkflowState> | undefined>,
     data: L.WorkflowStateConnectionFragment
   ) {
     super(
@@ -8433,7 +8430,7 @@ export class WorkflowStatePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The state that was created or updated. */
-  public get workflowState(): LinearFetch<WorkflowState> | undefined {
+  public get workflowState(): Promise<WorkflowState> | undefined {
     return new WorkflowStateQuery(this._request).fetch(this._workflowState.id);
   }
 }
@@ -8489,7 +8486,7 @@ export class AirbyteIntegrationConnectMutation extends Request {
    * @param input - required input to pass to airbyteIntegrationConnect
    * @returns parsed response from AirbyteIntegrationConnectMutation
    */
-  public async fetch(input: L.AirbyteConfigurationInput): LinearFetch<IntegrationPayload> {
+  public async fetch(input: L.AirbyteConfigurationInput): Promise<IntegrationPayload> {
     const response = await this._request<
       L.AirbyteIntegrationConnectMutation,
       L.AirbyteIntegrationConnectMutationVariables
@@ -8518,7 +8515,7 @@ export class CreateApiKeyMutation extends Request {
    * @param input - required input to pass to createApiKey
    * @returns parsed response from CreateApiKeyMutation
    */
-  public async fetch(input: L.ApiKeyCreateInput): LinearFetch<ApiKeyPayload> {
+  public async fetch(input: L.ApiKeyCreateInput): Promise<ApiKeyPayload> {
     const response = await this._request<L.CreateApiKeyMutation, L.CreateApiKeyMutationVariables>(
       L.CreateApiKeyDocument,
       {
@@ -8547,7 +8544,7 @@ export class DeleteApiKeyMutation extends Request {
    * @param id - required id to pass to deleteApiKey
    * @returns parsed response from DeleteApiKeyMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteApiKeyMutation, L.DeleteApiKeyMutationVariables>(
       L.DeleteApiKeyDocument,
       {
@@ -8576,7 +8573,7 @@ export class ArchiveAttachmentMutation extends Request {
    * @param id - required id to pass to archiveAttachment
    * @returns parsed response from ArchiveAttachmentMutation
    */
-  public async fetch(id: string): LinearFetch<AttachmentArchivePayload> {
+  public async fetch(id: string): Promise<AttachmentArchivePayload> {
     const response = await this._request<L.ArchiveAttachmentMutation, L.ArchiveAttachmentMutationVariables>(
       L.ArchiveAttachmentDocument,
       {
@@ -8605,7 +8602,7 @@ export class CreateAttachmentMutation extends Request {
    * @param input - required input to pass to createAttachment
    * @returns parsed response from CreateAttachmentMutation
    */
-  public async fetch(input: L.AttachmentCreateInput): LinearFetch<AttachmentPayload> {
+  public async fetch(input: L.AttachmentCreateInput): Promise<AttachmentPayload> {
     const response = await this._request<L.CreateAttachmentMutation, L.CreateAttachmentMutationVariables>(
       L.CreateAttachmentDocument,
       {
@@ -8634,7 +8631,7 @@ export class DeleteAttachmentMutation extends Request {
    * @param id - required id to pass to deleteAttachment
    * @returns parsed response from DeleteAttachmentMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteAttachmentMutation, L.DeleteAttachmentMutationVariables>(
       L.DeleteAttachmentDocument,
       {
@@ -8671,7 +8668,7 @@ export class AttachmentLinkDiscordMutation extends Request {
     issueId: string,
     messageId: string,
     url: string
-  ): LinearFetch<AttachmentPayload> {
+  ): Promise<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkDiscordMutation, L.AttachmentLinkDiscordMutationVariables>(
       L.AttachmentLinkDiscordDocument,
       {
@@ -8704,7 +8701,7 @@ export class AttachmentLinkFrontMutation extends Request {
    * @param issueId - required issueId to pass to attachmentLinkFront
    * @returns parsed response from AttachmentLinkFrontMutation
    */
-  public async fetch(conversationId: string, issueId: string): LinearFetch<FrontAttachmentPayload> {
+  public async fetch(conversationId: string, issueId: string): Promise<FrontAttachmentPayload> {
     const response = await this._request<L.AttachmentLinkFrontMutation, L.AttachmentLinkFrontMutationVariables>(
       L.AttachmentLinkFrontDocument,
       {
@@ -8735,7 +8732,7 @@ export class AttachmentLinkIntercomMutation extends Request {
    * @param issueId - required issueId to pass to attachmentLinkIntercom
    * @returns parsed response from AttachmentLinkIntercomMutation
    */
-  public async fetch(conversationId: string, issueId: string): LinearFetch<AttachmentPayload> {
+  public async fetch(conversationId: string, issueId: string): Promise<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkIntercomMutation, L.AttachmentLinkIntercomMutationVariables>(
       L.AttachmentLinkIntercomDocument,
       {
@@ -8766,7 +8763,7 @@ export class AttachmentLinkJiraIssueMutation extends Request {
    * @param jiraIssueId - required jiraIssueId to pass to attachmentLinkJiraIssue
    * @returns parsed response from AttachmentLinkJiraIssueMutation
    */
-  public async fetch(issueId: string, jiraIssueId: string): LinearFetch<AttachmentPayload> {
+  public async fetch(issueId: string, jiraIssueId: string): Promise<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkJiraIssueMutation, L.AttachmentLinkJiraIssueMutationVariables>(
       L.AttachmentLinkJiraIssueDocument,
       {
@@ -8802,7 +8799,7 @@ export class AttachmentLinkUrlMutation extends Request {
     issueId: string,
     url: string,
     variables?: Omit<L.AttachmentLinkUrlMutationVariables, "issueId" | "url">
-  ): LinearFetch<AttachmentPayload> {
+  ): Promise<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkUrlMutation, L.AttachmentLinkUrlMutationVariables>(
       L.AttachmentLinkUrlDocument,
       {
@@ -8834,7 +8831,7 @@ export class AttachmentLinkZendeskMutation extends Request {
    * @param ticketId - required ticketId to pass to attachmentLinkZendesk
    * @returns parsed response from AttachmentLinkZendeskMutation
    */
-  public async fetch(issueId: string, ticketId: string): LinearFetch<AttachmentPayload> {
+  public async fetch(issueId: string, ticketId: string): Promise<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkZendeskMutation, L.AttachmentLinkZendeskMutationVariables>(
       L.AttachmentLinkZendeskDocument,
       {
@@ -8864,7 +8861,7 @@ export class AttachmentUnsyncSlackMutation extends Request {
    * @param id - required id to pass to attachmentUnsyncSlack
    * @returns parsed response from AttachmentUnsyncSlackMutation
    */
-  public async fetch(id: string): LinearFetch<AttachmentPayload> {
+  public async fetch(id: string): Promise<AttachmentPayload> {
     const response = await this._request<L.AttachmentUnsyncSlackMutation, L.AttachmentUnsyncSlackMutationVariables>(
       L.AttachmentUnsyncSlackDocument,
       {
@@ -8894,7 +8891,7 @@ export class UpdateAttachmentMutation extends Request {
    * @param input - required input to pass to updateAttachment
    * @returns parsed response from UpdateAttachmentMutation
    */
-  public async fetch(id: string, input: L.AttachmentUpdateInput): LinearFetch<AttachmentPayload> {
+  public async fetch(id: string, input: L.AttachmentUpdateInput): Promise<AttachmentPayload> {
     const response = await this._request<L.UpdateAttachmentMutation, L.UpdateAttachmentMutationVariables>(
       L.UpdateAttachmentDocument,
       {
@@ -8924,7 +8921,7 @@ export class CreateCommentMutation extends Request {
    * @param input - required input to pass to createComment
    * @returns parsed response from CreateCommentMutation
    */
-  public async fetch(input: L.CommentCreateInput): LinearFetch<CommentPayload> {
+  public async fetch(input: L.CommentCreateInput): Promise<CommentPayload> {
     const response = await this._request<L.CreateCommentMutation, L.CreateCommentMutationVariables>(
       L.CreateCommentDocument,
       {
@@ -8953,7 +8950,7 @@ export class DeleteCommentMutation extends Request {
    * @param id - required id to pass to deleteComment
    * @returns parsed response from DeleteCommentMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteCommentMutation, L.DeleteCommentMutationVariables>(
       L.DeleteCommentDocument,
       {
@@ -8983,7 +8980,7 @@ export class UpdateCommentMutation extends Request {
    * @param input - required input to pass to updateComment
    * @returns parsed response from UpdateCommentMutation
    */
-  public async fetch(id: string, input: L.CommentUpdateInput): LinearFetch<CommentPayload> {
+  public async fetch(id: string, input: L.CommentUpdateInput): Promise<CommentPayload> {
     const response = await this._request<L.UpdateCommentMutation, L.UpdateCommentMutationVariables>(
       L.UpdateCommentDocument,
       {
@@ -9013,7 +9010,7 @@ export class CreateContactMutation extends Request {
    * @param input - required input to pass to createContact
    * @returns parsed response from CreateContactMutation
    */
-  public async fetch(input: L.ContactCreateInput): LinearFetch<ContactPayload> {
+  public async fetch(input: L.ContactCreateInput): Promise<ContactPayload> {
     const response = await this._request<L.CreateContactMutation, L.CreateContactMutationVariables>(
       L.CreateContactDocument,
       {
@@ -9042,7 +9039,7 @@ export class CreateCsvExportReportMutation extends Request {
    * @param variables - variables to pass into the CreateCsvExportReportMutation
    * @returns parsed response from CreateCsvExportReportMutation
    */
-  public async fetch(variables?: L.CreateCsvExportReportMutationVariables): LinearFetch<CreateCsvExportReportPayload> {
+  public async fetch(variables?: L.CreateCsvExportReportMutationVariables): Promise<CreateCsvExportReportPayload> {
     const response = await this._request<L.CreateCsvExportReportMutation, L.CreateCsvExportReportMutationVariables>(
       L.CreateCsvExportReportDocument,
       variables
@@ -9073,7 +9070,7 @@ export class CreateOrganizationFromOnboardingMutation extends Request {
   public async fetch(
     input: L.CreateOrganizationInput,
     variables?: Omit<L.CreateOrganizationFromOnboardingMutationVariables, "input">
-  ): LinearFetch<CreateOrJoinOrganizationResponse> {
+  ): Promise<CreateOrJoinOrganizationResponse> {
     const response = await this._request<
       L.CreateOrganizationFromOnboardingMutation,
       L.CreateOrganizationFromOnboardingMutationVariables
@@ -9103,7 +9100,7 @@ export class CreateCustomViewMutation extends Request {
    * @param input - required input to pass to createCustomView
    * @returns parsed response from CreateCustomViewMutation
    */
-  public async fetch(input: L.CustomViewCreateInput): LinearFetch<CustomViewPayload> {
+  public async fetch(input: L.CustomViewCreateInput): Promise<CustomViewPayload> {
     const response = await this._request<L.CreateCustomViewMutation, L.CreateCustomViewMutationVariables>(
       L.CreateCustomViewDocument,
       {
@@ -9132,7 +9129,7 @@ export class DeleteCustomViewMutation extends Request {
    * @param id - required id to pass to deleteCustomView
    * @returns parsed response from DeleteCustomViewMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteCustomViewMutation, L.DeleteCustomViewMutationVariables>(
       L.DeleteCustomViewDocument,
       {
@@ -9162,7 +9159,7 @@ export class UpdateCustomViewMutation extends Request {
    * @param input - required input to pass to updateCustomView
    * @returns parsed response from UpdateCustomViewMutation
    */
-  public async fetch(id: string, input: L.CustomViewUpdateInput): LinearFetch<CustomViewPayload> {
+  public async fetch(id: string, input: L.CustomViewUpdateInput): Promise<CustomViewPayload> {
     const response = await this._request<L.UpdateCustomViewMutation, L.UpdateCustomViewMutationVariables>(
       L.UpdateCustomViewDocument,
       {
@@ -9192,7 +9189,7 @@ export class ArchiveCycleMutation extends Request {
    * @param id - required id to pass to archiveCycle
    * @returns parsed response from ArchiveCycleMutation
    */
-  public async fetch(id: string): LinearFetch<CycleArchivePayload> {
+  public async fetch(id: string): Promise<CycleArchivePayload> {
     const response = await this._request<L.ArchiveCycleMutation, L.ArchiveCycleMutationVariables>(
       L.ArchiveCycleDocument,
       {
@@ -9221,7 +9218,7 @@ export class CreateCycleMutation extends Request {
    * @param input - required input to pass to createCycle
    * @returns parsed response from CreateCycleMutation
    */
-  public async fetch(input: L.CycleCreateInput): LinearFetch<CyclePayload> {
+  public async fetch(input: L.CycleCreateInput): Promise<CyclePayload> {
     const response = await this._request<L.CreateCycleMutation, L.CreateCycleMutationVariables>(L.CreateCycleDocument, {
       input,
     });
@@ -9248,7 +9245,7 @@ export class UpdateCycleMutation extends Request {
    * @param input - required input to pass to updateCycle
    * @returns parsed response from UpdateCycleMutation
    */
-  public async fetch(id: string, input: L.CycleUpdateInput): LinearFetch<CyclePayload> {
+  public async fetch(id: string, input: L.CycleUpdateInput): Promise<CyclePayload> {
     const response = await this._request<L.UpdateCycleMutation, L.UpdateCycleMutationVariables>(L.UpdateCycleDocument, {
       id,
       input,
@@ -9275,7 +9272,7 @@ export class CreateDocumentMutation extends Request {
    * @param input - required input to pass to createDocument
    * @returns parsed response from CreateDocumentMutation
    */
-  public async fetch(input: L.DocumentCreateInput): LinearFetch<DocumentPayload> {
+  public async fetch(input: L.DocumentCreateInput): Promise<DocumentPayload> {
     const response = await this._request<L.CreateDocumentMutation, L.CreateDocumentMutationVariables>(
       L.CreateDocumentDocument,
       {
@@ -9304,7 +9301,7 @@ export class DeleteDocumentMutation extends Request {
    * @param id - required id to pass to deleteDocument
    * @returns parsed response from DeleteDocumentMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteDocumentMutation, L.DeleteDocumentMutationVariables>(
       L.DeleteDocumentDocument,
       {
@@ -9334,7 +9331,7 @@ export class UpdateDocumentMutation extends Request {
    * @param input - required input to pass to updateDocument
    * @returns parsed response from UpdateDocumentMutation
    */
-  public async fetch(id: string, input: L.DocumentUpdateInput): LinearFetch<DocumentPayload> {
+  public async fetch(id: string, input: L.DocumentUpdateInput): Promise<DocumentPayload> {
     const response = await this._request<L.UpdateDocumentMutation, L.UpdateDocumentMutationVariables>(
       L.UpdateDocumentDocument,
       {
@@ -9364,7 +9361,7 @@ export class EmailTokenUserAccountAuthMutation extends Request {
    * @param input - required input to pass to emailTokenUserAccountAuth
    * @returns parsed response from EmailTokenUserAccountAuthMutation
    */
-  public async fetch(input: L.TokenUserAccountAuthInput): LinearFetch<AuthResolverResponse> {
+  public async fetch(input: L.TokenUserAccountAuthInput): Promise<AuthResolverResponse> {
     const response = await this._request<
       L.EmailTokenUserAccountAuthMutation,
       L.EmailTokenUserAccountAuthMutationVariables
@@ -9393,7 +9390,7 @@ export class EmailUnsubscribeMutation extends Request {
    * @param input - required input to pass to emailUnsubscribe
    * @returns parsed response from EmailUnsubscribeMutation
    */
-  public async fetch(input: L.EmailUnsubscribeInput): LinearFetch<EmailUnsubscribePayload> {
+  public async fetch(input: L.EmailUnsubscribeInput): Promise<EmailUnsubscribePayload> {
     const response = await this._request<L.EmailUnsubscribeMutation, L.EmailUnsubscribeMutationVariables>(
       L.EmailUnsubscribeDocument,
       {
@@ -9422,7 +9419,7 @@ export class EmailUserAccountAuthChallengeMutation extends Request {
    * @param input - required input to pass to emailUserAccountAuthChallenge
    * @returns parsed response from EmailUserAccountAuthChallengeMutation
    */
-  public async fetch(input: L.EmailUserAccountAuthChallengeInput): LinearFetch<EmailUserAccountAuthChallengeResponse> {
+  public async fetch(input: L.EmailUserAccountAuthChallengeInput): Promise<EmailUserAccountAuthChallengeResponse> {
     const response = await this._request<
       L.EmailUserAccountAuthChallengeMutation,
       L.EmailUserAccountAuthChallengeMutationVariables
@@ -9451,7 +9448,7 @@ export class CreateEmojiMutation extends Request {
    * @param input - required input to pass to createEmoji
    * @returns parsed response from CreateEmojiMutation
    */
-  public async fetch(input: L.EmojiCreateInput): LinearFetch<EmojiPayload> {
+  public async fetch(input: L.EmojiCreateInput): Promise<EmojiPayload> {
     const response = await this._request<L.CreateEmojiMutation, L.CreateEmojiMutationVariables>(L.CreateEmojiDocument, {
       input,
     });
@@ -9477,7 +9474,7 @@ export class DeleteEmojiMutation extends Request {
    * @param id - required id to pass to deleteEmoji
    * @returns parsed response from DeleteEmojiMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteEmojiMutation, L.DeleteEmojiMutationVariables>(L.DeleteEmojiDocument, {
       id,
     });
@@ -9503,7 +9500,7 @@ export class CreateEventMutation extends Request {
    * @param input - required input to pass to createEvent
    * @returns parsed response from CreateEventMutation
    */
-  public async fetch(input: L.EventCreateInput): LinearFetch<EventPayload> {
+  public async fetch(input: L.EventCreateInput): Promise<EventPayload> {
     const response = await this._request<L.CreateEventMutation, L.CreateEventMutationVariables>(L.CreateEventDocument, {
       input,
     });
@@ -9529,7 +9526,7 @@ export class CreateFavoriteMutation extends Request {
    * @param input - required input to pass to createFavorite
    * @returns parsed response from CreateFavoriteMutation
    */
-  public async fetch(input: L.FavoriteCreateInput): LinearFetch<FavoritePayload> {
+  public async fetch(input: L.FavoriteCreateInput): Promise<FavoritePayload> {
     const response = await this._request<L.CreateFavoriteMutation, L.CreateFavoriteMutationVariables>(
       L.CreateFavoriteDocument,
       {
@@ -9558,7 +9555,7 @@ export class DeleteFavoriteMutation extends Request {
    * @param id - required id to pass to deleteFavorite
    * @returns parsed response from DeleteFavoriteMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteFavoriteMutation, L.DeleteFavoriteMutationVariables>(
       L.DeleteFavoriteDocument,
       {
@@ -9588,7 +9585,7 @@ export class UpdateFavoriteMutation extends Request {
    * @param input - required input to pass to updateFavorite
    * @returns parsed response from UpdateFavoriteMutation
    */
-  public async fetch(id: string, input: L.FavoriteUpdateInput): LinearFetch<FavoritePayload> {
+  public async fetch(id: string, input: L.FavoriteUpdateInput): Promise<FavoritePayload> {
     const response = await this._request<L.UpdateFavoriteMutation, L.UpdateFavoriteMutationVariables>(
       L.UpdateFavoriteDocument,
       {
@@ -9626,7 +9623,7 @@ export class FileUploadMutation extends Request {
     filename: string,
     size: number,
     variables?: Omit<L.FileUploadMutationVariables, "contentType" | "filename" | "size">
-  ): LinearFetch<UploadPayload> {
+  ): Promise<UploadPayload> {
     const response = await this._request<L.FileUploadMutation, L.FileUploadMutationVariables>(L.FileUploadDocument, {
       contentType,
       filename,
@@ -9655,7 +9652,7 @@ export class GoogleUserAccountAuthMutation extends Request {
    * @param input - required input to pass to googleUserAccountAuth
    * @returns parsed response from GoogleUserAccountAuthMutation
    */
-  public async fetch(input: L.GoogleUserAccountAuthInput): LinearFetch<AuthResolverResponse> {
+  public async fetch(input: L.GoogleUserAccountAuthInput): Promise<AuthResolverResponse> {
     const response = await this._request<L.GoogleUserAccountAuthMutation, L.GoogleUserAccountAuthMutationVariables>(
       L.GoogleUserAccountAuthDocument,
       {
@@ -9684,7 +9681,7 @@ export class ImageUploadFromUrlMutation extends Request {
    * @param url - required url to pass to imageUploadFromUrl
    * @returns parsed response from ImageUploadFromUrlMutation
    */
-  public async fetch(url: string): LinearFetch<ImageUploadFromUrlPayload> {
+  public async fetch(url: string): Promise<ImageUploadFromUrlPayload> {
     const response = await this._request<L.ImageUploadFromUrlMutation, L.ImageUploadFromUrlMutationVariables>(
       L.ImageUploadFromUrlDocument,
       {
@@ -9721,7 +9718,7 @@ export class ImportFileUploadMutation extends Request {
     filename: string,
     size: number,
     variables?: Omit<L.ImportFileUploadMutationVariables, "contentType" | "filename" | "size">
-  ): LinearFetch<UploadPayload> {
+  ): Promise<UploadPayload> {
     const response = await this._request<L.ImportFileUploadMutation, L.ImportFileUploadMutationVariables>(
       L.ImportFileUploadDocument,
       {
@@ -9753,7 +9750,7 @@ export class DeleteIntegrationMutation extends Request {
    * @param id - required id to pass to deleteIntegration
    * @returns parsed response from DeleteIntegrationMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteIntegrationMutation, L.DeleteIntegrationMutationVariables>(
       L.DeleteIntegrationDocument,
       {
@@ -9783,7 +9780,7 @@ export class IntegrationDiscordMutation extends Request {
    * @param redirectUri - required redirectUri to pass to integrationDiscord
    * @returns parsed response from IntegrationDiscordMutation
    */
-  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public async fetch(code: string, redirectUri: string): Promise<IntegrationPayload> {
     const response = await this._request<L.IntegrationDiscordMutation, L.IntegrationDiscordMutationVariables>(
       L.IntegrationDiscordDocument,
       {
@@ -9814,7 +9811,7 @@ export class IntegrationFigmaMutation extends Request {
    * @param redirectUri - required redirectUri to pass to integrationFigma
    * @returns parsed response from IntegrationFigmaMutation
    */
-  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public async fetch(code: string, redirectUri: string): Promise<IntegrationPayload> {
     const response = await this._request<L.IntegrationFigmaMutation, L.IntegrationFigmaMutationVariables>(
       L.IntegrationFigmaDocument,
       {
@@ -9845,7 +9842,7 @@ export class IntegrationFrontMutation extends Request {
    * @param redirectUri - required redirectUri to pass to integrationFront
    * @returns parsed response from IntegrationFrontMutation
    */
-  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public async fetch(code: string, redirectUri: string): Promise<IntegrationPayload> {
     const response = await this._request<L.IntegrationFrontMutation, L.IntegrationFrontMutationVariables>(
       L.IntegrationFrontDocument,
       {
@@ -9874,7 +9871,7 @@ export class CreateIntegrationGithubCommitMutation extends Request {
    *
    * @returns parsed response from CreateIntegrationGithubCommitMutation
    */
-  public async fetch(): LinearFetch<GitHubCommitIntegrationPayload> {
+  public async fetch(): Promise<GitHubCommitIntegrationPayload> {
     const response = await this._request<
       L.CreateIntegrationGithubCommitMutation,
       L.CreateIntegrationGithubCommitMutationVariables
@@ -9901,7 +9898,7 @@ export class IntegrationGithubConnectMutation extends Request {
    * @param installationId - required installationId to pass to integrationGithubConnect
    * @returns parsed response from IntegrationGithubConnectMutation
    */
-  public async fetch(installationId: string): LinearFetch<IntegrationPayload> {
+  public async fetch(installationId: string): Promise<IntegrationPayload> {
     const response = await this._request<
       L.IntegrationGithubConnectMutation,
       L.IntegrationGithubConnectMutationVariables
@@ -9931,7 +9928,7 @@ export class IntegrationGitlabConnectMutation extends Request {
    * @param gitlabUrl - required gitlabUrl to pass to integrationGitlabConnect
    * @returns parsed response from IntegrationGitlabConnectMutation
    */
-  public async fetch(accessToken: string, gitlabUrl: string): LinearFetch<IntegrationPayload> {
+  public async fetch(accessToken: string, gitlabUrl: string): Promise<IntegrationPayload> {
     const response = await this._request<
       L.IntegrationGitlabConnectMutation,
       L.IntegrationGitlabConnectMutationVariables
@@ -9961,7 +9958,7 @@ export class IntegrationGoogleSheetsMutation extends Request {
    * @param code - required code to pass to integrationGoogleSheets
    * @returns parsed response from IntegrationGoogleSheetsMutation
    */
-  public async fetch(code: string): LinearFetch<IntegrationPayload> {
+  public async fetch(code: string): Promise<IntegrationPayload> {
     const response = await this._request<L.IntegrationGoogleSheetsMutation, L.IntegrationGoogleSheetsMutationVariables>(
       L.IntegrationGoogleSheetsDocument,
       {
@@ -9996,7 +9993,7 @@ export class IntegrationIntercomMutation extends Request {
     code: string,
     redirectUri: string,
     variables?: Omit<L.IntegrationIntercomMutationVariables, "code" | "redirectUri">
-  ): LinearFetch<IntegrationPayload> {
+  ): Promise<IntegrationPayload> {
     const response = await this._request<L.IntegrationIntercomMutation, L.IntegrationIntercomMutationVariables>(
       L.IntegrationIntercomDocument,
       {
@@ -10026,7 +10023,7 @@ export class DeleteIntegrationIntercomMutation extends Request {
    *
    * @returns parsed response from DeleteIntegrationIntercomMutation
    */
-  public async fetch(): LinearFetch<IntegrationPayload> {
+  public async fetch(): Promise<IntegrationPayload> {
     const response = await this._request<
       L.DeleteIntegrationIntercomMutation,
       L.DeleteIntegrationIntercomMutationVariables
@@ -10053,7 +10050,7 @@ export class UpdateIntegrationIntercomSettingsMutation extends Request {
    * @param input - required input to pass to updateIntegrationIntercomSettings
    * @returns parsed response from UpdateIntegrationIntercomSettingsMutation
    */
-  public async fetch(input: L.IntercomSettingsInput): LinearFetch<IntegrationPayload> {
+  public async fetch(input: L.IntercomSettingsInput): Promise<IntegrationPayload> {
     const response = await this._request<
       L.UpdateIntegrationIntercomSettingsMutation,
       L.UpdateIntegrationIntercomSettingsMutationVariables
@@ -10081,7 +10078,7 @@ export class IntegrationLoomMutation extends Request {
    *
    * @returns parsed response from IntegrationLoomMutation
    */
-  public async fetch(): LinearFetch<IntegrationPayload> {
+  public async fetch(): Promise<IntegrationPayload> {
     const response = await this._request<L.IntegrationLoomMutation, L.IntegrationLoomMutationVariables>(
       L.IntegrationLoomDocument,
       {}
@@ -10108,7 +10105,7 @@ export class IntegrationRequestMutation extends Request {
    * @param input - required input to pass to integrationRequest
    * @returns parsed response from IntegrationRequestMutation
    */
-  public async fetch(input: L.IntegrationRequestInput): LinearFetch<IntegrationRequestPayload> {
+  public async fetch(input: L.IntegrationRequestInput): Promise<IntegrationRequestPayload> {
     const response = await this._request<L.IntegrationRequestMutation, L.IntegrationRequestMutationVariables>(
       L.IntegrationRequestDocument,
       {
@@ -10139,7 +10136,7 @@ export class IntegrationSentryConnectMutation extends Request {
    * @param organizationSlug - required organizationSlug to pass to integrationSentryConnect
    * @returns parsed response from IntegrationSentryConnectMutation
    */
-  public async fetch(code: string, installationId: string, organizationSlug: string): LinearFetch<IntegrationPayload> {
+  public async fetch(code: string, installationId: string, organizationSlug: string): Promise<IntegrationPayload> {
     const response = await this._request<
       L.IntegrationSentryConnectMutation,
       L.IntegrationSentryConnectMutationVariables
@@ -10176,7 +10173,7 @@ export class IntegrationSlackMutation extends Request {
     code: string,
     redirectUri: string,
     variables?: Omit<L.IntegrationSlackMutationVariables, "code" | "redirectUri">
-  ): LinearFetch<IntegrationPayload> {
+  ): Promise<IntegrationPayload> {
     const response = await this._request<L.IntegrationSlackMutation, L.IntegrationSlackMutationVariables>(
       L.IntegrationSlackDocument,
       {
@@ -10208,7 +10205,7 @@ export class IntegrationSlackImportEmojisMutation extends Request {
    * @param redirectUri - required redirectUri to pass to integrationSlackImportEmojis
    * @returns parsed response from IntegrationSlackImportEmojisMutation
    */
-  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public async fetch(code: string, redirectUri: string): Promise<IntegrationPayload> {
     const response = await this._request<
       L.IntegrationSlackImportEmojisMutation,
       L.IntegrationSlackImportEmojisMutationVariables
@@ -10239,7 +10236,7 @@ export class IntegrationSlackIntakeMutation extends Request {
    * @param redirectUri - required redirectUri to pass to integrationSlackIntake
    * @returns parsed response from IntegrationSlackIntakeMutation
    */
-  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public async fetch(code: string, redirectUri: string): Promise<IntegrationPayload> {
     const response = await this._request<L.IntegrationSlackIntakeMutation, L.IntegrationSlackIntakeMutationVariables>(
       L.IntegrationSlackIntakeDocument,
       {
@@ -10270,7 +10267,7 @@ export class IntegrationSlackOrgProjectUpdatesPostMutation extends Request {
    * @param redirectUri - required redirectUri to pass to integrationSlackOrgProjectUpdatesPost
    * @returns parsed response from IntegrationSlackOrgProjectUpdatesPostMutation
    */
-  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public async fetch(code: string, redirectUri: string): Promise<IntegrationPayload> {
     const response = await this._request<
       L.IntegrationSlackOrgProjectUpdatesPostMutation,
       L.IntegrationSlackOrgProjectUpdatesPostMutationVariables
@@ -10301,7 +10298,7 @@ export class IntegrationSlackPersonalMutation extends Request {
    * @param redirectUri - required redirectUri to pass to integrationSlackPersonal
    * @returns parsed response from IntegrationSlackPersonalMutation
    */
-  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public async fetch(code: string, redirectUri: string): Promise<IntegrationPayload> {
     const response = await this._request<
       L.IntegrationSlackPersonalMutation,
       L.IntegrationSlackPersonalMutationVariables
@@ -10339,7 +10336,7 @@ export class IntegrationSlackPostMutation extends Request {
     redirectUri: string,
     teamId: string,
     variables?: Omit<L.IntegrationSlackPostMutationVariables, "code" | "redirectUri" | "teamId">
-  ): LinearFetch<IntegrationPayload> {
+  ): Promise<IntegrationPayload> {
     const response = await this._request<L.IntegrationSlackPostMutation, L.IntegrationSlackPostMutationVariables>(
       L.IntegrationSlackPostDocument,
       {
@@ -10379,7 +10376,7 @@ export class IntegrationSlackProjectPostMutation extends Request {
     projectId: string,
     redirectUri: string,
     service: string
-  ): LinearFetch<IntegrationPayload> {
+  ): Promise<IntegrationPayload> {
     const response = await this._request<
       L.IntegrationSlackProjectPostMutation,
       L.IntegrationSlackProjectPostMutationVariables
@@ -10411,7 +10408,7 @@ export class CreateIntegrationTemplateMutation extends Request {
    * @param input - required input to pass to createIntegrationTemplate
    * @returns parsed response from CreateIntegrationTemplateMutation
    */
-  public async fetch(input: L.IntegrationTemplateCreateInput): LinearFetch<IntegrationTemplatePayload> {
+  public async fetch(input: L.IntegrationTemplateCreateInput): Promise<IntegrationTemplatePayload> {
     const response = await this._request<
       L.CreateIntegrationTemplateMutation,
       L.CreateIntegrationTemplateMutationVariables
@@ -10440,7 +10437,7 @@ export class DeleteIntegrationTemplateMutation extends Request {
    * @param id - required id to pass to deleteIntegrationTemplate
    * @returns parsed response from DeleteIntegrationTemplateMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<
       L.DeleteIntegrationTemplateMutation,
       L.DeleteIntegrationTemplateMutationVariables
@@ -10470,7 +10467,7 @@ export class IntegrationUpdateSlackMutation extends Request {
    * @param redirectUri - required redirectUri to pass to integrationUpdateSlack
    * @returns parsed response from IntegrationUpdateSlackMutation
    */
-  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public async fetch(code: string, redirectUri: string): Promise<IntegrationPayload> {
     const response = await this._request<L.IntegrationUpdateSlackMutation, L.IntegrationUpdateSlackMutationVariables>(
       L.IntegrationUpdateSlackDocument,
       {
@@ -10508,7 +10505,7 @@ export class IntegrationZendeskMutation extends Request {
     redirectUri: string,
     scope: string,
     subdomain: string
-  ): LinearFetch<IntegrationPayload> {
+  ): Promise<IntegrationPayload> {
     const response = await this._request<L.IntegrationZendeskMutation, L.IntegrationZendeskMutationVariables>(
       L.IntegrationZendeskDocument,
       {
@@ -10540,7 +10537,7 @@ export class CreateIntegrationsSettingsMutation extends Request {
    * @param input - required input to pass to createIntegrationsSettings
    * @returns parsed response from CreateIntegrationsSettingsMutation
    */
-  public async fetch(input: L.IntegrationsSettingsCreateInput): LinearFetch<IntegrationsSettingsPayload> {
+  public async fetch(input: L.IntegrationsSettingsCreateInput): Promise<IntegrationsSettingsPayload> {
     const response = await this._request<
       L.CreateIntegrationsSettingsMutation,
       L.CreateIntegrationsSettingsMutationVariables
@@ -10570,7 +10567,7 @@ export class UpdateIntegrationsSettingsMutation extends Request {
    * @param input - required input to pass to updateIntegrationsSettings
    * @returns parsed response from UpdateIntegrationsSettingsMutation
    */
-  public async fetch(id: string, input: L.IntegrationsSettingsUpdateInput): LinearFetch<IntegrationsSettingsPayload> {
+  public async fetch(id: string, input: L.IntegrationsSettingsUpdateInput): Promise<IntegrationsSettingsPayload> {
     const response = await this._request<
       L.UpdateIntegrationsSettingsMutation,
       L.UpdateIntegrationsSettingsMutationVariables
@@ -10604,7 +10601,7 @@ export class ArchiveIssueMutation extends Request {
   public async fetch(
     id: string,
     variables?: Omit<L.ArchiveIssueMutationVariables, "id">
-  ): LinearFetch<IssueArchivePayload> {
+  ): Promise<IssueArchivePayload> {
     const response = await this._request<L.ArchiveIssueMutation, L.ArchiveIssueMutationVariables>(
       L.ArchiveIssueDocument,
       {
@@ -10635,7 +10632,7 @@ export class UpdateIssueBatchMutation extends Request {
    * @param input - required input to pass to updateIssueBatch
    * @returns parsed response from UpdateIssueBatchMutation
    */
-  public async fetch(ids: L.Scalars["UUID"][], input: L.IssueUpdateInput): LinearFetch<IssueBatchPayload> {
+  public async fetch(ids: L.Scalars["UUID"][], input: L.IssueUpdateInput): Promise<IssueBatchPayload> {
     const response = await this._request<L.UpdateIssueBatchMutation, L.UpdateIssueBatchMutationVariables>(
       L.UpdateIssueBatchDocument,
       {
@@ -10665,7 +10662,7 @@ export class CreateIssueMutation extends Request {
    * @param input - required input to pass to createIssue
    * @returns parsed response from CreateIssueMutation
    */
-  public async fetch(input: L.IssueCreateInput): LinearFetch<IssuePayload> {
+  public async fetch(input: L.IssueCreateInput): Promise<IssuePayload> {
     const response = await this._request<L.CreateIssueMutation, L.CreateIssueMutationVariables>(L.CreateIssueDocument, {
       input,
     });
@@ -10691,7 +10688,7 @@ export class DeleteIssueMutation extends Request {
    * @param id - required id to pass to deleteIssue
    * @returns parsed response from DeleteIssueMutation
    */
-  public async fetch(id: string): LinearFetch<IssueArchivePayload> {
+  public async fetch(id: string): Promise<IssueArchivePayload> {
     const response = await this._request<L.DeleteIssueMutation, L.DeleteIssueMutationVariables>(L.DeleteIssueDocument, {
       id,
     });
@@ -10723,7 +10720,7 @@ export class IssueImportCreateAsanaMutation extends Request {
     asanaTeamName: string,
     asanaToken: string,
     variables?: Omit<L.IssueImportCreateAsanaMutationVariables, "asanaTeamName" | "asanaToken">
-  ): LinearFetch<IssueImportPayload> {
+  ): Promise<IssueImportPayload> {
     const response = await this._request<L.IssueImportCreateAsanaMutation, L.IssueImportCreateAsanaMutationVariables>(
       L.IssueImportCreateAsanaDocument,
       {
@@ -10758,7 +10755,7 @@ export class IssueImportCreateCsvJiraMutation extends Request {
   public async fetch(
     csvUrl: string,
     variables?: Omit<L.IssueImportCreateCsvJiraMutationVariables, "csvUrl">
-  ): LinearFetch<IssueImportPayload> {
+  ): Promise<IssueImportPayload> {
     const response = await this._request<
       L.IssueImportCreateCsvJiraMutation,
       L.IssueImportCreateCsvJiraMutationVariables
@@ -10794,7 +10791,7 @@ export class IssueImportCreateClubhouseMutation extends Request {
     clubhouseGroupName: string,
     clubhouseToken: string,
     variables?: Omit<L.IssueImportCreateClubhouseMutationVariables, "clubhouseGroupName" | "clubhouseToken">
-  ): LinearFetch<IssueImportPayload> {
+  ): Promise<IssueImportPayload> {
     const response = await this._request<
       L.IssueImportCreateClubhouseMutation,
       L.IssueImportCreateClubhouseMutationVariables
@@ -10833,7 +10830,7 @@ export class IssueImportCreateGithubMutation extends Request {
     githubRepoOwner: string,
     githubToken: string,
     variables?: Omit<L.IssueImportCreateGithubMutationVariables, "githubRepoName" | "githubRepoOwner" | "githubToken">
-  ): LinearFetch<IssueImportPayload> {
+  ): Promise<IssueImportPayload> {
     const response = await this._request<L.IssueImportCreateGithubMutation, L.IssueImportCreateGithubMutationVariables>(
       L.IssueImportCreateGithubDocument,
       {
@@ -10878,7 +10875,7 @@ export class IssueImportCreateJiraMutation extends Request {
       L.IssueImportCreateJiraMutationVariables,
       "jiraEmail" | "jiraHostname" | "jiraProject" | "jiraToken"
     >
-  ): LinearFetch<IssueImportPayload> {
+  ): Promise<IssueImportPayload> {
     const response = await this._request<L.IssueImportCreateJiraMutation, L.IssueImportCreateJiraMutationVariables>(
       L.IssueImportCreateJiraDocument,
       {
@@ -10911,7 +10908,7 @@ export class DeleteIssueImportMutation extends Request {
    * @param issueImportId - required issueImportId to pass to deleteIssueImport
    * @returns parsed response from DeleteIssueImportMutation
    */
-  public async fetch(issueImportId: string): LinearFetch<IssueImportDeletePayload> {
+  public async fetch(issueImportId: string): Promise<IssueImportDeletePayload> {
     const response = await this._request<L.DeleteIssueImportMutation, L.DeleteIssueImportMutationVariables>(
       L.DeleteIssueImportDocument,
       {
@@ -10941,7 +10938,7 @@ export class IssueImportProcessMutation extends Request {
    * @param mapping - required mapping to pass to issueImportProcess
    * @returns parsed response from IssueImportProcessMutation
    */
-  public async fetch(issueImportId: string, mapping: Record<string, unknown>): LinearFetch<IssueImportPayload> {
+  public async fetch(issueImportId: string, mapping: Record<string, unknown>): Promise<IssueImportPayload> {
     const response = await this._request<L.IssueImportProcessMutation, L.IssueImportProcessMutationVariables>(
       L.IssueImportProcessDocument,
       {
@@ -10972,7 +10969,7 @@ export class UpdateIssueImportMutation extends Request {
    * @param input - required input to pass to updateIssueImport
    * @returns parsed response from UpdateIssueImportMutation
    */
-  public async fetch(id: string, input: L.IssueImportUpdateInput): LinearFetch<IssueImportPayload> {
+  public async fetch(id: string, input: L.IssueImportUpdateInput): Promise<IssueImportPayload> {
     const response = await this._request<L.UpdateIssueImportMutation, L.UpdateIssueImportMutationVariables>(
       L.UpdateIssueImportDocument,
       {
@@ -11006,7 +11003,7 @@ export class CreateIssueLabelMutation extends Request {
   public async fetch(
     input: L.IssueLabelCreateInput,
     variables?: Omit<L.CreateIssueLabelMutationVariables, "input">
-  ): LinearFetch<IssueLabelPayload> {
+  ): Promise<IssueLabelPayload> {
     const response = await this._request<L.CreateIssueLabelMutation, L.CreateIssueLabelMutationVariables>(
       L.CreateIssueLabelDocument,
       {
@@ -11036,7 +11033,7 @@ export class DeleteIssueLabelMutation extends Request {
    * @param id - required id to pass to deleteIssueLabel
    * @returns parsed response from DeleteIssueLabelMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteIssueLabelMutation, L.DeleteIssueLabelMutationVariables>(
       L.DeleteIssueLabelDocument,
       {
@@ -11066,7 +11063,7 @@ export class UpdateIssueLabelMutation extends Request {
    * @param input - required input to pass to updateIssueLabel
    * @returns parsed response from UpdateIssueLabelMutation
    */
-  public async fetch(id: string, input: L.IssueLabelUpdateInput): LinearFetch<IssueLabelPayload> {
+  public async fetch(id: string, input: L.IssueLabelUpdateInput): Promise<IssueLabelPayload> {
     const response = await this._request<L.UpdateIssueLabelMutation, L.UpdateIssueLabelMutationVariables>(
       L.UpdateIssueLabelDocument,
       {
@@ -11096,7 +11093,7 @@ export class CreateIssueRelationMutation extends Request {
    * @param input - required input to pass to createIssueRelation
    * @returns parsed response from CreateIssueRelationMutation
    */
-  public async fetch(input: L.IssueRelationCreateInput): LinearFetch<IssueRelationPayload> {
+  public async fetch(input: L.IssueRelationCreateInput): Promise<IssueRelationPayload> {
     const response = await this._request<L.CreateIssueRelationMutation, L.CreateIssueRelationMutationVariables>(
       L.CreateIssueRelationDocument,
       {
@@ -11125,7 +11122,7 @@ export class DeleteIssueRelationMutation extends Request {
    * @param id - required id to pass to deleteIssueRelation
    * @returns parsed response from DeleteIssueRelationMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteIssueRelationMutation, L.DeleteIssueRelationMutationVariables>(
       L.DeleteIssueRelationDocument,
       {
@@ -11155,7 +11152,7 @@ export class UpdateIssueRelationMutation extends Request {
    * @param input - required input to pass to updateIssueRelation
    * @returns parsed response from UpdateIssueRelationMutation
    */
-  public async fetch(id: string, input: L.IssueRelationUpdateInput): LinearFetch<IssueRelationPayload> {
+  public async fetch(id: string, input: L.IssueRelationUpdateInput): Promise<IssueRelationPayload> {
     const response = await this._request<L.UpdateIssueRelationMutation, L.UpdateIssueRelationMutationVariables>(
       L.UpdateIssueRelationDocument,
       {
@@ -11186,7 +11183,7 @@ export class IssueReminderMutation extends Request {
    * @param reminderAt - required reminderAt to pass to issueReminder
    * @returns parsed response from IssueReminderMutation
    */
-  public async fetch(id: string, reminderAt: Date): LinearFetch<IssuePayload> {
+  public async fetch(id: string, reminderAt: Date): Promise<IssuePayload> {
     const response = await this._request<L.IssueReminderMutation, L.IssueReminderMutationVariables>(
       L.IssueReminderDocument,
       {
@@ -11216,7 +11213,7 @@ export class UnarchiveIssueMutation extends Request {
    * @param id - required id to pass to unarchiveIssue
    * @returns parsed response from UnarchiveIssueMutation
    */
-  public async fetch(id: string): LinearFetch<IssueArchivePayload> {
+  public async fetch(id: string): Promise<IssueArchivePayload> {
     const response = await this._request<L.UnarchiveIssueMutation, L.UnarchiveIssueMutationVariables>(
       L.UnarchiveIssueDocument,
       {
@@ -11246,7 +11243,7 @@ export class UpdateIssueMutation extends Request {
    * @param input - required input to pass to updateIssue
    * @returns parsed response from UpdateIssueMutation
    */
-  public async fetch(id: string, input: L.IssueUpdateInput): LinearFetch<IssuePayload> {
+  public async fetch(id: string, input: L.IssueUpdateInput): Promise<IssuePayload> {
     const response = await this._request<L.UpdateIssueMutation, L.UpdateIssueMutationVariables>(L.UpdateIssueDocument, {
       id,
       input,
@@ -11273,7 +11270,7 @@ export class JoinOrganizationFromOnboardingMutation extends Request {
    * @param input - required input to pass to joinOrganizationFromOnboarding
    * @returns parsed response from JoinOrganizationFromOnboardingMutation
    */
-  public async fetch(input: L.JoinOrganizationInput): LinearFetch<CreateOrJoinOrganizationResponse> {
+  public async fetch(input: L.JoinOrganizationInput): Promise<CreateOrJoinOrganizationResponse> {
     const response = await this._request<
       L.JoinOrganizationFromOnboardingMutation,
       L.JoinOrganizationFromOnboardingMutationVariables
@@ -11302,7 +11299,7 @@ export class LeaveOrganizationMutation extends Request {
    * @param organizationId - required organizationId to pass to leaveOrganization
    * @returns parsed response from LeaveOrganizationMutation
    */
-  public async fetch(organizationId: string): LinearFetch<CreateOrJoinOrganizationResponse> {
+  public async fetch(organizationId: string): Promise<CreateOrJoinOrganizationResponse> {
     const response = await this._request<L.LeaveOrganizationMutation, L.LeaveOrganizationMutationVariables>(
       L.LeaveOrganizationDocument,
       {
@@ -11330,7 +11327,7 @@ export class LogoutMutation extends Request {
    *
    * @returns parsed response from LogoutMutation
    */
-  public async fetch(): LinearFetch<LogoutResponse> {
+  public async fetch(): Promise<LogoutResponse> {
     const response = await this._request<L.LogoutMutation, L.LogoutMutationVariables>(L.LogoutDocument, {});
     const data = response.logout;
 
@@ -11354,7 +11351,7 @@ export class ArchiveNotificationMutation extends Request {
    * @param id - required id to pass to archiveNotification
    * @returns parsed response from ArchiveNotificationMutation
    */
-  public async fetch(id: string): LinearFetch<NotificationArchivePayload> {
+  public async fetch(id: string): Promise<NotificationArchivePayload> {
     const response = await this._request<L.ArchiveNotificationMutation, L.ArchiveNotificationMutationVariables>(
       L.ArchiveNotificationDocument,
       {
@@ -11383,7 +11380,7 @@ export class CreateNotificationSubscriptionMutation extends Request {
    * @param input - required input to pass to createNotificationSubscription
    * @returns parsed response from CreateNotificationSubscriptionMutation
    */
-  public async fetch(input: L.NotificationSubscriptionCreateInput): LinearFetch<NotificationSubscriptionPayload> {
+  public async fetch(input: L.NotificationSubscriptionCreateInput): Promise<NotificationSubscriptionPayload> {
     const response = await this._request<
       L.CreateNotificationSubscriptionMutation,
       L.CreateNotificationSubscriptionMutationVariables
@@ -11412,7 +11409,7 @@ export class DeleteNotificationSubscriptionMutation extends Request {
    * @param id - required id to pass to deleteNotificationSubscription
    * @returns parsed response from DeleteNotificationSubscriptionMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<
       L.DeleteNotificationSubscriptionMutation,
       L.DeleteNotificationSubscriptionMutationVariables
@@ -11445,7 +11442,7 @@ export class UpdateNotificationSubscriptionMutation extends Request {
   public async fetch(
     id: string,
     input: L.NotificationSubscriptionUpdateInput
-  ): LinearFetch<NotificationSubscriptionPayload> {
+  ): Promise<NotificationSubscriptionPayload> {
     const response = await this._request<
       L.UpdateNotificationSubscriptionMutation,
       L.UpdateNotificationSubscriptionMutationVariables
@@ -11475,7 +11472,7 @@ export class UnarchiveNotificationMutation extends Request {
    * @param id - required id to pass to unarchiveNotification
    * @returns parsed response from UnarchiveNotificationMutation
    */
-  public async fetch(id: string): LinearFetch<NotificationArchivePayload> {
+  public async fetch(id: string): Promise<NotificationArchivePayload> {
     const response = await this._request<L.UnarchiveNotificationMutation, L.UnarchiveNotificationMutationVariables>(
       L.UnarchiveNotificationDocument,
       {
@@ -11505,7 +11502,7 @@ export class UpdateNotificationMutation extends Request {
    * @param input - required input to pass to updateNotification
    * @returns parsed response from UpdateNotificationMutation
    */
-  public async fetch(id: string, input: L.NotificationUpdateInput): LinearFetch<NotificationPayload> {
+  public async fetch(id: string, input: L.NotificationUpdateInput): Promise<NotificationPayload> {
     const response = await this._request<L.UpdateNotificationMutation, L.UpdateNotificationMutationVariables>(
       L.UpdateNotificationDocument,
       {
@@ -11534,7 +11531,7 @@ export class DeleteOrganizationCancelMutation extends Request {
    *
    * @returns parsed response from DeleteOrganizationCancelMutation
    */
-  public async fetch(): LinearFetch<OrganizationCancelDeletePayload> {
+  public async fetch(): Promise<OrganizationCancelDeletePayload> {
     const response = await this._request<
       L.DeleteOrganizationCancelMutation,
       L.DeleteOrganizationCancelMutationVariables
@@ -11561,7 +11558,7 @@ export class DeleteOrganizationMutation extends Request {
    * @param input - required input to pass to deleteOrganization
    * @returns parsed response from DeleteOrganizationMutation
    */
-  public async fetch(input: L.DeleteOrganizationInput): LinearFetch<OrganizationDeletePayload> {
+  public async fetch(input: L.DeleteOrganizationInput): Promise<OrganizationDeletePayload> {
     const response = await this._request<L.DeleteOrganizationMutation, L.DeleteOrganizationMutationVariables>(
       L.DeleteOrganizationDocument,
       {
@@ -11589,7 +11586,7 @@ export class OrganizationDeleteChallengeMutation extends Request {
    *
    * @returns parsed response from OrganizationDeleteChallengeMutation
    */
-  public async fetch(): LinearFetch<OrganizationDeletePayload> {
+  public async fetch(): Promise<OrganizationDeletePayload> {
     const response = await this._request<
       L.OrganizationDeleteChallengeMutation,
       L.OrganizationDeleteChallengeMutationVariables
@@ -11616,7 +11613,7 @@ export class DeleteOrganizationDomainMutation extends Request {
    * @param id - required id to pass to deleteOrganizationDomain
    * @returns parsed response from DeleteOrganizationDomainMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<
       L.DeleteOrganizationDomainMutation,
       L.DeleteOrganizationDomainMutationVariables
@@ -11645,7 +11642,7 @@ export class CreateOrganizationInviteMutation extends Request {
    * @param input - required input to pass to createOrganizationInvite
    * @returns parsed response from CreateOrganizationInviteMutation
    */
-  public async fetch(input: L.OrganizationInviteCreateInput): LinearFetch<OrganizationInvitePayload> {
+  public async fetch(input: L.OrganizationInviteCreateInput): Promise<OrganizationInvitePayload> {
     const response = await this._request<
       L.CreateOrganizationInviteMutation,
       L.CreateOrganizationInviteMutationVariables
@@ -11674,7 +11671,7 @@ export class DeleteOrganizationInviteMutation extends Request {
    * @param id - required id to pass to deleteOrganizationInvite
    * @returns parsed response from DeleteOrganizationInviteMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<
       L.DeleteOrganizationInviteMutation,
       L.DeleteOrganizationInviteMutationVariables
@@ -11704,7 +11701,7 @@ export class UpdateOrganizationInviteMutation extends Request {
    * @param input - required input to pass to updateOrganizationInvite
    * @returns parsed response from UpdateOrganizationInviteMutation
    */
-  public async fetch(id: string, input: L.OrganizationInviteUpdateInput): LinearFetch<OrganizationInvitePayload> {
+  public async fetch(id: string, input: L.OrganizationInviteUpdateInput): Promise<OrganizationInvitePayload> {
     const response = await this._request<
       L.UpdateOrganizationInviteMutation,
       L.UpdateOrganizationInviteMutationVariables
@@ -11733,7 +11730,7 @@ export class OrganizationStartPlusTrialMutation extends Request {
    *
    * @returns parsed response from OrganizationStartPlusTrialMutation
    */
-  public async fetch(): LinearFetch<OrganizationStartPlusTrialPayload> {
+  public async fetch(): Promise<OrganizationStartPlusTrialPayload> {
     const response = await this._request<
       L.OrganizationStartPlusTrialMutation,
       L.OrganizationStartPlusTrialMutationVariables
@@ -11760,7 +11757,7 @@ export class UpdateOrganizationMutation extends Request {
    * @param input - required input to pass to updateOrganization
    * @returns parsed response from UpdateOrganizationMutation
    */
-  public async fetch(input: L.UpdateOrganizationInput): LinearFetch<OrganizationPayload> {
+  public async fetch(input: L.UpdateOrganizationInput): Promise<OrganizationPayload> {
     const response = await this._request<L.UpdateOrganizationMutation, L.UpdateOrganizationMutationVariables>(
       L.UpdateOrganizationDocument,
       {
@@ -11789,7 +11786,7 @@ export class ArchiveProjectMutation extends Request {
    * @param id - required id to pass to archiveProject
    * @returns parsed response from ArchiveProjectMutation
    */
-  public async fetch(id: string): LinearFetch<ProjectArchivePayload> {
+  public async fetch(id: string): Promise<ProjectArchivePayload> {
     const response = await this._request<L.ArchiveProjectMutation, L.ArchiveProjectMutationVariables>(
       L.ArchiveProjectDocument,
       {
@@ -11818,7 +11815,7 @@ export class CreateProjectMutation extends Request {
    * @param input - required input to pass to createProject
    * @returns parsed response from CreateProjectMutation
    */
-  public async fetch(input: L.ProjectCreateInput): LinearFetch<ProjectPayload> {
+  public async fetch(input: L.ProjectCreateInput): Promise<ProjectPayload> {
     const response = await this._request<L.CreateProjectMutation, L.CreateProjectMutationVariables>(
       L.CreateProjectDocument,
       {
@@ -11847,7 +11844,7 @@ export class DeleteProjectMutation extends Request {
    * @param id - required id to pass to deleteProject
    * @returns parsed response from DeleteProjectMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteProjectMutation, L.DeleteProjectMutationVariables>(
       L.DeleteProjectDocument,
       {
@@ -11876,7 +11873,7 @@ export class CreateProjectLinkMutation extends Request {
    * @param input - required input to pass to createProjectLink
    * @returns parsed response from CreateProjectLinkMutation
    */
-  public async fetch(input: L.ProjectLinkCreateInput): LinearFetch<ProjectLinkPayload> {
+  public async fetch(input: L.ProjectLinkCreateInput): Promise<ProjectLinkPayload> {
     const response = await this._request<L.CreateProjectLinkMutation, L.CreateProjectLinkMutationVariables>(
       L.CreateProjectLinkDocument,
       {
@@ -11905,7 +11902,7 @@ export class DeleteProjectLinkMutation extends Request {
    * @param id - required id to pass to deleteProjectLink
    * @returns parsed response from DeleteProjectLinkMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteProjectLinkMutation, L.DeleteProjectLinkMutationVariables>(
       L.DeleteProjectLinkDocument,
       {
@@ -11935,7 +11932,7 @@ export class UpdateProjectLinkMutation extends Request {
    * @param input - required input to pass to updateProjectLink
    * @returns parsed response from UpdateProjectLinkMutation
    */
-  public async fetch(id: string, input: L.ProjectLinkUpdateInput): LinearFetch<ProjectLinkPayload> {
+  public async fetch(id: string, input: L.ProjectLinkUpdateInput): Promise<ProjectLinkPayload> {
     const response = await this._request<L.UpdateProjectLinkMutation, L.UpdateProjectLinkMutationVariables>(
       L.UpdateProjectLinkDocument,
       {
@@ -11965,7 +11962,7 @@ export class CreateProjectMilestoneMutation extends Request {
    * @param input - required input to pass to createProjectMilestone
    * @returns parsed response from CreateProjectMilestoneMutation
    */
-  public async fetch(input: L.ProjectMilestoneCreateInput): LinearFetch<ProjectMilestonePayload> {
+  public async fetch(input: L.ProjectMilestoneCreateInput): Promise<ProjectMilestonePayload> {
     const response = await this._request<L.CreateProjectMilestoneMutation, L.CreateProjectMilestoneMutationVariables>(
       L.CreateProjectMilestoneDocument,
       {
@@ -11994,7 +11991,7 @@ export class DeleteProjectMilestoneMutation extends Request {
    * @param id - required id to pass to deleteProjectMilestone
    * @returns parsed response from DeleteProjectMilestoneMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteProjectMilestoneMutation, L.DeleteProjectMilestoneMutationVariables>(
       L.DeleteProjectMilestoneDocument,
       {
@@ -12024,7 +12021,7 @@ export class UpdateProjectMilestoneMutation extends Request {
    * @param input - required input to pass to updateProjectMilestone
    * @returns parsed response from UpdateProjectMilestoneMutation
    */
-  public async fetch(id: string, input: L.ProjectMilestoneUpdateInput): LinearFetch<ProjectMilestonePayload> {
+  public async fetch(id: string, input: L.ProjectMilestoneUpdateInput): Promise<ProjectMilestonePayload> {
     const response = await this._request<L.UpdateProjectMilestoneMutation, L.UpdateProjectMilestoneMutationVariables>(
       L.UpdateProjectMilestoneDocument,
       {
@@ -12054,7 +12051,7 @@ export class UnarchiveProjectMutation extends Request {
    * @param id - required id to pass to unarchiveProject
    * @returns parsed response from UnarchiveProjectMutation
    */
-  public async fetch(id: string): LinearFetch<ProjectArchivePayload> {
+  public async fetch(id: string): Promise<ProjectArchivePayload> {
     const response = await this._request<L.UnarchiveProjectMutation, L.UnarchiveProjectMutationVariables>(
       L.UnarchiveProjectDocument,
       {
@@ -12084,7 +12081,7 @@ export class UpdateProjectMutation extends Request {
    * @param input - required input to pass to updateProject
    * @returns parsed response from UpdateProjectMutation
    */
-  public async fetch(id: string, input: L.ProjectUpdateInput): LinearFetch<ProjectPayload> {
+  public async fetch(id: string, input: L.ProjectUpdateInput): Promise<ProjectPayload> {
     const response = await this._request<L.UpdateProjectMutation, L.UpdateProjectMutationVariables>(
       L.UpdateProjectDocument,
       {
@@ -12114,7 +12111,7 @@ export class CreateProjectUpdateMutation extends Request {
    * @param input - required input to pass to createProjectUpdate
    * @returns parsed response from CreateProjectUpdateMutation
    */
-  public async fetch(input: L.ProjectUpdateCreateInput): LinearFetch<ProjectUpdatePayload> {
+  public async fetch(input: L.ProjectUpdateCreateInput): Promise<ProjectUpdatePayload> {
     const response = await this._request<L.CreateProjectUpdateMutation, L.CreateProjectUpdateMutationVariables>(
       L.CreateProjectUpdateDocument,
       {
@@ -12143,7 +12140,7 @@ export class DeleteProjectUpdateMutation extends Request {
    * @param id - required id to pass to deleteProjectUpdate
    * @returns parsed response from DeleteProjectUpdateMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteProjectUpdateMutation, L.DeleteProjectUpdateMutationVariables>(
       L.DeleteProjectUpdateDocument,
       {
@@ -12172,7 +12169,7 @@ export class CreateProjectUpdateInteractionMutation extends Request {
    * @param input - required input to pass to createProjectUpdateInteraction
    * @returns parsed response from CreateProjectUpdateInteractionMutation
    */
-  public async fetch(input: L.ProjectUpdateInteractionCreateInput): LinearFetch<ProjectUpdateInteractionPayload> {
+  public async fetch(input: L.ProjectUpdateInteractionCreateInput): Promise<ProjectUpdateInteractionPayload> {
     const response = await this._request<
       L.CreateProjectUpdateInteractionMutation,
       L.CreateProjectUpdateInteractionMutationVariables
@@ -12201,7 +12198,7 @@ export class ProjectUpdateMarkAsReadMutation extends Request {
    * @param id - required id to pass to projectUpdateMarkAsRead
    * @returns parsed response from ProjectUpdateMarkAsReadMutation
    */
-  public async fetch(id: string): LinearFetch<ProjectUpdateWithInteractionPayload> {
+  public async fetch(id: string): Promise<ProjectUpdateWithInteractionPayload> {
     const response = await this._request<L.ProjectUpdateMarkAsReadMutation, L.ProjectUpdateMarkAsReadMutationVariables>(
       L.ProjectUpdateMarkAsReadDocument,
       {
@@ -12231,7 +12228,7 @@ export class UpdateProjectUpdateMutation extends Request {
    * @param input - required input to pass to updateProjectUpdate
    * @returns parsed response from UpdateProjectUpdateMutation
    */
-  public async fetch(id: string, input: L.ProjectUpdateUpdateInput): LinearFetch<ProjectUpdatePayload> {
+  public async fetch(id: string, input: L.ProjectUpdateUpdateInput): Promise<ProjectUpdatePayload> {
     const response = await this._request<L.UpdateProjectUpdateMutation, L.UpdateProjectUpdateMutationVariables>(
       L.UpdateProjectUpdateDocument,
       {
@@ -12261,7 +12258,7 @@ export class CreatePushSubscriptionMutation extends Request {
    * @param input - required input to pass to createPushSubscription
    * @returns parsed response from CreatePushSubscriptionMutation
    */
-  public async fetch(input: L.PushSubscriptionCreateInput): LinearFetch<PushSubscriptionPayload> {
+  public async fetch(input: L.PushSubscriptionCreateInput): Promise<PushSubscriptionPayload> {
     const response = await this._request<L.CreatePushSubscriptionMutation, L.CreatePushSubscriptionMutationVariables>(
       L.CreatePushSubscriptionDocument,
       {
@@ -12290,7 +12287,7 @@ export class DeletePushSubscriptionMutation extends Request {
    * @param id - required id to pass to deletePushSubscription
    * @returns parsed response from DeletePushSubscriptionMutation
    */
-  public async fetch(id: string): LinearFetch<PushSubscriptionPayload> {
+  public async fetch(id: string): Promise<PushSubscriptionPayload> {
     const response = await this._request<L.DeletePushSubscriptionMutation, L.DeletePushSubscriptionMutationVariables>(
       L.DeletePushSubscriptionDocument,
       {
@@ -12319,7 +12316,7 @@ export class CreateReactionMutation extends Request {
    * @param input - required input to pass to createReaction
    * @returns parsed response from CreateReactionMutation
    */
-  public async fetch(input: L.ReactionCreateInput): LinearFetch<ReactionPayload> {
+  public async fetch(input: L.ReactionCreateInput): Promise<ReactionPayload> {
     const response = await this._request<L.CreateReactionMutation, L.CreateReactionMutationVariables>(
       L.CreateReactionDocument,
       {
@@ -12348,7 +12345,7 @@ export class DeleteReactionMutation extends Request {
    * @param id - required id to pass to deleteReaction
    * @returns parsed response from DeleteReactionMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteReactionMutation, L.DeleteReactionMutationVariables>(
       L.DeleteReactionDocument,
       {
@@ -12377,7 +12374,7 @@ export class RefreshGoogleSheetsDataMutation extends Request {
    * @param id - required id to pass to refreshGoogleSheetsData
    * @returns parsed response from RefreshGoogleSheetsDataMutation
    */
-  public async fetch(id: string): LinearFetch<IntegrationPayload> {
+  public async fetch(id: string): Promise<IntegrationPayload> {
     const response = await this._request<L.RefreshGoogleSheetsDataMutation, L.RefreshGoogleSheetsDataMutationVariables>(
       L.RefreshGoogleSheetsDataDocument,
       {
@@ -12406,7 +12403,7 @@ export class ResendOrganizationInviteMutation extends Request {
    * @param id - required id to pass to resendOrganizationInvite
    * @returns parsed response from ResendOrganizationInviteMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<
       L.ResendOrganizationInviteMutation,
       L.ResendOrganizationInviteMutationVariables
@@ -12435,7 +12432,7 @@ export class ArchiveRoadmapMutation extends Request {
    * @param id - required id to pass to archiveRoadmap
    * @returns parsed response from ArchiveRoadmapMutation
    */
-  public async fetch(id: string): LinearFetch<RoadmapArchivePayload> {
+  public async fetch(id: string): Promise<RoadmapArchivePayload> {
     const response = await this._request<L.ArchiveRoadmapMutation, L.ArchiveRoadmapMutationVariables>(
       L.ArchiveRoadmapDocument,
       {
@@ -12464,7 +12461,7 @@ export class CreateRoadmapMutation extends Request {
    * @param input - required input to pass to createRoadmap
    * @returns parsed response from CreateRoadmapMutation
    */
-  public async fetch(input: L.RoadmapCreateInput): LinearFetch<RoadmapPayload> {
+  public async fetch(input: L.RoadmapCreateInput): Promise<RoadmapPayload> {
     const response = await this._request<L.CreateRoadmapMutation, L.CreateRoadmapMutationVariables>(
       L.CreateRoadmapDocument,
       {
@@ -12493,7 +12490,7 @@ export class DeleteRoadmapMutation extends Request {
    * @param id - required id to pass to deleteRoadmap
    * @returns parsed response from DeleteRoadmapMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteRoadmapMutation, L.DeleteRoadmapMutationVariables>(
       L.DeleteRoadmapDocument,
       {
@@ -12522,7 +12519,7 @@ export class CreateRoadmapToProjectMutation extends Request {
    * @param input - required input to pass to createRoadmapToProject
    * @returns parsed response from CreateRoadmapToProjectMutation
    */
-  public async fetch(input: L.RoadmapToProjectCreateInput): LinearFetch<RoadmapToProjectPayload> {
+  public async fetch(input: L.RoadmapToProjectCreateInput): Promise<RoadmapToProjectPayload> {
     const response = await this._request<L.CreateRoadmapToProjectMutation, L.CreateRoadmapToProjectMutationVariables>(
       L.CreateRoadmapToProjectDocument,
       {
@@ -12551,7 +12548,7 @@ export class DeleteRoadmapToProjectMutation extends Request {
    * @param id - required id to pass to deleteRoadmapToProject
    * @returns parsed response from DeleteRoadmapToProjectMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteRoadmapToProjectMutation, L.DeleteRoadmapToProjectMutationVariables>(
       L.DeleteRoadmapToProjectDocument,
       {
@@ -12581,7 +12578,7 @@ export class UpdateRoadmapToProjectMutation extends Request {
    * @param input - required input to pass to updateRoadmapToProject
    * @returns parsed response from UpdateRoadmapToProjectMutation
    */
-  public async fetch(id: string, input: L.RoadmapToProjectUpdateInput): LinearFetch<RoadmapToProjectPayload> {
+  public async fetch(id: string, input: L.RoadmapToProjectUpdateInput): Promise<RoadmapToProjectPayload> {
     const response = await this._request<L.UpdateRoadmapToProjectMutation, L.UpdateRoadmapToProjectMutationVariables>(
       L.UpdateRoadmapToProjectDocument,
       {
@@ -12611,7 +12608,7 @@ export class UnarchiveRoadmapMutation extends Request {
    * @param id - required id to pass to unarchiveRoadmap
    * @returns parsed response from UnarchiveRoadmapMutation
    */
-  public async fetch(id: string): LinearFetch<RoadmapArchivePayload> {
+  public async fetch(id: string): Promise<RoadmapArchivePayload> {
     const response = await this._request<L.UnarchiveRoadmapMutation, L.UnarchiveRoadmapMutationVariables>(
       L.UnarchiveRoadmapDocument,
       {
@@ -12641,7 +12638,7 @@ export class UpdateRoadmapMutation extends Request {
    * @param input - required input to pass to updateRoadmap
    * @returns parsed response from UpdateRoadmapMutation
    */
-  public async fetch(id: string, input: L.RoadmapUpdateInput): LinearFetch<RoadmapPayload> {
+  public async fetch(id: string, input: L.RoadmapUpdateInput): Promise<RoadmapPayload> {
     const response = await this._request<L.UpdateRoadmapMutation, L.UpdateRoadmapMutationVariables>(
       L.UpdateRoadmapDocument,
       {
@@ -12671,7 +12668,7 @@ export class SamlTokenUserAccountAuthMutation extends Request {
    * @param input - required input to pass to samlTokenUserAccountAuth
    * @returns parsed response from SamlTokenUserAccountAuthMutation
    */
-  public async fetch(input: L.TokenUserAccountAuthInput): LinearFetch<AuthResolverResponse> {
+  public async fetch(input: L.TokenUserAccountAuthInput): Promise<AuthResolverResponse> {
     const response = await this._request<
       L.SamlTokenUserAccountAuthMutation,
       L.SamlTokenUserAccountAuthMutationVariables
@@ -12704,7 +12701,7 @@ export class CreateTeamMutation extends Request {
   public async fetch(
     input: L.TeamCreateInput,
     variables?: Omit<L.CreateTeamMutationVariables, "input">
-  ): LinearFetch<TeamPayload> {
+  ): Promise<TeamPayload> {
     const response = await this._request<L.CreateTeamMutation, L.CreateTeamMutationVariables>(L.CreateTeamDocument, {
       input,
       ...variables,
@@ -12731,7 +12728,7 @@ export class DeleteTeamCyclesMutation extends Request {
    * @param id - required id to pass to deleteTeamCycles
    * @returns parsed response from DeleteTeamCyclesMutation
    */
-  public async fetch(id: string): LinearFetch<TeamPayload> {
+  public async fetch(id: string): Promise<TeamPayload> {
     const response = await this._request<L.DeleteTeamCyclesMutation, L.DeleteTeamCyclesMutationVariables>(
       L.DeleteTeamCyclesDocument,
       {
@@ -12760,7 +12757,7 @@ export class DeleteTeamMutation extends Request {
    * @param id - required id to pass to deleteTeam
    * @returns parsed response from DeleteTeamMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteTeamMutation, L.DeleteTeamMutationVariables>(L.DeleteTeamDocument, {
       id,
     });
@@ -12786,7 +12783,7 @@ export class DeleteTeamKeyMutation extends Request {
    * @param id - required id to pass to deleteTeamKey
    * @returns parsed response from DeleteTeamKeyMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteTeamKeyMutation, L.DeleteTeamKeyMutationVariables>(
       L.DeleteTeamKeyDocument,
       {
@@ -12815,7 +12812,7 @@ export class CreateTeamMembershipMutation extends Request {
    * @param input - required input to pass to createTeamMembership
    * @returns parsed response from CreateTeamMembershipMutation
    */
-  public async fetch(input: L.TeamMembershipCreateInput): LinearFetch<TeamMembershipPayload> {
+  public async fetch(input: L.TeamMembershipCreateInput): Promise<TeamMembershipPayload> {
     const response = await this._request<L.CreateTeamMembershipMutation, L.CreateTeamMembershipMutationVariables>(
       L.CreateTeamMembershipDocument,
       {
@@ -12844,7 +12841,7 @@ export class DeleteTeamMembershipMutation extends Request {
    * @param id - required id to pass to deleteTeamMembership
    * @returns parsed response from DeleteTeamMembershipMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteTeamMembershipMutation, L.DeleteTeamMembershipMutationVariables>(
       L.DeleteTeamMembershipDocument,
       {
@@ -12874,7 +12871,7 @@ export class UpdateTeamMembershipMutation extends Request {
    * @param input - required input to pass to updateTeamMembership
    * @returns parsed response from UpdateTeamMembershipMutation
    */
-  public async fetch(id: string, input: L.TeamMembershipUpdateInput): LinearFetch<TeamMembershipPayload> {
+  public async fetch(id: string, input: L.TeamMembershipUpdateInput): Promise<TeamMembershipPayload> {
     const response = await this._request<L.UpdateTeamMembershipMutation, L.UpdateTeamMembershipMutationVariables>(
       L.UpdateTeamMembershipDocument,
       {
@@ -12905,7 +12902,7 @@ export class UpdateTeamMutation extends Request {
    * @param input - required input to pass to updateTeam
    * @returns parsed response from UpdateTeamMutation
    */
-  public async fetch(id: string, input: L.TeamUpdateInput): LinearFetch<TeamPayload> {
+  public async fetch(id: string, input: L.TeamUpdateInput): Promise<TeamPayload> {
     const response = await this._request<L.UpdateTeamMutation, L.UpdateTeamMutationVariables>(L.UpdateTeamDocument, {
       id,
       input,
@@ -12932,7 +12929,7 @@ export class CreateTemplateMutation extends Request {
    * @param input - required input to pass to createTemplate
    * @returns parsed response from CreateTemplateMutation
    */
-  public async fetch(input: L.TemplateCreateInput): LinearFetch<TemplatePayload> {
+  public async fetch(input: L.TemplateCreateInput): Promise<TemplatePayload> {
     const response = await this._request<L.CreateTemplateMutation, L.CreateTemplateMutationVariables>(
       L.CreateTemplateDocument,
       {
@@ -12961,7 +12958,7 @@ export class DeleteTemplateMutation extends Request {
    * @param id - required id to pass to deleteTemplate
    * @returns parsed response from DeleteTemplateMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteTemplateMutation, L.DeleteTemplateMutationVariables>(
       L.DeleteTemplateDocument,
       {
@@ -12991,7 +12988,7 @@ export class UpdateTemplateMutation extends Request {
    * @param input - required input to pass to updateTemplate
    * @returns parsed response from UpdateTemplateMutation
    */
-  public async fetch(id: string, input: L.TemplateUpdateInput): LinearFetch<TemplatePayload> {
+  public async fetch(id: string, input: L.TemplateUpdateInput): Promise<TemplatePayload> {
     const response = await this._request<L.UpdateTemplateMutation, L.UpdateTemplateMutationVariables>(
       L.UpdateTemplateDocument,
       {
@@ -13021,7 +13018,7 @@ export class UserDemoteAdminMutation extends Request {
    * @param id - required id to pass to userDemoteAdmin
    * @returns parsed response from UserDemoteAdminMutation
    */
-  public async fetch(id: string): LinearFetch<UserAdminPayload> {
+  public async fetch(id: string): Promise<UserAdminPayload> {
     const response = await this._request<L.UserDemoteAdminMutation, L.UserDemoteAdminMutationVariables>(
       L.UserDemoteAdminDocument,
       {
@@ -13050,7 +13047,7 @@ export class UserDemoteMemberMutation extends Request {
    * @param id - required id to pass to userDemoteMember
    * @returns parsed response from UserDemoteMemberMutation
    */
-  public async fetch(id: string): LinearFetch<UserAdminPayload> {
+  public async fetch(id: string): Promise<UserAdminPayload> {
     const response = await this._request<L.UserDemoteMemberMutation, L.UserDemoteMemberMutationVariables>(
       L.UserDemoteMemberDocument,
       {
@@ -13080,7 +13077,7 @@ export class UserDiscordConnectMutation extends Request {
    * @param redirectUri - required redirectUri to pass to userDiscordConnect
    * @returns parsed response from UserDiscordConnectMutation
    */
-  public async fetch(code: string, redirectUri: string): LinearFetch<UserPayload> {
+  public async fetch(code: string, redirectUri: string): Promise<UserPayload> {
     const response = await this._request<L.UserDiscordConnectMutation, L.UserDiscordConnectMutationVariables>(
       L.UserDiscordConnectDocument,
       {
@@ -13110,7 +13107,7 @@ export class UserExternalUserDisconnectMutation extends Request {
    * @param service - required service to pass to userExternalUserDisconnect
    * @returns parsed response from UserExternalUserDisconnectMutation
    */
-  public async fetch(service: string): LinearFetch<UserPayload> {
+  public async fetch(service: string): Promise<UserPayload> {
     const response = await this._request<
       L.UserExternalUserDisconnectMutation,
       L.UserExternalUserDisconnectMutationVariables
@@ -13140,7 +13137,7 @@ export class UpdateUserFlagMutation extends Request {
    * @param operation - required operation to pass to updateUserFlag
    * @returns parsed response from UpdateUserFlagMutation
    */
-  public async fetch(flag: L.UserFlagType, operation: L.UserFlagUpdateOperation): LinearFetch<UserSettingsFlagPayload> {
+  public async fetch(flag: L.UserFlagType, operation: L.UserFlagUpdateOperation): Promise<UserSettingsFlagPayload> {
     const response = await this._request<L.UpdateUserFlagMutation, L.UpdateUserFlagMutationVariables>(
       L.UpdateUserFlagDocument,
       {
@@ -13170,7 +13167,7 @@ export class UserGitHubConnectMutation extends Request {
    * @param code - required code to pass to userGitHubConnect
    * @returns parsed response from UserGitHubConnectMutation
    */
-  public async fetch(code: string): LinearFetch<UserPayload> {
+  public async fetch(code: string): Promise<UserPayload> {
     const response = await this._request<L.UserGitHubConnectMutation, L.UserGitHubConnectMutationVariables>(
       L.UserGitHubConnectDocument,
       {
@@ -13199,7 +13196,7 @@ export class UserGoogleCalendarConnectMutation extends Request {
    * @param code - required code to pass to userGoogleCalendarConnect
    * @returns parsed response from UserGoogleCalendarConnectMutation
    */
-  public async fetch(code: string): LinearFetch<UserPayload> {
+  public async fetch(code: string): Promise<UserPayload> {
     const response = await this._request<
       L.UserGoogleCalendarConnectMutation,
       L.UserGoogleCalendarConnectMutationVariables
@@ -13228,7 +13225,7 @@ export class UserJiraConnectMutation extends Request {
    * @param code - required code to pass to userJiraConnect
    * @returns parsed response from UserJiraConnectMutation
    */
-  public async fetch(code: string): LinearFetch<UserPayload> {
+  public async fetch(code: string): Promise<UserPayload> {
     const response = await this._request<L.UserJiraConnectMutation, L.UserJiraConnectMutationVariables>(
       L.UserJiraConnectDocument,
       {
@@ -13257,7 +13254,7 @@ export class UserPromoteAdminMutation extends Request {
    * @param id - required id to pass to userPromoteAdmin
    * @returns parsed response from UserPromoteAdminMutation
    */
-  public async fetch(id: string): LinearFetch<UserAdminPayload> {
+  public async fetch(id: string): Promise<UserAdminPayload> {
     const response = await this._request<L.UserPromoteAdminMutation, L.UserPromoteAdminMutationVariables>(
       L.UserPromoteAdminDocument,
       {
@@ -13286,7 +13283,7 @@ export class UserPromoteMemberMutation extends Request {
    * @param id - required id to pass to userPromoteMember
    * @returns parsed response from UserPromoteMemberMutation
    */
-  public async fetch(id: string): LinearFetch<UserAdminPayload> {
+  public async fetch(id: string): Promise<UserAdminPayload> {
     const response = await this._request<L.UserPromoteMemberMutation, L.UserPromoteMemberMutationVariables>(
       L.UserPromoteMemberDocument,
       {
@@ -13315,7 +13312,7 @@ export class UserSettingsFlagIncrementMutation extends Request {
    * @param flag - required flag to pass to userSettingsFlagIncrement
    * @returns parsed response from UserSettingsFlagIncrementMutation
    */
-  public async fetch(flag: string): LinearFetch<UserSettingsFlagPayload> {
+  public async fetch(flag: string): Promise<UserSettingsFlagPayload> {
     const response = await this._request<
       L.UserSettingsFlagIncrementMutation,
       L.UserSettingsFlagIncrementMutationVariables
@@ -13346,7 +13343,7 @@ export class UserSettingsFlagsResetMutation extends Request {
    */
   public async fetch(
     variables?: L.UserSettingsFlagsResetMutationVariables
-  ): LinearFetch<UserSettingsFlagsResetPayload> {
+  ): Promise<UserSettingsFlagsResetPayload> {
     const response = await this._request<L.UserSettingsFlagsResetMutation, L.UserSettingsFlagsResetMutationVariables>(
       L.UserSettingsFlagsResetDocument,
       variables
@@ -13374,7 +13371,7 @@ export class UpdateUserSettingsMutation extends Request {
    * @param input - required input to pass to updateUserSettings
    * @returns parsed response from UpdateUserSettingsMutation
    */
-  public async fetch(id: string, input: L.UserSettingsUpdateInput): LinearFetch<UserSettingsPayload> {
+  public async fetch(id: string, input: L.UserSettingsUpdateInput): Promise<UserSettingsPayload> {
     const response = await this._request<L.UpdateUserSettingsMutation, L.UpdateUserSettingsMutationVariables>(
       L.UpdateUserSettingsDocument,
       {
@@ -13404,7 +13401,7 @@ export class SuspendUserMutation extends Request {
    * @param id - required id to pass to suspendUser
    * @returns parsed response from SuspendUserMutation
    */
-  public async fetch(id: string): LinearFetch<UserAdminPayload> {
+  public async fetch(id: string): Promise<UserAdminPayload> {
     const response = await this._request<L.SuspendUserMutation, L.SuspendUserMutationVariables>(L.SuspendUserDocument, {
       id,
     });
@@ -13430,7 +13427,7 @@ export class UnsuspendUserMutation extends Request {
    * @param id - required id to pass to unsuspendUser
    * @returns parsed response from UnsuspendUserMutation
    */
-  public async fetch(id: string): LinearFetch<UserAdminPayload> {
+  public async fetch(id: string): Promise<UserAdminPayload> {
     const response = await this._request<L.UnsuspendUserMutation, L.UnsuspendUserMutationVariables>(
       L.UnsuspendUserDocument,
       {
@@ -13460,7 +13457,7 @@ export class UpdateUserMutation extends Request {
    * @param input - required input to pass to updateUser
    * @returns parsed response from UpdateUserMutation
    */
-  public async fetch(id: string, input: L.UpdateUserInput): LinearFetch<UserPayload> {
+  public async fetch(id: string, input: L.UpdateUserInput): Promise<UserPayload> {
     const response = await this._request<L.UpdateUserMutation, L.UpdateUserMutationVariables>(L.UpdateUserDocument, {
       id,
       input,
@@ -13487,7 +13484,7 @@ export class CreateViewPreferencesMutation extends Request {
    * @param input - required input to pass to createViewPreferences
    * @returns parsed response from CreateViewPreferencesMutation
    */
-  public async fetch(input: L.ViewPreferencesCreateInput): LinearFetch<ViewPreferencesPayload> {
+  public async fetch(input: L.ViewPreferencesCreateInput): Promise<ViewPreferencesPayload> {
     const response = await this._request<L.CreateViewPreferencesMutation, L.CreateViewPreferencesMutationVariables>(
       L.CreateViewPreferencesDocument,
       {
@@ -13516,7 +13513,7 @@ export class DeleteViewPreferencesMutation extends Request {
    * @param id - required id to pass to deleteViewPreferences
    * @returns parsed response from DeleteViewPreferencesMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteViewPreferencesMutation, L.DeleteViewPreferencesMutationVariables>(
       L.DeleteViewPreferencesDocument,
       {
@@ -13546,7 +13543,7 @@ export class UpdateViewPreferencesMutation extends Request {
    * @param input - required input to pass to updateViewPreferences
    * @returns parsed response from UpdateViewPreferencesMutation
    */
-  public async fetch(id: string, input: L.ViewPreferencesUpdateInput): LinearFetch<ViewPreferencesPayload> {
+  public async fetch(id: string, input: L.ViewPreferencesUpdateInput): Promise<ViewPreferencesPayload> {
     const response = await this._request<L.UpdateViewPreferencesMutation, L.UpdateViewPreferencesMutationVariables>(
       L.UpdateViewPreferencesDocument,
       {
@@ -13576,7 +13573,7 @@ export class CreateWebhookMutation extends Request {
    * @param input - required input to pass to createWebhook
    * @returns parsed response from CreateWebhookMutation
    */
-  public async fetch(input: L.WebhookCreateInput): LinearFetch<WebhookPayload> {
+  public async fetch(input: L.WebhookCreateInput): Promise<WebhookPayload> {
     const response = await this._request<L.CreateWebhookMutation, L.CreateWebhookMutationVariables>(
       L.CreateWebhookDocument,
       {
@@ -13605,7 +13602,7 @@ export class DeleteWebhookMutation extends Request {
    * @param id - required id to pass to deleteWebhook
    * @returns parsed response from DeleteWebhookMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): Promise<DeletePayload> {
     const response = await this._request<L.DeleteWebhookMutation, L.DeleteWebhookMutationVariables>(
       L.DeleteWebhookDocument,
       {
@@ -13635,7 +13632,7 @@ export class UpdateWebhookMutation extends Request {
    * @param input - required input to pass to updateWebhook
    * @returns parsed response from UpdateWebhookMutation
    */
-  public async fetch(id: string, input: L.WebhookUpdateInput): LinearFetch<WebhookPayload> {
+  public async fetch(id: string, input: L.WebhookUpdateInput): Promise<WebhookPayload> {
     const response = await this._request<L.UpdateWebhookMutation, L.UpdateWebhookMutationVariables>(
       L.UpdateWebhookDocument,
       {
@@ -13665,7 +13662,7 @@ export class ArchiveWorkflowStateMutation extends Request {
    * @param id - required id to pass to archiveWorkflowState
    * @returns parsed response from ArchiveWorkflowStateMutation
    */
-  public async fetch(id: string): LinearFetch<WorkflowStateArchivePayload> {
+  public async fetch(id: string): Promise<WorkflowStateArchivePayload> {
     const response = await this._request<L.ArchiveWorkflowStateMutation, L.ArchiveWorkflowStateMutationVariables>(
       L.ArchiveWorkflowStateDocument,
       {
@@ -13694,7 +13691,7 @@ export class CreateWorkflowStateMutation extends Request {
    * @param input - required input to pass to createWorkflowState
    * @returns parsed response from CreateWorkflowStateMutation
    */
-  public async fetch(input: L.WorkflowStateCreateInput): LinearFetch<WorkflowStatePayload> {
+  public async fetch(input: L.WorkflowStateCreateInput): Promise<WorkflowStatePayload> {
     const response = await this._request<L.CreateWorkflowStateMutation, L.CreateWorkflowStateMutationVariables>(
       L.CreateWorkflowStateDocument,
       {
@@ -13724,7 +13721,7 @@ export class UpdateWorkflowStateMutation extends Request {
    * @param input - required input to pass to updateWorkflowState
    * @returns parsed response from UpdateWorkflowStateMutation
    */
-  public async fetch(id: string, input: L.WorkflowStateUpdateInput): LinearFetch<WorkflowStatePayload> {
+  public async fetch(id: string, input: L.WorkflowStateUpdateInput): Promise<WorkflowStatePayload> {
     const response = await this._request<L.UpdateWorkflowStateMutation, L.UpdateWorkflowStateMutationVariables>(
       L.UpdateWorkflowStateDocument,
       {
@@ -13754,7 +13751,7 @@ export class ProjectMilestoneQuery extends Request {
    * @param id - required id to pass to ProjectMilestone
    * @returns parsed response from ProjectMilestoneQuery
    */
-  public async fetch(id: string): LinearFetch<ProjectMilestone> {
+  public async fetch(id: string): Promise<ProjectMilestone> {
     const response = await this._request<L.ProjectMilestoneQuery, L.ProjectMilestoneQueryVariables>(
       L.ProjectMilestoneDocument,
       {
@@ -13783,7 +13780,7 @@ export class ProjectMilestonesQuery extends Request {
    * @param variables - variables to pass into the ProjectMilestonesQuery
    * @returns parsed response from ProjectMilestonesQuery
    */
-  public async fetch(variables?: L.ProjectMilestonesQueryVariables): LinearFetch<ProjectMilestoneConnection> {
+  public async fetch(variables?: L.ProjectMilestonesQueryVariables): Promise<ProjectMilestoneConnection> {
     const response = await this._request<L.ProjectMilestonesQuery, L.ProjectMilestonesQueryVariables>(
       L.ProjectMilestonesDocument,
       variables
@@ -13820,7 +13817,7 @@ export class AdministrableTeamsQuery extends Request {
    * @param variables - variables to pass into the AdministrableTeamsQuery
    * @returns parsed response from AdministrableTeamsQuery
    */
-  public async fetch(variables?: L.AdministrableTeamsQueryVariables): LinearFetch<TeamConnection> {
+  public async fetch(variables?: L.AdministrableTeamsQueryVariables): Promise<TeamConnection> {
     const response = await this._request<L.AdministrableTeamsQuery, L.AdministrableTeamsQueryVariables>(
       L.AdministrableTeamsDocument,
       variables
@@ -13857,7 +13854,7 @@ export class ApiKeysQuery extends Request {
    * @param variables - variables to pass into the ApiKeysQuery
    * @returns parsed response from ApiKeysQuery
    */
-  public async fetch(variables?: L.ApiKeysQueryVariables): LinearFetch<ApiKeyConnection> {
+  public async fetch(variables?: L.ApiKeysQueryVariables): Promise<ApiKeyConnection> {
     const response = await this._request<L.ApiKeysQuery, L.ApiKeysQueryVariables>(L.ApiKeysDocument, variables);
     const data = response.apiKeys;
 
@@ -13891,7 +13888,7 @@ export class ApplicationInfoQuery extends Request {
    * @param clientId - required clientId to pass to applicationInfo
    * @returns parsed response from ApplicationInfoQuery
    */
-  public async fetch(clientId: string): LinearFetch<Application> {
+  public async fetch(clientId: string): Promise<Application> {
     const response = await this._request<L.ApplicationInfoQuery, L.ApplicationInfoQueryVariables>(
       L.ApplicationInfoDocument,
       {
@@ -13926,7 +13923,7 @@ export class ApplicationWithAuthorizationQuery extends Request {
     clientId: string,
     scope: string[],
     variables?: Omit<L.ApplicationWithAuthorizationQueryVariables, "clientId" | "scope">
-  ): LinearFetch<UserAuthorizedApplication> {
+  ): Promise<UserAuthorizedApplication> {
     const response = await this._request<
       L.ApplicationWithAuthorizationQuery,
       L.ApplicationWithAuthorizationQueryVariables
@@ -13957,7 +13954,7 @@ export class AttachmentQuery extends Request {
    * @param id - required id to pass to attachment
    * @returns parsed response from AttachmentQuery
    */
-  public async fetch(id: string): LinearFetch<Attachment> {
+  public async fetch(id: string): Promise<Attachment> {
     const response = await this._request<L.AttachmentQuery, L.AttachmentQueryVariables>(L.AttachmentDocument, {
       id,
     });
@@ -13983,7 +13980,7 @@ export class AttachmentIssueQuery extends Request {
    * @param id - required id to pass to attachmentIssue
    * @returns parsed response from AttachmentIssueQuery
    */
-  public async fetch(id: string): LinearFetch<Issue> {
+  public async fetch(id: string): Promise<Issue> {
     const response = await this._request<L.AttachmentIssueQuery, L.AttachmentIssueQueryVariables>(
       L.AttachmentIssueDocument,
       {
@@ -14012,7 +14009,7 @@ export class AttachmentsQuery extends Request {
    * @param variables - variables to pass into the AttachmentsQuery
    * @returns parsed response from AttachmentsQuery
    */
-  public async fetch(variables?: L.AttachmentsQueryVariables): LinearFetch<AttachmentConnection> {
+  public async fetch(variables?: L.AttachmentsQueryVariables): Promise<AttachmentConnection> {
     const response = await this._request<L.AttachmentsQuery, L.AttachmentsQueryVariables>(
       L.AttachmentsDocument,
       variables
@@ -14053,7 +14050,7 @@ export class AttachmentsForUrlQuery extends Request {
   public async fetch(
     url: string,
     variables?: Omit<L.AttachmentsForUrlQueryVariables, "url">
-  ): LinearFetch<AttachmentConnection> {
+  ): Promise<AttachmentConnection> {
     const response = await this._request<L.AttachmentsForUrlQuery, L.AttachmentsForUrlQueryVariables>(
       L.AttachmentsForUrlDocument,
       {
@@ -14094,7 +14091,7 @@ export class AuditEntriesQuery extends Request {
    * @param variables - variables to pass into the AuditEntriesQuery
    * @returns parsed response from AuditEntriesQuery
    */
-  public async fetch(variables?: L.AuditEntriesQueryVariables): LinearFetch<AuditEntryConnection> {
+  public async fetch(variables?: L.AuditEntriesQueryVariables): Promise<AuditEntryConnection> {
     const response = await this._request<L.AuditEntriesQuery, L.AuditEntriesQueryVariables>(
       L.AuditEntriesDocument,
       variables
@@ -14130,7 +14127,7 @@ export class AuditEntryTypesQuery extends Request {
    *
    * @returns parsed response from AuditEntryTypesQuery
    */
-  public async fetch(): LinearFetch<AuditEntryType[]> {
+  public async fetch(): Promise<AuditEntryType[]> {
     const response = await this._request<L.AuditEntryTypesQuery, L.AuditEntryTypesQueryVariables>(
       L.AuditEntryTypesDocument,
       {}
@@ -14158,7 +14155,7 @@ export class AvailableUsersQuery extends Request {
    *
    * @returns parsed response from AvailableUsersQuery
    */
-  public async fetch(): LinearFetch<AuthResolverResponse> {
+  public async fetch(): Promise<AuthResolverResponse> {
     const response = await this._request<L.AvailableUsersQuery, L.AvailableUsersQueryVariables>(
       L.AvailableUsersDocument,
       {}
@@ -14185,7 +14182,7 @@ export class CommentQuery extends Request {
    * @param id - required id to pass to comment
    * @returns parsed response from CommentQuery
    */
-  public async fetch(id: string): LinearFetch<Comment> {
+  public async fetch(id: string): Promise<Comment> {
     const response = await this._request<L.CommentQuery, L.CommentQueryVariables>(L.CommentDocument, {
       id,
     });
@@ -14211,7 +14208,7 @@ export class CommentsQuery extends Request {
    * @param variables - variables to pass into the CommentsQuery
    * @returns parsed response from CommentsQuery
    */
-  public async fetch(variables?: L.CommentsQueryVariables): LinearFetch<CommentConnection> {
+  public async fetch(variables?: L.CommentsQueryVariables): Promise<CommentConnection> {
     const response = await this._request<L.CommentsQuery, L.CommentsQueryVariables>(L.CommentsDocument, variables);
     const data = response.comments;
 
@@ -14245,7 +14242,7 @@ export class CustomViewQuery extends Request {
    * @param id - required id to pass to customView
    * @returns parsed response from CustomViewQuery
    */
-  public async fetch(id: string): LinearFetch<CustomView> {
+  public async fetch(id: string): Promise<CustomView> {
     const response = await this._request<L.CustomViewQuery, L.CustomViewQueryVariables>(L.CustomViewDocument, {
       id,
     });
@@ -14271,7 +14268,7 @@ export class CustomViewsQuery extends Request {
    * @param variables - variables to pass into the CustomViewsQuery
    * @returns parsed response from CustomViewsQuery
    */
-  public async fetch(variables?: L.CustomViewsQueryVariables): LinearFetch<CustomViewConnection> {
+  public async fetch(variables?: L.CustomViewsQueryVariables): Promise<CustomViewConnection> {
     const response = await this._request<L.CustomViewsQuery, L.CustomViewsQueryVariables>(
       L.CustomViewsDocument,
       variables
@@ -14308,7 +14305,7 @@ export class CycleQuery extends Request {
    * @param id - required id to pass to cycle
    * @returns parsed response from CycleQuery
    */
-  public async fetch(id: string): LinearFetch<Cycle> {
+  public async fetch(id: string): Promise<Cycle> {
     const response = await this._request<L.CycleQuery, L.CycleQueryVariables>(L.CycleDocument, {
       id,
     });
@@ -14334,7 +14331,7 @@ export class CyclesQuery extends Request {
    * @param variables - variables to pass into the CyclesQuery
    * @returns parsed response from CyclesQuery
    */
-  public async fetch(variables?: L.CyclesQueryVariables): LinearFetch<CycleConnection> {
+  public async fetch(variables?: L.CyclesQueryVariables): Promise<CycleConnection> {
     const response = await this._request<L.CyclesQuery, L.CyclesQueryVariables>(L.CyclesDocument, variables);
     const data = response.cycles;
 
@@ -14368,7 +14365,7 @@ export class DocumentQuery extends Request {
    * @param id - required id to pass to document
    * @returns parsed response from DocumentQuery
    */
-  public async fetch(id: string): LinearFetch<Document> {
+  public async fetch(id: string): Promise<Document> {
     const response = await this._request<L.DocumentQuery, L.DocumentQueryVariables>(L.DocumentDocument, {
       id,
     });
@@ -14394,7 +14391,7 @@ export class DocumentsQuery extends Request {
    * @param variables - variables to pass into the DocumentsQuery
    * @returns parsed response from DocumentsQuery
    */
-  public async fetch(variables?: L.DocumentsQueryVariables): LinearFetch<DocumentConnection> {
+  public async fetch(variables?: L.DocumentsQueryVariables): Promise<DocumentConnection> {
     const response = await this._request<L.DocumentsQuery, L.DocumentsQueryVariables>(L.DocumentsDocument, variables);
     const data = response.documents;
 
@@ -14428,7 +14425,7 @@ export class EmbedInfoQuery extends Request {
    * @param url - required url to pass to embedInfo
    * @returns parsed response from EmbedInfoQuery
    */
-  public async fetch(url: string): LinearFetch<EmbedPayload> {
+  public async fetch(url: string): Promise<EmbedPayload> {
     const response = await this._request<L.EmbedInfoQuery, L.EmbedInfoQueryVariables>(L.EmbedInfoDocument, {
       url,
     });
@@ -14454,7 +14451,7 @@ export class EmojiQuery extends Request {
    * @param id - required id to pass to emoji
    * @returns parsed response from EmojiQuery
    */
-  public async fetch(id: string): LinearFetch<Emoji> {
+  public async fetch(id: string): Promise<Emoji> {
     const response = await this._request<L.EmojiQuery, L.EmojiQueryVariables>(L.EmojiDocument, {
       id,
     });
@@ -14480,7 +14477,7 @@ export class EmojisQuery extends Request {
    * @param variables - variables to pass into the EmojisQuery
    * @returns parsed response from EmojisQuery
    */
-  public async fetch(variables?: L.EmojisQueryVariables): LinearFetch<EmojiConnection> {
+  public async fetch(variables?: L.EmojisQueryVariables): Promise<EmojiConnection> {
     const response = await this._request<L.EmojisQuery, L.EmojisQueryVariables>(L.EmojisDocument, variables);
     const data = response.emojis;
 
@@ -14514,7 +14511,7 @@ export class FavoriteQuery extends Request {
    * @param id - required id to pass to favorite
    * @returns parsed response from FavoriteQuery
    */
-  public async fetch(id: string): LinearFetch<Favorite> {
+  public async fetch(id: string): Promise<Favorite> {
     const response = await this._request<L.FavoriteQuery, L.FavoriteQueryVariables>(L.FavoriteDocument, {
       id,
     });
@@ -14540,7 +14537,7 @@ export class FavoritesQuery extends Request {
    * @param variables - variables to pass into the FavoritesQuery
    * @returns parsed response from FavoritesQuery
    */
-  public async fetch(variables?: L.FavoritesQueryVariables): LinearFetch<FavoriteConnection> {
+  public async fetch(variables?: L.FavoritesQueryVariables): Promise<FavoriteConnection> {
     const response = await this._request<L.FavoritesQuery, L.FavoritesQueryVariables>(L.FavoritesDocument, variables);
     const data = response.favorites;
 
@@ -14578,7 +14575,7 @@ export class FigmaEmbedInfoQuery extends Request {
   public async fetch(
     fileId: string,
     variables?: Omit<L.FigmaEmbedInfoQueryVariables, "fileId">
-  ): LinearFetch<FigmaEmbedPayload> {
+  ): Promise<FigmaEmbedPayload> {
     const response = await this._request<L.FigmaEmbedInfoQuery, L.FigmaEmbedInfoQueryVariables>(
       L.FigmaEmbedInfoDocument,
       {
@@ -14608,7 +14605,7 @@ export class IntegrationQuery extends Request {
    * @param id - required id to pass to integration
    * @returns parsed response from IntegrationQuery
    */
-  public async fetch(id: string): LinearFetch<Integration> {
+  public async fetch(id: string): Promise<Integration> {
     const response = await this._request<L.IntegrationQuery, L.IntegrationQueryVariables>(L.IntegrationDocument, {
       id,
     });
@@ -14634,7 +14631,7 @@ export class IntegrationTemplateQuery extends Request {
    * @param id - required id to pass to integrationTemplate
    * @returns parsed response from IntegrationTemplateQuery
    */
-  public async fetch(id: string): LinearFetch<IntegrationTemplate> {
+  public async fetch(id: string): Promise<IntegrationTemplate> {
     const response = await this._request<L.IntegrationTemplateQuery, L.IntegrationTemplateQueryVariables>(
       L.IntegrationTemplateDocument,
       {
@@ -14663,7 +14660,7 @@ export class IntegrationTemplatesQuery extends Request {
    * @param variables - variables to pass into the IntegrationTemplatesQuery
    * @returns parsed response from IntegrationTemplatesQuery
    */
-  public async fetch(variables?: L.IntegrationTemplatesQueryVariables): LinearFetch<IntegrationTemplateConnection> {
+  public async fetch(variables?: L.IntegrationTemplatesQueryVariables): Promise<IntegrationTemplateConnection> {
     const response = await this._request<L.IntegrationTemplatesQuery, L.IntegrationTemplatesQueryVariables>(
       L.IntegrationTemplatesDocument,
       variables
@@ -14700,7 +14697,7 @@ export class IntegrationsQuery extends Request {
    * @param variables - variables to pass into the IntegrationsQuery
    * @returns parsed response from IntegrationsQuery
    */
-  public async fetch(variables?: L.IntegrationsQueryVariables): LinearFetch<IntegrationConnection> {
+  public async fetch(variables?: L.IntegrationsQueryVariables): Promise<IntegrationConnection> {
     const response = await this._request<L.IntegrationsQuery, L.IntegrationsQueryVariables>(
       L.IntegrationsDocument,
       variables
@@ -14737,7 +14734,7 @@ export class IntegrationsSettingsQuery extends Request {
    * @param id - required id to pass to integrationsSettings
    * @returns parsed response from IntegrationsSettingsQuery
    */
-  public async fetch(id: string): LinearFetch<IntegrationsSettings> {
+  public async fetch(id: string): Promise<IntegrationsSettings> {
     const response = await this._request<L.IntegrationsSettingsQuery, L.IntegrationsSettingsQueryVariables>(
       L.IntegrationsSettingsDocument,
       {
@@ -14766,7 +14763,7 @@ export class IssueQuery extends Request {
    * @param id - required id to pass to issue
    * @returns parsed response from IssueQuery
    */
-  public async fetch(id: string): LinearFetch<Issue> {
+  public async fetch(id: string): Promise<Issue> {
     const response = await this._request<L.IssueQuery, L.IssueQueryVariables>(L.IssueDocument, {
       id,
     });
@@ -14796,7 +14793,7 @@ export class IssueFigmaFileKeySearchQuery extends Request {
   public async fetch(
     fileKey: string,
     variables?: Omit<L.IssueFigmaFileKeySearchQueryVariables, "fileKey">
-  ): LinearFetch<IssueConnection> {
+  ): Promise<IssueConnection> {
     const response = await this._request<L.IssueFigmaFileKeySearchQuery, L.IssueFigmaFileKeySearchQueryVariables>(
       L.IssueFigmaFileKeySearchDocument,
       {
@@ -14837,7 +14834,7 @@ export class IssueFilterSuggestionQuery extends Request {
    * @param prompt - required prompt to pass to issueFilterSuggestion
    * @returns parsed response from IssueFilterSuggestionQuery
    */
-  public async fetch(prompt: string): LinearFetch<IssueFilterSuggestionPayload> {
+  public async fetch(prompt: string): Promise<IssueFilterSuggestionPayload> {
     const response = await this._request<L.IssueFilterSuggestionQuery, L.IssueFilterSuggestionQueryVariables>(
       L.IssueFilterSuggestionDocument,
       {
@@ -14867,7 +14864,7 @@ export class IssueImportCheckCsvQuery extends Request {
    * @param service - required service to pass to issueImportCheckCSV
    * @returns parsed response from IssueImportCheckCsvQuery
    */
-  public async fetch(csvUrl: string, service: string): LinearFetch<IssueImportCheckPayload> {
+  public async fetch(csvUrl: string, service: string): Promise<IssueImportCheckPayload> {
     const response = await this._request<L.IssueImportCheckCsvQuery, L.IssueImportCheckCsvQueryVariables>(
       L.IssueImportCheckCsvDocument,
       {
@@ -14897,7 +14894,7 @@ export class IssueImportFinishGithubOAuthQuery extends Request {
    * @param code - required code to pass to issueImportFinishGithubOAuth
    * @returns parsed response from IssueImportFinishGithubOAuthQuery
    */
-  public async fetch(code: string): LinearFetch<GithubOAuthTokenPayload> {
+  public async fetch(code: string): Promise<GithubOAuthTokenPayload> {
     const response = await this._request<
       L.IssueImportFinishGithubOAuthQuery,
       L.IssueImportFinishGithubOAuthQueryVariables
@@ -14926,7 +14923,7 @@ export class IssueLabelQuery extends Request {
    * @param id - required id to pass to issueLabel
    * @returns parsed response from IssueLabelQuery
    */
-  public async fetch(id: string): LinearFetch<IssueLabel> {
+  public async fetch(id: string): Promise<IssueLabel> {
     const response = await this._request<L.IssueLabelQuery, L.IssueLabelQueryVariables>(L.IssueLabelDocument, {
       id,
     });
@@ -14952,7 +14949,7 @@ export class IssueLabelsQuery extends Request {
    * @param variables - variables to pass into the IssueLabelsQuery
    * @returns parsed response from IssueLabelsQuery
    */
-  public async fetch(variables?: L.IssueLabelsQueryVariables): LinearFetch<IssueLabelConnection> {
+  public async fetch(variables?: L.IssueLabelsQueryVariables): Promise<IssueLabelConnection> {
     const response = await this._request<L.IssueLabelsQuery, L.IssueLabelsQueryVariables>(
       L.IssueLabelsDocument,
       variables
@@ -14988,7 +14985,7 @@ export class IssuePriorityValuesQuery extends Request {
    *
    * @returns parsed response from IssuePriorityValuesQuery
    */
-  public async fetch(): LinearFetch<IssuePriorityValue[]> {
+  public async fetch(): Promise<IssuePriorityValue[]> {
     const response = await this._request<L.IssuePriorityValuesQuery, L.IssuePriorityValuesQueryVariables>(
       L.IssuePriorityValuesDocument,
       {}
@@ -15017,7 +15014,7 @@ export class IssueRelationQuery extends Request {
    * @param id - required id to pass to issueRelation
    * @returns parsed response from IssueRelationQuery
    */
-  public async fetch(id: string): LinearFetch<IssueRelation> {
+  public async fetch(id: string): Promise<IssueRelation> {
     const response = await this._request<L.IssueRelationQuery, L.IssueRelationQueryVariables>(L.IssueRelationDocument, {
       id,
     });
@@ -15043,7 +15040,7 @@ export class IssueRelationsQuery extends Request {
    * @param variables - variables to pass into the IssueRelationsQuery
    * @returns parsed response from IssueRelationsQuery
    */
-  public async fetch(variables?: L.IssueRelationsQueryVariables): LinearFetch<IssueRelationConnection> {
+  public async fetch(variables?: L.IssueRelationsQueryVariables): Promise<IssueRelationConnection> {
     const response = await this._request<L.IssueRelationsQuery, L.IssueRelationsQueryVariables>(
       L.IssueRelationsDocument,
       variables
@@ -15080,7 +15077,7 @@ export class IssueSearchQuery extends Request {
    * @param variables - variables to pass into the IssueSearchQuery
    * @returns parsed response from IssueSearchQuery
    */
-  public async fetch(variables?: L.IssueSearchQueryVariables): LinearFetch<IssueConnection> {
+  public async fetch(variables?: L.IssueSearchQueryVariables): Promise<IssueConnection> {
     const response = await this._request<L.IssueSearchQuery, L.IssueSearchQueryVariables>(
       L.IssueSearchDocument,
       variables
@@ -15117,7 +15114,7 @@ export class IssueVcsBranchSearchQuery extends Request {
    * @param branchName - required branchName to pass to issueVcsBranchSearch
    * @returns parsed response from IssueVcsBranchSearchQuery
    */
-  public async fetch(branchName: string): LinearFetch<Issue | undefined> {
+  public async fetch(branchName: string): Promise<Issue | undefined> {
     const response = await this._request<L.IssueVcsBranchSearchQuery, L.IssueVcsBranchSearchQueryVariables>(
       L.IssueVcsBranchSearchDocument,
       {
@@ -15146,7 +15143,7 @@ export class IssuesQuery extends Request {
    * @param variables - variables to pass into the IssuesQuery
    * @returns parsed response from IssuesQuery
    */
-  public async fetch(variables?: L.IssuesQueryVariables): LinearFetch<IssueConnection> {
+  public async fetch(variables?: L.IssuesQueryVariables): Promise<IssueConnection> {
     const response = await this._request<L.IssuesQuery, L.IssuesQueryVariables>(L.IssuesDocument, variables);
     const data = response.issues;
 
@@ -15182,7 +15179,7 @@ export class NotificationQuery extends Request {
    */
   public async fetch(
     id: string
-  ): LinearFetch<IssueNotification | OauthClientApprovalNotification | ProjectNotification | Notification> {
+  ): Promise<IssueNotification | OauthClientApprovalNotification | ProjectNotification | Notification> {
     const response = await this._request<L.NotificationQuery, L.NotificationQueryVariables>(L.NotificationDocument, {
       id,
     });
@@ -15220,7 +15217,7 @@ export class NotificationSubscriptionQuery extends Request {
    */
   public async fetch(
     id: string
-  ): LinearFetch<
+  ): Promise<
     | CustomViewNotificationSubscription
     | CycleNotificationSubscription
     | LabelNotificationSubscription
@@ -15275,7 +15272,7 @@ export class NotificationSubscriptionsQuery extends Request {
    */
   public async fetch(
     variables?: L.NotificationSubscriptionsQueryVariables
-  ): LinearFetch<NotificationSubscriptionConnection> {
+  ): Promise<NotificationSubscriptionConnection> {
     const response = await this._request<L.NotificationSubscriptionsQuery, L.NotificationSubscriptionsQueryVariables>(
       L.NotificationSubscriptionsDocument,
       variables
@@ -15312,7 +15309,7 @@ export class NotificationsQuery extends Request {
    * @param variables - variables to pass into the NotificationsQuery
    * @returns parsed response from NotificationsQuery
    */
-  public async fetch(variables?: L.NotificationsQueryVariables): LinearFetch<NotificationConnection> {
+  public async fetch(variables?: L.NotificationsQueryVariables): Promise<NotificationConnection> {
     const response = await this._request<L.NotificationsQuery, L.NotificationsQueryVariables>(
       L.NotificationsDocument,
       variables
@@ -15348,7 +15345,7 @@ export class OrganizationQuery extends Request {
    *
    * @returns parsed response from OrganizationQuery
    */
-  public async fetch(): LinearFetch<Organization> {
+  public async fetch(): Promise<Organization> {
     const response = await this._request<L.OrganizationQuery, L.OrganizationQueryVariables>(L.OrganizationDocument, {});
     const data = response.organization;
 
@@ -15372,7 +15369,7 @@ export class OrganizationExistsQuery extends Request {
    * @param urlKey - required urlKey to pass to organizationExists
    * @returns parsed response from OrganizationExistsQuery
    */
-  public async fetch(urlKey: string): LinearFetch<OrganizationExistsPayload> {
+  public async fetch(urlKey: string): Promise<OrganizationExistsPayload> {
     const response = await this._request<L.OrganizationExistsQuery, L.OrganizationExistsQueryVariables>(
       L.OrganizationExistsDocument,
       {
@@ -15401,7 +15398,7 @@ export class OrganizationInviteQuery extends Request {
    * @param id - required id to pass to organizationInvite
    * @returns parsed response from OrganizationInviteQuery
    */
-  public async fetch(id: string): LinearFetch<OrganizationInvite> {
+  public async fetch(id: string): Promise<OrganizationInvite> {
     const response = await this._request<L.OrganizationInviteQuery, L.OrganizationInviteQueryVariables>(
       L.OrganizationInviteDocument,
       {
@@ -15430,7 +15427,7 @@ export class OrganizationInvitesQuery extends Request {
    * @param variables - variables to pass into the OrganizationInvitesQuery
    * @returns parsed response from OrganizationInvitesQuery
    */
-  public async fetch(variables?: L.OrganizationInvitesQueryVariables): LinearFetch<OrganizationInviteConnection> {
+  public async fetch(variables?: L.OrganizationInvitesQueryVariables): Promise<OrganizationInviteConnection> {
     const response = await this._request<L.OrganizationInvitesQuery, L.OrganizationInvitesQueryVariables>(
       L.OrganizationInvitesDocument,
       variables
@@ -15467,7 +15464,7 @@ export class ProjectQuery extends Request {
    * @param id - required id to pass to project
    * @returns parsed response from ProjectQuery
    */
-  public async fetch(id: string): LinearFetch<Project> {
+  public async fetch(id: string): Promise<Project> {
     const response = await this._request<L.ProjectQuery, L.ProjectQueryVariables>(L.ProjectDocument, {
       id,
     });
@@ -15493,7 +15490,7 @@ export class ProjectFilterSuggestionQuery extends Request {
    * @param prompt - required prompt to pass to projectFilterSuggestion
    * @returns parsed response from ProjectFilterSuggestionQuery
    */
-  public async fetch(prompt: string): LinearFetch<ProjectFilterSuggestionPayload> {
+  public async fetch(prompt: string): Promise<ProjectFilterSuggestionPayload> {
     const response = await this._request<L.ProjectFilterSuggestionQuery, L.ProjectFilterSuggestionQueryVariables>(
       L.ProjectFilterSuggestionDocument,
       {
@@ -15522,7 +15519,7 @@ export class ProjectLinkQuery extends Request {
    * @param id - required id to pass to projectLink
    * @returns parsed response from ProjectLinkQuery
    */
-  public async fetch(id: string): LinearFetch<ProjectLink> {
+  public async fetch(id: string): Promise<ProjectLink> {
     const response = await this._request<L.ProjectLinkQuery, L.ProjectLinkQueryVariables>(L.ProjectLinkDocument, {
       id,
     });
@@ -15548,7 +15545,7 @@ export class ProjectLinksQuery extends Request {
    * @param variables - variables to pass into the ProjectLinksQuery
    * @returns parsed response from ProjectLinksQuery
    */
-  public async fetch(variables?: L.ProjectLinksQueryVariables): LinearFetch<ProjectLinkConnection> {
+  public async fetch(variables?: L.ProjectLinksQueryVariables): Promise<ProjectLinkConnection> {
     const response = await this._request<L.ProjectLinksQuery, L.ProjectLinksQueryVariables>(
       L.ProjectLinksDocument,
       variables
@@ -15585,7 +15582,7 @@ export class ProjectUpdateQuery extends Request {
    * @param id - required id to pass to projectUpdate
    * @returns parsed response from ProjectUpdateQuery
    */
-  public async fetch(id: string): LinearFetch<ProjectUpdate> {
+  public async fetch(id: string): Promise<ProjectUpdate> {
     const response = await this._request<L.ProjectUpdateQuery, L.ProjectUpdateQueryVariables>(L.ProjectUpdateDocument, {
       id,
     });
@@ -15611,7 +15608,7 @@ export class ProjectUpdateInteractionQuery extends Request {
    * @param id - required id to pass to projectUpdateInteraction
    * @returns parsed response from ProjectUpdateInteractionQuery
    */
-  public async fetch(id: string): LinearFetch<ProjectUpdateInteraction> {
+  public async fetch(id: string): Promise<ProjectUpdateInteraction> {
     const response = await this._request<L.ProjectUpdateInteractionQuery, L.ProjectUpdateInteractionQueryVariables>(
       L.ProjectUpdateInteractionDocument,
       {
@@ -15642,7 +15639,7 @@ export class ProjectUpdateInteractionsQuery extends Request {
    */
   public async fetch(
     variables?: L.ProjectUpdateInteractionsQueryVariables
-  ): LinearFetch<ProjectUpdateInteractionConnection> {
+  ): Promise<ProjectUpdateInteractionConnection> {
     const response = await this._request<L.ProjectUpdateInteractionsQuery, L.ProjectUpdateInteractionsQueryVariables>(
       L.ProjectUpdateInteractionsDocument,
       variables
@@ -15679,7 +15676,7 @@ export class ProjectUpdatesQuery extends Request {
    * @param variables - variables to pass into the ProjectUpdatesQuery
    * @returns parsed response from ProjectUpdatesQuery
    */
-  public async fetch(variables?: L.ProjectUpdatesQueryVariables): LinearFetch<ProjectUpdateConnection> {
+  public async fetch(variables?: L.ProjectUpdatesQueryVariables): Promise<ProjectUpdateConnection> {
     const response = await this._request<L.ProjectUpdatesQuery, L.ProjectUpdatesQueryVariables>(
       L.ProjectUpdatesDocument,
       variables
@@ -15716,7 +15713,7 @@ export class ProjectsQuery extends Request {
    * @param variables - variables to pass into the ProjectsQuery
    * @returns parsed response from ProjectsQuery
    */
-  public async fetch(variables?: L.ProjectsQueryVariables): LinearFetch<ProjectConnection> {
+  public async fetch(variables?: L.ProjectsQueryVariables): Promise<ProjectConnection> {
     const response = await this._request<L.ProjectsQuery, L.ProjectsQueryVariables>(L.ProjectsDocument, variables);
     const data = response.projects;
 
@@ -15749,7 +15746,7 @@ export class PushSubscriptionTestQuery extends Request {
    *
    * @returns parsed response from PushSubscriptionTestQuery
    */
-  public async fetch(): LinearFetch<PushSubscriptionTestPayload> {
+  public async fetch(): Promise<PushSubscriptionTestPayload> {
     const response = await this._request<L.PushSubscriptionTestQuery, L.PushSubscriptionTestQueryVariables>(
       L.PushSubscriptionTestDocument,
       {}
@@ -15775,7 +15772,7 @@ export class RateLimitStatusQuery extends Request {
    *
    * @returns parsed response from RateLimitStatusQuery
    */
-  public async fetch(): LinearFetch<RateLimitPayload> {
+  public async fetch(): Promise<RateLimitPayload> {
     const response = await this._request<L.RateLimitStatusQuery, L.RateLimitStatusQueryVariables>(
       L.RateLimitStatusDocument,
       {}
@@ -15802,7 +15799,7 @@ export class RoadmapQuery extends Request {
    * @param id - required id to pass to roadmap
    * @returns parsed response from RoadmapQuery
    */
-  public async fetch(id: string): LinearFetch<Roadmap> {
+  public async fetch(id: string): Promise<Roadmap> {
     const response = await this._request<L.RoadmapQuery, L.RoadmapQueryVariables>(L.RoadmapDocument, {
       id,
     });
@@ -15828,7 +15825,7 @@ export class RoadmapToProjectQuery extends Request {
    * @param id - required id to pass to roadmapToProject
    * @returns parsed response from RoadmapToProjectQuery
    */
-  public async fetch(id: string): LinearFetch<RoadmapToProject> {
+  public async fetch(id: string): Promise<RoadmapToProject> {
     const response = await this._request<L.RoadmapToProjectQuery, L.RoadmapToProjectQueryVariables>(
       L.RoadmapToProjectDocument,
       {
@@ -15857,7 +15854,7 @@ export class RoadmapToProjectsQuery extends Request {
    * @param variables - variables to pass into the RoadmapToProjectsQuery
    * @returns parsed response from RoadmapToProjectsQuery
    */
-  public async fetch(variables?: L.RoadmapToProjectsQueryVariables): LinearFetch<RoadmapToProjectConnection> {
+  public async fetch(variables?: L.RoadmapToProjectsQueryVariables): Promise<RoadmapToProjectConnection> {
     const response = await this._request<L.RoadmapToProjectsQuery, L.RoadmapToProjectsQueryVariables>(
       L.RoadmapToProjectsDocument,
       variables
@@ -15894,7 +15891,7 @@ export class RoadmapsQuery extends Request {
    * @param variables - variables to pass into the RoadmapsQuery
    * @returns parsed response from RoadmapsQuery
    */
-  public async fetch(variables?: L.RoadmapsQueryVariables): LinearFetch<RoadmapConnection> {
+  public async fetch(variables?: L.RoadmapsQueryVariables): Promise<RoadmapConnection> {
     const response = await this._request<L.RoadmapsQuery, L.RoadmapsQueryVariables>(L.RoadmapsDocument, variables);
     const data = response.roadmaps;
 
@@ -15932,7 +15929,7 @@ export class SearchDocumentsQuery extends Request {
   public async fetch(
     term: string,
     variables?: Omit<L.SearchDocumentsQueryVariables, "term">
-  ): LinearFetch<DocumentSearchPayload> {
+  ): Promise<DocumentSearchPayload> {
     const response = await this._request<L.SearchDocumentsQuery, L.SearchDocumentsQueryVariables>(
       L.SearchDocumentsDocument,
       {
@@ -15966,7 +15963,7 @@ export class SearchIssuesQuery extends Request {
   public async fetch(
     term: string,
     variables?: Omit<L.SearchIssuesQueryVariables, "term">
-  ): LinearFetch<IssueSearchPayload> {
+  ): Promise<IssueSearchPayload> {
     const response = await this._request<L.SearchIssuesQuery, L.SearchIssuesQueryVariables>(L.SearchIssuesDocument, {
       term,
       ...variables,
@@ -15997,7 +15994,7 @@ export class SearchProjectsQuery extends Request {
   public async fetch(
     term: string,
     variables?: Omit<L.SearchProjectsQueryVariables, "term">
-  ): LinearFetch<ProjectSearchPayload> {
+  ): Promise<ProjectSearchPayload> {
     const response = await this._request<L.SearchProjectsQuery, L.SearchProjectsQueryVariables>(
       L.SearchProjectsDocument,
       {
@@ -16031,7 +16028,7 @@ export class SsoUrlFromEmailQuery extends Request {
   public async fetch(
     email: string,
     variables?: Omit<L.SsoUrlFromEmailQueryVariables, "email">
-  ): LinearFetch<SsoUrlFromEmailResponse> {
+  ): Promise<SsoUrlFromEmailResponse> {
     const response = await this._request<L.SsoUrlFromEmailQuery, L.SsoUrlFromEmailQueryVariables>(
       L.SsoUrlFromEmailDocument,
       {
@@ -16061,7 +16058,7 @@ export class TeamQuery extends Request {
    * @param id - required id to pass to team
    * @returns parsed response from TeamQuery
    */
-  public async fetch(id: string): LinearFetch<Team> {
+  public async fetch(id: string): Promise<Team> {
     const response = await this._request<L.TeamQuery, L.TeamQueryVariables>(L.TeamDocument, {
       id,
     });
@@ -16087,7 +16084,7 @@ export class TeamMembershipQuery extends Request {
    * @param id - required id to pass to teamMembership
    * @returns parsed response from TeamMembershipQuery
    */
-  public async fetch(id: string): LinearFetch<TeamMembership> {
+  public async fetch(id: string): Promise<TeamMembership> {
     const response = await this._request<L.TeamMembershipQuery, L.TeamMembershipQueryVariables>(
       L.TeamMembershipDocument,
       {
@@ -16116,7 +16113,7 @@ export class TeamMembershipsQuery extends Request {
    * @param variables - variables to pass into the TeamMembershipsQuery
    * @returns parsed response from TeamMembershipsQuery
    */
-  public async fetch(variables?: L.TeamMembershipsQueryVariables): LinearFetch<TeamMembershipConnection> {
+  public async fetch(variables?: L.TeamMembershipsQueryVariables): Promise<TeamMembershipConnection> {
     const response = await this._request<L.TeamMembershipsQuery, L.TeamMembershipsQueryVariables>(
       L.TeamMembershipsDocument,
       variables
@@ -16153,7 +16150,7 @@ export class TeamsQuery extends Request {
    * @param variables - variables to pass into the TeamsQuery
    * @returns parsed response from TeamsQuery
    */
-  public async fetch(variables?: L.TeamsQueryVariables): LinearFetch<TeamConnection> {
+  public async fetch(variables?: L.TeamsQueryVariables): Promise<TeamConnection> {
     const response = await this._request<L.TeamsQuery, L.TeamsQueryVariables>(L.TeamsDocument, variables);
     const data = response.teams;
 
@@ -16187,7 +16184,7 @@ export class TemplateQuery extends Request {
    * @param id - required id to pass to template
    * @returns parsed response from TemplateQuery
    */
-  public async fetch(id: string): LinearFetch<Template> {
+  public async fetch(id: string): Promise<Template> {
     const response = await this._request<L.TemplateQuery, L.TemplateQueryVariables>(L.TemplateDocument, {
       id,
     });
@@ -16212,7 +16209,7 @@ export class TemplatesQuery extends Request {
    *
    * @returns parsed response from TemplatesQuery
    */
-  public async fetch(): LinearFetch<Template[]> {
+  public async fetch(): Promise<Template[]> {
     const response = await this._request<L.TemplatesQuery, L.TemplatesQueryVariables>(L.TemplatesDocument, {});
     const data = response.templates;
 
@@ -16238,7 +16235,7 @@ export class TemplatesForIntegrationQuery extends Request {
    * @param integrationType - required integrationType to pass to templatesForIntegration
    * @returns parsed response from TemplatesForIntegrationQuery
    */
-  public async fetch(integrationType: string): LinearFetch<Template[]> {
+  public async fetch(integrationType: string): Promise<Template[]> {
     const response = await this._request<L.TemplatesForIntegrationQuery, L.TemplatesForIntegrationQueryVariables>(
       L.TemplatesForIntegrationDocument,
       {
@@ -16269,7 +16266,7 @@ export class UserQuery extends Request {
    * @param id - required id to pass to user
    * @returns parsed response from UserQuery
    */
-  public async fetch(id: string): LinearFetch<User> {
+  public async fetch(id: string): Promise<User> {
     const response = await this._request<L.UserQuery, L.UserQueryVariables>(L.UserDocument, {
       id,
     });
@@ -16294,7 +16291,7 @@ export class UserSettingsQuery extends Request {
    *
    * @returns parsed response from UserSettingsQuery
    */
-  public async fetch(): LinearFetch<UserSettings> {
+  public async fetch(): Promise<UserSettings> {
     const response = await this._request<L.UserSettingsQuery, L.UserSettingsQueryVariables>(L.UserSettingsDocument, {});
     const data = response.userSettings;
 
@@ -16318,7 +16315,7 @@ export class UsersQuery extends Request {
    * @param variables - variables to pass into the UsersQuery
    * @returns parsed response from UsersQuery
    */
-  public async fetch(variables?: L.UsersQueryVariables): LinearFetch<UserConnection> {
+  public async fetch(variables?: L.UsersQueryVariables): Promise<UserConnection> {
     const response = await this._request<L.UsersQuery, L.UsersQueryVariables>(L.UsersDocument, variables);
     const data = response.users;
 
@@ -16351,7 +16348,7 @@ export class ViewerQuery extends Request {
    *
    * @returns parsed response from ViewerQuery
    */
-  public async fetch(): LinearFetch<User> {
+  public async fetch(): Promise<User> {
     const response = await this._request<L.ViewerQuery, L.ViewerQueryVariables>(L.ViewerDocument, {});
     const data = response.viewer;
 
@@ -16375,7 +16372,7 @@ export class WebhookQuery extends Request {
    * @param id - required id to pass to webhook
    * @returns parsed response from WebhookQuery
    */
-  public async fetch(id: string): LinearFetch<Webhook> {
+  public async fetch(id: string): Promise<Webhook> {
     const response = await this._request<L.WebhookQuery, L.WebhookQueryVariables>(L.WebhookDocument, {
       id,
     });
@@ -16401,7 +16398,7 @@ export class WebhooksQuery extends Request {
    * @param variables - variables to pass into the WebhooksQuery
    * @returns parsed response from WebhooksQuery
    */
-  public async fetch(variables?: L.WebhooksQueryVariables): LinearFetch<WebhookConnection> {
+  public async fetch(variables?: L.WebhooksQueryVariables): Promise<WebhookConnection> {
     const response = await this._request<L.WebhooksQuery, L.WebhooksQueryVariables>(L.WebhooksDocument, variables);
     const data = response.webhooks;
 
@@ -16435,7 +16432,7 @@ export class WorkflowStateQuery extends Request {
    * @param id - required id to pass to workflowState
    * @returns parsed response from WorkflowStateQuery
    */
-  public async fetch(id: string): LinearFetch<WorkflowState> {
+  public async fetch(id: string): Promise<WorkflowState> {
     const response = await this._request<L.WorkflowStateQuery, L.WorkflowStateQueryVariables>(L.WorkflowStateDocument, {
       id,
     });
@@ -16461,7 +16458,7 @@ export class WorkflowStatesQuery extends Request {
    * @param variables - variables to pass into the WorkflowStatesQuery
    * @returns parsed response from WorkflowStatesQuery
    */
-  public async fetch(variables?: L.WorkflowStatesQueryVariables): LinearFetch<WorkflowStateConnection> {
+  public async fetch(variables?: L.WorkflowStatesQueryVariables): Promise<WorkflowStateConnection> {
     const response = await this._request<L.WorkflowStatesQuery, L.WorkflowStatesQueryVariables>(
       L.WorkflowStatesDocument,
       variables
@@ -16511,7 +16508,7 @@ export class AttachmentIssue_AttachmentsQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.AttachmentIssue_AttachmentsQueryVariables, "id">
-  ): LinearFetch<AttachmentConnection> {
+  ): Promise<AttachmentConnection> {
     const response = await this._request<
       L.AttachmentIssue_AttachmentsQuery,
       L.AttachmentIssue_AttachmentsQueryVariables
@@ -16564,7 +16561,7 @@ export class AttachmentIssue_ChildrenQuery extends Request {
    * @param variables - variables without 'id' to pass into the AttachmentIssue_ChildrenQuery
    * @returns parsed response from AttachmentIssue_ChildrenQuery
    */
-  public async fetch(variables?: Omit<L.AttachmentIssue_ChildrenQueryVariables, "id">): LinearFetch<IssueConnection> {
+  public async fetch(variables?: Omit<L.AttachmentIssue_ChildrenQueryVariables, "id">): Promise<IssueConnection> {
     const response = await this._request<L.AttachmentIssue_ChildrenQuery, L.AttachmentIssue_ChildrenQueryVariables>(
       L.AttachmentIssue_ChildrenDocument,
       {
@@ -16617,7 +16614,7 @@ export class AttachmentIssue_CommentsQuery extends Request {
    * @param variables - variables without 'id' to pass into the AttachmentIssue_CommentsQuery
    * @returns parsed response from AttachmentIssue_CommentsQuery
    */
-  public async fetch(variables?: Omit<L.AttachmentIssue_CommentsQueryVariables, "id">): LinearFetch<CommentConnection> {
+  public async fetch(variables?: Omit<L.AttachmentIssue_CommentsQueryVariables, "id">): Promise<CommentConnection> {
     const response = await this._request<L.AttachmentIssue_CommentsQuery, L.AttachmentIssue_CommentsQueryVariables>(
       L.AttachmentIssue_CommentsDocument,
       {
@@ -16672,7 +16669,7 @@ export class AttachmentIssue_HistoryQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.AttachmentIssue_HistoryQueryVariables, "id">
-  ): LinearFetch<IssueHistoryConnection> {
+  ): Promise<IssueHistoryConnection> {
     const response = await this._request<L.AttachmentIssue_HistoryQuery, L.AttachmentIssue_HistoryQueryVariables>(
       L.AttachmentIssue_HistoryDocument,
       {
@@ -16727,7 +16724,7 @@ export class AttachmentIssue_InverseRelationsQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.AttachmentIssue_InverseRelationsQueryVariables, "id">
-  ): LinearFetch<IssueRelationConnection> {
+  ): Promise<IssueRelationConnection> {
     const response = await this._request<
       L.AttachmentIssue_InverseRelationsQuery,
       L.AttachmentIssue_InverseRelationsQueryVariables
@@ -16782,7 +16779,7 @@ export class AttachmentIssue_LabelsQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.AttachmentIssue_LabelsQueryVariables, "id">
-  ): LinearFetch<IssueLabelConnection> {
+  ): Promise<IssueLabelConnection> {
     const response = await this._request<L.AttachmentIssue_LabelsQuery, L.AttachmentIssue_LabelsQueryVariables>(
       L.AttachmentIssue_LabelsDocument,
       {
@@ -16837,7 +16834,7 @@ export class AttachmentIssue_RelationsQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.AttachmentIssue_RelationsQueryVariables, "id">
-  ): LinearFetch<IssueRelationConnection> {
+  ): Promise<IssueRelationConnection> {
     const response = await this._request<L.AttachmentIssue_RelationsQuery, L.AttachmentIssue_RelationsQueryVariables>(
       L.AttachmentIssue_RelationsDocument,
       {
@@ -16890,7 +16887,7 @@ export class AttachmentIssue_SubscribersQuery extends Request {
    * @param variables - variables without 'id' to pass into the AttachmentIssue_SubscribersQuery
    * @returns parsed response from AttachmentIssue_SubscribersQuery
    */
-  public async fetch(variables?: Omit<L.AttachmentIssue_SubscribersQueryVariables, "id">): LinearFetch<UserConnection> {
+  public async fetch(variables?: Omit<L.AttachmentIssue_SubscribersQueryVariables, "id">): Promise<UserConnection> {
     const response = await this._request<
       L.AttachmentIssue_SubscribersQuery,
       L.AttachmentIssue_SubscribersQueryVariables
@@ -16939,7 +16936,7 @@ export class Comment_ChildrenQuery extends Request {
    * @param variables - variables without 'id' to pass into the Comment_ChildrenQuery
    * @returns parsed response from Comment_ChildrenQuery
    */
-  public async fetch(variables?: Omit<L.Comment_ChildrenQueryVariables, "id">): LinearFetch<CommentConnection> {
+  public async fetch(variables?: Omit<L.Comment_ChildrenQueryVariables, "id">): Promise<CommentConnection> {
     const response = await this._request<L.Comment_ChildrenQuery, L.Comment_ChildrenQueryVariables>(
       L.Comment_ChildrenDocument,
       {
@@ -16988,7 +16985,7 @@ export class Cycle_IssuesQuery extends Request {
    * @param variables - variables without 'id' to pass into the Cycle_IssuesQuery
    * @returns parsed response from Cycle_IssuesQuery
    */
-  public async fetch(variables?: Omit<L.Cycle_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
+  public async fetch(variables?: Omit<L.Cycle_IssuesQueryVariables, "id">): Promise<IssueConnection> {
     const response = await this._request<L.Cycle_IssuesQuery, L.Cycle_IssuesQueryVariables>(L.Cycle_IssuesDocument, {
       id: this._id,
       ...this._variables,
@@ -17040,7 +17037,7 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">
-  ): LinearFetch<IssueConnection> {
+  ): Promise<IssueConnection> {
     const response = await this._request<
       L.Cycle_UncompletedIssuesUponCloseQuery,
       L.Cycle_UncompletedIssuesUponCloseQueryVariables
@@ -17085,7 +17082,7 @@ export class EmbedInfo_EmbedQuery extends Request {
    *
    * @returns parsed response from EmbedInfo_EmbedQuery
    */
-  public async fetch(): LinearFetch<Embed | undefined> {
+  public async fetch(): Promise<Embed | undefined> {
     const response = await this._request<L.EmbedInfo_EmbedQuery, L.EmbedInfo_EmbedQueryVariables>(
       L.EmbedInfo_EmbedDocument,
       {
@@ -17121,7 +17118,7 @@ export class Favorite_ChildrenQuery extends Request {
    * @param variables - variables without 'id' to pass into the Favorite_ChildrenQuery
    * @returns parsed response from Favorite_ChildrenQuery
    */
-  public async fetch(variables?: Omit<L.Favorite_ChildrenQueryVariables, "id">): LinearFetch<FavoriteConnection> {
+  public async fetch(variables?: Omit<L.Favorite_ChildrenQueryVariables, "id">): Promise<FavoriteConnection> {
     const response = await this._request<L.Favorite_ChildrenQuery, L.Favorite_ChildrenQueryVariables>(
       L.Favorite_ChildrenDocument,
       {
@@ -17176,7 +17173,7 @@ export class FigmaEmbedInfo_FigmaEmbedQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.FigmaEmbedInfo_FigmaEmbedQueryVariables, "fileId">
-  ): LinearFetch<FigmaEmbed | undefined> {
+  ): Promise<FigmaEmbed | undefined> {
     const response = await this._request<L.FigmaEmbedInfo_FigmaEmbedQuery, L.FigmaEmbedInfo_FigmaEmbedQueryVariables>(
       L.FigmaEmbedInfo_FigmaEmbedDocument,
       {
@@ -17214,7 +17211,7 @@ export class Issue_AttachmentsQuery extends Request {
    * @param variables - variables without 'id' to pass into the Issue_AttachmentsQuery
    * @returns parsed response from Issue_AttachmentsQuery
    */
-  public async fetch(variables?: Omit<L.Issue_AttachmentsQueryVariables, "id">): LinearFetch<AttachmentConnection> {
+  public async fetch(variables?: Omit<L.Issue_AttachmentsQueryVariables, "id">): Promise<AttachmentConnection> {
     const response = await this._request<L.Issue_AttachmentsQuery, L.Issue_AttachmentsQueryVariables>(
       L.Issue_AttachmentsDocument,
       {
@@ -17263,7 +17260,7 @@ export class Issue_ChildrenQuery extends Request {
    * @param variables - variables without 'id' to pass into the Issue_ChildrenQuery
    * @returns parsed response from Issue_ChildrenQuery
    */
-  public async fetch(variables?: Omit<L.Issue_ChildrenQueryVariables, "id">): LinearFetch<IssueConnection> {
+  public async fetch(variables?: Omit<L.Issue_ChildrenQueryVariables, "id">): Promise<IssueConnection> {
     const response = await this._request<L.Issue_ChildrenQuery, L.Issue_ChildrenQueryVariables>(
       L.Issue_ChildrenDocument,
       {
@@ -17312,7 +17309,7 @@ export class Issue_CommentsQuery extends Request {
    * @param variables - variables without 'id' to pass into the Issue_CommentsQuery
    * @returns parsed response from Issue_CommentsQuery
    */
-  public async fetch(variables?: Omit<L.Issue_CommentsQueryVariables, "id">): LinearFetch<CommentConnection> {
+  public async fetch(variables?: Omit<L.Issue_CommentsQueryVariables, "id">): Promise<CommentConnection> {
     const response = await this._request<L.Issue_CommentsQuery, L.Issue_CommentsQueryVariables>(
       L.Issue_CommentsDocument,
       {
@@ -17361,7 +17358,7 @@ export class Issue_HistoryQuery extends Request {
    * @param variables - variables without 'id' to pass into the Issue_HistoryQuery
    * @returns parsed response from Issue_HistoryQuery
    */
-  public async fetch(variables?: Omit<L.Issue_HistoryQueryVariables, "id">): LinearFetch<IssueHistoryConnection> {
+  public async fetch(variables?: Omit<L.Issue_HistoryQueryVariables, "id">): Promise<IssueHistoryConnection> {
     const response = await this._request<L.Issue_HistoryQuery, L.Issue_HistoryQueryVariables>(L.Issue_HistoryDocument, {
       id: this._id,
       ...this._variables,
@@ -17413,7 +17410,7 @@ export class Issue_InverseRelationsQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.Issue_InverseRelationsQueryVariables, "id">
-  ): LinearFetch<IssueRelationConnection> {
+  ): Promise<IssueRelationConnection> {
     const response = await this._request<L.Issue_InverseRelationsQuery, L.Issue_InverseRelationsQueryVariables>(
       L.Issue_InverseRelationsDocument,
       {
@@ -17462,7 +17459,7 @@ export class Issue_LabelsQuery extends Request {
    * @param variables - variables without 'id' to pass into the Issue_LabelsQuery
    * @returns parsed response from Issue_LabelsQuery
    */
-  public async fetch(variables?: Omit<L.Issue_LabelsQueryVariables, "id">): LinearFetch<IssueLabelConnection> {
+  public async fetch(variables?: Omit<L.Issue_LabelsQueryVariables, "id">): Promise<IssueLabelConnection> {
     const response = await this._request<L.Issue_LabelsQuery, L.Issue_LabelsQueryVariables>(L.Issue_LabelsDocument, {
       id: this._id,
       ...this._variables,
@@ -17508,7 +17505,7 @@ export class Issue_RelationsQuery extends Request {
    * @param variables - variables without 'id' to pass into the Issue_RelationsQuery
    * @returns parsed response from Issue_RelationsQuery
    */
-  public async fetch(variables?: Omit<L.Issue_RelationsQueryVariables, "id">): LinearFetch<IssueRelationConnection> {
+  public async fetch(variables?: Omit<L.Issue_RelationsQueryVariables, "id">): Promise<IssueRelationConnection> {
     const response = await this._request<L.Issue_RelationsQuery, L.Issue_RelationsQueryVariables>(
       L.Issue_RelationsDocument,
       {
@@ -17557,7 +17554,7 @@ export class Issue_SubscribersQuery extends Request {
    * @param variables - variables without 'id' to pass into the Issue_SubscribersQuery
    * @returns parsed response from Issue_SubscribersQuery
    */
-  public async fetch(variables?: Omit<L.Issue_SubscribersQueryVariables, "id">): LinearFetch<UserConnection> {
+  public async fetch(variables?: Omit<L.Issue_SubscribersQueryVariables, "id">): Promise<UserConnection> {
     const response = await this._request<L.Issue_SubscribersQuery, L.Issue_SubscribersQueryVariables>(
       L.Issue_SubscribersDocument,
       {
@@ -17606,7 +17603,7 @@ export class IssueLabel_ChildrenQuery extends Request {
    * @param variables - variables without 'id' to pass into the IssueLabel_ChildrenQuery
    * @returns parsed response from IssueLabel_ChildrenQuery
    */
-  public async fetch(variables?: Omit<L.IssueLabel_ChildrenQueryVariables, "id">): LinearFetch<IssueLabelConnection> {
+  public async fetch(variables?: Omit<L.IssueLabel_ChildrenQueryVariables, "id">): Promise<IssueLabelConnection> {
     const response = await this._request<L.IssueLabel_ChildrenQuery, L.IssueLabel_ChildrenQueryVariables>(
       L.IssueLabel_ChildrenDocument,
       {
@@ -17655,7 +17652,7 @@ export class IssueLabel_IssuesQuery extends Request {
    * @param variables - variables without 'id' to pass into the IssueLabel_IssuesQuery
    * @returns parsed response from IssueLabel_IssuesQuery
    */
-  public async fetch(variables?: Omit<L.IssueLabel_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
+  public async fetch(variables?: Omit<L.IssueLabel_IssuesQueryVariables, "id">): Promise<IssueConnection> {
     const response = await this._request<L.IssueLabel_IssuesQuery, L.IssueLabel_IssuesQueryVariables>(
       L.IssueLabel_IssuesDocument,
       {
@@ -17710,7 +17707,7 @@ export class IssueVcsBranchSearch_AttachmentsQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.IssueVcsBranchSearch_AttachmentsQueryVariables, "branchName">
-  ): LinearFetch<AttachmentConnection | undefined> {
+  ): Promise<AttachmentConnection | undefined> {
     const response = await this._request<
       L.IssueVcsBranchSearch_AttachmentsQuery,
       L.IssueVcsBranchSearch_AttachmentsQueryVariables
@@ -17768,7 +17765,7 @@ export class IssueVcsBranchSearch_ChildrenQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.IssueVcsBranchSearch_ChildrenQueryVariables, "branchName">
-  ): LinearFetch<IssueConnection | undefined> {
+  ): Promise<IssueConnection | undefined> {
     const response = await this._request<
       L.IssueVcsBranchSearch_ChildrenQuery,
       L.IssueVcsBranchSearch_ChildrenQueryVariables
@@ -17826,7 +17823,7 @@ export class IssueVcsBranchSearch_CommentsQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.IssueVcsBranchSearch_CommentsQueryVariables, "branchName">
-  ): LinearFetch<CommentConnection | undefined> {
+  ): Promise<CommentConnection | undefined> {
     const response = await this._request<
       L.IssueVcsBranchSearch_CommentsQuery,
       L.IssueVcsBranchSearch_CommentsQueryVariables
@@ -17884,7 +17881,7 @@ export class IssueVcsBranchSearch_HistoryQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.IssueVcsBranchSearch_HistoryQueryVariables, "branchName">
-  ): LinearFetch<IssueHistoryConnection | undefined> {
+  ): Promise<IssueHistoryConnection | undefined> {
     const response = await this._request<
       L.IssueVcsBranchSearch_HistoryQuery,
       L.IssueVcsBranchSearch_HistoryQueryVariables
@@ -17942,7 +17939,7 @@ export class IssueVcsBranchSearch_InverseRelationsQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.IssueVcsBranchSearch_InverseRelationsQueryVariables, "branchName">
-  ): LinearFetch<IssueRelationConnection | undefined> {
+  ): Promise<IssueRelationConnection | undefined> {
     const response = await this._request<
       L.IssueVcsBranchSearch_InverseRelationsQuery,
       L.IssueVcsBranchSearch_InverseRelationsQueryVariables
@@ -18000,7 +17997,7 @@ export class IssueVcsBranchSearch_LabelsQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.IssueVcsBranchSearch_LabelsQueryVariables, "branchName">
-  ): LinearFetch<IssueLabelConnection | undefined> {
+  ): Promise<IssueLabelConnection | undefined> {
     const response = await this._request<
       L.IssueVcsBranchSearch_LabelsQuery,
       L.IssueVcsBranchSearch_LabelsQueryVariables
@@ -18058,7 +18055,7 @@ export class IssueVcsBranchSearch_RelationsQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.IssueVcsBranchSearch_RelationsQueryVariables, "branchName">
-  ): LinearFetch<IssueRelationConnection | undefined> {
+  ): Promise<IssueRelationConnection | undefined> {
     const response = await this._request<
       L.IssueVcsBranchSearch_RelationsQuery,
       L.IssueVcsBranchSearch_RelationsQueryVariables
@@ -18116,7 +18113,7 @@ export class IssueVcsBranchSearch_SubscribersQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.IssueVcsBranchSearch_SubscribersQueryVariables, "branchName">
-  ): LinearFetch<UserConnection | undefined> {
+  ): Promise<UserConnection | undefined> {
     const response = await this._request<
       L.IssueVcsBranchSearch_SubscribersQuery,
       L.IssueVcsBranchSearch_SubscribersQueryVariables
@@ -18166,7 +18163,7 @@ export class Organization_IntegrationsQuery extends Request {
    * @param variables - variables to pass into the Organization_IntegrationsQuery
    * @returns parsed response from Organization_IntegrationsQuery
    */
-  public async fetch(variables?: L.Organization_IntegrationsQueryVariables): LinearFetch<IntegrationConnection> {
+  public async fetch(variables?: L.Organization_IntegrationsQueryVariables): Promise<IntegrationConnection> {
     const response = await this._request<L.Organization_IntegrationsQuery, L.Organization_IntegrationsQueryVariables>(
       L.Organization_IntegrationsDocument,
       variables
@@ -18209,7 +18206,7 @@ export class Organization_LabelsQuery extends Request {
    * @param variables - variables to pass into the Organization_LabelsQuery
    * @returns parsed response from Organization_LabelsQuery
    */
-  public async fetch(variables?: L.Organization_LabelsQueryVariables): LinearFetch<IssueLabelConnection> {
+  public async fetch(variables?: L.Organization_LabelsQueryVariables): Promise<IssueLabelConnection> {
     const response = await this._request<L.Organization_LabelsQuery, L.Organization_LabelsQueryVariables>(
       L.Organization_LabelsDocument,
       variables
@@ -18246,7 +18243,7 @@ export class Organization_SubscriptionQuery extends Request {
    *
    * @returns parsed response from Organization_SubscriptionQuery
    */
-  public async fetch(): LinearFetch<PaidSubscription | undefined> {
+  public async fetch(): Promise<PaidSubscription | undefined> {
     const response = await this._request<L.Organization_SubscriptionQuery, L.Organization_SubscriptionQueryVariables>(
       L.Organization_SubscriptionDocument,
       {}
@@ -18278,7 +18275,7 @@ export class Organization_TeamsQuery extends Request {
    * @param variables - variables to pass into the Organization_TeamsQuery
    * @returns parsed response from Organization_TeamsQuery
    */
-  public async fetch(variables?: L.Organization_TeamsQueryVariables): LinearFetch<TeamConnection> {
+  public async fetch(variables?: L.Organization_TeamsQueryVariables): Promise<TeamConnection> {
     const response = await this._request<L.Organization_TeamsQuery, L.Organization_TeamsQueryVariables>(
       L.Organization_TeamsDocument,
       variables
@@ -18307,7 +18304,7 @@ export class Organization_TeamsQuery extends Request {
  * @param variables - variables to pass into the Organization_TemplatesQuery
  */
 export class Organization_TemplatesQuery extends Request {
-  private _variables?: L.Organization_TemplatesQueryVariables;
+  _variables?: L.Organization_TemplatesQueryVariables;
 
   public constructor(request: LinearRequest, variables?: L.Organization_TemplatesQueryVariables) {
     super(request);
@@ -18321,7 +18318,7 @@ export class Organization_TemplatesQuery extends Request {
    * @param variables - variables to pass into the Organization_TemplatesQuery
    * @returns parsed response from Organization_TemplatesQuery
    */
-  public async fetch(variables?: L.Organization_TemplatesQueryVariables): LinearFetch<TemplateConnection> {
+  public async fetch(variables?: L.Organization_TemplatesQueryVariables): Promise<TemplateConnection> {
     const response = await this._request<L.Organization_TemplatesQuery, L.Organization_TemplatesQueryVariables>(
       L.Organization_TemplatesDocument,
       variables
@@ -18353,7 +18350,7 @@ export class Organization_UsersQuery extends Request {
    * @param variables - variables to pass into the Organization_UsersQuery
    * @returns parsed response from Organization_UsersQuery
    */
-  public async fetch(variables?: L.Organization_UsersQueryVariables): LinearFetch<UserConnection> {
+  public async fetch(variables?: L.Organization_UsersQueryVariables): Promise<UserConnection> {
     const response = await this._request<L.Organization_UsersQuery, L.Organization_UsersQueryVariables>(
       L.Organization_UsersDocument,
       variables
@@ -18398,7 +18395,7 @@ export class Project_DocumentsQuery extends Request {
    * @param variables - variables without 'id' to pass into the Project_DocumentsQuery
    * @returns parsed response from Project_DocumentsQuery
    */
-  public async fetch(variables?: Omit<L.Project_DocumentsQueryVariables, "id">): LinearFetch<DocumentConnection> {
+  public async fetch(variables?: Omit<L.Project_DocumentsQueryVariables, "id">): Promise<DocumentConnection> {
     const response = await this._request<L.Project_DocumentsQuery, L.Project_DocumentsQueryVariables>(
       L.Project_DocumentsDocument,
       {
@@ -18447,7 +18444,7 @@ export class Project_IssuesQuery extends Request {
    * @param variables - variables without 'id' to pass into the Project_IssuesQuery
    * @returns parsed response from Project_IssuesQuery
    */
-  public async fetch(variables?: Omit<L.Project_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
+  public async fetch(variables?: Omit<L.Project_IssuesQueryVariables, "id">): Promise<IssueConnection> {
     const response = await this._request<L.Project_IssuesQuery, L.Project_IssuesQueryVariables>(
       L.Project_IssuesDocument,
       {
@@ -18496,7 +18493,7 @@ export class Project_LinksQuery extends Request {
    * @param variables - variables without 'id' to pass into the Project_LinksQuery
    * @returns parsed response from Project_LinksQuery
    */
-  public async fetch(variables?: Omit<L.Project_LinksQueryVariables, "id">): LinearFetch<ProjectLinkConnection> {
+  public async fetch(variables?: Omit<L.Project_LinksQueryVariables, "id">): Promise<ProjectLinkConnection> {
     const response = await this._request<L.Project_LinksQuery, L.Project_LinksQueryVariables>(L.Project_LinksDocument, {
       id: this._id,
       ...this._variables,
@@ -18542,7 +18539,7 @@ export class Project_MembersQuery extends Request {
    * @param variables - variables without 'id' to pass into the Project_MembersQuery
    * @returns parsed response from Project_MembersQuery
    */
-  public async fetch(variables?: Omit<L.Project_MembersQueryVariables, "id">): LinearFetch<UserConnection> {
+  public async fetch(variables?: Omit<L.Project_MembersQueryVariables, "id">): Promise<UserConnection> {
     const response = await this._request<L.Project_MembersQuery, L.Project_MembersQueryVariables>(
       L.Project_MembersDocument,
       {
@@ -18597,7 +18594,7 @@ export class Project_ProjectMilestonesQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.Project_ProjectMilestonesQueryVariables, "id">
-  ): LinearFetch<ProjectMilestoneConnection> {
+  ): Promise<ProjectMilestoneConnection> {
     const response = await this._request<L.Project_ProjectMilestonesQuery, L.Project_ProjectMilestonesQueryVariables>(
       L.Project_ProjectMilestonesDocument,
       {
@@ -18652,7 +18649,7 @@ export class Project_ProjectUpdatesQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.Project_ProjectUpdatesQueryVariables, "id">
-  ): LinearFetch<ProjectUpdateConnection> {
+  ): Promise<ProjectUpdateConnection> {
     const response = await this._request<L.Project_ProjectUpdatesQuery, L.Project_ProjectUpdatesQueryVariables>(
       L.Project_ProjectUpdatesDocument,
       {
@@ -18701,7 +18698,7 @@ export class Project_TeamsQuery extends Request {
    * @param variables - variables without 'id' to pass into the Project_TeamsQuery
    * @returns parsed response from Project_TeamsQuery
    */
-  public async fetch(variables?: Omit<L.Project_TeamsQueryVariables, "id">): LinearFetch<TeamConnection> {
+  public async fetch(variables?: Omit<L.Project_TeamsQueryVariables, "id">): Promise<TeamConnection> {
     const response = await this._request<L.Project_TeamsQuery, L.Project_TeamsQueryVariables>(L.Project_TeamsDocument, {
       id: this._id,
       ...this._variables,
@@ -18747,7 +18744,7 @@ export class Roadmap_ProjectsQuery extends Request {
    * @param variables - variables without 'id' to pass into the Roadmap_ProjectsQuery
    * @returns parsed response from Roadmap_ProjectsQuery
    */
-  public async fetch(variables?: Omit<L.Roadmap_ProjectsQueryVariables, "id">): LinearFetch<ProjectConnection> {
+  public async fetch(variables?: Omit<L.Roadmap_ProjectsQueryVariables, "id">): Promise<ProjectConnection> {
     const response = await this._request<L.Roadmap_ProjectsQuery, L.Roadmap_ProjectsQueryVariables>(
       L.Roadmap_ProjectsDocument,
       {
@@ -18802,7 +18799,7 @@ export class SearchDocuments_ArchivePayloadQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.SearchDocuments_ArchivePayloadQueryVariables, "term">
-  ): LinearFetch<ArchiveResponse> {
+  ): Promise<ArchiveResponse> {
     const response = await this._request<
       L.SearchDocuments_ArchivePayloadQuery,
       L.SearchDocuments_ArchivePayloadQueryVariables
@@ -18846,7 +18843,7 @@ export class SearchIssues_ArchivePayloadQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.SearchIssues_ArchivePayloadQueryVariables, "term">
-  ): LinearFetch<ArchiveResponse> {
+  ): Promise<ArchiveResponse> {
     const response = await this._request<
       L.SearchIssues_ArchivePayloadQuery,
       L.SearchIssues_ArchivePayloadQueryVariables
@@ -18890,7 +18887,7 @@ export class SearchProjects_ArchivePayloadQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.SearchProjects_ArchivePayloadQueryVariables, "term">
-  ): LinearFetch<ArchiveResponse> {
+  ): Promise<ArchiveResponse> {
     const response = await this._request<
       L.SearchProjects_ArchivePayloadQuery,
       L.SearchProjects_ArchivePayloadQueryVariables
@@ -18928,7 +18925,7 @@ export class Team_CyclesQuery extends Request {
    * @param variables - variables without 'id' to pass into the Team_CyclesQuery
    * @returns parsed response from Team_CyclesQuery
    */
-  public async fetch(variables?: Omit<L.Team_CyclesQueryVariables, "id">): LinearFetch<CycleConnection> {
+  public async fetch(variables?: Omit<L.Team_CyclesQueryVariables, "id">): Promise<CycleConnection> {
     const response = await this._request<L.Team_CyclesQuery, L.Team_CyclesQueryVariables>(L.Team_CyclesDocument, {
       id: this._id,
       ...this._variables,
@@ -18974,7 +18971,7 @@ export class Team_IssuesQuery extends Request {
    * @param variables - variables without 'id' to pass into the Team_IssuesQuery
    * @returns parsed response from Team_IssuesQuery
    */
-  public async fetch(variables?: Omit<L.Team_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
+  public async fetch(variables?: Omit<L.Team_IssuesQueryVariables, "id">): Promise<IssueConnection> {
     const response = await this._request<L.Team_IssuesQuery, L.Team_IssuesQueryVariables>(L.Team_IssuesDocument, {
       id: this._id,
       ...this._variables,
@@ -19020,7 +19017,7 @@ export class Team_LabelsQuery extends Request {
    * @param variables - variables without 'id' to pass into the Team_LabelsQuery
    * @returns parsed response from Team_LabelsQuery
    */
-  public async fetch(variables?: Omit<L.Team_LabelsQueryVariables, "id">): LinearFetch<IssueLabelConnection> {
+  public async fetch(variables?: Omit<L.Team_LabelsQueryVariables, "id">): Promise<IssueLabelConnection> {
     const response = await this._request<L.Team_LabelsQuery, L.Team_LabelsQueryVariables>(L.Team_LabelsDocument, {
       id: this._id,
       ...this._variables,
@@ -19066,7 +19063,7 @@ export class Team_MembersQuery extends Request {
    * @param variables - variables without 'id' to pass into the Team_MembersQuery
    * @returns parsed response from Team_MembersQuery
    */
-  public async fetch(variables?: Omit<L.Team_MembersQueryVariables, "id">): LinearFetch<UserConnection> {
+  public async fetch(variables?: Omit<L.Team_MembersQueryVariables, "id">): Promise<UserConnection> {
     const response = await this._request<L.Team_MembersQuery, L.Team_MembersQueryVariables>(L.Team_MembersDocument, {
       id: this._id,
       ...this._variables,
@@ -19112,7 +19109,7 @@ export class Team_MembershipsQuery extends Request {
    * @param variables - variables without 'id' to pass into the Team_MembershipsQuery
    * @returns parsed response from Team_MembershipsQuery
    */
-  public async fetch(variables?: Omit<L.Team_MembershipsQueryVariables, "id">): LinearFetch<TeamMembershipConnection> {
+  public async fetch(variables?: Omit<L.Team_MembershipsQueryVariables, "id">): Promise<TeamMembershipConnection> {
     const response = await this._request<L.Team_MembershipsQuery, L.Team_MembershipsQueryVariables>(
       L.Team_MembershipsDocument,
       {
@@ -19161,7 +19158,7 @@ export class Team_ProjectsQuery extends Request {
    * @param variables - variables without 'id' to pass into the Team_ProjectsQuery
    * @returns parsed response from Team_ProjectsQuery
    */
-  public async fetch(variables?: Omit<L.Team_ProjectsQueryVariables, "id">): LinearFetch<ProjectConnection> {
+  public async fetch(variables?: Omit<L.Team_ProjectsQueryVariables, "id">): Promise<ProjectConnection> {
     const response = await this._request<L.Team_ProjectsQuery, L.Team_ProjectsQueryVariables>(L.Team_ProjectsDocument, {
       id: this._id,
       ...this._variables,
@@ -19207,7 +19204,7 @@ export class Team_StatesQuery extends Request {
    * @param variables - variables without 'id' to pass into the Team_StatesQuery
    * @returns parsed response from Team_StatesQuery
    */
-  public async fetch(variables?: Omit<L.Team_StatesQueryVariables, "id">): LinearFetch<WorkflowStateConnection> {
+  public async fetch(variables?: Omit<L.Team_StatesQueryVariables, "id">): Promise<WorkflowStateConnection> {
     const response = await this._request<L.Team_StatesQuery, L.Team_StatesQueryVariables>(L.Team_StatesDocument, {
       id: this._id,
       ...this._variables,
@@ -19253,7 +19250,7 @@ export class Team_TemplatesQuery extends Request {
    * @param variables - variables without 'id' to pass into the Team_TemplatesQuery
    * @returns parsed response from Team_TemplatesQuery
    */
-  public async fetch(variables?: Omit<L.Team_TemplatesQueryVariables, "id">): LinearFetch<TemplateConnection> {
+  public async fetch(variables?: Omit<L.Team_TemplatesQueryVariables, "id">): Promise<TemplateConnection> {
     const response = await this._request<L.Team_TemplatesQuery, L.Team_TemplatesQueryVariables>(
       L.Team_TemplatesDocument,
       {
@@ -19291,7 +19288,7 @@ export class Team_WebhooksQuery extends Request {
    * @param variables - variables without 'id' to pass into the Team_WebhooksQuery
    * @returns parsed response from Team_WebhooksQuery
    */
-  public async fetch(variables?: Omit<L.Team_WebhooksQueryVariables, "id">): LinearFetch<WebhookConnection> {
+  public async fetch(variables?: Omit<L.Team_WebhooksQueryVariables, "id">): Promise<WebhookConnection> {
     const response = await this._request<L.Team_WebhooksQuery, L.Team_WebhooksQueryVariables>(L.Team_WebhooksDocument, {
       id: this._id,
       ...this._variables,
@@ -19337,7 +19334,7 @@ export class User_AssignedIssuesQuery extends Request {
    * @param variables - variables without 'id' to pass into the User_AssignedIssuesQuery
    * @returns parsed response from User_AssignedIssuesQuery
    */
-  public async fetch(variables?: Omit<L.User_AssignedIssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
+  public async fetch(variables?: Omit<L.User_AssignedIssuesQueryVariables, "id">): Promise<IssueConnection> {
     const response = await this._request<L.User_AssignedIssuesQuery, L.User_AssignedIssuesQueryVariables>(
       L.User_AssignedIssuesDocument,
       {
@@ -19386,7 +19383,7 @@ export class User_CreatedIssuesQuery extends Request {
    * @param variables - variables without 'id' to pass into the User_CreatedIssuesQuery
    * @returns parsed response from User_CreatedIssuesQuery
    */
-  public async fetch(variables?: Omit<L.User_CreatedIssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
+  public async fetch(variables?: Omit<L.User_CreatedIssuesQueryVariables, "id">): Promise<IssueConnection> {
     const response = await this._request<L.User_CreatedIssuesQuery, L.User_CreatedIssuesQueryVariables>(
       L.User_CreatedIssuesDocument,
       {
@@ -19437,7 +19434,7 @@ export class User_TeamMembershipsQuery extends Request {
    */
   public async fetch(
     variables?: Omit<L.User_TeamMembershipsQueryVariables, "id">
-  ): LinearFetch<TeamMembershipConnection> {
+  ): Promise<TeamMembershipConnection> {
     const response = await this._request<L.User_TeamMembershipsQuery, L.User_TeamMembershipsQueryVariables>(
       L.User_TeamMembershipsDocument,
       {
@@ -19486,7 +19483,7 @@ export class User_TeamsQuery extends Request {
    * @param variables - variables without 'id' to pass into the User_TeamsQuery
    * @returns parsed response from User_TeamsQuery
    */
-  public async fetch(variables?: Omit<L.User_TeamsQueryVariables, "id">): LinearFetch<TeamConnection> {
+  public async fetch(variables?: Omit<L.User_TeamsQueryVariables, "id">): Promise<TeamConnection> {
     const response = await this._request<L.User_TeamsQuery, L.User_TeamsQueryVariables>(L.User_TeamsDocument, {
       id: this._id,
       ...this._variables,
@@ -19530,7 +19527,7 @@ export class Viewer_AssignedIssuesQuery extends Request {
    * @param variables - variables to pass into the Viewer_AssignedIssuesQuery
    * @returns parsed response from Viewer_AssignedIssuesQuery
    */
-  public async fetch(variables?: L.Viewer_AssignedIssuesQueryVariables): LinearFetch<IssueConnection> {
+  public async fetch(variables?: L.Viewer_AssignedIssuesQueryVariables): Promise<IssueConnection> {
     const response = await this._request<L.Viewer_AssignedIssuesQuery, L.Viewer_AssignedIssuesQueryVariables>(
       L.Viewer_AssignedIssuesDocument,
       variables
@@ -19573,7 +19570,7 @@ export class Viewer_CreatedIssuesQuery extends Request {
    * @param variables - variables to pass into the Viewer_CreatedIssuesQuery
    * @returns parsed response from Viewer_CreatedIssuesQuery
    */
-  public async fetch(variables?: L.Viewer_CreatedIssuesQueryVariables): LinearFetch<IssueConnection> {
+  public async fetch(variables?: L.Viewer_CreatedIssuesQueryVariables): Promise<IssueConnection> {
     const response = await this._request<L.Viewer_CreatedIssuesQuery, L.Viewer_CreatedIssuesQueryVariables>(
       L.Viewer_CreatedIssuesDocument,
       variables
@@ -19616,7 +19613,7 @@ export class Viewer_TeamMembershipsQuery extends Request {
    * @param variables - variables to pass into the Viewer_TeamMembershipsQuery
    * @returns parsed response from Viewer_TeamMembershipsQuery
    */
-  public async fetch(variables?: L.Viewer_TeamMembershipsQueryVariables): LinearFetch<TeamMembershipConnection> {
+  public async fetch(variables?: L.Viewer_TeamMembershipsQueryVariables): Promise<TeamMembershipConnection> {
     const response = await this._request<L.Viewer_TeamMembershipsQuery, L.Viewer_TeamMembershipsQueryVariables>(
       L.Viewer_TeamMembershipsDocument,
       variables
@@ -19659,7 +19656,7 @@ export class Viewer_TeamsQuery extends Request {
    * @param variables - variables to pass into the Viewer_TeamsQuery
    * @returns parsed response from Viewer_TeamsQuery
    */
-  public async fetch(variables?: L.Viewer_TeamsQueryVariables): LinearFetch<TeamConnection> {
+  public async fetch(variables?: L.Viewer_TeamsQueryVariables): Promise<TeamConnection> {
     const response = await this._request<L.Viewer_TeamsQuery, L.Viewer_TeamsQueryVariables>(
       L.Viewer_TeamsDocument,
       variables
@@ -19704,7 +19701,7 @@ export class WorkflowState_IssuesQuery extends Request {
    * @param variables - variables without 'id' to pass into the WorkflowState_IssuesQuery
    * @returns parsed response from WorkflowState_IssuesQuery
    */
-  public async fetch(variables?: Omit<L.WorkflowState_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
+  public async fetch(variables?: Omit<L.WorkflowState_IssuesQueryVariables, "id">): Promise<IssueConnection> {
     const response = await this._request<L.WorkflowState_IssuesQuery, L.WorkflowState_IssuesQueryVariables>(
       L.WorkflowState_IssuesDocument,
       {
@@ -19746,7 +19743,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to airbyteIntegrationConnect
    * @returns IntegrationPayload
    */
-  public airbyteIntegrationConnect(input: L.AirbyteConfigurationInput): LinearFetch<IntegrationPayload> {
+  public airbyteIntegrationConnect(input: L.AirbyteConfigurationInput): Promise<IntegrationPayload> {
     return new AirbyteIntegrationConnectMutation(this._request).fetch(input);
   }
   /**
@@ -19755,7 +19752,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createApiKey
    * @returns ApiKeyPayload
    */
-  public createApiKey(input: L.ApiKeyCreateInput): LinearFetch<ApiKeyPayload> {
+  public createApiKey(input: L.ApiKeyCreateInput): Promise<ApiKeyPayload> {
     return new CreateApiKeyMutation(this._request).fetch(input);
   }
   /**
@@ -19764,7 +19761,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteApiKey
    * @returns DeletePayload
    */
-  public deleteApiKey(id: string): LinearFetch<DeletePayload> {
+  public deleteApiKey(id: string): Promise<DeletePayload> {
     return new DeleteApiKeyMutation(this._request).fetch(id);
   }
   /**
@@ -19773,7 +19770,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to archiveAttachment
    * @returns AttachmentArchivePayload
    */
-  public archiveAttachment(id: string): LinearFetch<AttachmentArchivePayload> {
+  public archiveAttachment(id: string): Promise<AttachmentArchivePayload> {
     return new ArchiveAttachmentMutation(this._request).fetch(id);
   }
   /**
@@ -19782,7 +19779,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createAttachment
    * @returns AttachmentPayload
    */
-  public createAttachment(input: L.AttachmentCreateInput): LinearFetch<AttachmentPayload> {
+  public createAttachment(input: L.AttachmentCreateInput): Promise<AttachmentPayload> {
     return new CreateAttachmentMutation(this._request).fetch(input);
   }
   /**
@@ -19791,7 +19788,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteAttachment
    * @returns DeletePayload
    */
-  public deleteAttachment(id: string): LinearFetch<DeletePayload> {
+  public deleteAttachment(id: string): Promise<DeletePayload> {
     return new DeleteAttachmentMutation(this._request).fetch(id);
   }
   /**
@@ -19808,7 +19805,7 @@ export class LinearSdk extends Request {
     issueId: string,
     messageId: string,
     url: string
-  ): LinearFetch<AttachmentPayload> {
+  ): Promise<AttachmentPayload> {
     return new AttachmentLinkDiscordMutation(this._request).fetch(channelId, issueId, messageId, url);
   }
   /**
@@ -19818,7 +19815,7 @@ export class LinearSdk extends Request {
    * @param issueId - required issueId to pass to attachmentLinkFront
    * @returns FrontAttachmentPayload
    */
-  public attachmentLinkFront(conversationId: string, issueId: string): LinearFetch<FrontAttachmentPayload> {
+  public attachmentLinkFront(conversationId: string, issueId: string): Promise<FrontAttachmentPayload> {
     return new AttachmentLinkFrontMutation(this._request).fetch(conversationId, issueId);
   }
   /**
@@ -19828,7 +19825,7 @@ export class LinearSdk extends Request {
    * @param issueId - required issueId to pass to attachmentLinkIntercom
    * @returns AttachmentPayload
    */
-  public attachmentLinkIntercom(conversationId: string, issueId: string): LinearFetch<AttachmentPayload> {
+  public attachmentLinkIntercom(conversationId: string, issueId: string): Promise<AttachmentPayload> {
     return new AttachmentLinkIntercomMutation(this._request).fetch(conversationId, issueId);
   }
   /**
@@ -19838,7 +19835,7 @@ export class LinearSdk extends Request {
    * @param jiraIssueId - required jiraIssueId to pass to attachmentLinkJiraIssue
    * @returns AttachmentPayload
    */
-  public attachmentLinkJiraIssue(issueId: string, jiraIssueId: string): LinearFetch<AttachmentPayload> {
+  public attachmentLinkJiraIssue(issueId: string, jiraIssueId: string): Promise<AttachmentPayload> {
     return new AttachmentLinkJiraIssueMutation(this._request).fetch(issueId, jiraIssueId);
   }
   /**
@@ -19853,7 +19850,7 @@ export class LinearSdk extends Request {
     issueId: string,
     url: string,
     variables?: Omit<L.AttachmentLinkUrlMutationVariables, "issueId" | "url">
-  ): LinearFetch<AttachmentPayload> {
+  ): Promise<AttachmentPayload> {
     return new AttachmentLinkUrlMutation(this._request).fetch(issueId, url, variables);
   }
   /**
@@ -19863,7 +19860,7 @@ export class LinearSdk extends Request {
    * @param ticketId - required ticketId to pass to attachmentLinkZendesk
    * @returns AttachmentPayload
    */
-  public attachmentLinkZendesk(issueId: string, ticketId: string): LinearFetch<AttachmentPayload> {
+  public attachmentLinkZendesk(issueId: string, ticketId: string): Promise<AttachmentPayload> {
     return new AttachmentLinkZendeskMutation(this._request).fetch(issueId, ticketId);
   }
   /**
@@ -19872,7 +19869,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to attachmentUnsyncSlack
    * @returns AttachmentPayload
    */
-  public attachmentUnsyncSlack(id: string): LinearFetch<AttachmentPayload> {
+  public attachmentUnsyncSlack(id: string): Promise<AttachmentPayload> {
     return new AttachmentUnsyncSlackMutation(this._request).fetch(id);
   }
   /**
@@ -19882,7 +19879,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateAttachment
    * @returns AttachmentPayload
    */
-  public updateAttachment(id: string, input: L.AttachmentUpdateInput): LinearFetch<AttachmentPayload> {
+  public updateAttachment(id: string, input: L.AttachmentUpdateInput): Promise<AttachmentPayload> {
     return new UpdateAttachmentMutation(this._request).fetch(id, input);
   }
   /**
@@ -19891,7 +19888,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createComment
    * @returns CommentPayload
    */
-  public createComment(input: L.CommentCreateInput): LinearFetch<CommentPayload> {
+  public createComment(input: L.CommentCreateInput): Promise<CommentPayload> {
     return new CreateCommentMutation(this._request).fetch(input);
   }
   /**
@@ -19900,7 +19897,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteComment
    * @returns DeletePayload
    */
-  public deleteComment(id: string): LinearFetch<DeletePayload> {
+  public deleteComment(id: string): Promise<DeletePayload> {
     return new DeleteCommentMutation(this._request).fetch(id);
   }
   /**
@@ -19910,7 +19907,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateComment
    * @returns CommentPayload
    */
-  public updateComment(id: string, input: L.CommentUpdateInput): LinearFetch<CommentPayload> {
+  public updateComment(id: string, input: L.CommentUpdateInput): Promise<CommentPayload> {
     return new UpdateCommentMutation(this._request).fetch(id, input);
   }
   /**
@@ -19919,7 +19916,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createContact
    * @returns ContactPayload
    */
-  public createContact(input: L.ContactCreateInput): LinearFetch<ContactPayload> {
+  public createContact(input: L.ContactCreateInput): Promise<ContactPayload> {
     return new CreateContactMutation(this._request).fetch(input);
   }
   /**
@@ -19930,7 +19927,7 @@ export class LinearSdk extends Request {
    */
   public createCsvExportReport(
     variables?: L.CreateCsvExportReportMutationVariables
-  ): LinearFetch<CreateCsvExportReportPayload> {
+  ): Promise<CreateCsvExportReportPayload> {
     return new CreateCsvExportReportMutation(this._request).fetch(variables);
   }
   /**
@@ -19943,7 +19940,7 @@ export class LinearSdk extends Request {
   public createOrganizationFromOnboarding(
     input: L.CreateOrganizationInput,
     variables?: Omit<L.CreateOrganizationFromOnboardingMutationVariables, "input">
-  ): LinearFetch<CreateOrJoinOrganizationResponse> {
+  ): Promise<CreateOrJoinOrganizationResponse> {
     return new CreateOrganizationFromOnboardingMutation(this._request).fetch(input, variables);
   }
   /**
@@ -19952,7 +19949,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createCustomView
    * @returns CustomViewPayload
    */
-  public createCustomView(input: L.CustomViewCreateInput): LinearFetch<CustomViewPayload> {
+  public createCustomView(input: L.CustomViewCreateInput): Promise<CustomViewPayload> {
     return new CreateCustomViewMutation(this._request).fetch(input);
   }
   /**
@@ -19961,7 +19958,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteCustomView
    * @returns DeletePayload
    */
-  public deleteCustomView(id: string): LinearFetch<DeletePayload> {
+  public deleteCustomView(id: string): Promise<DeletePayload> {
     return new DeleteCustomViewMutation(this._request).fetch(id);
   }
   /**
@@ -19971,7 +19968,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateCustomView
    * @returns CustomViewPayload
    */
-  public updateCustomView(id: string, input: L.CustomViewUpdateInput): LinearFetch<CustomViewPayload> {
+  public updateCustomView(id: string, input: L.CustomViewUpdateInput): Promise<CustomViewPayload> {
     return new UpdateCustomViewMutation(this._request).fetch(id, input);
   }
   /**
@@ -19980,7 +19977,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to archiveCycle
    * @returns CycleArchivePayload
    */
-  public archiveCycle(id: string): LinearFetch<CycleArchivePayload> {
+  public archiveCycle(id: string): Promise<CycleArchivePayload> {
     return new ArchiveCycleMutation(this._request).fetch(id);
   }
   /**
@@ -19989,7 +19986,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createCycle
    * @returns CyclePayload
    */
-  public createCycle(input: L.CycleCreateInput): LinearFetch<CyclePayload> {
+  public createCycle(input: L.CycleCreateInput): Promise<CyclePayload> {
     return new CreateCycleMutation(this._request).fetch(input);
   }
   /**
@@ -19999,7 +19996,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateCycle
    * @returns CyclePayload
    */
-  public updateCycle(id: string, input: L.CycleUpdateInput): LinearFetch<CyclePayload> {
+  public updateCycle(id: string, input: L.CycleUpdateInput): Promise<CyclePayload> {
     return new UpdateCycleMutation(this._request).fetch(id, input);
   }
   /**
@@ -20008,7 +20005,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createDocument
    * @returns DocumentPayload
    */
-  public createDocument(input: L.DocumentCreateInput): LinearFetch<DocumentPayload> {
+  public createDocument(input: L.DocumentCreateInput): Promise<DocumentPayload> {
     return new CreateDocumentMutation(this._request).fetch(input);
   }
   /**
@@ -20017,7 +20014,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteDocument
    * @returns DeletePayload
    */
-  public deleteDocument(id: string): LinearFetch<DeletePayload> {
+  public deleteDocument(id: string): Promise<DeletePayload> {
     return new DeleteDocumentMutation(this._request).fetch(id);
   }
   /**
@@ -20027,7 +20024,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateDocument
    * @returns DocumentPayload
    */
-  public updateDocument(id: string, input: L.DocumentUpdateInput): LinearFetch<DocumentPayload> {
+  public updateDocument(id: string, input: L.DocumentUpdateInput): Promise<DocumentPayload> {
     return new UpdateDocumentMutation(this._request).fetch(id, input);
   }
   /**
@@ -20036,7 +20033,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to emailTokenUserAccountAuth
    * @returns AuthResolverResponse
    */
-  public emailTokenUserAccountAuth(input: L.TokenUserAccountAuthInput): LinearFetch<AuthResolverResponse> {
+  public emailTokenUserAccountAuth(input: L.TokenUserAccountAuthInput): Promise<AuthResolverResponse> {
     return new EmailTokenUserAccountAuthMutation(this._request).fetch(input);
   }
   /**
@@ -20045,7 +20042,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to emailUnsubscribe
    * @returns EmailUnsubscribePayload
    */
-  public emailUnsubscribe(input: L.EmailUnsubscribeInput): LinearFetch<EmailUnsubscribePayload> {
+  public emailUnsubscribe(input: L.EmailUnsubscribeInput): Promise<EmailUnsubscribePayload> {
     return new EmailUnsubscribeMutation(this._request).fetch(input);
   }
   /**
@@ -20056,7 +20053,7 @@ export class LinearSdk extends Request {
    */
   public emailUserAccountAuthChallenge(
     input: L.EmailUserAccountAuthChallengeInput
-  ): LinearFetch<EmailUserAccountAuthChallengeResponse> {
+  ): Promise<EmailUserAccountAuthChallengeResponse> {
     return new EmailUserAccountAuthChallengeMutation(this._request).fetch(input);
   }
   /**
@@ -20065,7 +20062,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createEmoji
    * @returns EmojiPayload
    */
-  public createEmoji(input: L.EmojiCreateInput): LinearFetch<EmojiPayload> {
+  public createEmoji(input: L.EmojiCreateInput): Promise<EmojiPayload> {
     return new CreateEmojiMutation(this._request).fetch(input);
   }
   /**
@@ -20074,7 +20071,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteEmoji
    * @returns DeletePayload
    */
-  public deleteEmoji(id: string): LinearFetch<DeletePayload> {
+  public deleteEmoji(id: string): Promise<DeletePayload> {
     return new DeleteEmojiMutation(this._request).fetch(id);
   }
   /**
@@ -20083,7 +20080,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createEvent
    * @returns EventPayload
    */
-  public createEvent(input: L.EventCreateInput): LinearFetch<EventPayload> {
+  public createEvent(input: L.EventCreateInput): Promise<EventPayload> {
     return new CreateEventMutation(this._request).fetch(input);
   }
   /**
@@ -20092,7 +20089,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createFavorite
    * @returns FavoritePayload
    */
-  public createFavorite(input: L.FavoriteCreateInput): LinearFetch<FavoritePayload> {
+  public createFavorite(input: L.FavoriteCreateInput): Promise<FavoritePayload> {
     return new CreateFavoriteMutation(this._request).fetch(input);
   }
   /**
@@ -20101,7 +20098,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteFavorite
    * @returns DeletePayload
    */
-  public deleteFavorite(id: string): LinearFetch<DeletePayload> {
+  public deleteFavorite(id: string): Promise<DeletePayload> {
     return new DeleteFavoriteMutation(this._request).fetch(id);
   }
   /**
@@ -20111,7 +20108,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateFavorite
    * @returns FavoritePayload
    */
-  public updateFavorite(id: string, input: L.FavoriteUpdateInput): LinearFetch<FavoritePayload> {
+  public updateFavorite(id: string, input: L.FavoriteUpdateInput): Promise<FavoritePayload> {
     return new UpdateFavoriteMutation(this._request).fetch(id, input);
   }
   /**
@@ -20128,7 +20125,7 @@ export class LinearSdk extends Request {
     filename: string,
     size: number,
     variables?: Omit<L.FileUploadMutationVariables, "contentType" | "filename" | "size">
-  ): LinearFetch<UploadPayload> {
+  ): Promise<UploadPayload> {
     return new FileUploadMutation(this._request).fetch(contentType, filename, size, variables);
   }
   /**
@@ -20137,7 +20134,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to googleUserAccountAuth
    * @returns AuthResolverResponse
    */
-  public googleUserAccountAuth(input: L.GoogleUserAccountAuthInput): LinearFetch<AuthResolverResponse> {
+  public googleUserAccountAuth(input: L.GoogleUserAccountAuthInput): Promise<AuthResolverResponse> {
     return new GoogleUserAccountAuthMutation(this._request).fetch(input);
   }
   /**
@@ -20146,7 +20143,7 @@ export class LinearSdk extends Request {
    * @param url - required url to pass to imageUploadFromUrl
    * @returns ImageUploadFromUrlPayload
    */
-  public imageUploadFromUrl(url: string): LinearFetch<ImageUploadFromUrlPayload> {
+  public imageUploadFromUrl(url: string): Promise<ImageUploadFromUrlPayload> {
     return new ImageUploadFromUrlMutation(this._request).fetch(url);
   }
   /**
@@ -20163,7 +20160,7 @@ export class LinearSdk extends Request {
     filename: string,
     size: number,
     variables?: Omit<L.ImportFileUploadMutationVariables, "contentType" | "filename" | "size">
-  ): LinearFetch<UploadPayload> {
+  ): Promise<UploadPayload> {
     return new ImportFileUploadMutation(this._request).fetch(contentType, filename, size, variables);
   }
   /**
@@ -20172,7 +20169,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteIntegration
    * @returns DeletePayload
    */
-  public deleteIntegration(id: string): LinearFetch<DeletePayload> {
+  public deleteIntegration(id: string): Promise<DeletePayload> {
     return new DeleteIntegrationMutation(this._request).fetch(id);
   }
   /**
@@ -20182,7 +20179,7 @@ export class LinearSdk extends Request {
    * @param redirectUri - required redirectUri to pass to integrationDiscord
    * @returns IntegrationPayload
    */
-  public integrationDiscord(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public integrationDiscord(code: string, redirectUri: string): Promise<IntegrationPayload> {
     return new IntegrationDiscordMutation(this._request).fetch(code, redirectUri);
   }
   /**
@@ -20192,7 +20189,7 @@ export class LinearSdk extends Request {
    * @param redirectUri - required redirectUri to pass to integrationFigma
    * @returns IntegrationPayload
    */
-  public integrationFigma(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public integrationFigma(code: string, redirectUri: string): Promise<IntegrationPayload> {
     return new IntegrationFigmaMutation(this._request).fetch(code, redirectUri);
   }
   /**
@@ -20202,7 +20199,7 @@ export class LinearSdk extends Request {
    * @param redirectUri - required redirectUri to pass to integrationFront
    * @returns IntegrationPayload
    */
-  public integrationFront(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public integrationFront(code: string, redirectUri: string): Promise<IntegrationPayload> {
     return new IntegrationFrontMutation(this._request).fetch(code, redirectUri);
   }
   /**
@@ -20210,7 +20207,7 @@ export class LinearSdk extends Request {
    *
    * @returns GitHubCommitIntegrationPayload
    */
-  public get createIntegrationGithubCommit(): LinearFetch<GitHubCommitIntegrationPayload> {
+  public get createIntegrationGithubCommit(): Promise<GitHubCommitIntegrationPayload> {
     return new CreateIntegrationGithubCommitMutation(this._request).fetch();
   }
   /**
@@ -20219,7 +20216,7 @@ export class LinearSdk extends Request {
    * @param installationId - required installationId to pass to integrationGithubConnect
    * @returns IntegrationPayload
    */
-  public integrationGithubConnect(installationId: string): LinearFetch<IntegrationPayload> {
+  public integrationGithubConnect(installationId: string): Promise<IntegrationPayload> {
     return new IntegrationGithubConnectMutation(this._request).fetch(installationId);
   }
   /**
@@ -20229,7 +20226,7 @@ export class LinearSdk extends Request {
    * @param gitlabUrl - required gitlabUrl to pass to integrationGitlabConnect
    * @returns IntegrationPayload
    */
-  public integrationGitlabConnect(accessToken: string, gitlabUrl: string): LinearFetch<IntegrationPayload> {
+  public integrationGitlabConnect(accessToken: string, gitlabUrl: string): Promise<IntegrationPayload> {
     return new IntegrationGitlabConnectMutation(this._request).fetch(accessToken, gitlabUrl);
   }
   /**
@@ -20238,7 +20235,7 @@ export class LinearSdk extends Request {
    * @param code - required code to pass to integrationGoogleSheets
    * @returns IntegrationPayload
    */
-  public integrationGoogleSheets(code: string): LinearFetch<IntegrationPayload> {
+  public integrationGoogleSheets(code: string): Promise<IntegrationPayload> {
     return new IntegrationGoogleSheetsMutation(this._request).fetch(code);
   }
   /**
@@ -20253,7 +20250,7 @@ export class LinearSdk extends Request {
     code: string,
     redirectUri: string,
     variables?: Omit<L.IntegrationIntercomMutationVariables, "code" | "redirectUri">
-  ): LinearFetch<IntegrationPayload> {
+  ): Promise<IntegrationPayload> {
     return new IntegrationIntercomMutation(this._request).fetch(code, redirectUri, variables);
   }
   /**
@@ -20261,7 +20258,7 @@ export class LinearSdk extends Request {
    *
    * @returns IntegrationPayload
    */
-  public get deleteIntegrationIntercom(): LinearFetch<IntegrationPayload> {
+  public get deleteIntegrationIntercom(): Promise<IntegrationPayload> {
     return new DeleteIntegrationIntercomMutation(this._request).fetch();
   }
   /**
@@ -20270,7 +20267,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateIntegrationIntercomSettings
    * @returns IntegrationPayload
    */
-  public updateIntegrationIntercomSettings(input: L.IntercomSettingsInput): LinearFetch<IntegrationPayload> {
+  public updateIntegrationIntercomSettings(input: L.IntercomSettingsInput): Promise<IntegrationPayload> {
     return new UpdateIntegrationIntercomSettingsMutation(this._request).fetch(input);
   }
   /**
@@ -20278,7 +20275,7 @@ export class LinearSdk extends Request {
    *
    * @returns IntegrationPayload
    */
-  public get integrationLoom(): LinearFetch<IntegrationPayload> {
+  public get integrationLoom(): Promise<IntegrationPayload> {
     return new IntegrationLoomMutation(this._request).fetch();
   }
   /**
@@ -20287,7 +20284,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to integrationRequest
    * @returns IntegrationRequestPayload
    */
-  public integrationRequest(input: L.IntegrationRequestInput): LinearFetch<IntegrationRequestPayload> {
+  public integrationRequest(input: L.IntegrationRequestInput): Promise<IntegrationRequestPayload> {
     return new IntegrationRequestMutation(this._request).fetch(input);
   }
   /**
@@ -20302,7 +20299,7 @@ export class LinearSdk extends Request {
     code: string,
     installationId: string,
     organizationSlug: string
-  ): LinearFetch<IntegrationPayload> {
+  ): Promise<IntegrationPayload> {
     return new IntegrationSentryConnectMutation(this._request).fetch(code, installationId, organizationSlug);
   }
   /**
@@ -20317,7 +20314,7 @@ export class LinearSdk extends Request {
     code: string,
     redirectUri: string,
     variables?: Omit<L.IntegrationSlackMutationVariables, "code" | "redirectUri">
-  ): LinearFetch<IntegrationPayload> {
+  ): Promise<IntegrationPayload> {
     return new IntegrationSlackMutation(this._request).fetch(code, redirectUri, variables);
   }
   /**
@@ -20327,7 +20324,7 @@ export class LinearSdk extends Request {
    * @param redirectUri - required redirectUri to pass to integrationSlackImportEmojis
    * @returns IntegrationPayload
    */
-  public integrationSlackImportEmojis(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public integrationSlackImportEmojis(code: string, redirectUri: string): Promise<IntegrationPayload> {
     return new IntegrationSlackImportEmojisMutation(this._request).fetch(code, redirectUri);
   }
   /**
@@ -20337,7 +20334,7 @@ export class LinearSdk extends Request {
    * @param redirectUri - required redirectUri to pass to integrationSlackIntake
    * @returns IntegrationPayload
    */
-  public integrationSlackIntake(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public integrationSlackIntake(code: string, redirectUri: string): Promise<IntegrationPayload> {
     return new IntegrationSlackIntakeMutation(this._request).fetch(code, redirectUri);
   }
   /**
@@ -20347,7 +20344,7 @@ export class LinearSdk extends Request {
    * @param redirectUri - required redirectUri to pass to integrationSlackOrgProjectUpdatesPost
    * @returns IntegrationPayload
    */
-  public integrationSlackOrgProjectUpdatesPost(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public integrationSlackOrgProjectUpdatesPost(code: string, redirectUri: string): Promise<IntegrationPayload> {
     return new IntegrationSlackOrgProjectUpdatesPostMutation(this._request).fetch(code, redirectUri);
   }
   /**
@@ -20357,7 +20354,7 @@ export class LinearSdk extends Request {
    * @param redirectUri - required redirectUri to pass to integrationSlackPersonal
    * @returns IntegrationPayload
    */
-  public integrationSlackPersonal(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public integrationSlackPersonal(code: string, redirectUri: string): Promise<IntegrationPayload> {
     return new IntegrationSlackPersonalMutation(this._request).fetch(code, redirectUri);
   }
   /**
@@ -20374,7 +20371,7 @@ export class LinearSdk extends Request {
     redirectUri: string,
     teamId: string,
     variables?: Omit<L.IntegrationSlackPostMutationVariables, "code" | "redirectUri" | "teamId">
-  ): LinearFetch<IntegrationPayload> {
+  ): Promise<IntegrationPayload> {
     return new IntegrationSlackPostMutation(this._request).fetch(code, redirectUri, teamId, variables);
   }
   /**
@@ -20391,7 +20388,7 @@ export class LinearSdk extends Request {
     projectId: string,
     redirectUri: string,
     service: string
-  ): LinearFetch<IntegrationPayload> {
+  ): Promise<IntegrationPayload> {
     return new IntegrationSlackProjectPostMutation(this._request).fetch(code, projectId, redirectUri, service);
   }
   /**
@@ -20400,7 +20397,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createIntegrationTemplate
    * @returns IntegrationTemplatePayload
    */
-  public createIntegrationTemplate(input: L.IntegrationTemplateCreateInput): LinearFetch<IntegrationTemplatePayload> {
+  public createIntegrationTemplate(input: L.IntegrationTemplateCreateInput): Promise<IntegrationTemplatePayload> {
     return new CreateIntegrationTemplateMutation(this._request).fetch(input);
   }
   /**
@@ -20409,7 +20406,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteIntegrationTemplate
    * @returns DeletePayload
    */
-  public deleteIntegrationTemplate(id: string): LinearFetch<DeletePayload> {
+  public deleteIntegrationTemplate(id: string): Promise<DeletePayload> {
     return new DeleteIntegrationTemplateMutation(this._request).fetch(id);
   }
   /**
@@ -20419,7 +20416,7 @@ export class LinearSdk extends Request {
    * @param redirectUri - required redirectUri to pass to integrationUpdateSlack
    * @returns IntegrationPayload
    */
-  public integrationUpdateSlack(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public integrationUpdateSlack(code: string, redirectUri: string): Promise<IntegrationPayload> {
     return new IntegrationUpdateSlackMutation(this._request).fetch(code, redirectUri);
   }
   /**
@@ -20436,7 +20433,7 @@ export class LinearSdk extends Request {
     redirectUri: string,
     scope: string,
     subdomain: string
-  ): LinearFetch<IntegrationPayload> {
+  ): Promise<IntegrationPayload> {
     return new IntegrationZendeskMutation(this._request).fetch(code, redirectUri, scope, subdomain);
   }
   /**
@@ -20447,7 +20444,7 @@ export class LinearSdk extends Request {
    */
   public createIntegrationsSettings(
     input: L.IntegrationsSettingsCreateInput
-  ): LinearFetch<IntegrationsSettingsPayload> {
+  ): Promise<IntegrationsSettingsPayload> {
     return new CreateIntegrationsSettingsMutation(this._request).fetch(input);
   }
   /**
@@ -20460,7 +20457,7 @@ export class LinearSdk extends Request {
   public updateIntegrationsSettings(
     id: string,
     input: L.IntegrationsSettingsUpdateInput
-  ): LinearFetch<IntegrationsSettingsPayload> {
+  ): Promise<IntegrationsSettingsPayload> {
     return new UpdateIntegrationsSettingsMutation(this._request).fetch(id, input);
   }
   /**
@@ -20473,7 +20470,7 @@ export class LinearSdk extends Request {
   public archiveIssue(
     id: string,
     variables?: Omit<L.ArchiveIssueMutationVariables, "id">
-  ): LinearFetch<IssueArchivePayload> {
+  ): Promise<IssueArchivePayload> {
     return new ArchiveIssueMutation(this._request).fetch(id, variables);
   }
   /**
@@ -20483,7 +20480,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateIssueBatch
    * @returns IssueBatchPayload
    */
-  public updateIssueBatch(ids: L.Scalars["UUID"][], input: L.IssueUpdateInput): LinearFetch<IssueBatchPayload> {
+  public updateIssueBatch(ids: L.Scalars["UUID"][], input: L.IssueUpdateInput): Promise<IssueBatchPayload> {
     return new UpdateIssueBatchMutation(this._request).fetch(ids, input);
   }
   /**
@@ -20492,7 +20489,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createIssue
    * @returns IssuePayload
    */
-  public createIssue(input: L.IssueCreateInput): LinearFetch<IssuePayload> {
+  public createIssue(input: L.IssueCreateInput): Promise<IssuePayload> {
     return new CreateIssueMutation(this._request).fetch(input);
   }
   /**
@@ -20501,7 +20498,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteIssue
    * @returns IssueArchivePayload
    */
-  public deleteIssue(id: string): LinearFetch<IssueArchivePayload> {
+  public deleteIssue(id: string): Promise<IssueArchivePayload> {
     return new DeleteIssueMutation(this._request).fetch(id);
   }
   /**
@@ -20516,7 +20513,7 @@ export class LinearSdk extends Request {
     asanaTeamName: string,
     asanaToken: string,
     variables?: Omit<L.IssueImportCreateAsanaMutationVariables, "asanaTeamName" | "asanaToken">
-  ): LinearFetch<IssueImportPayload> {
+  ): Promise<IssueImportPayload> {
     return new IssueImportCreateAsanaMutation(this._request).fetch(asanaTeamName, asanaToken, variables);
   }
   /**
@@ -20529,7 +20526,7 @@ export class LinearSdk extends Request {
   public issueImportCreateCSVJira(
     csvUrl: string,
     variables?: Omit<L.IssueImportCreateCsvJiraMutationVariables, "csvUrl">
-  ): LinearFetch<IssueImportPayload> {
+  ): Promise<IssueImportPayload> {
     return new IssueImportCreateCsvJiraMutation(this._request).fetch(csvUrl, variables);
   }
   /**
@@ -20544,7 +20541,7 @@ export class LinearSdk extends Request {
     clubhouseGroupName: string,
     clubhouseToken: string,
     variables?: Omit<L.IssueImportCreateClubhouseMutationVariables, "clubhouseGroupName" | "clubhouseToken">
-  ): LinearFetch<IssueImportPayload> {
+  ): Promise<IssueImportPayload> {
     return new IssueImportCreateClubhouseMutation(this._request).fetch(clubhouseGroupName, clubhouseToken, variables);
   }
   /**
@@ -20561,7 +20558,7 @@ export class LinearSdk extends Request {
     githubRepoOwner: string,
     githubToken: string,
     variables?: Omit<L.IssueImportCreateGithubMutationVariables, "githubRepoName" | "githubRepoOwner" | "githubToken">
-  ): LinearFetch<IssueImportPayload> {
+  ): Promise<IssueImportPayload> {
     return new IssueImportCreateGithubMutation(this._request).fetch(
       githubRepoName,
       githubRepoOwner,
@@ -20588,7 +20585,7 @@ export class LinearSdk extends Request {
       L.IssueImportCreateJiraMutationVariables,
       "jiraEmail" | "jiraHostname" | "jiraProject" | "jiraToken"
     >
-  ): LinearFetch<IssueImportPayload> {
+  ): Promise<IssueImportPayload> {
     return new IssueImportCreateJiraMutation(this._request).fetch(
       jiraEmail,
       jiraHostname,
@@ -20603,7 +20600,7 @@ export class LinearSdk extends Request {
    * @param issueImportId - required issueImportId to pass to deleteIssueImport
    * @returns IssueImportDeletePayload
    */
-  public deleteIssueImport(issueImportId: string): LinearFetch<IssueImportDeletePayload> {
+  public deleteIssueImport(issueImportId: string): Promise<IssueImportDeletePayload> {
     return new DeleteIssueImportMutation(this._request).fetch(issueImportId);
   }
   /**
@@ -20613,7 +20610,7 @@ export class LinearSdk extends Request {
    * @param mapping - required mapping to pass to issueImportProcess
    * @returns IssueImportPayload
    */
-  public issueImportProcess(issueImportId: string, mapping: Record<string, unknown>): LinearFetch<IssueImportPayload> {
+  public issueImportProcess(issueImportId: string, mapping: Record<string, unknown>): Promise<IssueImportPayload> {
     return new IssueImportProcessMutation(this._request).fetch(issueImportId, mapping);
   }
   /**
@@ -20623,7 +20620,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateIssueImport
    * @returns IssueImportPayload
    */
-  public updateIssueImport(id: string, input: L.IssueImportUpdateInput): LinearFetch<IssueImportPayload> {
+  public updateIssueImport(id: string, input: L.IssueImportUpdateInput): Promise<IssueImportPayload> {
     return new UpdateIssueImportMutation(this._request).fetch(id, input);
   }
   /**
@@ -20636,7 +20633,7 @@ export class LinearSdk extends Request {
   public createIssueLabel(
     input: L.IssueLabelCreateInput,
     variables?: Omit<L.CreateIssueLabelMutationVariables, "input">
-  ): LinearFetch<IssueLabelPayload> {
+  ): Promise<IssueLabelPayload> {
     return new CreateIssueLabelMutation(this._request).fetch(input, variables);
   }
   /**
@@ -20645,7 +20642,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteIssueLabel
    * @returns DeletePayload
    */
-  public deleteIssueLabel(id: string): LinearFetch<DeletePayload> {
+  public deleteIssueLabel(id: string): Promise<DeletePayload> {
     return new DeleteIssueLabelMutation(this._request).fetch(id);
   }
   /**
@@ -20655,7 +20652,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateIssueLabel
    * @returns IssueLabelPayload
    */
-  public updateIssueLabel(id: string, input: L.IssueLabelUpdateInput): LinearFetch<IssueLabelPayload> {
+  public updateIssueLabel(id: string, input: L.IssueLabelUpdateInput): Promise<IssueLabelPayload> {
     return new UpdateIssueLabelMutation(this._request).fetch(id, input);
   }
   /**
@@ -20664,7 +20661,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createIssueRelation
    * @returns IssueRelationPayload
    */
-  public createIssueRelation(input: L.IssueRelationCreateInput): LinearFetch<IssueRelationPayload> {
+  public createIssueRelation(input: L.IssueRelationCreateInput): Promise<IssueRelationPayload> {
     return new CreateIssueRelationMutation(this._request).fetch(input);
   }
   /**
@@ -20673,7 +20670,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteIssueRelation
    * @returns DeletePayload
    */
-  public deleteIssueRelation(id: string): LinearFetch<DeletePayload> {
+  public deleteIssueRelation(id: string): Promise<DeletePayload> {
     return new DeleteIssueRelationMutation(this._request).fetch(id);
   }
   /**
@@ -20683,7 +20680,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateIssueRelation
    * @returns IssueRelationPayload
    */
-  public updateIssueRelation(id: string, input: L.IssueRelationUpdateInput): LinearFetch<IssueRelationPayload> {
+  public updateIssueRelation(id: string, input: L.IssueRelationUpdateInput): Promise<IssueRelationPayload> {
     return new UpdateIssueRelationMutation(this._request).fetch(id, input);
   }
   /**
@@ -20693,7 +20690,7 @@ export class LinearSdk extends Request {
    * @param reminderAt - required reminderAt to pass to issueReminder
    * @returns IssuePayload
    */
-  public issueReminder(id: string, reminderAt: Date): LinearFetch<IssuePayload> {
+  public issueReminder(id: string, reminderAt: Date): Promise<IssuePayload> {
     return new IssueReminderMutation(this._request).fetch(id, reminderAt);
   }
   /**
@@ -20702,7 +20699,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to unarchiveIssue
    * @returns IssueArchivePayload
    */
-  public unarchiveIssue(id: string): LinearFetch<IssueArchivePayload> {
+  public unarchiveIssue(id: string): Promise<IssueArchivePayload> {
     return new UnarchiveIssueMutation(this._request).fetch(id);
   }
   /**
@@ -20712,7 +20709,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateIssue
    * @returns IssuePayload
    */
-  public updateIssue(id: string, input: L.IssueUpdateInput): LinearFetch<IssuePayload> {
+  public updateIssue(id: string, input: L.IssueUpdateInput): Promise<IssuePayload> {
     return new UpdateIssueMutation(this._request).fetch(id, input);
   }
   /**
@@ -20721,7 +20718,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to joinOrganizationFromOnboarding
    * @returns CreateOrJoinOrganizationResponse
    */
-  public joinOrganizationFromOnboarding(input: L.JoinOrganizationInput): LinearFetch<CreateOrJoinOrganizationResponse> {
+  public joinOrganizationFromOnboarding(input: L.JoinOrganizationInput): Promise<CreateOrJoinOrganizationResponse> {
     return new JoinOrganizationFromOnboardingMutation(this._request).fetch(input);
   }
   /**
@@ -20730,7 +20727,7 @@ export class LinearSdk extends Request {
    * @param organizationId - required organizationId to pass to leaveOrganization
    * @returns CreateOrJoinOrganizationResponse
    */
-  public leaveOrganization(organizationId: string): LinearFetch<CreateOrJoinOrganizationResponse> {
+  public leaveOrganization(organizationId: string): Promise<CreateOrJoinOrganizationResponse> {
     return new LeaveOrganizationMutation(this._request).fetch(organizationId);
   }
   /**
@@ -20738,7 +20735,7 @@ export class LinearSdk extends Request {
    *
    * @returns LogoutResponse
    */
-  public get logout(): LinearFetch<LogoutResponse> {
+  public get logout(): Promise<LogoutResponse> {
     return new LogoutMutation(this._request).fetch();
   }
   /**
@@ -20747,7 +20744,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to archiveNotification
    * @returns NotificationArchivePayload
    */
-  public archiveNotification(id: string): LinearFetch<NotificationArchivePayload> {
+  public archiveNotification(id: string): Promise<NotificationArchivePayload> {
     return new ArchiveNotificationMutation(this._request).fetch(id);
   }
   /**
@@ -20758,7 +20755,7 @@ export class LinearSdk extends Request {
    */
   public createNotificationSubscription(
     input: L.NotificationSubscriptionCreateInput
-  ): LinearFetch<NotificationSubscriptionPayload> {
+  ): Promise<NotificationSubscriptionPayload> {
     return new CreateNotificationSubscriptionMutation(this._request).fetch(input);
   }
   /**
@@ -20767,7 +20764,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteNotificationSubscription
    * @returns DeletePayload
    */
-  public deleteNotificationSubscription(id: string): LinearFetch<DeletePayload> {
+  public deleteNotificationSubscription(id: string): Promise<DeletePayload> {
     return new DeleteNotificationSubscriptionMutation(this._request).fetch(id);
   }
   /**
@@ -20780,7 +20777,7 @@ export class LinearSdk extends Request {
   public updateNotificationSubscription(
     id: string,
     input: L.NotificationSubscriptionUpdateInput
-  ): LinearFetch<NotificationSubscriptionPayload> {
+  ): Promise<NotificationSubscriptionPayload> {
     return new UpdateNotificationSubscriptionMutation(this._request).fetch(id, input);
   }
   /**
@@ -20789,7 +20786,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to unarchiveNotification
    * @returns NotificationArchivePayload
    */
-  public unarchiveNotification(id: string): LinearFetch<NotificationArchivePayload> {
+  public unarchiveNotification(id: string): Promise<NotificationArchivePayload> {
     return new UnarchiveNotificationMutation(this._request).fetch(id);
   }
   /**
@@ -20799,7 +20796,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateNotification
    * @returns NotificationPayload
    */
-  public updateNotification(id: string, input: L.NotificationUpdateInput): LinearFetch<NotificationPayload> {
+  public updateNotification(id: string, input: L.NotificationUpdateInput): Promise<NotificationPayload> {
     return new UpdateNotificationMutation(this._request).fetch(id, input);
   }
   /**
@@ -20807,7 +20804,7 @@ export class LinearSdk extends Request {
    *
    * @returns OrganizationCancelDeletePayload
    */
-  public get deleteOrganizationCancel(): LinearFetch<OrganizationCancelDeletePayload> {
+  public get deleteOrganizationCancel(): Promise<OrganizationCancelDeletePayload> {
     return new DeleteOrganizationCancelMutation(this._request).fetch();
   }
   /**
@@ -20816,7 +20813,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to deleteOrganization
    * @returns OrganizationDeletePayload
    */
-  public deleteOrganization(input: L.DeleteOrganizationInput): LinearFetch<OrganizationDeletePayload> {
+  public deleteOrganization(input: L.DeleteOrganizationInput): Promise<OrganizationDeletePayload> {
     return new DeleteOrganizationMutation(this._request).fetch(input);
   }
   /**
@@ -20824,7 +20821,7 @@ export class LinearSdk extends Request {
    *
    * @returns OrganizationDeletePayload
    */
-  public get organizationDeleteChallenge(): LinearFetch<OrganizationDeletePayload> {
+  public get organizationDeleteChallenge(): Promise<OrganizationDeletePayload> {
     return new OrganizationDeleteChallengeMutation(this._request).fetch();
   }
   /**
@@ -20833,7 +20830,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteOrganizationDomain
    * @returns DeletePayload
    */
-  public deleteOrganizationDomain(id: string): LinearFetch<DeletePayload> {
+  public deleteOrganizationDomain(id: string): Promise<DeletePayload> {
     return new DeleteOrganizationDomainMutation(this._request).fetch(id);
   }
   /**
@@ -20842,7 +20839,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createOrganizationInvite
    * @returns OrganizationInvitePayload
    */
-  public createOrganizationInvite(input: L.OrganizationInviteCreateInput): LinearFetch<OrganizationInvitePayload> {
+  public createOrganizationInvite(input: L.OrganizationInviteCreateInput): Promise<OrganizationInvitePayload> {
     return new CreateOrganizationInviteMutation(this._request).fetch(input);
   }
   /**
@@ -20851,7 +20848,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteOrganizationInvite
    * @returns DeletePayload
    */
-  public deleteOrganizationInvite(id: string): LinearFetch<DeletePayload> {
+  public deleteOrganizationInvite(id: string): Promise<DeletePayload> {
     return new DeleteOrganizationInviteMutation(this._request).fetch(id);
   }
   /**
@@ -20864,7 +20861,7 @@ export class LinearSdk extends Request {
   public updateOrganizationInvite(
     id: string,
     input: L.OrganizationInviteUpdateInput
-  ): LinearFetch<OrganizationInvitePayload> {
+  ): Promise<OrganizationInvitePayload> {
     return new UpdateOrganizationInviteMutation(this._request).fetch(id, input);
   }
   /**
@@ -20872,7 +20869,7 @@ export class LinearSdk extends Request {
    *
    * @returns OrganizationStartPlusTrialPayload
    */
-  public get organizationStartPlusTrial(): LinearFetch<OrganizationStartPlusTrialPayload> {
+  public get organizationStartPlusTrial(): Promise<OrganizationStartPlusTrialPayload> {
     return new OrganizationStartPlusTrialMutation(this._request).fetch();
   }
   /**
@@ -20881,7 +20878,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateOrganization
    * @returns OrganizationPayload
    */
-  public updateOrganization(input: L.UpdateOrganizationInput): LinearFetch<OrganizationPayload> {
+  public updateOrganization(input: L.UpdateOrganizationInput): Promise<OrganizationPayload> {
     return new UpdateOrganizationMutation(this._request).fetch(input);
   }
   /**
@@ -20890,7 +20887,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to archiveProject
    * @returns ProjectArchivePayload
    */
-  public archiveProject(id: string): LinearFetch<ProjectArchivePayload> {
+  public archiveProject(id: string): Promise<ProjectArchivePayload> {
     return new ArchiveProjectMutation(this._request).fetch(id);
   }
   /**
@@ -20899,7 +20896,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createProject
    * @returns ProjectPayload
    */
-  public createProject(input: L.ProjectCreateInput): LinearFetch<ProjectPayload> {
+  public createProject(input: L.ProjectCreateInput): Promise<ProjectPayload> {
     return new CreateProjectMutation(this._request).fetch(input);
   }
   /**
@@ -20908,7 +20905,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteProject
    * @returns DeletePayload
    */
-  public deleteProject(id: string): LinearFetch<DeletePayload> {
+  public deleteProject(id: string): Promise<DeletePayload> {
     return new DeleteProjectMutation(this._request).fetch(id);
   }
   /**
@@ -20917,7 +20914,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createProjectLink
    * @returns ProjectLinkPayload
    */
-  public createProjectLink(input: L.ProjectLinkCreateInput): LinearFetch<ProjectLinkPayload> {
+  public createProjectLink(input: L.ProjectLinkCreateInput): Promise<ProjectLinkPayload> {
     return new CreateProjectLinkMutation(this._request).fetch(input);
   }
   /**
@@ -20926,7 +20923,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteProjectLink
    * @returns DeletePayload
    */
-  public deleteProjectLink(id: string): LinearFetch<DeletePayload> {
+  public deleteProjectLink(id: string): Promise<DeletePayload> {
     return new DeleteProjectLinkMutation(this._request).fetch(id);
   }
   /**
@@ -20936,7 +20933,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateProjectLink
    * @returns ProjectLinkPayload
    */
-  public updateProjectLink(id: string, input: L.ProjectLinkUpdateInput): LinearFetch<ProjectLinkPayload> {
+  public updateProjectLink(id: string, input: L.ProjectLinkUpdateInput): Promise<ProjectLinkPayload> {
     return new UpdateProjectLinkMutation(this._request).fetch(id, input);
   }
   /**
@@ -20945,7 +20942,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createProjectMilestone
    * @returns ProjectMilestonePayload
    */
-  public createProjectMilestone(input: L.ProjectMilestoneCreateInput): LinearFetch<ProjectMilestonePayload> {
+  public createProjectMilestone(input: L.ProjectMilestoneCreateInput): Promise<ProjectMilestonePayload> {
     return new CreateProjectMilestoneMutation(this._request).fetch(input);
   }
   /**
@@ -20954,7 +20951,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteProjectMilestone
    * @returns DeletePayload
    */
-  public deleteProjectMilestone(id: string): LinearFetch<DeletePayload> {
+  public deleteProjectMilestone(id: string): Promise<DeletePayload> {
     return new DeleteProjectMilestoneMutation(this._request).fetch(id);
   }
   /**
@@ -20967,7 +20964,7 @@ export class LinearSdk extends Request {
   public updateProjectMilestone(
     id: string,
     input: L.ProjectMilestoneUpdateInput
-  ): LinearFetch<ProjectMilestonePayload> {
+  ): Promise<ProjectMilestonePayload> {
     return new UpdateProjectMilestoneMutation(this._request).fetch(id, input);
   }
   /**
@@ -20976,7 +20973,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to unarchiveProject
    * @returns ProjectArchivePayload
    */
-  public unarchiveProject(id: string): LinearFetch<ProjectArchivePayload> {
+  public unarchiveProject(id: string): Promise<ProjectArchivePayload> {
     return new UnarchiveProjectMutation(this._request).fetch(id);
   }
   /**
@@ -20986,7 +20983,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateProject
    * @returns ProjectPayload
    */
-  public updateProject(id: string, input: L.ProjectUpdateInput): LinearFetch<ProjectPayload> {
+  public updateProject(id: string, input: L.ProjectUpdateInput): Promise<ProjectPayload> {
     return new UpdateProjectMutation(this._request).fetch(id, input);
   }
   /**
@@ -20995,7 +20992,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createProjectUpdate
    * @returns ProjectUpdatePayload
    */
-  public createProjectUpdate(input: L.ProjectUpdateCreateInput): LinearFetch<ProjectUpdatePayload> {
+  public createProjectUpdate(input: L.ProjectUpdateCreateInput): Promise<ProjectUpdatePayload> {
     return new CreateProjectUpdateMutation(this._request).fetch(input);
   }
   /**
@@ -21004,7 +21001,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteProjectUpdate
    * @returns DeletePayload
    */
-  public deleteProjectUpdate(id: string): LinearFetch<DeletePayload> {
+  public deleteProjectUpdate(id: string): Promise<DeletePayload> {
     return new DeleteProjectUpdateMutation(this._request).fetch(id);
   }
   /**
@@ -21015,7 +21012,7 @@ export class LinearSdk extends Request {
    */
   public createProjectUpdateInteraction(
     input: L.ProjectUpdateInteractionCreateInput
-  ): LinearFetch<ProjectUpdateInteractionPayload> {
+  ): Promise<ProjectUpdateInteractionPayload> {
     return new CreateProjectUpdateInteractionMutation(this._request).fetch(input);
   }
   /**
@@ -21024,7 +21021,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to projectUpdateMarkAsRead
    * @returns ProjectUpdateWithInteractionPayload
    */
-  public projectUpdateMarkAsRead(id: string): LinearFetch<ProjectUpdateWithInteractionPayload> {
+  public projectUpdateMarkAsRead(id: string): Promise<ProjectUpdateWithInteractionPayload> {
     return new ProjectUpdateMarkAsReadMutation(this._request).fetch(id);
   }
   /**
@@ -21034,7 +21031,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateProjectUpdate
    * @returns ProjectUpdatePayload
    */
-  public updateProjectUpdate(id: string, input: L.ProjectUpdateUpdateInput): LinearFetch<ProjectUpdatePayload> {
+  public updateProjectUpdate(id: string, input: L.ProjectUpdateUpdateInput): Promise<ProjectUpdatePayload> {
     return new UpdateProjectUpdateMutation(this._request).fetch(id, input);
   }
   /**
@@ -21043,7 +21040,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createPushSubscription
    * @returns PushSubscriptionPayload
    */
-  public createPushSubscription(input: L.PushSubscriptionCreateInput): LinearFetch<PushSubscriptionPayload> {
+  public createPushSubscription(input: L.PushSubscriptionCreateInput): Promise<PushSubscriptionPayload> {
     return new CreatePushSubscriptionMutation(this._request).fetch(input);
   }
   /**
@@ -21052,7 +21049,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deletePushSubscription
    * @returns PushSubscriptionPayload
    */
-  public deletePushSubscription(id: string): LinearFetch<PushSubscriptionPayload> {
+  public deletePushSubscription(id: string): Promise<PushSubscriptionPayload> {
     return new DeletePushSubscriptionMutation(this._request).fetch(id);
   }
   /**
@@ -21061,7 +21058,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createReaction
    * @returns ReactionPayload
    */
-  public createReaction(input: L.ReactionCreateInput): LinearFetch<ReactionPayload> {
+  public createReaction(input: L.ReactionCreateInput): Promise<ReactionPayload> {
     return new CreateReactionMutation(this._request).fetch(input);
   }
   /**
@@ -21070,7 +21067,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteReaction
    * @returns DeletePayload
    */
-  public deleteReaction(id: string): LinearFetch<DeletePayload> {
+  public deleteReaction(id: string): Promise<DeletePayload> {
     return new DeleteReactionMutation(this._request).fetch(id);
   }
   /**
@@ -21079,7 +21076,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to refreshGoogleSheetsData
    * @returns IntegrationPayload
    */
-  public refreshGoogleSheetsData(id: string): LinearFetch<IntegrationPayload> {
+  public refreshGoogleSheetsData(id: string): Promise<IntegrationPayload> {
     return new RefreshGoogleSheetsDataMutation(this._request).fetch(id);
   }
   /**
@@ -21088,7 +21085,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to resendOrganizationInvite
    * @returns DeletePayload
    */
-  public resendOrganizationInvite(id: string): LinearFetch<DeletePayload> {
+  public resendOrganizationInvite(id: string): Promise<DeletePayload> {
     return new ResendOrganizationInviteMutation(this._request).fetch(id);
   }
   /**
@@ -21097,7 +21094,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to archiveRoadmap
    * @returns RoadmapArchivePayload
    */
-  public archiveRoadmap(id: string): LinearFetch<RoadmapArchivePayload> {
+  public archiveRoadmap(id: string): Promise<RoadmapArchivePayload> {
     return new ArchiveRoadmapMutation(this._request).fetch(id);
   }
   /**
@@ -21106,7 +21103,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createRoadmap
    * @returns RoadmapPayload
    */
-  public createRoadmap(input: L.RoadmapCreateInput): LinearFetch<RoadmapPayload> {
+  public createRoadmap(input: L.RoadmapCreateInput): Promise<RoadmapPayload> {
     return new CreateRoadmapMutation(this._request).fetch(input);
   }
   /**
@@ -21115,7 +21112,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteRoadmap
    * @returns DeletePayload
    */
-  public deleteRoadmap(id: string): LinearFetch<DeletePayload> {
+  public deleteRoadmap(id: string): Promise<DeletePayload> {
     return new DeleteRoadmapMutation(this._request).fetch(id);
   }
   /**
@@ -21124,7 +21121,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createRoadmapToProject
    * @returns RoadmapToProjectPayload
    */
-  public createRoadmapToProject(input: L.RoadmapToProjectCreateInput): LinearFetch<RoadmapToProjectPayload> {
+  public createRoadmapToProject(input: L.RoadmapToProjectCreateInput): Promise<RoadmapToProjectPayload> {
     return new CreateRoadmapToProjectMutation(this._request).fetch(input);
   }
   /**
@@ -21133,7 +21130,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteRoadmapToProject
    * @returns DeletePayload
    */
-  public deleteRoadmapToProject(id: string): LinearFetch<DeletePayload> {
+  public deleteRoadmapToProject(id: string): Promise<DeletePayload> {
     return new DeleteRoadmapToProjectMutation(this._request).fetch(id);
   }
   /**
@@ -21146,7 +21143,7 @@ export class LinearSdk extends Request {
   public updateRoadmapToProject(
     id: string,
     input: L.RoadmapToProjectUpdateInput
-  ): LinearFetch<RoadmapToProjectPayload> {
+  ): Promise<RoadmapToProjectPayload> {
     return new UpdateRoadmapToProjectMutation(this._request).fetch(id, input);
   }
   /**
@@ -21155,7 +21152,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to unarchiveRoadmap
    * @returns RoadmapArchivePayload
    */
-  public unarchiveRoadmap(id: string): LinearFetch<RoadmapArchivePayload> {
+  public unarchiveRoadmap(id: string): Promise<RoadmapArchivePayload> {
     return new UnarchiveRoadmapMutation(this._request).fetch(id);
   }
   /**
@@ -21165,7 +21162,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateRoadmap
    * @returns RoadmapPayload
    */
-  public updateRoadmap(id: string, input: L.RoadmapUpdateInput): LinearFetch<RoadmapPayload> {
+  public updateRoadmap(id: string, input: L.RoadmapUpdateInput): Promise<RoadmapPayload> {
     return new UpdateRoadmapMutation(this._request).fetch(id, input);
   }
   /**
@@ -21174,7 +21171,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to samlTokenUserAccountAuth
    * @returns AuthResolverResponse
    */
-  public samlTokenUserAccountAuth(input: L.TokenUserAccountAuthInput): LinearFetch<AuthResolverResponse> {
+  public samlTokenUserAccountAuth(input: L.TokenUserAccountAuthInput): Promise<AuthResolverResponse> {
     return new SamlTokenUserAccountAuthMutation(this._request).fetch(input);
   }
   /**
@@ -21187,7 +21184,7 @@ export class LinearSdk extends Request {
   public createTeam(
     input: L.TeamCreateInput,
     variables?: Omit<L.CreateTeamMutationVariables, "input">
-  ): LinearFetch<TeamPayload> {
+  ): Promise<TeamPayload> {
     return new CreateTeamMutation(this._request).fetch(input, variables);
   }
   /**
@@ -21196,7 +21193,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteTeamCycles
    * @returns TeamPayload
    */
-  public deleteTeamCycles(id: string): LinearFetch<TeamPayload> {
+  public deleteTeamCycles(id: string): Promise<TeamPayload> {
     return new DeleteTeamCyclesMutation(this._request).fetch(id);
   }
   /**
@@ -21205,7 +21202,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteTeam
    * @returns DeletePayload
    */
-  public deleteTeam(id: string): LinearFetch<DeletePayload> {
+  public deleteTeam(id: string): Promise<DeletePayload> {
     return new DeleteTeamMutation(this._request).fetch(id);
   }
   /**
@@ -21214,7 +21211,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteTeamKey
    * @returns DeletePayload
    */
-  public deleteTeamKey(id: string): LinearFetch<DeletePayload> {
+  public deleteTeamKey(id: string): Promise<DeletePayload> {
     return new DeleteTeamKeyMutation(this._request).fetch(id);
   }
   /**
@@ -21223,7 +21220,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createTeamMembership
    * @returns TeamMembershipPayload
    */
-  public createTeamMembership(input: L.TeamMembershipCreateInput): LinearFetch<TeamMembershipPayload> {
+  public createTeamMembership(input: L.TeamMembershipCreateInput): Promise<TeamMembershipPayload> {
     return new CreateTeamMembershipMutation(this._request).fetch(input);
   }
   /**
@@ -21232,7 +21229,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteTeamMembership
    * @returns DeletePayload
    */
-  public deleteTeamMembership(id: string): LinearFetch<DeletePayload> {
+  public deleteTeamMembership(id: string): Promise<DeletePayload> {
     return new DeleteTeamMembershipMutation(this._request).fetch(id);
   }
   /**
@@ -21242,7 +21239,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateTeamMembership
    * @returns TeamMembershipPayload
    */
-  public updateTeamMembership(id: string, input: L.TeamMembershipUpdateInput): LinearFetch<TeamMembershipPayload> {
+  public updateTeamMembership(id: string, input: L.TeamMembershipUpdateInput): Promise<TeamMembershipPayload> {
     return new UpdateTeamMembershipMutation(this._request).fetch(id, input);
   }
   /**
@@ -21252,7 +21249,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateTeam
    * @returns TeamPayload
    */
-  public updateTeam(id: string, input: L.TeamUpdateInput): LinearFetch<TeamPayload> {
+  public updateTeam(id: string, input: L.TeamUpdateInput): Promise<TeamPayload> {
     return new UpdateTeamMutation(this._request).fetch(id, input);
   }
   /**
@@ -21261,7 +21258,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createTemplate
    * @returns TemplatePayload
    */
-  public createTemplate(input: L.TemplateCreateInput): LinearFetch<TemplatePayload> {
+  public createTemplate(input: L.TemplateCreateInput): Promise<TemplatePayload> {
     return new CreateTemplateMutation(this._request).fetch(input);
   }
   /**
@@ -21270,7 +21267,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteTemplate
    * @returns DeletePayload
    */
-  public deleteTemplate(id: string): LinearFetch<DeletePayload> {
+  public deleteTemplate(id: string): Promise<DeletePayload> {
     return new DeleteTemplateMutation(this._request).fetch(id);
   }
   /**
@@ -21280,7 +21277,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateTemplate
    * @returns TemplatePayload
    */
-  public updateTemplate(id: string, input: L.TemplateUpdateInput): LinearFetch<TemplatePayload> {
+  public updateTemplate(id: string, input: L.TemplateUpdateInput): Promise<TemplatePayload> {
     return new UpdateTemplateMutation(this._request).fetch(id, input);
   }
   /**
@@ -21289,7 +21286,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to userDemoteAdmin
    * @returns UserAdminPayload
    */
-  public userDemoteAdmin(id: string): LinearFetch<UserAdminPayload> {
+  public userDemoteAdmin(id: string): Promise<UserAdminPayload> {
     return new UserDemoteAdminMutation(this._request).fetch(id);
   }
   /**
@@ -21298,7 +21295,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to userDemoteMember
    * @returns UserAdminPayload
    */
-  public userDemoteMember(id: string): LinearFetch<UserAdminPayload> {
+  public userDemoteMember(id: string): Promise<UserAdminPayload> {
     return new UserDemoteMemberMutation(this._request).fetch(id);
   }
   /**
@@ -21308,7 +21305,7 @@ export class LinearSdk extends Request {
    * @param redirectUri - required redirectUri to pass to userDiscordConnect
    * @returns UserPayload
    */
-  public userDiscordConnect(code: string, redirectUri: string): LinearFetch<UserPayload> {
+  public userDiscordConnect(code: string, redirectUri: string): Promise<UserPayload> {
     return new UserDiscordConnectMutation(this._request).fetch(code, redirectUri);
   }
   /**
@@ -21317,7 +21314,7 @@ export class LinearSdk extends Request {
    * @param service - required service to pass to userExternalUserDisconnect
    * @returns UserPayload
    */
-  public userExternalUserDisconnect(service: string): LinearFetch<UserPayload> {
+  public userExternalUserDisconnect(service: string): Promise<UserPayload> {
     return new UserExternalUserDisconnectMutation(this._request).fetch(service);
   }
   /**
@@ -21330,7 +21327,7 @@ export class LinearSdk extends Request {
   public updateUserFlag(
     flag: L.UserFlagType,
     operation: L.UserFlagUpdateOperation
-  ): LinearFetch<UserSettingsFlagPayload> {
+  ): Promise<UserSettingsFlagPayload> {
     return new UpdateUserFlagMutation(this._request).fetch(flag, operation);
   }
   /**
@@ -21339,7 +21336,7 @@ export class LinearSdk extends Request {
    * @param code - required code to pass to userGitHubConnect
    * @returns UserPayload
    */
-  public userGitHubConnect(code: string): LinearFetch<UserPayload> {
+  public userGitHubConnect(code: string): Promise<UserPayload> {
     return new UserGitHubConnectMutation(this._request).fetch(code);
   }
   /**
@@ -21348,7 +21345,7 @@ export class LinearSdk extends Request {
    * @param code - required code to pass to userGoogleCalendarConnect
    * @returns UserPayload
    */
-  public userGoogleCalendarConnect(code: string): LinearFetch<UserPayload> {
+  public userGoogleCalendarConnect(code: string): Promise<UserPayload> {
     return new UserGoogleCalendarConnectMutation(this._request).fetch(code);
   }
   /**
@@ -21357,7 +21354,7 @@ export class LinearSdk extends Request {
    * @param code - required code to pass to userJiraConnect
    * @returns UserPayload
    */
-  public userJiraConnect(code: string): LinearFetch<UserPayload> {
+  public userJiraConnect(code: string): Promise<UserPayload> {
     return new UserJiraConnectMutation(this._request).fetch(code);
   }
   /**
@@ -21366,7 +21363,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to userPromoteAdmin
    * @returns UserAdminPayload
    */
-  public userPromoteAdmin(id: string): LinearFetch<UserAdminPayload> {
+  public userPromoteAdmin(id: string): Promise<UserAdminPayload> {
     return new UserPromoteAdminMutation(this._request).fetch(id);
   }
   /**
@@ -21375,7 +21372,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to userPromoteMember
    * @returns UserAdminPayload
    */
-  public userPromoteMember(id: string): LinearFetch<UserAdminPayload> {
+  public userPromoteMember(id: string): Promise<UserAdminPayload> {
     return new UserPromoteMemberMutation(this._request).fetch(id);
   }
   /**
@@ -21384,7 +21381,7 @@ export class LinearSdk extends Request {
    * @param flag - required flag to pass to userSettingsFlagIncrement
    * @returns UserSettingsFlagPayload
    */
-  public userSettingsFlagIncrement(flag: string): LinearFetch<UserSettingsFlagPayload> {
+  public userSettingsFlagIncrement(flag: string): Promise<UserSettingsFlagPayload> {
     return new UserSettingsFlagIncrementMutation(this._request).fetch(flag);
   }
   /**
@@ -21395,7 +21392,7 @@ export class LinearSdk extends Request {
    */
   public userSettingsFlagsReset(
     variables?: L.UserSettingsFlagsResetMutationVariables
-  ): LinearFetch<UserSettingsFlagsResetPayload> {
+  ): Promise<UserSettingsFlagsResetPayload> {
     return new UserSettingsFlagsResetMutation(this._request).fetch(variables);
   }
   /**
@@ -21405,7 +21402,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateUserSettings
    * @returns UserSettingsPayload
    */
-  public updateUserSettings(id: string, input: L.UserSettingsUpdateInput): LinearFetch<UserSettingsPayload> {
+  public updateUserSettings(id: string, input: L.UserSettingsUpdateInput): Promise<UserSettingsPayload> {
     return new UpdateUserSettingsMutation(this._request).fetch(id, input);
   }
   /**
@@ -21414,7 +21411,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to suspendUser
    * @returns UserAdminPayload
    */
-  public suspendUser(id: string): LinearFetch<UserAdminPayload> {
+  public suspendUser(id: string): Promise<UserAdminPayload> {
     return new SuspendUserMutation(this._request).fetch(id);
   }
   /**
@@ -21423,7 +21420,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to unsuspendUser
    * @returns UserAdminPayload
    */
-  public unsuspendUser(id: string): LinearFetch<UserAdminPayload> {
+  public unsuspendUser(id: string): Promise<UserAdminPayload> {
     return new UnsuspendUserMutation(this._request).fetch(id);
   }
   /**
@@ -21433,7 +21430,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateUser
    * @returns UserPayload
    */
-  public updateUser(id: string, input: L.UpdateUserInput): LinearFetch<UserPayload> {
+  public updateUser(id: string, input: L.UpdateUserInput): Promise<UserPayload> {
     return new UpdateUserMutation(this._request).fetch(id, input);
   }
   /**
@@ -21442,7 +21439,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createViewPreferences
    * @returns ViewPreferencesPayload
    */
-  public createViewPreferences(input: L.ViewPreferencesCreateInput): LinearFetch<ViewPreferencesPayload> {
+  public createViewPreferences(input: L.ViewPreferencesCreateInput): Promise<ViewPreferencesPayload> {
     return new CreateViewPreferencesMutation(this._request).fetch(input);
   }
   /**
@@ -21451,7 +21448,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteViewPreferences
    * @returns DeletePayload
    */
-  public deleteViewPreferences(id: string): LinearFetch<DeletePayload> {
+  public deleteViewPreferences(id: string): Promise<DeletePayload> {
     return new DeleteViewPreferencesMutation(this._request).fetch(id);
   }
   /**
@@ -21461,7 +21458,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateViewPreferences
    * @returns ViewPreferencesPayload
    */
-  public updateViewPreferences(id: string, input: L.ViewPreferencesUpdateInput): LinearFetch<ViewPreferencesPayload> {
+  public updateViewPreferences(id: string, input: L.ViewPreferencesUpdateInput): Promise<ViewPreferencesPayload> {
     return new UpdateViewPreferencesMutation(this._request).fetch(id, input);
   }
   /**
@@ -21470,7 +21467,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createWebhook
    * @returns WebhookPayload
    */
-  public createWebhook(input: L.WebhookCreateInput): LinearFetch<WebhookPayload> {
+  public createWebhook(input: L.WebhookCreateInput): Promise<WebhookPayload> {
     return new CreateWebhookMutation(this._request).fetch(input);
   }
   /**
@@ -21479,7 +21476,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to deleteWebhook
    * @returns DeletePayload
    */
-  public deleteWebhook(id: string): LinearFetch<DeletePayload> {
+  public deleteWebhook(id: string): Promise<DeletePayload> {
     return new DeleteWebhookMutation(this._request).fetch(id);
   }
   /**
@@ -21489,7 +21486,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateWebhook
    * @returns WebhookPayload
    */
-  public updateWebhook(id: string, input: L.WebhookUpdateInput): LinearFetch<WebhookPayload> {
+  public updateWebhook(id: string, input: L.WebhookUpdateInput): Promise<WebhookPayload> {
     return new UpdateWebhookMutation(this._request).fetch(id, input);
   }
   /**
@@ -21498,7 +21495,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to archiveWorkflowState
    * @returns WorkflowStateArchivePayload
    */
-  public archiveWorkflowState(id: string): LinearFetch<WorkflowStateArchivePayload> {
+  public archiveWorkflowState(id: string): Promise<WorkflowStateArchivePayload> {
     return new ArchiveWorkflowStateMutation(this._request).fetch(id);
   }
   /**
@@ -21507,7 +21504,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to createWorkflowState
    * @returns WorkflowStatePayload
    */
-  public createWorkflowState(input: L.WorkflowStateCreateInput): LinearFetch<WorkflowStatePayload> {
+  public createWorkflowState(input: L.WorkflowStateCreateInput): Promise<WorkflowStatePayload> {
     return new CreateWorkflowStateMutation(this._request).fetch(input);
   }
   /**
@@ -21517,7 +21514,7 @@ export class LinearSdk extends Request {
    * @param input - required input to pass to updateWorkflowState
    * @returns WorkflowStatePayload
    */
-  public updateWorkflowState(id: string, input: L.WorkflowStateUpdateInput): LinearFetch<WorkflowStatePayload> {
+  public updateWorkflowState(id: string, input: L.WorkflowStateUpdateInput): Promise<WorkflowStatePayload> {
     return new UpdateWorkflowStateMutation(this._request).fetch(id, input);
   }
   /**
@@ -21526,7 +21523,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to ProjectMilestone
    * @returns ProjectMilestone
    */
-  public ProjectMilestone(id: string): LinearFetch<ProjectMilestone> {
+  public ProjectMilestone(id: string): Promise<ProjectMilestone> {
     return new ProjectMilestoneQuery(this._request).fetch(id);
   }
   /**
@@ -21535,7 +21532,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the ProjectMilestonesQuery
    * @returns ProjectMilestoneConnection
    */
-  public ProjectMilestones(variables?: L.ProjectMilestonesQueryVariables): LinearFetch<ProjectMilestoneConnection> {
+  public ProjectMilestones(variables?: L.ProjectMilestonesQueryVariables): Promise<ProjectMilestoneConnection> {
     return new ProjectMilestonesQuery(this._request).fetch(variables);
   }
   /**
@@ -21544,7 +21541,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the AdministrableTeamsQuery
    * @returns TeamConnection
    */
-  public administrableTeams(variables?: L.AdministrableTeamsQueryVariables): LinearFetch<TeamConnection> {
+  public administrableTeams(variables?: L.AdministrableTeamsQueryVariables): Promise<TeamConnection> {
     return new AdministrableTeamsQuery(this._request).fetch(variables);
   }
   /**
@@ -21553,7 +21550,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the ApiKeysQuery
    * @returns ApiKeyConnection
    */
-  public apiKeys(variables?: L.ApiKeysQueryVariables): LinearFetch<ApiKeyConnection> {
+  public apiKeys(variables?: L.ApiKeysQueryVariables): Promise<ApiKeyConnection> {
     return new ApiKeysQuery(this._request).fetch(variables);
   }
   /**
@@ -21562,7 +21559,7 @@ export class LinearSdk extends Request {
    * @param clientId - required clientId to pass to applicationInfo
    * @returns Application
    */
-  public applicationInfo(clientId: string): LinearFetch<Application> {
+  public applicationInfo(clientId: string): Promise<Application> {
     return new ApplicationInfoQuery(this._request).fetch(clientId);
   }
   /**
@@ -21577,7 +21574,7 @@ export class LinearSdk extends Request {
     clientId: string,
     scope: string[],
     variables?: Omit<L.ApplicationWithAuthorizationQueryVariables, "clientId" | "scope">
-  ): LinearFetch<UserAuthorizedApplication> {
+  ): Promise<UserAuthorizedApplication> {
     return new ApplicationWithAuthorizationQuery(this._request).fetch(clientId, scope, variables);
   }
   /**
@@ -21587,7 +21584,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to attachment
    * @returns Attachment
    */
-  public attachment(id: string): LinearFetch<Attachment> {
+  public attachment(id: string): Promise<Attachment> {
     return new AttachmentQuery(this._request).fetch(id);
   }
   /**
@@ -21596,7 +21593,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to attachmentIssue
    * @returns Issue
    */
-  public attachmentIssue(id: string): LinearFetch<Issue> {
+  public attachmentIssue(id: string): Promise<Issue> {
     return new AttachmentIssueQuery(this._request).fetch(id);
   }
   /**
@@ -21607,7 +21604,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the AttachmentsQuery
    * @returns AttachmentConnection
    */
-  public attachments(variables?: L.AttachmentsQueryVariables): LinearFetch<AttachmentConnection> {
+  public attachments(variables?: L.AttachmentsQueryVariables): Promise<AttachmentConnection> {
     return new AttachmentsQuery(this._request).fetch(variables);
   }
   /**
@@ -21620,7 +21617,7 @@ export class LinearSdk extends Request {
   public attachmentsForURL(
     url: string,
     variables?: Omit<L.AttachmentsForUrlQueryVariables, "url">
-  ): LinearFetch<AttachmentConnection> {
+  ): Promise<AttachmentConnection> {
     return new AttachmentsForUrlQuery(this._request).fetch(url, variables);
   }
   /**
@@ -21629,7 +21626,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the AuditEntriesQuery
    * @returns AuditEntryConnection
    */
-  public auditEntries(variables?: L.AuditEntriesQueryVariables): LinearFetch<AuditEntryConnection> {
+  public auditEntries(variables?: L.AuditEntriesQueryVariables): Promise<AuditEntryConnection> {
     return new AuditEntriesQuery(this._request).fetch(variables);
   }
   /**
@@ -21637,7 +21634,7 @@ export class LinearSdk extends Request {
    *
    * @returns AuditEntryType[]
    */
-  public get auditEntryTypes(): LinearFetch<AuditEntryType[]> {
+  public get auditEntryTypes(): Promise<AuditEntryType[]> {
     return new AuditEntryTypesQuery(this._request).fetch();
   }
   /**
@@ -21645,7 +21642,7 @@ export class LinearSdk extends Request {
    *
    * @returns AuthResolverResponse
    */
-  public get availableUsers(): LinearFetch<AuthResolverResponse> {
+  public get availableUsers(): Promise<AuthResolverResponse> {
     return new AvailableUsersQuery(this._request).fetch();
   }
   /**
@@ -21654,7 +21651,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to comment
    * @returns Comment
    */
-  public comment(id: string): LinearFetch<Comment> {
+  public comment(id: string): Promise<Comment> {
     return new CommentQuery(this._request).fetch(id);
   }
   /**
@@ -21663,7 +21660,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the CommentsQuery
    * @returns CommentConnection
    */
-  public comments(variables?: L.CommentsQueryVariables): LinearFetch<CommentConnection> {
+  public comments(variables?: L.CommentsQueryVariables): Promise<CommentConnection> {
     return new CommentsQuery(this._request).fetch(variables);
   }
   /**
@@ -21672,7 +21669,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to customView
    * @returns CustomView
    */
-  public customView(id: string): LinearFetch<CustomView> {
+  public customView(id: string): Promise<CustomView> {
     return new CustomViewQuery(this._request).fetch(id);
   }
   /**
@@ -21681,7 +21678,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the CustomViewsQuery
    * @returns CustomViewConnection
    */
-  public customViews(variables?: L.CustomViewsQueryVariables): LinearFetch<CustomViewConnection> {
+  public customViews(variables?: L.CustomViewsQueryVariables): Promise<CustomViewConnection> {
     return new CustomViewsQuery(this._request).fetch(variables);
   }
   /**
@@ -21690,7 +21687,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to cycle
    * @returns Cycle
    */
-  public cycle(id: string): LinearFetch<Cycle> {
+  public cycle(id: string): Promise<Cycle> {
     return new CycleQuery(this._request).fetch(id);
   }
   /**
@@ -21699,7 +21696,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the CyclesQuery
    * @returns CycleConnection
    */
-  public cycles(variables?: L.CyclesQueryVariables): LinearFetch<CycleConnection> {
+  public cycles(variables?: L.CyclesQueryVariables): Promise<CycleConnection> {
     return new CyclesQuery(this._request).fetch(variables);
   }
   /**
@@ -21708,7 +21705,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to document
    * @returns Document
    */
-  public document(id: string): LinearFetch<Document> {
+  public document(id: string): Promise<Document> {
     return new DocumentQuery(this._request).fetch(id);
   }
   /**
@@ -21717,7 +21714,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the DocumentsQuery
    * @returns DocumentConnection
    */
-  public documents(variables?: L.DocumentsQueryVariables): LinearFetch<DocumentConnection> {
+  public documents(variables?: L.DocumentsQueryVariables): Promise<DocumentConnection> {
     return new DocumentsQuery(this._request).fetch(variables);
   }
   /**
@@ -21726,7 +21723,7 @@ export class LinearSdk extends Request {
    * @param url - required url to pass to embedInfo
    * @returns EmbedPayload
    */
-  public embedInfo(url: string): LinearFetch<EmbedPayload> {
+  public embedInfo(url: string): Promise<EmbedPayload> {
     return new EmbedInfoQuery(this._request).fetch(url);
   }
   /**
@@ -21735,7 +21732,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to emoji
    * @returns Emoji
    */
-  public emoji(id: string): LinearFetch<Emoji> {
+  public emoji(id: string): Promise<Emoji> {
     return new EmojiQuery(this._request).fetch(id);
   }
   /**
@@ -21744,7 +21741,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the EmojisQuery
    * @returns EmojiConnection
    */
-  public emojis(variables?: L.EmojisQueryVariables): LinearFetch<EmojiConnection> {
+  public emojis(variables?: L.EmojisQueryVariables): Promise<EmojiConnection> {
     return new EmojisQuery(this._request).fetch(variables);
   }
   /**
@@ -21753,7 +21750,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to favorite
    * @returns Favorite
    */
-  public favorite(id: string): LinearFetch<Favorite> {
+  public favorite(id: string): Promise<Favorite> {
     return new FavoriteQuery(this._request).fetch(id);
   }
   /**
@@ -21762,7 +21759,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the FavoritesQuery
    * @returns FavoriteConnection
    */
-  public favorites(variables?: L.FavoritesQueryVariables): LinearFetch<FavoriteConnection> {
+  public favorites(variables?: L.FavoritesQueryVariables): Promise<FavoriteConnection> {
     return new FavoritesQuery(this._request).fetch(variables);
   }
   /**
@@ -21775,7 +21772,7 @@ export class LinearSdk extends Request {
   public figmaEmbedInfo(
     fileId: string,
     variables?: Omit<L.FigmaEmbedInfoQueryVariables, "fileId">
-  ): LinearFetch<FigmaEmbedPayload> {
+  ): Promise<FigmaEmbedPayload> {
     return new FigmaEmbedInfoQuery(this._request).fetch(fileId, variables);
   }
   /**
@@ -21784,7 +21781,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to integration
    * @returns Integration
    */
-  public integration(id: string): LinearFetch<Integration> {
+  public integration(id: string): Promise<Integration> {
     return new IntegrationQuery(this._request).fetch(id);
   }
   /**
@@ -21793,7 +21790,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to integrationTemplate
    * @returns IntegrationTemplate
    */
-  public integrationTemplate(id: string): LinearFetch<IntegrationTemplate> {
+  public integrationTemplate(id: string): Promise<IntegrationTemplate> {
     return new IntegrationTemplateQuery(this._request).fetch(id);
   }
   /**
@@ -21804,7 +21801,7 @@ export class LinearSdk extends Request {
    */
   public integrationTemplates(
     variables?: L.IntegrationTemplatesQueryVariables
-  ): LinearFetch<IntegrationTemplateConnection> {
+  ): Promise<IntegrationTemplateConnection> {
     return new IntegrationTemplatesQuery(this._request).fetch(variables);
   }
   /**
@@ -21813,7 +21810,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the IntegrationsQuery
    * @returns IntegrationConnection
    */
-  public integrations(variables?: L.IntegrationsQueryVariables): LinearFetch<IntegrationConnection> {
+  public integrations(variables?: L.IntegrationsQueryVariables): Promise<IntegrationConnection> {
     return new IntegrationsQuery(this._request).fetch(variables);
   }
   /**
@@ -21822,7 +21819,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to integrationsSettings
    * @returns IntegrationsSettings
    */
-  public integrationsSettings(id: string): LinearFetch<IntegrationsSettings> {
+  public integrationsSettings(id: string): Promise<IntegrationsSettings> {
     return new IntegrationsSettingsQuery(this._request).fetch(id);
   }
   /**
@@ -21831,7 +21828,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to issue
    * @returns Issue
    */
-  public issue(id: string): LinearFetch<Issue> {
+  public issue(id: string): Promise<Issue> {
     return new IssueQuery(this._request).fetch(id);
   }
   /**
@@ -21844,7 +21841,7 @@ export class LinearSdk extends Request {
   public issueFigmaFileKeySearch(
     fileKey: string,
     variables?: Omit<L.IssueFigmaFileKeySearchQueryVariables, "fileKey">
-  ): LinearFetch<IssueConnection> {
+  ): Promise<IssueConnection> {
     return new IssueFigmaFileKeySearchQuery(this._request).fetch(fileKey, variables);
   }
   /**
@@ -21853,7 +21850,7 @@ export class LinearSdk extends Request {
    * @param prompt - required prompt to pass to issueFilterSuggestion
    * @returns IssueFilterSuggestionPayload
    */
-  public issueFilterSuggestion(prompt: string): LinearFetch<IssueFilterSuggestionPayload> {
+  public issueFilterSuggestion(prompt: string): Promise<IssueFilterSuggestionPayload> {
     return new IssueFilterSuggestionQuery(this._request).fetch(prompt);
   }
   /**
@@ -21863,7 +21860,7 @@ export class LinearSdk extends Request {
    * @param service - required service to pass to issueImportCheckCSV
    * @returns IssueImportCheckPayload
    */
-  public issueImportCheckCSV(csvUrl: string, service: string): LinearFetch<IssueImportCheckPayload> {
+  public issueImportCheckCSV(csvUrl: string, service: string): Promise<IssueImportCheckPayload> {
     return new IssueImportCheckCsvQuery(this._request).fetch(csvUrl, service);
   }
   /**
@@ -21872,7 +21869,7 @@ export class LinearSdk extends Request {
    * @param code - required code to pass to issueImportFinishGithubOAuth
    * @returns GithubOAuthTokenPayload
    */
-  public issueImportFinishGithubOAuth(code: string): LinearFetch<GithubOAuthTokenPayload> {
+  public issueImportFinishGithubOAuth(code: string): Promise<GithubOAuthTokenPayload> {
     return new IssueImportFinishGithubOAuthQuery(this._request).fetch(code);
   }
   /**
@@ -21881,7 +21878,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to issueLabel
    * @returns IssueLabel
    */
-  public issueLabel(id: string): LinearFetch<IssueLabel> {
+  public issueLabel(id: string): Promise<IssueLabel> {
     return new IssueLabelQuery(this._request).fetch(id);
   }
   /**
@@ -21890,7 +21887,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the IssueLabelsQuery
    * @returns IssueLabelConnection
    */
-  public issueLabels(variables?: L.IssueLabelsQueryVariables): LinearFetch<IssueLabelConnection> {
+  public issueLabels(variables?: L.IssueLabelsQueryVariables): Promise<IssueLabelConnection> {
     return new IssueLabelsQuery(this._request).fetch(variables);
   }
   /**
@@ -21898,7 +21895,7 @@ export class LinearSdk extends Request {
    *
    * @returns IssuePriorityValue[]
    */
-  public get issuePriorityValues(): LinearFetch<IssuePriorityValue[]> {
+  public get issuePriorityValues(): Promise<IssuePriorityValue[]> {
     return new IssuePriorityValuesQuery(this._request).fetch();
   }
   /**
@@ -21907,7 +21904,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to issueRelation
    * @returns IssueRelation
    */
-  public issueRelation(id: string): LinearFetch<IssueRelation> {
+  public issueRelation(id: string): Promise<IssueRelation> {
     return new IssueRelationQuery(this._request).fetch(id);
   }
   /**
@@ -21916,7 +21913,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the IssueRelationsQuery
    * @returns IssueRelationConnection
    */
-  public issueRelations(variables?: L.IssueRelationsQueryVariables): LinearFetch<IssueRelationConnection> {
+  public issueRelations(variables?: L.IssueRelationsQueryVariables): Promise<IssueRelationConnection> {
     return new IssueRelationsQuery(this._request).fetch(variables);
   }
   /**
@@ -21925,7 +21922,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the IssueSearchQuery
    * @returns IssueConnection
    */
-  public issueSearch(variables?: L.IssueSearchQueryVariables): LinearFetch<IssueConnection> {
+  public issueSearch(variables?: L.IssueSearchQueryVariables): Promise<IssueConnection> {
     return new IssueSearchQuery(this._request).fetch(variables);
   }
   /**
@@ -21934,7 +21931,7 @@ export class LinearSdk extends Request {
    * @param branchName - required branchName to pass to issueVcsBranchSearch
    * @returns Issue
    */
-  public issueVcsBranchSearch(branchName: string): LinearFetch<Issue | undefined> {
+  public issueVcsBranchSearch(branchName: string): Promise<Issue | undefined> {
     return new IssueVcsBranchSearchQuery(this._request).fetch(branchName);
   }
   /**
@@ -21943,7 +21940,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the IssuesQuery
    * @returns IssueConnection
    */
-  public issues(variables?: L.IssuesQueryVariables): LinearFetch<IssueConnection> {
+  public issues(variables?: L.IssuesQueryVariables): Promise<IssueConnection> {
     return new IssuesQuery(this._request).fetch(variables);
   }
   /**
@@ -21954,7 +21951,7 @@ export class LinearSdk extends Request {
    */
   public notification(
     id: string
-  ): LinearFetch<IssueNotification | OauthClientApprovalNotification | ProjectNotification | Notification> {
+  ): Promise<IssueNotification | OauthClientApprovalNotification | ProjectNotification | Notification> {
     return new NotificationQuery(this._request).fetch(id);
   }
   /**
@@ -21965,7 +21962,7 @@ export class LinearSdk extends Request {
    */
   public notificationSubscription(
     id: string
-  ): LinearFetch<
+  ): Promise<
     | CustomViewNotificationSubscription
     | CycleNotificationSubscription
     | LabelNotificationSubscription
@@ -21983,7 +21980,7 @@ export class LinearSdk extends Request {
    */
   public notificationSubscriptions(
     variables?: L.NotificationSubscriptionsQueryVariables
-  ): LinearFetch<NotificationSubscriptionConnection> {
+  ): Promise<NotificationSubscriptionConnection> {
     return new NotificationSubscriptionsQuery(this._request).fetch(variables);
   }
   /**
@@ -21992,7 +21989,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the NotificationsQuery
    * @returns NotificationConnection
    */
-  public notifications(variables?: L.NotificationsQueryVariables): LinearFetch<NotificationConnection> {
+  public notifications(variables?: L.NotificationsQueryVariables): Promise<NotificationConnection> {
     return new NotificationsQuery(this._request).fetch(variables);
   }
   /**
@@ -22000,7 +21997,7 @@ export class LinearSdk extends Request {
    *
    * @returns Organization
    */
-  public get organization(): LinearFetch<Organization> {
+  public get organization(): Promise<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
   /**
@@ -22009,7 +22006,7 @@ export class LinearSdk extends Request {
    * @param urlKey - required urlKey to pass to organizationExists
    * @returns OrganizationExistsPayload
    */
-  public organizationExists(urlKey: string): LinearFetch<OrganizationExistsPayload> {
+  public organizationExists(urlKey: string): Promise<OrganizationExistsPayload> {
     return new OrganizationExistsQuery(this._request).fetch(urlKey);
   }
   /**
@@ -22018,7 +22015,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to organizationInvite
    * @returns OrganizationInvite
    */
-  public organizationInvite(id: string): LinearFetch<OrganizationInvite> {
+  public organizationInvite(id: string): Promise<OrganizationInvite> {
     return new OrganizationInviteQuery(this._request).fetch(id);
   }
   /**
@@ -22029,7 +22026,7 @@ export class LinearSdk extends Request {
    */
   public organizationInvites(
     variables?: L.OrganizationInvitesQueryVariables
-  ): LinearFetch<OrganizationInviteConnection> {
+  ): Promise<OrganizationInviteConnection> {
     return new OrganizationInvitesQuery(this._request).fetch(variables);
   }
   /**
@@ -22038,7 +22035,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to project
    * @returns Project
    */
-  public project(id: string): LinearFetch<Project> {
+  public project(id: string): Promise<Project> {
     return new ProjectQuery(this._request).fetch(id);
   }
   /**
@@ -22047,7 +22044,7 @@ export class LinearSdk extends Request {
    * @param prompt - required prompt to pass to projectFilterSuggestion
    * @returns ProjectFilterSuggestionPayload
    */
-  public projectFilterSuggestion(prompt: string): LinearFetch<ProjectFilterSuggestionPayload> {
+  public projectFilterSuggestion(prompt: string): Promise<ProjectFilterSuggestionPayload> {
     return new ProjectFilterSuggestionQuery(this._request).fetch(prompt);
   }
   /**
@@ -22056,7 +22053,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to projectLink
    * @returns ProjectLink
    */
-  public projectLink(id: string): LinearFetch<ProjectLink> {
+  public projectLink(id: string): Promise<ProjectLink> {
     return new ProjectLinkQuery(this._request).fetch(id);
   }
   /**
@@ -22065,7 +22062,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the ProjectLinksQuery
    * @returns ProjectLinkConnection
    */
-  public projectLinks(variables?: L.ProjectLinksQueryVariables): LinearFetch<ProjectLinkConnection> {
+  public projectLinks(variables?: L.ProjectLinksQueryVariables): Promise<ProjectLinkConnection> {
     return new ProjectLinksQuery(this._request).fetch(variables);
   }
   /**
@@ -22074,7 +22071,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to projectUpdate
    * @returns ProjectUpdate
    */
-  public projectUpdate(id: string): LinearFetch<ProjectUpdate> {
+  public projectUpdate(id: string): Promise<ProjectUpdate> {
     return new ProjectUpdateQuery(this._request).fetch(id);
   }
   /**
@@ -22083,7 +22080,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to projectUpdateInteraction
    * @returns ProjectUpdateInteraction
    */
-  public projectUpdateInteraction(id: string): LinearFetch<ProjectUpdateInteraction> {
+  public projectUpdateInteraction(id: string): Promise<ProjectUpdateInteraction> {
     return new ProjectUpdateInteractionQuery(this._request).fetch(id);
   }
   /**
@@ -22094,7 +22091,7 @@ export class LinearSdk extends Request {
    */
   public projectUpdateInteractions(
     variables?: L.ProjectUpdateInteractionsQueryVariables
-  ): LinearFetch<ProjectUpdateInteractionConnection> {
+  ): Promise<ProjectUpdateInteractionConnection> {
     return new ProjectUpdateInteractionsQuery(this._request).fetch(variables);
   }
   /**
@@ -22103,7 +22100,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the ProjectUpdatesQuery
    * @returns ProjectUpdateConnection
    */
-  public projectUpdates(variables?: L.ProjectUpdatesQueryVariables): LinearFetch<ProjectUpdateConnection> {
+  public projectUpdates(variables?: L.ProjectUpdatesQueryVariables): Promise<ProjectUpdateConnection> {
     return new ProjectUpdatesQuery(this._request).fetch(variables);
   }
   /**
@@ -22112,7 +22109,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the ProjectsQuery
    * @returns ProjectConnection
    */
-  public projects(variables?: L.ProjectsQueryVariables): LinearFetch<ProjectConnection> {
+  public projects(variables?: L.ProjectsQueryVariables): Promise<ProjectConnection> {
     return new ProjectsQuery(this._request).fetch(variables);
   }
   /**
@@ -22120,7 +22117,7 @@ export class LinearSdk extends Request {
    *
    * @returns PushSubscriptionTestPayload
    */
-  public get pushSubscriptionTest(): LinearFetch<PushSubscriptionTestPayload> {
+  public get pushSubscriptionTest(): Promise<PushSubscriptionTestPayload> {
     return new PushSubscriptionTestQuery(this._request).fetch();
   }
   /**
@@ -22128,7 +22125,7 @@ export class LinearSdk extends Request {
    *
    * @returns RateLimitPayload
    */
-  public get rateLimitStatus(): LinearFetch<RateLimitPayload> {
+  public get rateLimitStatus(): Promise<RateLimitPayload> {
     return new RateLimitStatusQuery(this._request).fetch();
   }
   /**
@@ -22137,7 +22134,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to roadmap
    * @returns Roadmap
    */
-  public roadmap(id: string): LinearFetch<Roadmap> {
+  public roadmap(id: string): Promise<Roadmap> {
     return new RoadmapQuery(this._request).fetch(id);
   }
   /**
@@ -22146,7 +22143,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to roadmapToProject
    * @returns RoadmapToProject
    */
-  public roadmapToProject(id: string): LinearFetch<RoadmapToProject> {
+  public roadmapToProject(id: string): Promise<RoadmapToProject> {
     return new RoadmapToProjectQuery(this._request).fetch(id);
   }
   /**
@@ -22155,7 +22152,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the RoadmapToProjectsQuery
    * @returns RoadmapToProjectConnection
    */
-  public roadmapToProjects(variables?: L.RoadmapToProjectsQueryVariables): LinearFetch<RoadmapToProjectConnection> {
+  public roadmapToProjects(variables?: L.RoadmapToProjectsQueryVariables): Promise<RoadmapToProjectConnection> {
     return new RoadmapToProjectsQuery(this._request).fetch(variables);
   }
   /**
@@ -22164,7 +22161,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the RoadmapsQuery
    * @returns RoadmapConnection
    */
-  public roadmaps(variables?: L.RoadmapsQueryVariables): LinearFetch<RoadmapConnection> {
+  public roadmaps(variables?: L.RoadmapsQueryVariables): Promise<RoadmapConnection> {
     return new RoadmapsQuery(this._request).fetch(variables);
   }
   /**
@@ -22177,7 +22174,7 @@ export class LinearSdk extends Request {
   public searchDocuments(
     term: string,
     variables?: Omit<L.SearchDocumentsQueryVariables, "term">
-  ): LinearFetch<DocumentSearchPayload> {
+  ): Promise<DocumentSearchPayload> {
     return new SearchDocumentsQuery(this._request).fetch(term, variables);
   }
   /**
@@ -22190,7 +22187,7 @@ export class LinearSdk extends Request {
   public searchIssues(
     term: string,
     variables?: Omit<L.SearchIssuesQueryVariables, "term">
-  ): LinearFetch<IssueSearchPayload> {
+  ): Promise<IssueSearchPayload> {
     return new SearchIssuesQuery(this._request).fetch(term, variables);
   }
   /**
@@ -22203,7 +22200,7 @@ export class LinearSdk extends Request {
   public searchProjects(
     term: string,
     variables?: Omit<L.SearchProjectsQueryVariables, "term">
-  ): LinearFetch<ProjectSearchPayload> {
+  ): Promise<ProjectSearchPayload> {
     return new SearchProjectsQuery(this._request).fetch(term, variables);
   }
   /**
@@ -22216,7 +22213,7 @@ export class LinearSdk extends Request {
   public ssoUrlFromEmail(
     email: string,
     variables?: Omit<L.SsoUrlFromEmailQueryVariables, "email">
-  ): LinearFetch<SsoUrlFromEmailResponse> {
+  ): Promise<SsoUrlFromEmailResponse> {
     return new SsoUrlFromEmailQuery(this._request).fetch(email, variables);
   }
   /**
@@ -22225,7 +22222,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to team
    * @returns Team
    */
-  public team(id: string): LinearFetch<Team> {
+  public team(id: string): Promise<Team> {
     return new TeamQuery(this._request).fetch(id);
   }
   /**
@@ -22234,7 +22231,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to teamMembership
    * @returns TeamMembership
    */
-  public teamMembership(id: string): LinearFetch<TeamMembership> {
+  public teamMembership(id: string): Promise<TeamMembership> {
     return new TeamMembershipQuery(this._request).fetch(id);
   }
   /**
@@ -22243,7 +22240,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the TeamMembershipsQuery
    * @returns TeamMembershipConnection
    */
-  public teamMemberships(variables?: L.TeamMembershipsQueryVariables): LinearFetch<TeamMembershipConnection> {
+  public teamMemberships(variables?: L.TeamMembershipsQueryVariables): Promise<TeamMembershipConnection> {
     return new TeamMembershipsQuery(this._request).fetch(variables);
   }
   /**
@@ -22252,7 +22249,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the TeamsQuery
    * @returns TeamConnection
    */
-  public teams(variables?: L.TeamsQueryVariables): LinearFetch<TeamConnection> {
+  public teams(variables?: L.TeamsQueryVariables): Promise<TeamConnection> {
     return new TeamsQuery(this._request).fetch(variables);
   }
   /**
@@ -22261,7 +22258,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to template
    * @returns Template
    */
-  public template(id: string): LinearFetch<Template> {
+  public template(id: string): Promise<Template> {
     return new TemplateQuery(this._request).fetch(id);
   }
   /**
@@ -22269,7 +22266,7 @@ export class LinearSdk extends Request {
    *
    * @returns Template[]
    */
-  public get templates(): LinearFetch<Template[]> {
+  public get templates(): Promise<Template[]> {
     return new TemplatesQuery(this._request).fetch();
   }
   /**
@@ -22278,7 +22275,7 @@ export class LinearSdk extends Request {
    * @param integrationType - required integrationType to pass to templatesForIntegration
    * @returns Template[]
    */
-  public templatesForIntegration(integrationType: string): LinearFetch<Template[]> {
+  public templatesForIntegration(integrationType: string): Promise<Template[]> {
     return new TemplatesForIntegrationQuery(this._request).fetch(integrationType);
   }
   /**
@@ -22287,7 +22284,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to user
    * @returns User
    */
-  public user(id: string): LinearFetch<User> {
+  public user(id: string): Promise<User> {
     return new UserQuery(this._request).fetch(id);
   }
   /**
@@ -22295,7 +22292,7 @@ export class LinearSdk extends Request {
    *
    * @returns UserSettings
    */
-  public get userSettings(): LinearFetch<UserSettings> {
+  public get userSettings(): Promise<UserSettings> {
     return new UserSettingsQuery(this._request).fetch();
   }
   /**
@@ -22304,7 +22301,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the UsersQuery
    * @returns UserConnection
    */
-  public users(variables?: L.UsersQueryVariables): LinearFetch<UserConnection> {
+  public users(variables?: L.UsersQueryVariables): Promise<UserConnection> {
     return new UsersQuery(this._request).fetch(variables);
   }
   /**
@@ -22312,7 +22309,7 @@ export class LinearSdk extends Request {
    *
    * @returns User
    */
-  public get viewer(): LinearFetch<User> {
+  public get viewer(): Promise<User> {
     return new ViewerQuery(this._request).fetch();
   }
   /**
@@ -22321,7 +22318,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to webhook
    * @returns Webhook
    */
-  public webhook(id: string): LinearFetch<Webhook> {
+  public webhook(id: string): Promise<Webhook> {
     return new WebhookQuery(this._request).fetch(id);
   }
   /**
@@ -22330,7 +22327,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the WebhooksQuery
    * @returns WebhookConnection
    */
-  public webhooks(variables?: L.WebhooksQueryVariables): LinearFetch<WebhookConnection> {
+  public webhooks(variables?: L.WebhooksQueryVariables): Promise<WebhookConnection> {
     return new WebhooksQuery(this._request).fetch(variables);
   }
   /**
@@ -22339,7 +22336,7 @@ export class LinearSdk extends Request {
    * @param id - required id to pass to workflowState
    * @returns WorkflowState
    */
-  public workflowState(id: string): LinearFetch<WorkflowState> {
+  public workflowState(id: string): Promise<WorkflowState> {
     return new WorkflowStateQuery(this._request).fetch(id);
   }
   /**
@@ -22348,7 +22345,7 @@ export class LinearSdk extends Request {
    * @param variables - variables to pass into the WorkflowStatesQuery
    * @returns WorkflowStateConnection
    */
-  public workflowStates(variables?: L.WorkflowStatesQueryVariables): LinearFetch<WorkflowStateConnection> {
+  public workflowStates(variables?: L.WorkflowStatesQueryVariables): Promise<WorkflowStateConnection> {
     return new WorkflowStatesQuery(this._request).fetch(variables);
   }
 }
