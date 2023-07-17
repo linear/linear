@@ -1,9 +1,33 @@
 {
-  "extends": "../../tsconfig",
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
-    "declarationDir": "dist"
+    "declaration": true,
+    "esModuleInterop": true,
+    "jsx": "react",
+    "lib": [
+      "esnext",
+      "dom"
+    ],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictBindCallApply": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "strict": true,
+    "target": "ES2018",
+    "baseUrl": ".",
+    "noEmitOnError": true,
+    "downlevelIteration": true,
+    "incremental": true
   },
-  "exclude": ["scripts", "src/_tests", "dist", "rollup.config.js", "src/scratch.ts"]
+  "exclude": [
+    "scripts",
+    "src/_tests",
+    "dist",
+    "src/scratch.ts",
+    "node_modules"
+  ]
 }

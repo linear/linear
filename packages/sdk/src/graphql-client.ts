@@ -149,7 +149,7 @@ export class LinearGraphQLClient {
 
     if (headers) {
       // todo what if headers is in nested array form... ?
-      headers[key] = value;
+      (headers as any)[key] = value;
     } else {
       this.options.headers = { [key]: value };
     }
