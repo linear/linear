@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.14.3
+
+### Patch Changes
+
+- 918c617: chore(deps): update dependency patch versions
+
 ## 1.14.2
 
 ### Patch Changes
