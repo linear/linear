@@ -640,16 +640,6 @@ describe("generated", () => {
       }
     });
 
-    /** Test the customView.owner query for L.User */
-    it("customView.owner", async () => {
-      if (_customView) {
-        const customView_owner: L.User | undefined = await _customView.owner;
-        expect(customView_owner instanceof L.User);
-      } else {
-        console.warn("codegen-doc:print: No CustomView found - cannot test customView.owner query");
-      }
-    });
-
     /** Test the customView.team query for L.Team */
     it("customView.team", async () => {
       if (_customView) {
@@ -2038,6 +2028,7 @@ describe("generated", () => {
       | L.LabelNotificationSubscription
       | L.ProjectNotificationSubscription
       | L.TeamNotificationSubscription
+      | L.UserNotificationSubscription
       | undefined;
     let _notificationSubscription_id: string | undefined;
 
@@ -2060,6 +2051,7 @@ describe("generated", () => {
           | L.LabelNotificationSubscription
           | L.ProjectNotificationSubscription
           | L.TeamNotificationSubscription
+          | L.UserNotificationSubscription
           | undefined = await client.notificationSubscription(_notificationSubscription_id);
         _notificationSubscription = notificationSubscription;
         expect(notificationSubscription instanceof L.NotificationSubscription);

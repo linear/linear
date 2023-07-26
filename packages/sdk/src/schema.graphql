@@ -1122,9 +1122,9 @@ type CustomView implements Node {
   """
   organization: Organization!
   """
-  [Deprecated] The user who owns the custom view.
+  [ALPHA] The user who owns the custom view.
   """
-  owner: User!
+  owner: User
   """
   [ALPHA] The filter applied to projects in the custom view.
   """
@@ -1184,6 +1184,10 @@ input CustomViewCreateInput {
   The name of the custom view.
   """
   name: String!
+  """
+  The owner of the custom view.
+  """
+  ownerId: String
   """
   [ALPHA] The project filter applied to issues in the custom view.
   """
@@ -1325,6 +1329,10 @@ input CustomViewUpdateInput {
   The name of the custom view.
   """
   name: String
+  """
+  The owner of the custom view.
+  """
+  ownerId: String
   """
   [ALPHA] The project filter applied to issues in the custom view.
   """
@@ -2368,36 +2376,6 @@ input EstimateComparator {
   Compound filters, all of which need to be matched by the estimate.
   """
   or: [NullableNumberComparator!]
-}
-
-input EventCreateInput {
-  """
-  The category of the event to create.
-  """
-  category: String!
-  """
-  Additional data of the event, encoded as JSON.
-  """
-  data: JSON
-  """
-  The subject of the event.
-  """
-  subject: String!
-  """
-  The target identifier of the event.
-  """
-  targetId: String
-  """
-  The value of the event.
-  """
-  value: Float
-}
-
-type EventPayload {
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
 }
 
 """
@@ -6190,6 +6168,39 @@ type Mutation {
     jiraIssueId: String!
   ): AttachmentPayload!
   """
+  Link an existing Slack message to an issue.
+  """
+  attachmentLinkSlack(
+    """
+    The Slack channel ID for the message to link.
+    """
+    channel: String!
+    """
+    Optional attachment ID that may be provided through the API
+    """
+    id: String
+    """
+    The issue to which to link the Slack message.
+    """
+    issueId: String!
+    """
+    The latest timestamp for the Slack message.
+    """
+    latest: String!
+    """
+    Optional title that may be provided through the API
+    """
+    title: String
+    """
+    Unique identifier of either a thread's parent message or a message in the thread.
+    """
+    ts: String
+    """
+    The Slack message URL for the message to link.
+    """
+    url: String!
+  ): AttachmentPayload!
+  """
   Link any url to an issue.
   """
   attachmentLinkURL(
@@ -6458,15 +6469,6 @@ type Mutation {
     """
     id: String!
   ): DeletePayload!
-  """
-  [Deprecated] Creates a new event.
-  """
-  eventCreate(
-    """
-    The event to create.
-    """
-    input: EventCreateInput!
-  ): EventPayload!
   """
   Creates a new favorite (project, cycle etc).
   """
@@ -6746,9 +6748,9 @@ type Mutation {
     shouldUseV2Auth: Boolean
   ): IntegrationPayload!
   """
-  Imports custom emojis from your Slack workspace.
+  Integrates the organization with the Slack Asks app
   """
-  integrationSlackImportEmojis(
+  integrationSlackAsks(
     """
     The Slack OAuth code.
     """
@@ -6759,9 +6761,9 @@ type Mutation {
     redirectUri: String!
   ): IntegrationPayload!
   """
-  Integrates the organization with Slack for issue intake.
+  Imports custom emojis from your Slack workspace.
   """
-  integrationSlackIntake(
+  integrationSlackImportEmojis(
     """
     The Slack OAuth code.
     """
@@ -7344,6 +7346,50 @@ type Mutation {
     id: String!
   ): NotificationArchivePayload!
   """
+  Archives all of the user's past notifications for the associated entity.
+  """
+  notificationArchiveAll(
+    """
+    The type and id of the entity to archive notifications for.
+    """
+    input: NotificationEntityInput!
+  ): NotificationBatchActionPayload!
+  """
+  Marks all past notifications for the associated entity as read.
+  """
+  notificationMarkReadAll(
+    """
+    The type and id of the entity to archive notifications for.
+    """
+    input: NotificationEntityInput!
+    """
+    The time when notification was marked as read.
+    """
+    readAt: DateTime!
+  ): NotificationBatchActionPayload!
+  """
+  Marks all past notifications for the associated entity as unread.
+  """
+  notificationMarkUnreadAll(
+    """
+    The type and id of the entity to archive notifications for.
+    """
+    input: NotificationEntityInput!
+  ): NotificationBatchActionPayload!
+  """
+  Snoozes a notification and all past notifications for the associated entity.
+  """
+  notificationSnoozeAll(
+    """
+    The type and id of the entity to archive notifications for.
+    """
+    input: NotificationEntityInput!
+    """
+    The time until a notification will be snoozed. After that it will appear in the inbox again.
+    """
+    snoozedUntilAt: DateTime!
+  ): NotificationBatchActionPayload!
+  """
   Creates a new notification subscription for a cycle, custom view, label, project or team.
   """
   notificationSubscriptionCreate(
@@ -7383,6 +7429,19 @@ type Mutation {
     """
     id: String!
   ): NotificationArchivePayload!
+  """
+  Unsnoozes a notification and all past notifications for the associated entity.
+  """
+  notificationUnsnoozeAll(
+    """
+    The type and id of the entity to archive notifications for.
+    """
+    input: NotificationEntityInput!
+    """
+    The time when the notification was unsnoozed.
+    """
+    unsnoozedAt: DateTime!
+  ): NotificationBatchActionPayload!
   """
   Updates a notification.
   """
@@ -8252,6 +8311,21 @@ type NotificationArchivePayload implements ArchivePayload {
   success: Boolean!
 }
 
+type NotificationBatchActionPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The notifications that were updated.
+  """
+  notifications: [Notification!]!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 type NotificationConnection {
   edges: [NotificationEdge!]!
   nodes: [Notification!]!
@@ -8264,6 +8338,28 @@ type NotificationEdge {
   """
   cursor: String!
   node: Notification!
+}
+
+"""
+Describes the type and id of the entity to target for notifications.
+"""
+input NotificationEntityInput {
+  """
+  The id of the issue related to the notification.
+  """
+  issueId: String
+  """
+  The id of the OAuth client approval related to the notification.
+  """
+  oauthClientApprovalId: String
+  """
+  The id of the project related to the notification.
+  """
+  projectId: String
+  """
+  The id of the project update related to the notification.
+  """
+  projectUpdateId: String
 }
 
 type NotificationPayload {
@@ -8384,6 +8480,10 @@ input NotificationSubscriptionCreateInput {
   The type of user view to which the notification subscription context is associated with.
   """
   userContextViewType: UserContextViewType
+  """
+  The identifier of the user to subscribe to.
+  """
+  userId: String
 }
 
 type NotificationSubscriptionEdge {
@@ -10430,7 +10530,7 @@ type Project implements Node {
   """
   sortOrder: Float!
   """
-  [Internal] The estimated start date of the project.
+  The estimated start date of the project.
   """
   startDate: TimelessDate
   """
@@ -11186,7 +11286,7 @@ type ProjectNotificationSubscription implements Entity & Node & NotificationSubs
   """
   The type of subscription.
   """
-  notificationSubscriptionTypes: [String!]
+  notificationSubscriptionTypes: [String!]!
   """
   The project subscribed to.
   """
@@ -11544,7 +11644,7 @@ type ProjectSearchResult implements Node {
   """
   sortOrder: Float!
   """
-  [Internal] The estimated start date of the project.
+  The estimated start date of the project.
   """
   startDate: TimelessDate
   """
@@ -13637,6 +13737,10 @@ input ReactionCreateInput {
   """
   id: String
   """
+  The issue to associate the reaction with.
+  """
+  issueId: String
+  """
   The project update to associate the reaction with.
   """
   projectUpdateId: String
@@ -15231,7 +15335,7 @@ type TeamNotificationSubscription implements Entity & Node & NotificationSubscri
   """
   The type of subscription.
   """
-  notificationSubscriptionTypes: [String!]
+  notificationSubscriptionTypes: [String!]!
   """
   The contextual project view associated with the notification subscription.
   """
@@ -16362,6 +16466,70 @@ enum UserFlagUpdateOperation {
   decr
   incr
   lock
+}
+
+"""
+A user notification subscription.
+"""
+type UserNotificationSubscription implements Entity & Node & NotificationSubscription {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The type of view to which the notification subscription context is associated with.
+  """
+  contextViewType: ContextViewType
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The contextual custom view associated with the notification subscription.
+  """
+  customView: CustomView
+  """
+  The contextual cycle view associated with the notification subscription.
+  """
+  cycle: Cycle
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The contextual label view associated with the notification subscription.
+  """
+  label: IssueLabel
+  """
+  The type of subscription.
+  """
+  notificationSubscriptionTypes: [String!]!
+  """
+  The contextual project view associated with the notification subscription.
+  """
+  project: Project
+  """
+  The user that subscribed to receive notifications.
+  """
+  subscriber: User!
+  """
+  The team associated with the notification subscription.
+  """
+  team: Team
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user subscribed to.
+  """
+  user: User!
+  """
+  The type of user view to which the notification subscription context is associated with.
+  """
+  userContextViewType: UserContextViewType
 }
 
 type UserPayload {

@@ -857,7 +857,6 @@ export class CreateOrJoinOrganizationResponse extends Request {
  */
 export class CustomView extends Request {
   private _creator: L.CustomViewFragment["creator"];
-  private _owner: L.CustomViewFragment["owner"];
   private _team?: L.CustomViewFragment["team"];
 
   public constructor(request: LinearRequest, data: L.CustomViewFragment) {
@@ -874,7 +873,6 @@ export class CustomView extends Request {
     this.shared = data.shared;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator;
-    this._owner = data.owner;
     this._team = data.team ?? undefined;
   }
 
@@ -911,10 +909,6 @@ export class CustomView extends Request {
   /** The organization of the custom view. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
-  }
-  /** [Deprecated] The user who owns the custom view. */
-  public get owner(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._owner.id);
   }
   /** The team associated with the custom view. */
   public get team(): LinearFetch<Team> | undefined {
@@ -1840,21 +1834,6 @@ export class Entity extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-}
-/**
- * EventPayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.EventPayloadFragment response data
- */
-export class EventPayload extends Request {
-  public constructor(request: LinearRequest, data: L.EventPayloadFragment) {
-    super(request);
-    this.success = data.success;
-  }
-
-  /** Whether the operation was successful. */
-  public success: boolean;
 }
 /**
  * User favorites presented in the sidebar.
@@ -4235,6 +4214,27 @@ export class NotificationArchivePayload extends Request {
   public success: boolean;
 }
 /**
+ * NotificationBatchActionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.NotificationBatchActionPayloadFragment response data
+ */
+export class NotificationBatchActionPayload extends Request {
+  public constructor(request: LinearRequest, data: L.NotificationBatchActionPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this.notifications = data.notifications.map(node => new Notification(request, node));
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The notifications that were updated. */
+  public notifications: Notification[];
+}
+/**
  * NotificationConnection model
  *
  * @param request - function to call the graphql client
@@ -4389,6 +4389,7 @@ export class NotificationSubscriptionConnection extends Connection<
   | LabelNotificationSubscription
   | ProjectNotificationSubscription
   | TeamNotificationSubscription
+  | UserNotificationSubscription
   | NotificationSubscription
 > {
   public constructor(
@@ -4402,6 +4403,7 @@ export class NotificationSubscriptionConnection extends Connection<
           | LabelNotificationSubscription
           | ProjectNotificationSubscription
           | TeamNotificationSubscription
+          | UserNotificationSubscription
           | NotificationSubscription
         >
       | undefined
@@ -4426,6 +4428,8 @@ export class NotificationSubscriptionConnection extends Connection<
             return new ProjectNotificationSubscription(request, node as L.ProjectNotificationSubscriptionFragment);
           case "TeamNotificationSubscription":
             return new TeamNotificationSubscription(request, node as L.TeamNotificationSubscriptionFragment);
+          case "UserNotificationSubscription":
+            return new UserNotificationSubscription(request, node as L.UserNotificationSubscriptionFragment);
 
           default:
             return new NotificationSubscription(request, node);
@@ -5229,6 +5233,7 @@ export class Project extends Request {
     this.slackNewIssue = data.slackNewIssue;
     this.slugId = data.slugId;
     this.sortOrder = data.sortOrder;
+    this.startDate = data.startDate ?? undefined;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.state = data.state;
     this.targetDate = data.targetDate ?? undefined;
@@ -5286,6 +5291,8 @@ export class Project extends Request {
   public slugId: string;
   /** The sort order for the project within the organization. */
   public sortOrder: number;
+  /** The estimated start date of the project. */
+  public startDate?: L.Scalars["TimelessDate"];
   /** The time at which the project was moved into started state. */
   public startedAt?: Date;
   /** The type of the state. */
@@ -5731,7 +5738,7 @@ export class ProjectNotificationSubscription extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
-    this.notificationSubscriptionTypes = data.notificationSubscriptionTypes ?? undefined;
+    this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
@@ -5749,7 +5756,7 @@ export class ProjectNotificationSubscription extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** The type of subscription. */
-  public notificationSubscriptionTypes?: string[];
+  public notificationSubscriptionTypes: string[];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -5870,6 +5877,7 @@ export class ProjectSearchResult extends Request {
     this.slackNewIssue = data.slackNewIssue;
     this.slugId = data.slugId;
     this.sortOrder = data.sortOrder;
+    this.startDate = data.startDate ?? undefined;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.state = data.state;
     this.targetDate = data.targetDate ?? undefined;
@@ -5929,6 +5937,8 @@ export class ProjectSearchResult extends Request {
   public slugId: string;
   /** The sort order for the project within the organization. */
   public sortOrder: number;
+  /** The estimated start date of the project. */
+  public startDate?: L.Scalars["TimelessDate"];
   /** The time at which the project was moved into started state. */
   public startedAt?: Date;
   /** The type of the state. */
@@ -7279,7 +7289,7 @@ export class TeamNotificationSubscription extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
-    this.notificationSubscriptionTypes = data.notificationSubscriptionTypes ?? undefined;
+    this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
@@ -7297,7 +7307,7 @@ export class TeamNotificationSubscription extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** The type of subscription. */
-  public notificationSubscriptionTypes?: string[];
+  public notificationSubscriptionTypes: string[];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -7778,6 +7788,80 @@ export class UserConnection extends Connection<User> {
       data.nodes.map(node => new User(request, node)),
       new PageInfo(request, data.pageInfo)
     );
+  }
+}
+/**
+ * A user notification subscription.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.UserNotificationSubscriptionFragment response data
+ */
+export class UserNotificationSubscription extends Request {
+  private _customView?: L.UserNotificationSubscriptionFragment["customView"];
+  private _cycle?: L.UserNotificationSubscriptionFragment["cycle"];
+  private _label?: L.UserNotificationSubscriptionFragment["label"];
+  private _project?: L.UserNotificationSubscriptionFragment["project"];
+  private _subscriber: L.UserNotificationSubscriptionFragment["subscriber"];
+  private _team?: L.UserNotificationSubscriptionFragment["team"];
+  private _user: L.UserNotificationSubscriptionFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.UserNotificationSubscriptionFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._customView = data.customView ?? undefined;
+    this._cycle = data.cycle ?? undefined;
+    this._label = data.label ?? undefined;
+    this._project = data.project ?? undefined;
+    this._subscriber = data.subscriber;
+    this._team = data.team ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The type of subscription. */
+  public notificationSubscriptionTypes: string[];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The contextual custom view associated with the notification subscription. */
+  public get customView(): LinearFetch<CustomView> | undefined {
+    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
+  }
+  /** The contextual cycle view associated with the notification subscription. */
+  public get cycle(): LinearFetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The contextual label view associated with the notification subscription. */
+  public get label(): LinearFetch<IssueLabel> | undefined {
+    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
+  }
+  /** The contextual project view associated with the notification subscription. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The user that subscribed to receive notifications. */
+  public get subscriber(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._subscriber.id);
+  }
+  /** The team associated with the notification subscription. */
+  public get team(): LinearFetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The user subscribed to. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
   }
 }
 /**
@@ -8781,6 +8865,49 @@ export class AttachmentLinkJiraIssueMutation extends Request {
 }
 
 /**
+ * A fetchable AttachmentLinkSlack Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentLinkSlackMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentLinkSlack mutation and return a AttachmentPayload
+   *
+   * @param channel - required channel to pass to attachmentLinkSlack
+   * @param issueId - required issueId to pass to attachmentLinkSlack
+   * @param latest - required latest to pass to attachmentLinkSlack
+   * @param url - required url to pass to attachmentLinkSlack
+   * @param variables - variables without 'channel', 'issueId', 'latest', 'url' to pass into the AttachmentLinkSlackMutation
+   * @returns parsed response from AttachmentLinkSlackMutation
+   */
+  public async fetch(
+    channel: string,
+    issueId: string,
+    latest: string,
+    url: string,
+    variables?: Omit<L.AttachmentLinkSlackMutationVariables, "channel" | "issueId" | "latest" | "url">
+  ): LinearFetch<AttachmentPayload> {
+    const response = await this._request<L.AttachmentLinkSlackMutation, L.AttachmentLinkSlackMutationVariables>(
+      L.AttachmentLinkSlackDocument,
+      {
+        channel,
+        issueId,
+        latest,
+        url,
+        ...variables,
+      }
+    );
+    const data = response.attachmentLinkSlack;
+
+    return new AttachmentPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable AttachmentLinkUrl Mutation
  *
  * @param request - function to call the graphql client
@@ -9488,32 +9615,6 @@ export class DeleteEmojiMutation extends Request {
 }
 
 /**
- * A fetchable CreateEvent Mutation
- *
- * @param request - function to call the graphql client
- */
-export class CreateEventMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the CreateEvent mutation and return a EventPayload
-   *
-   * @param input - required input to pass to createEvent
-   * @returns parsed response from CreateEventMutation
-   */
-  public async fetch(input: L.EventCreateInput): LinearFetch<EventPayload> {
-    const response = await this._request<L.CreateEventMutation, L.CreateEventMutationVariables>(L.CreateEventDocument, {
-      input,
-    });
-    const data = response.eventCreate;
-
-    return new EventPayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable CreateFavorite Mutation
  *
  * @param request - function to call the graphql client
@@ -10192,6 +10293,37 @@ export class IntegrationSlackMutation extends Request {
 }
 
 /**
+ * A fetchable IntegrationSlackAsks Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationSlackAsksMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationSlackAsks mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationSlackAsks
+   * @param redirectUri - required redirectUri to pass to integrationSlackAsks
+   * @returns parsed response from IntegrationSlackAsksMutation
+   */
+  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<L.IntegrationSlackAsksMutation, L.IntegrationSlackAsksMutationVariables>(
+      L.IntegrationSlackAsksDocument,
+      {
+        code,
+        redirectUri,
+      }
+    );
+    const data = response.integrationSlackAsks;
+
+    return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable IntegrationSlackImportEmojis Mutation
  *
  * @param request - function to call the graphql client
@@ -10217,37 +10349,6 @@ export class IntegrationSlackImportEmojisMutation extends Request {
       redirectUri,
     });
     const data = response.integrationSlackImportEmojis;
-
-    return new IntegrationPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable IntegrationSlackIntake Mutation
- *
- * @param request - function to call the graphql client
- */
-export class IntegrationSlackIntakeMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IntegrationSlackIntake mutation and return a IntegrationPayload
-   *
-   * @param code - required code to pass to integrationSlackIntake
-   * @param redirectUri - required redirectUri to pass to integrationSlackIntake
-   * @returns parsed response from IntegrationSlackIntakeMutation
-   */
-  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
-    const response = await this._request<L.IntegrationSlackIntakeMutation, L.IntegrationSlackIntakeMutationVariables>(
-      L.IntegrationSlackIntakeDocument,
-      {
-        code,
-        redirectUri,
-      }
-    );
-    const data = response.integrationSlackIntake;
 
     return new IntegrationPayload(this._request, data);
   }
@@ -11368,6 +11469,129 @@ export class ArchiveNotificationMutation extends Request {
 }
 
 /**
+ * A fetchable NotificationArchiveAll Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class NotificationArchiveAllMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the NotificationArchiveAll mutation and return a NotificationBatchActionPayload
+   *
+   * @param input - required input to pass to notificationArchiveAll
+   * @returns parsed response from NotificationArchiveAllMutation
+   */
+  public async fetch(input: L.NotificationEntityInput): LinearFetch<NotificationBatchActionPayload> {
+    const response = await this._request<L.NotificationArchiveAllMutation, L.NotificationArchiveAllMutationVariables>(
+      L.NotificationArchiveAllDocument,
+      {
+        input,
+      }
+    );
+    const data = response.notificationArchiveAll;
+
+    return new NotificationBatchActionPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable NotificationMarkReadAll Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class NotificationMarkReadAllMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the NotificationMarkReadAll mutation and return a NotificationBatchActionPayload
+   *
+   * @param input - required input to pass to notificationMarkReadAll
+   * @param readAt - required readAt to pass to notificationMarkReadAll
+   * @returns parsed response from NotificationMarkReadAllMutation
+   */
+  public async fetch(input: L.NotificationEntityInput, readAt: Date): LinearFetch<NotificationBatchActionPayload> {
+    const response = await this._request<L.NotificationMarkReadAllMutation, L.NotificationMarkReadAllMutationVariables>(
+      L.NotificationMarkReadAllDocument,
+      {
+        input,
+        readAt,
+      }
+    );
+    const data = response.notificationMarkReadAll;
+
+    return new NotificationBatchActionPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable NotificationMarkUnreadAll Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class NotificationMarkUnreadAllMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the NotificationMarkUnreadAll mutation and return a NotificationBatchActionPayload
+   *
+   * @param input - required input to pass to notificationMarkUnreadAll
+   * @returns parsed response from NotificationMarkUnreadAllMutation
+   */
+  public async fetch(input: L.NotificationEntityInput): LinearFetch<NotificationBatchActionPayload> {
+    const response = await this._request<
+      L.NotificationMarkUnreadAllMutation,
+      L.NotificationMarkUnreadAllMutationVariables
+    >(L.NotificationMarkUnreadAllDocument, {
+      input,
+    });
+    const data = response.notificationMarkUnreadAll;
+
+    return new NotificationBatchActionPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable NotificationSnoozeAll Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class NotificationSnoozeAllMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the NotificationSnoozeAll mutation and return a NotificationBatchActionPayload
+   *
+   * @param input - required input to pass to notificationSnoozeAll
+   * @param snoozedUntilAt - required snoozedUntilAt to pass to notificationSnoozeAll
+   * @returns parsed response from NotificationSnoozeAllMutation
+   */
+  public async fetch(
+    input: L.NotificationEntityInput,
+    snoozedUntilAt: Date
+  ): LinearFetch<NotificationBatchActionPayload> {
+    const response = await this._request<L.NotificationSnoozeAllMutation, L.NotificationSnoozeAllMutationVariables>(
+      L.NotificationSnoozeAllDocument,
+      {
+        input,
+        snoozedUntilAt,
+      }
+    );
+    const data = response.notificationSnoozeAll;
+
+    return new NotificationBatchActionPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable CreateNotificationSubscription Mutation
  *
  * @param request - function to call the graphql client
@@ -11485,6 +11709,37 @@ export class UnarchiveNotificationMutation extends Request {
     const data = response.notificationUnarchive;
 
     return new NotificationArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable NotificationUnsnoozeAll Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class NotificationUnsnoozeAllMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the NotificationUnsnoozeAll mutation and return a NotificationBatchActionPayload
+   *
+   * @param input - required input to pass to notificationUnsnoozeAll
+   * @param unsnoozedAt - required unsnoozedAt to pass to notificationUnsnoozeAll
+   * @returns parsed response from NotificationUnsnoozeAllMutation
+   */
+  public async fetch(input: L.NotificationEntityInput, unsnoozedAt: Date): LinearFetch<NotificationBatchActionPayload> {
+    const response = await this._request<L.NotificationUnsnoozeAllMutation, L.NotificationUnsnoozeAllMutationVariables>(
+      L.NotificationUnsnoozeAllDocument,
+      {
+        input,
+        unsnoozedAt,
+      }
+    );
+    const data = response.notificationUnsnoozeAll;
+
+    return new NotificationBatchActionPayload(this._request, data);
   }
 }
 
@@ -15226,6 +15481,7 @@ export class NotificationSubscriptionQuery extends Request {
     | LabelNotificationSubscription
     | ProjectNotificationSubscription
     | TeamNotificationSubscription
+    | UserNotificationSubscription
     | NotificationSubscription
   > {
     const response = await this._request<L.NotificationSubscriptionQuery, L.NotificationSubscriptionQueryVariables>(
@@ -15250,6 +15506,8 @@ export class NotificationSubscriptionQuery extends Request {
         return new ProjectNotificationSubscription(this._request, data as L.ProjectNotificationSubscriptionFragment);
       case "TeamNotificationSubscription":
         return new TeamNotificationSubscription(this._request, data as L.TeamNotificationSubscriptionFragment);
+      case "UserNotificationSubscription":
+        return new UserNotificationSubscription(this._request, data as L.UserNotificationSubscriptionFragment);
 
       default:
         return new NotificationSubscription(this._request, data);
@@ -19842,6 +20100,25 @@ export class LinearSdk extends Request {
     return new AttachmentLinkJiraIssueMutation(this._request).fetch(issueId, jiraIssueId);
   }
   /**
+   * Link an existing Slack message to an issue.
+   *
+   * @param channel - required channel to pass to attachmentLinkSlack
+   * @param issueId - required issueId to pass to attachmentLinkSlack
+   * @param latest - required latest to pass to attachmentLinkSlack
+   * @param url - required url to pass to attachmentLinkSlack
+   * @param variables - variables without 'channel', 'issueId', 'latest', 'url' to pass into the AttachmentLinkSlackMutation
+   * @returns AttachmentPayload
+   */
+  public attachmentLinkSlack(
+    channel: string,
+    issueId: string,
+    latest: string,
+    url: string,
+    variables?: Omit<L.AttachmentLinkSlackMutationVariables, "channel" | "issueId" | "latest" | "url">
+  ): LinearFetch<AttachmentPayload> {
+    return new AttachmentLinkSlackMutation(this._request).fetch(channel, issueId, latest, url, variables);
+  }
+  /**
    * Link any url to an issue.
    *
    * @param issueId - required issueId to pass to attachmentLinkURL
@@ -20078,15 +20355,6 @@ export class LinearSdk extends Request {
     return new DeleteEmojiMutation(this._request).fetch(id);
   }
   /**
-   * [Deprecated] Creates a new event.
-   *
-   * @param input - required input to pass to createEvent
-   * @returns EventPayload
-   */
-  public createEvent(input: L.EventCreateInput): LinearFetch<EventPayload> {
-    return new CreateEventMutation(this._request).fetch(input);
-  }
-  /**
    * Creates a new favorite (project, cycle etc).
    *
    * @param input - required input to pass to createFavorite
@@ -20321,6 +20589,16 @@ export class LinearSdk extends Request {
     return new IntegrationSlackMutation(this._request).fetch(code, redirectUri, variables);
   }
   /**
+   * Integrates the organization with the Slack Asks app
+   *
+   * @param code - required code to pass to integrationSlackAsks
+   * @param redirectUri - required redirectUri to pass to integrationSlackAsks
+   * @returns IntegrationPayload
+   */
+  public integrationSlackAsks(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationSlackAsksMutation(this._request).fetch(code, redirectUri);
+  }
+  /**
    * Imports custom emojis from your Slack workspace.
    *
    * @param code - required code to pass to integrationSlackImportEmojis
@@ -20329,16 +20607,6 @@ export class LinearSdk extends Request {
    */
   public integrationSlackImportEmojis(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
     return new IntegrationSlackImportEmojisMutation(this._request).fetch(code, redirectUri);
-  }
-  /**
-   * Integrates the organization with Slack for issue intake.
-   *
-   * @param code - required code to pass to integrationSlackIntake
-   * @param redirectUri - required redirectUri to pass to integrationSlackIntake
-   * @returns IntegrationPayload
-   */
-  public integrationSlackIntake(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
-    return new IntegrationSlackIntakeMutation(this._request).fetch(code, redirectUri);
   }
   /**
    * Slack integration for organization level project update notifications.
@@ -20751,6 +21019,50 @@ export class LinearSdk extends Request {
     return new ArchiveNotificationMutation(this._request).fetch(id);
   }
   /**
+   * Archives all of the user's past notifications for the associated entity.
+   *
+   * @param input - required input to pass to notificationArchiveAll
+   * @returns NotificationBatchActionPayload
+   */
+  public notificationArchiveAll(input: L.NotificationEntityInput): LinearFetch<NotificationBatchActionPayload> {
+    return new NotificationArchiveAllMutation(this._request).fetch(input);
+  }
+  /**
+   * Marks all past notifications for the associated entity as read.
+   *
+   * @param input - required input to pass to notificationMarkReadAll
+   * @param readAt - required readAt to pass to notificationMarkReadAll
+   * @returns NotificationBatchActionPayload
+   */
+  public notificationMarkReadAll(
+    input: L.NotificationEntityInput,
+    readAt: Date
+  ): LinearFetch<NotificationBatchActionPayload> {
+    return new NotificationMarkReadAllMutation(this._request).fetch(input, readAt);
+  }
+  /**
+   * Marks all past notifications for the associated entity as unread.
+   *
+   * @param input - required input to pass to notificationMarkUnreadAll
+   * @returns NotificationBatchActionPayload
+   */
+  public notificationMarkUnreadAll(input: L.NotificationEntityInput): LinearFetch<NotificationBatchActionPayload> {
+    return new NotificationMarkUnreadAllMutation(this._request).fetch(input);
+  }
+  /**
+   * Snoozes a notification and all past notifications for the associated entity.
+   *
+   * @param input - required input to pass to notificationSnoozeAll
+   * @param snoozedUntilAt - required snoozedUntilAt to pass to notificationSnoozeAll
+   * @returns NotificationBatchActionPayload
+   */
+  public notificationSnoozeAll(
+    input: L.NotificationEntityInput,
+    snoozedUntilAt: Date
+  ): LinearFetch<NotificationBatchActionPayload> {
+    return new NotificationSnoozeAllMutation(this._request).fetch(input, snoozedUntilAt);
+  }
+  /**
    * Creates a new notification subscription for a cycle, custom view, label, project or team.
    *
    * @param input - required input to pass to createNotificationSubscription
@@ -20791,6 +21103,19 @@ export class LinearSdk extends Request {
    */
   public unarchiveNotification(id: string): LinearFetch<NotificationArchivePayload> {
     return new UnarchiveNotificationMutation(this._request).fetch(id);
+  }
+  /**
+   * Unsnoozes a notification and all past notifications for the associated entity.
+   *
+   * @param input - required input to pass to notificationUnsnoozeAll
+   * @param unsnoozedAt - required unsnoozedAt to pass to notificationUnsnoozeAll
+   * @returns NotificationBatchActionPayload
+   */
+  public notificationUnsnoozeAll(
+    input: L.NotificationEntityInput,
+    unsnoozedAt: Date
+  ): LinearFetch<NotificationBatchActionPayload> {
+    return new NotificationUnsnoozeAllMutation(this._request).fetch(input, unsnoozedAt);
   }
   /**
    * Updates a notification.
@@ -21971,6 +22296,7 @@ export class LinearSdk extends Request {
     | LabelNotificationSubscription
     | ProjectNotificationSubscription
     | TeamNotificationSubscription
+    | UserNotificationSubscription
     | NotificationSubscription
   > {
     return new NotificationSubscriptionQuery(this._request).fetch(id);
