@@ -184,10 +184,6 @@ fragment CustomView on CustomView {
   }
   # Whether the custom view is shared with everyone in the organization.
   shared
-  # [Deprecated] The user who owns the custom view.
-  owner {
-    id
-  }
 }
 
 # A cycle notification subscription.
@@ -656,6 +652,8 @@ fragment Project on Project {
   }
   # The estimated completion date of the project.
   targetDate
+  # The estimated start date of the project.
+  startDate
   # The icon of the project.
   icon
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -1180,6 +1178,51 @@ fragment UserAccount on UserAccount {
   # Users belonging to the account.
   users {
     ...User
+  }
+}
+
+# A user notification subscription.
+fragment UserNotificationSubscription on UserNotificationSubscription {
+  __typename
+  # The contextual custom view associated with the notification subscription.
+  customView {
+    id
+  }
+  # The contextual cycle view associated with the notification subscription.
+  cycle {
+    id
+  }
+  # The contextual label view associated with the notification subscription.
+  label {
+    id
+  }
+  # The contextual project view associated with the notification subscription.
+  project {
+    id
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The team associated with the notification subscription.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of subscription.
+  notificationSubscriptionTypes
+  # The unique identifier of the entity.
+  id
+  # The user subscribed to.
+  user {
+    id
+  }
+  # The user that subscribed to receive notifications.
+  subscriber {
+    id
   }
 }
 
@@ -3029,12 +3072,6 @@ fragment EmojiPayload on EmojiPayload {
   success
 }
 
-fragment EventPayload on EventPayload {
-  __typename
-  # Whether the operation was successful.
-  success
-}
-
 fragment FavoriteConnection on FavoriteConnection {
   __typename
   nodes {
@@ -3455,6 +3492,18 @@ fragment Node on Node {
   id
 }
 
+fragment NotificationBatchActionPayload on NotificationBatchActionPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The notifications that were updated.
+  notifications {
+    ...Notification
+  }
+  # Whether the operation was successful.
+  success
+}
+
 fragment NotificationConnection on NotificationConnection {
   __typename
   nodes {
@@ -3697,6 +3746,8 @@ fragment ProjectSearchResult on ProjectSearchResult {
   }
   # The estimated completion date of the project.
   targetDate
+  # The estimated start date of the project.
+  startDate
   # The icon of the project.
   icon
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -4384,6 +4435,35 @@ mutation attachmentLinkJiraIssue(
     ...AttachmentPayload
   }
 }
+# Link an existing Slack message to an issue.
+mutation attachmentLinkSlack(
+  # The Slack channel ID for the message to link.
+  $channel: String!
+  # Optional attachment ID that may be provided through the API
+  $id: String
+  # The issue to which to link the Slack message.
+  $issueId: String!
+  # The latest timestamp for the Slack message.
+  $latest: String!
+  # Optional title that may be provided through the API
+  $title: String
+  # Unique identifier of either a thread's parent message or a message in the thread.
+  $ts: String
+  # The Slack message URL for the message to link.
+  $url: String!
+) {
+  attachmentLinkSlack(
+    channel: $channel
+    id: $id
+    issueId: $issueId
+    latest: $latest
+    title: $title
+    ts: $ts
+    url: $url
+  ) {
+    ...AttachmentPayload
+  }
+}
 # Link any url to an issue.
 mutation attachmentLinkURL(
   # The id for the attachment.
@@ -4615,15 +4695,6 @@ mutation deleteEmoji(
 ) {
   emojiDelete(id: $id) {
     ...DeletePayload
-  }
-}
-# [Deprecated] Creates a new event.
-mutation createEvent(
-  # The event to create.
-  $input: EventCreateInput!
-) {
-  eventCreate(input: $input) {
-    ...EventPayload
   }
 }
 # Creates a new favorite (project, cycle etc).
@@ -4858,6 +4929,17 @@ mutation integrationSlack(
     ...IntegrationPayload
   }
 }
+# Integrates the organization with the Slack Asks app
+mutation integrationSlackAsks(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationSlackAsks(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
 # Imports custom emojis from your Slack workspace.
 mutation integrationSlackImportEmojis(
   # The Slack OAuth code.
@@ -4866,17 +4948,6 @@ mutation integrationSlackImportEmojis(
   $redirectUri: String!
 ) {
   integrationSlackImportEmojis(code: $code, redirectUri: $redirectUri) {
-    ...IntegrationPayload
-  }
-}
-# Integrates the organization with Slack for issue intake.
-mutation integrationSlackIntake(
-  # The Slack OAuth code.
-  $code: String!
-  # The Slack OAuth redirect URI.
-  $redirectUri: String!
-) {
-  integrationSlackIntake(code: $code, redirectUri: $redirectUri) {
     ...IntegrationPayload
   }
 }
@@ -5361,6 +5432,46 @@ mutation archiveNotification(
     ...NotificationArchivePayload
   }
 }
+# Archives all of the user's past notifications for the associated entity.
+mutation notificationArchiveAll(
+  # The type and id of the entity to archive notifications for.
+  $input: NotificationEntityInput!
+) {
+  notificationArchiveAll(input: $input) {
+    ...NotificationBatchActionPayload
+  }
+}
+# Marks all past notifications for the associated entity as read.
+mutation notificationMarkReadAll(
+  # The type and id of the entity to archive notifications for.
+  $input: NotificationEntityInput!
+  # The time when notification was marked as read.
+  $readAt: DateTime!
+) {
+  notificationMarkReadAll(input: $input, readAt: $readAt) {
+    ...NotificationBatchActionPayload
+  }
+}
+# Marks all past notifications for the associated entity as unread.
+mutation notificationMarkUnreadAll(
+  # The type and id of the entity to archive notifications for.
+  $input: NotificationEntityInput!
+) {
+  notificationMarkUnreadAll(input: $input) {
+    ...NotificationBatchActionPayload
+  }
+}
+# Snoozes a notification and all past notifications for the associated entity.
+mutation notificationSnoozeAll(
+  # The type and id of the entity to archive notifications for.
+  $input: NotificationEntityInput!
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  $snoozedUntilAt: DateTime!
+) {
+  notificationSnoozeAll(input: $input, snoozedUntilAt: $snoozedUntilAt) {
+    ...NotificationBatchActionPayload
+  }
+}
 # Creates a new notification subscription for a cycle, custom view, label, project or team.
 mutation createNotificationSubscription(
   # The subscription object to create.
@@ -5397,6 +5508,17 @@ mutation unarchiveNotification(
 ) {
   notificationUnarchive(id: $id) {
     ...NotificationArchivePayload
+  }
+}
+# Unsnoozes a notification and all past notifications for the associated entity.
+mutation notificationUnsnoozeAll(
+  # The type and id of the entity to archive notifications for.
+  $input: NotificationEntityInput!
+  # The time when the notification was unsnoozed.
+  $unsnoozedAt: DateTime!
+) {
+  notificationUnsnoozeAll(input: $input, unsnoozedAt: $unsnoozedAt) {
+    ...NotificationBatchActionPayload
   }
 }
 # Updates a notification.

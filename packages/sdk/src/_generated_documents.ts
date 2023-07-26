@@ -698,8 +698,8 @@ export type CustomView = Node & {
   name: Scalars["String"];
   /** The organization of the custom view. */
   organization: Organization;
-  /** [Deprecated] The user who owns the custom view. */
-  owner: User;
+  /** [ALPHA] The user who owns the custom view. */
+  owner?: Maybe<User>;
   /** [ALPHA] The filter applied to projects in the custom view. */
   projectFilterData?: Maybe<Scalars["JSONObject"]>;
   /** Whether the custom view is shared with everyone in the organization. */
@@ -738,6 +738,8 @@ export type CustomViewCreateInput = {
   id?: Maybe<Scalars["String"]>;
   /** The name of the custom view. */
   name: Scalars["String"];
+  /** The owner of the custom view. */
+  ownerId?: Maybe<Scalars["String"]>;
   /** [ALPHA] The project filter applied to issues in the custom view. */
   projectFilterData?: Maybe<Scalars["JSONObject"]>;
   /** Whether the custom view is shared with everyone in the organization. */
@@ -825,6 +827,8 @@ export type CustomViewUpdateInput = {
   icon?: Maybe<Scalars["String"]>;
   /** The name of the custom view. */
   name?: Maybe<Scalars["String"]>;
+  /** The owner of the custom view. */
+  ownerId?: Maybe<Scalars["String"]>;
   /** [ALPHA] The project filter applied to issues in the custom view. */
   projectFilterData?: Maybe<Scalars["JSONObject"]>;
   /** Whether the custom view is shared with everyone in the organization. */
@@ -1450,25 +1454,6 @@ export type EstimateComparator = {
   null?: Maybe<Scalars["Boolean"]>;
   /** Compound filters, all of which need to be matched by the estimate. */
   or?: Maybe<Array<NullableNumberComparator>>;
-};
-
-export type EventCreateInput = {
-  /** The category of the event to create. */
-  category: Scalars["String"];
-  /** Additional data of the event, encoded as JSON. */
-  data?: Maybe<Scalars["JSON"]>;
-  /** The subject of the event. */
-  subject: Scalars["String"];
-  /** The target identifier of the event. */
-  targetId?: Maybe<Scalars["String"]>;
-  /** The value of the event. */
-  value?: Maybe<Scalars["Float"]>;
-};
-
-export type EventPayload = {
-  __typename?: "EventPayload";
-  /** Whether the operation was successful. */
-  success: Scalars["Boolean"];
 };
 
 /** [ALPHA] An external authenticated (e.g., through Slack) user which doesn't have a Linear account, but can create and update entities in Linear from the external system that authenticated them. */
@@ -3565,6 +3550,8 @@ export type Mutation = {
   attachmentLinkIntercom: AttachmentPayload;
   /** Link an existing Jira issue to an issue. */
   attachmentLinkJiraIssue: AttachmentPayload;
+  /** Link an existing Slack message to an issue. */
+  attachmentLinkSlack: AttachmentPayload;
   /** Link any url to an issue. */
   attachmentLinkURL: AttachmentPayload;
   /** Link an existing Zendesk ticket to an issue. */
@@ -3617,8 +3604,6 @@ export type Mutation = {
   emojiCreate: EmojiPayload;
   /** Deletes an emoji. */
   emojiDelete: DeletePayload;
-  /** [Deprecated] Creates a new event. */
-  eventCreate: EventPayload;
   /** Creates a new favorite (project, cycle etc). */
   favoriteCreate: FavoritePayload;
   /** Deletes a favorite reference. */
@@ -3673,10 +3658,10 @@ export type Mutation = {
   integrationSettingsUpdate: IntegrationPayload;
   /** Integrates the organization with Slack. */
   integrationSlack: IntegrationPayload;
+  /** Integrates the organization with the Slack Asks app */
+  integrationSlackAsks: IntegrationPayload;
   /** Imports custom emojis from your Slack workspace. */
   integrationSlackImportEmojis: IntegrationPayload;
-  /** Integrates the organization with Slack for issue intake. */
-  integrationSlackIntake: IntegrationPayload;
   /** Slack integration for organization level project update notifications. */
   integrationSlackOrgProjectUpdatesPost: IntegrationPayload;
   /** Integrates your personal notifications with Slack. */
@@ -3751,6 +3736,14 @@ export type Mutation = {
   logout: LogoutResponse;
   /** Archives a notification. */
   notificationArchive: NotificationArchivePayload;
+  /** Archives all of the user's past notifications for the associated entity. */
+  notificationArchiveAll: NotificationBatchActionPayload;
+  /** Marks all past notifications for the associated entity as read. */
+  notificationMarkReadAll: NotificationBatchActionPayload;
+  /** Marks all past notifications for the associated entity as unread. */
+  notificationMarkUnreadAll: NotificationBatchActionPayload;
+  /** Snoozes a notification and all past notifications for the associated entity. */
+  notificationSnoozeAll: NotificationBatchActionPayload;
   /** Creates a new notification subscription for a cycle, custom view, label, project or team. */
   notificationSubscriptionCreate: NotificationSubscriptionPayload;
   /** Deletes a notification subscription reference. */
@@ -3759,6 +3752,8 @@ export type Mutation = {
   notificationSubscriptionUpdate: NotificationSubscriptionPayload;
   /** Unarchives a notification. */
   notificationUnarchive: NotificationArchivePayload;
+  /** Unsnoozes a notification and all past notifications for the associated entity. */
+  notificationUnsnoozeAll: NotificationBatchActionPayload;
   /** Updates a notification. */
   notificationUpdate: NotificationPayload;
   /** Cancels the deletion of an organization. Administrator privileges required. */
@@ -3970,6 +3965,16 @@ export type MutationAttachmentLinkJiraIssueArgs = {
   jiraIssueId: Scalars["String"];
 };
 
+export type MutationAttachmentLinkSlackArgs = {
+  channel: Scalars["String"];
+  id?: Maybe<Scalars["String"]>;
+  issueId: Scalars["String"];
+  latest: Scalars["String"];
+  title?: Maybe<Scalars["String"]>;
+  ts?: Maybe<Scalars["String"]>;
+  url: Scalars["String"];
+};
+
 export type MutationAttachmentLinkUrlArgs = {
   id?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
@@ -4084,10 +4089,6 @@ export type MutationEmojiDeleteArgs = {
   id: Scalars["String"];
 };
 
-export type MutationEventCreateArgs = {
-  input: EventCreateInput;
-};
-
 export type MutationFavoriteCreateArgs = {
   input: FavoriteCreateInput;
 };
@@ -4191,12 +4192,12 @@ export type MutationIntegrationSlackArgs = {
   shouldUseV2Auth?: Maybe<Scalars["Boolean"]>;
 };
 
-export type MutationIntegrationSlackImportEmojisArgs = {
+export type MutationIntegrationSlackAsksArgs = {
   code: Scalars["String"];
   redirectUri: Scalars["String"];
 };
 
-export type MutationIntegrationSlackIntakeArgs = {
+export type MutationIntegrationSlackImportEmojisArgs = {
   code: Scalars["String"];
   redirectUri: Scalars["String"];
 };
@@ -4406,6 +4407,24 @@ export type MutationNotificationArchiveArgs = {
   id: Scalars["String"];
 };
 
+export type MutationNotificationArchiveAllArgs = {
+  input: NotificationEntityInput;
+};
+
+export type MutationNotificationMarkReadAllArgs = {
+  input: NotificationEntityInput;
+  readAt: Scalars["DateTime"];
+};
+
+export type MutationNotificationMarkUnreadAllArgs = {
+  input: NotificationEntityInput;
+};
+
+export type MutationNotificationSnoozeAllArgs = {
+  input: NotificationEntityInput;
+  snoozedUntilAt: Scalars["DateTime"];
+};
+
 export type MutationNotificationSubscriptionCreateArgs = {
   input: NotificationSubscriptionCreateInput;
 };
@@ -4421,6 +4440,11 @@ export type MutationNotificationSubscriptionUpdateArgs = {
 
 export type MutationNotificationUnarchiveArgs = {
   id: Scalars["String"];
+};
+
+export type MutationNotificationUnsnoozeAllArgs = {
+  input: NotificationEntityInput;
+  unsnoozedAt: Scalars["DateTime"];
 };
 
 export type MutationNotificationUpdateArgs = {
@@ -4802,6 +4826,16 @@ export type NotificationArchivePayload = ArchivePayload & {
   success: Scalars["Boolean"];
 };
 
+export type NotificationBatchActionPayload = {
+  __typename?: "NotificationBatchActionPayload";
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** The notifications that were updated. */
+  notifications: Array<Notification>;
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
 export type NotificationConnection = {
   __typename?: "NotificationConnection";
   edges: Array<NotificationEdge>;
@@ -4814,6 +4848,18 @@ export type NotificationEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: Notification;
+};
+
+/** Describes the type and id of the entity to target for notifications. */
+export type NotificationEntityInput = {
+  /** The id of the issue related to the notification. */
+  issueId?: Maybe<Scalars["String"]>;
+  /** The id of the OAuth client approval related to the notification. */
+  oauthClientApprovalId?: Maybe<Scalars["String"]>;
+  /** The id of the project related to the notification. */
+  projectId?: Maybe<Scalars["String"]>;
+  /** The id of the project update related to the notification. */
+  projectUpdateId?: Maybe<Scalars["String"]>;
 };
 
 export type NotificationPayload = {
@@ -4886,6 +4932,8 @@ export type NotificationSubscriptionCreateInput = {
   teamId?: Maybe<Scalars["String"]>;
   /** The type of user view to which the notification subscription context is associated with. */
   userContextViewType?: Maybe<UserContextViewType>;
+  /** The identifier of the user to subscribe to. */
+  userId?: Maybe<Scalars["String"]>;
 };
 
 export type NotificationSubscriptionEdge = {
@@ -5946,7 +5994,7 @@ export type Project = Node & {
   slugId: Scalars["String"];
   /** The sort order for the project within the organization. */
   sortOrder: Scalars["Float"];
-  /** [Internal] The estimated start date of the project. */
+  /** The estimated start date of the project. */
   startDate?: Maybe<Scalars["TimelessDate"]>;
   /** The time at which the project was moved into started state. */
   startedAt?: Maybe<Scalars["DateTime"]>;
@@ -6452,7 +6500,7 @@ export type ProjectNotificationSubscription = Entity &
     /** The contextual label view associated with the notification subscription. */
     label?: Maybe<IssueLabel>;
     /** The type of subscription. */
-    notificationSubscriptionTypes?: Maybe<Array<Scalars["String"]>>;
+    notificationSubscriptionTypes: Array<Scalars["String"]>;
     /** The project subscribed to. */
     project: Project;
     /** The user that subscribed to receive notifications. */
@@ -6562,7 +6610,7 @@ export type ProjectSearchResult = Node & {
   slugId: Scalars["String"];
   /** The sort order for the project within the organization. */
   sortOrder: Scalars["Float"];
-  /** [Internal] The estimated start date of the project. */
+  /** The estimated start date of the project. */
   startDate?: Maybe<Scalars["TimelessDate"]>;
   /** The time at which the project was moved into started state. */
   startedAt?: Maybe<Scalars["DateTime"]>;
@@ -7743,6 +7791,8 @@ export type ReactionCreateInput = {
   emoji?: Maybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one */
   id?: Maybe<Scalars["String"]>;
+  /** The issue to associate the reaction with. */
+  issueId?: Maybe<Scalars["String"]>;
   /** The project update to associate the reaction with. */
   projectUpdateId?: Maybe<Scalars["String"]>;
 };
@@ -8640,7 +8690,7 @@ export type TeamNotificationSubscription = Entity &
     /** The contextual label view associated with the notification subscription. */
     label?: Maybe<IssueLabel>;
     /** The type of subscription. */
-    notificationSubscriptionTypes?: Maybe<Array<Scalars["String"]>>;
+    notificationSubscriptionTypes: Array<Scalars["String"]>;
     /** The contextual project view associated with the notification subscription. */
     project?: Maybe<Project>;
     /** The user that subscribed to receive notifications. */
@@ -9275,6 +9325,45 @@ export enum UserFlagUpdateOperation {
   Incr = "incr",
   Lock = "lock",
 }
+
+/** A user notification subscription. */
+export type UserNotificationSubscription = Entity &
+  Node &
+  NotificationSubscription & {
+    __typename?: "UserNotificationSubscription";
+    /** The time at which the entity was archived. Null if the entity has not been archived. */
+    archivedAt?: Maybe<Scalars["DateTime"]>;
+    /** The type of view to which the notification subscription context is associated with. */
+    contextViewType?: Maybe<ContextViewType>;
+    /** The time at which the entity was created. */
+    createdAt: Scalars["DateTime"];
+    /** The contextual custom view associated with the notification subscription. */
+    customView?: Maybe<CustomView>;
+    /** The contextual cycle view associated with the notification subscription. */
+    cycle?: Maybe<Cycle>;
+    /** The unique identifier of the entity. */
+    id: Scalars["ID"];
+    /** The contextual label view associated with the notification subscription. */
+    label?: Maybe<IssueLabel>;
+    /** The type of subscription. */
+    notificationSubscriptionTypes: Array<Scalars["String"]>;
+    /** The contextual project view associated with the notification subscription. */
+    project?: Maybe<Project>;
+    /** The user that subscribed to receive notifications. */
+    subscriber: User;
+    /** The team associated with the notification subscription. */
+    team?: Maybe<Team>;
+    /**
+     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     *     been updated after creation.
+     */
+    updatedAt: Scalars["DateTime"];
+    /** The user subscribed to. */
+    user: User;
+    /** The type of user view to which the notification subscription context is associated with. */
+    userContextViewType?: Maybe<UserContextViewType>;
+  };
 
 export type UserPayload = {
   __typename?: "UserPayload";
@@ -9928,6 +10017,11 @@ type Entity_TeamNotificationSubscription_Fragment = { __typename: "TeamNotificat
   "updatedAt" | "archivedAt" | "createdAt" | "id"
 >;
 
+type Entity_UserNotificationSubscription_Fragment = { __typename: "UserNotificationSubscription" } & Pick<
+  UserNotificationSubscription,
+  "updatedAt" | "archivedAt" | "createdAt" | "id"
+>;
+
 export type EntityFragment =
   | Entity_CustomViewNotificationSubscription_Fragment
   | Entity_CycleNotificationSubscription_Fragment
@@ -9936,7 +10030,8 @@ export type EntityFragment =
   | Entity_OauthClientApprovalNotification_Fragment
   | Entity_ProjectNotification_Fragment
   | Entity_ProjectNotificationSubscription_Fragment
-  | Entity_TeamNotificationSubscription_Fragment;
+  | Entity_TeamNotificationSubscription_Fragment
+  | Entity_UserNotificationSubscription_Fragment;
 
 export type CommentFragment = { __typename: "Comment" } & Pick<
   Comment,
@@ -9991,11 +10086,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
   | "createdAt"
   | "id"
   | "shared"
-> & {
-    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
-    creator: { __typename?: "User" } & Pick<User, "id">;
-    owner: { __typename?: "User" } & Pick<User, "id">;
-  };
+> & { team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>; creator: { __typename?: "User" } & Pick<User, "id"> };
 
 export type CycleNotificationSubscriptionFragment = { __typename: "CycleNotificationSubscription" } & Pick<
   CycleNotificationSubscription,
@@ -10202,6 +10293,7 @@ export type ProjectFragment = { __typename: "Project" } & Pick<
   Project,
   | "url"
   | "targetDate"
+  | "startDate"
   | "icon"
   | "updatedAt"
   | "completedScopeHistory"
@@ -10374,6 +10466,19 @@ export type UserAccountFragment = { __typename: "UserAccount" } & Pick<
   UserAccount,
   "service" | "id" | "archivedAt" | "createdAt" | "updatedAt" | "email" | "name"
 > & { users: Array<{ __typename?: "User" } & UserFragment> };
+
+export type UserNotificationSubscriptionFragment = { __typename: "UserNotificationSubscription" } & Pick<
+  UserNotificationSubscription,
+  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id"
+> & {
+    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+    user: { __typename?: "User" } & Pick<User, "id">;
+    subscriber: { __typename?: "User" } & Pick<User, "id">;
+  };
 
 export type UserFragment = { __typename: "User" } & Pick<
   User,
@@ -10808,12 +10913,25 @@ type NotificationSubscription_TeamNotificationSubscription_Fragment = {
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
+type NotificationSubscription_UserNotificationSubscription_Fragment = {
+  __typename: "UserNotificationSubscription";
+} & Pick<UserNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+    subscriber: { __typename?: "User" } & Pick<User, "id">;
+    user: { __typename?: "User" } & Pick<User, "id">;
+  };
+
 export type NotificationSubscriptionFragment =
   | NotificationSubscription_CustomViewNotificationSubscription_Fragment
   | NotificationSubscription_CycleNotificationSubscription_Fragment
   | NotificationSubscription_LabelNotificationSubscription_Fragment
   | NotificationSubscription_ProjectNotificationSubscription_Fragment
-  | NotificationSubscription_TeamNotificationSubscription_Fragment;
+  | NotificationSubscription_TeamNotificationSubscription_Fragment
+  | NotificationSubscription_UserNotificationSubscription_Fragment;
 
 export type NotionSettingsFragment = { __typename: "NotionSettings" } & Pick<
   NotionSettings,
@@ -11178,8 +11296,6 @@ export type EmojiPayloadFragment = { __typename: "EmojiPayload" } & Pick<EmojiPa
     emoji: { __typename?: "Emoji" } & Pick<Emoji, "id">;
   };
 
-export type EventPayloadFragment = { __typename: "EventPayload" } & Pick<EventPayload, "success">;
-
 export type FavoriteConnectionFragment = { __typename: "FavoriteConnection" } & {
   nodes: Array<{ __typename?: "Favorite" } & FavoriteFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
@@ -11501,6 +11617,11 @@ type Node_Template_Fragment = { __typename: "Template" } & Pick<Template, "id">;
 
 type Node_User_Fragment = { __typename: "User" } & Pick<User, "id">;
 
+type Node_UserNotificationSubscription_Fragment = { __typename: "UserNotificationSubscription" } & Pick<
+  UserNotificationSubscription,
+  "id"
+>;
+
 type Node_UserSettings_Fragment = { __typename: "UserSettings" } & Pick<UserSettings, "id">;
 
 type Node_ViewPreferences_Fragment = { __typename: "ViewPreferences" } & Pick<ViewPreferences, "id">;
@@ -11569,12 +11690,24 @@ export type NodeFragment =
   | Node_TeamNotificationSubscription_Fragment
   | Node_Template_Fragment
   | Node_User_Fragment
+  | Node_UserNotificationSubscription_Fragment
   | Node_UserSettings_Fragment
   | Node_ViewPreferences_Fragment
   | Node_Webhook_Fragment
   | Node_WorkflowCronJobDefinition_Fragment
   | Node_WorkflowDefinition_Fragment
   | Node_WorkflowState_Fragment;
+
+export type NotificationBatchActionPayloadFragment = { __typename: "NotificationBatchActionPayload" } & Pick<
+  NotificationBatchActionPayload,
+  "lastSyncId" | "success"
+> & {
+    notifications: Array<
+      | ({ __typename?: "IssueNotification" } & Notification_IssueNotification_Fragment)
+      | ({ __typename?: "OauthClientApprovalNotification" } & Notification_OauthClientApprovalNotification_Fragment)
+      | ({ __typename?: "ProjectNotification" } & Notification_ProjectNotification_Fragment)
+    >;
+  };
 
 export type NotificationConnectionFragment = { __typename: "NotificationConnection" } & {
   nodes: Array<
@@ -11610,6 +11743,7 @@ export type NotificationSubscriptionConnectionFragment = { __typename: "Notifica
         __typename?: "ProjectNotificationSubscription";
       } & NotificationSubscription_ProjectNotificationSubscription_Fragment)
     | ({ __typename?: "TeamNotificationSubscription" } & NotificationSubscription_TeamNotificationSubscription_Fragment)
+    | ({ __typename?: "UserNotificationSubscription" } & NotificationSubscription_UserNotificationSubscription_Fragment)
   >;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
@@ -11633,7 +11767,10 @@ export type NotificationSubscriptionPayloadFragment = { __typename: "Notificatio
         } & NotificationSubscription_ProjectNotificationSubscription_Fragment)
       | ({
           __typename?: "TeamNotificationSubscription";
-        } & NotificationSubscription_TeamNotificationSubscription_Fragment);
+        } & NotificationSubscription_TeamNotificationSubscription_Fragment)
+      | ({
+          __typename?: "UserNotificationSubscription";
+        } & NotificationSubscription_UserNotificationSubscription_Fragment);
   };
 
 export type OauthClientConnectionFragment = { __typename: "OauthClientConnection" } & {
@@ -11744,6 +11881,7 @@ export type ProjectSearchResultFragment = { __typename: "ProjectSearchResult" } 
   | "metadata"
   | "url"
   | "targetDate"
+  | "startDate"
   | "icon"
   | "updatedAt"
   | "completedScopeHistory"
@@ -12098,6 +12236,20 @@ export type AttachmentLinkJiraIssueMutation = { __typename?: "Mutation" } & {
   attachmentLinkJiraIssue: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
 };
 
+export type AttachmentLinkSlackMutationVariables = Exact<{
+  channel: Scalars["String"];
+  id?: Maybe<Scalars["String"]>;
+  issueId: Scalars["String"];
+  latest: Scalars["String"];
+  title?: Maybe<Scalars["String"]>;
+  ts?: Maybe<Scalars["String"]>;
+  url: Scalars["String"];
+}>;
+
+export type AttachmentLinkSlackMutation = { __typename?: "Mutation" } & {
+  attachmentLinkSlack: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
+};
+
 export type AttachmentLinkUrlMutationVariables = Exact<{
   id?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
@@ -12304,14 +12456,6 @@ export type DeleteEmojiMutation = { __typename?: "Mutation" } & {
   emojiDelete: { __typename?: "DeletePayload" } & DeletePayloadFragment;
 };
 
-export type CreateEventMutationVariables = Exact<{
-  input: EventCreateInput;
-}>;
-
-export type CreateEventMutation = { __typename?: "Mutation" } & {
-  eventCreate: { __typename?: "EventPayload" } & EventPayloadFragment;
-};
-
 export type CreateFavoriteMutationVariables = Exact<{
   input: FavoriteCreateInput;
 }>;
@@ -12502,6 +12646,15 @@ export type IntegrationSlackMutation = { __typename?: "Mutation" } & {
   integrationSlack: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
+export type IntegrationSlackAsksMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationSlackAsksMutation = { __typename?: "Mutation" } & {
+  integrationSlackAsks: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
 export type IntegrationSlackImportEmojisMutationVariables = Exact<{
   code: Scalars["String"];
   redirectUri: Scalars["String"];
@@ -12509,15 +12662,6 @@ export type IntegrationSlackImportEmojisMutationVariables = Exact<{
 
 export type IntegrationSlackImportEmojisMutation = { __typename?: "Mutation" } & {
   integrationSlackImportEmojis: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
-};
-
-export type IntegrationSlackIntakeMutationVariables = Exact<{
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-}>;
-
-export type IntegrationSlackIntakeMutation = { __typename?: "Mutation" } & {
-  integrationSlackIntake: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
 export type IntegrationSlackOrgProjectUpdatesPostMutationVariables = Exact<{
@@ -12860,6 +13004,40 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
   notificationArchive: { __typename?: "NotificationArchivePayload" } & NotificationArchivePayloadFragment;
 };
 
+export type NotificationArchiveAllMutationVariables = Exact<{
+  input: NotificationEntityInput;
+}>;
+
+export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
+  notificationArchiveAll: { __typename?: "NotificationBatchActionPayload" } & NotificationBatchActionPayloadFragment;
+};
+
+export type NotificationMarkReadAllMutationVariables = Exact<{
+  input: NotificationEntityInput;
+  readAt: Scalars["DateTime"];
+}>;
+
+export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
+  notificationMarkReadAll: { __typename?: "NotificationBatchActionPayload" } & NotificationBatchActionPayloadFragment;
+};
+
+export type NotificationMarkUnreadAllMutationVariables = Exact<{
+  input: NotificationEntityInput;
+}>;
+
+export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
+  notificationMarkUnreadAll: { __typename?: "NotificationBatchActionPayload" } & NotificationBatchActionPayloadFragment;
+};
+
+export type NotificationSnoozeAllMutationVariables = Exact<{
+  input: NotificationEntityInput;
+  snoozedUntilAt: Scalars["DateTime"];
+}>;
+
+export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
+  notificationSnoozeAll: { __typename?: "NotificationBatchActionPayload" } & NotificationBatchActionPayloadFragment;
+};
+
 export type CreateNotificationSubscriptionMutationVariables = Exact<{
   input: NotificationSubscriptionCreateInput;
 }>;
@@ -12895,6 +13073,15 @@ export type UnarchiveNotificationMutationVariables = Exact<{
 
 export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
   notificationUnarchive: { __typename?: "NotificationArchivePayload" } & NotificationArchivePayloadFragment;
+};
+
+export type NotificationUnsnoozeAllMutationVariables = Exact<{
+  input: NotificationEntityInput;
+  unsnoozedAt: Scalars["DateTime"];
+}>;
+
+export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
+  notificationUnsnoozeAll: { __typename?: "NotificationBatchActionPayload" } & NotificationBatchActionPayloadFragment;
 };
 
 export type UpdateNotificationMutationVariables = Exact<{
@@ -14529,9 +14716,10 @@ export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
     | ({
         __typename?: "ProjectNotificationSubscription";
       } & NotificationSubscription_ProjectNotificationSubscription_Fragment)
+    | ({ __typename?: "TeamNotificationSubscription" } & NotificationSubscription_TeamNotificationSubscription_Fragment)
     | ({
-        __typename?: "TeamNotificationSubscription";
-      } & NotificationSubscription_TeamNotificationSubscription_Fragment);
+        __typename?: "UserNotificationSubscription";
+      } & NotificationSubscription_UserNotificationSubscription_Fragment);
 };
 
 export type NotificationSubscriptionsQueryVariables = Exact<{
@@ -16570,6 +16758,83 @@ export const UserAccountFragmentDoc = {
     ...UserFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UserAccountFragment, unknown>;
+export const UserNotificationSubscriptionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "UserNotificationSubscription" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserNotificationSubscription" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "customView" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "cycle" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "label" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "notificationSubscriptionTypes" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "subscriber" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UserNotificationSubscriptionFragment, unknown>;
 export const SyncResponseFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -17875,14 +18140,6 @@ export const CustomViewFragmentDoc = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "shared" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "owner" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
         ],
       },
     },
@@ -18507,23 +18764,6 @@ export const EmojiPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<EmojiPayloadFragment, unknown>;
-export const EventPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "EventPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EventPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "success" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<EventPayloadFragment, unknown>;
 export const FavoriteFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -20237,6 +20477,33 @@ export const NodeFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<NodeFragment, unknown>;
+export const NotificationBatchActionPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "NotificationBatchActionPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "NotificationBatchActionPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notifications" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Notification" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+    ...NotificationFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<NotificationBatchActionPayloadFragment, unknown>;
 export const NotificationConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -20741,6 +21008,7 @@ export const ProjectFragmentDoc = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "targetDate" } },
+          { kind: "Field", name: { kind: "Name", value: "startDate" } },
           { kind: "Field", name: { kind: "Name", value: "icon" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "completedScopeHistory" } },
@@ -21085,6 +21353,7 @@ export const ProjectSearchResultFragmentDoc = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "targetDate" } },
+          { kind: "Field", name: { kind: "Name", value: "startDate" } },
           { kind: "Field", name: { kind: "Name", value: "icon" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "completedScopeHistory" } },
@@ -23377,6 +23646,104 @@ export const AttachmentLinkJiraIssueDocument = {
     ...AttachmentPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentLinkJiraIssueMutation, AttachmentLinkJiraIssueMutationVariables>;
+export const AttachmentLinkSlackDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "attachmentLinkSlack" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "channel" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "latest" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "title" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "ts" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "url" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "attachmentLinkSlack" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "channel" },
+                value: { kind: "Variable", name: { kind: "Name", value: "channel" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "issueId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "latest" },
+                value: { kind: "Variable", name: { kind: "Name", value: "latest" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "title" },
+                value: { kind: "Variable", name: { kind: "Name", value: "title" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "ts" },
+                value: { kind: "Variable", name: { kind: "Name", value: "ts" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "url" },
+                value: { kind: "Variable", name: { kind: "Name", value: "url" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AttachmentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<AttachmentLinkSlackMutation, AttachmentLinkSlackMutationVariables>;
 export const AttachmentLinkUrlDocument = {
   kind: "Document",
   definitions: [
@@ -24435,44 +24802,6 @@ export const DeleteEmojiDocument = {
     ...DeletePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DeleteEmojiMutation, DeleteEmojiMutationVariables>;
-export const CreateEventDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "createEvent" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "EventCreateInput" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "eventCreate" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EventPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...EventPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<CreateEventMutation, CreateEventMutationVariables>;
 export const CreateFavoriteDocument = {
   kind: "Document",
   definitions: [
@@ -25465,6 +25794,54 @@ export const IntegrationSlackDocument = {
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationSlackMutation, IntegrationSlackMutationVariables>;
+export const IntegrationSlackAsksDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationSlackAsks" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationSlackAsks" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationSlackAsksMutation, IntegrationSlackAsksMutationVariables>;
 export const IntegrationSlackImportEmojisDocument = {
   kind: "Document",
   definitions: [
@@ -25513,54 +25890,6 @@ export const IntegrationSlackImportEmojisDocument = {
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationSlackImportEmojisMutation, IntegrationSlackImportEmojisMutationVariables>;
-export const IntegrationSlackIntakeDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationSlackIntake" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationSlackIntake" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationSlackIntakeMutation, IntegrationSlackIntakeMutationVariables>;
 export const IntegrationSlackOrgProjectUpdatesPostDocument = {
   kind: "Document",
   definitions: [
@@ -27517,6 +27846,190 @@ export const ArchiveNotificationDocument = {
     ...NotificationArchivePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ArchiveNotificationMutation, ArchiveNotificationMutationVariables>;
+export const NotificationArchiveAllDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "notificationArchiveAll" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "NotificationEntityInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notificationArchiveAll" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotificationBatchActionPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...NotificationBatchActionPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<NotificationArchiveAllMutation, NotificationArchiveAllMutationVariables>;
+export const NotificationMarkReadAllDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "notificationMarkReadAll" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "NotificationEntityInput" } },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "readAt" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "DateTime" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notificationMarkReadAll" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "readAt" },
+                value: { kind: "Variable", name: { kind: "Name", value: "readAt" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotificationBatchActionPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...NotificationBatchActionPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<NotificationMarkReadAllMutation, NotificationMarkReadAllMutationVariables>;
+export const NotificationMarkUnreadAllDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "notificationMarkUnreadAll" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "NotificationEntityInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notificationMarkUnreadAll" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotificationBatchActionPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...NotificationBatchActionPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<NotificationMarkUnreadAllMutation, NotificationMarkUnreadAllMutationVariables>;
+export const NotificationSnoozeAllDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "notificationSnoozeAll" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "NotificationEntityInput" } },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "snoozedUntilAt" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "DateTime" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notificationSnoozeAll" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "snoozedUntilAt" },
+                value: { kind: "Variable", name: { kind: "Name", value: "snoozedUntilAt" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotificationBatchActionPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...NotificationBatchActionPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<NotificationSnoozeAllMutation, NotificationSnoozeAllMutationVariables>;
 export const CreateNotificationSubscriptionDocument = {
   kind: "Document",
   definitions: [
@@ -27689,6 +28202,57 @@ export const UnarchiveNotificationDocument = {
     ...NotificationArchivePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UnarchiveNotificationMutation, UnarchiveNotificationMutationVariables>;
+export const NotificationUnsnoozeAllDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "notificationUnsnoozeAll" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "NotificationEntityInput" } },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "unsnoozedAt" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "DateTime" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "notificationUnsnoozeAll" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "unsnoozedAt" },
+                value: { kind: "Variable", name: { kind: "Name", value: "unsnoozedAt" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotificationBatchActionPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...NotificationBatchActionPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<NotificationUnsnoozeAllMutation, NotificationUnsnoozeAllMutationVariables>;
 export const UpdateNotificationDocument = {
   kind: "Document",
   definitions: [
