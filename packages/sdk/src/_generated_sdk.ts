@@ -470,6 +470,21 @@ export class AttachmentPayload extends Request {
   }
 }
 /**
+ * AttachmentSourcesPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AttachmentSourcesPayloadFragment response data
+ */
+export class AttachmentSourcesPayload extends Request {
+  public constructor(request: LinearRequest, data: L.AttachmentSourcesPayloadFragment) {
+    super(request);
+    this.sources = parseJson(data.sources) ?? {};
+  }
+
+  /** A unique list of all source types used in this workspace */
+  public sources: Record<string, unknown>;
+}
+/**
  * Workspace audit log entry object.
  *
  * @param request - function to call the graphql client
@@ -3400,6 +3415,7 @@ export class IssueLabel extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
     this.id = data.id;
+    this.isGroup = data.isGroup;
     this.name = data.name;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator ?? undefined;
@@ -3417,6 +3433,8 @@ export class IssueLabel extends Request {
   public description?: string;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Whether this label is considered to be a group. */
+  public isGroup: boolean;
   /** The label's name. */
   public name: string;
   /**

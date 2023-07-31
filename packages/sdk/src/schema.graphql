@@ -410,6 +410,13 @@ type AttachmentPayload {
   success: Boolean!
 }
 
+type AttachmentSourcesPayload {
+  """
+  A unique list of all source types used in this workspace
+  """
+  sources: JSONObject!
+}
+
 input AttachmentUpdateInput {
   """
   An icon url to display with the attachment. Should be of jpg or png format. Maximum of 1MB in size. Dimensions should be 20x20px for optimal display quality.
@@ -4860,6 +4867,10 @@ type IssueLabel implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  Whether this label is considered to be a group.
+  """
+  isGroup: Boolean!
   """
   Issues associated with the label.
   """
@@ -12268,6 +12279,15 @@ type Query {
     @deprecated(
       reason: "Will be removed in near future, please use `attachmentsForURL` to get attachments and their issues instead."
     )
+  """
+  [Internal] Get a list of all unique attachment sources in the workspace
+  """
+  attachmentSources(
+    """
+    (optional) if provided will only return attachment sources for the given team
+    """
+    teamId: String
+  ): AttachmentSourcesPayload!
   """
   All issue attachments.
 

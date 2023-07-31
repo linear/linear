@@ -268,6 +268,12 @@ export type AttachmentPayload = {
   success: Scalars["Boolean"];
 };
 
+export type AttachmentSourcesPayload = {
+  __typename?: "AttachmentSourcesPayload";
+  /** A unique list of all source types used in this workspace */
+  sources: Scalars["JSONObject"];
+};
+
 export type AttachmentUpdateInput = {
   /** An icon url to display with the attachment. Should be of jpg or png format. Maximum of 1MB in size. Dimensions should be 20x20px for optimal display quality. */
   iconUrl?: Maybe<Scalars["String"]>;
@@ -2860,6 +2866,8 @@ export type IssueLabel = Node & {
   description?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** Whether this label is considered to be a group. */
+  isGroup: Scalars["Boolean"];
   /** Issues associated with the label. */
   issues: IssueConnection;
   /** The label's name. */
@@ -6997,6 +7005,8 @@ export type Query = {
    * @deprecated Will be removed in near future, please use `attachmentsForURL` to get attachments and their issues instead.
    */
   attachmentIssue: Issue;
+  /** [Internal] Get a list of all unique attachment sources in the workspace */
+  attachmentSources: AttachmentSourcesPayload;
   /**
    * All issue attachments.
    *
@@ -7231,6 +7241,10 @@ export type QueryAttachmentArgs = {
 
 export type QueryAttachmentIssueArgs = {
   id: Scalars["String"];
+};
+
+export type QueryAttachmentSourcesArgs = {
+  teamId?: Maybe<Scalars["String"]>;
 };
 
 export type QueryAttachmentsArgs = {
@@ -10839,7 +10853,7 @@ export type IntegrationTemplateFragment = { __typename: "IntegrationTemplate" } 
 
 export type IssueLabelFragment = { __typename: "IssueLabel" } & Pick<
   IssueLabel,
-  "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+  "color" | "description" | "name" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "isGroup"
 > & {
     parent?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -11165,6 +11179,11 @@ export type AttachmentPayloadFragment = { __typename: "AttachmentPayload" } & Pi
   AttachmentPayload,
   "lastSyncId" | "success"
 > & { attachment: { __typename?: "Attachment" } & Pick<Attachment, "id"> };
+
+export type AttachmentSourcesPayloadFragment = { __typename: "AttachmentSourcesPayload" } & Pick<
+  AttachmentSourcesPayload,
+  "sources"
+>;
 
 export type AuditEntryConnectionFragment = { __typename: "AuditEntryConnection" } & {
   nodes: Array<{ __typename?: "AuditEntry" } & AuditEntryFragment>;
@@ -17662,6 +17681,23 @@ export const AttachmentPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AttachmentPayloadFragment, unknown>;
+export const AttachmentSourcesPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AttachmentSourcesPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AttachmentSourcesPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "sources" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AttachmentSourcesPayloadFragment, unknown>;
 export const AuditEntryFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -20034,6 +20070,7 @@ export const IssueLabelFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "isGroup" } },
         ],
       },
     },

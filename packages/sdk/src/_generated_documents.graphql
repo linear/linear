@@ -2160,6 +2160,8 @@ fragment IssueLabel on IssueLabel {
   creator {
     id
   }
+  # Whether this label is considered to be a group.
+  isGroup
 }
 
 # Metadata about a Jira project.
@@ -2791,6 +2793,12 @@ fragment AttachmentPayload on AttachmentPayload {
   }
   # Whether the operation was successful.
   success
+}
+
+fragment AttachmentSourcesPayload on AttachmentSourcesPayload {
+  __typename
+  # A unique list of all source types used in this workspace
+  sources
 }
 
 fragment AuditEntryConnection on AuditEntryConnection {
