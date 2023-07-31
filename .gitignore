@@ -79,3 +79,7 @@ TODO
 # Rollup
 .rollup.cache
 .size-snapshot.json
+
+# Next.js & Vercel
+.next
+.vercel
