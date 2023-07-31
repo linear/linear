@@ -1,5 +1,16 @@
 # Change Log
 
+## 7.0.1
+
+### Patch Changes
+
+- bb61209: chore(deps): update dependency patch versions
+- b194ff7: feat(schema): [non_breaking] Type 'AttachmentSourcesPayload' was added (AttachmentSourcesPayload)
+
+  feat(schema): [non_breaking] Field 'isGroup' was added to object type 'IssueLabel' (IssueLabel.isGroup)
+
+  feat(schema): [non_breaking] Field 'attachmentSources' was added to object type 'Query' (Query.attachmentSources)
+
 ## 7.0.0
 
 ### Major Changes
