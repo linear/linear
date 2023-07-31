@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.7.7
+
+### Patch Changes
+
+- bb61209: chore(deps): update dependency patch versions
+- f5d1633: Downgrade chalk to 4.x
+- Updated dependencies [bb61209]
+- Updated dependencies [b194ff7]
+  - @linear/sdk@7.0.1
+
 ## 1.7.6
 
 ### Patch Changes
