@@ -1,6 +1,11 @@
 # Upload a file to Linear with Next.js
 
-This example shows how to upload a file to Linear using the Linear TypeScript SDK and Next.js API Routes. To run this example, you'll need a Linear account and a Linear API key. You can create an API key from your personal [Linear settings](https://linear.app/settings/api). Learn more about authentication in the [Linear Developer documentation](https://developers.linear.app/docs/sdk/getting-started#2.-create-a-linear-client).
+This example shows how to upload a file to Linear using the Linear TypeScript SDK and Node.js. It uses [Next.js](https://nextjs.org/) to render a simple form with a file input. When the form is submitted, the file is uploaded to Linear via a Next.js API Route and the Linear-hosted URL is returned.
+
+> **Note**
+> While this example uses Next.js, this approach can be used with any Node.js backend.
+
+To run this example, you'll need a Linear account and a Linear API key. You can create an API key from your personal [Linear settings](https://linear.app/settings/api). Learn more about authentication in the [Linear Developer documentation](https://developers.linear.app/docs/sdk/getting-started#2.-create-a-linear-client).
 
 > **Note**
 > This example is part of a guide: ["How to upload a file to Linear"](https://developers.linear.app/guides/how-to-upload-a-file-to-linear).

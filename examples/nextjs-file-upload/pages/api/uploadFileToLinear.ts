@@ -55,7 +55,7 @@ async function uploadFileToLinear(file: Express.Multer.File): Promise<string> {
 
     return assetUrl;
   } catch (e) {
-    throw new Error("Failed to upload file to Linear", e);
+    throw new Error("Failed to upload file to Linear", { cause: e });
   }
 }
 
