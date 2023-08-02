@@ -42,12 +42,15 @@ async function uploadFileToLinear(file: Express.Multer.File): Promise<string> {
 
   // Make sure to copy the response headers for the PUT request
   const headers = new Headers();
+
+  // It is important that the content-type of the request matches the value passed as the first argument to `fileUpload`.
   headers.set("Content-Type", file.mimetype);
   headers.set("Cache-Control", "public, max-age=31536000");
   uploadPayload.uploadFile.headers.forEach(({ key, value }) => headers.set(key, value));
 
   try {
     await fetch(uploadUrl, {
+      // Note PUT is important here, other verbs will not work.
       method: "PUT",
       body: file.buffer,
       headers,
