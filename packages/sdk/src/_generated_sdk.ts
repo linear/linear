@@ -872,6 +872,7 @@ export class CreateOrJoinOrganizationResponse extends Request {
  */
 export class CustomView extends Request {
   private _creator: L.CustomViewFragment["creator"];
+  private _owner: L.CustomViewFragment["owner"];
   private _team?: L.CustomViewFragment["team"];
 
   public constructor(request: LinearRequest, data: L.CustomViewFragment) {
@@ -888,6 +889,7 @@ export class CustomView extends Request {
     this.shared = data.shared;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator;
+    this._owner = data.owner;
     this._team = data.team ?? undefined;
   }
 
@@ -924,6 +926,10 @@ export class CustomView extends Request {
   /** The organization of the custom view. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The user who owns the custom view. */
+  public get owner(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._owner.id);
   }
   /** The team associated with the custom view. */
   public get team(): LinearFetch<Team> | undefined {
@@ -2463,6 +2469,7 @@ export class IntegrationSettings extends Request {
     this.notion = data.notion ? new NotionSettings(request, data.notion) : undefined;
     this.pagerDuty = data.pagerDuty ? new PagerDutySettings(request, data.pagerDuty) : undefined;
     this.sentry = data.sentry ? new SentrySettings(request, data.sentry) : undefined;
+    this.slackAsks = data.slackAsks ? new SlackAsksSettings(request, data.slackAsks) : undefined;
     this.slackOrgProjectUpdatesPost = data.slackOrgProjectUpdatesPost
       ? new SlackPostSettings(request, data.slackOrgProjectUpdatesPost)
       : undefined;
@@ -2479,6 +2486,7 @@ export class IntegrationSettings extends Request {
   public notion?: NotionSettings;
   public pagerDuty?: PagerDutySettings;
   public sentry?: SentrySettings;
+  public slackAsks?: SlackAsksSettings;
   public slackOrgProjectUpdatesPost?: SlackPostSettings;
   public slackPost?: SlackPostSettings;
   public slackProjectPost?: SlackPostSettings;
@@ -2498,6 +2506,7 @@ export class IntegrationTemplate extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.foreignEntityId = data.foreignEntityId ?? undefined;
     this.id = data.id;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._integration = data.integration;
@@ -2508,6 +2517,8 @@ export class IntegrationTemplate extends Request {
   public archivedAt?: Date;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** ID of the foreign entity in the external integration this template is for, e.g., Slack channel ID. */
+  public foreignEntityId?: string;
   /** The unique identifier of the entity. */
   public id: string;
   /**
@@ -4927,6 +4938,7 @@ export class OrganizationInvite extends Request {
     this.expiresAt = parseDate(data.expiresAt) ?? undefined;
     this.external = data.external;
     this.id = data.id;
+    this.metadata = parseJson(data.metadata) ?? {};
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._invitee = data.invitee ?? undefined;
     this._inviter = data.inviter;
@@ -4946,6 +4958,8 @@ export class OrganizationInvite extends Request {
   public external: boolean;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Extra metadata associated with the organization invite. */
+  public metadata: Record<string, unknown>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -5255,6 +5269,7 @@ export class Project extends Request {
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.state = data.state;
     this.targetDate = data.targetDate ?? undefined;
+    this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._convertedFromIssue = data.convertedFromIssue ?? undefined;
@@ -5317,6 +5332,8 @@ export class Project extends Request {
   public state: string;
   /** The estimated completion date of the project. */
   public targetDate?: L.Scalars["TimelessDate"];
+  /** A flag that indicates whether the project is in the trash bin. */
+  public trashed?: boolean;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -5372,14 +5389,14 @@ export class Project extends Request {
     return new Project_TeamsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Archives a project. */
-  public archive() {
-    return new ArchiveProjectMutation(this._request).fetch(this.id);
+  public archive(variables?: Omit<L.ArchiveProjectMutationVariables, "id">) {
+    return new ArchiveProjectMutation(this._request).fetch(this.id, variables);
   }
   /** Creates a new project. */
   public create(input: L.ProjectCreateInput) {
     return new CreateProjectMutation(this._request).fetch(input);
   }
-  /** Deletes a project. All issues will be disassociated from the deleted project. */
+  /** Deletes (trashes) a project. */
   public delete() {
     return new DeleteProjectMutation(this._request).fetch(this.id);
   }
@@ -5899,6 +5916,7 @@ export class ProjectSearchResult extends Request {
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.state = data.state;
     this.targetDate = data.targetDate ?? undefined;
+    this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._convertedFromIssue = data.convertedFromIssue ?? undefined;
@@ -5963,6 +5981,8 @@ export class ProjectSearchResult extends Request {
   public state: string;
   /** The estimated completion date of the project. */
   public targetDate?: L.Scalars["TimelessDate"];
+  /** A flag that indicates whether the project is in the trash bin. */
+  public trashed?: boolean;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -6800,6 +6820,41 @@ export class SentrySettings extends Request {
 
   /** The slug of the Sentry organization being connected. */
   public organizationSlug: string;
+}
+/**
+ * Slack Asks specific settings.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SlackAsksSettingsFragment response data
+ */
+export class SlackAsksSettings extends Request {
+  public constructor(request: LinearRequest, data: L.SlackAsksSettingsFragment) {
+    super(request);
+    this.slackChannelMapping = data.slackChannelMapping
+      ? data.slackChannelMapping.map(node => new SlackChannelNameMapping(request, node))
+      : undefined;
+  }
+
+  /** The mapping of Slack channel ID => Slack channel name for connected channels. */
+  public slackChannelMapping?: SlackChannelNameMapping[];
+}
+/**
+ * Tuple for mapping Slack channel IDs to names
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SlackChannelNameMappingFragment response data
+ */
+export class SlackChannelNameMapping extends Request {
+  public constructor(request: LinearRequest, data: L.SlackChannelNameMappingFragment) {
+    super(request);
+    this.id = data.id;
+    this.name = data.name;
+  }
+
+  /** The Slack channel ID. */
+  public id: string;
+  /** The Slack channel name. */
+  public name: string;
 }
 /**
  * Slack notification specific settings.
@@ -9857,6 +9912,37 @@ export class ImportFileUploadMutation extends Request {
 }
 
 /**
+ * A fetchable IntegrationAsksConnectChannel Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationAsksConnectChannelMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationAsksConnectChannel mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationAsksConnectChannel
+   * @param redirectUri - required redirectUri to pass to integrationAsksConnectChannel
+   * @returns parsed response from IntegrationAsksConnectChannelMutation
+   */
+  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<
+      L.IntegrationAsksConnectChannelMutation,
+      L.IntegrationAsksConnectChannelMutationVariables
+    >(L.IntegrationAsksConnectChannelDocument, {
+      code,
+      redirectUri,
+    });
+    const data = response.integrationAsksConnectChannel;
+
+    return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable DeleteIntegration Mutation
  *
  * @param request - function to call the graphql client
@@ -12060,13 +12146,18 @@ export class ArchiveProjectMutation extends Request {
    * Call the ArchiveProject mutation and return a ProjectArchivePayload
    *
    * @param id - required id to pass to archiveProject
+   * @param variables - variables without 'id' to pass into the ArchiveProjectMutation
    * @returns parsed response from ArchiveProjectMutation
    */
-  public async fetch(id: string): LinearFetch<ProjectArchivePayload> {
+  public async fetch(
+    id: string,
+    variables?: Omit<L.ArchiveProjectMutationVariables, "id">
+  ): LinearFetch<ProjectArchivePayload> {
     const response = await this._request<L.ArchiveProjectMutation, L.ArchiveProjectMutationVariables>(
       L.ArchiveProjectDocument,
       {
         id,
+        ...variables,
       }
     );
     const data = response.projectArchive;
@@ -12115,12 +12206,12 @@ export class DeleteProjectMutation extends Request {
   }
 
   /**
-   * Call the DeleteProject mutation and return a DeletePayload
+   * Call the DeleteProject mutation and return a ProjectArchivePayload
    *
    * @param id - required id to pass to deleteProject
    * @returns parsed response from DeleteProjectMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): LinearFetch<ProjectArchivePayload> {
     const response = await this._request<L.DeleteProjectMutation, L.DeleteProjectMutationVariables>(
       L.DeleteProjectDocument,
       {
@@ -12129,7 +12220,7 @@ export class DeleteProjectMutation extends Request {
     );
     const data = response.projectDelete;
 
-    return new DeletePayload(this._request, data);
+    return new ProjectArchivePayload(this._request, data);
   }
 }
 
@@ -20453,6 +20544,16 @@ export class LinearSdk extends Request {
     return new ImportFileUploadMutation(this._request).fetch(contentType, filename, size, variables);
   }
   /**
+   * Connect a Slack channel to Asks.
+   *
+   * @param code - required code to pass to integrationAsksConnectChannel
+   * @param redirectUri - required redirectUri to pass to integrationAsksConnectChannel
+   * @returns IntegrationPayload
+   */
+  public integrationAsksConnectChannel(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationAsksConnectChannelMutation(this._request).fetch(code, redirectUri);
+  }
+  /**
    * Deletes an integration.
    *
    * @param id - required id to pass to deleteIntegration
@@ -21231,10 +21332,14 @@ export class LinearSdk extends Request {
    * Archives a project.
    *
    * @param id - required id to pass to archiveProject
+   * @param variables - variables without 'id' to pass into the ArchiveProjectMutation
    * @returns ProjectArchivePayload
    */
-  public archiveProject(id: string): LinearFetch<ProjectArchivePayload> {
-    return new ArchiveProjectMutation(this._request).fetch(id);
+  public archiveProject(
+    id: string,
+    variables?: Omit<L.ArchiveProjectMutationVariables, "id">
+  ): LinearFetch<ProjectArchivePayload> {
+    return new ArchiveProjectMutation(this._request).fetch(id, variables);
   }
   /**
    * Creates a new project.
@@ -21246,12 +21351,12 @@ export class LinearSdk extends Request {
     return new CreateProjectMutation(this._request).fetch(input);
   }
   /**
-   * Deletes a project. All issues will be disassociated from the deleted project.
+   * Deletes (trashes) a project.
    *
    * @param id - required id to pass to deleteProject
-   * @returns DeletePayload
+   * @returns ProjectArchivePayload
    */
-  public deleteProject(id: string): LinearFetch<DeletePayload> {
+  public deleteProject(id: string): LinearFetch<ProjectArchivePayload> {
     return new DeleteProjectMutation(this._request).fetch(id);
   }
   /**

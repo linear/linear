@@ -4250,12 +4250,16 @@
           },
           {
             "name": "owner",
-            "description": "[ALPHA] The user who owns the custom view.",
+            "description": "The user who owns the custom view.",
             "args": [],
             "type": {
-              "kind": "OBJECT",
-              "name": "User",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -11707,6 +11711,18 @@
         "description": "The integration resource's settings",
         "fields": [
           {
+            "name": "slackAsks",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "SlackAsksSettings",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slackPost",
             "description": null,
             "args": [],
@@ -11862,6 +11878,18 @@
         "description": null,
         "fields": null,
         "inputFields": [
+          {
+            "name": "slackAsks",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "SlackAsksSettingsInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "slackPost",
             "description": null,
@@ -12107,6 +12135,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "foreignEntityId",
+            "description": "ID of the foreign entity in the external integration this template is for, e.g., Slack channel ID.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -12240,6 +12280,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "foreignEntityId",
+            "description": "The foreign identifier in the other service.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -24778,6 +24830,55 @@
             "deprecationReason": null
           },
           {
+            "name": "integrationAsksConnectChannel",
+            "description": "Connect a Slack channel to Asks.",
+            "args": [
+              {
+                "name": "redirectUri",
+                "description": "The Slack OAuth redirect URI.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "code",
+                "description": "The Slack OAuth code.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationSlackPost",
             "description": "Slack webhook integration.",
             "args": [
@@ -28073,11 +28174,11 @@
           },
           {
             "name": "projectDelete",
-            "description": "Deletes a project. All issues will be disassociated from the deleted project.",
+            "description": "Deletes (trashes) a project.",
             "args": [
               {
                 "name": "id",
-                "description": "The identifier of the project to delete. Also the identifier from the URL is accepted.",
+                "description": "The identifier of the project to delete.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -28097,7 +28198,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "DeletePayload",
+                "name": "ProjectArchivePayload",
                 "ofType": null
               }
             },
@@ -28108,6 +28209,18 @@
             "name": "projectArchive",
             "description": "Archives a project.",
             "args": [
+              {
+                "name": "trash",
+                "description": "Whether to trash the project",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "id",
                 "description": "The identifier of the project to archive. Also the identifier from the URL is accepted.",
@@ -36451,6 +36564,22 @@
             "deprecationReason": null
           },
           {
+            "name": "metadata",
+            "description": "Extra metadata associated with the organization invite.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "inviter",
             "description": "The user who created the invitation.",
             "args": [],
@@ -36654,6 +36783,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "metadata",
+            "description": "[INTERNAL] Optional metadata about the invite",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -37807,6 +37948,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "trashed",
+            "description": "A flag that indicates whether the project is in the trash bin.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "isDeprecated": false,
@@ -41804,6 +41957,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "trashed",
+            "description": "A flag that indicates whether the project is in the trash bin.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "isDeprecated": false,
@@ -48811,6 +48976,18 @@
                 "defaultValue": null,
                 "isDeprecated": false,
                 "deprecationReason": null
+              },
+              {
+                "name": "teamId",
+                "description": "UUID of a team to use as a boost",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
               }
             ],
             "type": {
@@ -48912,6 +49089,18 @@
                     "name": "String",
                     "ofType": null
                   }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "teamId",
+                "description": "UUID of a team to use as a boost",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -49029,6 +49218,18 @@
                     "name": "String",
                     "ofType": null
                   }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "teamId",
+                "description": "UUID of a team to use as a boost",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -52311,6 +52512,154 @@
               "kind": "SCALAR",
               "name": "Boolean",
               "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SlackAsksSettings",
+        "description": "Slack Asks specific settings.",
+        "fields": [
+          {
+            "name": "slackChannelMapping",
+            "description": "The mapping of Slack channel ID => Slack channel name for connected channels.",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "SlackChannelNameMapping",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "SlackAsksSettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "slackChannelMapping",
+            "description": "The mapping of Slack channel ID => Slack channel name for connected channels.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "SlackChannelNameMappingInput",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SlackChannelNameMapping",
+        "description": "Tuple for mapping Slack channel IDs to names",
+        "fields": [
+          {
+            "name": "id",
+            "description": "The Slack channel ID.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The Slack channel name.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "SlackChannelNameMappingInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "The Slack channel ID.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The Slack channel name.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "defaultValue": null,
             "isDeprecated": false,

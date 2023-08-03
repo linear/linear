@@ -1129,9 +1129,9 @@ type CustomView implements Node {
   """
   organization: Organization!
   """
-  [ALPHA] The user who owns the custom view.
+  The user who owns the custom view.
   """
-  owner: User
+  owner: User!
   """
   [ALPHA] The filter applied to projects in the custom view.
   """
@@ -3092,6 +3092,7 @@ type IntegrationSettings {
   notion: NotionSettings
   pagerDuty: PagerDutySettings
   sentry: SentrySettings
+  slackAsks: SlackAsksSettings
   slackOrgProjectUpdatesPost: SlackPostSettings
   slackPost: SlackPostSettings
   slackProjectPost: SlackPostSettings
@@ -3107,6 +3108,7 @@ input IntegrationSettingsInput {
   notion: NotionSettingsInput
   pagerDuty: PagerDutyInput
   sentry: SentrySettingsInput
+  slackAsks: SlackAsksSettingsInput
   slackOrgProjectUpdatesPost: SlackPostSettingsInput
   slackPost: SlackPostSettingsInput
   slackProjectPost: SlackPostSettingsInput
@@ -3125,6 +3127,10 @@ type IntegrationTemplate implements Node {
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  """
+  ID of the foreign entity in the external integration this template is for, e.g., Slack channel ID.
+  """
+  foreignEntityId: String
   """
   The unique identifier of the entity.
   """
@@ -3152,6 +3158,10 @@ type IntegrationTemplateConnection {
 }
 
 input IntegrationTemplateCreateInput {
+  """
+  The foreign identifier in the other service.
+  """
+  foreignEntityId: String
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -6576,6 +6586,19 @@ type Mutation {
     size: Int!
   ): UploadPayload!
   """
+  Connect a Slack channel to Asks.
+  """
+  integrationAsksConnectChannel(
+    """
+    The Slack OAuth code.
+    """
+    code: String!
+    """
+    The Slack OAuth redirect URI.
+    """
+    redirectUri: String!
+  ): IntegrationPayload!
+  """
   Deletes an integration.
   """
   integrationDelete(
@@ -7575,6 +7598,10 @@ type Mutation {
     The identifier of the project to archive. Also the identifier from the URL is accepted.
     """
     id: String!
+    """
+    Whether to trash the project
+    """
+    trash: Boolean
   ): ProjectArchivePayload! @deprecated(reason: "Deprecated in favor of projectDelete.")
   """
   Creates a new project.
@@ -7586,14 +7613,14 @@ type Mutation {
     input: ProjectCreateInput!
   ): ProjectPayload!
   """
-  Deletes a project. All issues will be disassociated from the deleted project.
+  Deletes (trashes) a project.
   """
   projectDelete(
     """
-    The identifier of the project to delete. Also the identifier from the URL is accepted.
+    The identifier of the project to delete.
     """
     id: String!
-  ): DeletePayload!
+  ): ProjectArchivePayload!
   """
   Creates a new project link.
   """
@@ -9961,6 +9988,10 @@ type OrganizationInvite implements Node {
   """
   inviter: User!
   """
+  Extra metadata associated with the organization invite.
+  """
+  metadata: JSONObject!
+  """
   The organization that the invite is associated with.
   """
   organization: Organization!
@@ -9995,6 +10026,10 @@ input OrganizationInviteCreateInput {
   The message to send to the invitee.
   """
   message: String
+  """
+  [INTERNAL] Optional metadata about the invite
+  """
+  metadata: JSONObject
   """
   What user role the invite should grant.
   """
@@ -10589,6 +10624,10 @@ type Project implements Node {
     """
     orderBy: PaginationOrderBy
   ): TeamConnection!
+  """
+  A flag that indicates whether the project is in the trash bin.
+  """
+  trashed: Boolean
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -11703,6 +11742,10 @@ type ProjectSearchResult implements Node {
     """
     orderBy: PaginationOrderBy
   ): TeamConnection!
+  """
+  A flag that indicates whether the project is in the trash bin.
+  """
+  trashed: Boolean
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -13340,6 +13383,10 @@ type Query {
     """
     orderBy: PaginationOrderBy
     """
+    UUID of a team to use as a boost
+    """
+    teamId: String
+    """
     Search string to look for.
     """
     term: String!
@@ -13377,6 +13424,10 @@ type Query {
     """
     orderBy: PaginationOrderBy
     """
+    UUID of a team to use as a boost
+    """
+    teamId: String
+    """
     Search string to look for.
     """
     term: String!
@@ -13409,6 +13460,10 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    UUID of a team to use as a boost
+    """
+    teamId: String
     """
     Search string to look for.
     """
@@ -14290,6 +14345,48 @@ input SlaStatusComparator {
   Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
   """
   null: Boolean
+}
+
+"""
+Slack Asks specific settings.
+"""
+type SlackAsksSettings {
+  """
+  The mapping of Slack channel ID => Slack channel name for connected channels.
+  """
+  slackChannelMapping: [SlackChannelNameMapping!]
+}
+
+input SlackAsksSettingsInput {
+  """
+  The mapping of Slack channel ID => Slack channel name for connected channels.
+  """
+  slackChannelMapping: [SlackChannelNameMappingInput!]
+}
+
+"""
+Tuple for mapping Slack channel IDs to names
+"""
+type SlackChannelNameMapping {
+  """
+  The Slack channel ID.
+  """
+  id: String!
+  """
+  The Slack channel name.
+  """
+  name: String!
+}
+
+input SlackChannelNameMappingInput {
+  """
+  The Slack channel ID.
+  """
+  id: String!
+  """
+  The Slack channel name.
+  """
+  name: String!
 }
 
 """

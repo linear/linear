@@ -704,8 +704,8 @@ export type CustomView = Node & {
   name: Scalars["String"];
   /** The organization of the custom view. */
   organization: Organization;
-  /** [ALPHA] The user who owns the custom view. */
-  owner?: Maybe<User>;
+  /** The user who owns the custom view. */
+  owner: User;
   /** [ALPHA] The filter applied to projects in the custom view. */
   projectFilterData?: Maybe<Scalars["JSONObject"]>;
   /** Whether the custom view is shared with everyone in the organization. */
@@ -1913,6 +1913,7 @@ export type IntegrationSettings = {
   notion?: Maybe<NotionSettings>;
   pagerDuty?: Maybe<PagerDutySettings>;
   sentry?: Maybe<SentrySettings>;
+  slackAsks?: Maybe<SlackAsksSettings>;
   slackOrgProjectUpdatesPost?: Maybe<SlackPostSettings>;
   slackPost?: Maybe<SlackPostSettings>;
   slackProjectPost?: Maybe<SlackPostSettings>;
@@ -1928,6 +1929,7 @@ export type IntegrationSettingsInput = {
   notion?: Maybe<NotionSettingsInput>;
   pagerDuty?: Maybe<PagerDutyInput>;
   sentry?: Maybe<SentrySettingsInput>;
+  slackAsks?: Maybe<SlackAsksSettingsInput>;
   slackOrgProjectUpdatesPost?: Maybe<SlackPostSettingsInput>;
   slackPost?: Maybe<SlackPostSettingsInput>;
   slackProjectPost?: Maybe<SlackPostSettingsInput>;
@@ -1941,6 +1943,8 @@ export type IntegrationTemplate = Node & {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** ID of the foreign entity in the external integration this template is for, e.g., Slack channel ID. */
+  foreignEntityId?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The integration that the template is associated with. */
@@ -1963,6 +1967,8 @@ export type IntegrationTemplateConnection = {
 };
 
 export type IntegrationTemplateCreateInput = {
+  /** The foreign identifier in the other service. */
+  foreignEntityId?: Maybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
   /** The identifier of the integration. */
@@ -3626,6 +3632,8 @@ export type Mutation = {
   imageUploadFromUrl: ImageUploadFromUrlPayload;
   /** XHR request payload to upload a file for import, directly to Linear's cloud storage. */
   importFileUpload: UploadPayload;
+  /** Connect a Slack channel to Asks. */
+  integrationAsksConnectChannel: IntegrationPayload;
   /** Deletes an integration. */
   integrationDelete: DeletePayload;
   /** Integrates the organization with Discord. */
@@ -3795,8 +3803,8 @@ export type Mutation = {
   projectArchive: ProjectArchivePayload;
   /** Creates a new project. */
   projectCreate: ProjectPayload;
-  /** Deletes a project. All issues will be disassociated from the deleted project. */
-  projectDelete: DeletePayload;
+  /** Deletes (trashes) a project. */
+  projectDelete: ProjectArchivePayload;
   /** Creates a new project link. */
   projectLinkCreate: ProjectLinkPayload;
   /** Deletes a project link. */
@@ -4131,6 +4139,11 @@ export type MutationImportFileUploadArgs = {
   filename: Scalars["String"];
   metaData?: Maybe<Scalars["JSON"]>;
   size: Scalars["Int"];
+};
+
+export type MutationIntegrationAsksConnectChannelArgs = {
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
 };
 
 export type MutationIntegrationDeleteArgs = {
@@ -4500,6 +4513,7 @@ export type MutationOrganizationUpdateArgs = {
 
 export type MutationProjectArchiveArgs = {
   id: Scalars["String"];
+  trash?: Maybe<Scalars["Boolean"]>;
 };
 
 export type MutationProjectCreateArgs = {
@@ -5747,6 +5761,8 @@ export type OrganizationInvite = Node & {
   invitee?: Maybe<User>;
   /** The user who created the invitation. */
   inviter: User;
+  /** Extra metadata associated with the organization invite. */
+  metadata: Scalars["JSONObject"];
   /** The organization that the invite is associated with. */
   organization: Organization;
   /** The user role that the invitee will receive upon accepting the invite. */
@@ -5773,6 +5789,8 @@ export type OrganizationInviteCreateInput = {
   id?: Maybe<Scalars["String"]>;
   /** The message to send to the invitee. */
   message?: Maybe<Scalars["String"]>;
+  /** [INTERNAL] Optional metadata about the invite */
+  metadata?: Maybe<Scalars["JSONObject"]>;
   /** What user role the invite should grant. */
   role?: Maybe<UserRoleType>;
   /** The teams that the user has been invited to. */
@@ -6012,6 +6030,8 @@ export type Project = Node & {
   targetDate?: Maybe<Scalars["TimelessDate"]>;
   /** Teams associated with this project. */
   teams: TeamConnection;
+  /** A flag that indicates whether the project is in the trash bin. */
+  trashed?: Maybe<Scalars["Boolean"]>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -6628,6 +6648,8 @@ export type ProjectSearchResult = Node & {
   targetDate?: Maybe<Scalars["TimelessDate"]>;
   /** Teams associated with this project. */
   teams: TeamConnection;
+  /** A flag that indicates whether the project is in the trash bin. */
+  trashed?: Maybe<Scalars["Boolean"]>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -7634,6 +7656,7 @@ export type QuerySearchDocumentsArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 };
 
@@ -7645,6 +7668,7 @@ export type QuerySearchIssuesArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 };
 
@@ -7655,6 +7679,7 @@ export type QuerySearchProjectsArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 };
 
@@ -8133,6 +8158,34 @@ export type SlaStatusComparator = {
   nin?: Maybe<Array<SlaStatus>>;
   /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
   null?: Maybe<Scalars["Boolean"]>;
+};
+
+/** Slack Asks specific settings. */
+export type SlackAsksSettings = {
+  __typename?: "SlackAsksSettings";
+  /** The mapping of Slack channel ID => Slack channel name for connected channels. */
+  slackChannelMapping?: Maybe<Array<SlackChannelNameMapping>>;
+};
+
+export type SlackAsksSettingsInput = {
+  /** The mapping of Slack channel ID => Slack channel name for connected channels. */
+  slackChannelMapping?: Maybe<Array<SlackChannelNameMappingInput>>;
+};
+
+/** Tuple for mapping Slack channel IDs to names */
+export type SlackChannelNameMapping = {
+  __typename?: "SlackChannelNameMapping";
+  /** The Slack channel ID. */
+  id: Scalars["String"];
+  /** The Slack channel name. */
+  name: Scalars["String"];
+};
+
+export type SlackChannelNameMappingInput = {
+  /** The Slack channel ID. */
+  id: Scalars["String"];
+  /** The Slack channel name. */
+  name: Scalars["String"];
 };
 
 /** Slack notification specific settings. */
@@ -10100,7 +10153,11 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
   | "createdAt"
   | "id"
   | "shared"
-> & { team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>; creator: { __typename?: "User" } & Pick<User, "id"> };
+> & {
+    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+    creator: { __typename?: "User" } & Pick<User, "id">;
+    owner: { __typename?: "User" } & Pick<User, "id">;
+  };
 
 export type CycleNotificationSubscriptionFragment = { __typename: "CycleNotificationSubscription" } & Pick<
   CycleNotificationSubscription,
@@ -10305,6 +10362,7 @@ export type ProjectNotificationFragment = { __typename: "ProjectNotification" } 
 
 export type ProjectFragment = { __typename: "Project" } & Pick<
   Project,
+  | "trashed"
   | "url"
   | "targetDate"
   | "startDate"
@@ -10577,7 +10635,7 @@ export type IntegrationFragment = { __typename: "Integration" } & Pick<
 
 export type OrganizationInviteFragment = { __typename: "OrganizationInvite" } & Pick<
   OrganizationInvite,
-  "external" | "email" | "updatedAt" | "archivedAt" | "createdAt" | "acceptedAt" | "expiresAt" | "id"
+  "metadata" | "external" | "email" | "updatedAt" | "archivedAt" | "createdAt" | "acceptedAt" | "expiresAt" | "id"
 > & {
     inviter: { __typename?: "User" } & Pick<User, "id">;
     invitee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -10845,7 +10903,7 @@ export type RoadmapToProjectFragment = { __typename: "RoadmapToProject" } & Pick
 
 export type IntegrationTemplateFragment = { __typename: "IntegrationTemplate" } & Pick<
   IntegrationTemplate,
-  "updatedAt" | "archivedAt" | "createdAt" | "id"
+  "foreignEntityId" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & {
     integration: { __typename?: "Integration" } & Pick<Integration, "id">;
     template: { __typename?: "Template" } & Pick<Template, "id">;
@@ -11029,6 +11087,10 @@ export type OauthClientApprovalFragment = { __typename: "OauthClientApproval" } 
 
 export type SentrySettingsFragment = { __typename: "SentrySettings" } & Pick<SentrySettings, "organizationSlug">;
 
+export type SlackAsksSettingsFragment = { __typename: "SlackAsksSettings" } & {
+  slackChannelMapping?: Maybe<Array<{ __typename?: "SlackChannelNameMapping" } & SlackChannelNameMappingFragment>>;
+};
+
 export type SlackPostSettingsFragment = { __typename: "SlackPostSettings" } & Pick<
   SlackPostSettings,
   "channel" | "channelId" | "configurationUrl"
@@ -11064,6 +11126,7 @@ export type IntegrationSettingsFragment = { __typename: "IntegrationSettings" } 
   notion?: Maybe<{ __typename?: "NotionSettings" } & NotionSettingsFragment>;
   pagerDuty?: Maybe<{ __typename?: "PagerDutySettings" } & PagerDutySettingsFragment>;
   sentry?: Maybe<{ __typename?: "SentrySettings" } & SentrySettingsFragment>;
+  slackAsks?: Maybe<{ __typename?: "SlackAsksSettings" } & SlackAsksSettingsFragment>;
   slackOrgProjectUpdatesPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
   slackPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
   slackProjectPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
@@ -11110,6 +11173,11 @@ export type JiraLinearMappingFragment = { __typename: "JiraLinearMapping" } & Pi
 export type PagerDutyScheduleMappingFragment = { __typename: "PagerDutyScheduleMapping" } & Pick<
   PagerDutyScheduleMapping,
   "scheduleId" | "scheduleName"
+>;
+
+export type SlackChannelNameMappingFragment = { __typename: "SlackChannelNameMapping" } & Pick<
+  SlackChannelNameMapping,
+  "id" | "name"
 >;
 
 export type FavoriteFragment = { __typename: "Favorite" } & Pick<
@@ -11897,6 +11965,7 @@ export type ProjectSearchPayloadFragment = { __typename: "ProjectSearchPayload" 
 
 export type ProjectSearchResultFragment = { __typename: "ProjectSearchResult" } & Pick<
   ProjectSearchResult,
+  | "trashed"
   | "metadata"
   | "url"
   | "targetDate"
@@ -12537,6 +12606,15 @@ export type ImportFileUploadMutationVariables = Exact<{
 
 export type ImportFileUploadMutation = { __typename?: "Mutation" } & {
   importFileUpload: { __typename?: "UploadPayload" } & UploadPayloadFragment;
+};
+
+export type IntegrationAsksConnectChannelMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationAsksConnectChannelMutation = { __typename?: "Mutation" } & {
+  integrationAsksConnectChannel: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
 export type DeleteIntegrationMutationVariables = Exact<{
@@ -13185,6 +13263,7 @@ export type UpdateOrganizationMutation = { __typename?: "Mutation" } & {
 
 export type ArchiveProjectMutationVariables = Exact<{
   id: Scalars["String"];
+  trash?: Maybe<Scalars["Boolean"]>;
 }>;
 
 export type ArchiveProjectMutation = { __typename?: "Mutation" } & {
@@ -13204,7 +13283,7 @@ export type DeleteProjectMutationVariables = Exact<{
 }>;
 
 export type DeleteProjectMutation = { __typename?: "Mutation" } & {
-  projectDelete: { __typename?: "DeletePayload" } & DeletePayloadFragment;
+  projectDelete: { __typename?: "ProjectArchivePayload" } & ProjectArchivePayloadFragment;
 };
 
 export type CreateProjectLinkMutationVariables = Exact<{
@@ -15163,6 +15242,7 @@ export type SearchDocumentsQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
 
@@ -15177,6 +15257,7 @@ export type SearchDocuments_ArchivePayloadQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
 
@@ -15194,6 +15275,7 @@ export type SearchIssuesQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
 
@@ -15209,6 +15291,7 @@ export type SearchIssues_ArchivePayloadQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
 
@@ -15225,6 +15308,7 @@ export type SearchProjectsQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
 
@@ -15239,6 +15323,7 @@ export type SearchProjects_ArchivePayloadQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
 
@@ -17259,6 +17344,49 @@ export const SentrySettingsFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<SentrySettingsFragment, unknown>;
+export const SlackChannelNameMappingFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SlackChannelNameMapping" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SlackChannelNameMapping" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SlackChannelNameMappingFragment, unknown>;
+export const SlackAsksSettingsFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SlackAsksSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SlackAsksSettings" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "slackChannelMapping" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SlackChannelNameMapping" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...SlackChannelNameMappingFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<SlackAsksSettingsFragment, unknown>;
 export const SlackPostSettingsFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -17379,6 +17507,14 @@ export const IntegrationSettingsFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "slackAsks" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SlackAsksSettings" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "slackOrgProjectUpdatesPost" },
             selectionSet: {
               kind: "SelectionSet",
@@ -17420,6 +17556,7 @@ export const IntegrationSettingsFragmentDoc = {
     ...NotionSettingsFragmentDoc.definitions,
     ...PagerDutySettingsFragmentDoc.definitions,
     ...SentrySettingsFragmentDoc.definitions,
+    ...SlackAsksSettingsFragmentDoc.definitions,
     ...SlackPostSettingsFragmentDoc.definitions,
     ...ZendeskSettingsFragmentDoc.definitions,
   ],
@@ -18170,6 +18307,14 @@ export const CustomViewFragmentDoc = {
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "owner" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
@@ -19287,6 +19432,7 @@ export const IntegrationTemplateFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "foreignEntityId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "integration" },
@@ -20876,6 +21022,7 @@ export const OrganizationInviteFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "metadata" } },
           { kind: "Field", name: { kind: "Name", value: "external" } },
           { kind: "Field", name: { kind: "Name", value: "email" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
@@ -21035,6 +21182,7 @@ export const ProjectFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "trashed" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           {
             kind: "Field",
@@ -21379,6 +21527,7 @@ export const ProjectSearchResultFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "trashed" } },
           { kind: "Field", name: { kind: "Name", value: "metadata" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           {
@@ -25194,6 +25343,54 @@ export const ImportFileUploadDocument = {
     ...UploadPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ImportFileUploadMutation, ImportFileUploadMutationVariables>;
+export const IntegrationAsksConnectChannelDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationAsksConnectChannel" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationAsksConnectChannel" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationAsksConnectChannelMutation, IntegrationAsksConnectChannelMutationVariables>;
 export const DeleteIntegrationDocument = {
   kind: "Document",
   definitions: [
@@ -28680,6 +28877,11 @@ export const ArchiveProjectDocument = {
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "trash" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
       ],
       selectionSet: {
         kind: "SelectionSet",
@@ -28692,6 +28894,11 @@ export const ArchiveProjectDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "id" },
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "trash" },
+                value: { kind: "Variable", name: { kind: "Name", value: "trash" } },
               },
             ],
             selectionSet: {
@@ -28775,13 +28982,13 @@ export const DeleteProjectDocument = {
             ],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DeletePayload" } }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectArchivePayload" } }],
             },
           },
         ],
       },
     },
-    ...DeletePayloadFragmentDoc.definitions,
+    ...ProjectArchivePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DeleteProjectMutation, DeleteProjectMutationVariables>;
 export const CreateProjectLinkDocument = {
@@ -40683,6 +40890,11 @@ export const SearchDocumentsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -40723,6 +40935,11 @@ export const SearchDocumentsDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
               {
                 kind: "Argument",
@@ -40781,6 +40998,11 @@ export const SearchDocuments_ArchivePayloadDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -40821,6 +41043,11 @@ export const SearchDocuments_ArchivePayloadDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
               {
                 kind: "Argument",
@@ -40893,6 +41120,11 @@ export const SearchIssuesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -40938,6 +41170,11 @@ export const SearchIssuesDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
               {
                 kind: "Argument",
@@ -41001,6 +41238,11 @@ export const SearchIssues_ArchivePayloadDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -41046,6 +41288,11 @@ export const SearchIssues_ArchivePayloadDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
               {
                 kind: "Argument",
@@ -41113,6 +41360,11 @@ export const SearchProjectsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -41153,6 +41405,11 @@ export const SearchProjectsDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
               {
                 kind: "Argument",
@@ -41211,6 +41468,11 @@ export const SearchProjects_ArchivePayloadDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -41251,6 +41513,11 @@ export const SearchProjects_ArchivePayloadDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
               {
                 kind: "Argument",

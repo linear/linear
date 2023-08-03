@@ -182,6 +182,10 @@ fragment CustomView on CustomView {
   creator {
     id
   }
+  # The user who owns the custom view.
+  owner {
+    id
+  }
   # Whether the custom view is shared with everyone in the organization.
   shared
 }
@@ -644,6 +648,8 @@ fragment ProjectNotification on ProjectNotification {
 # A project.
 fragment Project on Project {
   __typename
+  # A flag that indicates whether the project is in the trash bin.
+  trashed
   # Project URL.
   url
   # Settings for all integrations associated with that project.
@@ -1434,6 +1440,8 @@ fragment Integration on Integration {
 # An invitation to the organization that has been sent via email.
 fragment OrganizationInvite on OrganizationInvite {
   __typename
+  # Extra metadata associated with the organization invite.
+  metadata
   # The invite was sent to external address.
   external
   # The invitees email address.
@@ -2109,6 +2117,8 @@ fragment RoadmapToProject on RoadmapToProject {
 # Join table between templates and integrations
 fragment IntegrationTemplate on IntegrationTemplate {
   __typename
+  # ID of the foreign entity in the external integration this template is for, e.g., Slack channel ID.
+  foreignEntityId
   # The integration that the template is associated with.
   integration {
     id
@@ -2427,6 +2437,15 @@ fragment SentrySettings on SentrySettings {
   organizationSlug
 }
 
+# Slack Asks specific settings.
+fragment SlackAsksSettings on SlackAsksSettings {
+  __typename
+  # The mapping of Slack channel ID => Slack channel name for connected channels.
+  slackChannelMapping {
+    ...SlackChannelNameMapping
+  }
+}
+
 # Slack notification specific settings.
 fragment SlackPostSettings on SlackPostSettings {
   __typename
@@ -2504,6 +2523,9 @@ fragment IntegrationSettings on IntegrationSettings {
   }
   sentry {
     ...SentrySettings
+  }
+  slackAsks {
+    ...SlackAsksSettings
   }
   slackOrgProjectUpdatesPost {
     ...SlackPostSettings
@@ -2608,6 +2630,15 @@ fragment PagerDutyScheduleMapping on PagerDutyScheduleMapping {
   scheduleId
   # The PagerDuty schedule name.
   scheduleName
+}
+
+# Tuple for mapping Slack channel IDs to names
+fragment SlackChannelNameMapping on SlackChannelNameMapping {
+  __typename
+  # The Slack channel ID.
+  id
+  # The Slack channel name.
+  name
 }
 
 # User favorites presented in the sidebar.
@@ -3744,6 +3775,8 @@ fragment ProjectSearchPayload on ProjectSearchPayload {
 
 fragment ProjectSearchResult on ProjectSearchResult {
   __typename
+  # A flag that indicates whether the project is in the trash bin.
+  trashed
   # Metadata related to search result
   metadata
   # Project URL.
@@ -4791,6 +4824,17 @@ mutation importFileUpload(
     ...UploadPayload
   }
 }
+# Connect a Slack channel to Asks.
+mutation integrationAsksConnectChannel(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationAsksConnectChannel(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
 # Deletes an integration.
 mutation deleteIntegration(
   # The identifier of the integration to delete.
@@ -5618,8 +5662,10 @@ mutation updateOrganization(
 mutation archiveProject(
   # The identifier of the project to archive. Also the identifier from the URL is accepted.
   $id: String!
+  # Whether to trash the project
+  $trash: Boolean
 ) {
-  projectArchive(id: $id) {
+  projectArchive(id: $id, trash: $trash) {
     ...ProjectArchivePayload
   }
 }
@@ -5632,13 +5678,13 @@ mutation createProject(
     ...ProjectPayload
   }
 }
-# Deletes a project. All issues will be disassociated from the deleted project.
+# Deletes (trashes) a project.
 mutation deleteProject(
-  # The identifier of the project to delete. Also the identifier from the URL is accepted.
+  # The identifier of the project to delete.
   $id: String!
 ) {
   projectDelete(id: $id) {
-    ...DeletePayload
+    ...ProjectArchivePayload
   }
 }
 # Creates a new project link.
@@ -8708,6 +8754,8 @@ query searchDocuments(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # UUID of a team to use as a boost
+  $teamId: String
   # Search string to look for.
   $term: String!
 ) {
@@ -8718,6 +8766,7 @@ query searchDocuments(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    teamId: $teamId
     term: $term
   ) {
     ...DocumentSearchPayload
@@ -8737,6 +8786,8 @@ query searchDocuments_archivePayload(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # UUID of a team to use as a boost
+  $teamId: String
   # Search string to look for.
   $term: String!
 ) {
@@ -8747,6 +8798,7 @@ query searchDocuments_archivePayload(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    teamId: $teamId
     term: $term
   ) {
     archivePayload {
@@ -8770,6 +8822,8 @@ query searchIssues(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # UUID of a team to use as a boost
+  $teamId: String
   # Search string to look for.
   $term: String!
 ) {
@@ -8781,6 +8835,7 @@ query searchIssues(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    teamId: $teamId
     term: $term
   ) {
     ...IssueSearchPayload
@@ -8802,6 +8857,8 @@ query searchIssues_archivePayload(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # UUID of a team to use as a boost
+  $teamId: String
   # Search string to look for.
   $term: String!
 ) {
@@ -8813,6 +8870,7 @@ query searchIssues_archivePayload(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    teamId: $teamId
     term: $term
   ) {
     archivePayload {
@@ -8834,6 +8892,8 @@ query searchProjects(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # UUID of a team to use as a boost
+  $teamId: String
   # Search string to look for.
   $term: String!
 ) {
@@ -8844,6 +8904,7 @@ query searchProjects(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    teamId: $teamId
     term: $term
   ) {
     ...ProjectSearchPayload
@@ -8863,6 +8924,8 @@ query searchProjects_archivePayload(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # UUID of a team to use as a boost
+  $teamId: String
   # Search string to look for.
   $term: String!
 ) {
@@ -8873,6 +8936,7 @@ query searchProjects_archivePayload(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    teamId: $teamId
     term: $term
   ) {
     archivePayload {
