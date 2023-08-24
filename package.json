@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@changesets/cli": "^2.14.1",
-    "@commitlint/cli": "^11.0.0",
+    "@commitlint/cli": "^17.6.7",
     "@commitlint/config-conventional": "^11.0.0",
     "@graphql-codegen/cli": "^1.19.1",
     "@octokit/core": "^3.2.1",
