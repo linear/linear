@@ -5,6 +5,7 @@ hooks:
   afterOneFileWrite:
     - prettier --write
 config:
+  dedupeFragments: true
   skipComments:
     - "[Internal]"
     - "[INTERNAL]"
