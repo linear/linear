@@ -167,14 +167,25 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
   const teamInfo = await client.team(teamId);
 
-  const issueLabels = await teamInfo?.labels();
+  const teamLabels = await teamInfo?.labels();
+  const workspaceLabels = await (await client.organization).labels();
+  const existingLabels = [...(teamLabels?.nodes ?? []), ...(workspaceLabels?.nodes ?? [])];
   const workflowStates = await teamInfo?.states();
 
   const existingLabelMap = {} as { [name: string]: string };
-  for (const label of issueLabels?.nodes ?? []) {
+  const existingLabelGroupsMap = {} as { [name: string]: string };
+
+  for (const label of existingLabels) {
     const labelName = label.name?.toLowerCase();
-    if (labelName && label.id && !existingLabelMap[labelName]) {
-      existingLabelMap[labelName] = label.id;
+    const children = await label.children();
+    if(children?.nodes?.length > 0) {
+      if (labelName && label.id && !existingLabelGroupsMap[labelName]) {
+        existingLabelGroupsMap[labelName] = label.id;
+      }
+    } else {
+      if (labelName && label.id && !existingLabelMap[labelName]) {
+        existingLabelMap[labelName] = label.id;
+      }
     }
   }
 
@@ -184,8 +195,16 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
   const labelMapping = {} as { [id: string]: string };
   for (const labelId of Object.keys(importData.labels)) {
     const label = importData.labels[labelId];
-    const labelName = _.truncate(label.name.trim(), { length: 20 });
-    let actualLabelId = existingLabelMap[labelName.toLowerCase()];
+    let labelName = _.truncate(label.name.trim(), { length: 20 });
+    let actualLabelId: string | undefined = existingLabelGroupsMap[labelName.toLowerCase()];
+
+    if(actualLabelId) {
+      //This label has matched with an existing group label. We cannot re-use the label as-is.
+      actualLabelId = undefined;
+      labelName = `${labelName} (imported)`;
+    }
+
+    actualLabelId = existingLabelMap[labelName.toLowerCase()];
 
     if (!actualLabelId) {
       const labelResponse = await client.createIssueLabel({
