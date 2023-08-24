@@ -178,7 +178,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
   for (const label of existingLabels) {
     const labelName = label.name?.toLowerCase();
     const children = await label.children();
-    if(children?.nodes?.length > 0) {
+    if (children?.nodes?.length > 0) {
       if (labelName && label.id && !existingLabelGroupsMap[labelName]) {
         existingLabelGroupsMap[labelName] = label.id;
       }
@@ -196,14 +196,17 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
   for (const labelId of Object.keys(importData.labels)) {
     const label = importData.labels[labelId];
     let labelName = _.truncate(label.name.trim(), { length: 20 });
+
+    // Check if this label matches with an existing group label
     let actualLabelId: string | undefined = existingLabelGroupsMap[labelName.toLowerCase()];
 
-    if(actualLabelId) {
-      //This label has matched with an existing group label. We cannot re-use the label as-is.
+    if (actualLabelId) {
+      // This label has matched with an existing group label. We cannot re-use the label as-is, it will be renamed.
       actualLabelId = undefined;
       labelName = `${labelName} (imported)`;
     }
 
+    // Check if this label matches with an existing label
     actualLabelId = existingLabelMap[labelName.toLowerCase()];
 
     if (!actualLabelId) {
