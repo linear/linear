@@ -11,6 +11,7 @@ config:
   skipFields:
     - integrationResource
     - integrationResources
+  dedupeFragments: true
 generates:
   src/_generated_documents.graphql:
     plugins:

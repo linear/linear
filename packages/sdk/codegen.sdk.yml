@@ -6,6 +6,7 @@ hooks:
     - prettier --write
 config:
   documentFile: ./_generated_documents
+  dedupeFragments: true
   skipComments:
     - "[Internal]"
     - "[INTERNAL]"
