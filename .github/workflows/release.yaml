@@ -6,15 +6,16 @@ on:
       - master
   workflow_dispatch:
 
-permissions:
-  contents: write
-  checks: write
-  pull-requests: write
-
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+      checks: write
+      pull-requests: write
+      statuses: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
