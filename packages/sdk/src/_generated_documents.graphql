@@ -13,6 +13,22 @@ fragment Entity on Entity {
   id
 }
 
+# A bot actor is an actor that is not a user, but an application or integration.
+fragment ActorBot on ActorBot {
+  __typename
+  # A url pointing to the avatar representing this bot.
+  avatarUrl
+  # The display name of the bot.
+  name
+  # The display name of the external user on behalf of which the bot acted.
+  userDisplayName
+  # The sub type of the bot.
+  subType
+  # The type of bot.
+  type
+  id
+}
+
 # A comment associated with an issue.
 fragment Comment on Comment {
   __typename
@@ -20,6 +36,10 @@ fragment Comment on Comment {
   url
   # Emoji reaction summary, grouped by emoji type
   reactionData
+  # The bot that created the comment
+  botActor {
+    ...ActorBot
+  }
   # The comment content as a Prosemirror document.
   bodyData
   # The comment content in markdown format.
@@ -147,6 +167,8 @@ fragment CustomViewNotificationSubscription on CustomViewNotificationSubscriptio
   user {
     id
   }
+  # Whether the subscription is active or not
+  active
 }
 
 # A custom view that has been saved by a user.
@@ -180,6 +202,10 @@ fragment CustomView on CustomView {
   id
   # The user who created the custom view.
   creator {
+    id
+  }
+  # The user who owns the custom view.
+  owner {
     id
   }
   # Whether the custom view is shared with everyone in the organization.
@@ -229,6 +255,8 @@ fragment CycleNotificationSubscription on CycleNotificationSubscription {
   user {
     id
   }
+  # Whether the subscription is active or not
+  active
 }
 
 # A document content for a project.
@@ -238,6 +266,8 @@ fragment DocumentContent on DocumentContent {
   contentData
   # The document content in markdown format.
   content
+  # The document content state as a base64 encoded string.
+  contentState
   # The issue that the document is associated with.
   issue {
     id
@@ -246,6 +276,10 @@ fragment DocumentContent on DocumentContent {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The project that the document is associated with.
+  project {
+    id
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -479,6 +513,8 @@ fragment LabelNotificationSubscription on LabelNotificationSubscription {
   user {
     id
   }
+  # Whether the subscription is active or not
+  active
 }
 
 # A milestone for a project.
@@ -513,6 +549,10 @@ fragment Notification on Notification {
   __typename
   # Notification type
   type
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -597,6 +637,8 @@ fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
   user {
     id
   }
+  # Whether the subscription is active or not
+  active
 }
 
 # A project related notification
@@ -604,6 +646,10 @@ fragment ProjectNotification on ProjectNotification {
   __typename
   # Notification type
   type
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -644,6 +690,8 @@ fragment ProjectNotification on ProjectNotification {
 # A project.
 fragment Project on Project {
   __typename
+  # A flag that indicates whether the project is in the trash bin.
+  trashed
   # Project URL.
   url
   # Settings for all integrations associated with that project.
@@ -680,6 +728,8 @@ fragment Project on Project {
   }
   # The project's color.
   color
+  # The project's content in markdown format.
+  content
   # The project's description.
   description
   # The project's name.
@@ -754,6 +804,10 @@ fragment IssueHistory on IssueHistory {
   addedLabelIds
   # ID's of labels that were removed.
   removedLabelIds
+  # The bot that performed the action
+  botActor {
+    ...ActorBot
+  }
   # The id of linked attachment.
   attachmentId
   # The id of new cycle of the issue.
@@ -951,11 +1005,7 @@ fragment Roadmap on Roadmap {
 # A schedule for a team's first responder.
 fragment FirstResponderSchedule on FirstResponderSchedule {
   __typename
-  # The current schedule and available schedules.
-  scheduleData
-  # The id of the integration schedule used for scheduling.
-  integrationScheduleId
-  # The integration used for scheduling.
+  # The integration used for time scheduling.
   integration {
     id
   }
@@ -963,6 +1013,8 @@ fragment FirstResponderSchedule on FirstResponderSchedule {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The schedule information.
+  scheduleData
   # The team to which the schedule belongs to.
   team {
     id
@@ -1092,6 +1144,8 @@ fragment TeamNotificationSubscription on TeamNotificationSubscription {
   user {
     id
   }
+  # Whether the subscription is active or not
+  active
 }
 
 # A template object used for creating entities faster.
@@ -1134,6 +1188,8 @@ fragment ProjectUpdate on ProjectUpdate {
   __typename
   # The URL to the project update.
   url
+  # The diff between the current update and the previous one.
+  diff
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -1224,6 +1280,8 @@ fragment UserNotificationSubscription on UserNotificationSubscription {
   subscriber {
     id
   }
+  # Whether the subscription is active or not
+  active
 }
 
 # A user that has access to the the resources of an organization.
@@ -1434,6 +1492,8 @@ fragment Integration on Integration {
 # An invitation to the organization that has been sent via email.
 fragment OrganizationInvite on OrganizationInvite {
   __typename
+  # Extra metadata associated with the organization invite.
+  metadata
   # The invite was sent to external address.
   external
   # The invitees email address.
@@ -1469,6 +1529,10 @@ fragment IssueNotification on IssueNotification {
   reactionEmoji
   # Notification type
   type
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
   # The comment related to the notification.
   comment {
     id
@@ -1621,6 +1685,10 @@ fragment OauthClientApprovalNotification on OauthClientApprovalNotification {
   # The OAuth client approval request related to the notification.
   oauthClientApproval {
     ...OauthClientApproval
+  }
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
   }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -1789,6 +1857,10 @@ fragment Team on Team {
   }
   # The workflow state into which issues are moved when a PR has been opened.
   startWorkflowState {
+    id
+  }
+  # The workflow state into which issues are moved when a PR is ready to be merged.
+  mergeableWorkflowState {
     id
   }
   # The workflow state into which issues are moved when a review has been requested for the PR.
@@ -2109,6 +2181,8 @@ fragment RoadmapToProject on RoadmapToProject {
 # Join table between templates and integrations
 fragment IntegrationTemplate on IntegrationTemplate {
   __typename
+  # ID of the foreign entity in the external integration this template is for, e.g., Slack channel ID.
+  foreignEntityId
   # The integration that the template is associated with.
   integration {
     id
@@ -2182,6 +2256,8 @@ fragment GitHubSettings on GitHubSettings {
   orgLogin
   # The avatar URL for the GitHub organization
   orgAvatarUrl
+  # The names of the repositories connected for the GitHub integration
+  repositories
 }
 
 # Notification subscriptions for models.
@@ -2225,6 +2301,8 @@ fragment NotificationSubscription on NotificationSubscription {
   user {
     id
   }
+  # Whether the subscription is active or not
+  active
 }
 
 # Notion specific settings.
@@ -2427,6 +2505,15 @@ fragment SentrySettings on SentrySettings {
   organizationSlug
 }
 
+# Slack Asks specific settings.
+fragment SlackAsksSettings on SlackAsksSettings {
+  __typename
+  # The mapping of Slack channel ID => Slack channel name for connected channels.
+  slackChannelMapping {
+    ...SlackChannelNameMapping
+  }
+}
+
 # Slack notification specific settings.
 fragment SlackPostSettings on SlackPostSettings {
   __typename
@@ -2504,6 +2591,9 @@ fragment IntegrationSettings on IntegrationSettings {
   }
   sentry {
     ...SentrySettings
+  }
+  slackAsks {
+    ...SlackAsksSettings
   }
   slackOrgProjectUpdatesPost {
     ...SlackPostSettings
@@ -2608,6 +2698,17 @@ fragment PagerDutyScheduleMapping on PagerDutyScheduleMapping {
   scheduleId
   # The PagerDuty schedule name.
   scheduleName
+}
+
+# Tuple for mapping Slack channel IDs to names
+fragment SlackChannelNameMapping on SlackChannelNameMapping {
+  __typename
+  # The Slack channel ID.
+  id
+  # The Slack channel name.
+  name
+  # Whether or not the Slack channel is private
+  isPrivate
 }
 
 # User favorites presented in the sidebar.
@@ -2769,6 +2870,22 @@ fragment ApiKeyPayload on ApiKeyPayload {
   }
   # The identifier of the last sync operation.
   lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment AsksChannelConnectPayload on AsksChannelConnectPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The integration that was created or updated.
+  integration {
+    id
+  }
+  # The new Asks Slack channel mapping for the connected channel.
+  mapping {
+    ...SlackChannelNameMapping
+  }
   # Whether the operation was successful.
   success
 }
@@ -3744,6 +3861,8 @@ fragment ProjectSearchPayload on ProjectSearchPayload {
 
 fragment ProjectSearchResult on ProjectSearchResult {
   __typename
+  # A flag that indicates whether the project is in the trash bin.
+  trashed
   # Metadata related to search result
   metadata
   # Project URL.
@@ -3782,6 +3901,8 @@ fragment ProjectSearchResult on ProjectSearchResult {
   }
   # The project's color.
   color
+  # The project's content in markdown format.
+  content
   # The project's description.
   description
   # The project's name.
@@ -4399,6 +4520,10 @@ mutation deleteAttachment(
 mutation attachmentLinkDiscord(
   # The Discord channel ID for the message to link.
   $channelId: String!
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  $createAsUser: String
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  $displayIconUrl: String
   # The issue for which to link the Discord message.
   $issueId: String!
   # The Discord message ID for the message to link.
@@ -4406,7 +4531,14 @@ mutation attachmentLinkDiscord(
   # The Discord message URL for the message to link.
   $url: String!
 ) {
-  attachmentLinkDiscord(channelId: $channelId, issueId: $issueId, messageId: $messageId, url: $url) {
+  attachmentLinkDiscord(
+    channelId: $channelId
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    issueId: $issueId
+    messageId: $messageId
+    url: $url
+  ) {
     ...AttachmentPayload
   }
 }
@@ -4414,10 +4546,19 @@ mutation attachmentLinkDiscord(
 mutation attachmentLinkFront(
   # The Front conversation ID to link.
   $conversationId: String!
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  $createAsUser: String
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  $displayIconUrl: String
   # The issue for which to link the Front conversation.
   $issueId: String!
 ) {
-  attachmentLinkFront(conversationId: $conversationId, issueId: $issueId) {
+  attachmentLinkFront(
+    conversationId: $conversationId
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    issueId: $issueId
+  ) {
     ...FrontAttachmentPayload
   }
 }
@@ -4425,10 +4566,19 @@ mutation attachmentLinkFront(
 mutation attachmentLinkIntercom(
   # The Intercom conversation ID to link.
   $conversationId: String!
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  $createAsUser: String
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  $displayIconUrl: String
   # The issue for which to link the Intercom conversation.
   $issueId: String!
 ) {
-  attachmentLinkIntercom(conversationId: $conversationId, issueId: $issueId) {
+  attachmentLinkIntercom(
+    conversationId: $conversationId
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    issueId: $issueId
+  ) {
     ...AttachmentPayload
   }
 }
@@ -4447,6 +4597,10 @@ mutation attachmentLinkJiraIssue(
 mutation attachmentLinkSlack(
   # The Slack channel ID for the message to link.
   $channel: String!
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  $createAsUser: String
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  $displayIconUrl: String
   # Optional attachment ID that may be provided through the API
   $id: String
   # The issue to which to link the Slack message.
@@ -4462,6 +4616,8 @@ mutation attachmentLinkSlack(
 ) {
   attachmentLinkSlack(
     channel: $channel
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
     id: $id
     issueId: $issueId
     latest: $latest
@@ -4474,6 +4630,10 @@ mutation attachmentLinkSlack(
 }
 # Link any url to an issue.
 mutation attachmentLinkURL(
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  $createAsUser: String
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  $displayIconUrl: String
   # The id for the attachment.
   $id: String
   # The issue for which to link the url.
@@ -4483,18 +4643,34 @@ mutation attachmentLinkURL(
   # The url to link.
   $url: String!
 ) {
-  attachmentLinkURL(id: $id, issueId: $issueId, title: $title, url: $url) {
+  attachmentLinkURL(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    title: $title
+    url: $url
+  ) {
     ...AttachmentPayload
   }
 }
 # Link an existing Zendesk ticket to an issue.
 mutation attachmentLinkZendesk(
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  $createAsUser: String
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  $displayIconUrl: String
   # The issue for which to link the Zendesk ticket.
   $issueId: String!
   # The Zendesk ticket ID to link.
   $ticketId: String!
 ) {
-  attachmentLinkZendesk(issueId: $issueId, ticketId: $ticketId) {
+  attachmentLinkZendesk(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    issueId: $issueId
+    ticketId: $ticketId
+  ) {
     ...AttachmentPayload
   }
 }
@@ -4789,6 +4965,17 @@ mutation importFileUpload(
 ) {
   importFileUpload(contentType: $contentType, filename: $filename, metaData: $metaData, size: $size) {
     ...UploadPayload
+  }
+}
+# Connect a Slack channel to Asks.
+mutation integrationAsksConnectChannel(
+  # The Slack OAuth code.
+  $code: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationAsksConnectChannel(code: $code, redirectUri: $redirectUri) {
+    ...AsksChannelConnectPayload
   }
 }
 # Deletes an integration.
@@ -5618,8 +5805,10 @@ mutation updateOrganization(
 mutation archiveProject(
   # The identifier of the project to archive. Also the identifier from the URL is accepted.
   $id: String!
+  # Whether to trash the project
+  $trash: Boolean
 ) {
-  projectArchive(id: $id) {
+  projectArchive(id: $id, trash: $trash) {
     ...ProjectArchivePayload
   }
 }
@@ -5632,13 +5821,13 @@ mutation createProject(
     ...ProjectPayload
   }
 }
-# Deletes a project. All issues will be disassociated from the deleted project.
+# Deletes (trashes) a project.
 mutation deleteProject(
-  # The identifier of the project to delete. Also the identifier from the URL is accepted.
+  # The identifier of the project to delete.
   $id: String!
 ) {
   projectDelete(id: $id) {
-    ...DeletePayload
+    ...ProjectArchivePayload
   }
 }
 # Creates a new project link.
@@ -6749,6 +6938,17 @@ query comment(
 ) {
   comment(id: $id) {
     ...Comment
+  }
+}
+# The bot that created the comment
+query comment_botActor(
+  # The identifier of the comment to retrieve.
+  $id: String!
+) {
+  comment(id: $id) {
+    botActor {
+      ...ActorBot
+    }
   }
 }
 # The children of the comment.
@@ -8708,6 +8908,8 @@ query searchDocuments(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # UUID of a team to use as a boost
+  $teamId: String
   # Search string to look for.
   $term: String!
 ) {
@@ -8718,6 +8920,7 @@ query searchDocuments(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    teamId: $teamId
     term: $term
   ) {
     ...DocumentSearchPayload
@@ -8737,6 +8940,8 @@ query searchDocuments_archivePayload(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # UUID of a team to use as a boost
+  $teamId: String
   # Search string to look for.
   $term: String!
 ) {
@@ -8747,6 +8952,7 @@ query searchDocuments_archivePayload(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    teamId: $teamId
     term: $term
   ) {
     archivePayload {
@@ -8770,6 +8976,8 @@ query searchIssues(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # UUID of a team to use as a boost
+  $teamId: String
   # Search string to look for.
   $term: String!
 ) {
@@ -8781,6 +8989,7 @@ query searchIssues(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    teamId: $teamId
     term: $term
   ) {
     ...IssueSearchPayload
@@ -8802,6 +9011,8 @@ query searchIssues_archivePayload(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # UUID of a team to use as a boost
+  $teamId: String
   # Search string to look for.
   $term: String!
 ) {
@@ -8813,6 +9024,7 @@ query searchIssues_archivePayload(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    teamId: $teamId
     term: $term
   ) {
     archivePayload {
@@ -8834,6 +9046,8 @@ query searchProjects(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # UUID of a team to use as a boost
+  $teamId: String
   # Search string to look for.
   $term: String!
 ) {
@@ -8844,6 +9058,7 @@ query searchProjects(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    teamId: $teamId
     term: $term
   ) {
     ...ProjectSearchPayload
@@ -8863,6 +9078,8 @@ query searchProjects_archivePayload(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # UUID of a team to use as a boost
+  $teamId: String
   # Search string to look for.
   $term: String!
 ) {
@@ -8873,6 +9090,7 @@ query searchProjects_archivePayload(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    teamId: $teamId
     term: $term
   ) {
     archivePayload {

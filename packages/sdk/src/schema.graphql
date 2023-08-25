@@ -3,6 +3,33 @@ schema {
   mutation: Mutation
 }
 
+"""
+A bot actor is an actor that is not a user, but an application or integration.
+"""
+type ActorBot {
+  """
+  A url pointing to the avatar representing this bot.
+  """
+  avatarUrl: String
+  id: ID!
+  """
+  The display name of the bot.
+  """
+  name: String
+  """
+  The sub type of the bot.
+  """
+  subType: String
+  """
+  The type of bot.
+  """
+  type: String!
+  """
+  The display name of the external user on behalf of which the bot acted.
+  """
+  userDisplayName: String
+}
+
 input AirbyteConfigurationInput {
   """
   Linear export API key.
@@ -152,6 +179,25 @@ type ArchiveResponse {
   totalCount: Float!
 }
 
+type AsksChannelConnectPayload {
+  """
+  The integration that was created or updated.
+  """
+  integration: Integration
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The new Asks Slack channel mapping for the connected channel.
+  """
+  mapping: SlackChannelNameMapping!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 """
 Issue attachment (e.g. support ticket, pull request).
 """
@@ -168,6 +214,10 @@ type Attachment implements Node {
   The creator of the attachment.
   """
   creator: User
+  """
+  The non-Linear user who created the attachment.
+  """
+  externalUserCreator: ExternalUser
   """
   Indicates if attachments for the same source application should be grouped in the Linear UI.
   """
@@ -654,6 +704,10 @@ type Comment implements Node {
   """
   bodyData: String!
   """
+  The bot that created the comment
+  """
+  botActor: ActorBot
+  """
   The children of the comment.
   """
   children(
@@ -714,6 +768,14 @@ type Comment implements Node {
   Emoji reaction summary, grouped by emoji type
   """
   reactionData: JSONObject!
+  """
+  [ALPHA] The comment that resolved the thread.
+  """
+  resolvingComment: Comment
+  """
+  [ALPHA] The user that resolved the thread.
+  """
+  resolvingUser: User
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -1129,9 +1191,9 @@ type CustomView implements Node {
   """
   organization: Organization!
   """
-  [ALPHA] The user who owns the custom view.
+  The user who owns the custom view.
   """
-  owner: User
+  owner: User!
   """
   [ALPHA] The filter applied to projects in the custom view.
   """
@@ -1221,6 +1283,10 @@ type CustomViewEdge {
 A custom view notification subscription.
 """
 type CustomViewNotificationSubscription implements Entity & Node & NotificationSubscription {
+  """
+  Whether the subscription is active or not
+  """
+  active: Boolean!
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
@@ -1642,6 +1708,10 @@ A cycle notification subscription.
 """
 type CycleNotificationSubscription implements Entity & Node & NotificationSubscription {
   """
+  Whether the subscription is active or not
+  """
+  active: Boolean!
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -1903,6 +1973,10 @@ type DocumentContent implements Node {
   """
   contentData: JSONObject
   """
+  The document content state as a base64 encoded string.
+  """
+  contentState: JSONObject
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -1915,11 +1989,33 @@ type DocumentContent implements Node {
   """
   issue: Issue
   """
+  The project that the document is associated with.
+  """
+  project: Project
+  """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
+}
+
+"""
+Document content filtering options.
+"""
+input DocumentContentFilter {
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 input DocumentCreateInput {
@@ -2721,17 +2817,13 @@ type FirstResponderSchedule implements Node {
   """
   id: ID!
   """
-  The integration used for scheduling.
+  The integration used for time scheduling.
   """
   integration: Integration!
   """
-  The id of the integration schedule used for scheduling.
+  The schedule information.
   """
-  integrationScheduleId: String
-  """
-  The current schedule and available schedules.
-  """
-  scheduleData: JSONObject!
+  scheduleData: JSONObject
   """
   The team to which the schedule belongs to.
   """
@@ -2849,6 +2941,10 @@ type GitHubSettings {
   The GitHub organization's name
   """
   orgLogin: String!
+  """
+  The names of the repositories connected for the GitHub integration
+  """
+  repositories: [String!]
 }
 
 input GitHubSettingsInput {
@@ -2860,6 +2956,10 @@ input GitHubSettingsInput {
   The GitHub organization's name
   """
   orgLogin: String!
+  """
+  The names of the repositories connected for the GitHub integration
+  """
+  repositories: [String!]
 }
 
 """
@@ -2938,6 +3038,10 @@ input GoogleUserAccountAuthInput {
   Code returned from Google's OAuth flow.
   """
   code: String!
+  """
+  An optional invite link for an organization.
+  """
+  inviteLink: String
   """
   The URI to redirect the user to.
   """
@@ -3092,6 +3196,7 @@ type IntegrationSettings {
   notion: NotionSettings
   pagerDuty: PagerDutySettings
   sentry: SentrySettings
+  slackAsks: SlackAsksSettings
   slackOrgProjectUpdatesPost: SlackPostSettings
   slackPost: SlackPostSettings
   slackProjectPost: SlackPostSettings
@@ -3107,6 +3212,7 @@ input IntegrationSettingsInput {
   notion: NotionSettingsInput
   pagerDuty: PagerDutyInput
   sentry: SentrySettingsInput
+  slackAsks: SlackAsksSettingsInput
   slackOrgProjectUpdatesPost: SlackPostSettingsInput
   slackPost: SlackPostSettingsInput
   slackProjectPost: SlackPostSettingsInput
@@ -3125,6 +3231,10 @@ type IntegrationTemplate implements Node {
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  """
+  ID of the foreign entity in the external integration this template is for, e.g., Slack channel ID.
+  """
+  foreignEntityId: String
   """
   The unique identifier of the entity.
   """
@@ -3152,6 +3262,10 @@ type IntegrationTemplateConnection {
 }
 
 input IntegrationTemplateCreateInput {
+  """
+  The foreign identifier in the other service.
+  """
+  foreignEntityId: String
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -4132,6 +4246,10 @@ input IssueCreateInput {
   """
   parentId: String
   """
+  Whether the passed sort order should be preserved
+  """
+  preserveSortOrderOnCreate: Boolean
+  """
   The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
   """
   priority: Int
@@ -4490,6 +4608,10 @@ type IssueHistory implements Node {
   Whether the issue was auto-closed.
   """
   autoClosed: Boolean
+  """
+  The bot that performed the action
+  """
+  botActor: ActorBot
   """
   [Internal] Serialized JSON representing changes for certain non-relational properties.
   """
@@ -5108,6 +5230,10 @@ type IssueNotification implements Entity & Node & Notification {
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
+  """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
   """
   The comment related to the notification.
   """
@@ -5868,7 +5994,7 @@ input IssueUpdateInput {
   """
   title: String
   """
-  Wether the issue has been trashed.
+  Whether the issue has been trashed.
   """
   trashed: Boolean
 }
@@ -5987,6 +6113,10 @@ input JiraSettingsInput {
 
 input JoinOrganizationInput {
   """
+  An optional invite link for an organization.
+  """
+  inviteLink: String
+  """
   The identifier of the organization.
   """
   organizationId: String!
@@ -5996,6 +6126,10 @@ input JoinOrganizationInput {
 A label notification subscription.
 """
 type LabelNotificationSubscription implements Entity & Node & NotificationSubscription {
+  """
+  Whether the subscription is active or not
+  """
+  active: Boolean!
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
@@ -6127,6 +6261,14 @@ type Mutation {
     """
     channelId: String!
     """
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    """
+    createAsUser: String
+    """
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    """
+    displayIconUrl: String
+    """
     The issue for which to link the Discord message.
     """
     issueId: String!
@@ -6148,6 +6290,14 @@ type Mutation {
     """
     conversationId: String!
     """
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    """
+    createAsUser: String
+    """
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    """
+    displayIconUrl: String
+    """
     The issue for which to link the Front conversation.
     """
     issueId: String!
@@ -6160,6 +6310,14 @@ type Mutation {
     The Intercom conversation ID to link.
     """
     conversationId: String!
+    """
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    """
+    createAsUser: String
+    """
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    """
+    displayIconUrl: String
     """
     The issue for which to link the Intercom conversation.
     """
@@ -6186,6 +6344,14 @@ type Mutation {
     The Slack channel ID for the message to link.
     """
     channel: String!
+    """
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    """
+    createAsUser: String
+    """
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    """
+    displayIconUrl: String
     """
     Optional attachment ID that may be provided through the API
     """
@@ -6216,6 +6382,14 @@ type Mutation {
   """
   attachmentLinkURL(
     """
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    """
+    createAsUser: String
+    """
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    """
+    displayIconUrl: String
+    """
     The id for the attachment.
     """
     id: String
@@ -6236,6 +6410,14 @@ type Mutation {
   Link an existing Zendesk ticket to an issue.
   """
   attachmentLinkZendesk(
+    """
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    """
+    createAsUser: String
+    """
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    """
+    displayIconUrl: String
     """
     The issue for which to link the Zendesk ticket.
     """
@@ -6285,6 +6467,25 @@ type Mutation {
     """
     id: String!
   ): DeletePayload!
+  """
+  [ALPHA] Resolves a comment.
+  """
+  commentResolve(
+    """
+    The identifier of the comment to update.
+    """
+    id: String!
+    resolvingCommentId: String
+  ): CommentPayload!
+  """
+  [ALPHA] Unresolves a comment.
+  """
+  commentUnresolve(
+    """
+    The identifier of the comment to update.
+    """
+    id: String!
+  ): CommentPayload!
   """
   Updates a comment.
   """
@@ -6576,6 +6777,19 @@ type Mutation {
     size: Int!
   ): UploadPayload!
   """
+  Connect a Slack channel to Asks.
+  """
+  integrationAsksConnectChannel(
+    """
+    The Slack OAuth code.
+    """
+    code: String!
+    """
+    The Slack OAuth redirect URI.
+    """
+    redirectUri: String!
+  ): AsksChannelConnectPayload!
+  """
   Deletes an integration.
   """
   integrationDelete(
@@ -6696,11 +6910,15 @@ type Mutation {
   """
   [INTERNAL] Integrates the organization with PagerDuty.
   """
-  integrationPageDutyConnect(
+  integrationPagerDutyConnect(
     """
-    The PagerDuty API token.
+    The PagerDuty OAuth code.
     """
-    apiToken: String!
+    code: String!
+    """
+    The PagerDuty OAuth redirect URI.
+    """
+    redirectUri: String!
   ): IntegrationPayload!
   """
   Requests a currently unavailable integration.
@@ -7417,7 +7635,7 @@ type Mutation {
     The identifier of the notification subscription reference to delete.
     """
     id: String!
-  ): DeletePayload!
+  ): DeletePayload! @deprecated(reason: "Update `notificationSubscription.active` to `false` instead.")
   """
   Updates a notification subscription.
   """
@@ -7575,6 +7793,10 @@ type Mutation {
     The identifier of the project to archive. Also the identifier from the URL is accepted.
     """
     id: String!
+    """
+    Whether to trash the project
+    """
+    trash: Boolean
   ): ProjectArchivePayload! @deprecated(reason: "Deprecated in favor of projectDelete.")
   """
   Creates a new project.
@@ -7586,14 +7808,14 @@ type Mutation {
     input: ProjectCreateInput!
   ): ProjectPayload!
   """
-  Deletes a project. All issues will be disassociated from the deleted project.
+  Deletes (trashes) a project.
   """
   projectDelete(
     """
-    The identifier of the project to delete. Also the identifier from the URL is accepted.
+    The identifier of the project to delete.
     """
     id: String!
-  ): DeletePayload!
+  ): ProjectArchivePayload!
   """
   Creates a new project link.
   """
@@ -8260,6 +8482,10 @@ interface Notification implements Entity & Node {
   """
   archivedAt: DateTime
   """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -8393,6 +8619,10 @@ Notification subscriptions for models.
 """
 interface NotificationSubscription implements Entity & Node {
   """
+  Whether the subscription is active or not
+  """
+  active: Boolean!
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -8455,6 +8685,10 @@ type NotificationSubscriptionConnection {
 }
 
 input NotificationSubscriptionCreateInput {
+  """
+  Whether the subscription is active.
+  """
+  active: Boolean
   """
   The type of view to which the notification subscription context is associated with.
   """
@@ -8521,6 +8755,10 @@ type NotificationSubscriptionPayload {
 }
 
 input NotificationSubscriptionUpdateInput {
+  """
+  Whether the subscription is active.
+  """
+  active: Boolean
   """
   The types of notifications of the subscription.
   """
@@ -8685,6 +8923,24 @@ input NullableDateComparator {
   Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
   """
   null: Boolean
+}
+
+"""
+Document content filtering options.
+"""
+input NullableDocumentContentFilter {
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 """
@@ -9432,6 +9688,10 @@ type OauthClientApprovalNotification implements Entity & Node & Notification {
   """
   archivedAt: DateTime
   """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -9642,9 +9902,17 @@ type Organization implements Node {
   """
   samlEnabled: Boolean!
   """
+  [INTERNAL] SAML settings
+  """
+  samlSettings: JSONObject!
+  """
   Whether SCIM provisioning is enabled for organization.
   """
   scimEnabled: Boolean!
+  """
+  Which day count to use for SLA calculations
+  """
+  slaDayCount: SLADayCountType!
   """
   The organization's subscription to a paid plan.
   """
@@ -9961,6 +10229,10 @@ type OrganizationInvite implements Node {
   """
   inviter: User!
   """
+  Extra metadata associated with the organization invite.
+  """
+  metadata: JSONObject!
+  """
   The organization that the invite is associated with.
   """
   organization: Organization!
@@ -9995,6 +10267,10 @@ input OrganizationInviteCreateInput {
   The message to send to the invitee.
   """
   message: String
+  """
+  [INTERNAL] Optional metadata about the invite
+  """
+  metadata: JSONObject
   """
   What user role the invite should grant.
   """
@@ -10274,6 +10550,14 @@ type Project implements Node {
   The number of completed estimation points after each week.
   """
   completedScopeHistory: [Float!]!
+  """
+  The project's content in markdown format.
+  """
+  content: String
+  """
+  [Internal] The project's content as a Prosemirror document.
+  """
+  contentData: JSON
   """
   The project was created based on this issue.
   """
@@ -10589,6 +10873,10 @@ type Project implements Node {
     """
     orderBy: PaginationOrderBy
   ): TeamConnection!
+  """
+  A flag that indicates whether the project is in the trash bin.
+  """
+  trashed: Boolean
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -11210,6 +11498,10 @@ type ProjectNotification implements Entity & Node & Notification {
   """
   archivedAt: DateTime
   """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -11266,6 +11558,10 @@ type ProjectNotification implements Entity & Node & Notification {
 A project notification subscription.
 """
 type ProjectNotificationSubscription implements Entity & Node & NotificationSubscription {
+  """
+  Whether the subscription is active or not
+  """
+  active: Boolean!
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
@@ -11384,6 +11680,14 @@ type ProjectSearchResult implements Node {
   The number of completed estimation points after each week.
   """
   completedScopeHistory: [Float!]!
+  """
+  The project's content in markdown format.
+  """
+  content: String
+  """
+  [Internal] The project's content as a Prosemirror document.
+  """
+  contentData: JSON
   """
   The project was created based on this issue.
   """
@@ -11704,6 +12008,10 @@ type ProjectSearchResult implements Node {
     orderBy: PaginationOrderBy
   ): TeamConnection!
   """
+  A flag that indicates whether the project is in the trash bin.
+  """
+  trashed: Boolean
+  """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -11745,6 +12053,10 @@ type ProjectUpdate implements Node {
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  """
+  The diff between the current update and the previous one.
+  """
+  diff: JSON
   """
   The time the project update was edited.
   """
@@ -12001,6 +12313,7 @@ type ProjectUpdatePayload {
 The frequency at which to send project update reminders.
 """
 enum ProjectUpdateReminderFrequency {
+  month
   never
   twoWeeks
   week
@@ -12120,6 +12433,8 @@ The different push subscription types
 """
 enum PushSubscriptionType {
   apple
+  appleDevelopment
+  firebase
   web
 }
 
@@ -13340,6 +13655,10 @@ type Query {
     """
     orderBy: PaginationOrderBy
     """
+    UUID of a team to use as a boost
+    """
+    teamId: String
+    """
     Search string to look for.
     """
     term: String!
@@ -13377,6 +13696,10 @@ type Query {
     """
     orderBy: PaginationOrderBy
     """
+    UUID of a team to use as a boost
+    """
+    teamId: String
+    """
     Search string to look for.
     """
     term: String!
@@ -13409,6 +13732,10 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    UUID of a team to use as a boost
+    """
+    teamId: String
     """
     Search string to look for.
     """
@@ -14172,6 +14499,14 @@ input RoadmapUpdateInput {
   sortOrder: Float
 }
 
+"""
+Which day count to use for SLA calculations
+"""
+enum SLADayCountType {
+  all
+  onlyBusinessDays
+}
+
 type SamlConfiguration {
   """
   The issuer's custom entity ID.
@@ -14290,6 +14625,56 @@ input SlaStatusComparator {
   Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
   """
   null: Boolean
+}
+
+"""
+Slack Asks specific settings.
+"""
+type SlackAsksSettings {
+  """
+  The mapping of Slack channel ID => Slack channel name for connected channels.
+  """
+  slackChannelMapping: [SlackChannelNameMapping!]
+}
+
+input SlackAsksSettingsInput {
+  """
+  The mapping of Slack channel ID => Slack channel name for connected channels.
+  """
+  slackChannelMapping: [SlackChannelNameMappingInput!]
+}
+
+"""
+Tuple for mapping Slack channel IDs to names
+"""
+type SlackChannelNameMapping {
+  """
+  The Slack channel ID.
+  """
+  id: String!
+  """
+  Whether or not the Slack channel is private
+  """
+  isPrivate: Boolean
+  """
+  The Slack channel name.
+  """
+  name: String!
+}
+
+input SlackChannelNameMappingInput {
+  """
+  The Slack channel ID.
+  """
+  id: String!
+  """
+  Whether or not the Slack channel is private
+  """
+  isPrivate: Boolean
+  """
+  The Slack channel name.
+  """
+  name: String!
 }
 
 """
@@ -14809,6 +15194,10 @@ type Team implements Node {
   """
   mergeWorkflowState: WorkflowState
   """
+  The workflow state into which issues are moved when a PR is ready to be merged.
+  """
+  mergeableWorkflowState: WorkflowState
+  """
   The team's name.
   """
   name: String!
@@ -15325,6 +15714,10 @@ A team notification subscription.
 """
 type TeamNotificationSubscription implements Entity & Node & NotificationSubscription {
   """
+  Whether the subscription is active or not
+  """
+  active: Boolean!
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -15512,6 +15905,10 @@ input TeamUpdateInput {
   The workflow state into which issues are moved when a PR has been merged.
   """
   mergeWorkflowStateId: String
+  """
+  The workflow state into which issues are moved when a PR is ready to be merged.
+  """
+  mergeableWorkflowStateId: String
   """
   The name of the team.
   """
@@ -15738,6 +16135,10 @@ input TokenUserAccountAuthInput {
   """
   email: String!
   """
+  An optional invite link for an organization.
+  """
+  inviteLink: String
+  """
   The identifiers of the teams to auto-join.
   """
   teamIdsToJoin: [String!]
@@ -15809,6 +16210,10 @@ input UpdateOrganizationInput {
   Whether the organization is using roadmap.
   """
   roadmapEnabled: Boolean
+  """
+  Which day count to use for SLA calculation.
+  """
+  slaDayCount: SLADayCountType
   """
   Internal. Whether SLAs have been enabled for the organization.
   """
@@ -16475,6 +16880,11 @@ enum UserFlagType {
   teamsPageIntroductionDismissed
   threadedCommentsNudgeIsSeen
   triageWelcomeDismissed
+  tryCyclesDismissed
+  tryGithubDismissed
+  tryInvitePeopleDismissed
+  tryRoadmapsDismissed
+  tryTriageDismissed
   updatedSlackThreadSyncIntegration
 }
 
@@ -16492,6 +16902,10 @@ enum UserFlagUpdateOperation {
 A user notification subscription.
 """
 type UserNotificationSubscription implements Entity & Node & NotificationSubscription {
+  """
+  Whether the subscription is active or not
+  """
+  active: Boolean!
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """

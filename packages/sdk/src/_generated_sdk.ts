@@ -163,6 +163,35 @@ function parseJson(value?: any): Record<string, unknown> | undefined {
 }
 
 /**
+ * A bot actor is an actor that is not a user, but an application or integration.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ActorBotFragment response data
+ */
+export class ActorBot extends Request {
+  public constructor(request: LinearRequest, data: L.ActorBotFragment) {
+    super(request);
+    this.avatarUrl = data.avatarUrl ?? undefined;
+    this.id = data.id;
+    this.name = data.name ?? undefined;
+    this.subType = data.subType ?? undefined;
+    this.type = data.type;
+    this.userDisplayName = data.userDisplayName ?? undefined;
+  }
+
+  /** A url pointing to the avatar representing this bot. */
+  public avatarUrl?: string;
+  public id: string;
+  /** The display name of the bot. */
+  public name?: string;
+  /** The sub type of the bot. */
+  public subType?: string;
+  /** The type of bot. */
+  public type: string;
+  /** The display name of the external user on behalf of which the bot acted. */
+  public userDisplayName?: string;
+}
+/**
  * An API key. Grants access to the user's resources.
  *
  * @param request - function to call the graphql client
@@ -318,6 +347,34 @@ export class ArchiveResponse extends Request {
   public includesDependencies: boolean;
   /** The total number of entities in the archive. */
   public totalCount: number;
+}
+/**
+ * AsksChannelConnectPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AsksChannelConnectPayloadFragment response data
+ */
+export class AsksChannelConnectPayload extends Request {
+  private _integration?: L.AsksChannelConnectPayloadFragment["integration"];
+
+  public constructor(request: LinearRequest, data: L.AsksChannelConnectPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this.mapping = new SlackChannelNameMapping(request, data.mapping);
+    this._integration = data.integration ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The new Asks Slack channel mapping for the connected channel. */
+  public mapping: SlackChannelNameMapping;
+  /** The integration that was created or updated. */
+  public get integration(): LinearFetch<Integration> | undefined {
+    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
+  }
 }
 /**
  * Issue attachment (e.g. support ticket, pull request).
@@ -636,6 +693,7 @@ export class Comment extends Request {
     this.reactionData = parseJson(data.reactionData) ?? {};
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this._issue = data.issue;
     this._parent = data.parent ?? undefined;
     this._user = data.user ?? undefined;
@@ -663,6 +721,8 @@ export class Comment extends Request {
   public updatedAt: Date;
   /** Comment's URL. */
   public url: string;
+  /** The bot that created the comment */
+  public botActor?: ActorBot;
   /** The issue that the comment is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
@@ -872,6 +932,7 @@ export class CreateOrJoinOrganizationResponse extends Request {
  */
 export class CustomView extends Request {
   private _creator: L.CustomViewFragment["creator"];
+  private _owner: L.CustomViewFragment["owner"];
   private _team?: L.CustomViewFragment["team"];
 
   public constructor(request: LinearRequest, data: L.CustomViewFragment) {
@@ -888,6 +949,7 @@ export class CustomView extends Request {
     this.shared = data.shared;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator;
+    this._owner = data.owner;
     this._team = data.team ?? undefined;
   }
 
@@ -924,6 +986,10 @@ export class CustomView extends Request {
   /** The organization of the custom view. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The user who owns the custom view. */
+  public get owner(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._owner.id);
   }
   /** The team associated with the custom view. */
   public get team(): LinearFetch<Team> | undefined {
@@ -981,6 +1047,7 @@ export class CustomViewNotificationSubscription extends Request {
 
   public constructor(request: LinearRequest, data: L.CustomViewNotificationSubscriptionFragment) {
     super(request);
+    this.active = data.active;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
@@ -995,6 +1062,8 @@ export class CustomViewNotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
+  /** Whether the subscription is active or not */
+  public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
@@ -1241,6 +1310,7 @@ export class CycleNotificationSubscription extends Request {
 
   public constructor(request: LinearRequest, data: L.CycleNotificationSubscriptionFragment) {
     super(request);
+    this.active = data.active;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
@@ -1255,6 +1325,8 @@ export class CycleNotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
+  /** Whether the subscription is active or not */
+  public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
@@ -1451,16 +1523,19 @@ export class DocumentConnection extends Connection<Document> {
  */
 export class DocumentContent extends Request {
   private _issue?: L.DocumentContentFragment["issue"];
+  private _project?: L.DocumentContentFragment["project"];
 
   public constructor(request: LinearRequest, data: L.DocumentContentFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.content = data.content ?? undefined;
     this.contentData = parseJson(data.contentData) ?? undefined;
+    this.contentState = parseJson(data.contentState) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._issue = data.issue ?? undefined;
+    this._project = data.project ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -1469,6 +1544,8 @@ export class DocumentContent extends Request {
   public content?: string;
   /** The document content as JSON. */
   public contentData?: Record<string, unknown>;
+  /** The document content state as a base64 encoded string. */
+  public contentState?: Record<string, unknown>;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -1482,6 +1559,10 @@ export class DocumentContent extends Request {
   /** The issue that the document is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** The project that the document is associated with. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
 }
 /**
@@ -2082,8 +2163,7 @@ export class FirstResponderSchedule extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
-    this.integrationScheduleId = data.integrationScheduleId ?? undefined;
-    this.scheduleData = parseJson(data.scheduleData) ?? {};
+    this.scheduleData = parseJson(data.scheduleData) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._integration = data.integration;
     this._team = data.team;
@@ -2095,17 +2175,15 @@ export class FirstResponderSchedule extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The id of the integration schedule used for scheduling. */
-  public integrationScheduleId?: string;
-  /** The current schedule and available schedules. */
-  public scheduleData: Record<string, unknown>;
+  /** The schedule information. */
+  public scheduleData?: Record<string, unknown>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The integration used for scheduling. */
+  /** The integration used for time scheduling. */
   public get integration(): LinearFetch<Integration> | undefined {
     return new IntegrationQuery(this._request).fetch(this._integration.id);
   }
@@ -2221,12 +2299,15 @@ export class GitHubSettings extends Request {
     super(request);
     this.orgAvatarUrl = data.orgAvatarUrl;
     this.orgLogin = data.orgLogin;
+    this.repositories = data.repositories ?? undefined;
   }
 
   /** The avatar URL for the GitHub organization */
   public orgAvatarUrl: string;
   /** The GitHub organization's name */
   public orgLogin: string;
+  /** The names of the repositories connected for the GitHub integration */
+  public repositories?: string[];
 }
 /**
  * GitHub OAuth token, plus information about the organizations the user is a member of.
@@ -2463,6 +2544,7 @@ export class IntegrationSettings extends Request {
     this.notion = data.notion ? new NotionSettings(request, data.notion) : undefined;
     this.pagerDuty = data.pagerDuty ? new PagerDutySettings(request, data.pagerDuty) : undefined;
     this.sentry = data.sentry ? new SentrySettings(request, data.sentry) : undefined;
+    this.slackAsks = data.slackAsks ? new SlackAsksSettings(request, data.slackAsks) : undefined;
     this.slackOrgProjectUpdatesPost = data.slackOrgProjectUpdatesPost
       ? new SlackPostSettings(request, data.slackOrgProjectUpdatesPost)
       : undefined;
@@ -2479,6 +2561,7 @@ export class IntegrationSettings extends Request {
   public notion?: NotionSettings;
   public pagerDuty?: PagerDutySettings;
   public sentry?: SentrySettings;
+  public slackAsks?: SlackAsksSettings;
   public slackOrgProjectUpdatesPost?: SlackPostSettings;
   public slackPost?: SlackPostSettings;
   public slackProjectPost?: SlackPostSettings;
@@ -2498,6 +2581,7 @@ export class IntegrationTemplate extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.foreignEntityId = data.foreignEntityId ?? undefined;
     this.id = data.id;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._integration = data.integration;
@@ -2508,6 +2592,8 @@ export class IntegrationTemplate extends Request {
   public archivedAt?: Date;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** ID of the foreign entity in the external integration this template is for, e.g., Slack channel ID. */
+  public foreignEntityId?: string;
   /** The unique identifier of the entity. */
   public id: string;
   /**
@@ -3090,6 +3176,7 @@ export class IssueHistory extends Request {
     this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.updatedDescription = data.updatedDescription ?? undefined;
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this.issueImport = data.issueImport ? new IssueImport(request, data.issueImport) : undefined;
     this.relationChanges = data.relationChanges
       ? data.relationChanges.map(node => new IssueRelationHistoryPayload(request, node))
@@ -3186,6 +3273,8 @@ export class IssueHistory extends Request {
   public updatedDescription?: boolean;
   /** Changed issue relationships. */
   public relationChanges?: IssueRelationHistoryPayload[];
+  /** The bot that performed the action */
+  public botActor?: ActorBot;
   /** The import record. */
   public issueImport?: IssueImport;
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
@@ -3550,6 +3639,7 @@ export class IssueNotification extends Request {
     this.type = data.type;
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this._actor = data.actor ?? undefined;
     this._comment = data.comment ?? undefined;
     this._issue = data.issue;
@@ -3584,6 +3674,8 @@ export class IssueNotification extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -4054,6 +4146,7 @@ export class LabelNotificationSubscription extends Request {
 
   public constructor(request: LinearRequest, data: L.LabelNotificationSubscriptionFragment) {
     super(request);
+    this.active = data.active;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
@@ -4068,6 +4161,8 @@ export class LabelNotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
+  /** Whether the subscription is active or not */
+  public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
@@ -4162,6 +4257,7 @@ export class Notification extends Request {
     this.type = data.type;
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this._actor = data.actor ?? undefined;
     this._user = data.user;
   }
@@ -4191,6 +4287,8 @@ export class Notification extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -4327,6 +4425,7 @@ export class NotificationSubscription extends Request {
 
   public constructor(request: LinearRequest, data: L.NotificationSubscriptionFragment) {
     super(request);
+    this.active = data.active;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
@@ -4340,6 +4439,8 @@ export class NotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
+  /** Whether the subscription is active or not */
+  public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
@@ -4635,6 +4736,7 @@ export class OauthClientApprovalNotification extends Request {
     this.type = data.type;
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this.oauthClientApproval = new OauthClientApproval(request, data.oauthClientApproval);
     this._actor = data.actor ?? undefined;
     this._user = data.user;
@@ -4665,6 +4767,8 @@ export class OauthClientApprovalNotification extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot;
   /** The OAuth client approval request related to the notification. */
   public oauthClientApproval: OauthClientApproval;
   /** The user that caused the notification. */
@@ -4927,6 +5031,7 @@ export class OrganizationInvite extends Request {
     this.expiresAt = parseDate(data.expiresAt) ?? undefined;
     this.external = data.external;
     this.id = data.id;
+    this.metadata = parseJson(data.metadata) ?? {};
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._invitee = data.invitee ?? undefined;
     this._inviter = data.inviter;
@@ -4946,6 +5051,8 @@ export class OrganizationInvite extends Request {
   public external: boolean;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Extra metadata associated with the organization invite. */
+  public metadata: Record<string, unknown>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -5235,6 +5342,7 @@ export class Project extends Request {
     this.completedAt = parseDate(data.completedAt) ?? undefined;
     this.completedIssueCountHistory = data.completedIssueCountHistory;
     this.completedScopeHistory = data.completedScopeHistory;
+    this.content = data.content ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description;
     this.icon = data.icon ?? undefined;
@@ -5255,6 +5363,7 @@ export class Project extends Request {
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.state = data.state;
     this.targetDate = data.targetDate ?? undefined;
+    this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._convertedFromIssue = data.convertedFromIssue ?? undefined;
@@ -5277,6 +5386,8 @@ export class Project extends Request {
   public completedIssueCountHistory: number[];
   /** The number of completed estimation points after each week. */
   public completedScopeHistory: number[];
+  /** The project's content in markdown format. */
+  public content?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The project's description. */
@@ -5317,6 +5428,8 @@ export class Project extends Request {
   public state: string;
   /** The estimated completion date of the project. */
   public targetDate?: L.Scalars["TimelessDate"];
+  /** A flag that indicates whether the project is in the trash bin. */
+  public trashed?: boolean;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -5372,14 +5485,14 @@ export class Project extends Request {
     return new Project_TeamsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Archives a project. */
-  public archive() {
-    return new ArchiveProjectMutation(this._request).fetch(this.id);
+  public archive(variables?: Omit<L.ArchiveProjectMutationVariables, "id">) {
+    return new ArchiveProjectMutation(this._request).fetch(this.id, variables);
   }
   /** Creates a new project. */
   public create(input: L.ProjectCreateInput) {
     return new CreateProjectMutation(this._request).fetch(input);
   }
-  /** Deletes a project. All issues will be disassociated from the deleted project. */
+  /** Deletes (trashes) a project. */
   public delete() {
     return new DeleteProjectMutation(this._request).fetch(this.id);
   }
@@ -5688,6 +5801,7 @@ export class ProjectNotification extends Request {
     this.type = data.type;
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this._actor = data.actor ?? undefined;
     this._project = data.project;
     this._projectUpdate = data.projectUpdate ?? undefined;
@@ -5719,6 +5833,8 @@ export class ProjectNotification extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -5753,6 +5869,7 @@ export class ProjectNotificationSubscription extends Request {
 
   public constructor(request: LinearRequest, data: L.ProjectNotificationSubscriptionFragment) {
     super(request);
+    this.active = data.active;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
@@ -5767,6 +5884,8 @@ export class ProjectNotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
+  /** Whether the subscription is active or not */
+  public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
@@ -5878,6 +5997,7 @@ export class ProjectSearchResult extends Request {
     this.completedAt = parseDate(data.completedAt) ?? undefined;
     this.completedIssueCountHistory = data.completedIssueCountHistory;
     this.completedScopeHistory = data.completedScopeHistory;
+    this.content = data.content ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description;
     this.icon = data.icon ?? undefined;
@@ -5899,6 +6019,7 @@ export class ProjectSearchResult extends Request {
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.state = data.state;
     this.targetDate = data.targetDate ?? undefined;
+    this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._convertedFromIssue = data.convertedFromIssue ?? undefined;
@@ -5921,6 +6042,8 @@ export class ProjectSearchResult extends Request {
   public completedIssueCountHistory: number[];
   /** The number of completed estimation points after each week. */
   public completedScopeHistory: number[];
+  /** The project's content in markdown format. */
+  public content?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The project's description. */
@@ -5963,6 +6086,8 @@ export class ProjectSearchResult extends Request {
   public state: string;
   /** The estimated completion date of the project. */
   public targetDate?: L.Scalars["TimelessDate"];
+  /** A flag that indicates whether the project is in the trash bin. */
+  public trashed?: boolean;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -6026,6 +6151,7 @@ export class ProjectUpdate extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.body = data.body;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.diff = parseJson(data.diff) ?? undefined;
     this.editedAt = parseDate(data.editedAt) ?? undefined;
     this.id = data.id;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -6040,6 +6166,8 @@ export class ProjectUpdate extends Request {
   public body: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** The diff between the current update and the previous one. */
+  public diff?: Record<string, unknown>;
   /** The time the project update was edited. */
   public editedAt?: Date;
   /** The unique identifier of the entity. */
@@ -6802,6 +6930,44 @@ export class SentrySettings extends Request {
   public organizationSlug: string;
 }
 /**
+ * Slack Asks specific settings.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SlackAsksSettingsFragment response data
+ */
+export class SlackAsksSettings extends Request {
+  public constructor(request: LinearRequest, data: L.SlackAsksSettingsFragment) {
+    super(request);
+    this.slackChannelMapping = data.slackChannelMapping
+      ? data.slackChannelMapping.map(node => new SlackChannelNameMapping(request, node))
+      : undefined;
+  }
+
+  /** The mapping of Slack channel ID => Slack channel name for connected channels. */
+  public slackChannelMapping?: SlackChannelNameMapping[];
+}
+/**
+ * Tuple for mapping Slack channel IDs to names
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SlackChannelNameMappingFragment response data
+ */
+export class SlackChannelNameMapping extends Request {
+  public constructor(request: LinearRequest, data: L.SlackChannelNameMappingFragment) {
+    super(request);
+    this.id = data.id;
+    this.isPrivate = data.isPrivate ?? undefined;
+    this.name = data.name;
+  }
+
+  /** The Slack channel ID. */
+  public id: string;
+  /** Whether or not the Slack channel is private */
+  public isPrivate?: boolean;
+  /** The Slack channel name. */
+  public name: string;
+}
+/**
  * Slack notification specific settings.
  *
  * @param request - function to call the graphql client
@@ -6901,6 +7067,7 @@ export class Team extends Request {
   private _integrationsSettings?: L.TeamFragment["integrationsSettings"];
   private _markedAsDuplicateWorkflowState?: L.TeamFragment["markedAsDuplicateWorkflowState"];
   private _mergeWorkflowState?: L.TeamFragment["mergeWorkflowState"];
+  private _mergeableWorkflowState?: L.TeamFragment["mergeableWorkflowState"];
   private _reviewWorkflowState?: L.TeamFragment["reviewWorkflowState"];
   private _startWorkflowState?: L.TeamFragment["startWorkflowState"];
   private _triageIssueState?: L.TeamFragment["triageIssueState"];
@@ -6954,6 +7121,7 @@ export class Team extends Request {
     this._integrationsSettings = data.integrationsSettings ?? undefined;
     this._markedAsDuplicateWorkflowState = data.markedAsDuplicateWorkflowState ?? undefined;
     this._mergeWorkflowState = data.mergeWorkflowState ?? undefined;
+    this._mergeableWorkflowState = data.mergeableWorkflowState ?? undefined;
     this._reviewWorkflowState = data.reviewWorkflowState ?? undefined;
     this._startWorkflowState = data.startWorkflowState ?? undefined;
     this._triageIssueState = data.triageIssueState ?? undefined;
@@ -7085,6 +7253,12 @@ export class Team extends Request {
   public get mergeWorkflowState(): LinearFetch<WorkflowState> | undefined {
     return this._mergeWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._mergeWorkflowState?.id)
+      : undefined;
+  }
+  /** The workflow state into which issues are moved when a PR is ready to be merged. */
+  public get mergeableWorkflowState(): LinearFetch<WorkflowState> | undefined {
+    return this._mergeableWorkflowState?.id
+      ? new WorkflowStateQuery(this._request).fetch(this._mergeableWorkflowState?.id)
       : undefined;
   }
   /** The organization that the team is associated with. */
@@ -7304,6 +7478,7 @@ export class TeamNotificationSubscription extends Request {
 
   public constructor(request: LinearRequest, data: L.TeamNotificationSubscriptionFragment) {
     super(request);
+    this.active = data.active;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
@@ -7318,6 +7493,8 @@ export class TeamNotificationSubscription extends Request {
     this._user = data.user ?? undefined;
   }
 
+  /** Whether the subscription is active or not */
+  public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
@@ -7825,6 +8002,7 @@ export class UserNotificationSubscription extends Request {
 
   public constructor(request: LinearRequest, data: L.UserNotificationSubscriptionFragment) {
     super(request);
+    this.active = data.active;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
@@ -7839,6 +8017,8 @@ export class UserNotificationSubscription extends Request {
     this._user = data.user;
   }
 
+  /** Whether the subscription is active or not */
+  public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
@@ -8766,13 +8946,15 @@ export class AttachmentLinkDiscordMutation extends Request {
    * @param issueId - required issueId to pass to attachmentLinkDiscord
    * @param messageId - required messageId to pass to attachmentLinkDiscord
    * @param url - required url to pass to attachmentLinkDiscord
+   * @param variables - variables without 'channelId', 'issueId', 'messageId', 'url' to pass into the AttachmentLinkDiscordMutation
    * @returns parsed response from AttachmentLinkDiscordMutation
    */
   public async fetch(
     channelId: string,
     issueId: string,
     messageId: string,
-    url: string
+    url: string,
+    variables?: Omit<L.AttachmentLinkDiscordMutationVariables, "channelId" | "issueId" | "messageId" | "url">
   ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkDiscordMutation, L.AttachmentLinkDiscordMutationVariables>(
       L.AttachmentLinkDiscordDocument,
@@ -8781,6 +8963,7 @@ export class AttachmentLinkDiscordMutation extends Request {
         issueId,
         messageId,
         url,
+        ...variables,
       }
     );
     const data = response.attachmentLinkDiscord;
@@ -8804,14 +8987,20 @@ export class AttachmentLinkFrontMutation extends Request {
    *
    * @param conversationId - required conversationId to pass to attachmentLinkFront
    * @param issueId - required issueId to pass to attachmentLinkFront
+   * @param variables - variables without 'conversationId', 'issueId' to pass into the AttachmentLinkFrontMutation
    * @returns parsed response from AttachmentLinkFrontMutation
    */
-  public async fetch(conversationId: string, issueId: string): LinearFetch<FrontAttachmentPayload> {
+  public async fetch(
+    conversationId: string,
+    issueId: string,
+    variables?: Omit<L.AttachmentLinkFrontMutationVariables, "conversationId" | "issueId">
+  ): LinearFetch<FrontAttachmentPayload> {
     const response = await this._request<L.AttachmentLinkFrontMutation, L.AttachmentLinkFrontMutationVariables>(
       L.AttachmentLinkFrontDocument,
       {
         conversationId,
         issueId,
+        ...variables,
       }
     );
     const data = response.attachmentLinkFront;
@@ -8835,14 +9024,20 @@ export class AttachmentLinkIntercomMutation extends Request {
    *
    * @param conversationId - required conversationId to pass to attachmentLinkIntercom
    * @param issueId - required issueId to pass to attachmentLinkIntercom
+   * @param variables - variables without 'conversationId', 'issueId' to pass into the AttachmentLinkIntercomMutation
    * @returns parsed response from AttachmentLinkIntercomMutation
    */
-  public async fetch(conversationId: string, issueId: string): LinearFetch<AttachmentPayload> {
+  public async fetch(
+    conversationId: string,
+    issueId: string,
+    variables?: Omit<L.AttachmentLinkIntercomMutationVariables, "conversationId" | "issueId">
+  ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkIntercomMutation, L.AttachmentLinkIntercomMutationVariables>(
       L.AttachmentLinkIntercomDocument,
       {
         conversationId,
         issueId,
+        ...variables,
       }
     );
     const data = response.attachmentLinkIntercom;
@@ -8977,14 +9172,20 @@ export class AttachmentLinkZendeskMutation extends Request {
    *
    * @param issueId - required issueId to pass to attachmentLinkZendesk
    * @param ticketId - required ticketId to pass to attachmentLinkZendesk
+   * @param variables - variables without 'issueId', 'ticketId' to pass into the AttachmentLinkZendeskMutation
    * @returns parsed response from AttachmentLinkZendeskMutation
    */
-  public async fetch(issueId: string, ticketId: string): LinearFetch<AttachmentPayload> {
+  public async fetch(
+    issueId: string,
+    ticketId: string,
+    variables?: Omit<L.AttachmentLinkZendeskMutationVariables, "issueId" | "ticketId">
+  ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkZendeskMutation, L.AttachmentLinkZendeskMutationVariables>(
       L.AttachmentLinkZendeskDocument,
       {
         issueId,
         ticketId,
+        ...variables,
       }
     );
     const data = response.attachmentLinkZendesk;
@@ -9853,6 +10054,37 @@ export class ImportFileUploadMutation extends Request {
     const data = response.importFileUpload;
 
     return new UploadPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationAsksConnectChannel Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationAsksConnectChannelMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationAsksConnectChannel mutation and return a AsksChannelConnectPayload
+   *
+   * @param code - required code to pass to integrationAsksConnectChannel
+   * @param redirectUri - required redirectUri to pass to integrationAsksConnectChannel
+   * @returns parsed response from IntegrationAsksConnectChannelMutation
+   */
+  public async fetch(code: string, redirectUri: string): LinearFetch<AsksChannelConnectPayload> {
+    const response = await this._request<
+      L.IntegrationAsksConnectChannelMutation,
+      L.IntegrationAsksConnectChannelMutationVariables
+    >(L.IntegrationAsksConnectChannelDocument, {
+      code,
+      redirectUri,
+    });
+    const data = response.integrationAsksConnectChannel;
+
+    return new AsksChannelConnectPayload(this._request, data);
   }
 }
 
@@ -12060,13 +12292,18 @@ export class ArchiveProjectMutation extends Request {
    * Call the ArchiveProject mutation and return a ProjectArchivePayload
    *
    * @param id - required id to pass to archiveProject
+   * @param variables - variables without 'id' to pass into the ArchiveProjectMutation
    * @returns parsed response from ArchiveProjectMutation
    */
-  public async fetch(id: string): LinearFetch<ProjectArchivePayload> {
+  public async fetch(
+    id: string,
+    variables?: Omit<L.ArchiveProjectMutationVariables, "id">
+  ): LinearFetch<ProjectArchivePayload> {
     const response = await this._request<L.ArchiveProjectMutation, L.ArchiveProjectMutationVariables>(
       L.ArchiveProjectDocument,
       {
         id,
+        ...variables,
       }
     );
     const data = response.projectArchive;
@@ -12115,12 +12352,12 @@ export class DeleteProjectMutation extends Request {
   }
 
   /**
-   * Call the DeleteProject mutation and return a DeletePayload
+   * Call the DeleteProject mutation and return a ProjectArchivePayload
    *
    * @param id - required id to pass to deleteProject
    * @returns parsed response from DeleteProjectMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): LinearFetch<ProjectArchivePayload> {
     const response = await this._request<L.DeleteProjectMutation, L.DeleteProjectMutationVariables>(
       L.DeleteProjectDocument,
       {
@@ -12129,7 +12366,7 @@ export class DeleteProjectMutation extends Request {
     );
     const data = response.projectDelete;
 
-    return new DeletePayload(this._request, data);
+    return new ProjectArchivePayload(this._request, data);
   }
 }
 
@@ -17193,6 +17430,38 @@ export class AttachmentIssue_SubscribersQuery extends Request {
 }
 
 /**
+ * A fetchable Comment_BotActor Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to comment
+ */
+export class Comment_BotActorQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the Comment_BotActor query and return a ActorBot
+   *
+   * @returns parsed response from Comment_BotActorQuery
+   */
+  public async fetch(): LinearFetch<ActorBot | undefined> {
+    const response = await this._request<L.Comment_BotActorQuery, L.Comment_BotActorQueryVariables>(
+      L.Comment_BotActorDocument,
+      {
+        id: this._id,
+      }
+    );
+    const data = response.comment.botActor;
+
+    return data ? new ActorBot(this._request, data) : undefined;
+  }
+}
+
+/**
  * A fetchable Comment_Children Query
  *
  * @param request - function to call the graphql client
@@ -20077,35 +20346,47 @@ export class LinearSdk extends Request {
    * @param issueId - required issueId to pass to attachmentLinkDiscord
    * @param messageId - required messageId to pass to attachmentLinkDiscord
    * @param url - required url to pass to attachmentLinkDiscord
+   * @param variables - variables without 'channelId', 'issueId', 'messageId', 'url' to pass into the AttachmentLinkDiscordMutation
    * @returns AttachmentPayload
    */
   public attachmentLinkDiscord(
     channelId: string,
     issueId: string,
     messageId: string,
-    url: string
+    url: string,
+    variables?: Omit<L.AttachmentLinkDiscordMutationVariables, "channelId" | "issueId" | "messageId" | "url">
   ): LinearFetch<AttachmentPayload> {
-    return new AttachmentLinkDiscordMutation(this._request).fetch(channelId, issueId, messageId, url);
+    return new AttachmentLinkDiscordMutation(this._request).fetch(channelId, issueId, messageId, url, variables);
   }
   /**
    * Link an existing Front conversation to an issue.
    *
    * @param conversationId - required conversationId to pass to attachmentLinkFront
    * @param issueId - required issueId to pass to attachmentLinkFront
+   * @param variables - variables without 'conversationId', 'issueId' to pass into the AttachmentLinkFrontMutation
    * @returns FrontAttachmentPayload
    */
-  public attachmentLinkFront(conversationId: string, issueId: string): LinearFetch<FrontAttachmentPayload> {
-    return new AttachmentLinkFrontMutation(this._request).fetch(conversationId, issueId);
+  public attachmentLinkFront(
+    conversationId: string,
+    issueId: string,
+    variables?: Omit<L.AttachmentLinkFrontMutationVariables, "conversationId" | "issueId">
+  ): LinearFetch<FrontAttachmentPayload> {
+    return new AttachmentLinkFrontMutation(this._request).fetch(conversationId, issueId, variables);
   }
   /**
    * Link an existing Intercom conversation to an issue.
    *
    * @param conversationId - required conversationId to pass to attachmentLinkIntercom
    * @param issueId - required issueId to pass to attachmentLinkIntercom
+   * @param variables - variables without 'conversationId', 'issueId' to pass into the AttachmentLinkIntercomMutation
    * @returns AttachmentPayload
    */
-  public attachmentLinkIntercom(conversationId: string, issueId: string): LinearFetch<AttachmentPayload> {
-    return new AttachmentLinkIntercomMutation(this._request).fetch(conversationId, issueId);
+  public attachmentLinkIntercom(
+    conversationId: string,
+    issueId: string,
+    variables?: Omit<L.AttachmentLinkIntercomMutationVariables, "conversationId" | "issueId">
+  ): LinearFetch<AttachmentPayload> {
+    return new AttachmentLinkIntercomMutation(this._request).fetch(conversationId, issueId, variables);
   }
   /**
    * Link an existing Jira issue to an issue.
@@ -20156,10 +20437,15 @@ export class LinearSdk extends Request {
    *
    * @param issueId - required issueId to pass to attachmentLinkZendesk
    * @param ticketId - required ticketId to pass to attachmentLinkZendesk
+   * @param variables - variables without 'issueId', 'ticketId' to pass into the AttachmentLinkZendeskMutation
    * @returns AttachmentPayload
    */
-  public attachmentLinkZendesk(issueId: string, ticketId: string): LinearFetch<AttachmentPayload> {
-    return new AttachmentLinkZendeskMutation(this._request).fetch(issueId, ticketId);
+  public attachmentLinkZendesk(
+    issueId: string,
+    ticketId: string,
+    variables?: Omit<L.AttachmentLinkZendeskMutationVariables, "issueId" | "ticketId">
+  ): LinearFetch<AttachmentPayload> {
+    return new AttachmentLinkZendeskMutation(this._request).fetch(issueId, ticketId, variables);
   }
   /**
    * Unsyncs an existing synced Slack attachment.
@@ -20451,6 +20737,16 @@ export class LinearSdk extends Request {
     variables?: Omit<L.ImportFileUploadMutationVariables, "contentType" | "filename" | "size">
   ): LinearFetch<UploadPayload> {
     return new ImportFileUploadMutation(this._request).fetch(contentType, filename, size, variables);
+  }
+  /**
+   * Connect a Slack channel to Asks.
+   *
+   * @param code - required code to pass to integrationAsksConnectChannel
+   * @param redirectUri - required redirectUri to pass to integrationAsksConnectChannel
+   * @returns AsksChannelConnectPayload
+   */
+  public integrationAsksConnectChannel(code: string, redirectUri: string): LinearFetch<AsksChannelConnectPayload> {
+    return new IntegrationAsksConnectChannelMutation(this._request).fetch(code, redirectUri);
   }
   /**
    * Deletes an integration.
@@ -21231,10 +21527,14 @@ export class LinearSdk extends Request {
    * Archives a project.
    *
    * @param id - required id to pass to archiveProject
+   * @param variables - variables without 'id' to pass into the ArchiveProjectMutation
    * @returns ProjectArchivePayload
    */
-  public archiveProject(id: string): LinearFetch<ProjectArchivePayload> {
-    return new ArchiveProjectMutation(this._request).fetch(id);
+  public archiveProject(
+    id: string,
+    variables?: Omit<L.ArchiveProjectMutationVariables, "id">
+  ): LinearFetch<ProjectArchivePayload> {
+    return new ArchiveProjectMutation(this._request).fetch(id, variables);
   }
   /**
    * Creates a new project.
@@ -21246,12 +21546,12 @@ export class LinearSdk extends Request {
     return new CreateProjectMutation(this._request).fetch(input);
   }
   /**
-   * Deletes a project. All issues will be disassociated from the deleted project.
+   * Deletes (trashes) a project.
    *
    * @param id - required id to pass to deleteProject
-   * @returns DeletePayload
+   * @returns ProjectArchivePayload
    */
-  public deleteProject(id: string): LinearFetch<DeletePayload> {
+  public deleteProject(id: string): LinearFetch<ProjectArchivePayload> {
     return new DeleteProjectMutation(this._request).fetch(id);
   }
   /**

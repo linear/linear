@@ -22,6 +22,22 @@ export type Scalars = {
   UUID: any;
 };
 
+/** A bot actor is an actor that is not a user, but an application or integration. */
+export type ActorBot = {
+  __typename?: "ActorBot";
+  /** A url pointing to the avatar representing this bot. */
+  avatarUrl?: Maybe<Scalars["String"]>;
+  id: Scalars["ID"];
+  /** The display name of the bot. */
+  name?: Maybe<Scalars["String"]>;
+  /** The sub type of the bot. */
+  subType?: Maybe<Scalars["String"]>;
+  /** The type of bot. */
+  type: Scalars["String"];
+  /** The display name of the external user on behalf of which the bot acted. */
+  userDisplayName?: Maybe<Scalars["String"]>;
+};
+
 export type AirbyteConfigurationInput = {
   /** Linear export API key. */
   apiKey: Scalars["String"];
@@ -119,6 +135,18 @@ export type ArchiveResponse = {
   totalCount: Scalars["Float"];
 };
 
+export type AsksChannelConnectPayload = {
+  __typename?: "AsksChannelConnectPayload";
+  /** The integration that was created or updated. */
+  integration?: Maybe<Integration>;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** The new Asks Slack channel mapping for the connected channel. */
+  mapping: SlackChannelNameMapping;
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
 /** Issue attachment (e.g. support ticket, pull request). */
 export type Attachment = Node & {
   __typename?: "Attachment";
@@ -128,6 +156,8 @@ export type Attachment = Node & {
   createdAt: Scalars["DateTime"];
   /** The creator of the attachment. */
   creator?: Maybe<User>;
+  /** The non-Linear user who created the attachment. */
+  externalUserCreator?: Maybe<ExternalUser>;
   /** Indicates if attachments for the same source application should be grouped in the Linear UI. */
   groupBySource: Scalars["Boolean"];
   /** The unique identifier of the entity. */
@@ -418,6 +448,8 @@ export type Comment = Node & {
   body: Scalars["String"];
   /** The comment content as a Prosemirror document. */
   bodyData: Scalars["String"];
+  /** The bot that created the comment */
+  botActor?: Maybe<ActorBot>;
   /** The children of the comment. */
   children: CommentConnection;
   /** The time at which the entity was created. */
@@ -434,6 +466,10 @@ export type Comment = Node & {
   parent?: Maybe<Comment>;
   /** Emoji reaction summary, grouped by emoji type */
   reactionData: Scalars["JSONObject"];
+  /** [ALPHA] The comment that resolved the thread. */
+  resolvingComment?: Maybe<Comment>;
+  /** [ALPHA] The user that resolved the thread. */
+  resolvingUser?: Maybe<User>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -704,8 +740,8 @@ export type CustomView = Node & {
   name: Scalars["String"];
   /** The organization of the custom view. */
   organization: Organization;
-  /** [ALPHA] The user who owns the custom view. */
-  owner?: Maybe<User>;
+  /** The user who owns the custom view. */
+  owner: User;
   /** [ALPHA] The filter applied to projects in the custom view. */
   projectFilterData?: Maybe<Scalars["JSONObject"]>;
   /** Whether the custom view is shared with everyone in the organization. */
@@ -766,6 +802,8 @@ export type CustomViewNotificationSubscription = Entity &
   Node &
   NotificationSubscription & {
     __typename?: "CustomViewNotificationSubscription";
+    /** Whether the subscription is active or not */
+    active: Scalars["Boolean"];
     /** The time at which the entity was archived. Null if the entity has not been archived. */
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The type of view to which the notification subscription context is associated with. */
@@ -999,6 +1037,8 @@ export type CycleNotificationSubscription = Entity &
   Node &
   NotificationSubscription & {
     __typename?: "CycleNotificationSubscription";
+    /** Whether the subscription is active or not */
+    active: Scalars["Boolean"];
     /** The time at which the entity was archived. Null if the entity has not been archived. */
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The type of view to which the notification subscription context is associated with. */
@@ -1154,18 +1194,32 @@ export type DocumentContent = Node & {
   content?: Maybe<Scalars["String"]>;
   /** The document content as JSON. */
   contentData?: Maybe<Scalars["JSONObject"]>;
+  /** The document content state as a base64 encoded string. */
+  contentState?: Maybe<Scalars["JSONObject"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The issue that the document is associated with. */
   issue?: Maybe<Issue>;
+  /** The project that the document is associated with. */
+  project?: Maybe<Project>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+};
+
+/** Document content filtering options. */
+export type DocumentContentFilter = {
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 export type DocumentCreateInput = {
@@ -1662,12 +1716,10 @@ export type FirstResponderSchedule = Node & {
   createdAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
-  /** The integration used for scheduling. */
+  /** The integration used for time scheduling. */
   integration: Integration;
-  /** The id of the integration schedule used for scheduling. */
-  integrationScheduleId?: Maybe<Scalars["String"]>;
-  /** The current schedule and available schedules. */
-  scheduleData: Scalars["JSONObject"];
+  /** The schedule information. */
+  scheduleData?: Maybe<Scalars["JSONObject"]>;
   /** The team to which the schedule belongs to. */
   team: Team;
   /**
@@ -1747,6 +1799,8 @@ export type GitHubSettings = {
   orgAvatarUrl: Scalars["String"];
   /** The GitHub organization's name */
   orgLogin: Scalars["String"];
+  /** The names of the repositories connected for the GitHub integration */
+  repositories?: Maybe<Array<Scalars["String"]>>;
 };
 
 export type GitHubSettingsInput = {
@@ -1754,6 +1808,8 @@ export type GitHubSettingsInput = {
   orgAvatarUrl: Scalars["String"];
   /** The GitHub organization's name */
   orgLogin: Scalars["String"];
+  /** The names of the repositories connected for the GitHub integration */
+  repositories?: Maybe<Array<Scalars["String"]>>;
 };
 
 /** GitHub OAuth token, plus information about the organizations the user is a member of. */
@@ -1808,6 +1864,8 @@ export type GoogleSheetsSettingsInput = {
 export type GoogleUserAccountAuthInput = {
   /** Code returned from Google's OAuth flow. */
   code: Scalars["String"];
+  /** An optional invite link for an organization. */
+  inviteLink?: Maybe<Scalars["String"]>;
   /** The URI to redirect the user to. */
   redirectUri?: Maybe<Scalars["String"]>;
   /** Signup code. */
@@ -1913,6 +1971,7 @@ export type IntegrationSettings = {
   notion?: Maybe<NotionSettings>;
   pagerDuty?: Maybe<PagerDutySettings>;
   sentry?: Maybe<SentrySettings>;
+  slackAsks?: Maybe<SlackAsksSettings>;
   slackOrgProjectUpdatesPost?: Maybe<SlackPostSettings>;
   slackPost?: Maybe<SlackPostSettings>;
   slackProjectPost?: Maybe<SlackPostSettings>;
@@ -1928,6 +1987,7 @@ export type IntegrationSettingsInput = {
   notion?: Maybe<NotionSettingsInput>;
   pagerDuty?: Maybe<PagerDutyInput>;
   sentry?: Maybe<SentrySettingsInput>;
+  slackAsks?: Maybe<SlackAsksSettingsInput>;
   slackOrgProjectUpdatesPost?: Maybe<SlackPostSettingsInput>;
   slackPost?: Maybe<SlackPostSettingsInput>;
   slackProjectPost?: Maybe<SlackPostSettingsInput>;
@@ -1941,6 +2001,8 @@ export type IntegrationTemplate = Node & {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** ID of the foreign entity in the external integration this template is for, e.g., Slack channel ID. */
+  foreignEntityId?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The integration that the template is associated with. */
@@ -1963,6 +2025,8 @@ export type IntegrationTemplateConnection = {
 };
 
 export type IntegrationTemplateCreateInput = {
+  /** The foreign identifier in the other service. */
+  foreignEntityId?: Maybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
   /** The identifier of the integration. */
@@ -2472,6 +2536,8 @@ export type IssueCreateInput = {
   labelIds?: Maybe<Array<Scalars["String"]>>;
   /** The identifier of the parent issue. */
   parentId?: Maybe<Scalars["String"]>;
+  /** Whether the passed sort order should be preserved */
+  preserveSortOrderOnCreate?: Maybe<Scalars["Boolean"]>;
   /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
   priority?: Maybe<Scalars["Int"]>;
   /** The project associated with the issue. */
@@ -2665,6 +2731,8 @@ export type IssueHistory = Node & {
   autoArchived?: Maybe<Scalars["Boolean"]>;
   /** Whether the issue was auto-closed. */
   autoClosed?: Maybe<Scalars["Boolean"]>;
+  /** The bot that performed the action */
+  botActor?: Maybe<ActorBot>;
   /** [Internal] Serialized JSON representing changes for certain non-relational properties. */
   changes?: Maybe<Scalars["JSONObject"]>;
   /** The time at which the entity was created. */
@@ -3017,6 +3085,8 @@ export type IssueNotification = Entity &
     actor?: Maybe<User>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
     archivedAt?: Maybe<Scalars["DateTime"]>;
+    /** The bot that caused the notification. */
+    botActor?: Maybe<ActorBot>;
     /** The comment related to the notification. */
     comment?: Maybe<Comment>;
     /** The time at which the entity was created. */
@@ -3416,7 +3486,7 @@ export type IssueUpdateInput = {
   teamId?: Maybe<Scalars["String"]>;
   /** The issue title. */
   title?: Maybe<Scalars["String"]>;
-  /** Wether the issue has been trashed. */
+  /** Whether the issue has been trashed. */
   trashed?: Maybe<Scalars["Boolean"]>;
 };
 
@@ -3484,6 +3554,8 @@ export type JiraSettingsInput = {
 };
 
 export type JoinOrganizationInput = {
+  /** An optional invite link for an organization. */
+  inviteLink?: Maybe<Scalars["String"]>;
   /** The identifier of the organization. */
   organizationId: Scalars["String"];
 };
@@ -3493,6 +3565,8 @@ export type LabelNotificationSubscription = Entity &
   Node &
   NotificationSubscription & {
     __typename?: "LabelNotificationSubscription";
+    /** Whether the subscription is active or not */
+    active: Scalars["Boolean"];
     /** The time at which the entity was archived. Null if the entity has not been archived. */
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The type of view to which the notification subscription context is associated with. */
@@ -3572,6 +3646,10 @@ export type Mutation = {
   commentCreate: CommentPayload;
   /** Deletes a comment. */
   commentDelete: DeletePayload;
+  /** [ALPHA] Resolves a comment. */
+  commentResolve: CommentPayload;
+  /** [ALPHA] Unresolves a comment. */
+  commentUnresolve: CommentPayload;
   /** Updates a comment. */
   commentUpdate: CommentPayload;
   /** Saves user message. */
@@ -3626,6 +3704,8 @@ export type Mutation = {
   imageUploadFromUrl: ImageUploadFromUrlPayload;
   /** XHR request payload to upload a file for import, directly to Linear's cloud storage. */
   importFileUpload: UploadPayload;
+  /** Connect a Slack channel to Asks. */
+  integrationAsksConnectChannel: AsksChannelConnectPayload;
   /** Deletes an integration. */
   integrationDelete: DeletePayload;
   /** Integrates the organization with Discord. */
@@ -3657,7 +3737,7 @@ export type Mutation = {
    */
   integrationLoom: IntegrationPayload;
   /** [INTERNAL] Integrates the organization with PagerDuty. */
-  integrationPageDutyConnect: IntegrationPayload;
+  integrationPagerDutyConnect: IntegrationPayload;
   /** Requests a currently unavailable integration. */
   integrationRequest: IntegrationRequestPayload;
   /** Integrates the organization with Sentry. */
@@ -3754,7 +3834,10 @@ export type Mutation = {
   notificationSnoozeAll: NotificationBatchActionPayload;
   /** Creates a new notification subscription for a cycle, custom view, label, project or team. */
   notificationSubscriptionCreate: NotificationSubscriptionPayload;
-  /** Deletes a notification subscription reference. */
+  /**
+   * Deletes a notification subscription reference.
+   * @deprecated Update `notificationSubscription.active` to `false` instead.
+   */
   notificationSubscriptionDelete: DeletePayload;
   /** Updates a notification subscription. */
   notificationSubscriptionUpdate: NotificationSubscriptionPayload;
@@ -3795,8 +3878,8 @@ export type Mutation = {
   projectArchive: ProjectArchivePayload;
   /** Creates a new project. */
   projectCreate: ProjectPayload;
-  /** Deletes a project. All issues will be disassociated from the deleted project. */
-  projectDelete: DeletePayload;
+  /** Deletes (trashes) a project. */
+  projectDelete: ProjectArchivePayload;
   /** Creates a new project link. */
   projectLinkCreate: ProjectLinkPayload;
   /** Deletes a project link. */
@@ -3953,6 +4036,8 @@ export type MutationAttachmentDeleteArgs = {
 
 export type MutationAttachmentLinkDiscordArgs = {
   channelId: Scalars["String"];
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
   messageId: Scalars["String"];
   url: Scalars["String"];
@@ -3960,11 +4045,15 @@ export type MutationAttachmentLinkDiscordArgs = {
 
 export type MutationAttachmentLinkFrontArgs = {
   conversationId: Scalars["String"];
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
 };
 
 export type MutationAttachmentLinkIntercomArgs = {
   conversationId: Scalars["String"];
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
 };
 
@@ -3975,6 +4064,8 @@ export type MutationAttachmentLinkJiraIssueArgs = {
 
 export type MutationAttachmentLinkSlackArgs = {
   channel: Scalars["String"];
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
   id?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
   latest: Scalars["String"];
@@ -3984,6 +4075,8 @@ export type MutationAttachmentLinkSlackArgs = {
 };
 
 export type MutationAttachmentLinkUrlArgs = {
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
   id?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
   title?: Maybe<Scalars["String"]>;
@@ -3991,6 +4084,8 @@ export type MutationAttachmentLinkUrlArgs = {
 };
 
 export type MutationAttachmentLinkZendeskArgs = {
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
   ticketId: Scalars["String"];
 };
@@ -4009,6 +4104,15 @@ export type MutationCommentCreateArgs = {
 };
 
 export type MutationCommentDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationCommentResolveArgs = {
+  id: Scalars["String"];
+  resolvingCommentId?: Maybe<Scalars["String"]>;
+};
+
+export type MutationCommentUnresolveArgs = {
   id: Scalars["String"];
 };
 
@@ -4133,6 +4237,11 @@ export type MutationImportFileUploadArgs = {
   size: Scalars["Int"];
 };
 
+export type MutationIntegrationAsksConnectChannelArgs = {
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+};
+
 export type MutationIntegrationDeleteArgs = {
   id: Scalars["String"];
 };
@@ -4175,8 +4284,9 @@ export type MutationIntegrationIntercomSettingsUpdateArgs = {
   input: IntercomSettingsInput;
 };
 
-export type MutationIntegrationPageDutyConnectArgs = {
-  apiToken: Scalars["String"];
+export type MutationIntegrationPagerDutyConnectArgs = {
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
 };
 
 export type MutationIntegrationRequestArgs = {
@@ -4500,6 +4610,7 @@ export type MutationOrganizationUpdateArgs = {
 
 export type MutationProjectArchiveArgs = {
   id: Scalars["String"];
+  trash?: Maybe<Scalars["Boolean"]>;
 };
 
 export type MutationProjectCreateArgs = {
@@ -4794,6 +4905,8 @@ export type Notification = {
   actor?: Maybe<User>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The bot that caused the notification. */
+  botActor?: Maybe<ActorBot>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /**
@@ -4882,6 +4995,8 @@ export type NotificationPayload = {
 
 /** Notification subscriptions for models. */
 export type NotificationSubscription = {
+  /** Whether the subscription is active or not */
+  active: Scalars["Boolean"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The type of view to which the notification subscription context is associated with. */
@@ -4922,6 +5037,8 @@ export type NotificationSubscriptionConnection = {
 };
 
 export type NotificationSubscriptionCreateInput = {
+  /** Whether the subscription is active. */
+  active?: Maybe<Scalars["Boolean"]>;
   /** The type of view to which the notification subscription context is associated with. */
   contextViewType?: Maybe<ContextViewType>;
   /** The identifier of the custom view to subscribe to. */
@@ -4962,6 +5079,8 @@ export type NotificationSubscriptionPayload = {
 };
 
 export type NotificationSubscriptionUpdateInput = {
+  /** Whether the subscription is active. */
+  active?: Maybe<Scalars["Boolean"]>;
   /** The types of notifications of the subscription. */
   notificationSubscriptionTypes?: Maybe<Array<Scalars["String"]>>;
 };
@@ -5051,6 +5170,16 @@ export type NullableDateComparator = {
   nin?: Maybe<Array<Scalars["DateTime"]>>;
   /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
   null?: Maybe<Scalars["Boolean"]>;
+};
+
+/** Document content filtering options. */
+export type NullableDocumentContentFilter = {
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 /** Issue filtering options. */
@@ -5450,6 +5579,8 @@ export type OauthClientApprovalNotification = Entity &
     actor?: Maybe<User>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
     archivedAt?: Maybe<Scalars["DateTime"]>;
+    /** The bot that caused the notification. */
+    botActor?: Maybe<ActorBot>;
     /** The time at which the entity was created. */
     createdAt: Scalars["DateTime"];
     /**
@@ -5545,8 +5676,12 @@ export type Organization = Node & {
   roadmapEnabled: Scalars["Boolean"];
   /** Whether SAML authentication is enabled for organization. */
   samlEnabled: Scalars["Boolean"];
+  /** [INTERNAL] SAML settings */
+  samlSettings: Scalars["JSONObject"];
   /** Whether SCIM provisioning is enabled for organization. */
   scimEnabled: Scalars["Boolean"];
+  /** Which day count to use for SLA calculations */
+  slaDayCount: SlaDayCountType;
   /** The organization's subscription to a paid plan. */
   subscription?: Maybe<PaidSubscription>;
   /** Teams associated with the organization. */
@@ -5747,6 +5882,8 @@ export type OrganizationInvite = Node & {
   invitee?: Maybe<User>;
   /** The user who created the invitation. */
   inviter: User;
+  /** Extra metadata associated with the organization invite. */
+  metadata: Scalars["JSONObject"];
   /** The organization that the invite is associated with. */
   organization: Organization;
   /** The user role that the invitee will receive upon accepting the invite. */
@@ -5773,6 +5910,8 @@ export type OrganizationInviteCreateInput = {
   id?: Maybe<Scalars["String"]>;
   /** The message to send to the invitee. */
   message?: Maybe<Scalars["String"]>;
+  /** [INTERNAL] Optional metadata about the invite */
+  metadata?: Maybe<Scalars["JSONObject"]>;
   /** What user role the invite should grant. */
   role?: Maybe<UserRoleType>;
   /** The teams that the user has been invited to. */
@@ -5950,6 +6089,10 @@ export type Project = Node & {
   completedIssueCountHistory: Array<Scalars["Float"]>;
   /** The number of completed estimation points after each week. */
   completedScopeHistory: Array<Scalars["Float"]>;
+  /** The project's content in markdown format. */
+  content?: Maybe<Scalars["String"]>;
+  /** [Internal] The project's content as a Prosemirror document. */
+  contentData?: Maybe<Scalars["JSON"]>;
   /** The project was created based on this issue. */
   convertedFromIssue?: Maybe<Issue>;
   /** The time at which the entity was created. */
@@ -6012,6 +6155,8 @@ export type Project = Node & {
   targetDate?: Maybe<Scalars["TimelessDate"]>;
   /** Teams associated with this project. */
   teams: TeamConnection;
+  /** A flag that indicates whether the project is in the trash bin. */
+  trashed?: Maybe<Scalars["Boolean"]>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -6455,6 +6600,8 @@ export type ProjectNotification = Entity &
     actor?: Maybe<User>;
     /** The time at which the entity was archived. Null if the entity has not been archived. */
     archivedAt?: Maybe<Scalars["DateTime"]>;
+    /** The bot that caused the notification. */
+    botActor?: Maybe<ActorBot>;
     /** The time at which the entity was created. */
     createdAt: Scalars["DateTime"];
     /**
@@ -6493,6 +6640,8 @@ export type ProjectNotificationSubscription = Entity &
   Node &
   NotificationSubscription & {
     __typename?: "ProjectNotificationSubscription";
+    /** Whether the subscription is active or not */
+    active: Scalars["Boolean"];
     /** The time at which the entity was archived. Null if the entity has not been archived. */
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The type of view to which the notification subscription context is associated with. */
@@ -6564,6 +6713,10 @@ export type ProjectSearchResult = Node & {
   completedIssueCountHistory: Array<Scalars["Float"]>;
   /** The number of completed estimation points after each week. */
   completedScopeHistory: Array<Scalars["Float"]>;
+  /** The project's content in markdown format. */
+  content?: Maybe<Scalars["String"]>;
+  /** [Internal] The project's content as a Prosemirror document. */
+  contentData?: Maybe<Scalars["JSON"]>;
   /** The project was created based on this issue. */
   convertedFromIssue?: Maybe<Issue>;
   /** The time at which the entity was created. */
@@ -6628,6 +6781,8 @@ export type ProjectSearchResult = Node & {
   targetDate?: Maybe<Scalars["TimelessDate"]>;
   /** Teams associated with this project. */
   teams: TeamConnection;
+  /** A flag that indicates whether the project is in the trash bin. */
+  trashed?: Maybe<Scalars["Boolean"]>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -6728,6 +6883,8 @@ export type ProjectUpdate = Node & {
   body: Scalars["String"];
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** The diff between the current update and the previous one. */
+  diff?: Maybe<Scalars["JSON"]>;
   /** The time the project update was edited. */
   editedAt?: Maybe<Scalars["DateTime"]>;
   /** The health of the project at the time of the update. */
@@ -6891,6 +7048,7 @@ export type ProjectUpdatePayload = {
 
 /** The frequency at which to send project update reminders. */
 export enum ProjectUpdateReminderFrequency {
+  Month = "month",
   Never = "never",
   TwoWeeks = "twoWeeks",
   Week = "week",
@@ -6976,6 +7134,8 @@ export type PushSubscriptionTestPayload = {
 /** The different push subscription types */
 export enum PushSubscriptionType {
   Apple = "apple",
+  AppleDevelopment = "appleDevelopment",
+  Firebase = "firebase",
   Web = "web",
 }
 
@@ -7634,6 +7794,7 @@ export type QuerySearchDocumentsArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 };
 
@@ -7645,6 +7806,7 @@ export type QuerySearchIssuesArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 };
 
@@ -7655,6 +7817,7 @@ export type QuerySearchProjectsArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 };
 
@@ -8060,6 +8223,12 @@ export type RoadmapUpdateInput = {
   sortOrder?: Maybe<Scalars["Float"]>;
 };
 
+/** Which day count to use for SLA calculations */
+export enum SlaDayCountType {
+  All = "all",
+  OnlyBusinessDays = "onlyBusinessDays",
+}
+
 export type SamlConfiguration = {
   __typename?: "SamlConfiguration";
   /** The issuer's custom entity ID. */
@@ -8133,6 +8302,38 @@ export type SlaStatusComparator = {
   nin?: Maybe<Array<SlaStatus>>;
   /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
   null?: Maybe<Scalars["Boolean"]>;
+};
+
+/** Slack Asks specific settings. */
+export type SlackAsksSettings = {
+  __typename?: "SlackAsksSettings";
+  /** The mapping of Slack channel ID => Slack channel name for connected channels. */
+  slackChannelMapping?: Maybe<Array<SlackChannelNameMapping>>;
+};
+
+export type SlackAsksSettingsInput = {
+  /** The mapping of Slack channel ID => Slack channel name for connected channels. */
+  slackChannelMapping?: Maybe<Array<SlackChannelNameMappingInput>>;
+};
+
+/** Tuple for mapping Slack channel IDs to names */
+export type SlackChannelNameMapping = {
+  __typename?: "SlackChannelNameMapping";
+  /** The Slack channel ID. */
+  id: Scalars["String"];
+  /** Whether or not the Slack channel is private */
+  isPrivate?: Maybe<Scalars["Boolean"]>;
+  /** The Slack channel name. */
+  name: Scalars["String"];
+};
+
+export type SlackChannelNameMappingInput = {
+  /** The Slack channel ID. */
+  id: Scalars["String"];
+  /** Whether or not the Slack channel is private */
+  isPrivate?: Maybe<Scalars["Boolean"]>;
+  /** The Slack channel name. */
+  name: Scalars["String"];
 };
 
 /** Slack notification specific settings. */
@@ -8348,6 +8549,8 @@ export type Team = Node & {
   memberships: TeamMembershipConnection;
   /** The workflow state into which issues are moved when a PR has been merged. */
   mergeWorkflowState?: Maybe<WorkflowState>;
+  /** The workflow state into which issues are moved when a PR is ready to be merged. */
+  mergeableWorkflowState?: Maybe<WorkflowState>;
   /** The team's name. */
   name: Scalars["String"];
   /** The organization that the team is associated with. */
@@ -8689,6 +8892,8 @@ export type TeamNotificationSubscription = Entity &
   Node &
   NotificationSubscription & {
     __typename?: "TeamNotificationSubscription";
+    /** Whether the subscription is active or not */
+    active: Scalars["Boolean"];
     /** The time at which the entity was archived. Null if the entity has not been archived. */
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The type of view to which the notification subscription context is associated with. */
@@ -8790,6 +8995,8 @@ export type TeamUpdateInput = {
   markedAsDuplicateWorkflowStateId?: Maybe<Scalars["String"]>;
   /** The workflow state into which issues are moved when a PR has been merged. */
   mergeWorkflowStateId?: Maybe<Scalars["String"]>;
+  /** The workflow state into which issues are moved when a PR is ready to be merged. */
+  mergeableWorkflowStateId?: Maybe<Scalars["String"]>;
   /** The name of the team. */
   name?: Maybe<Scalars["String"]>;
   /** Whether the team is private or not. */
@@ -8920,6 +9127,8 @@ export type TimelessDateComparator = {
 export type TokenUserAccountAuthInput = {
   /** The email which to login via the magic login code. */
   email: Scalars["String"];
+  /** An optional invite link for an organization. */
+  inviteLink?: Maybe<Scalars["String"]>;
   /** The identifiers of the teams to auto-join. */
   teamIdsToJoin?: Maybe<Array<Scalars["String"]>>;
   /** The timezone of the user's browser. */
@@ -8955,6 +9164,8 @@ export type UpdateOrganizationInput = {
   reducedPersonalInformation?: Maybe<Scalars["Boolean"]>;
   /** Whether the organization is using roadmap. */
   roadmapEnabled?: Maybe<Scalars["Boolean"]>;
+  /** Which day count to use for SLA calculation. */
+  slaDayCount?: Maybe<SlaDayCountType>;
   /** Internal. Whether SLAs have been enabled for the organization. */
   slaEnabled?: Maybe<Scalars["Boolean"]>;
   /** The URL key of the organization. */
@@ -9329,6 +9540,11 @@ export enum UserFlagType {
   TeamsPageIntroductionDismissed = "teamsPageIntroductionDismissed",
   ThreadedCommentsNudgeIsSeen = "threadedCommentsNudgeIsSeen",
   TriageWelcomeDismissed = "triageWelcomeDismissed",
+  TryCyclesDismissed = "tryCyclesDismissed",
+  TryGithubDismissed = "tryGithubDismissed",
+  TryInvitePeopleDismissed = "tryInvitePeopleDismissed",
+  TryRoadmapsDismissed = "tryRoadmapsDismissed",
+  TryTriageDismissed = "tryTriageDismissed",
   UpdatedSlackThreadSyncIntegration = "updatedSlackThreadSyncIntegration",
 }
 
@@ -9345,6 +9561,8 @@ export type UserNotificationSubscription = Entity &
   Node &
   NotificationSubscription & {
     __typename?: "UserNotificationSubscription";
+    /** Whether the subscription is active or not */
+    active: Scalars["Boolean"];
     /** The time at which the entity was archived. Null if the entity has not been archived. */
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The type of view to which the notification subscription context is associated with. */
@@ -10047,10 +10265,16 @@ export type EntityFragment =
   | Entity_TeamNotificationSubscription_Fragment
   | Entity_UserNotificationSubscription_Fragment;
 
+export type ActorBotFragment = { __typename: "ActorBot" } & Pick<
+  ActorBot,
+  "avatarUrl" | "name" | "userDisplayName" | "subType" | "type" | "id"
+>;
+
 export type CommentFragment = { __typename: "Comment" } & Pick<
   Comment,
   "url" | "reactionData" | "bodyData" | "body" | "updatedAt" | "archivedAt" | "createdAt" | "editedAt" | "id"
 > & {
+    botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     issue: { __typename?: "Issue" } & Pick<Issue, "id">;
     parent?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -10076,7 +10300,7 @@ export type EmojiFragment = { __typename: "Emoji" } & Pick<
 
 export type CustomViewNotificationSubscriptionFragment = { __typename: "CustomViewNotificationSubscription" } & Pick<
   CustomViewNotificationSubscription,
-  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id"
+  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id" | "active"
 > & {
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -10100,11 +10324,15 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
   | "createdAt"
   | "id"
   | "shared"
-> & { team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>; creator: { __typename?: "User" } & Pick<User, "id"> };
+> & {
+    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+    creator: { __typename?: "User" } & Pick<User, "id">;
+    owner: { __typename?: "User" } & Pick<User, "id">;
+  };
 
 export type CycleNotificationSubscriptionFragment = { __typename: "CycleNotificationSubscription" } & Pick<
   CycleNotificationSubscription,
-  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id"
+  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id" | "active"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -10117,8 +10345,11 @@ export type CycleNotificationSubscriptionFragment = { __typename: "CycleNotifica
 
 export type DocumentContentFragment = { __typename: "DocumentContent" } & Pick<
   DocumentContent,
-  "contentData" | "content" | "updatedAt" | "archivedAt" | "createdAt" | "id"
-> & { issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">> };
+  "contentData" | "content" | "contentState" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+> & {
+    issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+  };
 
 export type DocumentFragment = { __typename: "Document" } & Pick<
   Document,
@@ -10235,7 +10466,7 @@ export type DeletePayloadFragment = { __typename: "DeletePayload" } & Pick<
 
 export type LabelNotificationSubscriptionFragment = { __typename: "LabelNotificationSubscription" } & Pick<
   LabelNotificationSubscription,
-  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id"
+  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id" | "active"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -10255,6 +10486,7 @@ type Notification_IssueNotification_Fragment = { __typename: "IssueNotification"
   IssueNotification,
   "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
 > & {
+    botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     user: { __typename?: "User" } & Pick<User, "id">;
   } & IssueNotificationFragment;
@@ -10263,6 +10495,7 @@ type Notification_OauthClientApprovalNotification_Fragment = { __typename: "Oaut
   OauthClientApprovalNotification,
   "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
 > & {
+    botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     user: { __typename?: "User" } & Pick<User, "id">;
   } & OauthClientApprovalNotificationFragment;
@@ -10271,6 +10504,7 @@ type Notification_ProjectNotification_Fragment = { __typename: "ProjectNotificat
   ProjectNotification,
   "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
 > & {
+    botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     user: { __typename?: "User" } & Pick<User, "id">;
   } & ProjectNotificationFragment;
@@ -10282,7 +10516,7 @@ export type NotificationFragment =
 
 export type ProjectNotificationSubscriptionFragment = { __typename: "ProjectNotificationSubscription" } & Pick<
   ProjectNotificationSubscription,
-  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id"
+  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id" | "active"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -10297,6 +10531,7 @@ export type ProjectNotificationFragment = { __typename: "ProjectNotification" } 
   ProjectNotification,
   "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
 > & {
+    botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     project: { __typename?: "Project" } & Pick<Project, "id">;
     projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -10305,6 +10540,7 @@ export type ProjectNotificationFragment = { __typename: "ProjectNotification" } 
 
 export type ProjectFragment = { __typename: "Project" } & Pick<
   Project,
+  | "trashed"
   | "url"
   | "targetDate"
   | "startDate"
@@ -10316,6 +10552,7 @@ export type ProjectFragment = { __typename: "Project" } & Pick<
   | "progress"
   | "scope"
   | "color"
+  | "content"
   | "description"
   | "name"
   | "slugId"
@@ -10386,6 +10623,7 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
     relationChanges?: Maybe<
       Array<{ __typename?: "IssueRelationHistoryPayload" } & IssueRelationHistoryPayloadFragment>
     >;
+    botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     issueImport?: Maybe<{ __typename?: "IssueImport" } & IssueImportFragment>;
     issue: { __typename?: "Issue" } & Pick<Issue, "id">;
     attachment?: Maybe<{ __typename?: "Attachment" } & Pick<Attachment, "id">>;
@@ -10417,7 +10655,7 @@ export type RoadmapFragment = { __typename: "Roadmap" } & Pick<
 
 export type FirstResponderScheduleFragment = { __typename: "FirstResponderSchedule" } & Pick<
   FirstResponderSchedule,
-  "scheduleData" | "integrationScheduleId" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+  "updatedAt" | "scheduleData" | "archivedAt" | "createdAt" | "id"
 > & {
     integration: { __typename?: "Integration" } & Pick<Integration, "id">;
     team: { __typename?: "Team" } & Pick<Team, "id">;
@@ -10451,7 +10689,7 @@ export type WorkflowStateFragment = { __typename: "WorkflowState" } & Pick<
 
 export type TeamNotificationSubscriptionFragment = { __typename: "TeamNotificationSubscription" } & Pick<
   TeamNotificationSubscription,
-  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id"
+  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id" | "active"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -10473,7 +10711,7 @@ export type TemplateFragment = { __typename: "Template" } & Pick<
 
 export type ProjectUpdateFragment = { __typename: "ProjectUpdate" } & Pick<
   ProjectUpdate,
-  "url" | "updatedAt" | "archivedAt" | "createdAt" | "editedAt" | "id" | "body"
+  "url" | "diff" | "updatedAt" | "archivedAt" | "createdAt" | "editedAt" | "id" | "body"
 > & { project: { __typename?: "Project" } & Pick<Project, "id">; user: { __typename?: "User" } & Pick<User, "id"> };
 
 export type UserAccountFragment = { __typename: "UserAccount" } & Pick<
@@ -10483,7 +10721,7 @@ export type UserAccountFragment = { __typename: "UserAccount" } & Pick<
 
 export type UserNotificationSubscriptionFragment = { __typename: "UserNotificationSubscription" } & Pick<
   UserNotificationSubscription,
-  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id"
+  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id" | "active"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -10577,7 +10815,7 @@ export type IntegrationFragment = { __typename: "Integration" } & Pick<
 
 export type OrganizationInviteFragment = { __typename: "OrganizationInvite" } & Pick<
   OrganizationInvite,
-  "external" | "email" | "updatedAt" | "archivedAt" | "createdAt" | "acceptedAt" | "expiresAt" | "id"
+  "metadata" | "external" | "email" | "updatedAt" | "archivedAt" | "createdAt" | "acceptedAt" | "expiresAt" | "id"
 > & {
     inviter: { __typename?: "User" } & Pick<User, "id">;
     invitee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -10596,6 +10834,7 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
   | "snoozedUntilAt"
   | "id"
 > & {
+    botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
     issue: { __typename?: "Issue" } & Pick<Issue, "id">;
     team: { __typename?: "Team" } & Pick<Team, "id">;
@@ -10651,6 +10890,7 @@ export type OauthClientApprovalNotificationFragment = { __typename: "OauthClient
   "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
 > & {
     oauthClientApproval: { __typename?: "OauthClientApproval" } & OauthClientApprovalFragment;
+    botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     user: { __typename?: "User" } & Pick<User, "id">;
   };
@@ -10730,6 +10970,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
     mergeWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     draftWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     startWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+    mergeableWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     reviewWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     markedAsDuplicateWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     triageIssueState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
@@ -10845,7 +11086,7 @@ export type RoadmapToProjectFragment = { __typename: "RoadmapToProject" } & Pick
 
 export type IntegrationTemplateFragment = { __typename: "IntegrationTemplate" } & Pick<
   IntegrationTemplate,
-  "updatedAt" | "archivedAt" | "createdAt" | "id"
+  "foreignEntityId" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & {
     integration: { __typename?: "Integration" } & Pick<Integration, "id">;
     template: { __typename?: "Template" } & Pick<Template, "id">;
@@ -10864,12 +11105,12 @@ export type JiraProjectDataFragment = { __typename: "JiraProjectData" } & Pick<J
 
 export type GitHubSettingsFragment = { __typename: "GitHubSettings" } & Pick<
   GitHubSettings,
-  "orgLogin" | "orgAvatarUrl"
+  "orgLogin" | "orgAvatarUrl" | "repositories"
 >;
 
 type NotificationSubscription_CustomViewNotificationSubscription_Fragment = {
   __typename: "CustomViewNotificationSubscription";
-} & Pick<CustomViewNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+} & Pick<CustomViewNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id" | "active"> & {
     customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -10881,7 +11122,7 @@ type NotificationSubscription_CustomViewNotificationSubscription_Fragment = {
 
 type NotificationSubscription_CycleNotificationSubscription_Fragment = {
   __typename: "CycleNotificationSubscription";
-} & Pick<CycleNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+} & Pick<CycleNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id" | "active"> & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -10893,7 +11134,7 @@ type NotificationSubscription_CycleNotificationSubscription_Fragment = {
 
 type NotificationSubscription_LabelNotificationSubscription_Fragment = {
   __typename: "LabelNotificationSubscription";
-} & Pick<LabelNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+} & Pick<LabelNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id" | "active"> & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
@@ -10905,7 +11146,7 @@ type NotificationSubscription_LabelNotificationSubscription_Fragment = {
 
 type NotificationSubscription_ProjectNotificationSubscription_Fragment = {
   __typename: "ProjectNotificationSubscription";
-} & Pick<ProjectNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+} & Pick<ProjectNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id" | "active"> & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -10917,7 +11158,7 @@ type NotificationSubscription_ProjectNotificationSubscription_Fragment = {
 
 type NotificationSubscription_TeamNotificationSubscription_Fragment = {
   __typename: "TeamNotificationSubscription";
-} & Pick<TeamNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+} & Pick<TeamNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id" | "active"> & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -10929,7 +11170,7 @@ type NotificationSubscription_TeamNotificationSubscription_Fragment = {
 
 type NotificationSubscription_UserNotificationSubscription_Fragment = {
   __typename: "UserNotificationSubscription";
-} & Pick<UserNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+} & Pick<UserNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id" | "active"> & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -11029,6 +11270,10 @@ export type OauthClientApprovalFragment = { __typename: "OauthClientApproval" } 
 
 export type SentrySettingsFragment = { __typename: "SentrySettings" } & Pick<SentrySettings, "organizationSlug">;
 
+export type SlackAsksSettingsFragment = { __typename: "SlackAsksSettings" } & {
+  slackChannelMapping?: Maybe<Array<{ __typename?: "SlackChannelNameMapping" } & SlackChannelNameMappingFragment>>;
+};
+
 export type SlackPostSettingsFragment = { __typename: "SlackPostSettings" } & Pick<
   SlackPostSettings,
   "channel" | "channelId" | "configurationUrl"
@@ -11064,6 +11309,7 @@ export type IntegrationSettingsFragment = { __typename: "IntegrationSettings" } 
   notion?: Maybe<{ __typename?: "NotionSettings" } & NotionSettingsFragment>;
   pagerDuty?: Maybe<{ __typename?: "PagerDutySettings" } & PagerDutySettingsFragment>;
   sentry?: Maybe<{ __typename?: "SentrySettings" } & SentrySettingsFragment>;
+  slackAsks?: Maybe<{ __typename?: "SlackAsksSettings" } & SlackAsksSettingsFragment>;
   slackOrgProjectUpdatesPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
   slackPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
   slackProjectPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
@@ -11110,6 +11356,11 @@ export type JiraLinearMappingFragment = { __typename: "JiraLinearMapping" } & Pi
 export type PagerDutyScheduleMappingFragment = { __typename: "PagerDutyScheduleMapping" } & Pick<
   PagerDutyScheduleMapping,
   "scheduleId" | "scheduleName"
+>;
+
+export type SlackChannelNameMappingFragment = { __typename: "SlackChannelNameMapping" } & Pick<
+  SlackChannelNameMapping,
+  "id" | "name" | "isPrivate"
 >;
 
 export type FavoriteFragment = { __typename: "Favorite" } & Pick<
@@ -11168,6 +11419,14 @@ export type ApiKeyConnectionFragment = { __typename: "ApiKeyConnection" } & {
 
 export type ApiKeyPayloadFragment = { __typename: "ApiKeyPayload" } & Pick<ApiKeyPayload, "lastSyncId" | "success"> & {
     apiKey: { __typename?: "ApiKey" } & ApiKeyFragment;
+  };
+
+export type AsksChannelConnectPayloadFragment = { __typename: "AsksChannelConnectPayload" } & Pick<
+  AsksChannelConnectPayload,
+  "lastSyncId" | "success"
+> & {
+    integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">>;
+    mapping: { __typename?: "SlackChannelNameMapping" } & SlackChannelNameMappingFragment;
   };
 
 export type AttachmentConnectionFragment = { __typename: "AttachmentConnection" } & {
@@ -11897,6 +12156,7 @@ export type ProjectSearchPayloadFragment = { __typename: "ProjectSearchPayload" 
 
 export type ProjectSearchResultFragment = { __typename: "ProjectSearchResult" } & Pick<
   ProjectSearchResult,
+  | "trashed"
   | "metadata"
   | "url"
   | "targetDate"
@@ -11909,6 +12169,7 @@ export type ProjectSearchResultFragment = { __typename: "ProjectSearchResult" } 
   | "progress"
   | "scope"
   | "color"
+  | "content"
   | "description"
   | "name"
   | "slugId"
@@ -12219,6 +12480,8 @@ export type DeleteAttachmentMutation = { __typename?: "Mutation" } & {
 
 export type AttachmentLinkDiscordMutationVariables = Exact<{
   channelId: Scalars["String"];
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
   messageId: Scalars["String"];
   url: Scalars["String"];
@@ -12230,6 +12493,8 @@ export type AttachmentLinkDiscordMutation = { __typename?: "Mutation" } & {
 
 export type AttachmentLinkFrontMutationVariables = Exact<{
   conversationId: Scalars["String"];
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
 }>;
 
@@ -12239,6 +12504,8 @@ export type AttachmentLinkFrontMutation = { __typename?: "Mutation" } & {
 
 export type AttachmentLinkIntercomMutationVariables = Exact<{
   conversationId: Scalars["String"];
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
 }>;
 
@@ -12257,6 +12524,8 @@ export type AttachmentLinkJiraIssueMutation = { __typename?: "Mutation" } & {
 
 export type AttachmentLinkSlackMutationVariables = Exact<{
   channel: Scalars["String"];
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
   id?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
   latest: Scalars["String"];
@@ -12270,6 +12539,8 @@ export type AttachmentLinkSlackMutation = { __typename?: "Mutation" } & {
 };
 
 export type AttachmentLinkUrlMutationVariables = Exact<{
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
   id?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
   title?: Maybe<Scalars["String"]>;
@@ -12281,6 +12552,8 @@ export type AttachmentLinkUrlMutation = { __typename?: "Mutation" } & {
 };
 
 export type AttachmentLinkZendeskMutationVariables = Exact<{
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
   ticketId: Scalars["String"];
 }>;
@@ -12537,6 +12810,15 @@ export type ImportFileUploadMutationVariables = Exact<{
 
 export type ImportFileUploadMutation = { __typename?: "Mutation" } & {
   importFileUpload: { __typename?: "UploadPayload" } & UploadPayloadFragment;
+};
+
+export type IntegrationAsksConnectChannelMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationAsksConnectChannelMutation = { __typename?: "Mutation" } & {
+  integrationAsksConnectChannel: { __typename?: "AsksChannelConnectPayload" } & AsksChannelConnectPayloadFragment;
 };
 
 export type DeleteIntegrationMutationVariables = Exact<{
@@ -13185,6 +13467,7 @@ export type UpdateOrganizationMutation = { __typename?: "Mutation" } & {
 
 export type ArchiveProjectMutationVariables = Exact<{
   id: Scalars["String"];
+  trash?: Maybe<Scalars["Boolean"]>;
 }>;
 
 export type ArchiveProjectMutation = { __typename?: "Mutation" } & {
@@ -13204,7 +13487,7 @@ export type DeleteProjectMutationVariables = Exact<{
 }>;
 
 export type DeleteProjectMutation = { __typename?: "Mutation" } & {
-  projectDelete: { __typename?: "DeletePayload" } & DeletePayloadFragment;
+  projectDelete: { __typename?: "ProjectArchivePayload" } & ProjectArchivePayloadFragment;
 };
 
 export type CreateProjectLinkMutationVariables = Exact<{
@@ -14017,6 +14300,14 @@ export type CommentQueryVariables = Exact<{
 }>;
 
 export type CommentQuery = { __typename?: "Query" } & { comment: { __typename?: "Comment" } & CommentFragment };
+
+export type Comment_BotActorQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type Comment_BotActorQuery = { __typename?: "Query" } & {
+  comment: { __typename?: "Comment" } & { botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment> };
+};
 
 export type Comment_ChildrenQueryVariables = Exact<{
   id: Scalars["String"];
@@ -15163,6 +15454,7 @@ export type SearchDocumentsQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
 
@@ -15177,6 +15469,7 @@ export type SearchDocuments_ArchivePayloadQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
 
@@ -15194,6 +15487,7 @@ export type SearchIssuesQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
 
@@ -15209,6 +15503,7 @@ export type SearchIssues_ArchivePayloadQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
 
@@ -15225,6 +15520,7 @@ export type SearchProjectsQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
 
@@ -15239,6 +15535,7 @@ export type SearchProjects_ArchivePayloadQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
 
@@ -15754,6 +16051,7 @@ export const CustomViewNotificationSubscriptionFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "active" } },
         ],
       },
     },
@@ -15831,6 +16129,7 @@ export const CycleNotificationSubscriptionFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "active" } },
         ],
       },
     },
@@ -15849,6 +16148,7 @@ export const DocumentContentFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "contentData" } },
           { kind: "Field", name: { kind: "Name", value: "content" } },
+          { kind: "Field", name: { kind: "Name", value: "contentState" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "issue" },
@@ -15858,6 +16158,14 @@ export const DocumentContentFragmentDoc = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
@@ -15963,6 +16271,28 @@ export const IssueArchivePayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IssueArchivePayloadFragment, unknown>;
+export const ActorBotFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ActorBot" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ActorBot" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "userDisplayName" } },
+          { kind: "Field", name: { kind: "Name", value: "subType" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ActorBotFragment, unknown>;
 export const IssueNotificationFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -15976,6 +16306,14 @@ export const IssueNotificationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "reactionEmoji" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "botActor" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
+            },
+          },
           {
             kind: "Field",
             name: { kind: "Name", value: "comment" },
@@ -16075,6 +16413,14 @@ export const OauthClientApprovalNotificationFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OauthClientApproval" } }],
             },
           },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "botActor" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "emailedAt" } },
           { kind: "Field", name: { kind: "Name", value: "readAt" } },
@@ -16102,7 +16448,6 @@ export const OauthClientApprovalNotificationFragmentDoc = {
         ],
       },
     },
-    ...OauthClientApprovalFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<OauthClientApprovalNotificationFragment, unknown>;
 export const ProjectNotificationFragmentDoc = {
@@ -16117,6 +16462,14 @@ export const ProjectNotificationFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "botActor" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
@@ -16174,6 +16527,14 @@ export const NotificationFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "botActor" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "emailedAt" } },
           { kind: "Field", name: { kind: "Name", value: "readAt" } },
@@ -16227,9 +16588,6 @@ export const NotificationFragmentDoc = {
         ],
       },
     },
-    ...IssueNotificationFragmentDoc.definitions,
-    ...OauthClientApprovalNotificationFragmentDoc.definitions,
-    ...ProjectNotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationFragment, unknown>;
 export const NotificationArchivePayloadFragmentDoc = {
@@ -16256,7 +16614,6 @@ export const NotificationArchivePayloadFragmentDoc = {
         ],
       },
     },
-    ...NotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationArchivePayloadFragment, unknown>;
 export const ProjectArchivePayloadFragmentDoc = {
@@ -16417,14 +16774,6 @@ export const ArchivePayloadFragmentDoc = {
         ],
       },
     },
-    ...AttachmentArchivePayloadFragmentDoc.definitions,
-    ...CycleArchivePayloadFragmentDoc.definitions,
-    ...DeletePayloadFragmentDoc.definitions,
-    ...IssueArchivePayloadFragmentDoc.definitions,
-    ...NotificationArchivePayloadFragmentDoc.definitions,
-    ...ProjectArchivePayloadFragmentDoc.definitions,
-    ...RoadmapArchivePayloadFragmentDoc.definitions,
-    ...WorkflowStateArchivePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ArchivePayloadFragment, unknown>;
 export const LabelNotificationSubscriptionFragmentDoc = {
@@ -16499,6 +16848,7 @@ export const LabelNotificationSubscriptionFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "active" } },
         ],
       },
     },
@@ -16576,6 +16926,7 @@ export const ProjectNotificationSubscriptionFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "active" } },
         ],
       },
     },
@@ -16653,6 +17004,7 @@ export const TeamNotificationSubscriptionFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "active" } },
         ],
       },
     },
@@ -16774,7 +17126,6 @@ export const UserAccountFragmentDoc = {
         ],
       },
     },
-    ...UserFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UserAccountFragment, unknown>;
 export const UserNotificationSubscriptionFragmentDoc = {
@@ -16849,6 +17200,7 @@ export const UserNotificationSubscriptionFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "active" } },
         ],
       },
     },
@@ -16951,7 +17303,6 @@ export const GithubOrgFragmentDoc = {
         ],
       },
     },
-    ...GithubRepoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<GithubOrgFragment, unknown>;
 export const GithubOAuthTokenPayloadFragmentDoc = {
@@ -16977,7 +17328,6 @@ export const GithubOAuthTokenPayloadFragmentDoc = {
         ],
       },
     },
-    ...GithubOrgFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<GithubOAuthTokenPayloadFragment, unknown>;
 export const UserAuthorizedApplicationFragmentDoc = {
@@ -17064,6 +17414,7 @@ export const GitHubSettingsFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "orgLogin" } },
           { kind: "Field", name: { kind: "Name", value: "orgAvatarUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "repositories" } },
         ],
       },
     },
@@ -17177,8 +17528,6 @@ export const JiraSettingsFragmentDoc = {
         ],
       },
     },
-    ...JiraProjectDataFragmentDoc.definitions,
-    ...JiraLinearMappingFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<JiraSettingsFragment, unknown>;
 export const NotionSettingsFragmentDoc = {
@@ -17239,7 +17588,6 @@ export const PagerDutySettingsFragmentDoc = {
         ],
       },
     },
-    ...PagerDutyScheduleMappingFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<PagerDutySettingsFragment, unknown>;
 export const SentrySettingsFragmentDoc = {
@@ -17259,6 +17607,49 @@ export const SentrySettingsFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<SentrySettingsFragment, unknown>;
+export const SlackChannelNameMappingFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SlackChannelNameMapping" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SlackChannelNameMapping" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "isPrivate" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SlackChannelNameMappingFragment, unknown>;
+export const SlackAsksSettingsFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SlackAsksSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SlackAsksSettings" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "slackChannelMapping" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SlackChannelNameMapping" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SlackAsksSettingsFragment, unknown>;
 export const SlackPostSettingsFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -17379,6 +17770,14 @@ export const IntegrationSettingsFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "slackAsks" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SlackAsksSettings" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "slackOrgProjectUpdatesPost" },
             selectionSet: {
               kind: "SelectionSet",
@@ -17412,16 +17811,6 @@ export const IntegrationSettingsFragmentDoc = {
         ],
       },
     },
-    ...FrontSettingsFragmentDoc.definitions,
-    ...GitHubSettingsFragmentDoc.definitions,
-    ...GoogleSheetsSettingsFragmentDoc.definitions,
-    ...IntercomSettingsFragmentDoc.definitions,
-    ...JiraSettingsFragmentDoc.definitions,
-    ...NotionSettingsFragmentDoc.definitions,
-    ...PagerDutySettingsFragmentDoc.definitions,
-    ...SentrySettingsFragmentDoc.definitions,
-    ...SlackPostSettingsFragmentDoc.definitions,
-    ...ZendeskSettingsFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationSettingsFragment, unknown>;
 export const SamlConfigurationPayloadFragmentDoc = {
@@ -17547,8 +17936,6 @@ export const ApiKeyConnectionFragmentDoc = {
         ],
       },
     },
-    ...ApiKeyFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ApiKeyConnectionFragment, unknown>;
 export const ApiKeyPayloadFragmentDoc = {
@@ -17575,9 +17962,42 @@ export const ApiKeyPayloadFragmentDoc = {
         ],
       },
     },
-    ...ApiKeyFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ApiKeyPayloadFragment, unknown>;
+export const AsksChannelConnectPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AsksChannelConnectPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AsksChannelConnectPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integration" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "mapping" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SlackChannelNameMapping" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AsksChannelConnectPayloadFragment, unknown>;
 export const AttachmentFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -17651,8 +18071,6 @@ export const AttachmentConnectionFragmentDoc = {
         ],
       },
     },
-    ...AttachmentFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentConnectionFragment, unknown>;
 export const AttachmentPayloadFragmentDoc = {
@@ -17762,8 +18180,6 @@ export const AuditEntryConnectionFragmentDoc = {
         ],
       },
     },
-    ...AuditEntryFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AuditEntryConnectionFragment, unknown>;
 export const AuditEntryTypeFragmentDoc = {
@@ -17862,7 +18278,6 @@ export const OrganizationFragmentDoc = {
         ],
       },
     },
-    ...PaidSubscriptionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<OrganizationFragment, unknown>;
 export const AuthResolverResponseFragmentDoc = {
@@ -17900,8 +18315,6 @@ export const AuthResolverResponseFragmentDoc = {
         ],
       },
     },
-    ...OrganizationFragmentDoc.definitions,
-    ...UserFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AuthResolverResponseFragment, unknown>;
 export const CommentFragmentDoc = {
@@ -17917,6 +18330,14 @@ export const CommentFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "reactionData" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "botActor" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "bodyData" } },
           { kind: "Field", name: { kind: "Name", value: "body" } },
           {
@@ -17983,8 +18404,6 @@ export const CommentConnectionFragmentDoc = {
         ],
       },
     },
-    ...CommentFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CommentConnectionFragment, unknown>;
 export const CommentPayloadFragmentDoc = {
@@ -18076,8 +18495,6 @@ export const CompanyConnectionFragmentDoc = {
         ],
       },
     },
-    ...CompanyFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CompanyConnectionFragment, unknown>;
 export const ContactPayloadFragmentDoc = {
@@ -18175,6 +18592,14 @@ export const CustomViewFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "owner" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "shared" } },
         ],
       },
@@ -18211,8 +18636,6 @@ export const CustomViewConnectionFragmentDoc = {
         ],
       },
     },
-    ...CustomViewFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CustomViewConnectionFragment, unknown>;
 export const CustomViewPayloadFragmentDoc = {
@@ -18331,8 +18754,6 @@ export const CycleConnectionFragmentDoc = {
         ],
       },
     },
-    ...CycleFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CycleConnectionFragment, unknown>;
 export const CyclePayloadFragmentDoc = {
@@ -18441,8 +18862,6 @@ export const DocumentConnectionFragmentDoc = {
         ],
       },
     },
-    ...DocumentFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DocumentConnectionFragment, unknown>;
 export const DocumentPayloadFragmentDoc = {
@@ -18581,9 +19000,6 @@ export const DocumentSearchPayloadFragmentDoc = {
         ],
       },
     },
-    ...ArchiveResponseFragmentDoc.definitions,
-    ...DocumentSearchResultFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DocumentSearchPayloadFragment, unknown>;
 export const DocumentSearchResultConnectionFragmentDoc = {
@@ -18616,8 +19032,6 @@ export const DocumentSearchResultConnectionFragmentDoc = {
         ],
       },
     },
-    ...DocumentSearchResultFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DocumentSearchResultConnectionFragment, unknown>;
 export const EmailUnsubscribePayloadFragmentDoc = {
@@ -18706,7 +19120,6 @@ export const EmbedPayloadFragmentDoc = {
         ],
       },
     },
-    ...EmbedFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<EmbedPayloadFragment, unknown>;
 export const EmojiFragmentDoc = {
@@ -18770,8 +19183,6 @@ export const EmojiConnectionFragmentDoc = {
         ],
       },
     },
-    ...EmojiFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<EmojiConnectionFragment, unknown>;
 export const EmojiPayloadFragmentDoc = {
@@ -18950,8 +19361,6 @@ export const FavoriteConnectionFragmentDoc = {
         ],
       },
     },
-    ...FavoriteFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<FavoriteConnectionFragment, unknown>;
 export const FavoritePayloadFragmentDoc = {
@@ -19023,7 +19432,6 @@ export const FigmaEmbedPayloadFragmentDoc = {
         ],
       },
     },
-    ...FigmaEmbedFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<FigmaEmbedPayloadFragment, unknown>;
 export const FirstResponderScheduleFragmentDoc = {
@@ -19037,8 +19445,6 @@ export const FirstResponderScheduleFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "scheduleData" } },
-          { kind: "Field", name: { kind: "Name", value: "integrationScheduleId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "integration" },
@@ -19048,6 +19454,7 @@ export const FirstResponderScheduleFragmentDoc = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "scheduleData" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
@@ -19094,8 +19501,6 @@ export const FirstResponderScheduleConnectionFragmentDoc = {
         ],
       },
     },
-    ...FirstResponderScheduleFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<FirstResponderScheduleConnectionFragment, unknown>;
 export const FrontAttachmentPayloadFragmentDoc = {
@@ -19229,8 +19634,6 @@ export const IntegrationConnectionFragmentDoc = {
         ],
       },
     },
-    ...IntegrationFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationConnectionFragment, unknown>;
 export const IntegrationPayloadFragmentDoc = {
@@ -19287,6 +19690,7 @@ export const IntegrationTemplateFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "foreignEntityId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "integration" },
@@ -19342,8 +19746,6 @@ export const IntegrationTemplateConnectionFragmentDoc = {
         ],
       },
     },
-    ...IntegrationTemplateFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationTemplateConnectionFragment, unknown>;
 export const IntegrationTemplatePayloadFragmentDoc = {
@@ -19448,8 +19850,6 @@ export const IntegrationsSettingsConnectionFragmentDoc = {
         ],
       },
     },
-    ...IntegrationsSettingsFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationsSettingsConnectionFragment, unknown>;
 export const IntegrationsSettingsPayloadFragmentDoc = {
@@ -19626,7 +20026,6 @@ export const IssueBatchPayloadFragmentDoc = {
         ],
       },
     },
-    ...IssueFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueBatchPayloadFragment, unknown>;
 export const IssueConnectionFragmentDoc = {
@@ -19659,8 +20058,6 @@ export const IssueConnectionFragmentDoc = {
         ],
       },
     },
-    ...IssueFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueConnectionFragment, unknown>;
 export const IssueFilterSuggestionPayloadFragmentDoc = {
@@ -19748,6 +20145,14 @@ export const IssueHistoryFragmentDoc = {
           },
           { kind: "Field", name: { kind: "Name", value: "addedLabelIds" } },
           { kind: "Field", name: { kind: "Name", value: "removedLabelIds" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "botActor" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "attachmentId" } },
           { kind: "Field", name: { kind: "Name", value: "toCycleId" } },
           { kind: "Field", name: { kind: "Name", value: "toParentId" } },
@@ -19919,8 +20324,6 @@ export const IssueHistoryFragmentDoc = {
         ],
       },
     },
-    ...IssueRelationHistoryPayloadFragmentDoc.definitions,
-    ...IssueImportFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueHistoryFragment, unknown>;
 export const IssueHistoryConnectionFragmentDoc = {
@@ -19953,8 +20356,6 @@ export const IssueHistoryConnectionFragmentDoc = {
         ],
       },
     },
-    ...IssueHistoryFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueHistoryConnectionFragment, unknown>;
 export const IssueImportCheckPayloadFragmentDoc = {
@@ -19998,7 +20399,6 @@ export const IssueImportDeletePayloadFragmentDoc = {
         ],
       },
     },
-    ...IssueImportFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueImportDeletePayloadFragment, unknown>;
 export const IssueImportPayloadFragmentDoc = {
@@ -20025,7 +20425,6 @@ export const IssueImportPayloadFragmentDoc = {
         ],
       },
     },
-    ...IssueImportFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueImportPayloadFragment, unknown>;
 export const IssueLabelFragmentDoc = {
@@ -20106,8 +20505,6 @@ export const IssueLabelConnectionFragmentDoc = {
         ],
       },
     },
-    ...IssueLabelFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueLabelConnectionFragment, unknown>;
 export const IssueLabelPayloadFragmentDoc = {
@@ -20247,8 +20644,6 @@ export const IssueRelationConnectionFragmentDoc = {
         ],
       },
     },
-    ...IssueRelationFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueRelationConnectionFragment, unknown>;
 export const IssueRelationPayloadFragmentDoc = {
@@ -20441,9 +20836,6 @@ export const IssueSearchPayloadFragmentDoc = {
         ],
       },
     },
-    ...ArchiveResponseFragmentDoc.definitions,
-    ...IssueSearchResultFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueSearchPayloadFragment, unknown>;
 export const IssueSearchResultConnectionFragmentDoc = {
@@ -20476,8 +20868,6 @@ export const IssueSearchResultConnectionFragmentDoc = {
         ],
       },
     },
-    ...IssueSearchResultFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueSearchResultConnectionFragment, unknown>;
 export const LogoutResponseFragmentDoc = {
@@ -20538,7 +20928,6 @@ export const NotificationBatchActionPayloadFragmentDoc = {
         ],
       },
     },
-    ...NotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationBatchActionPayloadFragment, unknown>;
 export const NotificationConnectionFragmentDoc = {
@@ -20571,8 +20960,6 @@ export const NotificationConnectionFragmentDoc = {
         ],
       },
     },
-    ...NotificationFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationConnectionFragment, unknown>;
 export const NotificationPayloadFragmentDoc = {
@@ -20599,7 +20986,6 @@ export const NotificationPayloadFragmentDoc = {
         ],
       },
     },
-    ...NotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationPayloadFragment, unknown>;
 export const NotificationSubscriptionFragmentDoc = {
@@ -20673,6 +21059,7 @@ export const NotificationSubscriptionFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "active" } },
         ],
       },
     },
@@ -20708,8 +21095,6 @@ export const NotificationSubscriptionConnectionFragmentDoc = {
         ],
       },
     },
-    ...NotificationSubscriptionFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationSubscriptionConnectionFragment, unknown>;
 export const NotificationSubscriptionPayloadFragmentDoc = {
@@ -20736,7 +21121,6 @@ export const NotificationSubscriptionPayloadFragmentDoc = {
         ],
       },
     },
-    ...NotificationSubscriptionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationSubscriptionPayloadFragment, unknown>;
 export const OauthClientFragmentDoc = {
@@ -20809,8 +21193,6 @@ export const OauthClientConnectionFragmentDoc = {
         ],
       },
     },
-    ...OauthClientFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<OauthClientConnectionFragment, unknown>;
 export const OrganizationCancelDeletePayloadFragmentDoc = {
@@ -20876,6 +21258,7 @@ export const OrganizationInviteFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "metadata" } },
           { kind: "Field", name: { kind: "Name", value: "external" } },
           { kind: "Field", name: { kind: "Name", value: "email" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
@@ -20935,8 +21318,6 @@ export const OrganizationInviteConnectionFragmentDoc = {
         ],
       },
     },
-    ...OrganizationInviteFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<OrganizationInviteConnectionFragment, unknown>;
 export const OrganizationInviteFullDetailsPayloadFragmentDoc = {
@@ -21035,6 +21416,7 @@ export const ProjectFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "trashed" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           {
             kind: "Field",
@@ -21070,6 +21452,7 @@ export const ProjectFragmentDoc = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "color" } },
+          { kind: "Field", name: { kind: "Name", value: "content" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "slugId" } },
@@ -21131,8 +21514,6 @@ export const ProjectConnectionFragmentDoc = {
         ],
       },
     },
-    ...ProjectFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectConnectionFragment, unknown>;
 export const ProjectFilterSuggestionPayloadFragmentDoc = {
@@ -21220,8 +21601,6 @@ export const ProjectLinkConnectionFragmentDoc = {
         ],
       },
     },
-    ...ProjectLinkFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectLinkConnectionFragment, unknown>;
 export const ProjectLinkPayloadFragmentDoc = {
@@ -21312,8 +21691,6 @@ export const ProjectMilestoneConnectionFragmentDoc = {
         ],
       },
     },
-    ...ProjectMilestoneFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectMilestoneConnectionFragment, unknown>;
 export const ProjectMilestonePayloadFragmentDoc = {
@@ -21379,6 +21756,7 @@ export const ProjectSearchResultFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "trashed" } },
           { kind: "Field", name: { kind: "Name", value: "metadata" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           {
@@ -21415,6 +21793,7 @@ export const ProjectSearchResultFragmentDoc = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "color" } },
+          { kind: "Field", name: { kind: "Name", value: "content" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "slugId" } },
@@ -21485,9 +21864,6 @@ export const ProjectSearchPayloadFragmentDoc = {
         ],
       },
     },
-    ...ArchiveResponseFragmentDoc.definitions,
-    ...ProjectSearchResultFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectSearchPayloadFragment, unknown>;
 export const ProjectSearchResultConnectionFragmentDoc = {
@@ -21520,8 +21896,6 @@ export const ProjectSearchResultConnectionFragmentDoc = {
         ],
       },
     },
-    ...ProjectSearchResultFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectSearchResultConnectionFragment, unknown>;
 export const ProjectUpdateFragmentDoc = {
@@ -21536,6 +21910,7 @@ export const ProjectUpdateFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "diff" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
@@ -21593,8 +21968,6 @@ export const ProjectUpdateConnectionFragmentDoc = {
         ],
       },
     },
-    ...ProjectUpdateFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectUpdateConnectionFragment, unknown>;
 export const ProjectUpdateInteractionFragmentDoc = {
@@ -21664,8 +22037,6 @@ export const ProjectUpdateInteractionConnectionFragmentDoc = {
         ],
       },
     },
-    ...ProjectUpdateInteractionFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectUpdateInteractionConnectionFragment, unknown>;
 export const ProjectUpdateInteractionPayloadFragmentDoc = {
@@ -21804,8 +22175,6 @@ export const PushSubscriptionConnectionFragmentDoc = {
         ],
       },
     },
-    ...PushSubscriptionFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<PushSubscriptionConnectionFragment, unknown>;
 export const PushSubscriptionPayloadFragmentDoc = {
@@ -21889,7 +22258,6 @@ export const RateLimitPayloadFragmentDoc = {
         ],
       },
     },
-    ...RateLimitResultPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<RateLimitPayloadFragment, unknown>;
 export const ReactionFragmentDoc = {
@@ -21951,8 +22319,6 @@ export const ReactionConnectionFragmentDoc = {
         ],
       },
     },
-    ...ReactionFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ReactionConnectionFragment, unknown>;
 export const ReactionPayloadFragmentDoc = {
@@ -21979,7 +22345,6 @@ export const ReactionPayloadFragmentDoc = {
         ],
       },
     },
-    ...ReactionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ReactionPayloadFragment, unknown>;
 export const RoadmapFragmentDoc = {
@@ -22053,8 +22418,6 @@ export const RoadmapConnectionFragmentDoc = {
         ],
       },
     },
-    ...RoadmapFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<RoadmapConnectionFragment, unknown>;
 export const RoadmapPayloadFragmentDoc = {
@@ -22150,8 +22513,6 @@ export const RoadmapToProjectConnectionFragmentDoc = {
         ],
       },
     },
-    ...RoadmapToProjectFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<RoadmapToProjectConnectionFragment, unknown>;
 export const RoadmapToProjectPayloadFragmentDoc = {
@@ -22338,6 +22699,14 @@ export const TeamFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "mergeableWorkflowState" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "reviewWorkflowState" },
             selectionSet: {
               kind: "SelectionSet",
@@ -22409,8 +22778,6 @@ export const TeamConnectionFragmentDoc = {
         ],
       },
     },
-    ...TeamFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<TeamConnectionFragment, unknown>;
 export const TeamMembershipFragmentDoc = {
@@ -22481,8 +22848,6 @@ export const TeamMembershipConnectionFragmentDoc = {
         ],
       },
     },
-    ...TeamMembershipFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<TeamMembershipConnectionFragment, unknown>;
 export const TeamMembershipPayloadFragmentDoc = {
@@ -22559,7 +22924,6 @@ export const TemplateConnectionFragmentDoc = {
         ],
       },
     },
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<TemplateConnectionFragment, unknown>;
 export const TemplatePayloadFragmentDoc = {
@@ -22634,7 +22998,6 @@ export const UploadFileFragmentDoc = {
         ],
       },
     },
-    ...UploadFileHeaderFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UploadFileFragment, unknown>;
 export const UploadPayloadFragmentDoc = {
@@ -22661,7 +23024,6 @@ export const UploadPayloadFragmentDoc = {
         ],
       },
     },
-    ...UploadFileFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UploadPayloadFragment, unknown>;
 export const UserAdminPayloadFragmentDoc = {
@@ -22711,8 +23073,6 @@ export const UserConnectionFragmentDoc = {
         ],
       },
     },
-    ...UserFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UserConnectionFragment, unknown>;
 export const UserPayloadFragmentDoc = {
@@ -22843,7 +23203,6 @@ export const ViewPreferencesPayloadFragmentDoc = {
         ],
       },
     },
-    ...ViewPreferencesFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ViewPreferencesPayloadFragment, unknown>;
 export const WebhookFragmentDoc = {
@@ -22918,8 +23277,6 @@ export const WebhookConnectionFragmentDoc = {
         ],
       },
     },
-    ...WebhookFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<WebhookConnectionFragment, unknown>;
 export const WebhookPayloadFragmentDoc = {
@@ -23020,8 +23377,6 @@ export const WorkflowCronJobDefinitionConnectionFragmentDoc = {
         ],
       },
     },
-    ...WorkflowCronJobDefinitionFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<WorkflowCronJobDefinitionConnectionFragment, unknown>;
 export const WorkflowDefinitionFragmentDoc = {
@@ -23137,8 +23492,6 @@ export const WorkflowDefinitionConnectionFragmentDoc = {
         ],
       },
     },
-    ...WorkflowDefinitionFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<WorkflowDefinitionConnectionFragment, unknown>;
 export const WorkflowStateFragmentDoc = {
@@ -23204,8 +23557,6 @@ export const WorkflowStateConnectionFragmentDoc = {
         ],
       },
     },
-    ...WorkflowStateFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<WorkflowStateConnectionFragment, unknown>;
 export const WorkflowStatePayloadFragmentDoc = {
@@ -23314,6 +23665,7 @@ export const CreateApiKeyDocument = {
       },
     },
     ...ApiKeyPayloadFragmentDoc.definitions,
+    ...ApiKeyFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CreateApiKeyMutation, CreateApiKeyMutationVariables>;
 export const DeleteApiKeyDocument = {
@@ -23486,6 +23838,16 @@ export const AttachmentLinkDiscordDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -23511,6 +23873,16 @@ export const AttachmentLinkDiscordDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "channelId" },
                 value: { kind: "Variable", name: { kind: "Name", value: "channelId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "createAsUser" },
+                value: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "displayIconUrl" },
+                value: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
               },
               {
                 kind: "Argument",
@@ -23554,6 +23926,16 @@ export const AttachmentLinkFrontDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -23569,6 +23951,16 @@ export const AttachmentLinkFrontDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "conversationId" },
                 value: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "createAsUser" },
+                value: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "displayIconUrl" },
+                value: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
               },
               {
                 kind: "Argument",
@@ -23602,6 +23994,16 @@ export const AttachmentLinkIntercomDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -23617,6 +24019,16 @@ export const AttachmentLinkIntercomDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "conversationId" },
                 value: { kind: "Variable", name: { kind: "Name", value: "conversationId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "createAsUser" },
+                value: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "displayIconUrl" },
+                value: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
               },
               {
                 kind: "Argument",
@@ -23698,6 +24110,16 @@ export const AttachmentLinkSlackDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -23738,6 +24160,16 @@ export const AttachmentLinkSlackDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "channel" },
                 value: { kind: "Variable", name: { kind: "Name", value: "channel" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "createAsUser" },
+                value: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "displayIconUrl" },
+                value: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
               },
               {
                 kind: "Argument",
@@ -23791,6 +24223,16 @@ export const AttachmentLinkUrlDocument = {
       variableDefinitions: [
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -23817,6 +24259,16 @@ export const AttachmentLinkUrlDocument = {
             kind: "Field",
             name: { kind: "Name", value: "attachmentLinkURL" },
             arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "createAsUser" },
+                value: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "displayIconUrl" },
+                value: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
+              },
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "id" },
@@ -23859,6 +24311,16 @@ export const AttachmentLinkZendeskDocument = {
       variableDefinitions: [
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -23875,6 +24337,16 @@ export const AttachmentLinkZendeskDocument = {
             kind: "Field",
             name: { kind: "Name", value: "attachmentLinkZendesk" },
             arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "createAsUser" },
+                value: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "displayIconUrl" },
+                value: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
+              },
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "issueId" },
@@ -24677,6 +25149,9 @@ export const EmailTokenUserAccountAuthDocument = {
       },
     },
     ...AuthResolverResponseFragmentDoc.definitions,
+    ...OrganizationFragmentDoc.definitions,
+    ...PaidSubscriptionFragmentDoc.definitions,
+    ...UserFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<EmailTokenUserAccountAuthMutation, EmailTokenUserAccountAuthMutationVariables>;
 export const EmailUnsubscribeDocument = {
@@ -25045,6 +25520,8 @@ export const FileUploadDocument = {
       },
     },
     ...UploadPayloadFragmentDoc.definitions,
+    ...UploadFileFragmentDoc.definitions,
+    ...UploadFileHeaderFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<FileUploadMutation, FileUploadMutationVariables>;
 export const GoogleUserAccountAuthDocument = {
@@ -25086,6 +25563,9 @@ export const GoogleUserAccountAuthDocument = {
       },
     },
     ...AuthResolverResponseFragmentDoc.definitions,
+    ...OrganizationFragmentDoc.definitions,
+    ...PaidSubscriptionFragmentDoc.definitions,
+    ...UserFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<GoogleUserAccountAuthMutation, GoogleUserAccountAuthMutationVariables>;
 export const ImageUploadFromUrlDocument = {
@@ -25192,8 +25672,59 @@ export const ImportFileUploadDocument = {
       },
     },
     ...UploadPayloadFragmentDoc.definitions,
+    ...UploadFileFragmentDoc.definitions,
+    ...UploadFileHeaderFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ImportFileUploadMutation, ImportFileUploadMutationVariables>;
+export const IntegrationAsksConnectChannelDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationAsksConnectChannel" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationAsksConnectChannel" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AsksChannelConnectPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AsksChannelConnectPayloadFragmentDoc.definitions,
+    ...SlackChannelNameMappingFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationAsksConnectChannelMutation, IntegrationAsksConnectChannelMutationVariables>;
 export const DeleteIntegrationDocument = {
   kind: "Document",
   definitions: [
@@ -26549,6 +27080,7 @@ export const UpdateIssueBatchDocument = {
       },
     },
     ...IssueBatchPayloadFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateIssueBatchMutation, UpdateIssueBatchMutationVariables>;
 export const CreateIssueDocument = {
@@ -26733,6 +27265,7 @@ export const IssueImportCreateAsanaDocument = {
       },
     },
     ...IssueImportPayloadFragmentDoc.definitions,
+    ...IssueImportFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueImportCreateAsanaMutation, IssueImportCreateAsanaMutationVariables>;
 export const IssueImportCreateCsvJiraDocument = {
@@ -26831,6 +27364,7 @@ export const IssueImportCreateCsvJiraDocument = {
       },
     },
     ...IssueImportPayloadFragmentDoc.definitions,
+    ...IssueImportFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueImportCreateCsvJiraMutation, IssueImportCreateCsvJiraMutationVariables>;
 export const IssueImportCreateClubhouseDocument = {
@@ -26939,6 +27473,7 @@ export const IssueImportCreateClubhouseDocument = {
       },
     },
     ...IssueImportPayloadFragmentDoc.definitions,
+    ...IssueImportFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueImportCreateClubhouseMutation, IssueImportCreateClubhouseMutationVariables>;
 export const IssueImportCreateGithubDocument = {
@@ -27067,6 +27602,7 @@ export const IssueImportCreateGithubDocument = {
       },
     },
     ...IssueImportPayloadFragmentDoc.definitions,
+    ...IssueImportFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueImportCreateGithubMutation, IssueImportCreateGithubMutationVariables>;
 export const IssueImportCreateJiraDocument = {
@@ -27195,6 +27731,7 @@ export const IssueImportCreateJiraDocument = {
       },
     },
     ...IssueImportPayloadFragmentDoc.definitions,
+    ...IssueImportFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueImportCreateJiraMutation, IssueImportCreateJiraMutationVariables>;
 export const DeleteIssueImportDocument = {
@@ -27233,6 +27770,7 @@ export const DeleteIssueImportDocument = {
       },
     },
     ...IssueImportDeletePayloadFragmentDoc.definitions,
+    ...IssueImportFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DeleteIssueImportMutation, DeleteIssueImportMutationVariables>;
 export const IssueImportProcessDocument = {
@@ -27281,6 +27819,7 @@ export const IssueImportProcessDocument = {
       },
     },
     ...IssueImportPayloadFragmentDoc.definitions,
+    ...IssueImportFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueImportProcessMutation, IssueImportProcessMutationVariables>;
 export const UpdateIssueImportDocument = {
@@ -27332,6 +27871,7 @@ export const UpdateIssueImportDocument = {
       },
     },
     ...IssueImportPayloadFragmentDoc.definitions,
+    ...IssueImportFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateIssueImportMutation, UpdateIssueImportMutationVariables>;
 export const CreateIssueLabelDocument = {
@@ -27881,6 +28421,12 @@ export const ArchiveNotificationDocument = {
       },
     },
     ...NotificationArchivePayloadFragmentDoc.definitions,
+    ...NotificationFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...IssueNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalFragmentDoc.definitions,
+    ...ProjectNotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ArchiveNotificationMutation, ArchiveNotificationMutationVariables>;
 export const NotificationArchiveAllDocument = {
@@ -27922,6 +28468,12 @@ export const NotificationArchiveAllDocument = {
       },
     },
     ...NotificationBatchActionPayloadFragmentDoc.definitions,
+    ...NotificationFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...IssueNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalFragmentDoc.definitions,
+    ...ProjectNotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationArchiveAllMutation, NotificationArchiveAllMutationVariables>;
 export const NotificationMarkReadAllDocument = {
@@ -27973,6 +28525,12 @@ export const NotificationMarkReadAllDocument = {
       },
     },
     ...NotificationBatchActionPayloadFragmentDoc.definitions,
+    ...NotificationFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...IssueNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalFragmentDoc.definitions,
+    ...ProjectNotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationMarkReadAllMutation, NotificationMarkReadAllMutationVariables>;
 export const NotificationMarkUnreadAllDocument = {
@@ -28014,6 +28572,12 @@ export const NotificationMarkUnreadAllDocument = {
       },
     },
     ...NotificationBatchActionPayloadFragmentDoc.definitions,
+    ...NotificationFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...IssueNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalFragmentDoc.definitions,
+    ...ProjectNotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationMarkUnreadAllMutation, NotificationMarkUnreadAllMutationVariables>;
 export const NotificationSnoozeAllDocument = {
@@ -28065,6 +28629,12 @@ export const NotificationSnoozeAllDocument = {
       },
     },
     ...NotificationBatchActionPayloadFragmentDoc.definitions,
+    ...NotificationFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...IssueNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalFragmentDoc.definitions,
+    ...ProjectNotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationSnoozeAllMutation, NotificationSnoozeAllMutationVariables>;
 export const CreateNotificationSubscriptionDocument = {
@@ -28108,6 +28678,7 @@ export const CreateNotificationSubscriptionDocument = {
       },
     },
     ...NotificationSubscriptionPayloadFragmentDoc.definitions,
+    ...NotificationSubscriptionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CreateNotificationSubscriptionMutation, CreateNotificationSubscriptionMutationVariables>;
 export const DeleteNotificationSubscriptionDocument = {
@@ -28199,6 +28770,7 @@ export const UpdateNotificationSubscriptionDocument = {
       },
     },
     ...NotificationSubscriptionPayloadFragmentDoc.definitions,
+    ...NotificationSubscriptionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateNotificationSubscriptionMutation, UpdateNotificationSubscriptionMutationVariables>;
 export const UnarchiveNotificationDocument = {
@@ -28237,6 +28809,12 @@ export const UnarchiveNotificationDocument = {
       },
     },
     ...NotificationArchivePayloadFragmentDoc.definitions,
+    ...NotificationFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...IssueNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalFragmentDoc.definitions,
+    ...ProjectNotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UnarchiveNotificationMutation, UnarchiveNotificationMutationVariables>;
 export const NotificationUnsnoozeAllDocument = {
@@ -28288,6 +28866,12 @@ export const NotificationUnsnoozeAllDocument = {
       },
     },
     ...NotificationBatchActionPayloadFragmentDoc.definitions,
+    ...NotificationFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...IssueNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalFragmentDoc.definitions,
+    ...ProjectNotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationUnsnoozeAllMutation, NotificationUnsnoozeAllMutationVariables>;
 export const UpdateNotificationDocument = {
@@ -28339,6 +28923,12 @@ export const UpdateNotificationDocument = {
       },
     },
     ...NotificationPayloadFragmentDoc.definitions,
+    ...NotificationFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...IssueNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalFragmentDoc.definitions,
+    ...ProjectNotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateNotificationMutation, UpdateNotificationMutationVariables>;
 export const DeleteOrganizationCancelDocument = {
@@ -28680,6 +29270,11 @@ export const ArchiveProjectDocument = {
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "trash" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
       ],
       selectionSet: {
         kind: "SelectionSet",
@@ -28692,6 +29287,11 @@ export const ArchiveProjectDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "id" },
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "trash" },
+                value: { kind: "Variable", name: { kind: "Name", value: "trash" } },
               },
             ],
             selectionSet: {
@@ -28775,13 +29375,13 @@ export const DeleteProjectDocument = {
             ],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DeletePayload" } }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectArchivePayload" } }],
             },
           },
         ],
       },
     },
-    ...DeletePayloadFragmentDoc.definitions,
+    ...ProjectArchivePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DeleteProjectMutation, DeleteProjectMutationVariables>;
 export const CreateProjectLinkDocument = {
@@ -29464,6 +30064,7 @@ export const CreateReactionDocument = {
       },
     },
     ...ReactionPayloadFragmentDoc.definitions,
+    ...ReactionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CreateReactionMutation, CreateReactionMutationVariables>;
 export const DeleteReactionDocument = {
@@ -29955,6 +30556,9 @@ export const SamlTokenUserAccountAuthDocument = {
       },
     },
     ...AuthResolverResponseFragmentDoc.definitions,
+    ...OrganizationFragmentDoc.definitions,
+    ...PaidSubscriptionFragmentDoc.definitions,
+    ...UserFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<SamlTokenUserAccountAuthMutation, SamlTokenUserAccountAuthMutationVariables>;
 export const CreateTeamDocument = {
@@ -31123,6 +31727,7 @@ export const CreateViewPreferencesDocument = {
       },
     },
     ...ViewPreferencesPayloadFragmentDoc.definitions,
+    ...ViewPreferencesFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CreateViewPreferencesMutation, CreateViewPreferencesMutationVariables>;
 export const DeleteViewPreferencesDocument = {
@@ -31212,6 +31817,7 @@ export const UpdateViewPreferencesDocument = {
       },
     },
     ...ViewPreferencesPayloadFragmentDoc.definitions,
+    ...ViewPreferencesFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateViewPreferencesMutation, UpdateViewPreferencesMutationVariables>;
 export const CreateWebhookDocument = {
@@ -31608,6 +32214,8 @@ export const ProjectMilestonesDocument = {
       },
     },
     ...ProjectMilestoneConnectionFragmentDoc.definitions,
+    ...ProjectMilestoneFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectMilestonesQuery, ProjectMilestonesQueryVariables>;
 export const AdministrableTeamsDocument = {
@@ -31706,6 +32314,8 @@ export const AdministrableTeamsDocument = {
       },
     },
     ...TeamConnectionFragmentDoc.definitions,
+    ...TeamFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AdministrableTeamsQuery, AdministrableTeamsQueryVariables>;
 export const ApiKeysDocument = {
@@ -31794,6 +32404,8 @@ export const ApiKeysDocument = {
       },
     },
     ...ApiKeyConnectionFragmentDoc.definitions,
+    ...ApiKeyFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ApiKeysQuery, ApiKeysQueryVariables>;
 export const ApplicationInfoDocument = {
@@ -32101,6 +32713,8 @@ export const AttachmentIssue_AttachmentsDocument = {
       },
     },
     ...AttachmentConnectionFragmentDoc.definitions,
+    ...AttachmentFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentIssue_AttachmentsQuery, AttachmentIssue_AttachmentsQueryVariables>;
 export const AttachmentIssue_ChildrenDocument = {
@@ -32220,6 +32834,8 @@ export const AttachmentIssue_ChildrenDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentIssue_ChildrenQuery, AttachmentIssue_ChildrenQueryVariables>;
 export const AttachmentIssue_CommentsDocument = {
@@ -32339,6 +32955,9 @@ export const AttachmentIssue_CommentsDocument = {
       },
     },
     ...CommentConnectionFragmentDoc.definitions,
+    ...CommentFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentIssue_CommentsQuery, AttachmentIssue_CommentsQueryVariables>;
 export const AttachmentIssue_HistoryDocument = {
@@ -32448,6 +33067,11 @@ export const AttachmentIssue_HistoryDocument = {
       },
     },
     ...IssueHistoryConnectionFragmentDoc.definitions,
+    ...IssueHistoryFragmentDoc.definitions,
+    ...IssueRelationHistoryPayloadFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...IssueImportFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentIssue_HistoryQuery, AttachmentIssue_HistoryQueryVariables>;
 export const AttachmentIssue_InverseRelationsDocument = {
@@ -32557,6 +33181,8 @@ export const AttachmentIssue_InverseRelationsDocument = {
       },
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
+    ...IssueRelationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentIssue_InverseRelationsQuery, AttachmentIssue_InverseRelationsQueryVariables>;
 export const AttachmentIssue_LabelsDocument = {
@@ -32676,6 +33302,8 @@ export const AttachmentIssue_LabelsDocument = {
       },
     },
     ...IssueLabelConnectionFragmentDoc.definitions,
+    ...IssueLabelFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentIssue_LabelsQuery, AttachmentIssue_LabelsQueryVariables>;
 export const AttachmentIssue_RelationsDocument = {
@@ -32785,6 +33413,8 @@ export const AttachmentIssue_RelationsDocument = {
       },
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
+    ...IssueRelationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentIssue_RelationsQuery, AttachmentIssue_RelationsQueryVariables>;
 export const AttachmentIssue_SubscribersDocument = {
@@ -32914,6 +33544,8 @@ export const AttachmentIssue_SubscribersDocument = {
       },
     },
     ...UserConnectionFragmentDoc.definitions,
+    ...UserFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentIssue_SubscribersQuery, AttachmentIssue_SubscribersQueryVariables>;
 export const AttachmentsDocument = {
@@ -33012,6 +33644,8 @@ export const AttachmentsDocument = {
       },
     },
     ...AttachmentConnectionFragmentDoc.definitions,
+    ...AttachmentFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentsQuery, AttachmentsQueryVariables>;
 export const AttachmentsForUrlDocument = {
@@ -33110,6 +33744,8 @@ export const AttachmentsForUrlDocument = {
       },
     },
     ...AttachmentConnectionFragmentDoc.definitions,
+    ...AttachmentFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentsForUrlQuery, AttachmentsForUrlQueryVariables>;
 export const AuditEntriesDocument = {
@@ -33208,6 +33844,8 @@ export const AuditEntriesDocument = {
       },
     },
     ...AuditEntryConnectionFragmentDoc.definitions,
+    ...AuditEntryFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AuditEntriesQuery, AuditEntriesQueryVariables>;
 export const AuditEntryTypesDocument = {
@@ -33256,6 +33894,9 @@ export const AvailableUsersDocument = {
       },
     },
     ...AuthResolverResponseFragmentDoc.definitions,
+    ...OrganizationFragmentDoc.definitions,
+    ...PaidSubscriptionFragmentDoc.definitions,
+    ...UserFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AvailableUsersQuery, AvailableUsersQueryVariables>;
 export const CommentDocument = {
@@ -33294,8 +33935,56 @@ export const CommentDocument = {
       },
     },
     ...CommentFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CommentQuery, CommentQueryVariables>;
+export const Comment_BotActorDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "comment_botActor" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "comment" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "botActor" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...ActorBotFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<Comment_BotActorQuery, Comment_BotActorQueryVariables>;
 export const Comment_ChildrenDocument = {
   kind: "Document",
   definitions: [
@@ -33413,6 +34102,9 @@ export const Comment_ChildrenDocument = {
       },
     },
     ...CommentConnectionFragmentDoc.definitions,
+    ...CommentFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Comment_ChildrenQuery, Comment_ChildrenQueryVariables>;
 export const CommentsDocument = {
@@ -33511,6 +34203,9 @@ export const CommentsDocument = {
       },
     },
     ...CommentConnectionFragmentDoc.definitions,
+    ...CommentFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CommentsQuery, CommentsQueryVariables>;
 export const CustomViewDocument = {
@@ -33637,6 +34332,8 @@ export const CustomViewsDocument = {
       },
     },
     ...CustomViewConnectionFragmentDoc.definitions,
+    ...CustomViewFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CustomViewsQuery, CustomViewsQueryVariables>;
 export const CycleDocument = {
@@ -33794,6 +34491,8 @@ export const Cycle_IssuesDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Cycle_IssuesQuery, Cycle_IssuesQueryVariables>;
 export const Cycle_UncompletedIssuesUponCloseDocument = {
@@ -33913,6 +34612,8 @@ export const Cycle_UncompletedIssuesUponCloseDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Cycle_UncompletedIssuesUponCloseQuery, Cycle_UncompletedIssuesUponCloseQueryVariables>;
 export const CyclesDocument = {
@@ -34011,6 +34712,8 @@ export const CyclesDocument = {
       },
     },
     ...CycleConnectionFragmentDoc.definitions,
+    ...CycleFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CyclesQuery, CyclesQueryVariables>;
 export const DocumentDocument = {
@@ -34137,6 +34840,8 @@ export const DocumentsDocument = {
       },
     },
     ...DocumentConnectionFragmentDoc.definitions,
+    ...DocumentFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DocumentsQuery, DocumentsQueryVariables>;
 export const EmbedInfoDocument = {
@@ -34175,6 +34880,7 @@ export const EmbedInfoDocument = {
       },
     },
     ...EmbedPayloadFragmentDoc.definitions,
+    ...EmbedFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<EmbedInfoQuery, EmbedInfoQueryVariables>;
 export const EmbedInfo_EmbedDocument = {
@@ -34348,6 +35054,8 @@ export const EmojisDocument = {
       },
     },
     ...EmojiConnectionFragmentDoc.definitions,
+    ...EmojiFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<EmojisQuery, EmojisQueryVariables>;
 export const FavoriteDocument = {
@@ -34495,6 +35203,8 @@ export const Favorite_ChildrenDocument = {
       },
     },
     ...FavoriteConnectionFragmentDoc.definitions,
+    ...FavoriteFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Favorite_ChildrenQuery, Favorite_ChildrenQueryVariables>;
 export const FavoritesDocument = {
@@ -34583,6 +35293,8 @@ export const FavoritesDocument = {
       },
     },
     ...FavoriteConnectionFragmentDoc.definitions,
+    ...FavoriteFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<FavoritesQuery, FavoritesQueryVariables>;
 export const FigmaEmbedInfoDocument = {
@@ -34631,6 +35343,7 @@ export const FigmaEmbedInfoDocument = {
       },
     },
     ...FigmaEmbedPayloadFragmentDoc.definitions,
+    ...FigmaEmbedFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<FigmaEmbedInfoQuery, FigmaEmbedInfoQueryVariables>;
 export const FigmaEmbedInfo_FigmaEmbedDocument = {
@@ -34852,6 +35565,8 @@ export const IntegrationTemplatesDocument = {
       },
     },
     ...IntegrationTemplateConnectionFragmentDoc.definitions,
+    ...IntegrationTemplateFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationTemplatesQuery, IntegrationTemplatesQueryVariables>;
 export const IntegrationsDocument = {
@@ -34940,6 +35655,8 @@ export const IntegrationsDocument = {
       },
     },
     ...IntegrationConnectionFragmentDoc.definitions,
+    ...IntegrationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationsQuery, IntegrationsQueryVariables>;
 export const IntegrationsSettingsDocument = {
@@ -35135,6 +35852,8 @@ export const Issue_AttachmentsDocument = {
       },
     },
     ...AttachmentConnectionFragmentDoc.definitions,
+    ...AttachmentFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Issue_AttachmentsQuery, Issue_AttachmentsQueryVariables>;
 export const Issue_ChildrenDocument = {
@@ -35254,6 +35973,8 @@ export const Issue_ChildrenDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Issue_ChildrenQuery, Issue_ChildrenQueryVariables>;
 export const Issue_CommentsDocument = {
@@ -35373,6 +36094,9 @@ export const Issue_CommentsDocument = {
       },
     },
     ...CommentConnectionFragmentDoc.definitions,
+    ...CommentFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Issue_CommentsQuery, Issue_CommentsQueryVariables>;
 export const Issue_HistoryDocument = {
@@ -35482,6 +36206,11 @@ export const Issue_HistoryDocument = {
       },
     },
     ...IssueHistoryConnectionFragmentDoc.definitions,
+    ...IssueHistoryFragmentDoc.definitions,
+    ...IssueRelationHistoryPayloadFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...IssueImportFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Issue_HistoryQuery, Issue_HistoryQueryVariables>;
 export const Issue_InverseRelationsDocument = {
@@ -35591,6 +36320,8 @@ export const Issue_InverseRelationsDocument = {
       },
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
+    ...IssueRelationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Issue_InverseRelationsQuery, Issue_InverseRelationsQueryVariables>;
 export const Issue_LabelsDocument = {
@@ -35710,6 +36441,8 @@ export const Issue_LabelsDocument = {
       },
     },
     ...IssueLabelConnectionFragmentDoc.definitions,
+    ...IssueLabelFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Issue_LabelsQuery, Issue_LabelsQueryVariables>;
 export const Issue_RelationsDocument = {
@@ -35819,6 +36552,8 @@ export const Issue_RelationsDocument = {
       },
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
+    ...IssueRelationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Issue_RelationsQuery, Issue_RelationsQueryVariables>;
 export const Issue_SubscribersDocument = {
@@ -35948,6 +36683,8 @@ export const Issue_SubscribersDocument = {
       },
     },
     ...UserConnectionFragmentDoc.definitions,
+    ...UserFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Issue_SubscribersQuery, Issue_SubscribersQueryVariables>;
 export const IssueFigmaFileKeySearchDocument = {
@@ -36046,6 +36783,8 @@ export const IssueFigmaFileKeySearchDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueFigmaFileKeySearchQuery, IssueFigmaFileKeySearchQueryVariables>;
 export const IssueFilterSuggestionDocument = {
@@ -36170,6 +36909,8 @@ export const IssueImportFinishGithubOAuthDocument = {
       },
     },
     ...GithubOAuthTokenPayloadFragmentDoc.definitions,
+    ...GithubOrgFragmentDoc.definitions,
+    ...GithubRepoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueImportFinishGithubOAuthQuery, IssueImportFinishGithubOAuthQueryVariables>;
 export const IssueLabelDocument = {
@@ -36327,6 +37068,8 @@ export const IssueLabel_ChildrenDocument = {
       },
     },
     ...IssueLabelConnectionFragmentDoc.definitions,
+    ...IssueLabelFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueLabel_ChildrenQuery, IssueLabel_ChildrenQueryVariables>;
 export const IssueLabel_IssuesDocument = {
@@ -36446,6 +37189,8 @@ export const IssueLabel_IssuesDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueLabel_IssuesQuery, IssueLabel_IssuesQueryVariables>;
 export const IssueLabelsDocument = {
@@ -36544,6 +37289,8 @@ export const IssueLabelsDocument = {
       },
     },
     ...IssueLabelConnectionFragmentDoc.definitions,
+    ...IssueLabelFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueLabelsQuery, IssueLabelsQueryVariables>;
 export const IssuePriorityValuesDocument = {
@@ -36694,6 +37441,8 @@ export const IssueRelationsDocument = {
       },
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
+    ...IssueRelationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueRelationsQuery, IssueRelationsQueryVariables>;
 export const IssueSearchDocument = {
@@ -36802,6 +37551,8 @@ export const IssueSearchDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueSearchQuery, IssueSearchQueryVariables>;
 export const IssueVcsBranchSearchDocument = {
@@ -36959,6 +37710,8 @@ export const IssueVcsBranchSearch_AttachmentsDocument = {
       },
     },
     ...AttachmentConnectionFragmentDoc.definitions,
+    ...AttachmentFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueVcsBranchSearch_AttachmentsQuery, IssueVcsBranchSearch_AttachmentsQueryVariables>;
 export const IssueVcsBranchSearch_ChildrenDocument = {
@@ -37078,6 +37831,8 @@ export const IssueVcsBranchSearch_ChildrenDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueVcsBranchSearch_ChildrenQuery, IssueVcsBranchSearch_ChildrenQueryVariables>;
 export const IssueVcsBranchSearch_CommentsDocument = {
@@ -37197,6 +37952,9 @@ export const IssueVcsBranchSearch_CommentsDocument = {
       },
     },
     ...CommentConnectionFragmentDoc.definitions,
+    ...CommentFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueVcsBranchSearch_CommentsQuery, IssueVcsBranchSearch_CommentsQueryVariables>;
 export const IssueVcsBranchSearch_HistoryDocument = {
@@ -37306,6 +38064,11 @@ export const IssueVcsBranchSearch_HistoryDocument = {
       },
     },
     ...IssueHistoryConnectionFragmentDoc.definitions,
+    ...IssueHistoryFragmentDoc.definitions,
+    ...IssueRelationHistoryPayloadFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...IssueImportFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueVcsBranchSearch_HistoryQuery, IssueVcsBranchSearch_HistoryQueryVariables>;
 export const IssueVcsBranchSearch_InverseRelationsDocument = {
@@ -37415,6 +38178,8 @@ export const IssueVcsBranchSearch_InverseRelationsDocument = {
       },
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
+    ...IssueRelationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<
   IssueVcsBranchSearch_InverseRelationsQuery,
@@ -37537,6 +38302,8 @@ export const IssueVcsBranchSearch_LabelsDocument = {
       },
     },
     ...IssueLabelConnectionFragmentDoc.definitions,
+    ...IssueLabelFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueVcsBranchSearch_LabelsQuery, IssueVcsBranchSearch_LabelsQueryVariables>;
 export const IssueVcsBranchSearch_RelationsDocument = {
@@ -37646,6 +38413,8 @@ export const IssueVcsBranchSearch_RelationsDocument = {
       },
     },
     ...IssueRelationConnectionFragmentDoc.definitions,
+    ...IssueRelationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueVcsBranchSearch_RelationsQuery, IssueVcsBranchSearch_RelationsQueryVariables>;
 export const IssueVcsBranchSearch_SubscribersDocument = {
@@ -37775,6 +38544,8 @@ export const IssueVcsBranchSearch_SubscribersDocument = {
       },
     },
     ...UserConnectionFragmentDoc.definitions,
+    ...UserFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueVcsBranchSearch_SubscribersQuery, IssueVcsBranchSearch_SubscribersQueryVariables>;
 export const IssuesDocument = {
@@ -37873,6 +38644,8 @@ export const IssuesDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssuesQuery, IssuesQueryVariables>;
 export const NotificationDocument = {
@@ -37911,6 +38684,11 @@ export const NotificationDocument = {
       },
     },
     ...NotificationFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...IssueNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalFragmentDoc.definitions,
+    ...ProjectNotificationFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationQuery, NotificationQueryVariables>;
 export const NotificationSubscriptionDocument = {
@@ -38039,6 +38817,8 @@ export const NotificationSubscriptionsDocument = {
       },
     },
     ...NotificationSubscriptionConnectionFragmentDoc.definitions,
+    ...NotificationSubscriptionFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationSubscriptionsQuery, NotificationSubscriptionsQueryVariables>;
 export const NotificationsDocument = {
@@ -38127,6 +38907,13 @@ export const NotificationsDocument = {
       },
     },
     ...NotificationConnectionFragmentDoc.definitions,
+    ...NotificationFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...IssueNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalNotificationFragmentDoc.definitions,
+    ...OauthClientApprovalFragmentDoc.definitions,
+    ...ProjectNotificationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<NotificationsQuery, NotificationsQueryVariables>;
 export const OrganizationDocument = {
@@ -38151,6 +38938,7 @@ export const OrganizationDocument = {
       },
     },
     ...OrganizationFragmentDoc.definitions,
+    ...PaidSubscriptionFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<OrganizationQuery, OrganizationQueryVariables>;
 export const Organization_IntegrationsDocument = {
@@ -38248,6 +39036,8 @@ export const Organization_IntegrationsDocument = {
       },
     },
     ...IntegrationConnectionFragmentDoc.definitions,
+    ...IntegrationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Organization_IntegrationsQuery, Organization_IntegrationsQueryVariables>;
 export const Organization_LabelsDocument = {
@@ -38355,6 +39145,8 @@ export const Organization_LabelsDocument = {
       },
     },
     ...IssueLabelConnectionFragmentDoc.definitions,
+    ...IssueLabelFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Organization_LabelsQuery, Organization_LabelsQueryVariables>;
 export const Organization_SubscriptionDocument = {
@@ -38495,6 +39287,8 @@ export const Organization_TeamsDocument = {
       },
     },
     ...TeamConnectionFragmentDoc.definitions,
+    ...TeamFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Organization_TeamsQuery, Organization_TeamsQueryVariables>;
 export const Organization_TemplatesDocument = {
@@ -38592,6 +39386,7 @@ export const Organization_TemplatesDocument = {
       },
     },
     ...TemplateConnectionFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Organization_TemplatesQuery, Organization_TemplatesQueryVariables>;
 export const Organization_UsersDocument = {
@@ -38699,6 +39494,8 @@ export const Organization_UsersDocument = {
       },
     },
     ...UserConnectionFragmentDoc.definitions,
+    ...UserFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Organization_UsersQuery, Organization_UsersQueryVariables>;
 export const OrganizationExistsDocument = {
@@ -38863,6 +39660,8 @@ export const OrganizationInvitesDocument = {
       },
     },
     ...OrganizationInviteConnectionFragmentDoc.definitions,
+    ...OrganizationInviteFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<OrganizationInvitesQuery, OrganizationInvitesQueryVariables>;
 export const ProjectDocument = {
@@ -39010,6 +39809,8 @@ export const Project_DocumentsDocument = {
       },
     },
     ...DocumentConnectionFragmentDoc.definitions,
+    ...DocumentFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_DocumentsQuery, Project_DocumentsQueryVariables>;
 export const Project_IssuesDocument = {
@@ -39129,6 +39930,8 @@ export const Project_IssuesDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_IssuesQuery, Project_IssuesQueryVariables>;
 export const Project_LinksDocument = {
@@ -39238,6 +40041,8 @@ export const Project_LinksDocument = {
       },
     },
     ...ProjectLinkConnectionFragmentDoc.definitions,
+    ...ProjectLinkFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_LinksQuery, Project_LinksQueryVariables>;
 export const Project_MembersDocument = {
@@ -39367,6 +40172,8 @@ export const Project_MembersDocument = {
       },
     },
     ...UserConnectionFragmentDoc.definitions,
+    ...UserFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_MembersQuery, Project_MembersQueryVariables>;
 export const Project_ProjectMilestonesDocument = {
@@ -39478,6 +40285,8 @@ export const Project_ProjectMilestonesDocument = {
       },
     },
     ...ProjectMilestoneConnectionFragmentDoc.definitions,
+    ...ProjectMilestoneFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_ProjectMilestonesQuery, Project_ProjectMilestonesQueryVariables>;
 export const Project_ProjectUpdatesDocument = {
@@ -39587,6 +40396,8 @@ export const Project_ProjectUpdatesDocument = {
       },
     },
     ...ProjectUpdateConnectionFragmentDoc.definitions,
+    ...ProjectUpdateFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_ProjectUpdatesQuery, Project_ProjectUpdatesQueryVariables>;
 export const Project_TeamsDocument = {
@@ -39706,6 +40517,8 @@ export const Project_TeamsDocument = {
       },
     },
     ...TeamConnectionFragmentDoc.definitions,
+    ...TeamFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_TeamsQuery, Project_TeamsQueryVariables>;
 export const ProjectFilterSuggestionDocument = {
@@ -39870,6 +40683,8 @@ export const ProjectLinksDocument = {
       },
     },
     ...ProjectLinkConnectionFragmentDoc.definitions,
+    ...ProjectLinkFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectLinksQuery, ProjectLinksQueryVariables>;
 export const ProjectUpdateDocument = {
@@ -40036,6 +40851,8 @@ export const ProjectUpdateInteractionsDocument = {
       },
     },
     ...ProjectUpdateInteractionConnectionFragmentDoc.definitions,
+    ...ProjectUpdateInteractionFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectUpdateInteractionsQuery, ProjectUpdateInteractionsQueryVariables>;
 export const ProjectUpdatesDocument = {
@@ -40124,6 +40941,8 @@ export const ProjectUpdatesDocument = {
       },
     },
     ...ProjectUpdateConnectionFragmentDoc.definitions,
+    ...ProjectUpdateFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectUpdatesQuery, ProjectUpdatesQueryVariables>;
 export const ProjectsDocument = {
@@ -40222,6 +41041,8 @@ export const ProjectsDocument = {
       },
     },
     ...ProjectConnectionFragmentDoc.definitions,
+    ...ProjectFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectsQuery, ProjectsQueryVariables>;
 export const PushSubscriptionTestDocument = {
@@ -40270,6 +41091,7 @@ export const RateLimitStatusDocument = {
       },
     },
     ...RateLimitPayloadFragmentDoc.definitions,
+    ...RateLimitResultPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<RateLimitStatusQuery, RateLimitStatusQueryVariables>;
 export const RoadmapDocument = {
@@ -40427,6 +41249,8 @@ export const Roadmap_ProjectsDocument = {
       },
     },
     ...ProjectConnectionFragmentDoc.definitions,
+    ...ProjectFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Roadmap_ProjectsQuery, Roadmap_ProjectsQueryVariables>;
 export const RoadmapToProjectDocument = {
@@ -40553,6 +41377,8 @@ export const RoadmapToProjectsDocument = {
       },
     },
     ...RoadmapToProjectConnectionFragmentDoc.definitions,
+    ...RoadmapToProjectFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<RoadmapToProjectsQuery, RoadmapToProjectsQueryVariables>;
 export const RoadmapsDocument = {
@@ -40641,6 +41467,8 @@ export const RoadmapsDocument = {
       },
     },
     ...RoadmapConnectionFragmentDoc.definitions,
+    ...RoadmapFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<RoadmapsQuery, RoadmapsQueryVariables>;
 export const SearchDocumentsDocument = {
@@ -40683,6 +41511,11 @@ export const SearchDocumentsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -40726,6 +41559,11 @@ export const SearchDocumentsDocument = {
               },
               {
                 kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+              },
+              {
+                kind: "Argument",
                 name: { kind: "Name", value: "term" },
                 value: { kind: "Variable", name: { kind: "Name", value: "term" } },
               },
@@ -40739,6 +41577,9 @@ export const SearchDocumentsDocument = {
       },
     },
     ...DocumentSearchPayloadFragmentDoc.definitions,
+    ...ArchiveResponseFragmentDoc.definitions,
+    ...DocumentSearchResultFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<SearchDocumentsQuery, SearchDocumentsQueryVariables>;
 export const SearchDocuments_ArchivePayloadDocument = {
@@ -40781,6 +41622,11 @@ export const SearchDocuments_ArchivePayloadDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -40821,6 +41667,11 @@ export const SearchDocuments_ArchivePayloadDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
               {
                 kind: "Argument",
@@ -40893,6 +41744,11 @@ export const SearchIssuesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -40941,6 +41797,11 @@ export const SearchIssuesDocument = {
               },
               {
                 kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+              },
+              {
+                kind: "Argument",
                 name: { kind: "Name", value: "term" },
                 value: { kind: "Variable", name: { kind: "Name", value: "term" } },
               },
@@ -40954,6 +41815,9 @@ export const SearchIssuesDocument = {
       },
     },
     ...IssueSearchPayloadFragmentDoc.definitions,
+    ...ArchiveResponseFragmentDoc.definitions,
+    ...IssueSearchResultFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<SearchIssuesQuery, SearchIssuesQueryVariables>;
 export const SearchIssues_ArchivePayloadDocument = {
@@ -41001,6 +41865,11 @@ export const SearchIssues_ArchivePayloadDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -41046,6 +41915,11 @@ export const SearchIssues_ArchivePayloadDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
               {
                 kind: "Argument",
@@ -41113,6 +41987,11 @@ export const SearchProjectsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -41156,6 +42035,11 @@ export const SearchProjectsDocument = {
               },
               {
                 kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+              },
+              {
+                kind: "Argument",
                 name: { kind: "Name", value: "term" },
                 value: { kind: "Variable", name: { kind: "Name", value: "term" } },
               },
@@ -41169,6 +42053,9 @@ export const SearchProjectsDocument = {
       },
     },
     ...ProjectSearchPayloadFragmentDoc.definitions,
+    ...ArchiveResponseFragmentDoc.definitions,
+    ...ProjectSearchResultFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<SearchProjectsQuery, SearchProjectsQueryVariables>;
 export const SearchProjects_ArchivePayloadDocument = {
@@ -41211,6 +42098,11 @@ export const SearchProjects_ArchivePayloadDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "term" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -41251,6 +42143,11 @@ export const SearchProjects_ArchivePayloadDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "teamId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
               },
               {
                 kind: "Argument",
@@ -41481,6 +42378,8 @@ export const Team_CyclesDocument = {
       },
     },
     ...CycleConnectionFragmentDoc.definitions,
+    ...CycleFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Team_CyclesQuery, Team_CyclesQueryVariables>;
 export const Team_IssuesDocument = {
@@ -41600,6 +42499,8 @@ export const Team_IssuesDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Team_IssuesQuery, Team_IssuesQueryVariables>;
 export const Team_LabelsDocument = {
@@ -41719,6 +42620,8 @@ export const Team_LabelsDocument = {
       },
     },
     ...IssueLabelConnectionFragmentDoc.definitions,
+    ...IssueLabelFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Team_LabelsQuery, Team_LabelsQueryVariables>;
 export const Team_MembersDocument = {
@@ -41848,6 +42751,8 @@ export const Team_MembersDocument = {
       },
     },
     ...UserConnectionFragmentDoc.definitions,
+    ...UserFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Team_MembersQuery, Team_MembersQueryVariables>;
 export const Team_MembershipsDocument = {
@@ -41957,6 +42862,8 @@ export const Team_MembershipsDocument = {
       },
     },
     ...TeamMembershipConnectionFragmentDoc.definitions,
+    ...TeamMembershipFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Team_MembershipsQuery, Team_MembershipsQueryVariables>;
 export const Team_ProjectsDocument = {
@@ -42076,6 +42983,8 @@ export const Team_ProjectsDocument = {
       },
     },
     ...ProjectConnectionFragmentDoc.definitions,
+    ...ProjectFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Team_ProjectsQuery, Team_ProjectsQueryVariables>;
 export const Team_StatesDocument = {
@@ -42195,6 +43104,8 @@ export const Team_StatesDocument = {
       },
     },
     ...WorkflowStateConnectionFragmentDoc.definitions,
+    ...WorkflowStateFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Team_StatesQuery, Team_StatesQueryVariables>;
 export const Team_TemplatesDocument = {
@@ -42304,6 +43215,7 @@ export const Team_TemplatesDocument = {
       },
     },
     ...TemplateConnectionFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Team_TemplatesQuery, Team_TemplatesQueryVariables>;
 export const Team_WebhooksDocument = {
@@ -42413,6 +43325,8 @@ export const Team_WebhooksDocument = {
       },
     },
     ...WebhookConnectionFragmentDoc.definitions,
+    ...WebhookFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Team_WebhooksQuery, Team_WebhooksQueryVariables>;
 export const TeamMembershipDocument = {
@@ -42539,6 +43453,8 @@ export const TeamMembershipsDocument = {
       },
     },
     ...TeamMembershipConnectionFragmentDoc.definitions,
+    ...TeamMembershipFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<TeamMembershipsQuery, TeamMembershipsQueryVariables>;
 export const TeamsDocument = {
@@ -42637,6 +43553,8 @@ export const TeamsDocument = {
       },
     },
     ...TeamConnectionFragmentDoc.definitions,
+    ...TeamFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<TeamsQuery, TeamsQueryVariables>;
 export const TemplateDocument = {
@@ -42894,6 +43812,8 @@ export const User_AssignedIssuesDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<User_AssignedIssuesQuery, User_AssignedIssuesQueryVariables>;
 export const User_CreatedIssuesDocument = {
@@ -43013,6 +43933,8 @@ export const User_CreatedIssuesDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<User_CreatedIssuesQuery, User_CreatedIssuesQueryVariables>;
 export const User_TeamMembershipsDocument = {
@@ -43122,6 +44044,8 @@ export const User_TeamMembershipsDocument = {
       },
     },
     ...TeamMembershipConnectionFragmentDoc.definitions,
+    ...TeamMembershipFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<User_TeamMembershipsQuery, User_TeamMembershipsQueryVariables>;
 export const User_TeamsDocument = {
@@ -43241,6 +44165,8 @@ export const User_TeamsDocument = {
       },
     },
     ...TeamConnectionFragmentDoc.definitions,
+    ...TeamFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<User_TeamsQuery, User_TeamsQueryVariables>;
 export const UserSettingsDocument = {
@@ -43373,6 +44299,8 @@ export const UsersDocument = {
       },
     },
     ...UserConnectionFragmentDoc.definitions,
+    ...UserFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UsersQuery, UsersQueryVariables>;
 export const ViewerDocument = {
@@ -43504,6 +44432,8 @@ export const Viewer_AssignedIssuesDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Viewer_AssignedIssuesQuery, Viewer_AssignedIssuesQueryVariables>;
 export const Viewer_CreatedIssuesDocument = {
@@ -43611,6 +44541,8 @@ export const Viewer_CreatedIssuesDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Viewer_CreatedIssuesQuery, Viewer_CreatedIssuesQueryVariables>;
 export const Viewer_TeamMembershipsDocument = {
@@ -43708,6 +44640,8 @@ export const Viewer_TeamMembershipsDocument = {
       },
     },
     ...TeamMembershipConnectionFragmentDoc.definitions,
+    ...TeamMembershipFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Viewer_TeamMembershipsQuery, Viewer_TeamMembershipsQueryVariables>;
 export const Viewer_TeamsDocument = {
@@ -43815,6 +44749,8 @@ export const Viewer_TeamsDocument = {
       },
     },
     ...TeamConnectionFragmentDoc.definitions,
+    ...TeamFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Viewer_TeamsQuery, Viewer_TeamsQueryVariables>;
 export const WebhookDocument = {
@@ -43941,6 +44877,8 @@ export const WebhooksDocument = {
       },
     },
     ...WebhookConnectionFragmentDoc.definitions,
+    ...WebhookFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<WebhooksQuery, WebhooksQueryVariables>;
 export const WorkflowStateDocument = {
@@ -44098,6 +45036,8 @@ export const WorkflowState_IssuesDocument = {
       },
     },
     ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<WorkflowState_IssuesQuery, WorkflowState_IssuesQueryVariables>;
 export const WorkflowStatesDocument = {
@@ -44196,5 +45136,7 @@ export const WorkflowStatesDocument = {
       },
     },
     ...WorkflowStateConnectionFragmentDoc.definitions,
+    ...WorkflowStateFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<WorkflowStatesQuery, WorkflowStatesQueryVariables>;

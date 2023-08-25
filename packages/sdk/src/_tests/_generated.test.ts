@@ -251,6 +251,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the team.mergeableWorkflowState query for L.WorkflowState */
+    it("team.mergeableWorkflowState", async () => {
+      if (_team) {
+        const team_mergeableWorkflowState: L.WorkflowState | undefined = await _team.mergeableWorkflowState;
+        expect(team_mergeableWorkflowState instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.mergeableWorkflowState query");
+      }
+    });
+
     /** Test the team.organization query for L.Organization */
     it("team.organization", async () => {
       if (_team) {
@@ -555,6 +565,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the comment model query for Comment_BotActor */
+    it("comment.botActor", async () => {
+      if (_comment) {
+        const botActor: L.ActorBot | undefined = _comment.botActor;
+        expect(botActor instanceof L.ActorBot);
+      } else {
+        console.warn("codegen-doc:print: No comment found - cannot test _comment.botActor query");
+      }
+    });
+
     /** Test the comment connection query for the Comment */
     it("comment.children", async () => {
       if (_comment) {
@@ -637,6 +657,16 @@ describe("generated", () => {
         expect(customView_organization instanceof L.Organization);
       } else {
         console.warn("codegen-doc:print: No CustomView found - cannot test customView.organization query");
+      }
+    });
+
+    /** Test the customView.owner query for L.User */
+    it("customView.owner", async () => {
+      if (_customView) {
+        const customView_owner: L.User | undefined = await _customView.owner;
+        expect(customView_owner instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No CustomView found - cannot test customView.owner query");
       }
     });
 
@@ -3042,6 +3072,16 @@ describe("generated", () => {
         expect(team_mergeWorkflowState instanceof L.WorkflowState);
       } else {
         console.warn("codegen-doc:print: No Team found - cannot test team.mergeWorkflowState query");
+      }
+    });
+
+    /** Test the team.mergeableWorkflowState query for L.WorkflowState */
+    it("team.mergeableWorkflowState", async () => {
+      if (_team) {
+        const team_mergeableWorkflowState: L.WorkflowState | undefined = await _team.mergeableWorkflowState;
+        expect(team_mergeableWorkflowState instanceof L.WorkflowState);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.mergeableWorkflowState query");
       }
     });
 
