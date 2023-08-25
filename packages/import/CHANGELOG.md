@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.8.0
+
+### Minor Changes
+
+- 9d87b5c: Add support for workspace-level and group labels
+
+### Patch Changes
+
+- Updated dependencies [878bac2]
+  - @linear/sdk@8.0.0
+
 ## 1.7.7
 
 ### Patch Changes

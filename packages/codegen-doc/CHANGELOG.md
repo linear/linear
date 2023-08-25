@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.15.0
+
+### Minor Changes
+
+- 30c8d7b: Use dedupeFragments option
+
 ## 1.14.4
 
 ### Patch Changes
