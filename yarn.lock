@@ -6218,7 +6218,7 @@ graphql-config@^3.3.0:
     minimatch "3.0.4"
     string-env-interpolation "1.0.1"
 
-graphql-faker@^2.0.0-rc.23:
+graphql-faker@2.0.0-rc.25:
   version "2.0.0-rc.25"
   resolved "https://registry.yarnpkg.com/graphql-faker/-/graphql-faker-2.0.0-rc.25.tgz#74d2cce58b0610deed9a0323e1d147cb8a756702"
   integrity sha512-tMSBRA/+aC988v66j95fxP1yzcVIXmc+KutspxrogvNSlMq314NE4omQyuY1FGD+RnOPMvy7p3nYgO30AKfVtA==
