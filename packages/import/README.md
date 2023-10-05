@@ -118,7 +118,7 @@ Following fields are supported:
 - `Description` - Issue description
 - `Priority` - Issue priority
 - `Status` - Issue state (workflow)
-- `Assignee` - Issue assignee
+- `Assignee` - Issue assignee (user's full name)
 - `Labels` - Added as a label
 ## Todo
 
