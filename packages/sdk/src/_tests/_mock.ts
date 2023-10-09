@@ -53,50 +53,58 @@ interface MockResult<Spec extends MockSpec> {
 export function createTestServer(): MockContext {
   const ctx = {} as MockContext;
 
-  beforeAll(async done => {
-    /** Initialise the test server */
+  beforeAll(async () => {
     const port = await getPort();
-    ctx.server = express();
-    ctx.server.use(body.json());
-    ctx.nodeServer = createServer();
-    ctx.nodeServer.listen({ port });
-    ctx.nodeServer.on("request", ctx.server);
-    ctx.nodeServer.once("listening", done);
-    ctx.url = `http://localhost:${port}`;
 
-    /** Provide function for mocking the response */
-    ctx.res = function createMockResponse<Spec extends MockSpec>(spec: Spec) {
-      const requests: CapturedRequest[] = [];
+    const callbackResolved = new Promise((resolve) => {
 
-      /** Listen to all routes */
-      ctx.server.use("*", function mock(req, res) {
-        if (req.headers.authorization !== MOCK_API_KEY) {
-          /** Handle invalid auth headers */
-          res.sendStatus(401);
-        } else {
-          req.headers.host = "DYNAMIC";
+      /** Initialise the test server */
+      ctx.server = express();
+      ctx.server.use(body.json());
+      ctx.nodeServer = createServer();
+      ctx.nodeServer.listen({ port });
+      ctx.nodeServer.on("request", ctx.server);
+      ctx.nodeServer.once("listening", resolve);
+      ctx.url = `http://localhost:${port}`;
 
-          /** Record test request */
-          requests.push({
-            method: req.method,
-            headers: req.headers,
-            body: req.body,
-          });
+      /** Provide function for mocking the response */
+      ctx.res = function createMockResponse<Spec extends MockSpec>(spec: Spec) {
+        const requests: CapturedRequest[] = [];
 
-          /** Set response headers */
-          if (spec?.headers) {
-            Object.entries(spec.headers).forEach(([name, value]) => {
-              res.setHeader(name, value);
+        /** Listen to all routes */
+        ctx.server.use("*", function mock(req, res) {
+          if (req.headers.authorization !== MOCK_API_KEY) {
+            /** Handle invalid auth headers */
+            res.sendStatus(401);
+          } else {
+            req.headers.host = "DYNAMIC";
+
+            /** Record test request */
+            requests.push({
+              method: req.method,
+              headers: req.headers,
+              body: req.body,
             });
+
+            /** Set response headers */
+            if (spec?.headers) {
+              Object.entries(spec.headers).forEach(([name, value]) => {
+                res.setHeader(name, value);
+              });
+            }
+
+            /** Return a valid response with mocked response body */
+            res.send(spec?.body ?? { data: {} });
           }
+        });
 
-          /** Return a valid response with mocked response body */
-          res.send(spec?.body ?? { data: {} });
-        }
-      });
+        return { spec, requests };
+      };
+    });
 
-      return { spec, requests };
-    };
+
+
+    await callbackResolved;
   });
 
   afterAll(done => {
