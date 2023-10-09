@@ -28,7 +28,7 @@
     "test:e2e": "E2E=true yarn test _generated.test",
     "test:update": "yarn test -u",
     "test:watch": "yarn test --watch",
-    "test": "npx jest -w 1 --detectOpenHandles --runInBand",
+    "test": "npx jest --detectOpenHandles --runInBand",
     "update:dependencies": "yarn upgrade && lerna run generate:changeset:dependencies",
     "update:schema": "lerna run generate:schema && lerna run generate:changeset:schema"
   },
