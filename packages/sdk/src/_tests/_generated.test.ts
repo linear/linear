@@ -1051,9 +1051,8 @@ describe("generated", () => {
     /** Test the root query for a single IntegrationTemplate */
     it("integrationTemplate", async () => {
       if (_integrationTemplate_id) {
-        const integrationTemplate: L.IntegrationTemplate | undefined = await client.integrationTemplate(
-          _integrationTemplate_id
-        );
+        const integrationTemplate: L.IntegrationTemplate | undefined =
+          await client.integrationTemplate(_integrationTemplate_id);
         _integrationTemplate = integrationTemplate;
         expect(integrationTemplate instanceof L.IntegrationTemplate);
       } else {
@@ -1159,9 +1158,8 @@ describe("generated", () => {
 
     /** Test the root connection query for the Issue */
     it("issueFigmaFileKeySearch", async () => {
-      const issueFigmaFileKeySearch: L.IssueConnection | undefined = await client.issueFigmaFileKeySearch(
-        "mock-fileKey"
-      );
+      const issueFigmaFileKeySearch: L.IssueConnection | undefined =
+        await client.issueFigmaFileKeySearch("mock-fileKey");
       const issue = issueFigmaFileKeySearch?.nodes?.[0];
       _issue_id = issue?.id;
       expect(issueFigmaFileKeySearch instanceof L.IssueConnection);
@@ -1363,9 +1361,8 @@ describe("generated", () => {
   describe("IssueFilterSuggestion", () => {
     /** Test the root model query for IssueFilterSuggestion */
     it("issueFilterSuggestion", async () => {
-      const issueFilterSuggestion: L.IssueFilterSuggestionPayload | undefined = await client.issueFilterSuggestion(
-        "mock-prompt"
-      );
+      const issueFilterSuggestion: L.IssueFilterSuggestionPayload | undefined =
+        await client.issueFilterSuggestion("mock-prompt");
       expect(issueFilterSuggestion instanceof L.IssueFilterSuggestionPayload);
     });
   });
@@ -2309,9 +2306,8 @@ describe("generated", () => {
   describe("OrganizationExists", () => {
     /** Test the root model query for OrganizationExists */
     it("organizationExists", async () => {
-      const organizationExists: L.OrganizationExistsPayload | undefined = await client.organizationExists(
-        "mock-urlKey"
-      );
+      const organizationExists: L.OrganizationExistsPayload | undefined =
+        await client.organizationExists("mock-urlKey");
       expect(organizationExists instanceof L.OrganizationExistsPayload);
     });
   });
@@ -2332,9 +2328,8 @@ describe("generated", () => {
     /** Test the root query for a single OrganizationInvite */
     it("organizationInvite", async () => {
       if (_organizationInvite_id) {
-        const organizationInvite: L.OrganizationInvite | undefined = await client.organizationInvite(
-          _organizationInvite_id
-        );
+        const organizationInvite: L.OrganizationInvite | undefined =
+          await client.organizationInvite(_organizationInvite_id);
         _organizationInvite = organizationInvite;
         expect(organizationInvite instanceof L.OrganizationInvite);
       } else {
@@ -2449,9 +2444,8 @@ describe("generated", () => {
     /** Test the root query for a single ProjectUpdateInteraction */
     it("projectUpdateInteraction", async () => {
       if (_projectUpdateInteraction_id) {
-        const projectUpdateInteraction: L.ProjectUpdateInteraction | undefined = await client.projectUpdateInteraction(
-          _projectUpdateInteraction_id
-        );
+        const projectUpdateInteraction: L.ProjectUpdateInteraction | undefined =
+          await client.projectUpdateInteraction(_projectUpdateInteraction_id);
         _projectUpdateInteraction = projectUpdateInteraction;
         expect(projectUpdateInteraction instanceof L.ProjectUpdateInteraction);
       } else {
@@ -3148,9 +3142,8 @@ describe("generated", () => {
   describe("TemplatesForIntegration", () => {
     /** Test the root model query for TemplatesForIntegration */
     it("templatesForIntegration", async () => {
-      const templatesForIntegration: L.Template[] | undefined = await client.templatesForIntegration(
-        "mock-integrationType"
-      );
+      const templatesForIntegration: L.Template[] | undefined =
+        await client.templatesForIntegration("mock-integrationType");
       templatesForIntegration?.map(node => expect(node instanceof L.Template));
     });
   });

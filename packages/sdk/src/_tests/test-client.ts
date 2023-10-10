@@ -29,7 +29,7 @@ export async function startClient(Client: typeof LinearClient = LinearClient): P
     /** Start the mock server */
     try {
       console.log(log, `Using mock server on http://localhost:${serverPort}/graphql`);
-      mockServer = execa("npx", ["graphql-faker", "packages/sdk/src/schema.graphql", `-p ${serverPort}`]);
+      mockServer = execa("graphql-faker", ["packages/sdk/src/schema.graphql", `-p ${serverPort}`]);
     } catch (error) {
       console.error(log, error);
       throw new Error(`${log} Failed to start the mock server`);
