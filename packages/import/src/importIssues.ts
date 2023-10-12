@@ -133,7 +133,10 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
           name: user.name,
           value: user.id,
         }));
-        map.push({ name: "[Unassigned]", value: "" });
+
+        map.unshift({ name: "[Unassigned]", value: "" });
+        map.unshift({ name: "[Provided assignee]", value: "{{assignee}}" });
+
         return map;
       },
       when: (answers: ImportAnswers) => {
@@ -283,13 +286,14 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       ? existingUserMap[issue.assigneeId.toLowerCase()]
       : undefined;
 
-    const assigneeId: string | undefined =
-      existingAssigneeId ||
-      (importAnswers.selfAssign
-        ? viewer
-        : !!importAnswers.targetAssignee && importAnswers.targetAssignee.length > 0
-        ? importAnswers.targetAssignee
-        : undefined);
+    let assigneeId: string | undefined;
+    if (importAnswers.selfAssign) {
+      assigneeId = viewer;
+    } else if (importAnswers.targetAssignee === "{{assignee}}") {
+      assigneeId = existingAssigneeId
+    } else {
+      assigneeId = importAnswers.targetAssignee || undefined;
+    }
 
     const formattedDueDate = issue.dueDate ? format(issue.dueDate, "yyyy-MM-dd") : undefined;
 
