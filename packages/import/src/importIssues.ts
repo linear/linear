@@ -284,11 +284,12 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       : undefined;
 
     const assigneeId: string | undefined =
-      existingAssigneeId || importAnswers.selfAssign
+      existingAssigneeId ||
+      (importAnswers.selfAssign
         ? viewer
         : !!importAnswers.targetAssignee && importAnswers.targetAssignee.length > 0
         ? importAnswers.targetAssignee
-        : undefined;
+        : undefined);
 
     const formattedDueDate = issue.dueDate ? format(issue.dueDate, "yyyy-MM-dd") : undefined;
 
