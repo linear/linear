@@ -598,6 +598,49 @@ type AuditEntryType {
   type: String!
 }
 
+type AuthApiKey {
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+}
+
+input AuthApiKeyCreateInput {
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The API key value.
+  """
+  key: String!
+}
+
+type AuthApiKeyDeletePayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+type AuthApiKeyPayload {
+  """
+  The auth API key that was created.
+  """
+  authApiKey: AuthApiKey!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+type AuthIntegration {
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+}
+
 """
 [INTERNAL] An OAuth userId/createdDate tuple
 """
@@ -612,6 +655,42 @@ type AuthMembership {
   userId: String!
 }
 
+"""
+An organization. Organizations are root-level objects that contain users and teams.
+"""
+type AuthOrganization {
+  """
+  Allowed authentication providers, empty array means all are allowed
+  """
+  allowedAuthServices: [String!]!
+  """
+  The time at which deletion of the organization was requested.
+  """
+  deletionRequestedAt: DateTime
+  id: ID!
+  """
+  The organization's logo URL.
+  """
+  logoUrl: String
+  """
+  The organization's name.
+  """
+  name: String!
+  """
+  Previously used URL keys for the organization (last 3 are kept and redirected).
+  """
+  previousUrlKeys: [String!]!
+  """
+  Whether SAML authentication is enabled for organization.
+  """
+  samlEnabled: Boolean!
+  """
+  The organization's unique URL key.
+  """
+  urlKey: String!
+  userCount: Float!
+}
+
 type AuthResolverResponse {
   """
   Should the signup flow allow access for the domain.
@@ -620,7 +699,7 @@ type AuthResolverResponse {
   """
   Organizations this account has access to, but is not yet a member.
   """
-  availableOrganizations: [Organization!]
+  availableOrganizations: [AuthOrganization!]
   """
   Email for the authenticated account.
   """
@@ -634,13 +713,178 @@ type AuthResolverResponse {
   """
   lastUsedOrganizationId: String
   """
+  List of organizations this user account is part of but are currently locked because of the current auth service.
+  """
+  lockedOrganizations: [AuthOrganization!]
+  """
   JWT token for authentication of the account.
   """
   token: String
   """
   Users belonging to this account.
   """
-  users: [User!]!
+  users: [AuthUser!]!
+}
+
+"""
+A user that has access to the the resources of an organization.
+"""
+type AuthUser {
+  """
+  An URL to the user's avatar image.
+  """
+  avatarUrl: String
+  """
+  The user's display (nick) name. Unique within each organization.
+  """
+  displayName: String!
+  """
+  The user's email address.
+  """
+  email: String!
+  id: ID!
+  """
+  The user's full name.
+  """
+  name: String!
+  """
+  Organization the user belongs to.
+  """
+  organization: AuthOrganization!
+}
+
+"""
+User authentication session.
+"""
+type AuthenticationSession {
+  """
+  Client used for the session
+  """
+  client: String
+  """
+  Country codes of all seen locations.
+  """
+  countryCodes: [String!]!
+  """
+  Date when the session was created.
+  """
+  createdAt: DateTime!
+  id: String!
+  """
+  IP address.
+  """
+  ip: String
+  """
+  When was the session last seen
+  """
+  lastActiveAt: DateTime
+  """
+  Human readable location
+  """
+  location: String
+  """
+  Location city name.
+  """
+  locationCity: String
+  """
+  Location country name.
+  """
+  locationCountry: String
+  """
+  Location country code.
+  """
+  locationCountryCode: String
+  """
+  Name of the session, derived from the client and operating system
+  """
+  name: String!
+  """
+  Operating system used for the session
+  """
+  operatingSystem: String
+  """
+  Type of application used to authenticate.
+  """
+  type: AuthenticationSessionType!
+  """
+  Date when the session was last updated.
+  """
+  updatedAt: DateTime!
+  """
+  Session's user-agent.
+  """
+  userAgent: String
+}
+
+type AuthenticationSessionResponse {
+  """
+  Client used for the session
+  """
+  client: String
+  """
+  Country codes of all seen locations.
+  """
+  countryCodes: [String!]!
+  """
+  Date when the session was created.
+  """
+  createdAt: DateTime!
+  id: String!
+  """
+  IP address.
+  """
+  ip: String
+  """
+  Identifies the session used to make the request.
+  """
+  isCurrentSession: Boolean!
+  """
+  When was the session last seen
+  """
+  lastActiveAt: DateTime
+  """
+  Human readable location
+  """
+  location: String
+  """
+  Location city name.
+  """
+  locationCity: String
+  """
+  Location country name.
+  """
+  locationCountry: String
+  """
+  Location country code.
+  """
+  locationCountryCode: String
+  """
+  Name of the session, derived from the client and operating system
+  """
+  name: String!
+  """
+  Operating system used for the session
+  """
+  operatingSystem: String
+  """
+  Type of application used to authenticate.
+  """
+  type: AuthenticationSessionType!
+  """
+  Date when the session was last updated.
+  """
+  updatedAt: DateTime!
+  """
+  Session's user-agent.
+  """
+  userAgent: String
+}
+
+enum AuthenticationSessionType {
+  android
+  desktop
+  ios
+  web
 }
 
 """
@@ -745,6 +989,10 @@ type Comment implements Node {
   """
   createdAt: DateTime!
   """
+  The document content that the comment is associated with.
+  """
+  documentContent: DocumentContent!
+  """
   The time user edited the comment.
   """
   editedAt: DateTime
@@ -765,15 +1013,23 @@ type Comment implements Node {
   """
   parent: Comment
   """
+  [ALPHA] The project update that the comment is associated with.
+  """
+  projectUpdate: ProjectUpdate!
+  """
   Emoji reaction summary, grouped by emoji type
   """
   reactionData: JSONObject!
   """
-  [ALPHA] The comment that resolved the thread.
+  The time the resolvingUser resolved the thread.
+  """
+  resolvedAt: DateTime
+  """
+  The comment that resolved the thread.
   """
   resolvingComment: Comment
   """
-  [ALPHA] The user that resolved the thread.
+  The user that resolved the thread.
   """
   resolvingUser: User
   """
@@ -874,17 +1130,25 @@ input CommentCreateInput {
   """
   doNotSubscribeToIssue: Boolean
   """
+  The document content to associate the comment with.
+  """
+  documentContentId: String
+  """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
   """
   The issue to associate the comment with.
   """
-  issueId: String!
+  issueId: String
   """
   The parent comment under which to nest a current comment.
   """
   parentId: String
+  """
+  The prject update to associate the comment with.
+  """
+  projectUpdateId: String
 }
 
 type CommentEdge {
@@ -1115,8 +1379,8 @@ type CreateCsvExportReportPayload {
 }
 
 type CreateOrJoinOrganizationResponse {
-  organization: Organization!
-  user: User!
+  organization: AuthOrganization!
+  user: AuthUser!
 }
 
 input CreateOrganizationInput {
@@ -1277,6 +1541,13 @@ type CustomViewEdge {
   """
   cursor: String!
   node: CustomView!
+}
+
+type CustomViewHasSubscribersPayload {
+  """
+  Whether the custom view has subscribers.
+  """
+  hasSubscribers: Boolean!
 }
 
 """
@@ -1903,13 +2174,13 @@ type Document implements Node {
   """
   color: String
   """
-  The document content in markdown format.
+  The documents content in markdown format.
   """
   content: String
   """
-  The document content as JSON.
+  The documents content as a Prosemirror document.
   """
-  contentData: JSONObject
+  contentData: JSON @deprecated(reason: "Use content instead.")
   """
   The time at which the entity was created.
   """
@@ -1926,6 +2197,10 @@ type Document implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  The last template that was applied to this document.
+  """
+  lastAppliedTemplate: Template
   """
   The project that the document is associated with.
   """
@@ -1975,23 +2250,31 @@ type DocumentContent implements Node {
   """
   The document content state as a base64 encoded string.
   """
-  contentState: JSONObject
+  contentState: String
   """
   The time at which the entity was created.
   """
   createdAt: DateTime!
   """
+  The document that the content is associated with.
+  """
+  document: Document
+  """
   The unique identifier of the entity.
   """
   id: ID!
   """
-  The issue that the document is associated with.
+  The issue that the content is associated with.
   """
   issue: Issue
   """
-  The project that the document is associated with.
+  The project that the content is associated with.
   """
   project: Project
+  """
+  The project milestone that the content is associated with.
+  """
+  projectMilestone: ProjectMilestone
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -2018,6 +2301,80 @@ input DocumentContentFilter {
   updatedAt: DateComparator
 }
 
+"""
+A document content history for a document
+"""
+type DocumentContentHistory implements Node {
+  """
+  IDs of actors whose edits went into this history item.
+  """
+  actorIds: [String!]!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The document content as JSON.
+  """
+  contentData: JSONObject
+  """
+  The timestamp associated with the DocumentContent when it was originally saved
+  """
+  contentDataSnapshotAt: DateTime!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The document content that this history item is associated with.
+  """
+  documentContent: DocumentContent!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type DocumentContentHistoryPayload {
+  """
+  The document content history entries.
+  """
+  history: [DocumentContentHistoryType!]
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+type DocumentContentHistoryType {
+  """
+  The ID of the author of the change.
+  """
+  actorIds: [String!]
+  """
+  The document content as Prosemirror document.
+  """
+  contentData: JSON!
+  """
+  The date when the document content history snapshot was taken. This can be different than createdAt since the content is captured from its state at the previously known updatedAt timestamp in the case of an update. On document create, these timestamps can be the same.
+  """
+  contentDataSnapshotAt: DateTime!
+  """
+  The date when the document content history entry was created.
+  """
+  createdAt: DateTime!
+  """
+  The UUID of the document content history entry.
+  """
+  id: String!
+}
+
 input DocumentCreateInput {
   """
   The color of the icon.
@@ -2028,7 +2385,7 @@ input DocumentCreateInput {
   """
   content: String
   """
-  The document content as a Prosemirror document.
+  [Internal] The document content as a Prosemirror document.
   """
   contentData: JSONObject
   """
@@ -2039,6 +2396,10 @@ input DocumentCreateInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  The ID of the last template applied to the document.
+  """
+  lastAppliedTemplateId: String
   """
   Related project for the document.
   """
@@ -2096,13 +2457,13 @@ type DocumentSearchResult implements Node {
   """
   color: String
   """
-  The document content in markdown format.
+  The documents content in markdown format.
   """
   content: String
   """
-  The document content as JSON.
+  The documents content as a Prosemirror document.
   """
-  contentData: JSONObject
+  contentData: JSON @deprecated(reason: "Use content instead.")
   """
   The time at which the entity was created.
   """
@@ -2119,6 +2480,10 @@ type DocumentSearchResult implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  The last template that was applied to this document.
+  """
+  lastAppliedTemplate: Template
   """
   Metadata related to search result
   """
@@ -2171,13 +2536,17 @@ input DocumentUpdateInput {
   """
   content: String
   """
-  The document content as a Prosemirror document.
+  [Internal] The document content as a Prosemirror document.
   """
   contentData: JSONObject
   """
   The icon of the document.
   """
   icon: String
+  """
+  The ID of the last template applied to the document.
+  """
+  lastAppliedTemplateId: String
   """
   Related project for the document.
   """
@@ -2234,6 +2603,10 @@ input EmailUserAccountAuthChallengeInput {
   """
   email: String!
   """
+  The organization invite link to associate with this authentication.
+  """
+  inviteLink: String
+  """
   Whether the login was requested from the desktop app.
   """
   isDesktop: Boolean
@@ -2250,71 +2623,6 @@ type EmailUserAccountAuthChallengeResponse {
   authType: String!
   """
   Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-"""
-Information for creating embedded content for the provided URL
-"""
-type Embed {
-  """
-  The name of the author/owner of the resource
-  """
-  authorName: String
-  """
-  The description of the content
-  """
-  description: String
-  """
-  The height of embedded content (photo, video, rich)
-  """
-  height: Float
-  """
-  The HTML (video, rich)
-  """
-  html: String
-  """
-  The name of the provider
-  """
-  providerName: String
-  """
-  The height of the thumbnail preview image
-  """
-  thumbnailHeight: Float
-  """
-  The URL of the thumbnail preview image
-  """
-  thumbnailUrl: String
-  """
-  The width of the thumbnail preview image
-  """
-  thumbnailWidth: Float
-  """
-  Title for the returned embed view
-  """
-  title: String
-  """
-  The type of embed
-  """
-  type: String!
-  """
-  The asset URL (photo)
-  """
-  url: String
-  """
-  The width of embedded content (photo, video, rich)
-  """
-  width: Float
-}
-
-type EmbedPayload {
-  """
-  Embed information
-  """
-  embed: Embed
-  """
-  Whether the query was successful
   """
   success: Boolean!
 }
@@ -2767,89 +3075,6 @@ input FavoriteUpdateInput {
   sortOrder: Float
 }
 
-"""
-Object representing Figma preview information.
-"""
-type FigmaEmbed {
-  """
-  Date when the file was updated at the time of embedding.
-  """
-  lastModified: DateTime!
-  """
-  Figma file name.
-  """
-  name: String!
-  """
-  Node name.
-  """
-  nodeName: String
-  """
-  Figma screenshot URL.
-  """
-  url: String
-}
-
-type FigmaEmbedPayload {
-  """
-  Figma embed information.
-  """
-  figmaEmbed: FigmaEmbed
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-"""
-A schedule for a team's first responder.
-"""
-type FirstResponderSchedule implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The integration used for time scheduling.
-  """
-  integration: Integration!
-  """
-  The schedule information.
-  """
-  scheduleData: JSONObject
-  """
-  The team to which the schedule belongs to.
-  """
-  team: Team!
-  """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
-type FirstResponderScheduleConnection {
-  edges: [FirstResponderScheduleEdge!]!
-  nodes: [FirstResponderSchedule!]!
-  pageInfo: PageInfo!
-}
-
-type FirstResponderScheduleEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: FirstResponderSchedule!
-}
-
 type FrontAttachmentPayload {
   """
   The identifier of the last sync operation.
@@ -2960,6 +3185,73 @@ input GitHubSettingsInput {
   The names of the repositories connected for the GitHub integration
   """
   repositories: [String!]
+}
+
+"""
+GitHub repos available to sync.
+"""
+type GitHubSyncRepo {
+  """
+  The full name of the repository.
+  """
+  fullName: String!
+  """
+  The GitHub repo id.
+  """
+  id: Float!
+}
+
+input GitHubSyncRepoInput {
+  """
+  The full name of the repository.
+  """
+  fullName: String!
+  """
+  The GitHub repo id.
+  """
+  id: Float!
+}
+
+"""
+Metadata and settings for a GitHub Sync integration.
+"""
+type GitHubSyncSettings {
+  """
+  The names of the repositories connected for the GitHub integration
+  """
+  repositories: [GitHubSyncRepo!]
+  """
+  Mapping of team to repository for syncing
+  """
+  teamRepoMap: [TeamRepoMapping!]
+}
+
+input GitHubSyncSettingsInput {
+  """
+  The names of the repositories connected for the GitHub integration
+  """
+  repositories: [GitHubSyncRepoInput!]
+  """
+  Mapping of team to repository for syncing
+  """
+  teamRepoMap: [TeamRepoMappingInput!]
+}
+
+"""
+Metadata and settings for a GitLab integration.
+"""
+type GitLabSettings {
+  """
+  The self-hosted URL of the GitLab instance
+  """
+  url: String
+}
+
+input GitLabSettingsInput {
+  """
+  The self-hosted URL of the GitLab instance
+  """
+  url: String
 }
 
 """
@@ -3190,6 +3482,8 @@ The integration resource's settings
 type IntegrationSettings {
   front: FrontSettings
   gitHub: GitHubSettings
+  gitHubSync: GitHubSyncSettings
+  gitLab: GitLabSettings
   googleSheets: GoogleSheetsSettings
   intercom: IntercomSettings
   jira: JiraSettings
@@ -3206,6 +3500,8 @@ type IntegrationSettings {
 input IntegrationSettingsInput {
   front: FrontSettingsInput
   gitHub: GitHubSettingsInput
+  gitHubSync: GitHubSyncSettingsInput
+  gitLab: GitLabSettingsInput
   googleSheets: GoogleSheetsSettingsInput
   intercom: IntercomSettingsInput
   jira: JiraSettingsInput
@@ -3709,7 +4005,7 @@ type Issue implements Node {
   """
   [Internal] The issue's description as a Prosemirror document.
   """
-  descriptionData: JSON
+  descriptionData: JSON @deprecated(reason: "Use description instead.")
   """
   The date at which the issue is due.
   """
@@ -3825,6 +4121,10 @@ type Issue implements Node {
     """
     orderBy: PaginationOrderBy
   ): IssueLabelConnection!
+  """
+  The last template that was applied to this issue.
+  """
+  lastAppliedTemplate: Template
   """
   The issue's unique number.
   """
@@ -4109,6 +4409,10 @@ input IssueCollectionFilter {
   """
   labels: IssueLabelCollectionFilter
   """
+  Filters that the last applied template must satisfy.
+  """
+  lastAppliedTemplate: NullableTemplateFilter
+  """
   Comparator for the collection length.
   """
   length: NumberComparator
@@ -4156,6 +4460,10 @@ input IssueCollectionFilter {
   Filters that needs to be matched by some issues.
   """
   some: IssueFilter
+  """
+  Filters that the source must satisfy.
+  """
+  sourceMetadata: SourceMetadataComparator
   """
   Comparator for the issues started at date.
   """
@@ -4241,6 +4549,10 @@ input IssueCreateInput {
   The identifiers of the issue labels associated with this ticket.
   """
   labelIds: [String!]
+  """
+  The ID of the last template applied to the issue.
+  """
+  lastAppliedTemplateId: String
   """
   The identifier of the parent issue.
   """
@@ -4492,6 +4804,10 @@ input IssueFilter {
   """
   labels: IssueLabelCollectionFilter
   """
+  Filters that the last applied template must satisfy.
+  """
+  lastAppliedTemplate: NullableTemplateFilter
+  """
   Comparator for the issues number.
   """
   number: NumberComparator
@@ -4531,6 +4847,10 @@ input IssueFilter {
   Comparator for the issues snoozed until date.
   """
   snoozedUntilAt: NullableDateComparator
+  """
+  Filters that the source must satisfy.
+  """
+  sourceMetadata: SourceMetadataComparator
   """
   Comparator for the issues started at date.
   """
@@ -4584,6 +4904,7 @@ type IssueHistory implements Node {
   ID's of labels that were added.
   """
   addedLabelIds: [String!]
+  addedLabels: [IssueLabel!]
   """
   Whether the issue is archived at the time of this history entry.
   """
@@ -4704,6 +5025,7 @@ type IssueHistory implements Node {
   ID's of labels that were removed.
   """
   removedLabelIds: [String!]
+  removedLabels: [IssueLabel!]
   """
   The user to whom the issue was assigned to.
   """
@@ -5272,6 +5594,10 @@ type IssueNotification implements Entity & Node & Notification {
   """
   snoozedUntilAt: DateTime
   """
+  The subscriptions related to the notification.
+  """
+  subscriptions: [NotificationSubscription!]
+  """
   The team related to the notification.
   """
   team: Team!
@@ -5612,7 +5938,7 @@ type IssueSearchResult implements Node {
   """
   [Internal] The issue's description as a Prosemirror document.
   """
-  descriptionData: JSON
+  descriptionData: JSON @deprecated(reason: "Use description instead.")
   """
   The date at which the issue is due.
   """
@@ -5728,6 +6054,10 @@ type IssueSearchResult implements Node {
     """
     orderBy: PaginationOrderBy
   ): IssueLabelConnection!
+  """
+  The last template that was applied to this issue.
+  """
+  lastAppliedTemplate: Template
   """
   Metadata related to search result
   """
@@ -5941,6 +6271,10 @@ input IssueUpdateInput {
   The identifiers of the issue labels associated with this ticket.
   """
   labelIds: [String!]
+  """
+  The ID of the last template applied to the issue.
+  """
+  lastAppliedTemplateId: String
   """
   The identifier of the parent issue.
   """
@@ -6269,6 +6603,10 @@ type Mutation {
     """
     displayIconUrl: String
     """
+    Optional attachment ID that may be provided through the API
+    """
+    id: String
+    """
     The issue for which to link the Discord message.
     """
     issueId: String!
@@ -6298,10 +6636,88 @@ type Mutation {
     """
     displayIconUrl: String
     """
+    Optional attachment ID that may be provided through the API
+    """
+    id: String
+    """
     The issue for which to link the Front conversation.
     """
     issueId: String!
   ): FrontAttachmentPayload!
+  """
+  Link an existing GitHub PR to an issue.
+  """
+  attachmentLinkGitHubPR(
+    """
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    """
+    createAsUser: String
+    """
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    """
+    displayIconUrl: String
+    """
+    Optional attachment ID that may be provided through the API
+    """
+    id: String
+    """
+    The issue for which to link the GitHub pull request.
+    """
+    issueId: String!
+    """
+    The GitHub pull request number to link.
+    """
+    number: Float!
+    """
+    The owner of the GitHub repository.
+    """
+    owner: String!
+    """
+    The name of the GitHub repository.
+    """
+    repo: String!
+    """
+    The URL of the GitHub pull request to link.
+    """
+    url: String!
+  ): AttachmentPayload!
+  """
+  Link an existing GitLab MR to an issue.
+  """
+  attachmentLinkGitLabMR(
+    """
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    """
+    createAsUser: String
+    """
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    """
+    displayIconUrl: String
+    """
+    Optional attachment ID that may be provided through the API
+    """
+    id: String
+    """
+    The issue for which to link the GitLab merge request.
+    """
+    issueId: String!
+    """
+    The GitLab merge request number to link.
+    """
+    number: Float!
+    """
+    The owner of the GitLab repository.
+    """
+    owner: String!
+    """
+    The name of the GitLab repository.
+    """
+    repo: String!
+    """
+    The URL of the GitLab merge request to link.
+    """
+    url: String!
+  ): AttachmentPayload!
   """
   Link an existing Intercom conversation to an issue.
   """
@@ -6318,6 +6734,10 @@ type Mutation {
     Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
     """
     displayIconUrl: String
+    """
+    Optional attachment ID that may be provided through the API
+    """
+    id: String
     """
     The issue for which to link the Intercom conversation.
     """
@@ -6418,6 +6838,10 @@ type Mutation {
     Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
     """
     displayIconUrl: String
+    """
+    Optional attachment ID that may be provided through the API
+    """
+    id: String
     """
     The issue for which to link the Zendesk ticket.
     """
@@ -6534,6 +6958,19 @@ type Mutation {
     """
     survey: OnboardingCustomerSurvey
   ): CreateOrJoinOrganizationResponse!
+  """
+  Create a notification to remind a user about a project update.
+  """
+  createProjectUpdateReminder(
+    """
+    The identifier of the project to remind about.
+    """
+    projectId: String!
+    """
+    The user identifier to whom the notification will be sent. By default, it is set to the project lead.
+    """
+    userId: String
+  ): ProjectUpdateReminderPayload!
   """
   Creates a new custom view.
   """
@@ -6851,6 +7288,15 @@ type Mutation {
     installationId: String!
   ): IntegrationPayload!
   """
+  Connects the organization with the GitHub Sync App.
+  """
+  integrationGithubSync(
+    """
+    The GitHub data to connect with.
+    """
+    installationId: String!
+  ): IntegrationPayload!
+  """
   Connects the organization with a GitLab Access Token.
   """
   integrationGitlabConnect(
@@ -6862,6 +7308,15 @@ type Mutation {
     The URL of the GitLab installation
     """
     gitlabUrl: String!
+  ): IntegrationPayload!
+  """
+  [Internal] Connects the Google Calendar to the user to this Linear account via OAuth2.
+  """
+  integrationGoogleCalendarPersonalConnect(
+    """
+    [Internal] The Google OAuth code.
+    """
+    code: String!
   ): IntegrationPayload!
   """
   Integrates the organization with Google Sheets.
@@ -6920,6 +7375,10 @@ type Mutation {
     """
     redirectUri: String!
   ): IntegrationPayload!
+  """
+  [INTERNAL] Refresh PagerDuty schedule mappings.
+  """
+  integrationPagerDutyRefreshScheduleMappings: IntegrationPayload!
   """
   Requests a currently unavailable integration.
   """
@@ -7144,6 +7603,19 @@ type Mutation {
     """
     input: IntegrationsSettingsUpdateInput!
   ): IntegrationsSettingsPayload!
+  """
+  Adds a label to an issue.
+  """
+  issueAddLabel(
+    """
+    The identifier of the issue to add the label to.
+    """
+    id: String!
+    """
+    The identifier of the label to add.
+    """
+    labelId: String!
+  ): IssuePayload!
   """
   Archives an issue.
   """
@@ -7513,6 +7985,32 @@ type Mutation {
     reminderAt: DateTime!
   ): IssuePayload!
   """
+  Removes a label from an issue.
+  """
+  issueRemoveLabel(
+    """
+    The identifier of the issue to remove the label from.
+    """
+    id: String!
+    """
+    The identifier of the label to remove.
+    """
+    labelId: String!
+  ): IssuePayload!
+  """
+  Subscribes a user to an issue.
+  """
+  issueSubscribe(
+    """
+    The identifier of the issue to subscribe to.
+    """
+    id: String!
+    """
+    The identifier of the user to subscribe, default is the current user.
+    """
+    userId: String
+  ): IssuePayload!
+  """
   Unarchives an issue.
   """
   issueUnarchive(
@@ -7521,6 +8019,19 @@ type Mutation {
     """
     id: String!
   ): IssueArchivePayload!
+  """
+  Unsubscribes a user from an issue.
+  """
+  issueUnsubscribe(
+    """
+    The identifier of the issue to unsubscribe from.
+    """
+    id: String!
+    """
+    The identifier of the user to unsubscribe, default is the current user.
+    """
+    userId: String
+  ): IssuePayload!
   """
   Updates an issue.
   """
@@ -7562,9 +8073,26 @@ type Mutation {
     organizationId: String!
   ): CreateOrJoinOrganizationResponse!
   """
-  Logout of all clients.
+  Logout the client.
   """
   logout: LogoutResponse!
+  """
+  Logout all of user's sessions including the active one.
+  """
+  logoutAllSessions: LogoutResponse!
+  """
+  Logout all of user's sessions excluding the current one.
+  """
+  logoutOtherSessions: LogoutResponse!
+  """
+  Logout an individual session with its ID.
+  """
+  logoutSession(
+    """
+    ID of the session to logout.
+    """
+    sessionId: String!
+  ): LogoutResponse!
   """
   Archives a notification.
   """
@@ -7783,7 +8311,7 @@ type Mutation {
     """
     A partial organization object to update the organization with.
     """
-    input: UpdateOrganizationInput!
+    input: OrganizationUpdateInput!
   ): OrganizationPayload!
   """
   Archives a project.
@@ -8270,15 +8798,6 @@ type Mutation {
     code: String!
   ): UserPayload!
   """
-  Connects the Google Calendar to the user to this Linear account via OAuth2.
-  """
-  userGoogleCalendarConnect(
-    """
-    [Internal] The Google OAuth code.
-    """
-    code: String!
-  ): UserPayload!
-  """
   Connects the Jira user to this Linear account via OAuth2.
   """
   userJiraConnect(
@@ -8365,7 +8884,7 @@ type Mutation {
     """
     A partial user object to update the user with.
     """
-    input: UpdateUserInput!
+    input: UserUpdateInput!
   ): UserPayload!
   """
   Creates a new ViewPreferences object.
@@ -9032,6 +9551,10 @@ input NullableIssueFilter {
   """
   labels: IssueLabelCollectionFilter
   """
+  Filters that the last applied template must satisfy.
+  """
+  lastAppliedTemplate: NullableTemplateFilter
+  """
   Filter based on the existence of the relation.
   """
   null: Boolean
@@ -9075,6 +9598,10 @@ input NullableIssueFilter {
   Comparator for the issues snoozed until date.
   """
   snoozedUntilAt: NullableDateComparator
+  """
+  Filters that the source must satisfy.
+  """
+  sourceMetadata: SourceMetadataComparator
   """
   Comparator for the issues started at date.
   """
@@ -9187,6 +9714,10 @@ input NullableProjectFilter {
   Filters that the projects issues must satisfy.
   """
   issues: IssueCollectionFilter
+  """
+  Filters that the last applied template must satisfy.
+  """
+  lastAppliedTemplate: NullableTemplateFilter
   """
   Filters that the projects lead must satisfy.
   """
@@ -9399,6 +9930,40 @@ input NullableTeamFilter {
   updatedAt: DateComparator
 }
 
+"""
+Template filtering options.
+"""
+input NullableTemplateFilter {
+  """
+  Compound filters, all of which need to be matched by the template.
+  """
+  and: [NullableTemplateFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the template's name.
+  """
+  name: StringComparator
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the template.
+  """
+  or: [NullableTemplateFilter!]
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 input NullableTimelessDateComparator {
   """
   Equals constraint.
@@ -9564,7 +10129,7 @@ type OauthClient implements Node {
   """
   createdAt: DateTime!
   """
-  The user who created the OAuthClient.
+  The user who created the OAuth application.
   """
   creator: User!
   """
@@ -9592,11 +10157,11 @@ type OauthClient implements Node {
   """
   name: String!
   """
-  The organization that the OAuthClient is associated with.
+  The organization that the OAuth application is associated with.
   """
   organization: Organization!
   """
-  Whether the OAuth application is publicly visible, or only visible to the creating workspace.
+  Whether the OAuth application can be installed in other organizations.
   """
   publicEnabled: Boolean!
   """
@@ -9764,6 +10329,10 @@ An organization. Organizations are root-level objects that contain user accounts
 """
 type Organization implements Node {
   """
+  Whether member users are allowed to send invites
+  """
+  allowMembersToInvite: Boolean
+  """
   Allowed authentication providers, empty array means all are allowed
   """
   allowedAuthServices: [String!]!
@@ -9904,7 +10473,7 @@ type Organization implements Node {
   """
   [INTERNAL] SAML settings
   """
-  samlSettings: JSONObject!
+  samlSettings: JSONObject
   """
   Whether SCIM provisioning is enabled for organization.
   """
@@ -10389,6 +10958,77 @@ type OrganizationStartPlusTrialPayload {
   success: Boolean!
 }
 
+input OrganizationUpdateInput {
+  """
+  Whether member users are allowed to send invites.
+  """
+  allowMembersToInvite: Boolean
+  """
+  List of services that are allowed to be used for login.
+  """
+  allowedAuthServices: [String!]
+  """
+  How git branches are formatted. If null, default formatting will be used.
+  """
+  gitBranchFormat: String
+  """
+  Whether the Git integration linkback messages should be sent for private repositories.
+  """
+  gitLinkbackMessagesEnabled: Boolean
+  """
+  Whether the Git integration linkback messages should be sent for public repositories.
+  """
+  gitPublicLinkbackMessagesEnabled: Boolean
+  """
+  Linear Preview feature flags
+  """
+  linearPreviewFlags: JSONObject
+  """
+  The logo of the organization.
+  """
+  logoUrl: String
+  """
+  The name of the organization.
+  """
+  name: String
+  """
+  Whether the organization has opted for having to approve all OAuth applications for install.
+  """
+  oauthAppReview: Boolean
+  """
+  The day at which project updates are sent.
+  """
+  projectUpdateRemindersDay: Day
+  """
+  The hour at which project updates are sent.
+  """
+  projectUpdateRemindersHour: Float
+  """
+  The frequency at which project updates are sent.
+  """
+  projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency
+  """
+  Whether the organization has opted for reduced customer support attachment information.
+  """
+  reducedPersonalInformation: Boolean
+  """
+  Whether the organization is using roadmap.
+  """
+  roadmapEnabled: Boolean
+  """
+  Which day count to use for SLA calculation.
+  """
+  slaDayCount: SLADayCountType
+  """
+  Internal. Whether SLAs have been enabled for the organization.
+  """
+  slaEnabled: Boolean
+  """
+  The URL key of the organization.
+  """
+  urlKey: String
+}
+
 type PageInfo {
   """
   Cursor representing the last result in the paginated results.
@@ -10410,15 +11050,15 @@ type PageInfo {
 
 input PagerDutyInput {
   """
-  The mapping of PagerDuty schedule id to names.
+  Metadata about a PagerDuty schedule.
   """
-  scheduleMapping: [PagerDutyScheduleMappingInput!]!
+  scheduleMapping: [PagerDutyScheduleInfoInput!]!
 }
 
 """
-Tuple for mapping PagerDuty schedule id to names.
+Metadata about a PagerDuty schedule.
 """
-type PagerDutyScheduleMapping {
+type PagerDutyScheduleInfo {
   """
   The PagerDuty schedule id.
   """
@@ -10427,9 +11067,13 @@ type PagerDutyScheduleMapping {
   The PagerDuty schedule name.
   """
   scheduleName: String!
+  """
+  The URL of the schedule in PagerDuty's web app.
+  """
+  url: String!
 }
 
-input PagerDutyScheduleMappingInput {
+input PagerDutyScheduleInfoInput {
   """
   The PagerDuty schedule id.
   """
@@ -10438,6 +11082,10 @@ input PagerDutyScheduleMappingInput {
   The PagerDuty schedule name.
   """
   scheduleName: String!
+  """
+  The URL of the schedule in PagerDuty's web app.
+  """
+  url: String!
 }
 
 """
@@ -10445,9 +11093,9 @@ PagerDuty specific settings.
 """
 type PagerDutySettings {
   """
-  The mapping of PagerDuty schedule id to names.
+  Metadata about a PagerDuty schedule.
   """
-  scheduleMapping: [PagerDutyScheduleMapping!]!
+  scheduleMapping: [PagerDutyScheduleInfo!]!
 }
 
 """
@@ -10470,6 +11118,10 @@ type PaidSubscription implements Node {
   The date the subscription was canceled, if any.
   """
   canceledAt: DateTime
+  """
+  The collection method for this subscription, either automatically charged or invoiced.
+  """
+  collectionMethod: String
   """
   The time at which the entity was created.
   """
@@ -10554,10 +11206,6 @@ type Project implements Node {
   The project's content in markdown format.
   """
   content: String
-  """
-  [Internal] The project's content as a Prosemirror document.
-  """
-  contentData: JSON
   """
   The project was created based on this issue.
   """
@@ -10656,6 +11304,10 @@ type Project implements Node {
     """
     orderBy: PaginationOrderBy
   ): IssueConnection!
+  """
+  The last template that was applied to this project.
+  """
+  lastAppliedTemplate: Template
   """
   The project lead.
   """
@@ -10952,6 +11604,10 @@ input ProjectCollectionFilter {
   """
   issues: IssueCollectionFilter
   """
+  Filters that the last applied template must satisfy.
+  """
+  lastAppliedTemplate: NullableTemplateFilter
+  """
   Filters that the projects lead must satisfy.
   """
   lead: NullableUserFilter
@@ -11041,6 +11697,10 @@ input ProjectCreateInput {
   """
   id: String
   """
+  The ID of the last template applied to the project.
+  """
+  lastAppliedTemplateId: String
+  """
   The identifier of the project lead.
   """
   leadId: String
@@ -11122,6 +11782,10 @@ input ProjectFilter {
   Filters that the projects issues must satisfy.
   """
   issues: IssueCollectionFilter
+  """
+  Filters that the last applied template must satisfy.
+  """
+  lastAppliedTemplate: NullableTemplateFilter
   """
   Filters that the projects lead must satisfy.
   """
@@ -11295,9 +11959,13 @@ type ProjectMilestone implements Node {
   """
   createdAt: DateTime!
   """
-  The description of the project milestone.
+  The project milestone's description in markdown format.
   """
   description: String
+  """
+  [Internal] The project milestone's description as a Prosemirror document.
+  """
+  descriptionData: JSON
   """
   The unique identifier of the entity.
   """
@@ -11380,9 +12048,13 @@ type ProjectMilestoneConnection {
 
 input ProjectMilestoneCreateInput {
   """
-  The description of the project milestone.
+  The description of the project milestone in markdown format.
   """
   description: String
+  """
+  The description of the project milestone as a Prosemirror document.
+  """
+  descriptionData: JSONObject
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -11464,17 +12136,17 @@ type ProjectMilestonePayload {
 
 input ProjectMilestoneUpdateInput {
   """
-  The description of the project milestone.
+  The description of the project milestone in markdown format.
   """
   description: String
+  """
+  The description of the project milestone as a Prosemirror document.
+  """
+  descriptionData: JSONObject
   """
   The name of the project milestone.
   """
   name: String
-  """
-  Related project for the project milestone.
-  """
-  projectId: String
   """
   The sort order for the project milestone within a project.
   """
@@ -11685,10 +12357,6 @@ type ProjectSearchResult implements Node {
   """
   content: String
   """
-  [Internal] The project's content as a Prosemirror document.
-  """
-  contentData: JSON
-  """
   The project was created based on this issue.
   """
   convertedFromIssue: Issue
@@ -11786,6 +12454,10 @@ type ProjectSearchResult implements Node {
     """
     orderBy: PaginationOrderBy
   ): IssueConnection!
+  """
+  The last template that was applied to this project.
+  """
+  lastAppliedTemplate: Template
   """
   The project lead.
   """
@@ -12058,6 +12730,10 @@ type ProjectUpdate implements Node {
   """
   diff: JSON
   """
+  The diff between the current update and the previous one, formatted as markdown.
+  """
+  diffMarkdown: String
+  """
   The time the project update was edited.
   """
   editedAt: DateTime
@@ -12131,6 +12807,40 @@ type ProjectUpdateEdge {
 }
 
 """
+ProjectUpdate filtering options.
+"""
+input ProjectUpdateFilter {
+  """
+  Compound filters, all of which need to be matched by the ProjectUpdate.
+  """
+  and: [ProjectUpdateFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the ProjectUpdate.
+  """
+  or: [ProjectUpdateFilter!]
+  """
+  Filters that the project update project must satisfy.
+  """
+  project: ProjectFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+  """
+  Filters that the project update creator must satisfy.
+  """
+  user: UserFilter
+}
+
+"""
 The health type of a project when the update is created.
 """
 enum ProjectUpdateHealthType {
@@ -12164,6 +12874,10 @@ input ProjectUpdateInput {
   The icon of the project.
   """
   icon: String
+  """
+  The ID of the last template applied to the project.
+  """
+  lastAppliedTemplateId: String
   """
   The identifier of the project lead.
   """
@@ -12319,6 +13033,17 @@ enum ProjectUpdateReminderFrequency {
   week
 }
 
+type ProjectUpdateReminderPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 input ProjectUpdateUpdateInput {
   """
   The content of the project update in markdown format.
@@ -12399,7 +13124,7 @@ input PushSubscriptionCreateInput {
   """
   The user identifier of the subscription.
   """
-  userId: String!
+  userId: String
 }
 
 type PushSubscriptionEdge {
@@ -12411,6 +13136,10 @@ type PushSubscriptionEdge {
 }
 
 type PushSubscriptionPayload {
+  """
+  The push subscription that was created or updated.
+  """
+  entity: PushSubscription!
   """
   The identifier of the last sync operation.
   """
@@ -12709,6 +13438,10 @@ type Query {
   """
   auditEntryTypes: [AuditEntryType!]!
   """
+  User's active sessions.
+  """
+  authenticationSessions: [AuthenticationSessionResponse!]!
+  """
   [INTERNAL] Get all authorized applications for a user
   """
   authorizedApplications: [AuthorizedApplication!]!
@@ -12766,6 +13499,15 @@ type Query {
   [INTERNAL] Suggests metadata for a view based on it's filters.
   """
   customViewDetailsSuggestion(filter: JSONObject!, modelName: String): CustomViewSuggestionPayload!
+  """
+  Whether a custom view has other subscribers than the current user in the organization.
+  """
+  customViewHasSubscribers(
+    """
+    The identifier of the custom view.
+    """
+    id: String!
+  ): CustomViewHasSubscribersPayload!
   """
   Custom views for the user.
   """
@@ -12837,7 +13579,11 @@ type Query {
   """
   document(id: String!): Document!
   """
-  All documents for the project.
+  A collection of document content history entries.
+  """
+  documentContentHistory(id: String!): DocumentContentHistoryPayload!
+  """
+  All documents in the workspace.
   """
   documents(
     """
@@ -12865,15 +13611,6 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): DocumentConnection!
-  """
-  Returns embed info for any url
-  """
-  embedInfo(
-    """
-    The URL to lookup embed info for
-    """
-    url: String!
-  ): EmbedPayload!
   """
   A specific emoji.
   """
@@ -12983,19 +13720,6 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): FavoriteConnection!
-  """
-  Fetch Figma screenshot and other information with file and node identifiers.
-  """
-  figmaEmbedInfo(
-    """
-    Figma file identifier.
-    """
-    fileId: String!
-    """
-    Figma node identifier.
-    """
-    nodeId: String
-  ): FigmaEmbedPayload!
   """
   One specific integration.
   """
@@ -13503,6 +14227,10 @@ type Query {
     """
     before: String
     """
+    Filter returned project updates.
+    """
+    filter: ProjectUpdateFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -13647,6 +14375,10 @@ type Query {
     """
     includeArchived: Boolean
     """
+    Should associated comments be searched (default: true)
+    """
+    includeComments: Boolean
+    """
     The number of items to backward paginate (used with before). Defaults to 50.
     """
     last: Int
@@ -13688,6 +14420,10 @@ type Query {
     """
     includeArchived: Boolean
     """
+    Should associated comments be searched (default: true)
+    """
+    includeComments: Boolean
+    """
     The number of items to backward paginate (used with before). Defaults to 50.
     """
     last: Int
@@ -13724,6 +14460,10 @@ type Query {
     Should archived resources be included (default: false)
     """
     includeArchived: Boolean
+    """
+    Should associated comments be searched (default: true)
+    """
+    includeComments: Boolean
     """
     The number of items to backward paginate (used with before). Defaults to 50.
     """
@@ -13855,15 +14595,6 @@ type Query {
     """
     id: String!
   ): User!
-  """
-  Finds a user account by email.
-  """
-  userAccountExists(
-    """
-    The email to find the user account by.
-    """
-    email: String!
-  ): UserAccountExistsPayload
   """
   The user's settings.
   """
@@ -14599,6 +15330,7 @@ enum SlaStatus {
   HighRisk
   LowRisk
   MediumRisk
+  Paused
 }
 
 """
@@ -14647,7 +15379,40 @@ input SlackAsksSettingsInput {
 """
 Tuple for mapping Slack channel IDs to names
 """
+type SlackAsksTeamSettings {
+  """
+  Whether the default Asks template is enabled in the given channel for this team
+  """
+  hasDefaultAsk: Boolean!
+  """
+  The Linear team ID.
+  """
+  id: String!
+}
+
+input SlackAsksTeamSettingsInput {
+  """
+  Whether the default Asks template is enabled in the given channel for this team
+  """
+  hasDefaultAsk: Boolean!
+  """
+  The Linear team ID.
+  """
+  id: String!
+}
+
+"""
+Object for mapping Slack channel IDs to names and other settings
+"""
 type SlackChannelNameMapping {
+  """
+  Whether or not using the :ticket: emoji in this channel should automatically create Asks
+  """
+  autoCreateOnEmoji: Boolean
+  """
+  Whether or not top-level messages in this channel should automatically create Asks
+  """
+  autoCreateOnMessage: Boolean
   """
   The Slack channel ID.
   """
@@ -14660,10 +15425,22 @@ type SlackChannelNameMapping {
   The Slack channel name.
   """
   name: String!
+  """
+  Which teams are connected to the channel and settings for those teams
+  """
+  teams: [SlackAsksTeamSettings!]!
 }
 
 input SlackChannelNameMappingInput {
   """
+  Whether or not using the :ticket: emoji in this channel should automatically create Asks
+  """
+  autoCreateOnEmoji: Boolean
+  """
+  Whether or not top-level messages in this channel should automatically create Asks
+  """
+  autoCreateOnMessage: Boolean
+  """
   The Slack channel ID.
   """
   id: String!
@@ -14675,6 +15452,10 @@ input SlackChannelNameMappingInput {
   The Slack channel name.
   """
   name: String!
+  """
+  Which teams are connected to the channel and settings for those teams
+  """
+  teams: [SlackAsksTeamSettingsInput!]!
 }
 
 """
@@ -14690,6 +15471,36 @@ input SlackPostSettingsInput {
   channel: String!
   channelId: String!
   configurationUrl: String!
+}
+
+"""
+Comparator for issue source type.
+"""
+input SourceMetadataComparator {
+  """
+  Equals constraint.
+  """
+  eq: String
+  """
+  In-array constraint.
+  """
+  in: [String!]
+  """
+  Not-equals constraint.
+  """
+  neq: String
+  """
+  Not-in-array constraint.
+  """
+  nin: [String!]
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
+  """
+  Compound filters, all of which need to be matched by the sub type.
+  """
+  subType: SubTypeComparator
 }
 
 """
@@ -14836,8 +15647,33 @@ input StringComparator {
 }
 
 """
-Contains either the full serialized state of the application or delta packets that the requester can
-  apply to the local data set in order to be up-to-date.
+Comparator for source type.
+"""
+input SubTypeComparator {
+  """
+  Equals constraint.
+  """
+  eq: String
+  """
+  In-array constraint.
+  """
+  in: [String!]
+  """
+  Not-equals constraint.
+  """
+  neq: String
+  """
+  Not-in-array constraint.
+  """
+  nin: [String!]
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
+}
+
+"""
+Contains either the full serialized state of the application or delta packets that the requester can apply to the local data set in order to be up-to-date.
 """
 type SyncResponse {
   """
@@ -14845,8 +15681,7 @@ type SyncResponse {
   """
   databaseVersion: Float!
   """
-  JSON serialized delta changes that the client can apply to its local state
-      in order to catch up with the state of the world.
+  JSON serialized delta changes that the client can apply to its local state in order to catch up with the state of the world.
   """
   delta: String
   """
@@ -14924,7 +15759,7 @@ type Team implements Node {
   """
   cycleIssueAutoAssignStarted: Boolean!
   """
-  Only allow issues issues with cycles in Active Issues.
+  Auto assign issues to current cycle if in active status.
   """
   cycleLockToActive: Boolean!
   """
@@ -14976,6 +15811,10 @@ type Team implements Node {
   The default workflow state into which issues are set when they are opened by team members.
   """
   defaultIssueState: WorkflowState
+  """
+  The default template to use for new projects created for the team.
+  """
+  defaultProjectTemplate: Template
   """
   The default template to use for new issues created by members of the team.
   """
@@ -15475,6 +16314,10 @@ input TeamCreateInput {
   """
   defaultIssueEstimate: Float
   """
+  The identifier of the default project template of this team.
+  """
+  defaultProjectTemplateId: String
+  """
   The identifier of the default template for members of this team.
   """
   defaultTemplateForMembersId: String
@@ -15792,6 +16635,31 @@ type TeamPayload {
   team: Team
 }
 
+"""
+Tuple for mapping Linear teams to GitHub repos.
+"""
+type TeamRepoMapping {
+  """
+  The GitHub repo id.
+  """
+  gitHubRepoId: Float!
+  """
+  The Linear team id to map to the given project.
+  """
+  linearTeamId: String!
+}
+
+input TeamRepoMappingInput {
+  """
+  The GitHub repo id.
+  """
+  gitHubRepoId: Float!
+  """
+  The Linear team id to map to the given project.
+  """
+  linearTeamId: String!
+}
+
 input TeamUpdateInput {
   """
   Period after which closed and completed issues are automatically archived, in months.
@@ -15849,6 +16717,10 @@ input TeamUpdateInput {
   Default status for newly created issues.
   """
   defaultIssueStateId: String
+  """
+  The identifier of the default project template of this team.
+  """
+  defaultProjectTemplateId: String
   """
   The identifier of the default template for members of this team.
   """
@@ -16153,123 +17025,71 @@ input TokenUserAccountAuthInput {
 }
 
 """
+A team's triage responsibility.
+"""
+type TriageResponsibility implements Node {
+  """
+  The action to take when an issue is added to triage.
+  """
+  action: TriageResponsibilityAction!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The responsibility configuration.
+  """
+  config: JSONObject
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The integration used for scheduling when using the 'integrationSchedule' configuration.
+  """
+  integration: Integration!
+  """
+  The team to which the triage responsibility belongs to.
+  """
+  team: Team!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Which action should be taken after an issue is added to triage.
+"""
+enum TriageResponsibilityAction {
+  assign
+  notify
+}
+
+type TriageResponsibilityConnection {
+  edges: [TriageResponsibilityEdge!]!
+  nodes: [TriageResponsibility!]!
+  pageInfo: PageInfo!
+}
+
+type TriageResponsibilityEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: TriageResponsibility!
+}
+
+"""
 A universally unique identifier as specified by RFC 4122.
 """
 scalar UUID
-
-input UpdateOrganizationInput {
-  """
-  List of services that are allowed to be used for login.
-  """
-  allowedAuthServices: [String!]
-  """
-  How git branches are formatted. If null, default formatting will be used.
-  """
-  gitBranchFormat: String
-  """
-  Whether the Git integration linkback messages should be sent for private repositories.
-  """
-  gitLinkbackMessagesEnabled: Boolean
-  """
-  Whether the Git integration linkback messages should be sent for public repositories.
-  """
-  gitPublicLinkbackMessagesEnabled: Boolean
-  """
-  Linear Preview feature flags
-  """
-  linearPreviewFlags: JSONObject
-  """
-  The logo of the organization.
-  """
-  logoUrl: String
-  """
-  The name of the organization.
-  """
-  name: String
-  """
-  Whether the organization has opted for having to approve all OAuth applications for install.
-  """
-  oauthAppReview: Boolean
-  """
-  The day at which project updates are sent.
-  """
-  projectUpdateRemindersDay: Day
-  """
-  The hour at which project updates are sent.
-  """
-  projectUpdateRemindersHour: Float
-  """
-  The frequency at which project updates are sent.
-  """
-  projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency
-  """
-  Whether the organization has opted for reduced customer support attachment information.
-  """
-  reducedPersonalInformation: Boolean
-  """
-  Whether the organization is using roadmap.
-  """
-  roadmapEnabled: Boolean
-  """
-  Which day count to use for SLA calculation.
-  """
-  slaDayCount: SLADayCountType
-  """
-  Internal. Whether SLAs have been enabled for the organization.
-  """
-  slaEnabled: Boolean
-  """
-  The URL key of the organization.
-  """
-  urlKey: String
-}
-
-input UpdateUserInput {
-  """
-  Whether the user account is active.
-  """
-  active: Boolean
-  """
-  Whether the user account has admin privileges.
-  """
-  admin: Boolean
-  """
-  The avatar image URL of the user.
-  """
-  avatarUrl: String
-  """
-  The user description or a short bio.
-  """
-  description: String
-  """
-  Reason for deactivation.
-  """
-  disableReason: String
-  """
-  The display name of the user.
-  """
-  displayName: String
-  """
-  The name of the user.
-  """
-  name: String
-  """
-  The emoji part of the user status.
-  """
-  statusEmoji: String
-  """
-  The label part of the user status.
-  """
-  statusLabel: String
-  """
-  When the user status should be cleared.
-  """
-  statusUntilAt: DateTime
-  """
-  The local timezone of the user.
-  """
-  timezone: String
-}
 
 """
 Object representing Google Cloud upload policy, plus additional data.
@@ -16589,10 +17409,6 @@ type UserAccount {
   The time at which the model was updated.
   """
   updatedAt: DateTime!
-  """
-  Users belonging to the account.
-  """
-  users: [User!]!
 }
 
 """
@@ -16635,16 +17451,6 @@ type UserAccountEmailChange {
   The time at which the model was updated.
   """
   updatedAt: DateTime!
-}
-
-"""
-[INTERNAL] Result of looking up a user account by email.
-"""
-type UserAccountExistsPayload {
-  """
-  [INTERNAL] Whether the operation was successful.
-  """
-  success: Boolean!
 }
 
 type UserAdminPayload {
@@ -16862,6 +17668,7 @@ enum UserFlagType {
   emptyMyIssuesDismissed
   figmaPluginBannerDismissed
   figmaPromptDismissed
+  helpIslandFeatureInsightsDismissed
   importBannerDismissed
   insightsHelpDismissed
   insightsWelcomeDismissed
@@ -17096,6 +17903,53 @@ input UserSettingsUpdateInput {
   [Internal] The user's usage warning history.
   """
   usageWarningHistory: JSONObject
+}
+
+input UserUpdateInput {
+  """
+  Whether the user account is active.
+  """
+  active: Boolean
+  """
+  Whether the user account has admin privileges.
+  """
+  admin: Boolean
+  """
+  The avatar image URL of the user.
+  """
+  avatarUrl: String
+  """
+  The user description or a short bio.
+  """
+  description: String
+  """
+  Reason for deactivation.
+  """
+  disableReason: String
+  """
+  The display name of the user.
+  """
+  displayName: String
+  """
+  The name of the user.
+  """
+  name: String
+  """
+  The emoji part of the user status.
+  """
+  statusEmoji: String
+  """
+  The label part of the user status.
+  """
+  statusLabel: String
+  """
+  When the user status should be cleared.
+  """
+  statusUntilAt: DateTime
+  """
+  The local timezone of the user.
+  """
+  timezone: String
 }
 
 """
@@ -17652,7 +18506,7 @@ type WorkflowState implements Node {
   """
   team: Team!
   """
-  The type of the state.
+  The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
   """
   type: String!
   """
