@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.9.0
+
+### Minor Changes
+
+- 2bea2a8: Added provided assignee option during import
+
+### Patch Changes
+
+- Updated dependencies [4a95929]
+- Updated dependencies [e049794]
+  - @linear/sdk@9.0.0
+
 ## 1.8.0
 
 ### Minor Changes
