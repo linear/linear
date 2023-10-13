@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.9.1
+
+### Patch Changes
+
+- 11d3074: chore(deps): update dependency patch versions
+- Updated dependencies [11d3074]
+  - @linear/sdk@9.0.1
+
 ## 1.9.0
 
 ### Minor Changes

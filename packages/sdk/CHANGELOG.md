@@ -1,5 +1,11 @@
 # Change Log
 
+## 9.0.1
+
+### Patch Changes
+
+- 11d3074: chore(deps): update dependency patch versions
+
 ## 9.0.0
 
 ### Major Changes
