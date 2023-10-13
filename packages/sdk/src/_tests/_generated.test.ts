@@ -190,6 +190,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the team.defaultProjectTemplate query for L.Template */
+    it("team.defaultProjectTemplate", async () => {
+      if (_team) {
+        const team_defaultProjectTemplate: L.Template | undefined = await _team.defaultProjectTemplate;
+        expect(team_defaultProjectTemplate instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.defaultProjectTemplate query");
+      }
+    });
+
     /** Test the team.defaultTemplateForMembers query for L.Template */
     it("team.defaultTemplateForMembers", async () => {
       if (_team) {
@@ -532,6 +542,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test AuthenticationSessions query */
+  describe("AuthenticationSessions", () => {
+    /** Test the root model query for AuthenticationSessions */
+    it("authenticationSessions", async () => {
+      const authenticationSessions: L.AuthenticationSessionResponse[] | undefined = await client.authenticationSessions;
+      authenticationSessions?.map(node => expect(node instanceof L.AuthenticationSessionResponse));
+    });
+  });
+
   /** Test AvailableUsers query */
   describe("AvailableUsers", () => {
     /** Test the root model query for AvailableUsers */
@@ -585,6 +604,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the comment model query for Comment_DocumentContent */
+    it("comment.documentContent", async () => {
+      if (_comment) {
+        const documentContent: L.DocumentContent | undefined = _comment.documentContent;
+        expect(documentContent instanceof L.DocumentContent);
+      } else {
+        console.warn("codegen-doc:print: No comment found - cannot test _comment.documentContent query");
+      }
+    });
+
     /** Test the comment.issue query for L.Issue */
     it("comment.issue", async () => {
       if (_comment) {
@@ -605,6 +634,26 @@ describe("generated", () => {
       }
     });
 
+    /** Test the comment.resolvingComment query for L.Comment */
+    it("comment.resolvingComment", async () => {
+      if (_comment) {
+        const comment_resolvingComment: L.Comment | undefined = await _comment.resolvingComment;
+        expect(comment_resolvingComment instanceof L.Comment);
+      } else {
+        console.warn("codegen-doc:print: No Comment found - cannot test comment.resolvingComment query");
+      }
+    });
+
+    /** Test the comment.resolvingUser query for L.User */
+    it("comment.resolvingUser", async () => {
+      if (_comment) {
+        const comment_resolvingUser: L.User | undefined = await _comment.resolvingUser;
+        expect(comment_resolvingUser instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Comment found - cannot test comment.resolvingUser query");
+      }
+    });
+
     /** Test the comment.user query for L.User */
     it("comment.user", async () => {
       if (_comment) {
@@ -613,6 +662,16 @@ describe("generated", () => {
       } else {
         console.warn("codegen-doc:print: No Comment found - cannot test comment.user query");
       }
+    });
+  });
+
+  /** Test CustomViewHasSubscribers query */
+  describe("CustomViewHasSubscribers", () => {
+    /** Test the root model query for CustomViewHasSubscribers */
+    it("customViewHasSubscribers", async () => {
+      const customViewHasSubscribers: L.CustomViewHasSubscribersPayload | undefined =
+        await client.customViewHasSubscribers("mock-id");
+      expect(customViewHasSubscribers instanceof L.CustomViewHasSubscribersPayload);
     });
   });
 
@@ -736,6 +795,16 @@ describe("generated", () => {
     });
   });
 
+  /** Test DocumentContentHistory query */
+  describe("DocumentContentHistory", () => {
+    /** Test the root model query for DocumentContentHistory */
+    it("documentContentHistory", async () => {
+      const documentContentHistory: L.DocumentContentHistoryPayload | undefined =
+        await client.documentContentHistory("mock-id");
+      expect(documentContentHistory instanceof L.DocumentContentHistoryPayload);
+    });
+  });
+
   /** Test all Document queries */
   describe("Documents", () => {
     let _document: L.Document | undefined;
@@ -770,6 +839,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the document.lastAppliedTemplate query for L.Template */
+    it("document.lastAppliedTemplate", async () => {
+      if (_document) {
+        const document_lastAppliedTemplate: L.Template | undefined = await _document.lastAppliedTemplate;
+        expect(document_lastAppliedTemplate instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Document found - cannot test document.lastAppliedTemplate query");
+      }
+    });
+
     /** Test the document.project query for L.Project */
     it("document.project", async () => {
       if (_document) {
@@ -787,28 +866,6 @@ describe("generated", () => {
         expect(document_updatedBy instanceof L.User);
       } else {
         console.warn("codegen-doc:print: No Document found - cannot test document.updatedBy query");
-      }
-    });
-  });
-
-  /** Test EmbedInfo query */
-  describe("EmbedInfo", () => {
-    let _embedInfo: L.EmbedPayload | undefined;
-
-    /** Test the root model query for EmbedInfo */
-    it("embedInfo", async () => {
-      const embedInfo: L.EmbedPayload | undefined = await client.embedInfo("mock-url");
-      _embedInfo = embedInfo;
-      expect(embedInfo instanceof L.EmbedPayload);
-    });
-
-    /** Test the embedInfo model query for EmbedInfo_Embed */
-    it("embedInfo.embed", async () => {
-      if (_embedInfo) {
-        const embed: L.Embed | undefined = _embedInfo.embed;
-        expect(embed instanceof L.Embed);
-      } else {
-        console.warn("codegen-doc:print: No embedInfo found - cannot test _embedInfo.embed query");
       }
     });
   });
@@ -1009,28 +1066,6 @@ describe("generated", () => {
         expect(favorite_user instanceof L.User);
       } else {
         console.warn("codegen-doc:print: No Favorite found - cannot test favorite.user query");
-      }
-    });
-  });
-
-  /** Test FigmaEmbedInfo query */
-  describe("FigmaEmbedInfo", () => {
-    let _figmaEmbedInfo: L.FigmaEmbedPayload | undefined;
-
-    /** Test the root model query for FigmaEmbedInfo */
-    it("figmaEmbedInfo", async () => {
-      const figmaEmbedInfo: L.FigmaEmbedPayload | undefined = await client.figmaEmbedInfo("mock-fileId");
-      _figmaEmbedInfo = figmaEmbedInfo;
-      expect(figmaEmbedInfo instanceof L.FigmaEmbedPayload);
-    });
-
-    /** Test the figmaEmbedInfo model query for FigmaEmbedInfo_FigmaEmbed */
-    it("figmaEmbedInfo.figmaEmbed", async () => {
-      if (_figmaEmbedInfo) {
-        const figmaEmbed: L.FigmaEmbed | undefined = _figmaEmbedInfo.figmaEmbed;
-        expect(figmaEmbed instanceof L.FigmaEmbed);
-      } else {
-        console.warn("codegen-doc:print: No figmaEmbedInfo found - cannot test _figmaEmbedInfo.figmaEmbed query");
       }
     });
   });
@@ -1293,6 +1328,16 @@ describe("generated", () => {
         expect(issue_favorite instanceof L.Favorite);
       } else {
         console.warn("codegen-doc:print: No Issue found - cannot test issue.favorite query");
+      }
+    });
+
+    /** Test the issue.lastAppliedTemplate query for L.Template */
+    it("issue.lastAppliedTemplate", async () => {
+      if (_issue) {
+        const issue_lastAppliedTemplate: L.Template | undefined = await _issue.lastAppliedTemplate;
+        expect(issue_lastAppliedTemplate instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.lastAppliedTemplate query");
       }
     });
 
@@ -1672,6 +1717,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue.lastAppliedTemplate query for L.Template */
+    it("issue.lastAppliedTemplate", async () => {
+      if (_issue) {
+        const issue_lastAppliedTemplate: L.Template | undefined = await _issue.lastAppliedTemplate;
+        expect(issue_lastAppliedTemplate instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.lastAppliedTemplate query");
+      }
+    });
+
     /** Test the issue.parent query for L.Issue */
     it("issue.parent", async () => {
       if (_issue) {
@@ -1982,6 +2037,16 @@ describe("generated", () => {
         expect(issue_favorite instanceof L.Favorite);
       } else {
         console.warn("codegen-doc:print: No Issue found - cannot test issue.favorite query");
+      }
+    });
+
+    /** Test the issue.lastAppliedTemplate query for L.Template */
+    it("issue.lastAppliedTemplate", async () => {
+      if (_issue) {
+        const issue_lastAppliedTemplate: L.Template | undefined = await _issue.lastAppliedTemplate;
+        expect(issue_lastAppliedTemplate instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.lastAppliedTemplate query");
       }
     });
 
@@ -2650,6 +2715,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the project.lastAppliedTemplate query for L.Template */
+    it("project.lastAppliedTemplate", async () => {
+      if (_project) {
+        const project_lastAppliedTemplate: L.Template | undefined = await _project.lastAppliedTemplate;
+        expect(project_lastAppliedTemplate instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Project found - cannot test project.lastAppliedTemplate query");
+      }
+    });
+
     /** Test the project.lead query for L.User */
     it("project.lead", async () => {
       if (_project) {
@@ -3005,6 +3080,16 @@ describe("generated", () => {
         expect(team_defaultIssueState instanceof L.WorkflowState);
       } else {
         console.warn("codegen-doc:print: No Team found - cannot test team.defaultIssueState query");
+      }
+    });
+
+    /** Test the team.defaultProjectTemplate query for L.Template */
+    it("team.defaultProjectTemplate", async () => {
+      if (_team) {
+        const team_defaultProjectTemplate: L.Template | undefined = await _team.defaultProjectTemplate;
+        expect(team_defaultProjectTemplate instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.defaultProjectTemplate query");
       }
     });
 

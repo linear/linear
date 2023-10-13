@@ -44,6 +44,14 @@ fragment Comment on Comment {
   bodyData
   # The comment content in markdown format.
   body
+  # The comment that resolved the thread.
+  resolvingComment {
+    id
+  }
+  # The document content that the comment is associated with.
+  documentContent {
+    ...DocumentContent
+  }
   # The issue that the comment is associated with.
   issue {
     id
@@ -60,10 +68,16 @@ fragment Comment on Comment {
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The time the resolvingUser resolved the thread.
+  resolvedAt
   # The time user edited the comment.
   editedAt
   # The unique identifier of the entity.
   id
+  # The user that resolved the thread.
+  resolvingUser {
+    id
+  }
   # The user who wrote the comment.
   user {
     id
@@ -268,7 +282,11 @@ fragment DocumentContent on DocumentContent {
   content
   # The document content state as a base64 encoded string.
   contentState
-  # The issue that the document is associated with.
+  # The document that the content is associated with.
+  document {
+    id
+  }
+  # The issue that the content is associated with.
   issue {
     id
   }
@@ -276,7 +294,11 @@ fragment DocumentContent on DocumentContent {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The project that the document is associated with.
+  # The project milestone that the content is associated with.
+  projectMilestone {
+    id
+  }
+  # The project that the content is associated with.
   project {
     id
   }
@@ -288,21 +310,50 @@ fragment DocumentContent on DocumentContent {
   id
 }
 
+# A document content history for a document
+fragment DocumentContentHistory on DocumentContentHistory {
+  __typename
+  # IDs of actors whose edits went into this history item.
+  actorIds
+  # The document content as JSON.
+  contentData
+  # The document content that this history item is associated with.
+  documentContent {
+    ...DocumentContent
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The timestamp associated with the DocumentContent when it was originally saved
+  contentDataSnapshotAt
+  # The unique identifier of the entity.
+  id
+}
+
 # A document for a project.
 fragment Document on Document {
   __typename
   # The color of the icon.
   color
-  # The document content as JSON.
-  contentData
-  # The document content in markdown format.
-  content
   # The document title.
   title
   # The document's unique URL slug.
   slugId
+  # The documents content as a Prosemirror document.
+  contentData
+  # The documents content in markdown format.
+  content
   # The icon of the document.
   icon
+  # The last template that was applied to this document.
+  lastAppliedTemplate {
+    id
+  }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -520,8 +571,6 @@ fragment LabelNotificationSubscription on LabelNotificationSubscription {
 # A milestone for a project.
 fragment ProjectMilestone on ProjectMilestone {
   __typename
-  # The description of the project milestone.
-  description
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -532,6 +581,8 @@ fragment ProjectMilestone on ProjectMilestone {
   sortOrder
   # The planned completion date of the milestone.
   targetDate
+  # The project milestone's description in markdown format.
+  description
   # The project of the milestone.
   project {
     id
@@ -704,6 +755,10 @@ fragment Project on Project {
   startDate
   # The icon of the project.
   icon
+  # The last template that was applied to this project.
+  lastAppliedTemplate {
+    id
+  }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -942,6 +997,12 @@ fragment IssueHistory on IssueHistory {
   trashed
   # Whether the issue's description was updated.
   updatedDescription
+  addedLabels {
+    ...IssueLabel
+  }
+  removedLabels {
+    ...IssueLabel
+  }
 }
 
 # A relation between two issues.
@@ -1000,31 +1061,6 @@ fragment Roadmap on Roadmap {
   owner {
     id
   }
-}
-
-# A schedule for a team's first responder.
-fragment FirstResponderSchedule on FirstResponderSchedule {
-  __typename
-  # The integration used for time scheduling.
-  integration {
-    id
-  }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The schedule information.
-  scheduleData
-  # The team to which the schedule belongs to.
-  team {
-    id
-  }
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The unique identifier of the entity.
-  id
 }
 
 # A set of issues to be resolved in a specified amount of time.
@@ -1095,7 +1131,7 @@ fragment WorkflowState on WorkflowState {
   archivedAt
   # The time at which the entity was created.
   createdAt
-  # The type of the state.
+  # The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
   type
   # The unique identifier of the entity.
   id
@@ -1148,6 +1184,31 @@ fragment TeamNotificationSubscription on TeamNotificationSubscription {
   active
 }
 
+# A team's triage responsibility.
+fragment TriageResponsibility on TriageResponsibility {
+  __typename
+  # The integration used for scheduling when using the 'integrationSchedule' configuration.
+  integration {
+    id
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The responsibility configuration.
+  config
+  # The team to which the triage responsibility belongs to.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
 # A template object used for creating entities faster.
 fragment Template on Template {
   __typename
@@ -1188,6 +1249,8 @@ fragment ProjectUpdate on ProjectUpdate {
   __typename
   # The URL to the project update.
   url
+  # The diff between the current update and the previous one, formatted as markdown.
+  diffMarkdown
   # The diff between the current update and the previous one.
   diff
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -1231,10 +1294,6 @@ fragment UserAccount on UserAccount {
   email
   # The user's name.
   name
-  # Users belonging to the account.
-  users {
-    ...User
-  }
 }
 
 # A user notification subscription.
@@ -1282,6 +1341,24 @@ fragment UserNotificationSubscription on UserNotificationSubscription {
   }
   # Whether the subscription is active or not
   active
+}
+
+# A user that has access to the the resources of an organization.
+fragment AuthUser on AuthUser {
+  __typename
+  # An URL to the user's avatar image.
+  avatarUrl
+  # Organization the user belongs to.
+  organization {
+    ...AuthOrganization
+  }
+  # The user's display (nick) name. Unique within each organization.
+  displayName
+  # The user's email address.
+  email
+  # The user's full name.
+  name
+  id
 }
 
 # A user that has access to the the resources of an organization.
@@ -1545,6 +1622,10 @@ fragment IssueNotification on IssueNotification {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The subscriptions related to the notification.
+  subscriptions {
+    ...NotificationSubscription
+  }
   # The team related to the notification.
   team {
     id
@@ -1605,6 +1686,10 @@ fragment Issue on Issue {
   title
   # The issue's unique number.
   number
+  # The last template that was applied to this issue.
+  lastAppliedTemplate {
+    id
+  }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -1764,6 +1849,8 @@ fragment Organization on Organization {
   samlEnabled
   # Whether SCIM provisioning is enabled for organization.
   scimEnabled
+  # Whether member users are allowed to send invites
+  allowMembersToInvite
   # Whether the Git integration linkback messages should be sent to private repositories.
   gitLinkbackMessagesEnabled
   # Whether the Git integration linkback messages should be sent to public repositories.
@@ -1772,11 +1859,34 @@ fragment Organization on Organization {
   roadmapEnabled
 }
 
+# An organization. Organizations are root-level objects that contain users and teams.
+fragment AuthOrganization on AuthOrganization {
+  __typename
+  # Allowed authentication providers, empty array means all are allowed
+  allowedAuthServices
+  # Previously used URL keys for the organization (last 3 are kept and redirected).
+  previousUrlKeys
+  # The organization's logo URL.
+  logoUrl
+  # The organization's name.
+  name
+  # The organization's unique URL key.
+  urlKey
+  # The time at which deletion of the organization was requested.
+  deletionRequestedAt
+  # Whether SAML authentication is enabled for organization.
+  samlEnabled
+  id
+  userCount
+}
+
 # An organizational unit that contains issues.
 fragment Team on Team {
   __typename
   # Auto assign completed issues to current cycle.
   cycleIssueAutoAssignCompleted
+  # Auto assign issues to current cycle if in active status.
+  cycleLockToActive
   # Auto assign started issues to current cycle.
   cycleIssueAutoAssignStarted
   # Calendar feed URL (iCal) for cycles.
@@ -1785,8 +1895,6 @@ fragment Team on Team {
   upcomingCycleCount
   # Number of issues in the team.
   issueCount
-  # Only allow issues issues with cycles in Active Issues.
-  cycleLockToActive
   # Period after which automatically closed and completed issues are automatically archived in months.
   autoArchivePeriod
   # Period after which issues are automatically closed in months. Null/undefined means disabled.
@@ -1811,6 +1919,10 @@ fragment Team on Team {
   }
   # The default template to use for new issues created by non-members of the team.
   defaultTemplateForNonMembers {
+    id
+  }
+  # The default template to use for new projects created for the team.
+  defaultProjectTemplate {
     id
   }
   # The default workflow state into which issues are set when they are opened by team members.
@@ -1909,8 +2021,7 @@ fragment Team on Team {
 # apply to the local data set in order to be up-to-date.
 fragment SyncResponse on SyncResponse {
   __typename
-  # JSON serialized delta changes that the client can apply to its local state
-  #     in order to catch up with the state of the world.
+  # JSON serialized delta changes that the client can apply to its local state in order to catch up with the state of the world.
   delta
   # The full state of the organization as a serialized JSON object.
   #     Mutually exclusive with the delta property
@@ -2016,6 +2127,15 @@ fragment GithubOAuthTokenPayload on GithubOAuthTokenPayload {
   token
 }
 
+# GitHub repos available to sync.
+fragment GitHubSyncRepo on GitHubSyncRepo {
+  __typename
+  # The GitHub repo id.
+  id
+  # The full name of the repository.
+  fullName
+}
+
 # Google Sheets specific settings.
 fragment GoogleSheetsSettings on GoogleSheetsSettings {
   __typename
@@ -2048,35 +2168,6 @@ fragment ProjectUpdateInteraction on ProjectUpdateInteraction {
   user {
     id
   }
-}
-
-# Information for creating embedded content for the provided URL
-fragment Embed on Embed {
-  __typename
-  # The HTML (video, rich)
-  html
-  # The URL of the thumbnail preview image
-  thumbnailUrl
-  # The asset URL (photo)
-  url
-  # The description of the content
-  description
-  # The height of embedded content (photo, video, rich)
-  height
-  # The height of the thumbnail preview image
-  thumbnailHeight
-  # The name of the author/owner of the resource
-  authorName
-  # The name of the provider
-  providerName
-  # The type of embed
-  type
-  # The width of embedded content (photo, video, rich)
-  width
-  # The width of the thumbnail preview image
-  thumbnailWidth
-  # Title for the returned embed view
-  title
 }
 
 # Intercom specific settings.
@@ -2249,6 +2340,30 @@ fragment JiraProjectData on JiraProjectData {
   name
 }
 
+# Metadata about a PagerDuty schedule.
+fragment PagerDutyScheduleInfo on PagerDutyScheduleInfo {
+  __typename
+  # The PagerDuty schedule id.
+  scheduleId
+  # The PagerDuty schedule name.
+  scheduleName
+  # The URL of the schedule in PagerDuty's web app.
+  url
+}
+
+# Metadata and settings for a GitHub Sync integration.
+fragment GitHubSyncSettings on GitHubSyncSettings {
+  __typename
+  # Mapping of team to repository for syncing
+  teamRepoMap {
+    ...TeamRepoMapping
+  }
+  # The names of the repositories connected for the GitHub integration
+  repositories {
+    ...GitHubSyncRepo
+  }
+}
+
 # Metadata and settings for a GitHub integration.
 fragment GitHubSettings on GitHubSettings {
   __typename
@@ -2258,6 +2373,13 @@ fragment GitHubSettings on GitHubSettings {
   orgAvatarUrl
   # The names of the repositories connected for the GitHub integration
   repositories
+}
+
+# Metadata and settings for a GitLab integration.
+fragment GitLabSettings on GitLabSettings {
+  __typename
+  # The self-hosted URL of the GitLab instance
+  url
 }
 
 # Notification subscriptions for models.
@@ -2343,7 +2465,7 @@ fragment OauthClient on OauthClient {
   createdAt
   # The unique identifier of the entity.
   id
-  # The user who created the OAuthClient.
+  # The user who created the OAuth application.
   creator {
     id
   }
@@ -2353,21 +2475,27 @@ fragment OauthClient on OauthClient {
   webhookUrl
   # Webhook secret token for verifying the origin on the recipient side.
   webhookSecret
-  # Whether the OAuth application is publicly visible, or only visible to the creating workspace.
+  # Whether the OAuth application can be installed in other organizations.
   publicEnabled
 }
 
-# Object representing Figma preview information.
-fragment FigmaEmbed on FigmaEmbed {
+# Object for mapping Slack channel IDs to names and other settings
+fragment SlackChannelNameMapping on SlackChannelNameMapping {
   __typename
-  # Date when the file was updated at the time of embedding.
-  lastModified
-  # Figma file name.
+  # The Slack channel ID.
+  id
+  # The Slack channel name.
   name
-  # Figma screenshot URL.
-  url
-  # Node name.
-  nodeName
+  # Whether or not the Slack channel is private
+  isPrivate
+  # Whether or not top-level messages in this channel should automatically create Asks
+  autoCreateOnMessage
+  # Whether or not using the :ticket: emoji in this channel should automatically create Asks
+  autoCreateOnEmoji
+  # Which teams are connected to the channel and settings for those teams
+  teams {
+    ...SlackAsksTeamSettings
+  }
 }
 
 # Object representing Google Cloud upload policy, plus additional data.
@@ -2392,9 +2520,9 @@ fragment UploadFile on UploadFile {
 # PagerDuty specific settings.
 fragment PagerDutySettings on PagerDutySettings {
   __typename
-  # The mapping of PagerDuty schedule id to names.
+  # Metadata about a PagerDuty schedule.
   scheduleMapping {
-    ...PagerDutyScheduleMapping
+    ...PagerDutyScheduleInfo
   }
 }
 
@@ -2574,6 +2702,12 @@ fragment IntegrationSettings on IntegrationSettings {
   gitHub {
     ...GitHubSettings
   }
+  gitHubSync {
+    ...GitHubSyncSettings
+  }
+  gitLab {
+    ...GitLabSettings
+  }
   googleSheets {
     ...GoogleSheetsSettings
   }
@@ -2625,6 +2759,8 @@ fragment SamlConfigurationPayload on SamlConfigurationPayload {
 # The paid subscription of an organization.
 fragment PaidSubscription on PaidSubscription {
   __typename
+  # The collection method for this subscription, either automatically charged or invoiced.
+  collectionMethod
   # The creator of the subscription.
   creator {
     id
@@ -2691,24 +2827,54 @@ fragment JiraLinearMapping on JiraLinearMapping {
   linearTeamId
 }
 
-# Tuple for mapping PagerDuty schedule id to names.
-fragment PagerDutyScheduleMapping on PagerDutyScheduleMapping {
+# Tuple for mapping Linear teams to GitHub repos.
+fragment TeamRepoMapping on TeamRepoMapping {
   __typename
-  # The PagerDuty schedule id.
-  scheduleId
-  # The PagerDuty schedule name.
-  scheduleName
+  # The GitHub repo id.
+  gitHubRepoId
+  # The Linear team id to map to the given project.
+  linearTeamId
 }
 
 # Tuple for mapping Slack channel IDs to names
-fragment SlackChannelNameMapping on SlackChannelNameMapping {
+fragment SlackAsksTeamSettings on SlackAsksTeamSettings {
   __typename
-  # The Slack channel ID.
+  # The Linear team ID.
   id
-  # The Slack channel name.
+  # Whether the default Asks template is enabled in the given channel for this team
+  hasDefaultAsk
+}
+
+# User authentication session.
+fragment AuthenticationSession on AuthenticationSession {
+  __typename
+  # Client used for the session
+  client
+  # Country codes of all seen locations.
+  countryCodes
+  # Date when the session was created.
+  createdAt
+  # Date when the session was last updated.
+  updatedAt
+  # Human readable location
+  location
+  # IP address.
+  ip
+  # Location city name.
+  locationCity
+  # Location country code.
+  locationCountryCode
+  # Location country name.
+  locationCountry
+  # Name of the session, derived from the client and operating system
   name
-  # Whether or not the Slack channel is private
-  isPrivate
+  # Operating system used for the session
+  operatingSystem
+  # Session's user-agent.
+  userAgent
+  # When was the session last seen
+  lastActiveAt
+  id
 }
 
 # User favorites presented in the sidebar.
@@ -2936,6 +3102,34 @@ fragment AuditEntryType on AuditEntryType {
   type
 }
 
+fragment AuthApiKey on AuthApiKey {
+  __typename
+  # The unique identifier of the entity.
+  id
+}
+
+fragment AuthApiKeyDeletePayload on AuthApiKeyDeletePayload {
+  __typename
+  # Whether the operation was successful.
+  success
+}
+
+fragment AuthApiKeyPayload on AuthApiKeyPayload {
+  __typename
+  # The auth API key that was created.
+  authApiKey {
+    ...AuthApiKey
+  }
+  # Whether the operation was successful.
+  success
+}
+
+fragment AuthIntegration on AuthIntegration {
+  __typename
+  # The unique identifier of the entity.
+  id
+}
+
 fragment AuthResolverResponse on AuthResolverResponse {
   __typename
   # Email for the authenticated account.
@@ -2944,9 +3138,13 @@ fragment AuthResolverResponse on AuthResolverResponse {
   lastUsedOrganizationId
   # JWT token for authentication of the account.
   token
+  # List of organizations this user account is part of but are currently locked because of the current auth service.
+  lockedOrganizations {
+    ...AuthOrganization
+  }
   # Organizations this account has access to, but is not yet a member.
   availableOrganizations {
-    ...Organization
+    ...AuthOrganization
   }
   # Should the signup flow allow access for the domain.
   allowDomainAccess
@@ -2954,8 +3152,41 @@ fragment AuthResolverResponse on AuthResolverResponse {
   id
   # Users belonging to this account.
   users {
-    ...User
+    ...AuthUser
   }
+}
+
+fragment AuthenticationSessionResponse on AuthenticationSessionResponse {
+  __typename
+  # Client used for the session
+  client
+  # Country codes of all seen locations.
+  countryCodes
+  # Date when the session was created.
+  createdAt
+  # Date when the session was last updated.
+  updatedAt
+  # Human readable location
+  location
+  # IP address.
+  ip
+  # Identifies the session used to make the request.
+  isCurrentSession
+  # Location city name.
+  locationCity
+  # Location country code.
+  locationCountryCode
+  # Location country name.
+  locationCountry
+  # Name of the session, derived from the client and operating system
+  name
+  # Operating system used for the session
+  operatingSystem
+  # Session's user-agent.
+  userAgent
+  # When was the session last seen
+  lastActiveAt
+  id
 }
 
 fragment CommentConnection on CommentConnection {
@@ -3004,8 +3235,11 @@ fragment CreateCsvExportReportPayload on CreateCsvExportReportPayload {
 
 fragment CreateOrJoinOrganizationResponse on CreateOrJoinOrganizationResponse {
   __typename
+  organization {
+    ...AuthOrganization
+  }
   user {
-    id
+    ...AuthUser
   }
 }
 
@@ -3017,6 +3251,12 @@ fragment CustomViewConnection on CustomViewConnection {
   pageInfo {
     ...PageInfo
   }
+}
+
+fragment CustomViewHasSubscribersPayload on CustomViewHasSubscribersPayload {
+  __typename
+  # Whether the custom view has subscribers.
+  hasSubscribers
 }
 
 fragment CustomViewPayload on CustomViewPayload {
@@ -3073,6 +3313,30 @@ fragment DocumentConnection on DocumentConnection {
   }
 }
 
+fragment DocumentContentHistoryPayload on DocumentContentHistoryPayload {
+  __typename
+  # The document content history entries.
+  history {
+    ...DocumentContentHistoryType
+  }
+  # Whether the operation was successful.
+  success
+}
+
+fragment DocumentContentHistoryType on DocumentContentHistoryType {
+  __typename
+  # The ID of the author of the change.
+  actorIds
+  # The UUID of the document content history entry.
+  id
+  # The date when the document content history entry was created.
+  createdAt
+  # The date when the document content history snapshot was taken. This can be different than createdAt since the content is captured from its state at the previously known updatedAt timestamp in the case of an update. On document create, these timestamps can be the same.
+  contentDataSnapshotAt
+  # The document content as Prosemirror document.
+  contentData
+}
+
 fragment DocumentPayload on DocumentPayload {
   __typename
   # The document that was created or updated.
@@ -3107,16 +3371,20 @@ fragment DocumentSearchResult on DocumentSearchResult {
   metadata
   # The color of the icon.
   color
-  # The document content as JSON.
-  contentData
-  # The document content in markdown format.
-  content
   # The document title.
   title
   # The document's unique URL slug.
   slugId
+  # The documents content as a Prosemirror document.
+  contentData
+  # The documents content in markdown format.
+  content
   # The icon of the document.
   icon
+  # The last template that was applied to this document.
+  lastAppliedTemplate {
+    id
+  }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -3165,16 +3433,6 @@ fragment EmailUserAccountAuthChallengeResponse on EmailUserAccountAuthChallengeR
   success
 }
 
-fragment EmbedPayload on EmbedPayload {
-  __typename
-  # Embed information
-  embed {
-    ...Embed
-  }
-  # Whether the query was successful
-  success
-}
-
 fragment EmojiConnection on EmojiConnection {
   __typename
   nodes {
@@ -3217,26 +3475,6 @@ fragment FavoritePayload on FavoritePayload {
   }
   # Whether the operation was successful.
   success
-}
-
-fragment FigmaEmbedPayload on FigmaEmbedPayload {
-  __typename
-  # Figma embed information.
-  figmaEmbed {
-    ...FigmaEmbed
-  }
-  # Whether the operation was successful.
-  success
-}
-
-fragment FirstResponderScheduleConnection on FirstResponderScheduleConnection {
-  __typename
-  nodes {
-    ...FirstResponderSchedule
-  }
-  pageInfo {
-    ...PageInfo
-  }
 }
 
 fragment FrontAttachmentPayload on FrontAttachmentPayload {
@@ -3523,6 +3761,10 @@ fragment IssueSearchResult on IssueSearchResult {
   title
   # The issue's unique number.
   number
+  # The last template that was applied to this issue.
+  lastAppliedTemplate {
+    id
+  }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -3877,6 +4119,10 @@ fragment ProjectSearchResult on ProjectSearchResult {
   startDate
   # The icon of the project.
   icon
+  # The last template that was applied to this project.
+  lastAppliedTemplate {
+    id
+  }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -3999,6 +4245,14 @@ fragment ProjectUpdatePayload on ProjectUpdatePayload {
   success
 }
 
+fragment ProjectUpdateReminderPayload on ProjectUpdateReminderPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
 fragment ProjectUpdateWithInteractionPayload on ProjectUpdateWithInteractionPayload {
   __typename
   # The identifier of the last sync operation.
@@ -4029,6 +4283,10 @@ fragment PushSubscriptionPayload on PushSubscriptionPayload {
   __typename
   # The identifier of the last sync operation.
   lastSyncId
+  # The push subscription that was created or updated.
+  entity {
+    ...PushSubscription
+  }
   # Whether the operation was successful.
   success
 }
@@ -4220,6 +4478,16 @@ fragment TemplatePayload on TemplatePayload {
   }
   # Whether the operation was successful.
   success
+}
+
+fragment TriageResponsibilityConnection on TriageResponsibilityConnection {
+  __typename
+  nodes {
+    ...TriageResponsibility
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment UploadFileHeader on UploadFileHeader {
@@ -4524,6 +4792,8 @@ mutation attachmentLinkDiscord(
   $createAsUser: String
   # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
   $displayIconUrl: String
+  # Optional attachment ID that may be provided through the API
+  $id: String
   # The issue for which to link the Discord message.
   $issueId: String!
   # The Discord message ID for the message to link.
@@ -4535,6 +4805,7 @@ mutation attachmentLinkDiscord(
     channelId: $channelId
     createAsUser: $createAsUser
     displayIconUrl: $displayIconUrl
+    id: $id
     issueId: $issueId
     messageId: $messageId
     url: $url
@@ -4550,6 +4821,8 @@ mutation attachmentLinkFront(
   $createAsUser: String
   # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
   $displayIconUrl: String
+  # Optional attachment ID that may be provided through the API
+  $id: String
   # The issue for which to link the Front conversation.
   $issueId: String!
 ) {
@@ -4557,9 +4830,74 @@ mutation attachmentLinkFront(
     conversationId: $conversationId
     createAsUser: $createAsUser
     displayIconUrl: $displayIconUrl
+    id: $id
     issueId: $issueId
   ) {
     ...FrontAttachmentPayload
+  }
+}
+# Link an existing GitHub PR to an issue.
+mutation attachmentLinkGitHubPR(
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  $createAsUser: String
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  $displayIconUrl: String
+  # Optional attachment ID that may be provided through the API
+  $id: String
+  # The issue for which to link the GitHub pull request.
+  $issueId: String!
+  # The GitHub pull request number to link.
+  $number: Float!
+  # The owner of the GitHub repository.
+  $owner: String!
+  # The name of the GitHub repository.
+  $repo: String!
+  # The URL of the GitHub pull request to link.
+  $url: String!
+) {
+  attachmentLinkGitHubPR(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    number: $number
+    owner: $owner
+    repo: $repo
+    url: $url
+  ) {
+    ...AttachmentPayload
+  }
+}
+# Link an existing GitLab MR to an issue.
+mutation attachmentLinkGitLabMR(
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  $createAsUser: String
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  $displayIconUrl: String
+  # Optional attachment ID that may be provided through the API
+  $id: String
+  # The issue for which to link the GitLab merge request.
+  $issueId: String!
+  # The GitLab merge request number to link.
+  $number: Float!
+  # The owner of the GitLab repository.
+  $owner: String!
+  # The name of the GitLab repository.
+  $repo: String!
+  # The URL of the GitLab merge request to link.
+  $url: String!
+) {
+  attachmentLinkGitLabMR(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    number: $number
+    owner: $owner
+    repo: $repo
+    url: $url
+  ) {
+    ...AttachmentPayload
   }
 }
 # Link an existing Intercom conversation to an issue.
@@ -4570,6 +4908,8 @@ mutation attachmentLinkIntercom(
   $createAsUser: String
   # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
   $displayIconUrl: String
+  # Optional attachment ID that may be provided through the API
+  $id: String
   # The issue for which to link the Intercom conversation.
   $issueId: String!
 ) {
@@ -4577,6 +4917,7 @@ mutation attachmentLinkIntercom(
     conversationId: $conversationId
     createAsUser: $createAsUser
     displayIconUrl: $displayIconUrl
+    id: $id
     issueId: $issueId
   ) {
     ...AttachmentPayload
@@ -4660,6 +5001,8 @@ mutation attachmentLinkZendesk(
   $createAsUser: String
   # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
   $displayIconUrl: String
+  # Optional attachment ID that may be provided through the API
+  $id: String
   # The issue for which to link the Zendesk ticket.
   $issueId: String!
   # The Zendesk ticket ID to link.
@@ -4668,6 +5011,7 @@ mutation attachmentLinkZendesk(
   attachmentLinkZendesk(
     createAsUser: $createAsUser
     displayIconUrl: $displayIconUrl
+    id: $id
     issueId: $issueId
     ticketId: $ticketId
   ) {
@@ -4747,6 +5091,17 @@ mutation createOrganizationFromOnboarding(
 ) {
   createOrganizationFromOnboarding(input: $input, survey: $survey) {
     ...CreateOrJoinOrganizationResponse
+  }
+}
+# Create a notification to remind a user about a project update.
+mutation createProjectUpdateReminder(
+  # The identifier of the project to remind about.
+  $projectId: String!
+  # The user identifier to whom the notification will be sent. By default, it is set to the project lead.
+  $userId: String
+) {
+  createProjectUpdateReminder(projectId: $projectId, userId: $userId) {
+    ...ProjectUpdateReminderPayload
   }
 }
 # Creates a new custom view.
@@ -5035,6 +5390,15 @@ mutation integrationGithubConnect(
     ...IntegrationPayload
   }
 }
+# Connects the organization with the GitHub Sync App.
+mutation integrationGithubSync(
+  # The GitHub data to connect with.
+  $installationId: String!
+) {
+  integrationGithubSync(installationId: $installationId) {
+    ...IntegrationPayload
+  }
+}
 # Connects the organization with a GitLab Access Token.
 mutation integrationGitlabConnect(
   # The GitLab Access Token to connect with.
@@ -5260,6 +5624,17 @@ mutation updateIntegrationsSettings(
 ) {
   integrationsSettingsUpdate(id: $id, input: $input) {
     ...IntegrationsSettingsPayload
+  }
+}
+# Adds a label to an issue.
+mutation issueAddLabel(
+  # The identifier of the issue to add the label to.
+  $id: String!
+  # The identifier of the label to add.
+  $labelId: String!
+) {
+  issueAddLabel(id: $id, labelId: $labelId) {
+    ...IssuePayload
   }
 }
 # Archives an issue.
@@ -5574,6 +5949,28 @@ mutation issueReminder(
     ...IssuePayload
   }
 }
+# Removes a label from an issue.
+mutation issueRemoveLabel(
+  # The identifier of the issue to remove the label from.
+  $id: String!
+  # The identifier of the label to remove.
+  $labelId: String!
+) {
+  issueRemoveLabel(id: $id, labelId: $labelId) {
+    ...IssuePayload
+  }
+}
+# Subscribes a user to an issue.
+mutation issueSubscribe(
+  # The identifier of the issue to subscribe to.
+  $id: String!
+  # The identifier of the user to subscribe, default is the current user.
+  $userId: String
+) {
+  issueSubscribe(id: $id, userId: $userId) {
+    ...IssuePayload
+  }
+}
 # Unarchives an issue.
 mutation unarchiveIssue(
   # The identifier of the issue to archive.
@@ -5581,6 +5978,17 @@ mutation unarchiveIssue(
 ) {
   issueUnarchive(id: $id) {
     ...IssueArchivePayload
+  }
+}
+# Unsubscribes a user from an issue.
+mutation issueUnsubscribe(
+  # The identifier of the issue to unsubscribe from.
+  $id: String!
+  # The identifier of the user to unsubscribe, default is the current user.
+  $userId: String
+) {
+  issueUnsubscribe(id: $id, userId: $userId) {
+    ...IssuePayload
   }
 }
 # Updates an issue.
@@ -5612,9 +6020,30 @@ mutation leaveOrganization(
     ...CreateOrJoinOrganizationResponse
   }
 }
-# Logout of all clients.
+# Logout the client.
 mutation logout {
   logout {
+    ...LogoutResponse
+  }
+}
+# Logout all of user's sessions including the active one.
+mutation logoutAllSessions {
+  logoutAllSessions {
+    ...LogoutResponse
+  }
+}
+# Logout all of user's sessions excluding the current one.
+mutation logoutOtherSessions {
+  logoutOtherSessions {
+    ...LogoutResponse
+  }
+}
+# Logout an individual session with its ID.
+mutation logoutSession(
+  # ID of the session to logout.
+  $sessionId: String!
+) {
+  logoutSession(sessionId: $sessionId) {
     ...LogoutResponse
   }
 }
@@ -5795,7 +6224,7 @@ mutation organizationStartPlusTrial {
 # Updates the user's organization.
 mutation updateOrganization(
   # A partial organization object to update the organization with.
-  $input: UpdateOrganizationInput!
+  $input: OrganizationUpdateInput!
 ) {
   organizationUpdate(input: $input) {
     ...OrganizationPayload
@@ -6260,15 +6689,6 @@ mutation userGitHubConnect(
     ...UserPayload
   }
 }
-# Connects the Google Calendar to the user to this Linear account via OAuth2.
-mutation userGoogleCalendarConnect(
-  # [Internal] The Google OAuth code.
-  $code: String!
-) {
-  userGoogleCalendarConnect(code: $code) {
-    ...UserPayload
-  }
-}
 # Connects the Jira user to this Linear account via OAuth2.
 mutation userJiraConnect(
   # The Jira OAuth code.
@@ -6348,7 +6768,7 @@ mutation updateUser(
   # The identifier of the user to update. Use `me` to reference currently authenticated user.
   $id: String!
   # A partial user object to update the user with.
-  $input: UpdateUserInput!
+  $input: UserUpdateInput!
 ) {
   userUpdate(id: $id, input: $input) {
     ...UserPayload
@@ -6925,6 +7345,12 @@ query auditEntryTypes {
     ...AuditEntryType
   }
 }
+# User's active sessions.
+query authenticationSessions {
+  authenticationSessions {
+    ...AuthenticationSessionResponse
+  }
+}
 # Fetch users belonging to this user account.
 query availableUsers {
   availableUsers {
@@ -6984,6 +7410,17 @@ query comment_children(
     }
   }
 }
+# The document content that the comment is associated with.
+query comment_documentContent(
+  # The identifier of the comment to retrieve.
+  $id: String!
+) {
+  comment(id: $id) {
+    documentContent {
+      ...DocumentContent
+    }
+  }
+}
 # All comments.
 query comments(
   # A cursor to be used with first for forward pagination
@@ -7017,6 +7454,15 @@ query comments(
 query customView($id: String!) {
   customView(id: $id) {
     ...CustomView
+  }
+}
+# Whether a custom view has other subscribers than the current user in the organization.
+query customViewHasSubscribers(
+  # The identifier of the custom view.
+  $id: String!
+) {
+  customViewHasSubscribers(id: $id) {
+    ...CustomViewHasSubscribersPayload
   }
 }
 # Custom views for the user.
@@ -7150,7 +7596,13 @@ query document($id: String!) {
     ...Document
   }
 }
-# All documents for the project.
+# A collection of document content history entries.
+query documentContentHistory($id: String!) {
+  documentContentHistory(id: $id) {
+    ...DocumentContentHistoryPayload
+  }
+}
+# All documents in the workspace.
 query documents(
   # A cursor to be used with first for forward pagination
   $after: String
@@ -7174,26 +7626,6 @@ query documents(
     orderBy: $orderBy
   ) {
     ...DocumentConnection
-  }
-}
-# Returns embed info for any url
-query embedInfo(
-  # The URL to lookup embed info for
-  $url: String!
-) {
-  embedInfo(url: $url) {
-    ...EmbedPayload
-  }
-}
-# Embed information
-query embedInfo_embed(
-  # The URL to lookup embed info for
-  $url: String!
-) {
-  embedInfo(url: $url) {
-    embed {
-      ...Embed
-    }
   }
 }
 # A specific emoji.
@@ -7290,30 +7722,6 @@ query favorites(
     orderBy: $orderBy
   ) {
     ...FavoriteConnection
-  }
-}
-# Fetch Figma screenshot and other information with file and node identifiers.
-query figmaEmbedInfo(
-  # Figma file identifier.
-  $fileId: String!
-  # Figma node identifier.
-  $nodeId: String
-) {
-  figmaEmbedInfo(fileId: $fileId, nodeId: $nodeId) {
-    ...FigmaEmbedPayload
-  }
-}
-# Figma embed information.
-query figmaEmbedInfo_figmaEmbed(
-  # Figma file identifier.
-  $fileId: String!
-  # Figma node identifier.
-  $nodeId: String
-) {
-  figmaEmbedInfo(fileId: $fileId, nodeId: $nodeId) {
-    figmaEmbed {
-      ...FigmaEmbed
-    }
   }
 }
 # One specific integration.
@@ -8737,6 +9145,8 @@ query projectUpdates(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # Filter returned project updates.
+  $filter: ProjectUpdateFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -8749,6 +9159,7 @@ query projectUpdates(
   projectUpdates(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -8904,6 +9315,8 @@ query searchDocuments(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Should associated comments be searched (default: true)
+  $includeComments: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -8918,6 +9331,7 @@ query searchDocuments(
     before: $before
     first: $first
     includeArchived: $includeArchived
+    includeComments: $includeComments
     last: $last
     orderBy: $orderBy
     teamId: $teamId
@@ -8936,6 +9350,8 @@ query searchDocuments_archivePayload(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Should associated comments be searched (default: true)
+  $includeComments: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -8950,6 +9366,7 @@ query searchDocuments_archivePayload(
     before: $before
     first: $first
     includeArchived: $includeArchived
+    includeComments: $includeComments
     last: $last
     orderBy: $orderBy
     teamId: $teamId
@@ -8972,6 +9389,8 @@ query searchIssues(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Should associated comments be searched (default: true)
+  $includeComments: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -8987,6 +9406,7 @@ query searchIssues(
     filter: $filter
     first: $first
     includeArchived: $includeArchived
+    includeComments: $includeComments
     last: $last
     orderBy: $orderBy
     teamId: $teamId
@@ -9007,6 +9427,8 @@ query searchIssues_archivePayload(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Should associated comments be searched (default: true)
+  $includeComments: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -9022,6 +9444,7 @@ query searchIssues_archivePayload(
     filter: $filter
     first: $first
     includeArchived: $includeArchived
+    includeComments: $includeComments
     last: $last
     orderBy: $orderBy
     teamId: $teamId
@@ -9042,6 +9465,8 @@ query searchProjects(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Should associated comments be searched (default: true)
+  $includeComments: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -9056,6 +9481,7 @@ query searchProjects(
     before: $before
     first: $first
     includeArchived: $includeArchived
+    includeComments: $includeComments
     last: $last
     orderBy: $orderBy
     teamId: $teamId
@@ -9074,6 +9500,8 @@ query searchProjects_archivePayload(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Should associated comments be searched (default: true)
+  $includeComments: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -9088,6 +9516,7 @@ query searchProjects_archivePayload(
     before: $before
     first: $first
     includeArchived: $includeArchived
+    includeComments: $includeComments
     last: $last
     orderBy: $orderBy
     teamId: $teamId
