@@ -20,6 +20,8 @@ generates:
       - typescript
       - typescript-operations
       - typed-document-node
+    config:
+      namingConvention: './naming-override#case'
   src/_generated_sdk.ts:
     plugins:
       - "@linear/codegen-sdk"
