@@ -1,10 +1,19 @@
-var changeCaseAll = require("change-case-all");
+const changeCaseAll = require("change-case-all");
+
+// Sometimes we have two queries with the same case. If we do, add the query names here (PascalCased), and we'll perform
+// deduplication on their query args to allow the SDK to build by suffixing additional types with the same name with a
+// counter.
+const duplicateQueries = ["ProjectMilestone", "ProjectMilestones"];
+
+// Object containing counters of how many times we've seen each DuplicateQueryNameArgs type.
+const deduplicate = Object.fromEntries(duplicateQueries.map(query => [`Query${query}Args`, 0]));
 
 exports.case = (type) => {
-    if(type.includes("ProjectMilestoneQuery") || type.includes("ProjectMilestonesQuery")) {
-        console.log("will not touch:", type)
-         return "ProjectMilestoneQueryDoNotUse";
+  if (type in deduplicate) {
+    if (deduplicate[type] > 0) {
+      type = type + deduplicate[type];
     }
-    console.log("Will pascal case:", type)
-    return changeCaseAll.pascalCase(type)
+    deduplicate[type] += 1
+  }
+  return changeCaseAll.pascalCase(type)
 }
