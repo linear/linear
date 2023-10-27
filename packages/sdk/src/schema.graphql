@@ -181,6 +181,10 @@ type ArchiveResponse {
 
 type AsksChannelConnectPayload {
   """
+  Whether the bot needs to be added to the channel.
+  """
+  addBot: Boolean!
+  """
   The integration that was created or updated.
   """
   integration: Integration
@@ -1118,6 +1122,10 @@ input CommentCreateInput {
   """
   createAsUser: String
   """
+  Flag to indicate this comment should be created on the issue's synced Slack comment thread. If no synced Slack comment thread exists, the mutation will fail.
+  """
+  createOnSyncedSlackThread: Boolean
+  """
   The date when the comment was created (e.g. if importing from another system). Must be a date in the past. If none is provided, the backend will generate the time as now.
   """
   createdAt: DateTime
@@ -1221,6 +1229,14 @@ input CommentUpdateInput {
   The comment content as a Prosemirror document.
   """
   bodyData: JSON
+  """
+  [INTERNAL] The child comment that resolves this thread.
+  """
+  resolvingCommentId: String
+  """
+  [INTERNAL] The user who resolved this thread.
+  """
+  resolvingUserId: String
 }
 
 """
@@ -2276,6 +2292,10 @@ type DocumentContent implements Node {
   """
   projectMilestone: ProjectMilestone
   """
+  The time at which the document content was restored from a previous version
+  """
+  restoredAt: DateTime
+  """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -3217,24 +3237,24 @@ Metadata and settings for a GitHub Sync integration.
 """
 type GitHubSyncSettings {
   """
-  The names of the repositories connected for the GitHub integration
-  """
-  repositories: [GitHubSyncRepo!]
-  """
   Mapping of team to repository for syncing
   """
-  teamRepoMap: [TeamRepoMapping!]
+  repoMapping: [TeamRepoMapping!]
+  """
+  The names of the repositories connected for the GitHub integration
+  """
+  repos: [GitHubSyncRepo!]
 }
 
 input GitHubSyncSettingsInput {
   """
-  The names of the repositories connected for the GitHub integration
-  """
-  repositories: [GitHubSyncRepoInput!]
-  """
   Mapping of team to repository for syncing
   """
-  teamRepoMap: [TeamRepoMappingInput!]
+  repoMapping: [TeamRepoMappingInput!]
+  """
+  The names of the repositories connected for the GitHub integration
+  """
+  repos: [GitHubSyncRepoInput!]
 }
 
 """
@@ -3477,6 +3497,37 @@ type IntegrationRequestPayload {
 }
 
 """
+Linear supported integration services.
+"""
+enum IntegrationService {
+  airbyte
+  discord
+  figma
+  figmaPlugin
+  front
+  gitHubSync
+  github
+  githubCommit
+  gitlab
+  googleCalendarPersonal
+  googleSheets
+  intercom
+  jira
+  loom
+  notion
+  pagerDuty
+  sentry
+  slack
+  slackAsks
+  slackOrgProjectUpdatesPost
+  slackPersonal
+  slackPost
+  slackProjectPost
+  slackProjectUpdatesPost
+  zendesk
+}
+
+"""
 The integration resource's settings
 """
 type IntegrationSettings {
@@ -3490,6 +3541,7 @@ type IntegrationSettings {
   notion: NotionSettings
   pagerDuty: PagerDutySettings
   sentry: SentrySettings
+  slack: SlackSettings
   slackAsks: SlackAsksSettings
   slackOrgProjectUpdatesPost: SlackPostSettings
   slackPost: SlackPostSettings
@@ -3508,6 +3560,7 @@ input IntegrationSettingsInput {
   notion: NotionSettingsInput
   pagerDuty: PagerDutyInput
   sentry: SentrySettingsInput
+  slack: SlackSettingsInput
   slackAsks: SlackAsksSettingsInput
   slackOrgProjectUpdatesPost: SlackPostSettingsInput
   slackPost: SlackPostSettingsInput
@@ -4059,6 +4112,10 @@ type Issue implements Node {
   Issue's human readable identifier (e.g. ENG-123).
   """
   identifier: String!
+  """
+  Integration type that created this issue, if applicable.
+  """
+  integrationSourceType: IntegrationService
   """
   Inverse relations associated with this issue.
   """
@@ -5993,6 +6050,10 @@ type IssueSearchResult implements Node {
   """
   identifier: String!
   """
+  Integration type that created this issue, if applicable.
+  """
+  integrationSourceType: IntegrationService
+  """
   Inverse relations associated with this issue.
   """
   inverseRelations(
@@ -6892,7 +6953,7 @@ type Mutation {
     id: String!
   ): DeletePayload!
   """
-  [ALPHA] Resolves a comment.
+  Resolves a comment.
   """
   commentResolve(
     """
@@ -6902,7 +6963,7 @@ type Mutation {
     resolvingCommentId: String
   ): CommentPayload!
   """
-  [ALPHA] Unresolves a comment.
+  Unresolves a comment.
   """
   commentUnresolve(
     """
@@ -7290,7 +7351,7 @@ type Mutation {
   """
   Connects the organization with the GitHub Sync App.
   """
-  integrationGithubSync(
+  integrationGithubSyncConnect(
     """
     The GitHub data to connect with.
     """
@@ -12750,6 +12811,10 @@ type ProjectUpdate implements Node {
   """
   infoSnapshot: JSONObject
   """
+  [ALPHA] Whether project update diff should be hidden
+  """
+  isDiffHidden: Boolean!
+  """
   The project that the update is associated with.
   """
   project: Project!
@@ -12792,6 +12857,10 @@ input ProjectUpdateCreateInput {
   The identifier. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  [ALPHA] Whether the diff between the current update and the previous one should be hidden.
+  """
+  isDiffHidden: Boolean
   """
   The project to associate the project update with.
   """
@@ -13057,6 +13126,10 @@ input ProjectUpdateUpdateInput {
   The health of the project at the time of the update.
   """
   health: ProjectUpdateHealthType
+  """
+  [ALPHA] Whether the diff between the current update and the previous one should be hidden.
+  """
+  isDiffHidden: Boolean
 }
 
 type ProjectUpdateWithInteractionPayload {
@@ -15406,6 +15479,10 @@ Object for mapping Slack channel IDs to names and other settings
 """
 type SlackChannelNameMapping {
   """
+  Whether or not @-mentioning the bot should automatically create an Ask with the message
+  """
+  autoCreateOnBotMention: Boolean
+  """
   Whether or not using the :ticket: emoji in this channel should automatically create Asks
   """
   autoCreateOnEmoji: Boolean
@@ -15421,6 +15498,10 @@ type SlackChannelNameMapping {
   Whether or not the Slack channel is private
   """
   isPrivate: Boolean
+  """
+  Whether or not the Slack channel is shared with an external org
+  """
+  isShared: Boolean
   """
   The Slack channel name.
   """
@@ -15433,6 +15514,10 @@ type SlackChannelNameMapping {
 
 input SlackChannelNameMappingInput {
   """
+  Whether or not @-mentioning the bot should automatically create an Ask with the message
+  """
+  autoCreateOnBotMention: Boolean
+  """
   Whether or not using the :ticket: emoji in this channel should automatically create Asks
   """
   autoCreateOnEmoji: Boolean
@@ -15448,6 +15533,10 @@ input SlackChannelNameMappingInput {
   Whether or not the Slack channel is private
   """
   isPrivate: Boolean
+  """
+  Whether or not the Slack channel is shared with an external org
+  """
+  isShared: Boolean
   """
   The Slack channel name.
   """
@@ -15471,6 +15560,23 @@ input SlackPostSettingsInput {
   channel: String!
   channelId: String!
   configurationUrl: String!
+}
+
+"""
+Settings for the regular Slack integration.
+"""
+type SlackSettings {
+  """
+  Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.
+  """
+  linkOnIssueIdMention: Boolean!
+}
+
+input SlackSettingsInput {
+  """
+  Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.
+  """
+  linkOnIssueIdMention: Boolean!
 }
 
 """
@@ -15921,6 +16027,10 @@ type Team implements Node {
     """
     orderBy: PaginationOrderBy
   ): IssueConnection!
+  """
+  [INTERNAL] Whether new users should join this team by default.
+  """
+  joinByDefault: Boolean
   """
   The team's unique key. The key is used in URLs.
   """
@@ -16766,6 +16876,10 @@ input TeamUpdateInput {
   """
   issueSortOrderDefaultToBottom: Boolean
   """
+  Whether new users should join this team by default. Mutation restricted to workspace admins!
+  """
+  joinByDefault: Boolean
+  """
   The key of the team.
   """
   key: String
@@ -17049,9 +17163,17 @@ type TriageResponsibility implements Node {
   """
   id: ID!
   """
-  The integration used for scheduling when using the 'integrationSchedule' configuration.
+  The integration used for scheduling.
   """
   integration: Integration!
+  """
+  Set of users used for triage responsibility.
+  """
+  manualSelection: JSONObject
+  """
+  Schedule used for triage responsibility.
+  """
+  schedule: JSONObject
   """
   The team to which the triage responsibility belongs to.
   """
@@ -17084,6 +17206,60 @@ type TriageResponsibilityEdge {
   """
   cursor: String!
   node: TriageResponsibility!
+}
+
+"""
+Manual triage responsibility using a set of users.
+"""
+input TriageResponsibilityManualSelection {
+  """
+  [INTERNAL] The index of the current userId used for the assign action when having more than one user.
+  """
+  assignmentIndex: Int
+  """
+  The set of users responsible for triage.
+  """
+  userIds: [String!]!
+}
+
+"""
+Triage responsibility schedule.
+"""
+input TriageResponsibilitySchedule {
+  """
+  The schedule entries, undefined if the schedule is not fetched yet or failed.
+  """
+  entries: [TriageResponsibilityScheduleEntry!]
+  """
+  Optional user presentable error message when using an integration.
+  """
+  integrationError: String
+  """
+  Reference to the integration's schedule when using an integration.
+  """
+  integrationScheduleId: String
+}
+
+"""
+The triage responsibility schedule entry.
+"""
+input TriageResponsibilityScheduleEntry {
+  """
+  The end date in ISO 8601 date-time format.
+  """
+  endsAt: DateTime!
+  """
+  The external email of the user on schedule if the external user could not be found in Linear.
+  """
+  externalUserEmail: String
+  """
+  The start date in ISO 8601 date-time format.
+  """
+  startsAt: DateTime!
+  """
+  The linear user id of the user on schedule.
+  """
+  userId: String
 }
 
 """

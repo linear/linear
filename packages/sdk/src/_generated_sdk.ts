@@ -359,12 +359,15 @@ export class AsksChannelConnectPayload extends Request {
 
   public constructor(request: LinearRequest, data: L.AsksChannelConnectPayloadFragment) {
     super(request);
+    this.addBot = data.addBot;
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
     this.mapping = new SlackChannelNameMapping(request, data.mapping);
     this._integration = data.integration ?? undefined;
   }
 
+  /** Whether the bot needs to be added to the channel. */
+  public addBot: boolean;
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
@@ -1814,6 +1817,7 @@ export class DocumentContent extends Request {
     this.contentState = data.contentState ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.restoredAt = parseDate(data.restoredAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._document = data.document ?? undefined;
     this._issue = data.issue ?? undefined;
@@ -1833,6 +1837,8 @@ export class DocumentContent extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The time at which the document content was restored from a previous version */
+  public restoredAt?: Date;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -2547,16 +2553,14 @@ export class GitHubSyncRepo extends Request {
 export class GitHubSyncSettings extends Request {
   public constructor(request: LinearRequest, data: L.GitHubSyncSettingsFragment) {
     super(request);
-    this.repositories = data.repositories
-      ? data.repositories.map(node => new GitHubSyncRepo(request, node))
-      : undefined;
-    this.teamRepoMap = data.teamRepoMap ? data.teamRepoMap.map(node => new TeamRepoMapping(request, node)) : undefined;
+    this.repoMapping = data.repoMapping ? data.repoMapping.map(node => new TeamRepoMapping(request, node)) : undefined;
+    this.repos = data.repos ? data.repos.map(node => new GitHubSyncRepo(request, node)) : undefined;
   }
 
-  /** The names of the repositories connected for the GitHub integration */
-  public repositories?: GitHubSyncRepo[];
   /** Mapping of team to repository for syncing */
-  public teamRepoMap?: TeamRepoMapping[];
+  public repoMapping?: TeamRepoMapping[];
+  /** The names of the repositories connected for the GitHub integration */
+  public repos?: GitHubSyncRepo[];
 }
 /**
  * Metadata and settings for a GitLab integration.
@@ -2810,6 +2814,7 @@ export class IntegrationSettings extends Request {
     this.notion = data.notion ? new NotionSettings(request, data.notion) : undefined;
     this.pagerDuty = data.pagerDuty ? new PagerDutySettings(request, data.pagerDuty) : undefined;
     this.sentry = data.sentry ? new SentrySettings(request, data.sentry) : undefined;
+    this.slack = data.slack ? new SlackSettings(request, data.slack) : undefined;
     this.slackAsks = data.slackAsks ? new SlackAsksSettings(request, data.slackAsks) : undefined;
     this.slackOrgProjectUpdatesPost = data.slackOrgProjectUpdatesPost
       ? new SlackPostSettings(request, data.slackOrgProjectUpdatesPost)
@@ -2829,6 +2834,7 @@ export class IntegrationSettings extends Request {
   public notion?: NotionSettings;
   public pagerDuty?: PagerDutySettings;
   public sentry?: SentrySettings;
+  public slack?: SlackSettings;
   public slackAsks?: SlackAsksSettings;
   public slackOrgProjectUpdatesPost?: SlackPostSettings;
   public slackPost?: SlackPostSettings;
@@ -7315,14 +7321,18 @@ export class SlackAsksTeamSettings extends Request {
 export class SlackChannelNameMapping extends Request {
   public constructor(request: LinearRequest, data: L.SlackChannelNameMappingFragment) {
     super(request);
+    this.autoCreateOnBotMention = data.autoCreateOnBotMention ?? undefined;
     this.autoCreateOnEmoji = data.autoCreateOnEmoji ?? undefined;
     this.autoCreateOnMessage = data.autoCreateOnMessage ?? undefined;
     this.id = data.id;
     this.isPrivate = data.isPrivate ?? undefined;
+    this.isShared = data.isShared ?? undefined;
     this.name = data.name;
     this.teams = data.teams.map(node => new SlackAsksTeamSettings(request, node));
   }
 
+  /** Whether or not @-mentioning the bot should automatically create an Ask with the message */
+  public autoCreateOnBotMention?: boolean;
   /** Whether or not using the :ticket: emoji in this channel should automatically create Asks */
   public autoCreateOnEmoji?: boolean;
   /** Whether or not top-level messages in this channel should automatically create Asks */
@@ -7331,6 +7341,8 @@ export class SlackChannelNameMapping extends Request {
   public id: string;
   /** Whether or not the Slack channel is private */
   public isPrivate?: boolean;
+  /** Whether or not the Slack channel is shared with an external org */
+  public isShared?: boolean;
   /** The Slack channel name. */
   public name: string;
   /** Which teams are connected to the channel and settings for those teams */
@@ -7353,6 +7365,21 @@ export class SlackPostSettings extends Request {
   public channel: string;
   public channelId: string;
   public configurationUrl: string;
+}
+/**
+ * Settings for the regular Slack integration.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SlackSettingsFragment response data
+ */
+export class SlackSettings extends Request {
+  public constructor(request: LinearRequest, data: L.SlackSettingsFragment) {
+    super(request);
+    this.linkOnIssueIdMention = data.linkOnIssueIdMention;
+  }
+
+  /** Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message. */
+  public linkOnIssueIdMention: boolean;
 }
 /**
  * SsoUrlFromEmailResponse model
@@ -8088,6 +8115,8 @@ export class TriageResponsibility extends Request {
     this.config = parseJson(data.config) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.manualSelection = parseJson(data.manualSelection) ?? undefined;
+    this.schedule = parseJson(data.schedule) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._integration = data.integration;
     this._team = data.team;
@@ -8101,13 +8130,17 @@ export class TriageResponsibility extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Set of users used for triage responsibility. */
+  public manualSelection?: Record<string, unknown>;
+  /** Schedule used for triage responsibility. */
+  public schedule?: Record<string, unknown>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The integration used for scheduling when using the 'integrationSchedule' configuration. */
+  /** The integration used for scheduling. */
   public get integration(): LinearFetch<Integration> | undefined {
     return new IntegrationQuery(this._request).fetch(this._integration.id);
   }
@@ -9858,6 +9891,69 @@ export class DeleteCommentMutation extends Request {
 }
 
 /**
+ * A fetchable CommentResolve Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CommentResolveMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CommentResolve mutation and return a CommentPayload
+   *
+   * @param id - required id to pass to commentResolve
+   * @param variables - variables without 'id' to pass into the CommentResolveMutation
+   * @returns parsed response from CommentResolveMutation
+   */
+  public async fetch(
+    id: string,
+    variables?: Omit<L.CommentResolveMutationVariables, "id">
+  ): LinearFetch<CommentPayload> {
+    const response = await this._request<L.CommentResolveMutation, L.CommentResolveMutationVariables>(
+      L.CommentResolveDocument,
+      {
+        id,
+        ...variables,
+      }
+    );
+    const data = response.commentResolve;
+
+    return new CommentPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CommentUnresolve Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CommentUnresolveMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CommentUnresolve mutation and return a CommentPayload
+   *
+   * @param id - required id to pass to commentUnresolve
+   * @returns parsed response from CommentUnresolveMutation
+   */
+  public async fetch(id: string): LinearFetch<CommentPayload> {
+    const response = await this._request<L.CommentUnresolveMutation, L.CommentUnresolveMutationVariables>(
+      L.CommentUnresolveDocument,
+      {
+        id,
+      }
+    );
+    const data = response.commentUnresolve;
+
+    return new CommentPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UpdateComment Mutation
  *
  * @param request - function to call the graphql client
@@ -10845,29 +10941,29 @@ export class IntegrationGithubConnectMutation extends Request {
 }
 
 /**
- * A fetchable IntegrationGithubSync Mutation
+ * A fetchable IntegrationGithubSyncConnect Mutation
  *
  * @param request - function to call the graphql client
  */
-export class IntegrationGithubSyncMutation extends Request {
+export class IntegrationGithubSyncConnectMutation extends Request {
   public constructor(request: LinearRequest) {
     super(request);
   }
 
   /**
-   * Call the IntegrationGithubSync mutation and return a IntegrationPayload
+   * Call the IntegrationGithubSyncConnect mutation and return a IntegrationPayload
    *
-   * @param installationId - required installationId to pass to integrationGithubSync
-   * @returns parsed response from IntegrationGithubSyncMutation
+   * @param installationId - required installationId to pass to integrationGithubSyncConnect
+   * @returns parsed response from IntegrationGithubSyncConnectMutation
    */
   public async fetch(installationId: string): LinearFetch<IntegrationPayload> {
-    const response = await this._request<L.IntegrationGithubSyncMutation, L.IntegrationGithubSyncMutationVariables>(
-      L.IntegrationGithubSyncDocument,
-      {
-        installationId,
-      }
-    );
-    const data = response.integrationGithubSync;
+    const response = await this._request<
+      L.IntegrationGithubSyncConnectMutation,
+      L.IntegrationGithubSyncConnectMutationVariables
+    >(L.IntegrationGithubSyncConnectDocument, {
+      installationId,
+    });
+    const data = response.integrationGithubSyncConnect;
 
     return new IntegrationPayload(this._request, data);
   }
@@ -21296,6 +21392,28 @@ export class LinearSdk extends Request {
     return new DeleteCommentMutation(this._request).fetch(id);
   }
   /**
+   * Resolves a comment.
+   *
+   * @param id - required id to pass to commentResolve
+   * @param variables - variables without 'id' to pass into the CommentResolveMutation
+   * @returns CommentPayload
+   */
+  public commentResolve(
+    id: string,
+    variables?: Omit<L.CommentResolveMutationVariables, "id">
+  ): LinearFetch<CommentPayload> {
+    return new CommentResolveMutation(this._request).fetch(id, variables);
+  }
+  /**
+   * Unresolves a comment.
+   *
+   * @param id - required id to pass to commentUnresolve
+   * @returns CommentPayload
+   */
+  public commentUnresolve(id: string): LinearFetch<CommentPayload> {
+    return new CommentUnresolveMutation(this._request).fetch(id);
+  }
+  /**
    * Updates a comment.
    *
    * @param id - required id to pass to updateComment
@@ -21631,11 +21749,11 @@ export class LinearSdk extends Request {
   /**
    * Connects the organization with the GitHub Sync App.
    *
-   * @param installationId - required installationId to pass to integrationGithubSync
+   * @param installationId - required installationId to pass to integrationGithubSyncConnect
    * @returns IntegrationPayload
    */
-  public integrationGithubSync(installationId: string): LinearFetch<IntegrationPayload> {
-    return new IntegrationGithubSyncMutation(this._request).fetch(installationId);
+  public integrationGithubSyncConnect(installationId: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationGithubSyncConnectMutation(this._request).fetch(installationId);
   }
   /**
    * Connects the organization with a GitLab Access Token.

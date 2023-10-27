@@ -137,6 +137,8 @@ export type ArchiveResponse = {
 
 export type AsksChannelConnectPayload = {
   __typename?: "AsksChannelConnectPayload";
+  /** Whether the bot needs to be added to the channel. */
+  addBot: Scalars["Boolean"];
   /** The integration that was created or updated. */
   integration?: Maybe<Integration>;
   /** The identifier of the last sync operation. */
@@ -687,6 +689,8 @@ export type CommentCreateInput = {
   bodyData?: Maybe<Scalars["JSON"]>;
   /** Create comment as a user with the provided name. This option is only available to OAuth applications creating comments in `actor=application` mode. */
   createAsUser?: Maybe<Scalars["String"]>;
+  /** Flag to indicate this comment should be created on the issue's synced Slack comment thread. If no synced Slack comment thread exists, the mutation will fail. */
+  createOnSyncedSlackThread?: Maybe<Scalars["Boolean"]>;
   /** The date when the comment was created (e.g. if importing from another system). Must be a date in the past. If none is provided, the backend will generate the time as now. */
   createdAt?: Maybe<Scalars["DateTime"]>;
   /** Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode. */
@@ -747,6 +751,10 @@ export type CommentUpdateInput = {
   body?: Maybe<Scalars["String"]>;
   /** The comment content as a Prosemirror document. */
   bodyData?: Maybe<Scalars["JSON"]>;
+  /** [INTERNAL] The child comment that resolves this thread. */
+  resolvingCommentId?: Maybe<Scalars["String"]>;
+  /** [INTERNAL] The user who resolved this thread. */
+  resolvingUserId?: Maybe<Scalars["String"]>;
 };
 
 /** A company related to issue's origin. */
@@ -1377,6 +1385,8 @@ export type DocumentContent = Node & {
   project?: Maybe<Project>;
   /** The project milestone that the content is associated with. */
   projectMilestone?: Maybe<ProjectMilestone>;
+  /** The time at which the document content was restored from a previous version */
+  restoredAt?: Maybe<Scalars["DateTime"]>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -1967,17 +1977,17 @@ export type GitHubSyncRepoInput = {
 /** Metadata and settings for a GitHub Sync integration. */
 export type GitHubSyncSettings = {
   __typename?: "GitHubSyncSettings";
-  /** The names of the repositories connected for the GitHub integration */
-  repositories?: Maybe<Array<GitHubSyncRepo>>;
   /** Mapping of team to repository for syncing */
-  teamRepoMap?: Maybe<Array<TeamRepoMapping>>;
+  repoMapping?: Maybe<Array<TeamRepoMapping>>;
+  /** The names of the repositories connected for the GitHub integration */
+  repos?: Maybe<Array<GitHubSyncRepo>>;
 };
 
 export type GitHubSyncSettingsInput = {
-  /** The names of the repositories connected for the GitHub integration */
-  repositories?: Maybe<Array<GitHubSyncRepoInput>>;
   /** Mapping of team to repository for syncing */
-  teamRepoMap?: Maybe<Array<TeamRepoMappingInput>>;
+  repoMapping?: Maybe<Array<TeamRepoMappingInput>>;
+  /** The names of the repositories connected for the GitHub integration */
+  repos?: Maybe<Array<GitHubSyncRepoInput>>;
 };
 
 /** Metadata and settings for a GitLab integration. */
@@ -2140,6 +2150,35 @@ export type IntegrationRequestPayload = {
   success: Scalars["Boolean"];
 };
 
+/** Linear supported integration services. */
+export enum IntegrationService {
+  Airbyte = "airbyte",
+  Discord = "discord",
+  Figma = "figma",
+  FigmaPlugin = "figmaPlugin",
+  Front = "front",
+  GitHubSync = "gitHubSync",
+  Github = "github",
+  GithubCommit = "githubCommit",
+  Gitlab = "gitlab",
+  GoogleCalendarPersonal = "googleCalendarPersonal",
+  GoogleSheets = "googleSheets",
+  Intercom = "intercom",
+  Jira = "jira",
+  Loom = "loom",
+  Notion = "notion",
+  PagerDuty = "pagerDuty",
+  Sentry = "sentry",
+  Slack = "slack",
+  SlackAsks = "slackAsks",
+  SlackOrgProjectUpdatesPost = "slackOrgProjectUpdatesPost",
+  SlackPersonal = "slackPersonal",
+  SlackPost = "slackPost",
+  SlackProjectPost = "slackProjectPost",
+  SlackProjectUpdatesPost = "slackProjectUpdatesPost",
+  Zendesk = "zendesk",
+}
+
 /** The integration resource's settings */
 export type IntegrationSettings = {
   __typename?: "IntegrationSettings";
@@ -2153,6 +2192,7 @@ export type IntegrationSettings = {
   notion?: Maybe<NotionSettings>;
   pagerDuty?: Maybe<PagerDutySettings>;
   sentry?: Maybe<SentrySettings>;
+  slack?: Maybe<SlackSettings>;
   slackAsks?: Maybe<SlackAsksSettings>;
   slackOrgProjectUpdatesPost?: Maybe<SlackPostSettings>;
   slackPost?: Maybe<SlackPostSettings>;
@@ -2171,6 +2211,7 @@ export type IntegrationSettingsInput = {
   notion?: Maybe<NotionSettingsInput>;
   pagerDuty?: Maybe<PagerDutyInput>;
   sentry?: Maybe<SentrySettingsInput>;
+  slack?: Maybe<SlackSettingsInput>;
   slackAsks?: Maybe<SlackAsksSettingsInput>;
   slackOrgProjectUpdatesPost?: Maybe<SlackPostSettingsInput>;
   slackPost?: Maybe<SlackPostSettingsInput>;
@@ -2438,6 +2479,8 @@ export type Issue = Node & {
   id: Scalars["ID"];
   /** Issue's human readable identifier (e.g. ENG-123). */
   identifier: Scalars["String"];
+  /** Integration type that created this issue, if applicable. */
+  integrationSourceType?: Maybe<IntegrationService>;
   /** Inverse relations associated with this issue. */
   inverseRelations: IssueRelationConnection;
   /** Labels associated with this issue. */
@@ -3495,6 +3538,8 @@ export type IssueSearchResult = Node & {
   id: Scalars["ID"];
   /** Issue's human readable identifier (e.g. ENG-123). */
   identifier: Scalars["String"];
+  /** Integration type that created this issue, if applicable. */
+  integrationSourceType?: Maybe<IntegrationService>;
   /** Inverse relations associated with this issue. */
   inverseRelations: IssueRelationConnection;
   /** Labels associated with this issue. */
@@ -3860,9 +3905,9 @@ export type Mutation = {
   commentCreate: CommentPayload;
   /** Deletes a comment. */
   commentDelete: DeletePayload;
-  /** [ALPHA] Resolves a comment. */
+  /** Resolves a comment. */
   commentResolve: CommentPayload;
-  /** [ALPHA] Unresolves a comment. */
+  /** Unresolves a comment. */
   commentUnresolve: CommentPayload;
   /** Updates a comment. */
   commentUpdate: CommentPayload;
@@ -3935,7 +3980,7 @@ export type Mutation = {
   /** Connects the organization with the GitHub App. */
   integrationGithubConnect: IntegrationPayload;
   /** Connects the organization with the GitHub Sync App. */
-  integrationGithubSync: IntegrationPayload;
+  integrationGithubSyncConnect: IntegrationPayload;
   /** Connects the organization with a GitLab Access Token. */
   integrationGitlabConnect: IntegrationPayload;
   /** [Internal] Connects the Google Calendar to the user to this Linear account via OAuth2. */
@@ -4530,7 +4575,7 @@ export type MutationIntegrationGithubConnectArgs = {
   installationId: Scalars["String"];
 };
 
-export type MutationIntegrationGithubSyncArgs = {
+export type MutationIntegrationGithubSyncConnectArgs = {
   installationId: Scalars["String"];
 };
 
@@ -7267,6 +7312,8 @@ export type ProjectUpdate = Node & {
   id: Scalars["ID"];
   /** [Internal] Serialized JSON representing current state of the project properties when posting the project update. */
   infoSnapshot?: Maybe<Scalars["JSONObject"]>;
+  /** [ALPHA] Whether project update diff should be hidden */
+  isDiffHidden: Scalars["Boolean"];
   /** The project that the update is associated with. */
   project: Project;
   /**
@@ -7297,6 +7344,8 @@ export type ProjectUpdateCreateInput = {
   health?: Maybe<ProjectUpdateHealthType>;
   /** The identifier. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
+  /** [ALPHA] Whether the diff between the current update and the previous one should be hidden. */
+  isDiffHidden?: Maybe<Scalars["Boolean"]>;
   /** The project to associate the project update with. */
   projectId: Scalars["String"];
 };
@@ -7463,6 +7512,8 @@ export type ProjectUpdateUpdateInput = {
   bodyData?: Maybe<Scalars["JSON"]>;
   /** The health of the project at the time of the update. */
   health?: Maybe<ProjectUpdateHealthType>;
+  /** [ALPHA] Whether the diff between the current update and the previous one should be hidden. */
+  isDiffHidden?: Maybe<Scalars["Boolean"]>;
 };
 
 export type ProjectUpdateWithInteractionPayload = {
@@ -8739,6 +8790,8 @@ export type SlackAsksTeamSettingsInput = {
 /** Object for mapping Slack channel IDs to names and other settings */
 export type SlackChannelNameMapping = {
   __typename?: "SlackChannelNameMapping";
+  /** Whether or not @-mentioning the bot should automatically create an Ask with the message */
+  autoCreateOnBotMention?: Maybe<Scalars["Boolean"]>;
   /** Whether or not using the :ticket: emoji in this channel should automatically create Asks */
   autoCreateOnEmoji?: Maybe<Scalars["Boolean"]>;
   /** Whether or not top-level messages in this channel should automatically create Asks */
@@ -8747,6 +8800,8 @@ export type SlackChannelNameMapping = {
   id: Scalars["String"];
   /** Whether or not the Slack channel is private */
   isPrivate?: Maybe<Scalars["Boolean"]>;
+  /** Whether or not the Slack channel is shared with an external org */
+  isShared?: Maybe<Scalars["Boolean"]>;
   /** The Slack channel name. */
   name: Scalars["String"];
   /** Which teams are connected to the channel and settings for those teams */
@@ -8754,6 +8809,8 @@ export type SlackChannelNameMapping = {
 };
 
 export type SlackChannelNameMappingInput = {
+  /** Whether or not @-mentioning the bot should automatically create an Ask with the message */
+  autoCreateOnBotMention?: Maybe<Scalars["Boolean"]>;
   /** Whether or not using the :ticket: emoji in this channel should automatically create Asks */
   autoCreateOnEmoji?: Maybe<Scalars["Boolean"]>;
   /** Whether or not top-level messages in this channel should automatically create Asks */
@@ -8762,6 +8819,8 @@ export type SlackChannelNameMappingInput = {
   id: Scalars["String"];
   /** Whether or not the Slack channel is private */
   isPrivate?: Maybe<Scalars["Boolean"]>;
+  /** Whether or not the Slack channel is shared with an external org */
+  isShared?: Maybe<Scalars["Boolean"]>;
   /** The Slack channel name. */
   name: Scalars["String"];
   /** Which teams are connected to the channel and settings for those teams */
@@ -8780,6 +8839,18 @@ export type SlackPostSettingsInput = {
   channel: Scalars["String"];
   channelId: Scalars["String"];
   configurationUrl: Scalars["String"];
+};
+
+/** Settings for the regular Slack integration. */
+export type SlackSettings = {
+  __typename?: "SlackSettings";
+  /** Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message. */
+  linkOnIssueIdMention: Scalars["Boolean"];
+};
+
+export type SlackSettingsInput = {
+  /** Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message. */
+  linkOnIssueIdMention: Scalars["Boolean"];
 };
 
 /** Comparator for issue source type. */
@@ -8995,6 +9066,8 @@ export type Team = Node & {
   issueSortOrderDefaultToBottom: Scalars["Boolean"];
   /** Issues associated with the team. */
   issues: IssueConnection;
+  /** [INTERNAL] Whether new users should join this team by default. */
+  joinByDefault?: Maybe<Scalars["Boolean"]>;
   /** The team's unique key. The key is used in URLs. */
   key: Scalars["String"];
   /** Labels associated with the team. */
@@ -9467,6 +9540,8 @@ export type TeamUpdateInput = {
   issueOrderingNoPriorityFirst?: Maybe<Scalars["Boolean"]>;
   /** Whether to move issues to bottom of the column when changing state. */
   issueSortOrderDefaultToBottom?: Maybe<Scalars["Boolean"]>;
+  /** Whether new users should join this team by default. Mutation restricted to workspace admins! */
+  joinByDefault?: Maybe<Scalars["Boolean"]>;
   /** The key of the team. */
   key?: Maybe<Scalars["String"]>;
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. */
@@ -9628,8 +9703,12 @@ export type TriageResponsibility = Node & {
   createdAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
-  /** The integration used for scheduling when using the 'integrationSchedule' configuration. */
+  /** The integration used for scheduling. */
   integration: Integration;
+  /** Set of users used for triage responsibility. */
+  manualSelection?: Maybe<Scalars["JSONObject"]>;
+  /** Schedule used for triage responsibility. */
+  schedule?: Maybe<Scalars["JSONObject"]>;
   /** The team to which the triage responsibility belongs to. */
   team: Team;
   /**
@@ -9658,6 +9737,36 @@ export type TriageResponsibilityEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: TriageResponsibility;
+};
+
+/** Manual triage responsibility using a set of users. */
+export type TriageResponsibilityManualSelection = {
+  /** [INTERNAL] The index of the current userId used for the assign action when having more than one user. */
+  assignmentIndex?: Maybe<Scalars["Int"]>;
+  /** The set of users responsible for triage. */
+  userIds: Array<Scalars["String"]>;
+};
+
+/** Triage responsibility schedule. */
+export type TriageResponsibilitySchedule = {
+  /** The schedule entries, undefined if the schedule is not fetched yet or failed. */
+  entries?: Maybe<Array<TriageResponsibilityScheduleEntry>>;
+  /** Optional user presentable error message when using an integration. */
+  integrationError?: Maybe<Scalars["String"]>;
+  /** Reference to the integration's schedule when using an integration. */
+  integrationScheduleId?: Maybe<Scalars["String"]>;
+};
+
+/** The triage responsibility schedule entry. */
+export type TriageResponsibilityScheduleEntry = {
+  /** The end date in ISO 8601 date-time format. */
+  endsAt: Scalars["DateTime"];
+  /** The external email of the user on schedule if the external user could not be found in Linear. */
+  externalUserEmail?: Maybe<Scalars["String"]>;
+  /** The start date in ISO 8601 date-time format. */
+  startsAt: Scalars["DateTime"];
+  /** The linear user id of the user on schedule. */
+  userId?: Maybe<Scalars["String"]>;
 };
 
 /** Object representing Google Cloud upload policy, plus additional data. */
@@ -10837,7 +10946,7 @@ export type CycleNotificationSubscriptionFragment = { __typename: "CycleNotifica
 
 export type DocumentContentFragment = { __typename: "DocumentContent" } & Pick<
   DocumentContent,
-  "contentData" | "content" | "contentState" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+  "contentData" | "content" | "contentState" | "updatedAt" | "restoredAt" | "archivedAt" | "createdAt" | "id"
 > & {
     document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
@@ -11197,7 +11306,7 @@ export type TeamNotificationSubscriptionFragment = { __typename: "TeamNotificati
 
 export type TriageResponsibilityFragment = { __typename: "TriageResponsibility" } & Pick<
   TriageResponsibility,
-  "updatedAt" | "config" | "archivedAt" | "createdAt" | "id"
+  "schedule" | "manualSelection" | "updatedAt" | "config" | "archivedAt" | "createdAt" | "id"
 > & {
     integration: { __typename?: "Integration" } & Pick<Integration, "id">;
     team: { __typename?: "Team" } & Pick<Team, "id">;
@@ -11641,8 +11750,8 @@ export type PagerDutyScheduleInfoFragment = { __typename: "PagerDutyScheduleInfo
 >;
 
 export type GitHubSyncSettingsFragment = { __typename: "GitHubSyncSettings" } & {
-  teamRepoMap?: Maybe<Array<{ __typename?: "TeamRepoMapping" } & TeamRepoMappingFragment>>;
-  repositories?: Maybe<Array<{ __typename?: "GitHubSyncRepo" } & GitHubSyncRepoFragment>>;
+  repoMapping?: Maybe<Array<{ __typename?: "TeamRepoMapping" } & TeamRepoMappingFragment>>;
+  repos?: Maybe<Array<{ __typename?: "GitHubSyncRepo" } & GitHubSyncRepoFragment>>;
 };
 
 export type GitHubSettingsFragment = { __typename: "GitHubSettings" } & Pick<
@@ -11759,7 +11868,7 @@ export type OauthClientFragment = { __typename: "OauthClient" } & Pick<
 
 export type SlackChannelNameMappingFragment = { __typename: "SlackChannelNameMapping" } & Pick<
   SlackChannelNameMapping,
-  "id" | "name" | "isPrivate" | "autoCreateOnMessage" | "autoCreateOnEmoji"
+  "id" | "name" | "autoCreateOnBotMention" | "isPrivate" | "isShared" | "autoCreateOnMessage" | "autoCreateOnEmoji"
 > & { teams: Array<{ __typename?: "SlackAsksTeamSettings" } & SlackAsksTeamSettingsFragment> };
 
 export type UploadFileFragment = { __typename: "UploadFile" } & Pick<
@@ -11814,6 +11923,8 @@ export type OauthClientApprovalFragment = { __typename: "OauthClientApproval" } 
 
 export type SentrySettingsFragment = { __typename: "SentrySettings" } & Pick<SentrySettings, "organizationSlug">;
 
+export type SlackSettingsFragment = { __typename: "SlackSettings" } & Pick<SlackSettings, "linkOnIssueIdMention">;
+
 export type SlackAsksSettingsFragment = { __typename: "SlackAsksSettings" } & {
   slackChannelMapping?: Maybe<Array<{ __typename?: "SlackChannelNameMapping" } & SlackChannelNameMappingFragment>>;
 };
@@ -11855,6 +11966,7 @@ export type IntegrationSettingsFragment = { __typename: "IntegrationSettings" } 
   notion?: Maybe<{ __typename?: "NotionSettings" } & NotionSettingsFragment>;
   pagerDuty?: Maybe<{ __typename?: "PagerDutySettings" } & PagerDutySettingsFragment>;
   sentry?: Maybe<{ __typename?: "SentrySettings" } & SentrySettingsFragment>;
+  slack?: Maybe<{ __typename?: "SlackSettings" } & SlackSettingsFragment>;
   slackAsks?: Maybe<{ __typename?: "SlackAsksSettings" } & SlackAsksSettingsFragment>;
   slackOrgProjectUpdatesPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
   slackPost?: Maybe<{ __typename?: "SlackPostSettings" } & SlackPostSettingsFragment>;
@@ -11988,7 +12100,7 @@ export type ApiKeyPayloadFragment = { __typename: "ApiKeyPayload" } & Pick<ApiKe
 
 export type AsksChannelConnectPayloadFragment = { __typename: "AsksChannelConnectPayload" } & Pick<
   AsksChannelConnectPayload,
-  "lastSyncId" | "success"
+  "lastSyncId" | "addBot" | "success"
 > & {
     integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">>;
     mapping: { __typename?: "SlackChannelNameMapping" } & SlackChannelNameMappingFragment;
@@ -13246,6 +13358,23 @@ export type DeleteCommentMutation = { __typename?: "Mutation" } & {
   commentDelete: { __typename?: "DeletePayload" } & DeletePayloadFragment;
 };
 
+export type CommentResolveMutationVariables = Exact<{
+  id: Scalars["String"];
+  resolvingCommentId?: Maybe<Scalars["String"]>;
+}>;
+
+export type CommentResolveMutation = { __typename?: "Mutation" } & {
+  commentResolve: { __typename?: "CommentPayload" } & CommentPayloadFragment;
+};
+
+export type CommentUnresolveMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type CommentUnresolveMutation = { __typename?: "Mutation" } & {
+  commentUnresolve: { __typename?: "CommentPayload" } & CommentPayloadFragment;
+};
+
 export type UpdateCommentMutationVariables = Exact<{
   id: Scalars["String"];
   input: CommentUpdateInput;
@@ -13532,12 +13661,12 @@ export type IntegrationGithubConnectMutation = { __typename?: "Mutation" } & {
   integrationGithubConnect: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
-export type IntegrationGithubSyncMutationVariables = Exact<{
+export type IntegrationGithubSyncConnectMutationVariables = Exact<{
   installationId: Scalars["String"];
 }>;
 
-export type IntegrationGithubSyncMutation = { __typename?: "Mutation" } & {
-  integrationGithubSync: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+export type IntegrationGithubSyncConnectMutation = { __typename?: "Mutation" } & {
+  integrationGithubSyncConnect: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
 export type IntegrationGitlabConnectMutationVariables = Exact<{
@@ -16905,6 +17034,7 @@ export const DocumentContentFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "restoredAt" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
@@ -18359,7 +18489,7 @@ export const GitHubSyncSettingsFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           {
             kind: "Field",
-            name: { kind: "Name", value: "teamRepoMap" },
+            name: { kind: "Name", value: "repoMapping" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamRepoMapping" } }],
@@ -18367,7 +18497,7 @@ export const GitHubSyncSettingsFragmentDoc = {
           },
           {
             kind: "Field",
-            name: { kind: "Name", value: "repositories" },
+            name: { kind: "Name", value: "repos" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "GitHubSyncRepo" } }],
@@ -18583,6 +18713,23 @@ export const SentrySettingsFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<SentrySettingsFragment, unknown>;
+export const SlackSettingsFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SlackSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SlackSettings" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "linkOnIssueIdMention" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SlackSettingsFragment, unknown>;
 export const SlackAsksTeamSettingsFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -18614,7 +18761,9 @@ export const SlackChannelNameMappingFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "autoCreateOnBotMention" } },
           { kind: "Field", name: { kind: "Name", value: "isPrivate" } },
+          { kind: "Field", name: { kind: "Name", value: "isShared" } },
           { kind: "Field", name: { kind: "Name", value: "autoCreateOnMessage" } },
           { kind: "Field", name: { kind: "Name", value: "autoCreateOnEmoji" } },
           {
@@ -18786,6 +18935,14 @@ export const IntegrationSettingsFragmentDoc = {
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SentrySettings" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "slack" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SlackSettings" } }],
             },
           },
           {
@@ -19042,6 +19199,7 @@ export const AsksChannelConnectPayloadFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SlackChannelNameMapping" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "addBot" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
@@ -24053,6 +24211,8 @@ export const TriageResponsibilityFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "schedule" } },
+          { kind: "Field", name: { kind: "Name", value: "manualSelection" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "integration" },
@@ -25991,6 +26151,92 @@ export const DeleteCommentDocument = {
     ...DeletePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DeleteCommentMutation, DeleteCommentMutationVariables>;
+export const CommentResolveDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "commentResolve" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "resolvingCommentId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "commentResolve" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "resolvingCommentId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "resolvingCommentId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...CommentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CommentResolveMutation, CommentResolveMutationVariables>;
+export const CommentUnresolveDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "commentUnresolve" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "commentUnresolve" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...CommentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CommentUnresolveMutation, CommentUnresolveMutationVariables>;
 export const UpdateCommentDocument = {
   kind: "Document",
   definitions: [
@@ -27472,13 +27718,13 @@ export const IntegrationGithubConnectDocument = {
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationGithubConnectMutation, IntegrationGithubConnectMutationVariables>;
-export const IntegrationGithubSyncDocument = {
+export const IntegrationGithubSyncConnectDocument = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "mutation",
-      name: { kind: "Name", value: "integrationGithubSync" },
+      name: { kind: "Name", value: "integrationGithubSyncConnect" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
@@ -27491,7 +27737,7 @@ export const IntegrationGithubSyncDocument = {
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "integrationGithubSync" },
+            name: { kind: "Name", value: "integrationGithubSyncConnect" },
             arguments: [
               {
                 kind: "Argument",
@@ -27509,7 +27755,7 @@ export const IntegrationGithubSyncDocument = {
     },
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
-} as unknown as DocumentNode<IntegrationGithubSyncMutation, IntegrationGithubSyncMutationVariables>;
+} as unknown as DocumentNode<IntegrationGithubSyncConnectMutation, IntegrationGithubSyncConnectMutationVariables>;
 export const IntegrationGitlabConnectDocument = {
   kind: "Document",
   definitions: [

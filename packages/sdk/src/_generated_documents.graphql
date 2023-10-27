@@ -302,6 +302,8 @@ fragment DocumentContent on DocumentContent {
   project {
     id
   }
+  # The time at which the document content was restored from a previous version
+  restoredAt
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -1187,7 +1189,11 @@ fragment TeamNotificationSubscription on TeamNotificationSubscription {
 # A team's triage responsibility.
 fragment TriageResponsibility on TriageResponsibility {
   __typename
-  # The integration used for scheduling when using the 'integrationSchedule' configuration.
+  # Schedule used for triage responsibility.
+  schedule
+  # Set of users used for triage responsibility.
+  manualSelection
+  # The integration used for scheduling.
   integration {
     id
   }
@@ -2355,11 +2361,11 @@ fragment PagerDutyScheduleInfo on PagerDutyScheduleInfo {
 fragment GitHubSyncSettings on GitHubSyncSettings {
   __typename
   # Mapping of team to repository for syncing
-  teamRepoMap {
+  repoMapping {
     ...TeamRepoMapping
   }
   # The names of the repositories connected for the GitHub integration
-  repositories {
+  repos {
     ...GitHubSyncRepo
   }
 }
@@ -2486,8 +2492,12 @@ fragment SlackChannelNameMapping on SlackChannelNameMapping {
   id
   # The Slack channel name.
   name
+  # Whether or not @-mentioning the bot should automatically create an Ask with the message
+  autoCreateOnBotMention
   # Whether or not the Slack channel is private
   isPrivate
+  # Whether or not the Slack channel is shared with an external org
+  isShared
   # Whether or not top-level messages in this channel should automatically create Asks
   autoCreateOnMessage
   # Whether or not using the :ticket: emoji in this channel should automatically create Asks
@@ -2633,6 +2643,13 @@ fragment SentrySettings on SentrySettings {
   organizationSlug
 }
 
+# Settings for the regular Slack integration.
+fragment SlackSettings on SlackSettings {
+  __typename
+  # Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.
+  linkOnIssueIdMention
+}
+
 # Slack Asks specific settings.
 fragment SlackAsksSettings on SlackAsksSettings {
   __typename
@@ -2725,6 +2742,9 @@ fragment IntegrationSettings on IntegrationSettings {
   }
   sentry {
     ...SentrySettings
+  }
+  slack {
+    ...SlackSettings
   }
   slackAsks {
     ...SlackAsksSettings
@@ -3052,6 +3072,8 @@ fragment AsksChannelConnectPayload on AsksChannelConnectPayload {
   mapping {
     ...SlackChannelNameMapping
   }
+  # Whether the bot needs to be added to the channel.
+  addBot
   # Whether the operation was successful.
   success
 }
@@ -5056,6 +5078,25 @@ mutation deleteComment(
     ...DeletePayload
   }
 }
+# Resolves a comment.
+mutation commentResolve(
+  # The identifier of the comment to update.
+  $id: String!
+  $resolvingCommentId: String
+) {
+  commentResolve(id: $id, resolvingCommentId: $resolvingCommentId) {
+    ...CommentPayload
+  }
+}
+# Unresolves a comment.
+mutation commentUnresolve(
+  # The identifier of the comment to update.
+  $id: String!
+) {
+  commentUnresolve(id: $id) {
+    ...CommentPayload
+  }
+}
 # Updates a comment.
 mutation updateComment(
   # The identifier of the comment to update.
@@ -5391,11 +5432,11 @@ mutation integrationGithubConnect(
   }
 }
 # Connects the organization with the GitHub Sync App.
-mutation integrationGithubSync(
+mutation integrationGithubSyncConnect(
   # The GitHub data to connect with.
   $installationId: String!
 ) {
-  integrationGithubSync(installationId: $installationId) {
+  integrationGithubSyncConnect(installationId: $installationId) {
     ...IntegrationPayload
   }
 }
