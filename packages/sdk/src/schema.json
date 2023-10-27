@@ -829,6 +829,22 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "addBot",
+            "description": "Whether the bot needs to be added to the channel.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -4320,6 +4336,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "createOnSyncedSlackThread",
+            "description": "Flag to indicate this comment should be created on the issue's synced Slack comment thread. If no synced Slack comment thread exists, the mutation will fail.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -4575,6 +4603,30 @@
             "type": {
               "kind": "SCALAR",
               "name": "JSON",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "resolvingUserId",
+            "description": "[INTERNAL] The user who resolved this thread.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "resolvingCommentId",
+            "description": "[INTERNAL] The child comment that resolves this thread.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null,
@@ -8475,6 +8527,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "restoredAt",
+            "description": "The time at which the document content was restored from a previous version",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -12075,7 +12139,7 @@
         "description": "Metadata and settings for a GitHub Sync integration.",
         "fields": [
           {
-            "name": "repositories",
+            "name": "repos",
             "description": "The names of the repositories connected for the GitHub integration",
             "args": [],
             "type": {
@@ -12095,7 +12159,7 @@
             "deprecationReason": null
           },
           {
-            "name": "teamRepoMap",
+            "name": "repoMapping",
             "description": "Mapping of team to repository for syncing",
             "args": [],
             "type": {
@@ -12127,7 +12191,7 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "repositories",
+            "name": "repos",
             "description": "The names of the repositories connected for the GitHub integration",
             "type": {
               "kind": "LIST",
@@ -12147,7 +12211,7 @@
             "deprecationReason": null
           },
           {
-            "name": "teamRepoMap",
+            "name": "repoMapping",
             "description": "Mapping of team to repository for syncing",
             "type": {
               "kind": "LIST",
@@ -13154,10 +13218,183 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "IntegrationService",
+        "description": "Linear supported integration services.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "airbyte",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "discord",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "figma",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "figmaPlugin",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "front",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "github",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "githubCommit",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gitHubSync",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gitlab",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "googleCalendarPersonal",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "googleSheets",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "intercom",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "jira",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "loom",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "notion",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pagerDuty",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slack",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackAsks",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackOrgProjectUpdatesPost",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackPersonal",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackPost",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackProjectPost",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackProjectUpdatesPost",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sentry",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "zendesk",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "IntegrationSettings",
         "description": "The integration resource's settings",
         "fields": [
+          {
+            "name": "slack",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "SlackSettings",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "slackAsks",
             "description": null,
@@ -13350,6 +13587,18 @@
         "description": null,
         "fields": null,
         "inputFields": [
+          {
+            "name": "slack",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "SlackSettingsInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "slackAsks",
             "description": null,
@@ -15215,6 +15464,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integrationSourceType",
+            "description": "Integration type that created this issue, if applicable.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "IntegrationService",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -21871,6 +22132,18 @@
             "deprecationReason": null
           },
           {
+            "name": "integrationSourceType",
+            "description": "Integration type that created this issue, if applicable.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "IntegrationService",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "favorite",
             "description": "The users favorite associated with this issue.",
             "args": [],
@@ -25567,7 +25840,7 @@
           },
           {
             "name": "commentResolve",
-            "description": "[ALPHA] Resolves a comment.",
+            "description": "Resolves a comment.",
             "args": [
               {
                 "name": "resolvingCommentId",
@@ -25612,7 +25885,7 @@
           },
           {
             "name": "commentUnresolve",
-            "description": "[ALPHA] Unresolves a comment.",
+            "description": "Unresolves a comment.",
             "args": [
               {
                 "name": "id",
@@ -26632,7 +26905,7 @@
             "deprecationReason": null
           },
           {
-            "name": "integrationGithubSync",
+            "name": "integrationGithubSyncConnect",
             "description": "Connects the organization with the GitHub Sync App.",
             "args": [
               {
@@ -46522,6 +46795,22 @@
             "deprecationReason": null
           },
           {
+            "name": "isDiffHidden",
+            "description": "[ALPHA] Whether project update diff should be hidden",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "url",
             "description": "The URL to the project update.",
             "args": [],
@@ -46712,6 +47001,18 @@
             "type": {
               "kind": "ENUM",
               "name": "ProjectUpdateHealthType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isDiffHidden",
+            "description": "[ALPHA] Whether the diff between the current update and the previous one should be hidden.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -47691,6 +47992,18 @@
             "type": {
               "kind": "ENUM",
               "name": "ProjectUpdateHealthType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isDiffHidden",
+            "description": "[ALPHA] Whether the diff between the current update and the previous one should be hidden.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -56321,6 +56634,18 @@
             "deprecationReason": null
           },
           {
+            "name": "isShared",
+            "description": "Whether or not the Slack channel is shared with an external org",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "teams",
             "description": "Which teams are connected to the channel and settings for those teams",
             "args": [],
@@ -56359,6 +56684,18 @@
           {
             "name": "autoCreateOnEmoji",
             "description": "Whether or not using the :ticket: emoji in this channel should automatically create Asks",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "autoCreateOnBotMention",
+            "description": "Whether or not @-mentioning the bot should automatically create an Ask with the message",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -56425,6 +56762,18 @@
             "deprecationReason": null
           },
           {
+            "name": "isShared",
+            "description": "Whether or not the Slack channel is shared with an external org",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "teams",
             "description": "Which teams are connected to the channel and settings for those teams",
             "type": {
@@ -56463,6 +56812,18 @@
           {
             "name": "autoCreateOnEmoji",
             "description": "Whether or not using the :ticket: emoji in this channel should automatically create Asks",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "autoCreateOnBotMention",
+            "description": "Whether or not @-mentioning the bot should automatically create an Ask with the message",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -56583,6 +56944,60 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SlackSettings",
+        "description": "Settings for the regular Slack integration.",
+        "fields": [
+          {
+            "name": "linkOnIssueIdMention",
+            "description": "Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "SlackSettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "linkOnIssueIdMention",
+            "description": "Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -58064,6 +58479,18 @@
             "type": {
               "kind": "OBJECT",
               "name": "WorkflowState",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "joinByDefault",
+            "description": "[INTERNAL] Whether new users should join this team by default.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "isDeprecated": false,
@@ -61127,6 +61554,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "joinByDefault",
+            "description": "Whether new users should join this team by default. Mutation restricted to workspace admins!",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -61983,8 +62422,32 @@
             "deprecationReason": null
           },
           {
+            "name": "manualSelection",
+            "description": "Set of users used for triage responsibility.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "schedule",
+            "description": "Schedule used for triage responsibility.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integration",
-            "description": "The integration used for scheduling when using the 'integrationSchedule' configuration.",
+            "description": "The integration used for scheduling.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -62148,6 +62611,175 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "TriageResponsibilityManualSelection",
+        "description": "Manual triage responsibility using a set of users.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "userIds",
+            "description": "The set of users responsible for triage.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "assignmentIndex",
+            "description": "[INTERNAL] The index of the current userId used for the assign action when having more than one user.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "TriageResponsibilitySchedule",
+        "description": "Triage responsibility schedule.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "entries",
+            "description": "The schedule entries, undefined if the schedule is not fetched yet or failed.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "TriageResponsibilityScheduleEntry",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integrationError",
+            "description": "Optional user presentable error message when using an integration.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integrationScheduleId",
+            "description": "Reference to the integration's schedule when using an integration.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "TriageResponsibilityScheduleEntry",
+        "description": "The triage responsibility schedule entry.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "startsAt",
+            "description": "The start date in ISO 8601 date-time format.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "endsAt",
+            "description": "The end date in ISO 8601 date-time format.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "userId",
+            "description": "The linear user id of the user on schedule.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "externalUserEmail",
+            "description": "The external email of the user on schedule if the external user could not be found in Linear.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
