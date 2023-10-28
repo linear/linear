@@ -3262,12 +3262,28 @@ Metadata and settings for a GitLab integration.
 """
 type GitLabSettings {
   """
+  The ISO timestamp the GitLab access token expires
+  """
+  expiresAt: String
+  """
+  Whether the token is limited to a read-only scope
+  """
+  readonly: Boolean
+  """
   The self-hosted URL of the GitLab instance
   """
   url: String
 }
 
 input GitLabSettingsInput {
+  """
+  The ISO timestamp the GitLab access token expires
+  """
+  expiresAt: String
+  """
+  Whether the token is limited to a read-only scope
+  """
+  readonly: Boolean
   """
   The self-hosted URL of the GitLab instance
   """

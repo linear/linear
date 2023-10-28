@@ -1993,11 +1993,19 @@ export type GitHubSyncSettingsInput = {
 /** Metadata and settings for a GitLab integration. */
 export type GitLabSettings = {
   __typename?: "GitLabSettings";
+  /** The ISO timestamp the GitLab access token expires */
+  expiresAt?: Maybe<Scalars["String"]>;
+  /** Whether the token is limited to a read-only scope */
+  readonly?: Maybe<Scalars["Boolean"]>;
   /** The self-hosted URL of the GitLab instance */
   url?: Maybe<Scalars["String"]>;
 };
 
 export type GitLabSettingsInput = {
+  /** The ISO timestamp the GitLab access token expires */
+  expiresAt?: Maybe<Scalars["String"]>;
+  /** Whether the token is limited to a read-only scope */
+  readonly?: Maybe<Scalars["Boolean"]>;
   /** The self-hosted URL of the GitLab instance */
   url?: Maybe<Scalars["String"]>;
 };
@@ -11759,7 +11767,10 @@ export type GitHubSettingsFragment = { __typename: "GitHubSettings" } & Pick<
   "orgLogin" | "orgAvatarUrl" | "repositories"
 >;
 
-export type GitLabSettingsFragment = { __typename: "GitLabSettings" } & Pick<GitLabSettings, "url">;
+export type GitLabSettingsFragment = { __typename: "GitLabSettings" } & Pick<
+  GitLabSettings,
+  "expiresAt" | "url" | "readonly"
+>;
 
 type NotificationSubscription_CustomViewNotificationSubscription_Fragment = {
   __typename: "CustomViewNotificationSubscription";
@@ -18519,7 +18530,9 @@ export const GitLabSettingsFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "expiresAt" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "readonly" } },
         ],
       },
     },

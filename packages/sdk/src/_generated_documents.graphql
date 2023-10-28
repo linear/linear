@@ -2384,8 +2384,12 @@ fragment GitHubSettings on GitHubSettings {
 # Metadata and settings for a GitLab integration.
 fragment GitLabSettings on GitLabSettings {
   __typename
+  # The ISO timestamp the GitLab access token expires
+  expiresAt
   # The self-hosted URL of the GitLab instance
   url
+  # Whether the token is limited to a read-only scope
+  readonly
 }
 
 # Notification subscriptions for models.
