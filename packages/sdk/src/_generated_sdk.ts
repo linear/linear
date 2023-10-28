@@ -2571,9 +2571,15 @@ export class GitHubSyncSettings extends Request {
 export class GitLabSettings extends Request {
   public constructor(request: LinearRequest, data: L.GitLabSettingsFragment) {
     super(request);
+    this.expiresAt = data.expiresAt ?? undefined;
+    this.readonly = data.readonly ?? undefined;
     this.url = data.url ?? undefined;
   }
 
+  /** The ISO timestamp the GitLab access token expires */
+  public expiresAt?: string;
+  /** Whether the token is limited to a read-only scope */
+  public readonly?: boolean;
   /** The self-hosted URL of the GitLab instance */
   public url?: string;
 }
