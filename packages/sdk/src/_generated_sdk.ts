@@ -1807,7 +1807,6 @@ export class DocumentContent extends Request {
   private _document?: L.DocumentContentFragment["document"];
   private _issue?: L.DocumentContentFragment["issue"];
   private _project?: L.DocumentContentFragment["project"];
-  private _projectMilestone?: L.DocumentContentFragment["projectMilestone"];
 
   public constructor(request: LinearRequest, data: L.DocumentContentFragment) {
     super(request);
@@ -1822,7 +1821,6 @@ export class DocumentContent extends Request {
     this._document = data.document ?? undefined;
     this._issue = data.issue ?? undefined;
     this._project = data.project ?? undefined;
-    this._projectMilestone = data.projectMilestone ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -1856,12 +1854,6 @@ export class DocumentContent extends Request {
   /** The project that the content is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
-  }
-  /** The project milestone that the content is associated with. */
-  public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
-    return this._projectMilestone?.id
-      ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
-      : undefined;
   }
 }
 /**
@@ -3113,7 +3105,6 @@ export class Issue extends Request {
   private _lastAppliedTemplate?: L.IssueFragment["lastAppliedTemplate"];
   private _parent?: L.IssueFragment["parent"];
   private _project?: L.IssueFragment["project"];
-  private _projectMilestone?: L.IssueFragment["projectMilestone"];
   private _snoozedBy?: L.IssueFragment["snoozedBy"];
   private _state: L.IssueFragment["state"];
   private _team: L.IssueFragment["team"];
@@ -3155,7 +3146,6 @@ export class Issue extends Request {
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
     this._parent = data.parent ?? undefined;
     this._project = data.project ?? undefined;
-    this._projectMilestone = data.projectMilestone ?? undefined;
     this._snoozedBy = data.snoozedBy ?? undefined;
     this._state = data.state;
     this._team = data.team;
@@ -3250,12 +3240,6 @@ export class Issue extends Request {
   /** The project that the issue is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
-  }
-  /** The projectMilestone that the issue is associated with. */
-  public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
-    return this._projectMilestone?.id
-      ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
-      : undefined;
   }
   /** The user who snoozed the issue. */
   public get snoozedBy(): LinearFetch<User> | undefined {
@@ -4194,7 +4178,6 @@ export class IssueSearchResult extends Request {
   private _lastAppliedTemplate?: L.IssueSearchResultFragment["lastAppliedTemplate"];
   private _parent?: L.IssueSearchResultFragment["parent"];
   private _project?: L.IssueSearchResultFragment["project"];
-  private _projectMilestone?: L.IssueSearchResultFragment["projectMilestone"];
   private _snoozedBy?: L.IssueSearchResultFragment["snoozedBy"];
   private _state: L.IssueSearchResultFragment["state"];
   private _team: L.IssueSearchResultFragment["team"];
@@ -4237,7 +4220,6 @@ export class IssueSearchResult extends Request {
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
     this._parent = data.parent ?? undefined;
     this._project = data.project ?? undefined;
-    this._projectMilestone = data.projectMilestone ?? undefined;
     this._snoozedBy = data.snoozedBy ?? undefined;
     this._state = data.state;
     this._team = data.team;
@@ -4334,12 +4316,6 @@ export class IssueSearchResult extends Request {
   /** The project that the issue is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
-  }
-  /** The projectMilestone that the issue is associated with. */
-  public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
-    return this._projectMilestone?.id
-      ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
-      : undefined;
   }
   /** The user who snoozed the issue. */
   public get snoozedBy(): LinearFetch<User> | undefined {
@@ -5823,8 +5799,8 @@ export class Project extends Request {
     return new UnarchiveProjectMutation(this._request).fetch(this.id);
   }
   /** Updates a project. */
-  public update(input: L.ProjectUpdateInput) {
-    return new UpdateProjectMutation(this._request).fetch(this.id, input);
+  public update() {
+    return new ProjectUpdateQuery(this._request).fetch(this.id);
   }
 }
 /**
@@ -6082,23 +6058,16 @@ export class ProjectMilestoneConnection extends Connection<ProjectMilestone> {
  * @param data - L.ProjectMilestonePayloadFragment response data
  */
 export class ProjectMilestonePayload extends Request {
-  private _projectMilestone: L.ProjectMilestonePayloadFragment["projectMilestone"];
-
   public constructor(request: LinearRequest, data: L.ProjectMilestonePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
-    this._projectMilestone = data.projectMilestone;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
-  /** The project milestone that was created or updated. */
-  public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
-    return new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone.id);
-  }
 }
 /**
  * A project related notification
@@ -8118,7 +8087,6 @@ export class TriageResponsibility extends Request {
   public constructor(request: LinearRequest, data: L.TriageResponsibilityFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.config = parseJson(data.config) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.manualSelection = parseJson(data.manualSelection) ?? undefined;
@@ -8130,8 +8098,6 @@ export class TriageResponsibility extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
-  /** The responsibility configuration. */
-  public config?: Record<string, unknown>;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -9247,6 +9213,2779 @@ export class ZendeskSettings extends Request {
   /** The URL of the connected Zendesk organization. */
   public url: string;
 }
+/**
+ * A fetchable AdministrableTeams Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AdministrableTeamsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AdministrableTeams query and return a TeamConnection
+   *
+   * @param variables - variables to pass into the AdministrableTeamsQuery
+   * @returns parsed response from AdministrableTeamsQuery
+   */
+  public async fetch(variables?: L.AdministrableTeamsQueryVariables): LinearFetch<TeamConnection> {
+    const response = await this._request<L.AdministrableTeamsQuery, L.AdministrableTeamsQueryVariables>(
+      L.AdministrableTeamsDocument,
+      variables
+    );
+    const data = response.administrableTeams;
+
+    return new TeamConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ApiKeys Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ApiKeysQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ApiKeys query and return a ApiKeyConnection
+   *
+   * @param variables - variables to pass into the ApiKeysQuery
+   * @returns parsed response from ApiKeysQuery
+   */
+  public async fetch(variables?: L.ApiKeysQueryVariables): LinearFetch<ApiKeyConnection> {
+    const response = await this._request<L.ApiKeysQuery, L.ApiKeysQueryVariables>(L.ApiKeysDocument, variables);
+    const data = response.apiKeys;
+
+    return new ApiKeyConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ApplicationInfo Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ApplicationInfoQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ApplicationInfo query and return a Application
+   *
+   * @param clientId - required clientId to pass to applicationInfo
+   * @returns parsed response from ApplicationInfoQuery
+   */
+  public async fetch(clientId: string): LinearFetch<Application> {
+    const response = await this._request<L.ApplicationInfoQuery, L.ApplicationInfoQueryVariables>(
+      L.ApplicationInfoDocument,
+      {
+        clientId,
+      }
+    );
+    const data = response.applicationInfo;
+
+    return new Application(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ApplicationWithAuthorization Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ApplicationWithAuthorizationQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ApplicationWithAuthorization query and return a UserAuthorizedApplication
+   *
+   * @param clientId - required clientId to pass to applicationWithAuthorization
+   * @param scope - required scope to pass to applicationWithAuthorization
+   * @param variables - variables without 'clientId', 'scope' to pass into the ApplicationWithAuthorizationQuery
+   * @returns parsed response from ApplicationWithAuthorizationQuery
+   */
+  public async fetch(
+    clientId: string,
+    scope: string[],
+    variables?: Omit<L.ApplicationWithAuthorizationQueryVariables, "clientId" | "scope">
+  ): LinearFetch<UserAuthorizedApplication> {
+    const response = await this._request<
+      L.ApplicationWithAuthorizationQuery,
+      L.ApplicationWithAuthorizationQueryVariables
+    >(L.ApplicationWithAuthorizationDocument, {
+      clientId,
+      scope,
+      ...variables,
+    });
+    const data = response.applicationWithAuthorization;
+
+    return new UserAuthorizedApplication(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Attachment Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Attachment query and return a Attachment
+   *
+   * @param id - required id to pass to attachment
+   * @returns parsed response from AttachmentQuery
+   */
+  public async fetch(id: string): LinearFetch<Attachment> {
+    const response = await this._request<L.AttachmentQuery, L.AttachmentQueryVariables>(L.AttachmentDocument, {
+      id,
+    });
+    const data = response.attachment;
+
+    return new Attachment(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AttachmentIssue Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentIssueQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentIssue query and return a Issue
+   *
+   * @param id - required id to pass to attachmentIssue
+   * @returns parsed response from AttachmentIssueQuery
+   */
+  public async fetch(id: string): LinearFetch<Issue> {
+    const response = await this._request<L.AttachmentIssueQuery, L.AttachmentIssueQueryVariables>(
+      L.AttachmentIssueDocument,
+      {
+        id,
+      }
+    );
+    const data = response.attachmentIssue;
+
+    return new Issue(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Attachments Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Attachments query and return a AttachmentConnection
+   *
+   * @param variables - variables to pass into the AttachmentsQuery
+   * @returns parsed response from AttachmentsQuery
+   */
+  public async fetch(variables?: L.AttachmentsQueryVariables): LinearFetch<AttachmentConnection> {
+    const response = await this._request<L.AttachmentsQuery, L.AttachmentsQueryVariables>(
+      L.AttachmentsDocument,
+      variables
+    );
+    const data = response.attachments;
+
+    return new AttachmentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable AttachmentsForUrl Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentsForUrlQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentsForUrl query and return a AttachmentConnection
+   *
+   * @param url - required url to pass to attachmentsForURL
+   * @param variables - variables without 'url' to pass into the AttachmentsForUrlQuery
+   * @returns parsed response from AttachmentsForUrlQuery
+   */
+  public async fetch(
+    url: string,
+    variables?: Omit<L.AttachmentsForUrlQueryVariables, "url">
+  ): LinearFetch<AttachmentConnection> {
+    const response = await this._request<L.AttachmentsForUrlQuery, L.AttachmentsForUrlQueryVariables>(
+      L.AttachmentsForUrlDocument,
+      {
+        url,
+        ...variables,
+      }
+    );
+    const data = response.attachmentsForURL;
+
+    return new AttachmentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          url,
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable AuditEntries Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AuditEntriesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AuditEntries query and return a AuditEntryConnection
+   *
+   * @param variables - variables to pass into the AuditEntriesQuery
+   * @returns parsed response from AuditEntriesQuery
+   */
+  public async fetch(variables?: L.AuditEntriesQueryVariables): LinearFetch<AuditEntryConnection> {
+    const response = await this._request<L.AuditEntriesQuery, L.AuditEntriesQueryVariables>(
+      L.AuditEntriesDocument,
+      variables
+    );
+    const data = response.auditEntries;
+
+    return new AuditEntryConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable AuditEntryTypes Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AuditEntryTypesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AuditEntryTypes query and return a AuditEntryType list
+   *
+   * @returns parsed response from AuditEntryTypesQuery
+   */
+  public async fetch(): LinearFetch<AuditEntryType[]> {
+    const response = await this._request<L.AuditEntryTypesQuery, L.AuditEntryTypesQueryVariables>(
+      L.AuditEntryTypesDocument,
+      {}
+    );
+    const data = response.auditEntryTypes;
+
+    return data.map(node => {
+      return new AuditEntryType(this._request, node);
+    });
+  }
+}
+
+/**
+ * A fetchable AuthenticationSessions Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AuthenticationSessionsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AuthenticationSessions query and return a AuthenticationSessionResponse list
+   *
+   * @returns parsed response from AuthenticationSessionsQuery
+   */
+  public async fetch(): LinearFetch<AuthenticationSessionResponse[]> {
+    const response = await this._request<L.AuthenticationSessionsQuery, L.AuthenticationSessionsQueryVariables>(
+      L.AuthenticationSessionsDocument,
+      {}
+    );
+    const data = response.authenticationSessions;
+
+    return data.map(node => {
+      return new AuthenticationSessionResponse(this._request, node);
+    });
+  }
+}
+
+/**
+ * A fetchable AvailableUsers Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AvailableUsersQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AvailableUsers query and return a AuthResolverResponse
+   *
+   * @returns parsed response from AvailableUsersQuery
+   */
+  public async fetch(): LinearFetch<AuthResolverResponse> {
+    const response = await this._request<L.AvailableUsersQuery, L.AvailableUsersQueryVariables>(
+      L.AvailableUsersDocument,
+      {}
+    );
+    const data = response.availableUsers;
+
+    return new AuthResolverResponse(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Comment Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class CommentQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Comment query and return a Comment
+   *
+   * @param id - required id to pass to comment
+   * @returns parsed response from CommentQuery
+   */
+  public async fetch(id: string): LinearFetch<Comment> {
+    const response = await this._request<L.CommentQuery, L.CommentQueryVariables>(L.CommentDocument, {
+      id,
+    });
+    const data = response.comment;
+
+    return new Comment(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Comments Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class CommentsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Comments query and return a CommentConnection
+   *
+   * @param variables - variables to pass into the CommentsQuery
+   * @returns parsed response from CommentsQuery
+   */
+  public async fetch(variables?: L.CommentsQueryVariables): LinearFetch<CommentConnection> {
+    const response = await this._request<L.CommentsQuery, L.CommentsQueryVariables>(L.CommentsDocument, variables);
+    const data = response.comments;
+
+    return new CommentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable CustomView Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class CustomViewQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CustomView query and return a CustomView
+   *
+   * @param id - required id to pass to customView
+   * @returns parsed response from CustomViewQuery
+   */
+  public async fetch(id: string): LinearFetch<CustomView> {
+    const response = await this._request<L.CustomViewQuery, L.CustomViewQueryVariables>(L.CustomViewDocument, {
+      id,
+    });
+    const data = response.customView;
+
+    return new CustomView(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CustomViewHasSubscribers Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class CustomViewHasSubscribersQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CustomViewHasSubscribers query and return a CustomViewHasSubscribersPayload
+   *
+   * @param id - required id to pass to customViewHasSubscribers
+   * @returns parsed response from CustomViewHasSubscribersQuery
+   */
+  public async fetch(id: string): LinearFetch<CustomViewHasSubscribersPayload> {
+    const response = await this._request<L.CustomViewHasSubscribersQuery, L.CustomViewHasSubscribersQueryVariables>(
+      L.CustomViewHasSubscribersDocument,
+      {
+        id,
+      }
+    );
+    const data = response.customViewHasSubscribers;
+
+    return new CustomViewHasSubscribersPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CustomViews Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class CustomViewsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CustomViews query and return a CustomViewConnection
+   *
+   * @param variables - variables to pass into the CustomViewsQuery
+   * @returns parsed response from CustomViewsQuery
+   */
+  public async fetch(variables?: L.CustomViewsQueryVariables): LinearFetch<CustomViewConnection> {
+    const response = await this._request<L.CustomViewsQuery, L.CustomViewsQueryVariables>(
+      L.CustomViewsDocument,
+      variables
+    );
+    const data = response.customViews;
+
+    return new CustomViewConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Cycle Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class CycleQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Cycle query and return a Cycle
+   *
+   * @param id - required id to pass to cycle
+   * @returns parsed response from CycleQuery
+   */
+  public async fetch(id: string): LinearFetch<Cycle> {
+    const response = await this._request<L.CycleQuery, L.CycleQueryVariables>(L.CycleDocument, {
+      id,
+    });
+    const data = response.cycle;
+
+    return new Cycle(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Cycles Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class CyclesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Cycles query and return a CycleConnection
+   *
+   * @param variables - variables to pass into the CyclesQuery
+   * @returns parsed response from CyclesQuery
+   */
+  public async fetch(variables?: L.CyclesQueryVariables): LinearFetch<CycleConnection> {
+    const response = await this._request<L.CyclesQuery, L.CyclesQueryVariables>(L.CyclesDocument, variables);
+    const data = response.cycles;
+
+    return new CycleConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Document Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class DocumentQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Document query and return a Document
+   *
+   * @param id - required id to pass to document
+   * @returns parsed response from DocumentQuery
+   */
+  public async fetch(id: string): LinearFetch<Document> {
+    const response = await this._request<L.DocumentQuery, L.DocumentQueryVariables>(L.DocumentDocument, {
+      id,
+    });
+    const data = response.document;
+
+    return new Document(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DocumentContentHistory Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class DocumentContentHistoryQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DocumentContentHistory query and return a DocumentContentHistoryPayload
+   *
+   * @param id - required id to pass to documentContentHistory
+   * @returns parsed response from DocumentContentHistoryQuery
+   */
+  public async fetch(id: string): LinearFetch<DocumentContentHistoryPayload> {
+    const response = await this._request<L.DocumentContentHistoryQuery, L.DocumentContentHistoryQueryVariables>(
+      L.DocumentContentHistoryDocument,
+      {
+        id,
+      }
+    );
+    const data = response.documentContentHistory;
+
+    return new DocumentContentHistoryPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Documents Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class DocumentsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Documents query and return a DocumentConnection
+   *
+   * @param variables - variables to pass into the DocumentsQuery
+   * @returns parsed response from DocumentsQuery
+   */
+  public async fetch(variables?: L.DocumentsQueryVariables): LinearFetch<DocumentConnection> {
+    const response = await this._request<L.DocumentsQuery, L.DocumentsQueryVariables>(L.DocumentsDocument, variables);
+    const data = response.documents;
+
+    return new DocumentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Emoji Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class EmojiQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Emoji query and return a Emoji
+   *
+   * @param id - required id to pass to emoji
+   * @returns parsed response from EmojiQuery
+   */
+  public async fetch(id: string): LinearFetch<Emoji> {
+    const response = await this._request<L.EmojiQuery, L.EmojiQueryVariables>(L.EmojiDocument, {
+      id,
+    });
+    const data = response.emoji;
+
+    return new Emoji(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Emojis Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class EmojisQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Emojis query and return a EmojiConnection
+   *
+   * @param variables - variables to pass into the EmojisQuery
+   * @returns parsed response from EmojisQuery
+   */
+  public async fetch(variables?: L.EmojisQueryVariables): LinearFetch<EmojiConnection> {
+    const response = await this._request<L.EmojisQuery, L.EmojisQueryVariables>(L.EmojisDocument, variables);
+    const data = response.emojis;
+
+    return new EmojiConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Favorite Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class FavoriteQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Favorite query and return a Favorite
+   *
+   * @param id - required id to pass to favorite
+   * @returns parsed response from FavoriteQuery
+   */
+  public async fetch(id: string): LinearFetch<Favorite> {
+    const response = await this._request<L.FavoriteQuery, L.FavoriteQueryVariables>(L.FavoriteDocument, {
+      id,
+    });
+    const data = response.favorite;
+
+    return new Favorite(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Favorites Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class FavoritesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Favorites query and return a FavoriteConnection
+   *
+   * @param variables - variables to pass into the FavoritesQuery
+   * @returns parsed response from FavoritesQuery
+   */
+  public async fetch(variables?: L.FavoritesQueryVariables): LinearFetch<FavoriteConnection> {
+    const response = await this._request<L.FavoritesQuery, L.FavoritesQueryVariables>(L.FavoritesDocument, variables);
+    const data = response.favorites;
+
+    return new FavoriteConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Integration Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Integration query and return a Integration
+   *
+   * @param id - required id to pass to integration
+   * @returns parsed response from IntegrationQuery
+   */
+  public async fetch(id: string): LinearFetch<Integration> {
+    const response = await this._request<L.IntegrationQuery, L.IntegrationQueryVariables>(L.IntegrationDocument, {
+      id,
+    });
+    const data = response.integration;
+
+    return new Integration(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationTemplate Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationTemplateQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationTemplate query and return a IntegrationTemplate
+   *
+   * @param id - required id to pass to integrationTemplate
+   * @returns parsed response from IntegrationTemplateQuery
+   */
+  public async fetch(id: string): LinearFetch<IntegrationTemplate> {
+    const response = await this._request<L.IntegrationTemplateQuery, L.IntegrationTemplateQueryVariables>(
+      L.IntegrationTemplateDocument,
+      {
+        id,
+      }
+    );
+    const data = response.integrationTemplate;
+
+    return new IntegrationTemplate(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationTemplates Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationTemplatesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationTemplates query and return a IntegrationTemplateConnection
+   *
+   * @param variables - variables to pass into the IntegrationTemplatesQuery
+   * @returns parsed response from IntegrationTemplatesQuery
+   */
+  public async fetch(variables?: L.IntegrationTemplatesQueryVariables): LinearFetch<IntegrationTemplateConnection> {
+    const response = await this._request<L.IntegrationTemplatesQuery, L.IntegrationTemplatesQueryVariables>(
+      L.IntegrationTemplatesDocument,
+      variables
+    );
+    const data = response.integrationTemplates;
+
+    return new IntegrationTemplateConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Integrations Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Integrations query and return a IntegrationConnection
+   *
+   * @param variables - variables to pass into the IntegrationsQuery
+   * @returns parsed response from IntegrationsQuery
+   */
+  public async fetch(variables?: L.IntegrationsQueryVariables): LinearFetch<IntegrationConnection> {
+    const response = await this._request<L.IntegrationsQuery, L.IntegrationsQueryVariables>(
+      L.IntegrationsDocument,
+      variables
+    );
+    const data = response.integrations;
+
+    return new IntegrationConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable IntegrationsSettings Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationsSettingsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationsSettings query and return a IntegrationsSettings
+   *
+   * @param id - required id to pass to integrationsSettings
+   * @returns parsed response from IntegrationsSettingsQuery
+   */
+  public async fetch(id: string): LinearFetch<IntegrationsSettings> {
+    const response = await this._request<L.IntegrationsSettingsQuery, L.IntegrationsSettingsQueryVariables>(
+      L.IntegrationsSettingsDocument,
+      {
+        id,
+      }
+    );
+    const data = response.integrationsSettings;
+
+    return new IntegrationsSettings(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Issue Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Issue query and return a Issue
+   *
+   * @param id - required id to pass to issue
+   * @returns parsed response from IssueQuery
+   */
+  public async fetch(id: string): LinearFetch<Issue> {
+    const response = await this._request<L.IssueQuery, L.IssueQueryVariables>(L.IssueDocument, {
+      id,
+    });
+    const data = response.issue;
+
+    return new Issue(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueFigmaFileKeySearch Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueFigmaFileKeySearchQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueFigmaFileKeySearch query and return a IssueConnection
+   *
+   * @param fileKey - required fileKey to pass to issueFigmaFileKeySearch
+   * @param variables - variables without 'fileKey' to pass into the IssueFigmaFileKeySearchQuery
+   * @returns parsed response from IssueFigmaFileKeySearchQuery
+   */
+  public async fetch(
+    fileKey: string,
+    variables?: Omit<L.IssueFigmaFileKeySearchQueryVariables, "fileKey">
+  ): LinearFetch<IssueConnection> {
+    const response = await this._request<L.IssueFigmaFileKeySearchQuery, L.IssueFigmaFileKeySearchQueryVariables>(
+      L.IssueFigmaFileKeySearchDocument,
+      {
+        fileKey,
+        ...variables,
+      }
+    );
+    const data = response.issueFigmaFileKeySearch;
+
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          fileKey,
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable IssueFilterSuggestion Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueFilterSuggestionQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueFilterSuggestion query and return a IssueFilterSuggestionPayload
+   *
+   * @param prompt - required prompt to pass to issueFilterSuggestion
+   * @returns parsed response from IssueFilterSuggestionQuery
+   */
+  public async fetch(prompt: string): LinearFetch<IssueFilterSuggestionPayload> {
+    const response = await this._request<L.IssueFilterSuggestionQuery, L.IssueFilterSuggestionQueryVariables>(
+      L.IssueFilterSuggestionDocument,
+      {
+        prompt,
+      }
+    );
+    const data = response.issueFilterSuggestion;
+
+    return new IssueFilterSuggestionPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueImportCheckCsv Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueImportCheckCsvQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueImportCheckCsv query and return a IssueImportCheckPayload
+   *
+   * @param csvUrl - required csvUrl to pass to issueImportCheckCSV
+   * @param service - required service to pass to issueImportCheckCSV
+   * @returns parsed response from IssueImportCheckCsvQuery
+   */
+  public async fetch(csvUrl: string, service: string): LinearFetch<IssueImportCheckPayload> {
+    const response = await this._request<L.IssueImportCheckCsvQuery, L.IssueImportCheckCsvQueryVariables>(
+      L.IssueImportCheckCsvDocument,
+      {
+        csvUrl,
+        service,
+      }
+    );
+    const data = response.issueImportCheckCSV;
+
+    return new IssueImportCheckPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueImportFinishGithubOAuth Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueImportFinishGithubOAuthQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueImportFinishGithubOAuth query and return a GithubOAuthTokenPayload
+   *
+   * @param code - required code to pass to issueImportFinishGithubOAuth
+   * @returns parsed response from IssueImportFinishGithubOAuthQuery
+   */
+  public async fetch(code: string): LinearFetch<GithubOAuthTokenPayload> {
+    const response = await this._request<
+      L.IssueImportFinishGithubOAuthQuery,
+      L.IssueImportFinishGithubOAuthQueryVariables
+    >(L.IssueImportFinishGithubOAuthDocument, {
+      code,
+    });
+    const data = response.issueImportFinishGithubOAuth;
+
+    return new GithubOAuthTokenPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueLabel Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueLabelQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueLabel query and return a IssueLabel
+   *
+   * @param id - required id to pass to issueLabel
+   * @returns parsed response from IssueLabelQuery
+   */
+  public async fetch(id: string): LinearFetch<IssueLabel> {
+    const response = await this._request<L.IssueLabelQuery, L.IssueLabelQueryVariables>(L.IssueLabelDocument, {
+      id,
+    });
+    const data = response.issueLabel;
+
+    return new IssueLabel(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueLabels Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueLabelsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueLabels query and return a IssueLabelConnection
+   *
+   * @param variables - variables to pass into the IssueLabelsQuery
+   * @returns parsed response from IssueLabelsQuery
+   */
+  public async fetch(variables?: L.IssueLabelsQueryVariables): LinearFetch<IssueLabelConnection> {
+    const response = await this._request<L.IssueLabelsQuery, L.IssueLabelsQueryVariables>(
+      L.IssueLabelsDocument,
+      variables
+    );
+    const data = response.issueLabels;
+
+    return new IssueLabelConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable IssuePriorityValues Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssuePriorityValuesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssuePriorityValues query and return a IssuePriorityValue list
+   *
+   * @returns parsed response from IssuePriorityValuesQuery
+   */
+  public async fetch(): LinearFetch<IssuePriorityValue[]> {
+    const response = await this._request<L.IssuePriorityValuesQuery, L.IssuePriorityValuesQueryVariables>(
+      L.IssuePriorityValuesDocument,
+      {}
+    );
+    const data = response.issuePriorityValues;
+
+    return data.map(node => {
+      return new IssuePriorityValue(this._request, node);
+    });
+  }
+}
+
+/**
+ * A fetchable IssueRelation Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueRelationQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueRelation query and return a IssueRelation
+   *
+   * @param id - required id to pass to issueRelation
+   * @returns parsed response from IssueRelationQuery
+   */
+  public async fetch(id: string): LinearFetch<IssueRelation> {
+    const response = await this._request<L.IssueRelationQuery, L.IssueRelationQueryVariables>(L.IssueRelationDocument, {
+      id,
+    });
+    const data = response.issueRelation;
+
+    return new IssueRelation(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueRelations Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueRelationsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueRelations query and return a IssueRelationConnection
+   *
+   * @param variables - variables to pass into the IssueRelationsQuery
+   * @returns parsed response from IssueRelationsQuery
+   */
+  public async fetch(variables?: L.IssueRelationsQueryVariables): LinearFetch<IssueRelationConnection> {
+    const response = await this._request<L.IssueRelationsQuery, L.IssueRelationsQueryVariables>(
+      L.IssueRelationsDocument,
+      variables
+    );
+    const data = response.issueRelations;
+
+    return new IssueRelationConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable IssueSearch Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueSearchQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueSearch query and return a IssueConnection
+   *
+   * @param variables - variables to pass into the IssueSearchQuery
+   * @returns parsed response from IssueSearchQuery
+   */
+  public async fetch(variables?: L.IssueSearchQueryVariables): LinearFetch<IssueConnection> {
+    const response = await this._request<L.IssueSearchQuery, L.IssueSearchQueryVariables>(
+      L.IssueSearchDocument,
+      variables
+    );
+    const data = response.issueSearch;
+
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable IssueVcsBranchSearch Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueVcsBranchSearchQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueVcsBranchSearch query and return a Issue
+   *
+   * @param branchName - required branchName to pass to issueVcsBranchSearch
+   * @returns parsed response from IssueVcsBranchSearchQuery
+   */
+  public async fetch(branchName: string): LinearFetch<Issue | undefined> {
+    const response = await this._request<L.IssueVcsBranchSearchQuery, L.IssueVcsBranchSearchQueryVariables>(
+      L.IssueVcsBranchSearchDocument,
+      {
+        branchName,
+      }
+    );
+    const data = response.issueVcsBranchSearch;
+
+    return data ? new Issue(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable Issues Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssuesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Issues query and return a IssueConnection
+   *
+   * @param variables - variables to pass into the IssuesQuery
+   * @returns parsed response from IssuesQuery
+   */
+  public async fetch(variables?: L.IssuesQueryVariables): LinearFetch<IssueConnection> {
+    const response = await this._request<L.IssuesQuery, L.IssuesQueryVariables>(L.IssuesDocument, variables);
+    const data = response.issues;
+
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Notification Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class NotificationQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Notification query and return a Notification
+   *
+   * @param id - required id to pass to notification
+   * @returns parsed response from NotificationQuery
+   */
+  public async fetch(
+    id: string
+  ): LinearFetch<IssueNotification | OauthClientApprovalNotification | ProjectNotification | Notification> {
+    const response = await this._request<L.NotificationQuery, L.NotificationQueryVariables>(L.NotificationDocument, {
+      id,
+    });
+    const data = response.notification;
+
+    switch (data.__typename) {
+      case "IssueNotification":
+        return new IssueNotification(this._request, data as L.IssueNotificationFragment);
+      case "OauthClientApprovalNotification":
+        return new OauthClientApprovalNotification(this._request, data as L.OauthClientApprovalNotificationFragment);
+      case "ProjectNotification":
+        return new ProjectNotification(this._request, data as L.ProjectNotificationFragment);
+
+      default:
+        return new Notification(this._request, data);
+    }
+  }
+}
+
+/**
+ * A fetchable NotificationSubscription Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class NotificationSubscriptionQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the NotificationSubscription query and return a NotificationSubscription
+   *
+   * @param id - required id to pass to notificationSubscription
+   * @returns parsed response from NotificationSubscriptionQuery
+   */
+  public async fetch(
+    id: string
+  ): LinearFetch<
+    | CustomViewNotificationSubscription
+    | CycleNotificationSubscription
+    | LabelNotificationSubscription
+    | ProjectNotificationSubscription
+    | TeamNotificationSubscription
+    | UserNotificationSubscription
+    | NotificationSubscription
+  > {
+    const response = await this._request<L.NotificationSubscriptionQuery, L.NotificationSubscriptionQueryVariables>(
+      L.NotificationSubscriptionDocument,
+      {
+        id,
+      }
+    );
+    const data = response.notificationSubscription;
+
+    switch (data.__typename) {
+      case "CustomViewNotificationSubscription":
+        return new CustomViewNotificationSubscription(
+          this._request,
+          data as L.CustomViewNotificationSubscriptionFragment
+        );
+      case "CycleNotificationSubscription":
+        return new CycleNotificationSubscription(this._request, data as L.CycleNotificationSubscriptionFragment);
+      case "LabelNotificationSubscription":
+        return new LabelNotificationSubscription(this._request, data as L.LabelNotificationSubscriptionFragment);
+      case "ProjectNotificationSubscription":
+        return new ProjectNotificationSubscription(this._request, data as L.ProjectNotificationSubscriptionFragment);
+      case "TeamNotificationSubscription":
+        return new TeamNotificationSubscription(this._request, data as L.TeamNotificationSubscriptionFragment);
+      case "UserNotificationSubscription":
+        return new UserNotificationSubscription(this._request, data as L.UserNotificationSubscriptionFragment);
+
+      default:
+        return new NotificationSubscription(this._request, data);
+    }
+  }
+}
+
+/**
+ * A fetchable NotificationSubscriptions Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class NotificationSubscriptionsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the NotificationSubscriptions query and return a NotificationSubscriptionConnection
+   *
+   * @param variables - variables to pass into the NotificationSubscriptionsQuery
+   * @returns parsed response from NotificationSubscriptionsQuery
+   */
+  public async fetch(
+    variables?: L.NotificationSubscriptionsQueryVariables
+  ): LinearFetch<NotificationSubscriptionConnection> {
+    const response = await this._request<L.NotificationSubscriptionsQuery, L.NotificationSubscriptionsQueryVariables>(
+      L.NotificationSubscriptionsDocument,
+      variables
+    );
+    const data = response.notificationSubscriptions;
+
+    return new NotificationSubscriptionConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Notifications Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class NotificationsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Notifications query and return a NotificationConnection
+   *
+   * @param variables - variables to pass into the NotificationsQuery
+   * @returns parsed response from NotificationsQuery
+   */
+  public async fetch(variables?: L.NotificationsQueryVariables): LinearFetch<NotificationConnection> {
+    const response = await this._request<L.NotificationsQuery, L.NotificationsQueryVariables>(
+      L.NotificationsDocument,
+      variables
+    );
+    const data = response.notifications;
+
+    return new NotificationConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Organization Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class OrganizationQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Organization query and return a Organization
+   *
+   * @returns parsed response from OrganizationQuery
+   */
+  public async fetch(): LinearFetch<Organization> {
+    const response = await this._request<L.OrganizationQuery, L.OrganizationQueryVariables>(L.OrganizationDocument, {});
+    const data = response.organization;
+
+    return new Organization(this._request, data);
+  }
+}
+
+/**
+ * A fetchable OrganizationExists Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class OrganizationExistsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the OrganizationExists query and return a OrganizationExistsPayload
+   *
+   * @param urlKey - required urlKey to pass to organizationExists
+   * @returns parsed response from OrganizationExistsQuery
+   */
+  public async fetch(urlKey: string): LinearFetch<OrganizationExistsPayload> {
+    const response = await this._request<L.OrganizationExistsQuery, L.OrganizationExistsQueryVariables>(
+      L.OrganizationExistsDocument,
+      {
+        urlKey,
+      }
+    );
+    const data = response.organizationExists;
+
+    return new OrganizationExistsPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable OrganizationInvite Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class OrganizationInviteQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the OrganizationInvite query and return a OrganizationInvite
+   *
+   * @param id - required id to pass to organizationInvite
+   * @returns parsed response from OrganizationInviteQuery
+   */
+  public async fetch(id: string): LinearFetch<OrganizationInvite> {
+    const response = await this._request<L.OrganizationInviteQuery, L.OrganizationInviteQueryVariables>(
+      L.OrganizationInviteDocument,
+      {
+        id,
+      }
+    );
+    const data = response.organizationInvite;
+
+    return new OrganizationInvite(this._request, data);
+  }
+}
+
+/**
+ * A fetchable OrganizationInvites Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class OrganizationInvitesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the OrganizationInvites query and return a OrganizationInviteConnection
+   *
+   * @param variables - variables to pass into the OrganizationInvitesQuery
+   * @returns parsed response from OrganizationInvitesQuery
+   */
+  public async fetch(variables?: L.OrganizationInvitesQueryVariables): LinearFetch<OrganizationInviteConnection> {
+    const response = await this._request<L.OrganizationInvitesQuery, L.OrganizationInvitesQueryVariables>(
+      L.OrganizationInvitesDocument,
+      variables
+    );
+    const data = response.organizationInvites;
+
+    return new OrganizationInviteConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Project Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Project query and return a Project
+   *
+   * @param id - required id to pass to project
+   * @returns parsed response from ProjectQuery
+   */
+  public async fetch(id: string): LinearFetch<Project> {
+    const response = await this._request<L.ProjectQuery, L.ProjectQueryVariables>(L.ProjectDocument, {
+      id,
+    });
+    const data = response.project;
+
+    return new Project(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ProjectFilterSuggestion Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectFilterSuggestionQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectFilterSuggestion query and return a ProjectFilterSuggestionPayload
+   *
+   * @param prompt - required prompt to pass to projectFilterSuggestion
+   * @returns parsed response from ProjectFilterSuggestionQuery
+   */
+  public async fetch(prompt: string): LinearFetch<ProjectFilterSuggestionPayload> {
+    const response = await this._request<L.ProjectFilterSuggestionQuery, L.ProjectFilterSuggestionQueryVariables>(
+      L.ProjectFilterSuggestionDocument,
+      {
+        prompt,
+      }
+    );
+    const data = response.projectFilterSuggestion;
+
+    return new ProjectFilterSuggestionPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ProjectLink Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectLinkQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectLink query and return a ProjectLink
+   *
+   * @param id - required id to pass to projectLink
+   * @returns parsed response from ProjectLinkQuery
+   */
+  public async fetch(id: string): LinearFetch<ProjectLink> {
+    const response = await this._request<L.ProjectLinkQuery, L.ProjectLinkQueryVariables>(L.ProjectLinkDocument, {
+      id,
+    });
+    const data = response.projectLink;
+
+    return new ProjectLink(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ProjectLinks Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectLinksQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectLinks query and return a ProjectLinkConnection
+   *
+   * @param variables - variables to pass into the ProjectLinksQuery
+   * @returns parsed response from ProjectLinksQuery
+   */
+  public async fetch(variables?: L.ProjectLinksQueryVariables): LinearFetch<ProjectLinkConnection> {
+    const response = await this._request<L.ProjectLinksQuery, L.ProjectLinksQueryVariables>(
+      L.ProjectLinksDocument,
+      variables
+    );
+    const data = response.projectLinks;
+
+    return new ProjectLinkConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ProjectMilestone Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectMilestoneQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectMilestone query and return a ProjectMilestone
+   *
+   * @param id - required id to pass to projectMilestone
+   * @returns parsed response from ProjectMilestoneQuery
+   */
+  public async fetch(id: string): LinearFetch<ProjectMilestone> {
+    const response = await this._request<L.ProjectMilestoneQuery, L.ProjectMilestoneQueryVariables>(
+      L.ProjectMilestoneDocument,
+      {
+        id,
+      }
+    );
+    const data = response.projectMilestone;
+
+    return new ProjectMilestone(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ProjectMilestones Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectMilestonesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectMilestones query and return a ProjectMilestoneConnection
+   *
+   * @param variables - variables to pass into the ProjectMilestonesQuery
+   * @returns parsed response from ProjectMilestonesQuery
+   */
+  public async fetch(variables?: L.ProjectMilestonesQueryVariables): LinearFetch<ProjectMilestoneConnection> {
+    const response = await this._request<L.ProjectMilestonesQuery, L.ProjectMilestonesQueryVariables>(
+      L.ProjectMilestonesDocument,
+      variables
+    );
+    const data = response.projectMilestones;
+
+    return new ProjectMilestoneConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ProjectUpdate Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectUpdateQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectUpdate query and return a ProjectUpdate
+   *
+   * @param id - required id to pass to projectUpdate
+   * @returns parsed response from ProjectUpdateQuery
+   */
+  public async fetch(id: string): LinearFetch<ProjectUpdate> {
+    const response = await this._request<L.ProjectUpdateQuery, L.ProjectUpdateQueryVariables>(L.ProjectUpdateDocument, {
+      id,
+    });
+    const data = response.projectUpdate;
+
+    return new ProjectUpdate(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ProjectUpdateInteraction Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectUpdateInteractionQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectUpdateInteraction query and return a ProjectUpdateInteraction
+   *
+   * @param id - required id to pass to projectUpdateInteraction
+   * @returns parsed response from ProjectUpdateInteractionQuery
+   */
+  public async fetch(id: string): LinearFetch<ProjectUpdateInteraction> {
+    const response = await this._request<L.ProjectUpdateInteractionQuery, L.ProjectUpdateInteractionQueryVariables>(
+      L.ProjectUpdateInteractionDocument,
+      {
+        id,
+      }
+    );
+    const data = response.projectUpdateInteraction;
+
+    return new ProjectUpdateInteraction(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ProjectUpdateInteractions Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectUpdateInteractionsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectUpdateInteractions query and return a ProjectUpdateInteractionConnection
+   *
+   * @param variables - variables to pass into the ProjectUpdateInteractionsQuery
+   * @returns parsed response from ProjectUpdateInteractionsQuery
+   */
+  public async fetch(
+    variables?: L.ProjectUpdateInteractionsQueryVariables
+  ): LinearFetch<ProjectUpdateInteractionConnection> {
+    const response = await this._request<L.ProjectUpdateInteractionsQuery, L.ProjectUpdateInteractionsQueryVariables>(
+      L.ProjectUpdateInteractionsDocument,
+      variables
+    );
+    const data = response.projectUpdateInteractions;
+
+    return new ProjectUpdateInteractionConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ProjectUpdates Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectUpdatesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectUpdates query and return a ProjectUpdateConnection
+   *
+   * @param variables - variables to pass into the ProjectUpdatesQuery
+   * @returns parsed response from ProjectUpdatesQuery
+   */
+  public async fetch(variables?: L.ProjectUpdatesQueryVariables): LinearFetch<ProjectUpdateConnection> {
+    const response = await this._request<L.ProjectUpdatesQuery, L.ProjectUpdatesQueryVariables>(
+      L.ProjectUpdatesDocument,
+      variables
+    );
+    const data = response.projectUpdates;
+
+    return new ProjectUpdateConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Projects Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Projects query and return a ProjectConnection
+   *
+   * @param variables - variables to pass into the ProjectsQuery
+   * @returns parsed response from ProjectsQuery
+   */
+  public async fetch(variables?: L.ProjectsQueryVariables): LinearFetch<ProjectConnection> {
+    const response = await this._request<L.ProjectsQuery, L.ProjectsQueryVariables>(L.ProjectsDocument, variables);
+    const data = response.projects;
+
+    return new ProjectConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable PushSubscriptionTest Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class PushSubscriptionTestQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the PushSubscriptionTest query and return a PushSubscriptionTestPayload
+   *
+   * @returns parsed response from PushSubscriptionTestQuery
+   */
+  public async fetch(): LinearFetch<PushSubscriptionTestPayload> {
+    const response = await this._request<L.PushSubscriptionTestQuery, L.PushSubscriptionTestQueryVariables>(
+      L.PushSubscriptionTestDocument,
+      {}
+    );
+    const data = response.pushSubscriptionTest;
+
+    return new PushSubscriptionTestPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable RateLimitStatus Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class RateLimitStatusQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the RateLimitStatus query and return a RateLimitPayload
+   *
+   * @returns parsed response from RateLimitStatusQuery
+   */
+  public async fetch(): LinearFetch<RateLimitPayload> {
+    const response = await this._request<L.RateLimitStatusQuery, L.RateLimitStatusQueryVariables>(
+      L.RateLimitStatusDocument,
+      {}
+    );
+    const data = response.rateLimitStatus;
+
+    return new RateLimitPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Roadmap Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class RoadmapQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Roadmap query and return a Roadmap
+   *
+   * @param id - required id to pass to roadmap
+   * @returns parsed response from RoadmapQuery
+   */
+  public async fetch(id: string): LinearFetch<Roadmap> {
+    const response = await this._request<L.RoadmapQuery, L.RoadmapQueryVariables>(L.RoadmapDocument, {
+      id,
+    });
+    const data = response.roadmap;
+
+    return new Roadmap(this._request, data);
+  }
+}
+
+/**
+ * A fetchable RoadmapToProject Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class RoadmapToProjectQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the RoadmapToProject query and return a RoadmapToProject
+   *
+   * @param id - required id to pass to roadmapToProject
+   * @returns parsed response from RoadmapToProjectQuery
+   */
+  public async fetch(id: string): LinearFetch<RoadmapToProject> {
+    const response = await this._request<L.RoadmapToProjectQuery, L.RoadmapToProjectQueryVariables>(
+      L.RoadmapToProjectDocument,
+      {
+        id,
+      }
+    );
+    const data = response.roadmapToProject;
+
+    return new RoadmapToProject(this._request, data);
+  }
+}
+
+/**
+ * A fetchable RoadmapToProjects Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class RoadmapToProjectsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the RoadmapToProjects query and return a RoadmapToProjectConnection
+   *
+   * @param variables - variables to pass into the RoadmapToProjectsQuery
+   * @returns parsed response from RoadmapToProjectsQuery
+   */
+  public async fetch(variables?: L.RoadmapToProjectsQueryVariables): LinearFetch<RoadmapToProjectConnection> {
+    const response = await this._request<L.RoadmapToProjectsQuery, L.RoadmapToProjectsQueryVariables>(
+      L.RoadmapToProjectsDocument,
+      variables
+    );
+    const data = response.roadmapToProjects;
+
+    return new RoadmapToProjectConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Roadmaps Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class RoadmapsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Roadmaps query and return a RoadmapConnection
+   *
+   * @param variables - variables to pass into the RoadmapsQuery
+   * @returns parsed response from RoadmapsQuery
+   */
+  public async fetch(variables?: L.RoadmapsQueryVariables): LinearFetch<RoadmapConnection> {
+    const response = await this._request<L.RoadmapsQuery, L.RoadmapsQueryVariables>(L.RoadmapsDocument, variables);
+    const data = response.roadmaps;
+
+    return new RoadmapConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable SearchDocuments Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class SearchDocumentsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the SearchDocuments query and return a DocumentSearchPayload
+   *
+   * @param term - required term to pass to searchDocuments
+   * @param variables - variables without 'term' to pass into the SearchDocumentsQuery
+   * @returns parsed response from SearchDocumentsQuery
+   */
+  public async fetch(
+    term: string,
+    variables?: Omit<L.SearchDocumentsQueryVariables, "term">
+  ): LinearFetch<DocumentSearchPayload> {
+    const response = await this._request<L.SearchDocumentsQuery, L.SearchDocumentsQueryVariables>(
+      L.SearchDocumentsDocument,
+      {
+        term,
+        ...variables,
+      }
+    );
+    const data = response.searchDocuments;
+
+    return new DocumentSearchPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable SearchIssues Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class SearchIssuesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the SearchIssues query and return a IssueSearchPayload
+   *
+   * @param term - required term to pass to searchIssues
+   * @param variables - variables without 'term' to pass into the SearchIssuesQuery
+   * @returns parsed response from SearchIssuesQuery
+   */
+  public async fetch(
+    term: string,
+    variables?: Omit<L.SearchIssuesQueryVariables, "term">
+  ): LinearFetch<IssueSearchPayload> {
+    const response = await this._request<L.SearchIssuesQuery, L.SearchIssuesQueryVariables>(L.SearchIssuesDocument, {
+      term,
+      ...variables,
+    });
+    const data = response.searchIssues;
+
+    return new IssueSearchPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable SearchProjects Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class SearchProjectsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the SearchProjects query and return a ProjectSearchPayload
+   *
+   * @param term - required term to pass to searchProjects
+   * @param variables - variables without 'term' to pass into the SearchProjectsQuery
+   * @returns parsed response from SearchProjectsQuery
+   */
+  public async fetch(
+    term: string,
+    variables?: Omit<L.SearchProjectsQueryVariables, "term">
+  ): LinearFetch<ProjectSearchPayload> {
+    const response = await this._request<L.SearchProjectsQuery, L.SearchProjectsQueryVariables>(
+      L.SearchProjectsDocument,
+      {
+        term,
+        ...variables,
+      }
+    );
+    const data = response.searchProjects;
+
+    return new ProjectSearchPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable SsoUrlFromEmail Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class SsoUrlFromEmailQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the SsoUrlFromEmail query and return a SsoUrlFromEmailResponse
+   *
+   * @param email - required email to pass to ssoUrlFromEmail
+   * @param variables - variables without 'email' to pass into the SsoUrlFromEmailQuery
+   * @returns parsed response from SsoUrlFromEmailQuery
+   */
+  public async fetch(
+    email: string,
+    variables?: Omit<L.SsoUrlFromEmailQueryVariables, "email">
+  ): LinearFetch<SsoUrlFromEmailResponse> {
+    const response = await this._request<L.SsoUrlFromEmailQuery, L.SsoUrlFromEmailQueryVariables>(
+      L.SsoUrlFromEmailDocument,
+      {
+        email,
+        ...variables,
+      }
+    );
+    const data = response.ssoUrlFromEmail;
+
+    return new SsoUrlFromEmailResponse(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Team Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class TeamQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Team query and return a Team
+   *
+   * @param id - required id to pass to team
+   * @returns parsed response from TeamQuery
+   */
+  public async fetch(id: string): LinearFetch<Team> {
+    const response = await this._request<L.TeamQuery, L.TeamQueryVariables>(L.TeamDocument, {
+      id,
+    });
+    const data = response.team;
+
+    return new Team(this._request, data);
+  }
+}
+
+/**
+ * A fetchable TeamMembership Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class TeamMembershipQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TeamMembership query and return a TeamMembership
+   *
+   * @param id - required id to pass to teamMembership
+   * @returns parsed response from TeamMembershipQuery
+   */
+  public async fetch(id: string): LinearFetch<TeamMembership> {
+    const response = await this._request<L.TeamMembershipQuery, L.TeamMembershipQueryVariables>(
+      L.TeamMembershipDocument,
+      {
+        id,
+      }
+    );
+    const data = response.teamMembership;
+
+    return new TeamMembership(this._request, data);
+  }
+}
+
+/**
+ * A fetchable TeamMemberships Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class TeamMembershipsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TeamMemberships query and return a TeamMembershipConnection
+   *
+   * @param variables - variables to pass into the TeamMembershipsQuery
+   * @returns parsed response from TeamMembershipsQuery
+   */
+  public async fetch(variables?: L.TeamMembershipsQueryVariables): LinearFetch<TeamMembershipConnection> {
+    const response = await this._request<L.TeamMembershipsQuery, L.TeamMembershipsQueryVariables>(
+      L.TeamMembershipsDocument,
+      variables
+    );
+    const data = response.teamMemberships;
+
+    return new TeamMembershipConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Teams Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class TeamsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Teams query and return a TeamConnection
+   *
+   * @param variables - variables to pass into the TeamsQuery
+   * @returns parsed response from TeamsQuery
+   */
+  public async fetch(variables?: L.TeamsQueryVariables): LinearFetch<TeamConnection> {
+    const response = await this._request<L.TeamsQuery, L.TeamsQueryVariables>(L.TeamsDocument, variables);
+    const data = response.teams;
+
+    return new TeamConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Template Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class TemplateQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Template query and return a Template
+   *
+   * @param id - required id to pass to template
+   * @returns parsed response from TemplateQuery
+   */
+  public async fetch(id: string): LinearFetch<Template> {
+    const response = await this._request<L.TemplateQuery, L.TemplateQueryVariables>(L.TemplateDocument, {
+      id,
+    });
+    const data = response.template;
+
+    return new Template(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Templates Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class TemplatesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Templates query and return a Template list
+   *
+   * @returns parsed response from TemplatesQuery
+   */
+  public async fetch(): LinearFetch<Template[]> {
+    const response = await this._request<L.TemplatesQuery, L.TemplatesQueryVariables>(L.TemplatesDocument, {});
+    const data = response.templates;
+
+    return data.map(node => {
+      return new Template(this._request, node);
+    });
+  }
+}
+
+/**
+ * A fetchable TemplatesForIntegration Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class TemplatesForIntegrationQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TemplatesForIntegration query and return a Template list
+   *
+   * @param integrationType - required integrationType to pass to templatesForIntegration
+   * @returns parsed response from TemplatesForIntegrationQuery
+   */
+  public async fetch(integrationType: string): LinearFetch<Template[]> {
+    const response = await this._request<L.TemplatesForIntegrationQuery, L.TemplatesForIntegrationQueryVariables>(
+      L.TemplatesForIntegrationDocument,
+      {
+        integrationType,
+      }
+    );
+    const data = response.templatesForIntegration;
+
+    return data.map(node => {
+      return new Template(this._request, node);
+    });
+  }
+}
+
+/**
+ * A fetchable User Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the User query and return a User
+   *
+   * @param id - required id to pass to user
+   * @returns parsed response from UserQuery
+   */
+  public async fetch(id: string): LinearFetch<User> {
+    const response = await this._request<L.UserQuery, L.UserQueryVariables>(L.UserDocument, {
+      id,
+    });
+    const data = response.user;
+
+    return new User(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UserSettings Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettingsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings query and return a UserSettings
+   *
+   * @returns parsed response from UserSettingsQuery
+   */
+  public async fetch(): LinearFetch<UserSettings> {
+    const response = await this._request<L.UserSettingsQuery, L.UserSettingsQueryVariables>(L.UserSettingsDocument, {});
+    const data = response.userSettings;
+
+    return new UserSettings(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Users Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UsersQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Users query and return a UserConnection
+   *
+   * @param variables - variables to pass into the UsersQuery
+   * @returns parsed response from UsersQuery
+   */
+  public async fetch(variables?: L.UsersQueryVariables): LinearFetch<UserConnection> {
+    const response = await this._request<L.UsersQuery, L.UsersQueryVariables>(L.UsersDocument, variables);
+    const data = response.users;
+
+    return new UserConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Viewer Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ViewerQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Viewer query and return a User
+   *
+   * @returns parsed response from ViewerQuery
+   */
+  public async fetch(): LinearFetch<User> {
+    const response = await this._request<L.ViewerQuery, L.ViewerQueryVariables>(L.ViewerDocument, {});
+    const data = response.viewer;
+
+    return new User(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Webhook Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class WebhookQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Webhook query and return a Webhook
+   *
+   * @param id - required id to pass to webhook
+   * @returns parsed response from WebhookQuery
+   */
+  public async fetch(id: string): LinearFetch<Webhook> {
+    const response = await this._request<L.WebhookQuery, L.WebhookQueryVariables>(L.WebhookDocument, {
+      id,
+    });
+    const data = response.webhook;
+
+    return new Webhook(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Webhooks Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class WebhooksQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Webhooks query and return a WebhookConnection
+   *
+   * @param variables - variables to pass into the WebhooksQuery
+   * @returns parsed response from WebhooksQuery
+   */
+  public async fetch(variables?: L.WebhooksQueryVariables): LinearFetch<WebhookConnection> {
+    const response = await this._request<L.WebhooksQuery, L.WebhooksQueryVariables>(L.WebhooksDocument, variables);
+    const data = response.webhooks;
+
+    return new WebhookConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable WorkflowState Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class WorkflowStateQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the WorkflowState query and return a WorkflowState
+   *
+   * @param id - required id to pass to workflowState
+   * @returns parsed response from WorkflowStateQuery
+   */
+  public async fetch(id: string): LinearFetch<WorkflowState> {
+    const response = await this._request<L.WorkflowStateQuery, L.WorkflowStateQueryVariables>(L.WorkflowStateDocument, {
+      id,
+    });
+    const data = response.workflowState;
+
+    return new WorkflowState(this._request, data);
+  }
+}
+
+/**
+ * A fetchable WorkflowStates Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class WorkflowStatesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the WorkflowStates query and return a WorkflowStateConnection
+   *
+   * @param variables - variables to pass into the WorkflowStatesQuery
+   * @returns parsed response from WorkflowStatesQuery
+   */
+  public async fetch(variables?: L.WorkflowStatesQueryVariables): LinearFetch<WorkflowStateConnection> {
+    const response = await this._request<L.WorkflowStatesQuery, L.WorkflowStatesQueryVariables>(
+      L.WorkflowStatesDocument,
+      variables
+    );
+    const data = response.workflowStates;
+
+    return new WorkflowStateConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
 /**
  * A fetchable AirbyteIntegrationConnect Mutation
  *
@@ -15138,2779 +17877,6 @@ export class UpdateWorkflowStateMutation extends Request {
 }
 
 /**
- * A fetchable ProjectMilestone Query
- *
- * @param request - function to call the graphql client
- */
-export class ProjectMilestoneQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ProjectMilestone query and return a ProjectMilestone
-   *
-   * @param id - required id to pass to ProjectMilestone
-   * @returns parsed response from ProjectMilestoneQuery
-   */
-  public async fetch(id: string): LinearFetch<ProjectMilestone> {
-    const response = await this._request<L.ProjectMilestoneQuery, L.ProjectMilestoneQueryVariables>(
-      L.ProjectMilestoneDocument,
-      {
-        id,
-      }
-    );
-    const data = response.ProjectMilestone;
-
-    return new ProjectMilestone(this._request, data);
-  }
-}
-
-/**
- * A fetchable ProjectMilestones Query
- *
- * @param request - function to call the graphql client
- */
-export class ProjectMilestonesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ProjectMilestones query and return a ProjectMilestoneConnection
-   *
-   * @param variables - variables to pass into the ProjectMilestonesQuery
-   * @returns parsed response from ProjectMilestonesQuery
-   */
-  public async fetch(variables?: L.ProjectMilestonesQueryVariables): LinearFetch<ProjectMilestoneConnection> {
-    const response = await this._request<L.ProjectMilestonesQuery, L.ProjectMilestonesQueryVariables>(
-      L.ProjectMilestonesDocument,
-      variables
-    );
-    const data = response.ProjectMilestones;
-
-    return new ProjectMilestoneConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable AdministrableTeams Query
- *
- * @param request - function to call the graphql client
- */
-export class AdministrableTeamsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AdministrableTeams query and return a TeamConnection
-   *
-   * @param variables - variables to pass into the AdministrableTeamsQuery
-   * @returns parsed response from AdministrableTeamsQuery
-   */
-  public async fetch(variables?: L.AdministrableTeamsQueryVariables): LinearFetch<TeamConnection> {
-    const response = await this._request<L.AdministrableTeamsQuery, L.AdministrableTeamsQueryVariables>(
-      L.AdministrableTeamsDocument,
-      variables
-    );
-    const data = response.administrableTeams;
-
-    return new TeamConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable ApiKeys Query
- *
- * @param request - function to call the graphql client
- */
-export class ApiKeysQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ApiKeys query and return a ApiKeyConnection
-   *
-   * @param variables - variables to pass into the ApiKeysQuery
-   * @returns parsed response from ApiKeysQuery
-   */
-  public async fetch(variables?: L.ApiKeysQueryVariables): LinearFetch<ApiKeyConnection> {
-    const response = await this._request<L.ApiKeysQuery, L.ApiKeysQueryVariables>(L.ApiKeysDocument, variables);
-    const data = response.apiKeys;
-
-    return new ApiKeyConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable ApplicationInfo Query
- *
- * @param request - function to call the graphql client
- */
-export class ApplicationInfoQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ApplicationInfo query and return a Application
-   *
-   * @param clientId - required clientId to pass to applicationInfo
-   * @returns parsed response from ApplicationInfoQuery
-   */
-  public async fetch(clientId: string): LinearFetch<Application> {
-    const response = await this._request<L.ApplicationInfoQuery, L.ApplicationInfoQueryVariables>(
-      L.ApplicationInfoDocument,
-      {
-        clientId,
-      }
-    );
-    const data = response.applicationInfo;
-
-    return new Application(this._request, data);
-  }
-}
-
-/**
- * A fetchable ApplicationWithAuthorization Query
- *
- * @param request - function to call the graphql client
- */
-export class ApplicationWithAuthorizationQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ApplicationWithAuthorization query and return a UserAuthorizedApplication
-   *
-   * @param clientId - required clientId to pass to applicationWithAuthorization
-   * @param scope - required scope to pass to applicationWithAuthorization
-   * @param variables - variables without 'clientId', 'scope' to pass into the ApplicationWithAuthorizationQuery
-   * @returns parsed response from ApplicationWithAuthorizationQuery
-   */
-  public async fetch(
-    clientId: string,
-    scope: string[],
-    variables?: Omit<L.ApplicationWithAuthorizationQueryVariables, "clientId" | "scope">
-  ): LinearFetch<UserAuthorizedApplication> {
-    const response = await this._request<
-      L.ApplicationWithAuthorizationQuery,
-      L.ApplicationWithAuthorizationQueryVariables
-    >(L.ApplicationWithAuthorizationDocument, {
-      clientId,
-      scope,
-      ...variables,
-    });
-    const data = response.applicationWithAuthorization;
-
-    return new UserAuthorizedApplication(this._request, data);
-  }
-}
-
-/**
- * A fetchable Attachment Query
- *
- * @param request - function to call the graphql client
- */
-export class AttachmentQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Attachment query and return a Attachment
-   *
-   * @param id - required id to pass to attachment
-   * @returns parsed response from AttachmentQuery
-   */
-  public async fetch(id: string): LinearFetch<Attachment> {
-    const response = await this._request<L.AttachmentQuery, L.AttachmentQueryVariables>(L.AttachmentDocument, {
-      id,
-    });
-    const data = response.attachment;
-
-    return new Attachment(this._request, data);
-  }
-}
-
-/**
- * A fetchable AttachmentIssue Query
- *
- * @param request - function to call the graphql client
- */
-export class AttachmentIssueQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AttachmentIssue query and return a Issue
-   *
-   * @param id - required id to pass to attachmentIssue
-   * @returns parsed response from AttachmentIssueQuery
-   */
-  public async fetch(id: string): LinearFetch<Issue> {
-    const response = await this._request<L.AttachmentIssueQuery, L.AttachmentIssueQueryVariables>(
-      L.AttachmentIssueDocument,
-      {
-        id,
-      }
-    );
-    const data = response.attachmentIssue;
-
-    return new Issue(this._request, data);
-  }
-}
-
-/**
- * A fetchable Attachments Query
- *
- * @param request - function to call the graphql client
- */
-export class AttachmentsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Attachments query and return a AttachmentConnection
-   *
-   * @param variables - variables to pass into the AttachmentsQuery
-   * @returns parsed response from AttachmentsQuery
-   */
-  public async fetch(variables?: L.AttachmentsQueryVariables): LinearFetch<AttachmentConnection> {
-    const response = await this._request<L.AttachmentsQuery, L.AttachmentsQueryVariables>(
-      L.AttachmentsDocument,
-      variables
-    );
-    const data = response.attachments;
-
-    return new AttachmentConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable AttachmentsForUrl Query
- *
- * @param request - function to call the graphql client
- */
-export class AttachmentsForUrlQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AttachmentsForUrl query and return a AttachmentConnection
-   *
-   * @param url - required url to pass to attachmentsForURL
-   * @param variables - variables without 'url' to pass into the AttachmentsForUrlQuery
-   * @returns parsed response from AttachmentsForUrlQuery
-   */
-  public async fetch(
-    url: string,
-    variables?: Omit<L.AttachmentsForUrlQueryVariables, "url">
-  ): LinearFetch<AttachmentConnection> {
-    const response = await this._request<L.AttachmentsForUrlQuery, L.AttachmentsForUrlQueryVariables>(
-      L.AttachmentsForUrlDocument,
-      {
-        url,
-        ...variables,
-      }
-    );
-    const data = response.attachmentsForURL;
-
-    return new AttachmentConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          url,
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable AuditEntries Query
- *
- * @param request - function to call the graphql client
- */
-export class AuditEntriesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AuditEntries query and return a AuditEntryConnection
-   *
-   * @param variables - variables to pass into the AuditEntriesQuery
-   * @returns parsed response from AuditEntriesQuery
-   */
-  public async fetch(variables?: L.AuditEntriesQueryVariables): LinearFetch<AuditEntryConnection> {
-    const response = await this._request<L.AuditEntriesQuery, L.AuditEntriesQueryVariables>(
-      L.AuditEntriesDocument,
-      variables
-    );
-    const data = response.auditEntries;
-
-    return new AuditEntryConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable AuditEntryTypes Query
- *
- * @param request - function to call the graphql client
- */
-export class AuditEntryTypesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AuditEntryTypes query and return a AuditEntryType list
-   *
-   * @returns parsed response from AuditEntryTypesQuery
-   */
-  public async fetch(): LinearFetch<AuditEntryType[]> {
-    const response = await this._request<L.AuditEntryTypesQuery, L.AuditEntryTypesQueryVariables>(
-      L.AuditEntryTypesDocument,
-      {}
-    );
-    const data = response.auditEntryTypes;
-
-    return data.map(node => {
-      return new AuditEntryType(this._request, node);
-    });
-  }
-}
-
-/**
- * A fetchable AuthenticationSessions Query
- *
- * @param request - function to call the graphql client
- */
-export class AuthenticationSessionsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AuthenticationSessions query and return a AuthenticationSessionResponse list
-   *
-   * @returns parsed response from AuthenticationSessionsQuery
-   */
-  public async fetch(): LinearFetch<AuthenticationSessionResponse[]> {
-    const response = await this._request<L.AuthenticationSessionsQuery, L.AuthenticationSessionsQueryVariables>(
-      L.AuthenticationSessionsDocument,
-      {}
-    );
-    const data = response.authenticationSessions;
-
-    return data.map(node => {
-      return new AuthenticationSessionResponse(this._request, node);
-    });
-  }
-}
-
-/**
- * A fetchable AvailableUsers Query
- *
- * @param request - function to call the graphql client
- */
-export class AvailableUsersQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AvailableUsers query and return a AuthResolverResponse
-   *
-   * @returns parsed response from AvailableUsersQuery
-   */
-  public async fetch(): LinearFetch<AuthResolverResponse> {
-    const response = await this._request<L.AvailableUsersQuery, L.AvailableUsersQueryVariables>(
-      L.AvailableUsersDocument,
-      {}
-    );
-    const data = response.availableUsers;
-
-    return new AuthResolverResponse(this._request, data);
-  }
-}
-
-/**
- * A fetchable Comment Query
- *
- * @param request - function to call the graphql client
- */
-export class CommentQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Comment query and return a Comment
-   *
-   * @param id - required id to pass to comment
-   * @returns parsed response from CommentQuery
-   */
-  public async fetch(id: string): LinearFetch<Comment> {
-    const response = await this._request<L.CommentQuery, L.CommentQueryVariables>(L.CommentDocument, {
-      id,
-    });
-    const data = response.comment;
-
-    return new Comment(this._request, data);
-  }
-}
-
-/**
- * A fetchable Comments Query
- *
- * @param request - function to call the graphql client
- */
-export class CommentsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Comments query and return a CommentConnection
-   *
-   * @param variables - variables to pass into the CommentsQuery
-   * @returns parsed response from CommentsQuery
-   */
-  public async fetch(variables?: L.CommentsQueryVariables): LinearFetch<CommentConnection> {
-    const response = await this._request<L.CommentsQuery, L.CommentsQueryVariables>(L.CommentsDocument, variables);
-    const data = response.comments;
-
-    return new CommentConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable CustomView Query
- *
- * @param request - function to call the graphql client
- */
-export class CustomViewQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the CustomView query and return a CustomView
-   *
-   * @param id - required id to pass to customView
-   * @returns parsed response from CustomViewQuery
-   */
-  public async fetch(id: string): LinearFetch<CustomView> {
-    const response = await this._request<L.CustomViewQuery, L.CustomViewQueryVariables>(L.CustomViewDocument, {
-      id,
-    });
-    const data = response.customView;
-
-    return new CustomView(this._request, data);
-  }
-}
-
-/**
- * A fetchable CustomViewHasSubscribers Query
- *
- * @param request - function to call the graphql client
- */
-export class CustomViewHasSubscribersQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the CustomViewHasSubscribers query and return a CustomViewHasSubscribersPayload
-   *
-   * @param id - required id to pass to customViewHasSubscribers
-   * @returns parsed response from CustomViewHasSubscribersQuery
-   */
-  public async fetch(id: string): LinearFetch<CustomViewHasSubscribersPayload> {
-    const response = await this._request<L.CustomViewHasSubscribersQuery, L.CustomViewHasSubscribersQueryVariables>(
-      L.CustomViewHasSubscribersDocument,
-      {
-        id,
-      }
-    );
-    const data = response.customViewHasSubscribers;
-
-    return new CustomViewHasSubscribersPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable CustomViews Query
- *
- * @param request - function to call the graphql client
- */
-export class CustomViewsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the CustomViews query and return a CustomViewConnection
-   *
-   * @param variables - variables to pass into the CustomViewsQuery
-   * @returns parsed response from CustomViewsQuery
-   */
-  public async fetch(variables?: L.CustomViewsQueryVariables): LinearFetch<CustomViewConnection> {
-    const response = await this._request<L.CustomViewsQuery, L.CustomViewsQueryVariables>(
-      L.CustomViewsDocument,
-      variables
-    );
-    const data = response.customViews;
-
-    return new CustomViewConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Cycle Query
- *
- * @param request - function to call the graphql client
- */
-export class CycleQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Cycle query and return a Cycle
-   *
-   * @param id - required id to pass to cycle
-   * @returns parsed response from CycleQuery
-   */
-  public async fetch(id: string): LinearFetch<Cycle> {
-    const response = await this._request<L.CycleQuery, L.CycleQueryVariables>(L.CycleDocument, {
-      id,
-    });
-    const data = response.cycle;
-
-    return new Cycle(this._request, data);
-  }
-}
-
-/**
- * A fetchable Cycles Query
- *
- * @param request - function to call the graphql client
- */
-export class CyclesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Cycles query and return a CycleConnection
-   *
-   * @param variables - variables to pass into the CyclesQuery
-   * @returns parsed response from CyclesQuery
-   */
-  public async fetch(variables?: L.CyclesQueryVariables): LinearFetch<CycleConnection> {
-    const response = await this._request<L.CyclesQuery, L.CyclesQueryVariables>(L.CyclesDocument, variables);
-    const data = response.cycles;
-
-    return new CycleConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Document Query
- *
- * @param request - function to call the graphql client
- */
-export class DocumentQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Document query and return a Document
-   *
-   * @param id - required id to pass to document
-   * @returns parsed response from DocumentQuery
-   */
-  public async fetch(id: string): LinearFetch<Document> {
-    const response = await this._request<L.DocumentQuery, L.DocumentQueryVariables>(L.DocumentDocument, {
-      id,
-    });
-    const data = response.document;
-
-    return new Document(this._request, data);
-  }
-}
-
-/**
- * A fetchable DocumentContentHistory Query
- *
- * @param request - function to call the graphql client
- */
-export class DocumentContentHistoryQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the DocumentContentHistory query and return a DocumentContentHistoryPayload
-   *
-   * @param id - required id to pass to documentContentHistory
-   * @returns parsed response from DocumentContentHistoryQuery
-   */
-  public async fetch(id: string): LinearFetch<DocumentContentHistoryPayload> {
-    const response = await this._request<L.DocumentContentHistoryQuery, L.DocumentContentHistoryQueryVariables>(
-      L.DocumentContentHistoryDocument,
-      {
-        id,
-      }
-    );
-    const data = response.documentContentHistory;
-
-    return new DocumentContentHistoryPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable Documents Query
- *
- * @param request - function to call the graphql client
- */
-export class DocumentsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Documents query and return a DocumentConnection
-   *
-   * @param variables - variables to pass into the DocumentsQuery
-   * @returns parsed response from DocumentsQuery
-   */
-  public async fetch(variables?: L.DocumentsQueryVariables): LinearFetch<DocumentConnection> {
-    const response = await this._request<L.DocumentsQuery, L.DocumentsQueryVariables>(L.DocumentsDocument, variables);
-    const data = response.documents;
-
-    return new DocumentConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Emoji Query
- *
- * @param request - function to call the graphql client
- */
-export class EmojiQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Emoji query and return a Emoji
-   *
-   * @param id - required id to pass to emoji
-   * @returns parsed response from EmojiQuery
-   */
-  public async fetch(id: string): LinearFetch<Emoji> {
-    const response = await this._request<L.EmojiQuery, L.EmojiQueryVariables>(L.EmojiDocument, {
-      id,
-    });
-    const data = response.emoji;
-
-    return new Emoji(this._request, data);
-  }
-}
-
-/**
- * A fetchable Emojis Query
- *
- * @param request - function to call the graphql client
- */
-export class EmojisQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Emojis query and return a EmojiConnection
-   *
-   * @param variables - variables to pass into the EmojisQuery
-   * @returns parsed response from EmojisQuery
-   */
-  public async fetch(variables?: L.EmojisQueryVariables): LinearFetch<EmojiConnection> {
-    const response = await this._request<L.EmojisQuery, L.EmojisQueryVariables>(L.EmojisDocument, variables);
-    const data = response.emojis;
-
-    return new EmojiConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Favorite Query
- *
- * @param request - function to call the graphql client
- */
-export class FavoriteQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Favorite query and return a Favorite
-   *
-   * @param id - required id to pass to favorite
-   * @returns parsed response from FavoriteQuery
-   */
-  public async fetch(id: string): LinearFetch<Favorite> {
-    const response = await this._request<L.FavoriteQuery, L.FavoriteQueryVariables>(L.FavoriteDocument, {
-      id,
-    });
-    const data = response.favorite;
-
-    return new Favorite(this._request, data);
-  }
-}
-
-/**
- * A fetchable Favorites Query
- *
- * @param request - function to call the graphql client
- */
-export class FavoritesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Favorites query and return a FavoriteConnection
-   *
-   * @param variables - variables to pass into the FavoritesQuery
-   * @returns parsed response from FavoritesQuery
-   */
-  public async fetch(variables?: L.FavoritesQueryVariables): LinearFetch<FavoriteConnection> {
-    const response = await this._request<L.FavoritesQuery, L.FavoritesQueryVariables>(L.FavoritesDocument, variables);
-    const data = response.favorites;
-
-    return new FavoriteConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Integration Query
- *
- * @param request - function to call the graphql client
- */
-export class IntegrationQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Integration query and return a Integration
-   *
-   * @param id - required id to pass to integration
-   * @returns parsed response from IntegrationQuery
-   */
-  public async fetch(id: string): LinearFetch<Integration> {
-    const response = await this._request<L.IntegrationQuery, L.IntegrationQueryVariables>(L.IntegrationDocument, {
-      id,
-    });
-    const data = response.integration;
-
-    return new Integration(this._request, data);
-  }
-}
-
-/**
- * A fetchable IntegrationTemplate Query
- *
- * @param request - function to call the graphql client
- */
-export class IntegrationTemplateQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IntegrationTemplate query and return a IntegrationTemplate
-   *
-   * @param id - required id to pass to integrationTemplate
-   * @returns parsed response from IntegrationTemplateQuery
-   */
-  public async fetch(id: string): LinearFetch<IntegrationTemplate> {
-    const response = await this._request<L.IntegrationTemplateQuery, L.IntegrationTemplateQueryVariables>(
-      L.IntegrationTemplateDocument,
-      {
-        id,
-      }
-    );
-    const data = response.integrationTemplate;
-
-    return new IntegrationTemplate(this._request, data);
-  }
-}
-
-/**
- * A fetchable IntegrationTemplates Query
- *
- * @param request - function to call the graphql client
- */
-export class IntegrationTemplatesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IntegrationTemplates query and return a IntegrationTemplateConnection
-   *
-   * @param variables - variables to pass into the IntegrationTemplatesQuery
-   * @returns parsed response from IntegrationTemplatesQuery
-   */
-  public async fetch(variables?: L.IntegrationTemplatesQueryVariables): LinearFetch<IntegrationTemplateConnection> {
-    const response = await this._request<L.IntegrationTemplatesQuery, L.IntegrationTemplatesQueryVariables>(
-      L.IntegrationTemplatesDocument,
-      variables
-    );
-    const data = response.integrationTemplates;
-
-    return new IntegrationTemplateConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Integrations Query
- *
- * @param request - function to call the graphql client
- */
-export class IntegrationsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Integrations query and return a IntegrationConnection
-   *
-   * @param variables - variables to pass into the IntegrationsQuery
-   * @returns parsed response from IntegrationsQuery
-   */
-  public async fetch(variables?: L.IntegrationsQueryVariables): LinearFetch<IntegrationConnection> {
-    const response = await this._request<L.IntegrationsQuery, L.IntegrationsQueryVariables>(
-      L.IntegrationsDocument,
-      variables
-    );
-    const data = response.integrations;
-
-    return new IntegrationConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable IntegrationsSettings Query
- *
- * @param request - function to call the graphql client
- */
-export class IntegrationsSettingsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IntegrationsSettings query and return a IntegrationsSettings
-   *
-   * @param id - required id to pass to integrationsSettings
-   * @returns parsed response from IntegrationsSettingsQuery
-   */
-  public async fetch(id: string): LinearFetch<IntegrationsSettings> {
-    const response = await this._request<L.IntegrationsSettingsQuery, L.IntegrationsSettingsQueryVariables>(
-      L.IntegrationsSettingsDocument,
-      {
-        id,
-      }
-    );
-    const data = response.integrationsSettings;
-
-    return new IntegrationsSettings(this._request, data);
-  }
-}
-
-/**
- * A fetchable Issue Query
- *
- * @param request - function to call the graphql client
- */
-export class IssueQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Issue query and return a Issue
-   *
-   * @param id - required id to pass to issue
-   * @returns parsed response from IssueQuery
-   */
-  public async fetch(id: string): LinearFetch<Issue> {
-    const response = await this._request<L.IssueQuery, L.IssueQueryVariables>(L.IssueDocument, {
-      id,
-    });
-    const data = response.issue;
-
-    return new Issue(this._request, data);
-  }
-}
-
-/**
- * A fetchable IssueFigmaFileKeySearch Query
- *
- * @param request - function to call the graphql client
- */
-export class IssueFigmaFileKeySearchQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueFigmaFileKeySearch query and return a IssueConnection
-   *
-   * @param fileKey - required fileKey to pass to issueFigmaFileKeySearch
-   * @param variables - variables without 'fileKey' to pass into the IssueFigmaFileKeySearchQuery
-   * @returns parsed response from IssueFigmaFileKeySearchQuery
-   */
-  public async fetch(
-    fileKey: string,
-    variables?: Omit<L.IssueFigmaFileKeySearchQueryVariables, "fileKey">
-  ): LinearFetch<IssueConnection> {
-    const response = await this._request<L.IssueFigmaFileKeySearchQuery, L.IssueFigmaFileKeySearchQueryVariables>(
-      L.IssueFigmaFileKeySearchDocument,
-      {
-        fileKey,
-        ...variables,
-      }
-    );
-    const data = response.issueFigmaFileKeySearch;
-
-    return new IssueConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          fileKey,
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable IssueFilterSuggestion Query
- *
- * @param request - function to call the graphql client
- */
-export class IssueFilterSuggestionQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueFilterSuggestion query and return a IssueFilterSuggestionPayload
-   *
-   * @param prompt - required prompt to pass to issueFilterSuggestion
-   * @returns parsed response from IssueFilterSuggestionQuery
-   */
-  public async fetch(prompt: string): LinearFetch<IssueFilterSuggestionPayload> {
-    const response = await this._request<L.IssueFilterSuggestionQuery, L.IssueFilterSuggestionQueryVariables>(
-      L.IssueFilterSuggestionDocument,
-      {
-        prompt,
-      }
-    );
-    const data = response.issueFilterSuggestion;
-
-    return new IssueFilterSuggestionPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable IssueImportCheckCsv Query
- *
- * @param request - function to call the graphql client
- */
-export class IssueImportCheckCsvQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueImportCheckCsv query and return a IssueImportCheckPayload
-   *
-   * @param csvUrl - required csvUrl to pass to issueImportCheckCSV
-   * @param service - required service to pass to issueImportCheckCSV
-   * @returns parsed response from IssueImportCheckCsvQuery
-   */
-  public async fetch(csvUrl: string, service: string): LinearFetch<IssueImportCheckPayload> {
-    const response = await this._request<L.IssueImportCheckCsvQuery, L.IssueImportCheckCsvQueryVariables>(
-      L.IssueImportCheckCsvDocument,
-      {
-        csvUrl,
-        service,
-      }
-    );
-    const data = response.issueImportCheckCSV;
-
-    return new IssueImportCheckPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable IssueImportFinishGithubOAuth Query
- *
- * @param request - function to call the graphql client
- */
-export class IssueImportFinishGithubOAuthQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueImportFinishGithubOAuth query and return a GithubOAuthTokenPayload
-   *
-   * @param code - required code to pass to issueImportFinishGithubOAuth
-   * @returns parsed response from IssueImportFinishGithubOAuthQuery
-   */
-  public async fetch(code: string): LinearFetch<GithubOAuthTokenPayload> {
-    const response = await this._request<
-      L.IssueImportFinishGithubOAuthQuery,
-      L.IssueImportFinishGithubOAuthQueryVariables
-    >(L.IssueImportFinishGithubOAuthDocument, {
-      code,
-    });
-    const data = response.issueImportFinishGithubOAuth;
-
-    return new GithubOAuthTokenPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable IssueLabel Query
- *
- * @param request - function to call the graphql client
- */
-export class IssueLabelQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueLabel query and return a IssueLabel
-   *
-   * @param id - required id to pass to issueLabel
-   * @returns parsed response from IssueLabelQuery
-   */
-  public async fetch(id: string): LinearFetch<IssueLabel> {
-    const response = await this._request<L.IssueLabelQuery, L.IssueLabelQueryVariables>(L.IssueLabelDocument, {
-      id,
-    });
-    const data = response.issueLabel;
-
-    return new IssueLabel(this._request, data);
-  }
-}
-
-/**
- * A fetchable IssueLabels Query
- *
- * @param request - function to call the graphql client
- */
-export class IssueLabelsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueLabels query and return a IssueLabelConnection
-   *
-   * @param variables - variables to pass into the IssueLabelsQuery
-   * @returns parsed response from IssueLabelsQuery
-   */
-  public async fetch(variables?: L.IssueLabelsQueryVariables): LinearFetch<IssueLabelConnection> {
-    const response = await this._request<L.IssueLabelsQuery, L.IssueLabelsQueryVariables>(
-      L.IssueLabelsDocument,
-      variables
-    );
-    const data = response.issueLabels;
-
-    return new IssueLabelConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable IssuePriorityValues Query
- *
- * @param request - function to call the graphql client
- */
-export class IssuePriorityValuesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssuePriorityValues query and return a IssuePriorityValue list
-   *
-   * @returns parsed response from IssuePriorityValuesQuery
-   */
-  public async fetch(): LinearFetch<IssuePriorityValue[]> {
-    const response = await this._request<L.IssuePriorityValuesQuery, L.IssuePriorityValuesQueryVariables>(
-      L.IssuePriorityValuesDocument,
-      {}
-    );
-    const data = response.issuePriorityValues;
-
-    return data.map(node => {
-      return new IssuePriorityValue(this._request, node);
-    });
-  }
-}
-
-/**
- * A fetchable IssueRelation Query
- *
- * @param request - function to call the graphql client
- */
-export class IssueRelationQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueRelation query and return a IssueRelation
-   *
-   * @param id - required id to pass to issueRelation
-   * @returns parsed response from IssueRelationQuery
-   */
-  public async fetch(id: string): LinearFetch<IssueRelation> {
-    const response = await this._request<L.IssueRelationQuery, L.IssueRelationQueryVariables>(L.IssueRelationDocument, {
-      id,
-    });
-    const data = response.issueRelation;
-
-    return new IssueRelation(this._request, data);
-  }
-}
-
-/**
- * A fetchable IssueRelations Query
- *
- * @param request - function to call the graphql client
- */
-export class IssueRelationsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueRelations query and return a IssueRelationConnection
-   *
-   * @param variables - variables to pass into the IssueRelationsQuery
-   * @returns parsed response from IssueRelationsQuery
-   */
-  public async fetch(variables?: L.IssueRelationsQueryVariables): LinearFetch<IssueRelationConnection> {
-    const response = await this._request<L.IssueRelationsQuery, L.IssueRelationsQueryVariables>(
-      L.IssueRelationsDocument,
-      variables
-    );
-    const data = response.issueRelations;
-
-    return new IssueRelationConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable IssueSearch Query
- *
- * @param request - function to call the graphql client
- */
-export class IssueSearchQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueSearch query and return a IssueConnection
-   *
-   * @param variables - variables to pass into the IssueSearchQuery
-   * @returns parsed response from IssueSearchQuery
-   */
-  public async fetch(variables?: L.IssueSearchQueryVariables): LinearFetch<IssueConnection> {
-    const response = await this._request<L.IssueSearchQuery, L.IssueSearchQueryVariables>(
-      L.IssueSearchDocument,
-      variables
-    );
-    const data = response.issueSearch;
-
-    return new IssueConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable IssueVcsBranchSearch Query
- *
- * @param request - function to call the graphql client
- */
-export class IssueVcsBranchSearchQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueVcsBranchSearch query and return a Issue
-   *
-   * @param branchName - required branchName to pass to issueVcsBranchSearch
-   * @returns parsed response from IssueVcsBranchSearchQuery
-   */
-  public async fetch(branchName: string): LinearFetch<Issue | undefined> {
-    const response = await this._request<L.IssueVcsBranchSearchQuery, L.IssueVcsBranchSearchQueryVariables>(
-      L.IssueVcsBranchSearchDocument,
-      {
-        branchName,
-      }
-    );
-    const data = response.issueVcsBranchSearch;
-
-    return data ? new Issue(this._request, data) : undefined;
-  }
-}
-
-/**
- * A fetchable Issues Query
- *
- * @param request - function to call the graphql client
- */
-export class IssuesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Issues query and return a IssueConnection
-   *
-   * @param variables - variables to pass into the IssuesQuery
-   * @returns parsed response from IssuesQuery
-   */
-  public async fetch(variables?: L.IssuesQueryVariables): LinearFetch<IssueConnection> {
-    const response = await this._request<L.IssuesQuery, L.IssuesQueryVariables>(L.IssuesDocument, variables);
-    const data = response.issues;
-
-    return new IssueConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Notification Query
- *
- * @param request - function to call the graphql client
- */
-export class NotificationQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Notification query and return a Notification
-   *
-   * @param id - required id to pass to notification
-   * @returns parsed response from NotificationQuery
-   */
-  public async fetch(
-    id: string
-  ): LinearFetch<IssueNotification | OauthClientApprovalNotification | ProjectNotification | Notification> {
-    const response = await this._request<L.NotificationQuery, L.NotificationQueryVariables>(L.NotificationDocument, {
-      id,
-    });
-    const data = response.notification;
-
-    switch (data.__typename) {
-      case "IssueNotification":
-        return new IssueNotification(this._request, data as L.IssueNotificationFragment);
-      case "OauthClientApprovalNotification":
-        return new OauthClientApprovalNotification(this._request, data as L.OauthClientApprovalNotificationFragment);
-      case "ProjectNotification":
-        return new ProjectNotification(this._request, data as L.ProjectNotificationFragment);
-
-      default:
-        return new Notification(this._request, data);
-    }
-  }
-}
-
-/**
- * A fetchable NotificationSubscription Query
- *
- * @param request - function to call the graphql client
- */
-export class NotificationSubscriptionQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the NotificationSubscription query and return a NotificationSubscription
-   *
-   * @param id - required id to pass to notificationSubscription
-   * @returns parsed response from NotificationSubscriptionQuery
-   */
-  public async fetch(
-    id: string
-  ): LinearFetch<
-    | CustomViewNotificationSubscription
-    | CycleNotificationSubscription
-    | LabelNotificationSubscription
-    | ProjectNotificationSubscription
-    | TeamNotificationSubscription
-    | UserNotificationSubscription
-    | NotificationSubscription
-  > {
-    const response = await this._request<L.NotificationSubscriptionQuery, L.NotificationSubscriptionQueryVariables>(
-      L.NotificationSubscriptionDocument,
-      {
-        id,
-      }
-    );
-    const data = response.notificationSubscription;
-
-    switch (data.__typename) {
-      case "CustomViewNotificationSubscription":
-        return new CustomViewNotificationSubscription(
-          this._request,
-          data as L.CustomViewNotificationSubscriptionFragment
-        );
-      case "CycleNotificationSubscription":
-        return new CycleNotificationSubscription(this._request, data as L.CycleNotificationSubscriptionFragment);
-      case "LabelNotificationSubscription":
-        return new LabelNotificationSubscription(this._request, data as L.LabelNotificationSubscriptionFragment);
-      case "ProjectNotificationSubscription":
-        return new ProjectNotificationSubscription(this._request, data as L.ProjectNotificationSubscriptionFragment);
-      case "TeamNotificationSubscription":
-        return new TeamNotificationSubscription(this._request, data as L.TeamNotificationSubscriptionFragment);
-      case "UserNotificationSubscription":
-        return new UserNotificationSubscription(this._request, data as L.UserNotificationSubscriptionFragment);
-
-      default:
-        return new NotificationSubscription(this._request, data);
-    }
-  }
-}
-
-/**
- * A fetchable NotificationSubscriptions Query
- *
- * @param request - function to call the graphql client
- */
-export class NotificationSubscriptionsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the NotificationSubscriptions query and return a NotificationSubscriptionConnection
-   *
-   * @param variables - variables to pass into the NotificationSubscriptionsQuery
-   * @returns parsed response from NotificationSubscriptionsQuery
-   */
-  public async fetch(
-    variables?: L.NotificationSubscriptionsQueryVariables
-  ): LinearFetch<NotificationSubscriptionConnection> {
-    const response = await this._request<L.NotificationSubscriptionsQuery, L.NotificationSubscriptionsQueryVariables>(
-      L.NotificationSubscriptionsDocument,
-      variables
-    );
-    const data = response.notificationSubscriptions;
-
-    return new NotificationSubscriptionConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Notifications Query
- *
- * @param request - function to call the graphql client
- */
-export class NotificationsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Notifications query and return a NotificationConnection
-   *
-   * @param variables - variables to pass into the NotificationsQuery
-   * @returns parsed response from NotificationsQuery
-   */
-  public async fetch(variables?: L.NotificationsQueryVariables): LinearFetch<NotificationConnection> {
-    const response = await this._request<L.NotificationsQuery, L.NotificationsQueryVariables>(
-      L.NotificationsDocument,
-      variables
-    );
-    const data = response.notifications;
-
-    return new NotificationConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Organization Query
- *
- * @param request - function to call the graphql client
- */
-export class OrganizationQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Organization query and return a Organization
-   *
-   * @returns parsed response from OrganizationQuery
-   */
-  public async fetch(): LinearFetch<Organization> {
-    const response = await this._request<L.OrganizationQuery, L.OrganizationQueryVariables>(L.OrganizationDocument, {});
-    const data = response.organization;
-
-    return new Organization(this._request, data);
-  }
-}
-
-/**
- * A fetchable OrganizationExists Query
- *
- * @param request - function to call the graphql client
- */
-export class OrganizationExistsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the OrganizationExists query and return a OrganizationExistsPayload
-   *
-   * @param urlKey - required urlKey to pass to organizationExists
-   * @returns parsed response from OrganizationExistsQuery
-   */
-  public async fetch(urlKey: string): LinearFetch<OrganizationExistsPayload> {
-    const response = await this._request<L.OrganizationExistsQuery, L.OrganizationExistsQueryVariables>(
-      L.OrganizationExistsDocument,
-      {
-        urlKey,
-      }
-    );
-    const data = response.organizationExists;
-
-    return new OrganizationExistsPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable OrganizationInvite Query
- *
- * @param request - function to call the graphql client
- */
-export class OrganizationInviteQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the OrganizationInvite query and return a OrganizationInvite
-   *
-   * @param id - required id to pass to organizationInvite
-   * @returns parsed response from OrganizationInviteQuery
-   */
-  public async fetch(id: string): LinearFetch<OrganizationInvite> {
-    const response = await this._request<L.OrganizationInviteQuery, L.OrganizationInviteQueryVariables>(
-      L.OrganizationInviteDocument,
-      {
-        id,
-      }
-    );
-    const data = response.organizationInvite;
-
-    return new OrganizationInvite(this._request, data);
-  }
-}
-
-/**
- * A fetchable OrganizationInvites Query
- *
- * @param request - function to call the graphql client
- */
-export class OrganizationInvitesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the OrganizationInvites query and return a OrganizationInviteConnection
-   *
-   * @param variables - variables to pass into the OrganizationInvitesQuery
-   * @returns parsed response from OrganizationInvitesQuery
-   */
-  public async fetch(variables?: L.OrganizationInvitesQueryVariables): LinearFetch<OrganizationInviteConnection> {
-    const response = await this._request<L.OrganizationInvitesQuery, L.OrganizationInvitesQueryVariables>(
-      L.OrganizationInvitesDocument,
-      variables
-    );
-    const data = response.organizationInvites;
-
-    return new OrganizationInviteConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Project Query
- *
- * @param request - function to call the graphql client
- */
-export class ProjectQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Project query and return a Project
-   *
-   * @param id - required id to pass to project
-   * @returns parsed response from ProjectQuery
-   */
-  public async fetch(id: string): LinearFetch<Project> {
-    const response = await this._request<L.ProjectQuery, L.ProjectQueryVariables>(L.ProjectDocument, {
-      id,
-    });
-    const data = response.project;
-
-    return new Project(this._request, data);
-  }
-}
-
-/**
- * A fetchable ProjectFilterSuggestion Query
- *
- * @param request - function to call the graphql client
- */
-export class ProjectFilterSuggestionQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ProjectFilterSuggestion query and return a ProjectFilterSuggestionPayload
-   *
-   * @param prompt - required prompt to pass to projectFilterSuggestion
-   * @returns parsed response from ProjectFilterSuggestionQuery
-   */
-  public async fetch(prompt: string): LinearFetch<ProjectFilterSuggestionPayload> {
-    const response = await this._request<L.ProjectFilterSuggestionQuery, L.ProjectFilterSuggestionQueryVariables>(
-      L.ProjectFilterSuggestionDocument,
-      {
-        prompt,
-      }
-    );
-    const data = response.projectFilterSuggestion;
-
-    return new ProjectFilterSuggestionPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable ProjectLink Query
- *
- * @param request - function to call the graphql client
- */
-export class ProjectLinkQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ProjectLink query and return a ProjectLink
-   *
-   * @param id - required id to pass to projectLink
-   * @returns parsed response from ProjectLinkQuery
-   */
-  public async fetch(id: string): LinearFetch<ProjectLink> {
-    const response = await this._request<L.ProjectLinkQuery, L.ProjectLinkQueryVariables>(L.ProjectLinkDocument, {
-      id,
-    });
-    const data = response.projectLink;
-
-    return new ProjectLink(this._request, data);
-  }
-}
-
-/**
- * A fetchable ProjectLinks Query
- *
- * @param request - function to call the graphql client
- */
-export class ProjectLinksQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ProjectLinks query and return a ProjectLinkConnection
-   *
-   * @param variables - variables to pass into the ProjectLinksQuery
-   * @returns parsed response from ProjectLinksQuery
-   */
-  public async fetch(variables?: L.ProjectLinksQueryVariables): LinearFetch<ProjectLinkConnection> {
-    const response = await this._request<L.ProjectLinksQuery, L.ProjectLinksQueryVariables>(
-      L.ProjectLinksDocument,
-      variables
-    );
-    const data = response.projectLinks;
-
-    return new ProjectLinkConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable ProjectUpdate Query
- *
- * @param request - function to call the graphql client
- */
-export class ProjectUpdateQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ProjectUpdate query and return a ProjectUpdate
-   *
-   * @param id - required id to pass to projectUpdate
-   * @returns parsed response from ProjectUpdateQuery
-   */
-  public async fetch(id: string): LinearFetch<ProjectUpdate> {
-    const response = await this._request<L.ProjectUpdateQuery, L.ProjectUpdateQueryVariables>(L.ProjectUpdateDocument, {
-      id,
-    });
-    const data = response.projectUpdate;
-
-    return new ProjectUpdate(this._request, data);
-  }
-}
-
-/**
- * A fetchable ProjectUpdateInteraction Query
- *
- * @param request - function to call the graphql client
- */
-export class ProjectUpdateInteractionQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ProjectUpdateInteraction query and return a ProjectUpdateInteraction
-   *
-   * @param id - required id to pass to projectUpdateInteraction
-   * @returns parsed response from ProjectUpdateInteractionQuery
-   */
-  public async fetch(id: string): LinearFetch<ProjectUpdateInteraction> {
-    const response = await this._request<L.ProjectUpdateInteractionQuery, L.ProjectUpdateInteractionQueryVariables>(
-      L.ProjectUpdateInteractionDocument,
-      {
-        id,
-      }
-    );
-    const data = response.projectUpdateInteraction;
-
-    return new ProjectUpdateInteraction(this._request, data);
-  }
-}
-
-/**
- * A fetchable ProjectUpdateInteractions Query
- *
- * @param request - function to call the graphql client
- */
-export class ProjectUpdateInteractionsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ProjectUpdateInteractions query and return a ProjectUpdateInteractionConnection
-   *
-   * @param variables - variables to pass into the ProjectUpdateInteractionsQuery
-   * @returns parsed response from ProjectUpdateInteractionsQuery
-   */
-  public async fetch(
-    variables?: L.ProjectUpdateInteractionsQueryVariables
-  ): LinearFetch<ProjectUpdateInteractionConnection> {
-    const response = await this._request<L.ProjectUpdateInteractionsQuery, L.ProjectUpdateInteractionsQueryVariables>(
-      L.ProjectUpdateInteractionsDocument,
-      variables
-    );
-    const data = response.projectUpdateInteractions;
-
-    return new ProjectUpdateInteractionConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable ProjectUpdates Query
- *
- * @param request - function to call the graphql client
- */
-export class ProjectUpdatesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ProjectUpdates query and return a ProjectUpdateConnection
-   *
-   * @param variables - variables to pass into the ProjectUpdatesQuery
-   * @returns parsed response from ProjectUpdatesQuery
-   */
-  public async fetch(variables?: L.ProjectUpdatesQueryVariables): LinearFetch<ProjectUpdateConnection> {
-    const response = await this._request<L.ProjectUpdatesQuery, L.ProjectUpdatesQueryVariables>(
-      L.ProjectUpdatesDocument,
-      variables
-    );
-    const data = response.projectUpdates;
-
-    return new ProjectUpdateConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Projects Query
- *
- * @param request - function to call the graphql client
- */
-export class ProjectsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Projects query and return a ProjectConnection
-   *
-   * @param variables - variables to pass into the ProjectsQuery
-   * @returns parsed response from ProjectsQuery
-   */
-  public async fetch(variables?: L.ProjectsQueryVariables): LinearFetch<ProjectConnection> {
-    const response = await this._request<L.ProjectsQuery, L.ProjectsQueryVariables>(L.ProjectsDocument, variables);
-    const data = response.projects;
-
-    return new ProjectConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable PushSubscriptionTest Query
- *
- * @param request - function to call the graphql client
- */
-export class PushSubscriptionTestQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the PushSubscriptionTest query and return a PushSubscriptionTestPayload
-   *
-   * @returns parsed response from PushSubscriptionTestQuery
-   */
-  public async fetch(): LinearFetch<PushSubscriptionTestPayload> {
-    const response = await this._request<L.PushSubscriptionTestQuery, L.PushSubscriptionTestQueryVariables>(
-      L.PushSubscriptionTestDocument,
-      {}
-    );
-    const data = response.pushSubscriptionTest;
-
-    return new PushSubscriptionTestPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable RateLimitStatus Query
- *
- * @param request - function to call the graphql client
- */
-export class RateLimitStatusQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the RateLimitStatus query and return a RateLimitPayload
-   *
-   * @returns parsed response from RateLimitStatusQuery
-   */
-  public async fetch(): LinearFetch<RateLimitPayload> {
-    const response = await this._request<L.RateLimitStatusQuery, L.RateLimitStatusQueryVariables>(
-      L.RateLimitStatusDocument,
-      {}
-    );
-    const data = response.rateLimitStatus;
-
-    return new RateLimitPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable Roadmap Query
- *
- * @param request - function to call the graphql client
- */
-export class RoadmapQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Roadmap query and return a Roadmap
-   *
-   * @param id - required id to pass to roadmap
-   * @returns parsed response from RoadmapQuery
-   */
-  public async fetch(id: string): LinearFetch<Roadmap> {
-    const response = await this._request<L.RoadmapQuery, L.RoadmapQueryVariables>(L.RoadmapDocument, {
-      id,
-    });
-    const data = response.roadmap;
-
-    return new Roadmap(this._request, data);
-  }
-}
-
-/**
- * A fetchable RoadmapToProject Query
- *
- * @param request - function to call the graphql client
- */
-export class RoadmapToProjectQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the RoadmapToProject query and return a RoadmapToProject
-   *
-   * @param id - required id to pass to roadmapToProject
-   * @returns parsed response from RoadmapToProjectQuery
-   */
-  public async fetch(id: string): LinearFetch<RoadmapToProject> {
-    const response = await this._request<L.RoadmapToProjectQuery, L.RoadmapToProjectQueryVariables>(
-      L.RoadmapToProjectDocument,
-      {
-        id,
-      }
-    );
-    const data = response.roadmapToProject;
-
-    return new RoadmapToProject(this._request, data);
-  }
-}
-
-/**
- * A fetchable RoadmapToProjects Query
- *
- * @param request - function to call the graphql client
- */
-export class RoadmapToProjectsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the RoadmapToProjects query and return a RoadmapToProjectConnection
-   *
-   * @param variables - variables to pass into the RoadmapToProjectsQuery
-   * @returns parsed response from RoadmapToProjectsQuery
-   */
-  public async fetch(variables?: L.RoadmapToProjectsQueryVariables): LinearFetch<RoadmapToProjectConnection> {
-    const response = await this._request<L.RoadmapToProjectsQuery, L.RoadmapToProjectsQueryVariables>(
-      L.RoadmapToProjectsDocument,
-      variables
-    );
-    const data = response.roadmapToProjects;
-
-    return new RoadmapToProjectConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Roadmaps Query
- *
- * @param request - function to call the graphql client
- */
-export class RoadmapsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Roadmaps query and return a RoadmapConnection
-   *
-   * @param variables - variables to pass into the RoadmapsQuery
-   * @returns parsed response from RoadmapsQuery
-   */
-  public async fetch(variables?: L.RoadmapsQueryVariables): LinearFetch<RoadmapConnection> {
-    const response = await this._request<L.RoadmapsQuery, L.RoadmapsQueryVariables>(L.RoadmapsDocument, variables);
-    const data = response.roadmaps;
-
-    return new RoadmapConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable SearchDocuments Query
- *
- * @param request - function to call the graphql client
- */
-export class SearchDocumentsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the SearchDocuments query and return a DocumentSearchPayload
-   *
-   * @param term - required term to pass to searchDocuments
-   * @param variables - variables without 'term' to pass into the SearchDocumentsQuery
-   * @returns parsed response from SearchDocumentsQuery
-   */
-  public async fetch(
-    term: string,
-    variables?: Omit<L.SearchDocumentsQueryVariables, "term">
-  ): LinearFetch<DocumentSearchPayload> {
-    const response = await this._request<L.SearchDocumentsQuery, L.SearchDocumentsQueryVariables>(
-      L.SearchDocumentsDocument,
-      {
-        term,
-        ...variables,
-      }
-    );
-    const data = response.searchDocuments;
-
-    return new DocumentSearchPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable SearchIssues Query
- *
- * @param request - function to call the graphql client
- */
-export class SearchIssuesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the SearchIssues query and return a IssueSearchPayload
-   *
-   * @param term - required term to pass to searchIssues
-   * @param variables - variables without 'term' to pass into the SearchIssuesQuery
-   * @returns parsed response from SearchIssuesQuery
-   */
-  public async fetch(
-    term: string,
-    variables?: Omit<L.SearchIssuesQueryVariables, "term">
-  ): LinearFetch<IssueSearchPayload> {
-    const response = await this._request<L.SearchIssuesQuery, L.SearchIssuesQueryVariables>(L.SearchIssuesDocument, {
-      term,
-      ...variables,
-    });
-    const data = response.searchIssues;
-
-    return new IssueSearchPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable SearchProjects Query
- *
- * @param request - function to call the graphql client
- */
-export class SearchProjectsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the SearchProjects query and return a ProjectSearchPayload
-   *
-   * @param term - required term to pass to searchProjects
-   * @param variables - variables without 'term' to pass into the SearchProjectsQuery
-   * @returns parsed response from SearchProjectsQuery
-   */
-  public async fetch(
-    term: string,
-    variables?: Omit<L.SearchProjectsQueryVariables, "term">
-  ): LinearFetch<ProjectSearchPayload> {
-    const response = await this._request<L.SearchProjectsQuery, L.SearchProjectsQueryVariables>(
-      L.SearchProjectsDocument,
-      {
-        term,
-        ...variables,
-      }
-    );
-    const data = response.searchProjects;
-
-    return new ProjectSearchPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable SsoUrlFromEmail Query
- *
- * @param request - function to call the graphql client
- */
-export class SsoUrlFromEmailQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the SsoUrlFromEmail query and return a SsoUrlFromEmailResponse
-   *
-   * @param email - required email to pass to ssoUrlFromEmail
-   * @param variables - variables without 'email' to pass into the SsoUrlFromEmailQuery
-   * @returns parsed response from SsoUrlFromEmailQuery
-   */
-  public async fetch(
-    email: string,
-    variables?: Omit<L.SsoUrlFromEmailQueryVariables, "email">
-  ): LinearFetch<SsoUrlFromEmailResponse> {
-    const response = await this._request<L.SsoUrlFromEmailQuery, L.SsoUrlFromEmailQueryVariables>(
-      L.SsoUrlFromEmailDocument,
-      {
-        email,
-        ...variables,
-      }
-    );
-    const data = response.ssoUrlFromEmail;
-
-    return new SsoUrlFromEmailResponse(this._request, data);
-  }
-}
-
-/**
- * A fetchable Team Query
- *
- * @param request - function to call the graphql client
- */
-export class TeamQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Team query and return a Team
-   *
-   * @param id - required id to pass to team
-   * @returns parsed response from TeamQuery
-   */
-  public async fetch(id: string): LinearFetch<Team> {
-    const response = await this._request<L.TeamQuery, L.TeamQueryVariables>(L.TeamDocument, {
-      id,
-    });
-    const data = response.team;
-
-    return new Team(this._request, data);
-  }
-}
-
-/**
- * A fetchable TeamMembership Query
- *
- * @param request - function to call the graphql client
- */
-export class TeamMembershipQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the TeamMembership query and return a TeamMembership
-   *
-   * @param id - required id to pass to teamMembership
-   * @returns parsed response from TeamMembershipQuery
-   */
-  public async fetch(id: string): LinearFetch<TeamMembership> {
-    const response = await this._request<L.TeamMembershipQuery, L.TeamMembershipQueryVariables>(
-      L.TeamMembershipDocument,
-      {
-        id,
-      }
-    );
-    const data = response.teamMembership;
-
-    return new TeamMembership(this._request, data);
-  }
-}
-
-/**
- * A fetchable TeamMemberships Query
- *
- * @param request - function to call the graphql client
- */
-export class TeamMembershipsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the TeamMemberships query and return a TeamMembershipConnection
-   *
-   * @param variables - variables to pass into the TeamMembershipsQuery
-   * @returns parsed response from TeamMembershipsQuery
-   */
-  public async fetch(variables?: L.TeamMembershipsQueryVariables): LinearFetch<TeamMembershipConnection> {
-    const response = await this._request<L.TeamMembershipsQuery, L.TeamMembershipsQueryVariables>(
-      L.TeamMembershipsDocument,
-      variables
-    );
-    const data = response.teamMemberships;
-
-    return new TeamMembershipConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Teams Query
- *
- * @param request - function to call the graphql client
- */
-export class TeamsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Teams query and return a TeamConnection
-   *
-   * @param variables - variables to pass into the TeamsQuery
-   * @returns parsed response from TeamsQuery
-   */
-  public async fetch(variables?: L.TeamsQueryVariables): LinearFetch<TeamConnection> {
-    const response = await this._request<L.TeamsQuery, L.TeamsQueryVariables>(L.TeamsDocument, variables);
-    const data = response.teams;
-
-    return new TeamConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Template Query
- *
- * @param request - function to call the graphql client
- */
-export class TemplateQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Template query and return a Template
-   *
-   * @param id - required id to pass to template
-   * @returns parsed response from TemplateQuery
-   */
-  public async fetch(id: string): LinearFetch<Template> {
-    const response = await this._request<L.TemplateQuery, L.TemplateQueryVariables>(L.TemplateDocument, {
-      id,
-    });
-    const data = response.template;
-
-    return new Template(this._request, data);
-  }
-}
-
-/**
- * A fetchable Templates Query
- *
- * @param request - function to call the graphql client
- */
-export class TemplatesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Templates query and return a Template list
-   *
-   * @returns parsed response from TemplatesQuery
-   */
-  public async fetch(): LinearFetch<Template[]> {
-    const response = await this._request<L.TemplatesQuery, L.TemplatesQueryVariables>(L.TemplatesDocument, {});
-    const data = response.templates;
-
-    return data.map(node => {
-      return new Template(this._request, node);
-    });
-  }
-}
-
-/**
- * A fetchable TemplatesForIntegration Query
- *
- * @param request - function to call the graphql client
- */
-export class TemplatesForIntegrationQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the TemplatesForIntegration query and return a Template list
-   *
-   * @param integrationType - required integrationType to pass to templatesForIntegration
-   * @returns parsed response from TemplatesForIntegrationQuery
-   */
-  public async fetch(integrationType: string): LinearFetch<Template[]> {
-    const response = await this._request<L.TemplatesForIntegrationQuery, L.TemplatesForIntegrationQueryVariables>(
-      L.TemplatesForIntegrationDocument,
-      {
-        integrationType,
-      }
-    );
-    const data = response.templatesForIntegration;
-
-    return data.map(node => {
-      return new Template(this._request, node);
-    });
-  }
-}
-
-/**
- * A fetchable User Query
- *
- * @param request - function to call the graphql client
- */
-export class UserQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the User query and return a User
-   *
-   * @param id - required id to pass to user
-   * @returns parsed response from UserQuery
-   */
-  public async fetch(id: string): LinearFetch<User> {
-    const response = await this._request<L.UserQuery, L.UserQueryVariables>(L.UserDocument, {
-      id,
-    });
-    const data = response.user;
-
-    return new User(this._request, data);
-  }
-}
-
-/**
- * A fetchable UserSettings Query
- *
- * @param request - function to call the graphql client
- */
-export class UserSettingsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the UserSettings query and return a UserSettings
-   *
-   * @returns parsed response from UserSettingsQuery
-   */
-  public async fetch(): LinearFetch<UserSettings> {
-    const response = await this._request<L.UserSettingsQuery, L.UserSettingsQueryVariables>(L.UserSettingsDocument, {});
-    const data = response.userSettings;
-
-    return new UserSettings(this._request, data);
-  }
-}
-
-/**
- * A fetchable Users Query
- *
- * @param request - function to call the graphql client
- */
-export class UsersQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Users query and return a UserConnection
-   *
-   * @param variables - variables to pass into the UsersQuery
-   * @returns parsed response from UsersQuery
-   */
-  public async fetch(variables?: L.UsersQueryVariables): LinearFetch<UserConnection> {
-    const response = await this._request<L.UsersQuery, L.UsersQueryVariables>(L.UsersDocument, variables);
-    const data = response.users;
-
-    return new UserConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Viewer Query
- *
- * @param request - function to call the graphql client
- */
-export class ViewerQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Viewer query and return a User
-   *
-   * @returns parsed response from ViewerQuery
-   */
-  public async fetch(): LinearFetch<User> {
-    const response = await this._request<L.ViewerQuery, L.ViewerQueryVariables>(L.ViewerDocument, {});
-    const data = response.viewer;
-
-    return new User(this._request, data);
-  }
-}
-
-/**
- * A fetchable Webhook Query
- *
- * @param request - function to call the graphql client
- */
-export class WebhookQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Webhook query and return a Webhook
-   *
-   * @param id - required id to pass to webhook
-   * @returns parsed response from WebhookQuery
-   */
-  public async fetch(id: string): LinearFetch<Webhook> {
-    const response = await this._request<L.WebhookQuery, L.WebhookQueryVariables>(L.WebhookDocument, {
-      id,
-    });
-    const data = response.webhook;
-
-    return new Webhook(this._request, data);
-  }
-}
-
-/**
- * A fetchable Webhooks Query
- *
- * @param request - function to call the graphql client
- */
-export class WebhooksQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the Webhooks query and return a WebhookConnection
-   *
-   * @param variables - variables to pass into the WebhooksQuery
-   * @returns parsed response from WebhooksQuery
-   */
-  public async fetch(variables?: L.WebhooksQueryVariables): LinearFetch<WebhookConnection> {
-    const response = await this._request<L.WebhooksQuery, L.WebhooksQueryVariables>(L.WebhooksDocument, variables);
-    const data = response.webhooks;
-
-    return new WebhookConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable WorkflowState Query
- *
- * @param request - function to call the graphql client
- */
-export class WorkflowStateQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the WorkflowState query and return a WorkflowState
-   *
-   * @param id - required id to pass to workflowState
-   * @returns parsed response from WorkflowStateQuery
-   */
-  public async fetch(id: string): LinearFetch<WorkflowState> {
-    const response = await this._request<L.WorkflowStateQuery, L.WorkflowStateQueryVariables>(L.WorkflowStateDocument, {
-      id,
-    });
-    const data = response.workflowState;
-
-    return new WorkflowState(this._request, data);
-  }
-}
-
-/**
- * A fetchable WorkflowStates Query
- *
- * @param request - function to call the graphql client
- */
-export class WorkflowStatesQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the WorkflowStates query and return a WorkflowStateConnection
-   *
-   * @param variables - variables to pass into the WorkflowStatesQuery
-   * @returns parsed response from WorkflowStatesQuery
-   */
-  public async fetch(variables?: L.WorkflowStatesQueryVariables): LinearFetch<WorkflowStateConnection> {
-    const response = await this._request<L.WorkflowStatesQuery, L.WorkflowStatesQueryVariables>(
-      L.WorkflowStatesDocument,
-      variables
-    );
-    const data = response.workflowStates;
-
-    return new WorkflowStateConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
  * A fetchable AttachmentIssue_Attachments Query
  *
  * @param request - function to call the graphql client
@@ -21157,6 +21123,842 @@ export class LinearSdk extends Request {
   }
 
   /**
+   * All teams you the user can administrate. Administrable teams are teams whose settings the user can change, but to whose issues the user doesn't necessarily have access to.
+   *
+   * @param variables - variables to pass into the AdministrableTeamsQuery
+   * @returns TeamConnection
+   */
+  public administrableTeams(variables?: L.AdministrableTeamsQueryVariables): LinearFetch<TeamConnection> {
+    return new AdministrableTeamsQuery(this._request).fetch(variables);
+  }
+  /**
+   * All API keys for the user.
+   *
+   * @param variables - variables to pass into the ApiKeysQuery
+   * @returns ApiKeyConnection
+   */
+  public apiKeys(variables?: L.ApiKeysQueryVariables): LinearFetch<ApiKeyConnection> {
+    return new ApiKeysQuery(this._request).fetch(variables);
+  }
+  /**
+   * Get basic information for an application.
+   *
+   * @param clientId - required clientId to pass to applicationInfo
+   * @returns Application
+   */
+  public applicationInfo(clientId: string): LinearFetch<Application> {
+    return new ApplicationInfoQuery(this._request).fetch(clientId);
+  }
+  /**
+   * Get information for an application and whether a user has approved it for the given scopes.
+   *
+   * @param clientId - required clientId to pass to applicationWithAuthorization
+   * @param scope - required scope to pass to applicationWithAuthorization
+   * @param variables - variables without 'clientId', 'scope' to pass into the ApplicationWithAuthorizationQuery
+   * @returns UserAuthorizedApplication
+   */
+  public applicationWithAuthorization(
+    clientId: string,
+    scope: string[],
+    variables?: Omit<L.ApplicationWithAuthorizationQueryVariables, "clientId" | "scope">
+  ): LinearFetch<UserAuthorizedApplication> {
+    return new ApplicationWithAuthorizationQuery(this._request).fetch(clientId, scope, variables);
+  }
+  /**
+   * One specific issue attachment.
+   * [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
+   *
+   * @param id - required id to pass to attachment
+   * @returns Attachment
+   */
+  public attachment(id: string): LinearFetch<Attachment> {
+    return new AttachmentQuery(this._request).fetch(id);
+  }
+  /**
+   * Query an issue by its associated attachment, and its id.
+   *
+   * @param id - required id to pass to attachmentIssue
+   * @returns Issue
+   */
+  public attachmentIssue(id: string): LinearFetch<Issue> {
+    return new AttachmentIssueQuery(this._request).fetch(id);
+  }
+  /**
+   * All issue attachments.
+   *
+   * To get attachments for a given URL, use `attachmentsForURL` query.
+   *
+   * @param variables - variables to pass into the AttachmentsQuery
+   * @returns AttachmentConnection
+   */
+  public attachments(variables?: L.AttachmentsQueryVariables): LinearFetch<AttachmentConnection> {
+    return new AttachmentsQuery(this._request).fetch(variables);
+  }
+  /**
+   * Returns issue attachments for a given `url`.
+   *
+   * @param url - required url to pass to attachmentsForURL
+   * @param variables - variables without 'url' to pass into the AttachmentsForUrlQuery
+   * @returns AttachmentConnection
+   */
+  public attachmentsForURL(
+    url: string,
+    variables?: Omit<L.AttachmentsForUrlQueryVariables, "url">
+  ): LinearFetch<AttachmentConnection> {
+    return new AttachmentsForUrlQuery(this._request).fetch(url, variables);
+  }
+  /**
+   * All audit log entries.
+   *
+   * @param variables - variables to pass into the AuditEntriesQuery
+   * @returns AuditEntryConnection
+   */
+  public auditEntries(variables?: L.AuditEntriesQueryVariables): LinearFetch<AuditEntryConnection> {
+    return new AuditEntriesQuery(this._request).fetch(variables);
+  }
+  /**
+   * List of audit entry types.
+   *
+   * @returns AuditEntryType[]
+   */
+  public get auditEntryTypes(): LinearFetch<AuditEntryType[]> {
+    return new AuditEntryTypesQuery(this._request).fetch();
+  }
+  /**
+   * User's active sessions.
+   *
+   * @returns AuthenticationSessionResponse[]
+   */
+  public get authenticationSessions(): LinearFetch<AuthenticationSessionResponse[]> {
+    return new AuthenticationSessionsQuery(this._request).fetch();
+  }
+  /**
+   * Fetch users belonging to this user account.
+   *
+   * @returns AuthResolverResponse
+   */
+  public get availableUsers(): LinearFetch<AuthResolverResponse> {
+    return new AvailableUsersQuery(this._request).fetch();
+  }
+  /**
+   * A specific comment.
+   *
+   * @param id - required id to pass to comment
+   * @returns Comment
+   */
+  public comment(id: string): LinearFetch<Comment> {
+    return new CommentQuery(this._request).fetch(id);
+  }
+  /**
+   * All comments.
+   *
+   * @param variables - variables to pass into the CommentsQuery
+   * @returns CommentConnection
+   */
+  public comments(variables?: L.CommentsQueryVariables): LinearFetch<CommentConnection> {
+    return new CommentsQuery(this._request).fetch(variables);
+  }
+  /**
+   * One specific custom view.
+   *
+   * @param id - required id to pass to customView
+   * @returns CustomView
+   */
+  public customView(id: string): LinearFetch<CustomView> {
+    return new CustomViewQuery(this._request).fetch(id);
+  }
+  /**
+   * Whether a custom view has other subscribers than the current user in the organization.
+   *
+   * @param id - required id to pass to customViewHasSubscribers
+   * @returns CustomViewHasSubscribersPayload
+   */
+  public customViewHasSubscribers(id: string): LinearFetch<CustomViewHasSubscribersPayload> {
+    return new CustomViewHasSubscribersQuery(this._request).fetch(id);
+  }
+  /**
+   * Custom views for the user.
+   *
+   * @param variables - variables to pass into the CustomViewsQuery
+   * @returns CustomViewConnection
+   */
+  public customViews(variables?: L.CustomViewsQueryVariables): LinearFetch<CustomViewConnection> {
+    return new CustomViewsQuery(this._request).fetch(variables);
+  }
+  /**
+   * One specific cycle.
+   *
+   * @param id - required id to pass to cycle
+   * @returns Cycle
+   */
+  public cycle(id: string): LinearFetch<Cycle> {
+    return new CycleQuery(this._request).fetch(id);
+  }
+  /**
+   * All cycles.
+   *
+   * @param variables - variables to pass into the CyclesQuery
+   * @returns CycleConnection
+   */
+  public cycles(variables?: L.CyclesQueryVariables): LinearFetch<CycleConnection> {
+    return new CyclesQuery(this._request).fetch(variables);
+  }
+  /**
+   * One specific document.
+   *
+   * @param id - required id to pass to document
+   * @returns Document
+   */
+  public document(id: string): LinearFetch<Document> {
+    return new DocumentQuery(this._request).fetch(id);
+  }
+  /**
+   * A collection of document content history entries.
+   *
+   * @param id - required id to pass to documentContentHistory
+   * @returns DocumentContentHistoryPayload
+   */
+  public documentContentHistory(id: string): LinearFetch<DocumentContentHistoryPayload> {
+    return new DocumentContentHistoryQuery(this._request).fetch(id);
+  }
+  /**
+   * All documents in the workspace.
+   *
+   * @param variables - variables to pass into the DocumentsQuery
+   * @returns DocumentConnection
+   */
+  public documents(variables?: L.DocumentsQueryVariables): LinearFetch<DocumentConnection> {
+    return new DocumentsQuery(this._request).fetch(variables);
+  }
+  /**
+   * A specific emoji.
+   *
+   * @param id - required id to pass to emoji
+   * @returns Emoji
+   */
+  public emoji(id: string): LinearFetch<Emoji> {
+    return new EmojiQuery(this._request).fetch(id);
+  }
+  /**
+   * All custom emojis.
+   *
+   * @param variables - variables to pass into the EmojisQuery
+   * @returns EmojiConnection
+   */
+  public emojis(variables?: L.EmojisQueryVariables): LinearFetch<EmojiConnection> {
+    return new EmojisQuery(this._request).fetch(variables);
+  }
+  /**
+   * One specific favorite.
+   *
+   * @param id - required id to pass to favorite
+   * @returns Favorite
+   */
+  public favorite(id: string): LinearFetch<Favorite> {
+    return new FavoriteQuery(this._request).fetch(id);
+  }
+  /**
+   * The user's favorites.
+   *
+   * @param variables - variables to pass into the FavoritesQuery
+   * @returns FavoriteConnection
+   */
+  public favorites(variables?: L.FavoritesQueryVariables): LinearFetch<FavoriteConnection> {
+    return new FavoritesQuery(this._request).fetch(variables);
+  }
+  /**
+   * One specific integration.
+   *
+   * @param id - required id to pass to integration
+   * @returns Integration
+   */
+  public integration(id: string): LinearFetch<Integration> {
+    return new IntegrationQuery(this._request).fetch(id);
+  }
+  /**
+   * One specific integrationTemplate.
+   *
+   * @param id - required id to pass to integrationTemplate
+   * @returns IntegrationTemplate
+   */
+  public integrationTemplate(id: string): LinearFetch<IntegrationTemplate> {
+    return new IntegrationTemplateQuery(this._request).fetch(id);
+  }
+  /**
+   * Template and integration connections.
+   *
+   * @param variables - variables to pass into the IntegrationTemplatesQuery
+   * @returns IntegrationTemplateConnection
+   */
+  public integrationTemplates(
+    variables?: L.IntegrationTemplatesQueryVariables
+  ): LinearFetch<IntegrationTemplateConnection> {
+    return new IntegrationTemplatesQuery(this._request).fetch(variables);
+  }
+  /**
+   * All integrations.
+   *
+   * @param variables - variables to pass into the IntegrationsQuery
+   * @returns IntegrationConnection
+   */
+  public integrations(variables?: L.IntegrationsQueryVariables): LinearFetch<IntegrationConnection> {
+    return new IntegrationsQuery(this._request).fetch(variables);
+  }
+  /**
+   * One specific set of settings.
+   *
+   * @param id - required id to pass to integrationsSettings
+   * @returns IntegrationsSettings
+   */
+  public integrationsSettings(id: string): LinearFetch<IntegrationsSettings> {
+    return new IntegrationsSettingsQuery(this._request).fetch(id);
+  }
+  /**
+   * One specific issue.
+   *
+   * @param id - required id to pass to issue
+   * @returns Issue
+   */
+  public issue(id: string): LinearFetch<Issue> {
+    return new IssueQuery(this._request).fetch(id);
+  }
+  /**
+   * Find issues that are related to a given Figma file key.
+   *
+   * @param fileKey - required fileKey to pass to issueFigmaFileKeySearch
+   * @param variables - variables without 'fileKey' to pass into the IssueFigmaFileKeySearchQuery
+   * @returns IssueConnection
+   */
+  public issueFigmaFileKeySearch(
+    fileKey: string,
+    variables?: Omit<L.IssueFigmaFileKeySearchQueryVariables, "fileKey">
+  ): LinearFetch<IssueConnection> {
+    return new IssueFigmaFileKeySearchQuery(this._request).fetch(fileKey, variables);
+  }
+  /**
+   * Suggests filters for an issue view based on a text prompt.
+   *
+   * @param prompt - required prompt to pass to issueFilterSuggestion
+   * @returns IssueFilterSuggestionPayload
+   */
+  public issueFilterSuggestion(prompt: string): LinearFetch<IssueFilterSuggestionPayload> {
+    return new IssueFilterSuggestionQuery(this._request).fetch(prompt);
+  }
+  /**
+   * Checks a CSV file validity against a specific import service.
+   *
+   * @param csvUrl - required csvUrl to pass to issueImportCheckCSV
+   * @param service - required service to pass to issueImportCheckCSV
+   * @returns IssueImportCheckPayload
+   */
+  public issueImportCheckCSV(csvUrl: string, service: string): LinearFetch<IssueImportCheckPayload> {
+    return new IssueImportCheckCsvQuery(this._request).fetch(csvUrl, service);
+  }
+  /**
+   * Fetches the GitHub token, completing the OAuth flow.
+   *
+   * @param code - required code to pass to issueImportFinishGithubOAuth
+   * @returns GithubOAuthTokenPayload
+   */
+  public issueImportFinishGithubOAuth(code: string): LinearFetch<GithubOAuthTokenPayload> {
+    return new IssueImportFinishGithubOAuthQuery(this._request).fetch(code);
+  }
+  /**
+   * One specific label.
+   *
+   * @param id - required id to pass to issueLabel
+   * @returns IssueLabel
+   */
+  public issueLabel(id: string): LinearFetch<IssueLabel> {
+    return new IssueLabelQuery(this._request).fetch(id);
+  }
+  /**
+   * All issue labels.
+   *
+   * @param variables - variables to pass into the IssueLabelsQuery
+   * @returns IssueLabelConnection
+   */
+  public issueLabels(variables?: L.IssueLabelsQueryVariables): LinearFetch<IssueLabelConnection> {
+    return new IssueLabelsQuery(this._request).fetch(variables);
+  }
+  /**
+   * Issue priority values and corresponding labels.
+   *
+   * @returns IssuePriorityValue[]
+   */
+  public get issuePriorityValues(): LinearFetch<IssuePriorityValue[]> {
+    return new IssuePriorityValuesQuery(this._request).fetch();
+  }
+  /**
+   * One specific issue relation.
+   *
+   * @param id - required id to pass to issueRelation
+   * @returns IssueRelation
+   */
+  public issueRelation(id: string): LinearFetch<IssueRelation> {
+    return new IssueRelationQuery(this._request).fetch(id);
+  }
+  /**
+   * All issue relationships.
+   *
+   * @param variables - variables to pass into the IssueRelationsQuery
+   * @returns IssueRelationConnection
+   */
+  public issueRelations(variables?: L.IssueRelationsQueryVariables): LinearFetch<IssueRelationConnection> {
+    return new IssueRelationsQuery(this._request).fetch(variables);
+  }
+  /**
+   * [DEPRECATED] Search issues. This endpoint is deprecated and will be removed in the future – use `searchIssues` instead.
+   *
+   * @param variables - variables to pass into the IssueSearchQuery
+   * @returns IssueConnection
+   */
+  public issueSearch(variables?: L.IssueSearchQueryVariables): LinearFetch<IssueConnection> {
+    return new IssueSearchQuery(this._request).fetch(variables);
+  }
+  /**
+   * Find issue based on the VCS branch name.
+   *
+   * @param branchName - required branchName to pass to issueVcsBranchSearch
+   * @returns Issue
+   */
+  public issueVcsBranchSearch(branchName: string): LinearFetch<Issue | undefined> {
+    return new IssueVcsBranchSearchQuery(this._request).fetch(branchName);
+  }
+  /**
+   * All issues.
+   *
+   * @param variables - variables to pass into the IssuesQuery
+   * @returns IssueConnection
+   */
+  public issues(variables?: L.IssuesQueryVariables): LinearFetch<IssueConnection> {
+    return new IssuesQuery(this._request).fetch(variables);
+  }
+  /**
+   * One specific notification.
+   *
+   * @param id - required id to pass to notification
+   * @returns Notification
+   */
+  public notification(
+    id: string
+  ): LinearFetch<IssueNotification | OauthClientApprovalNotification | ProjectNotification | Notification> {
+    return new NotificationQuery(this._request).fetch(id);
+  }
+  /**
+   * One specific notification subscription.
+   *
+   * @param id - required id to pass to notificationSubscription
+   * @returns NotificationSubscription
+   */
+  public notificationSubscription(
+    id: string
+  ): LinearFetch<
+    | CustomViewNotificationSubscription
+    | CycleNotificationSubscription
+    | LabelNotificationSubscription
+    | ProjectNotificationSubscription
+    | TeamNotificationSubscription
+    | UserNotificationSubscription
+    | NotificationSubscription
+  > {
+    return new NotificationSubscriptionQuery(this._request).fetch(id);
+  }
+  /**
+   * The user's notification subscriptions.
+   *
+   * @param variables - variables to pass into the NotificationSubscriptionsQuery
+   * @returns NotificationSubscriptionConnection
+   */
+  public notificationSubscriptions(
+    variables?: L.NotificationSubscriptionsQueryVariables
+  ): LinearFetch<NotificationSubscriptionConnection> {
+    return new NotificationSubscriptionsQuery(this._request).fetch(variables);
+  }
+  /**
+   * All notifications.
+   *
+   * @param variables - variables to pass into the NotificationsQuery
+   * @returns NotificationConnection
+   */
+  public notifications(variables?: L.NotificationsQueryVariables): LinearFetch<NotificationConnection> {
+    return new NotificationsQuery(this._request).fetch(variables);
+  }
+  /**
+   * The user's organization.
+   *
+   * @returns Organization
+   */
+  public get organization(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+  /**
+   * Does the organization exist.
+   *
+   * @param urlKey - required urlKey to pass to organizationExists
+   * @returns OrganizationExistsPayload
+   */
+  public organizationExists(urlKey: string): LinearFetch<OrganizationExistsPayload> {
+    return new OrganizationExistsQuery(this._request).fetch(urlKey);
+  }
+  /**
+   * One specific organization invite.
+   *
+   * @param id - required id to pass to organizationInvite
+   * @returns OrganizationInvite
+   */
+  public organizationInvite(id: string): LinearFetch<OrganizationInvite> {
+    return new OrganizationInviteQuery(this._request).fetch(id);
+  }
+  /**
+   * All invites for the organization.
+   *
+   * @param variables - variables to pass into the OrganizationInvitesQuery
+   * @returns OrganizationInviteConnection
+   */
+  public organizationInvites(
+    variables?: L.OrganizationInvitesQueryVariables
+  ): LinearFetch<OrganizationInviteConnection> {
+    return new OrganizationInvitesQuery(this._request).fetch(variables);
+  }
+  /**
+   * One specific project.
+   *
+   * @param id - required id to pass to project
+   * @returns Project
+   */
+  public project(id: string): LinearFetch<Project> {
+    return new ProjectQuery(this._request).fetch(id);
+  }
+  /**
+   * Suggests filters for a project view based on a text prompt.
+   *
+   * @param prompt - required prompt to pass to projectFilterSuggestion
+   * @returns ProjectFilterSuggestionPayload
+   */
+  public projectFilterSuggestion(prompt: string): LinearFetch<ProjectFilterSuggestionPayload> {
+    return new ProjectFilterSuggestionQuery(this._request).fetch(prompt);
+  }
+  /**
+   * One specific project link.
+   *
+   * @param id - required id to pass to projectLink
+   * @returns ProjectLink
+   */
+  public projectLink(id: string): LinearFetch<ProjectLink> {
+    return new ProjectLinkQuery(this._request).fetch(id);
+  }
+  /**
+   * All links for the project.
+   *
+   * @param variables - variables to pass into the ProjectLinksQuery
+   * @returns ProjectLinkConnection
+   */
+  public projectLinks(variables?: L.ProjectLinksQueryVariables): LinearFetch<ProjectLinkConnection> {
+    return new ProjectLinksQuery(this._request).fetch(variables);
+  }
+  /**
+   * One specific project milestone.
+   *
+   * @param id - required id to pass to projectMilestone
+   * @returns ProjectMilestone
+   */
+  public projectMilestone(id: string): LinearFetch<ProjectMilestone> {
+    return new ProjectMilestoneQuery(this._request).fetch(id);
+  }
+  /**
+   * All milestones for the project.
+   *
+   * @param variables - variables to pass into the ProjectMilestonesQuery
+   * @returns ProjectMilestoneConnection
+   */
+  public projectMilestones(variables?: L.ProjectMilestonesQueryVariables): LinearFetch<ProjectMilestoneConnection> {
+    return new ProjectMilestonesQuery(this._request).fetch(variables);
+  }
+  /**
+   * A specific project update.
+   *
+   * @param id - required id to pass to projectUpdate
+   * @returns ProjectUpdate
+   */
+  public projectUpdate(id: string): LinearFetch<ProjectUpdate> {
+    return new ProjectUpdateQuery(this._request).fetch(id);
+  }
+  /**
+   * A specific interaction on a project update.
+   *
+   * @param id - required id to pass to projectUpdateInteraction
+   * @returns ProjectUpdateInteraction
+   */
+  public projectUpdateInteraction(id: string): LinearFetch<ProjectUpdateInteraction> {
+    return new ProjectUpdateInteractionQuery(this._request).fetch(id);
+  }
+  /**
+   * All interactions on project updates.
+   *
+   * @param variables - variables to pass into the ProjectUpdateInteractionsQuery
+   * @returns ProjectUpdateInteractionConnection
+   */
+  public projectUpdateInteractions(
+    variables?: L.ProjectUpdateInteractionsQueryVariables
+  ): LinearFetch<ProjectUpdateInteractionConnection> {
+    return new ProjectUpdateInteractionsQuery(this._request).fetch(variables);
+  }
+  /**
+   * All project updates.
+   *
+   * @param variables - variables to pass into the ProjectUpdatesQuery
+   * @returns ProjectUpdateConnection
+   */
+  public projectUpdates(variables?: L.ProjectUpdatesQueryVariables): LinearFetch<ProjectUpdateConnection> {
+    return new ProjectUpdatesQuery(this._request).fetch(variables);
+  }
+  /**
+   * All projects.
+   *
+   * @param variables - variables to pass into the ProjectsQuery
+   * @returns ProjectConnection
+   */
+  public projects(variables?: L.ProjectsQueryVariables): LinearFetch<ProjectConnection> {
+    return new ProjectsQuery(this._request).fetch(variables);
+  }
+  /**
+   * Sends a test push message.
+   *
+   * @returns PushSubscriptionTestPayload
+   */
+  public get pushSubscriptionTest(): LinearFetch<PushSubscriptionTestPayload> {
+    return new PushSubscriptionTestQuery(this._request).fetch();
+  }
+  /**
+   * The status of the rate limiter.
+   *
+   * @returns RateLimitPayload
+   */
+  public get rateLimitStatus(): LinearFetch<RateLimitPayload> {
+    return new RateLimitStatusQuery(this._request).fetch();
+  }
+  /**
+   * One specific roadmap.
+   *
+   * @param id - required id to pass to roadmap
+   * @returns Roadmap
+   */
+  public roadmap(id: string): LinearFetch<Roadmap> {
+    return new RoadmapQuery(this._request).fetch(id);
+  }
+  /**
+   * One specific roadmapToProject.
+   *
+   * @param id - required id to pass to roadmapToProject
+   * @returns RoadmapToProject
+   */
+  public roadmapToProject(id: string): LinearFetch<RoadmapToProject> {
+    return new RoadmapToProjectQuery(this._request).fetch(id);
+  }
+  /**
+   * Custom views for the user.
+   *
+   * @param variables - variables to pass into the RoadmapToProjectsQuery
+   * @returns RoadmapToProjectConnection
+   */
+  public roadmapToProjects(variables?: L.RoadmapToProjectsQueryVariables): LinearFetch<RoadmapToProjectConnection> {
+    return new RoadmapToProjectsQuery(this._request).fetch(variables);
+  }
+  /**
+   * All roadmaps in the workspace.
+   *
+   * @param variables - variables to pass into the RoadmapsQuery
+   * @returns RoadmapConnection
+   */
+  public roadmaps(variables?: L.RoadmapsQueryVariables): LinearFetch<RoadmapConnection> {
+    return new RoadmapsQuery(this._request).fetch(variables);
+  }
+  /**
+   * Search documents.
+   *
+   * @param term - required term to pass to searchDocuments
+   * @param variables - variables without 'term' to pass into the SearchDocumentsQuery
+   * @returns DocumentSearchPayload
+   */
+  public searchDocuments(
+    term: string,
+    variables?: Omit<L.SearchDocumentsQueryVariables, "term">
+  ): LinearFetch<DocumentSearchPayload> {
+    return new SearchDocumentsQuery(this._request).fetch(term, variables);
+  }
+  /**
+   * Search issues.
+   *
+   * @param term - required term to pass to searchIssues
+   * @param variables - variables without 'term' to pass into the SearchIssuesQuery
+   * @returns IssueSearchPayload
+   */
+  public searchIssues(
+    term: string,
+    variables?: Omit<L.SearchIssuesQueryVariables, "term">
+  ): LinearFetch<IssueSearchPayload> {
+    return new SearchIssuesQuery(this._request).fetch(term, variables);
+  }
+  /**
+   * Search projects.
+   *
+   * @param term - required term to pass to searchProjects
+   * @param variables - variables without 'term' to pass into the SearchProjectsQuery
+   * @returns ProjectSearchPayload
+   */
+  public searchProjects(
+    term: string,
+    variables?: Omit<L.SearchProjectsQueryVariables, "term">
+  ): LinearFetch<ProjectSearchPayload> {
+    return new SearchProjectsQuery(this._request).fetch(term, variables);
+  }
+  /**
+   * Fetch SSO login URL for the email provided.
+   *
+   * @param email - required email to pass to ssoUrlFromEmail
+   * @param variables - variables without 'email' to pass into the SsoUrlFromEmailQuery
+   * @returns SsoUrlFromEmailResponse
+   */
+  public ssoUrlFromEmail(
+    email: string,
+    variables?: Omit<L.SsoUrlFromEmailQueryVariables, "email">
+  ): LinearFetch<SsoUrlFromEmailResponse> {
+    return new SsoUrlFromEmailQuery(this._request).fetch(email, variables);
+  }
+  /**
+   * One specific team.
+   *
+   * @param id - required id to pass to team
+   * @returns Team
+   */
+  public team(id: string): LinearFetch<Team> {
+    return new TeamQuery(this._request).fetch(id);
+  }
+  /**
+   * One specific team membership.
+   *
+   * @param id - required id to pass to teamMembership
+   * @returns TeamMembership
+   */
+  public teamMembership(id: string): LinearFetch<TeamMembership> {
+    return new TeamMembershipQuery(this._request).fetch(id);
+  }
+  /**
+   * All team memberships.
+   *
+   * @param variables - variables to pass into the TeamMembershipsQuery
+   * @returns TeamMembershipConnection
+   */
+  public teamMemberships(variables?: L.TeamMembershipsQueryVariables): LinearFetch<TeamMembershipConnection> {
+    return new TeamMembershipsQuery(this._request).fetch(variables);
+  }
+  /**
+   * All teams whose issues can be accessed by the user. This might be different from `administrableTeams`, which also includes teams whose settings can be changed by the user.
+   *
+   * @param variables - variables to pass into the TeamsQuery
+   * @returns TeamConnection
+   */
+  public teams(variables?: L.TeamsQueryVariables): LinearFetch<TeamConnection> {
+    return new TeamsQuery(this._request).fetch(variables);
+  }
+  /**
+   * A specific template.
+   *
+   * @param id - required id to pass to template
+   * @returns Template
+   */
+  public template(id: string): LinearFetch<Template> {
+    return new TemplateQuery(this._request).fetch(id);
+  }
+  /**
+   * All templates from all users.
+   *
+   * @returns Template[]
+   */
+  public get templates(): LinearFetch<Template[]> {
+    return new TemplatesQuery(this._request).fetch();
+  }
+  /**
+   * Returns all templates that are associated with the integration type.
+   *
+   * @param integrationType - required integrationType to pass to templatesForIntegration
+   * @returns Template[]
+   */
+  public templatesForIntegration(integrationType: string): LinearFetch<Template[]> {
+    return new TemplatesForIntegrationQuery(this._request).fetch(integrationType);
+  }
+  /**
+   * One specific user.
+   *
+   * @param id - required id to pass to user
+   * @returns User
+   */
+  public user(id: string): LinearFetch<User> {
+    return new UserQuery(this._request).fetch(id);
+  }
+  /**
+   * The user's settings.
+   *
+   * @returns UserSettings
+   */
+  public get userSettings(): LinearFetch<UserSettings> {
+    return new UserSettingsQuery(this._request).fetch();
+  }
+  /**
+   * All users for the organization.
+   *
+   * @param variables - variables to pass into the UsersQuery
+   * @returns UserConnection
+   */
+  public users(variables?: L.UsersQueryVariables): LinearFetch<UserConnection> {
+    return new UsersQuery(this._request).fetch(variables);
+  }
+  /**
+   * The currently authenticated user.
+   *
+   * @returns User
+   */
+  public get viewer(): LinearFetch<User> {
+    return new ViewerQuery(this._request).fetch();
+  }
+  /**
+   * A specific webhook.
+   *
+   * @param id - required id to pass to webhook
+   * @returns Webhook
+   */
+  public webhook(id: string): LinearFetch<Webhook> {
+    return new WebhookQuery(this._request).fetch(id);
+  }
+  /**
+   * All webhooks.
+   *
+   * @param variables - variables to pass into the WebhooksQuery
+   * @returns WebhookConnection
+   */
+  public webhooks(variables?: L.WebhooksQueryVariables): LinearFetch<WebhookConnection> {
+    return new WebhooksQuery(this._request).fetch(variables);
+  }
+  /**
+   * One specific state.
+   *
+   * @param id - required id to pass to workflowState
+   * @returns WorkflowState
+   */
+  public workflowState(id: string): LinearFetch<WorkflowState> {
+    return new WorkflowStateQuery(this._request).fetch(id);
+  }
+  /**
+   * All issue workflow states.
+   *
+   * @param variables - variables to pass into the WorkflowStatesQuery
+   * @returns WorkflowStateConnection
+   */
+  public workflowStates(variables?: L.WorkflowStatesQueryVariables): LinearFetch<WorkflowStateConnection> {
+    return new WorkflowStatesQuery(this._request).fetch(variables);
+  }
+  /**
    * Creates an integration api key for Airbyte to connect with Linear
    *
    * @param input - required input to pass to airbyteIntegrationConnect
@@ -23181,841 +23983,5 @@ export class LinearSdk extends Request {
    */
   public updateWorkflowState(id: string, input: L.WorkflowStateUpdateInput): LinearFetch<WorkflowStatePayload> {
     return new UpdateWorkflowStateMutation(this._request).fetch(id, input);
-  }
-  /**
-   * One specific project milestone.
-   *
-   * @param id - required id to pass to ProjectMilestone
-   * @returns ProjectMilestone
-   */
-  public ProjectMilestone(id: string): LinearFetch<ProjectMilestone> {
-    return new ProjectMilestoneQuery(this._request).fetch(id);
-  }
-  /**
-   * All milestones for the project.
-   *
-   * @param variables - variables to pass into the ProjectMilestonesQuery
-   * @returns ProjectMilestoneConnection
-   */
-  public ProjectMilestones(variables?: L.ProjectMilestonesQueryVariables): LinearFetch<ProjectMilestoneConnection> {
-    return new ProjectMilestonesQuery(this._request).fetch(variables);
-  }
-  /**
-   * All teams you the user can administrate. Administrable teams are teams whose settings the user can change, but to whose issues the user doesn't necessarily have access to.
-   *
-   * @param variables - variables to pass into the AdministrableTeamsQuery
-   * @returns TeamConnection
-   */
-  public administrableTeams(variables?: L.AdministrableTeamsQueryVariables): LinearFetch<TeamConnection> {
-    return new AdministrableTeamsQuery(this._request).fetch(variables);
-  }
-  /**
-   * All API keys for the user.
-   *
-   * @param variables - variables to pass into the ApiKeysQuery
-   * @returns ApiKeyConnection
-   */
-  public apiKeys(variables?: L.ApiKeysQueryVariables): LinearFetch<ApiKeyConnection> {
-    return new ApiKeysQuery(this._request).fetch(variables);
-  }
-  /**
-   * Get basic information for an application.
-   *
-   * @param clientId - required clientId to pass to applicationInfo
-   * @returns Application
-   */
-  public applicationInfo(clientId: string): LinearFetch<Application> {
-    return new ApplicationInfoQuery(this._request).fetch(clientId);
-  }
-  /**
-   * Get information for an application and whether a user has approved it for the given scopes.
-   *
-   * @param clientId - required clientId to pass to applicationWithAuthorization
-   * @param scope - required scope to pass to applicationWithAuthorization
-   * @param variables - variables without 'clientId', 'scope' to pass into the ApplicationWithAuthorizationQuery
-   * @returns UserAuthorizedApplication
-   */
-  public applicationWithAuthorization(
-    clientId: string,
-    scope: string[],
-    variables?: Omit<L.ApplicationWithAuthorizationQueryVariables, "clientId" | "scope">
-  ): LinearFetch<UserAuthorizedApplication> {
-    return new ApplicationWithAuthorizationQuery(this._request).fetch(clientId, scope, variables);
-  }
-  /**
-   * One specific issue attachment.
-   * [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
-   *
-   * @param id - required id to pass to attachment
-   * @returns Attachment
-   */
-  public attachment(id: string): LinearFetch<Attachment> {
-    return new AttachmentQuery(this._request).fetch(id);
-  }
-  /**
-   * Query an issue by its associated attachment, and its id.
-   *
-   * @param id - required id to pass to attachmentIssue
-   * @returns Issue
-   */
-  public attachmentIssue(id: string): LinearFetch<Issue> {
-    return new AttachmentIssueQuery(this._request).fetch(id);
-  }
-  /**
-   * All issue attachments.
-   *
-   * To get attachments for a given URL, use `attachmentsForURL` query.
-   *
-   * @param variables - variables to pass into the AttachmentsQuery
-   * @returns AttachmentConnection
-   */
-  public attachments(variables?: L.AttachmentsQueryVariables): LinearFetch<AttachmentConnection> {
-    return new AttachmentsQuery(this._request).fetch(variables);
-  }
-  /**
-   * Returns issue attachments for a given `url`.
-   *
-   * @param url - required url to pass to attachmentsForURL
-   * @param variables - variables without 'url' to pass into the AttachmentsForUrlQuery
-   * @returns AttachmentConnection
-   */
-  public attachmentsForURL(
-    url: string,
-    variables?: Omit<L.AttachmentsForUrlQueryVariables, "url">
-  ): LinearFetch<AttachmentConnection> {
-    return new AttachmentsForUrlQuery(this._request).fetch(url, variables);
-  }
-  /**
-   * All audit log entries.
-   *
-   * @param variables - variables to pass into the AuditEntriesQuery
-   * @returns AuditEntryConnection
-   */
-  public auditEntries(variables?: L.AuditEntriesQueryVariables): LinearFetch<AuditEntryConnection> {
-    return new AuditEntriesQuery(this._request).fetch(variables);
-  }
-  /**
-   * List of audit entry types.
-   *
-   * @returns AuditEntryType[]
-   */
-  public get auditEntryTypes(): LinearFetch<AuditEntryType[]> {
-    return new AuditEntryTypesQuery(this._request).fetch();
-  }
-  /**
-   * User's active sessions.
-   *
-   * @returns AuthenticationSessionResponse[]
-   */
-  public get authenticationSessions(): LinearFetch<AuthenticationSessionResponse[]> {
-    return new AuthenticationSessionsQuery(this._request).fetch();
-  }
-  /**
-   * Fetch users belonging to this user account.
-   *
-   * @returns AuthResolverResponse
-   */
-  public get availableUsers(): LinearFetch<AuthResolverResponse> {
-    return new AvailableUsersQuery(this._request).fetch();
-  }
-  /**
-   * A specific comment.
-   *
-   * @param id - required id to pass to comment
-   * @returns Comment
-   */
-  public comment(id: string): LinearFetch<Comment> {
-    return new CommentQuery(this._request).fetch(id);
-  }
-  /**
-   * All comments.
-   *
-   * @param variables - variables to pass into the CommentsQuery
-   * @returns CommentConnection
-   */
-  public comments(variables?: L.CommentsQueryVariables): LinearFetch<CommentConnection> {
-    return new CommentsQuery(this._request).fetch(variables);
-  }
-  /**
-   * One specific custom view.
-   *
-   * @param id - required id to pass to customView
-   * @returns CustomView
-   */
-  public customView(id: string): LinearFetch<CustomView> {
-    return new CustomViewQuery(this._request).fetch(id);
-  }
-  /**
-   * Whether a custom view has other subscribers than the current user in the organization.
-   *
-   * @param id - required id to pass to customViewHasSubscribers
-   * @returns CustomViewHasSubscribersPayload
-   */
-  public customViewHasSubscribers(id: string): LinearFetch<CustomViewHasSubscribersPayload> {
-    return new CustomViewHasSubscribersQuery(this._request).fetch(id);
-  }
-  /**
-   * Custom views for the user.
-   *
-   * @param variables - variables to pass into the CustomViewsQuery
-   * @returns CustomViewConnection
-   */
-  public customViews(variables?: L.CustomViewsQueryVariables): LinearFetch<CustomViewConnection> {
-    return new CustomViewsQuery(this._request).fetch(variables);
-  }
-  /**
-   * One specific cycle.
-   *
-   * @param id - required id to pass to cycle
-   * @returns Cycle
-   */
-  public cycle(id: string): LinearFetch<Cycle> {
-    return new CycleQuery(this._request).fetch(id);
-  }
-  /**
-   * All cycles.
-   *
-   * @param variables - variables to pass into the CyclesQuery
-   * @returns CycleConnection
-   */
-  public cycles(variables?: L.CyclesQueryVariables): LinearFetch<CycleConnection> {
-    return new CyclesQuery(this._request).fetch(variables);
-  }
-  /**
-   * One specific document.
-   *
-   * @param id - required id to pass to document
-   * @returns Document
-   */
-  public document(id: string): LinearFetch<Document> {
-    return new DocumentQuery(this._request).fetch(id);
-  }
-  /**
-   * A collection of document content history entries.
-   *
-   * @param id - required id to pass to documentContentHistory
-   * @returns DocumentContentHistoryPayload
-   */
-  public documentContentHistory(id: string): LinearFetch<DocumentContentHistoryPayload> {
-    return new DocumentContentHistoryQuery(this._request).fetch(id);
-  }
-  /**
-   * All documents in the workspace.
-   *
-   * @param variables - variables to pass into the DocumentsQuery
-   * @returns DocumentConnection
-   */
-  public documents(variables?: L.DocumentsQueryVariables): LinearFetch<DocumentConnection> {
-    return new DocumentsQuery(this._request).fetch(variables);
-  }
-  /**
-   * A specific emoji.
-   *
-   * @param id - required id to pass to emoji
-   * @returns Emoji
-   */
-  public emoji(id: string): LinearFetch<Emoji> {
-    return new EmojiQuery(this._request).fetch(id);
-  }
-  /**
-   * All custom emojis.
-   *
-   * @param variables - variables to pass into the EmojisQuery
-   * @returns EmojiConnection
-   */
-  public emojis(variables?: L.EmojisQueryVariables): LinearFetch<EmojiConnection> {
-    return new EmojisQuery(this._request).fetch(variables);
-  }
-  /**
-   * One specific favorite.
-   *
-   * @param id - required id to pass to favorite
-   * @returns Favorite
-   */
-  public favorite(id: string): LinearFetch<Favorite> {
-    return new FavoriteQuery(this._request).fetch(id);
-  }
-  /**
-   * The user's favorites.
-   *
-   * @param variables - variables to pass into the FavoritesQuery
-   * @returns FavoriteConnection
-   */
-  public favorites(variables?: L.FavoritesQueryVariables): LinearFetch<FavoriteConnection> {
-    return new FavoritesQuery(this._request).fetch(variables);
-  }
-  /**
-   * One specific integration.
-   *
-   * @param id - required id to pass to integration
-   * @returns Integration
-   */
-  public integration(id: string): LinearFetch<Integration> {
-    return new IntegrationQuery(this._request).fetch(id);
-  }
-  /**
-   * One specific integrationTemplate.
-   *
-   * @param id - required id to pass to integrationTemplate
-   * @returns IntegrationTemplate
-   */
-  public integrationTemplate(id: string): LinearFetch<IntegrationTemplate> {
-    return new IntegrationTemplateQuery(this._request).fetch(id);
-  }
-  /**
-   * Template and integration connections.
-   *
-   * @param variables - variables to pass into the IntegrationTemplatesQuery
-   * @returns IntegrationTemplateConnection
-   */
-  public integrationTemplates(
-    variables?: L.IntegrationTemplatesQueryVariables
-  ): LinearFetch<IntegrationTemplateConnection> {
-    return new IntegrationTemplatesQuery(this._request).fetch(variables);
-  }
-  /**
-   * All integrations.
-   *
-   * @param variables - variables to pass into the IntegrationsQuery
-   * @returns IntegrationConnection
-   */
-  public integrations(variables?: L.IntegrationsQueryVariables): LinearFetch<IntegrationConnection> {
-    return new IntegrationsQuery(this._request).fetch(variables);
-  }
-  /**
-   * One specific set of settings.
-   *
-   * @param id - required id to pass to integrationsSettings
-   * @returns IntegrationsSettings
-   */
-  public integrationsSettings(id: string): LinearFetch<IntegrationsSettings> {
-    return new IntegrationsSettingsQuery(this._request).fetch(id);
-  }
-  /**
-   * One specific issue.
-   *
-   * @param id - required id to pass to issue
-   * @returns Issue
-   */
-  public issue(id: string): LinearFetch<Issue> {
-    return new IssueQuery(this._request).fetch(id);
-  }
-  /**
-   * Find issues that are related to a given Figma file key.
-   *
-   * @param fileKey - required fileKey to pass to issueFigmaFileKeySearch
-   * @param variables - variables without 'fileKey' to pass into the IssueFigmaFileKeySearchQuery
-   * @returns IssueConnection
-   */
-  public issueFigmaFileKeySearch(
-    fileKey: string,
-    variables?: Omit<L.IssueFigmaFileKeySearchQueryVariables, "fileKey">
-  ): LinearFetch<IssueConnection> {
-    return new IssueFigmaFileKeySearchQuery(this._request).fetch(fileKey, variables);
-  }
-  /**
-   * Suggests filters for an issue view based on a text prompt.
-   *
-   * @param prompt - required prompt to pass to issueFilterSuggestion
-   * @returns IssueFilterSuggestionPayload
-   */
-  public issueFilterSuggestion(prompt: string): LinearFetch<IssueFilterSuggestionPayload> {
-    return new IssueFilterSuggestionQuery(this._request).fetch(prompt);
-  }
-  /**
-   * Checks a CSV file validity against a specific import service.
-   *
-   * @param csvUrl - required csvUrl to pass to issueImportCheckCSV
-   * @param service - required service to pass to issueImportCheckCSV
-   * @returns IssueImportCheckPayload
-   */
-  public issueImportCheckCSV(csvUrl: string, service: string): LinearFetch<IssueImportCheckPayload> {
-    return new IssueImportCheckCsvQuery(this._request).fetch(csvUrl, service);
-  }
-  /**
-   * Fetches the GitHub token, completing the OAuth flow.
-   *
-   * @param code - required code to pass to issueImportFinishGithubOAuth
-   * @returns GithubOAuthTokenPayload
-   */
-  public issueImportFinishGithubOAuth(code: string): LinearFetch<GithubOAuthTokenPayload> {
-    return new IssueImportFinishGithubOAuthQuery(this._request).fetch(code);
-  }
-  /**
-   * One specific label.
-   *
-   * @param id - required id to pass to issueLabel
-   * @returns IssueLabel
-   */
-  public issueLabel(id: string): LinearFetch<IssueLabel> {
-    return new IssueLabelQuery(this._request).fetch(id);
-  }
-  /**
-   * All issue labels.
-   *
-   * @param variables - variables to pass into the IssueLabelsQuery
-   * @returns IssueLabelConnection
-   */
-  public issueLabels(variables?: L.IssueLabelsQueryVariables): LinearFetch<IssueLabelConnection> {
-    return new IssueLabelsQuery(this._request).fetch(variables);
-  }
-  /**
-   * Issue priority values and corresponding labels.
-   *
-   * @returns IssuePriorityValue[]
-   */
-  public get issuePriorityValues(): LinearFetch<IssuePriorityValue[]> {
-    return new IssuePriorityValuesQuery(this._request).fetch();
-  }
-  /**
-   * One specific issue relation.
-   *
-   * @param id - required id to pass to issueRelation
-   * @returns IssueRelation
-   */
-  public issueRelation(id: string): LinearFetch<IssueRelation> {
-    return new IssueRelationQuery(this._request).fetch(id);
-  }
-  /**
-   * All issue relationships.
-   *
-   * @param variables - variables to pass into the IssueRelationsQuery
-   * @returns IssueRelationConnection
-   */
-  public issueRelations(variables?: L.IssueRelationsQueryVariables): LinearFetch<IssueRelationConnection> {
-    return new IssueRelationsQuery(this._request).fetch(variables);
-  }
-  /**
-   * [DEPRECATED] Search issues. This endpoint is deprecated and will be removed in the future – use `searchIssues` instead.
-   *
-   * @param variables - variables to pass into the IssueSearchQuery
-   * @returns IssueConnection
-   */
-  public issueSearch(variables?: L.IssueSearchQueryVariables): LinearFetch<IssueConnection> {
-    return new IssueSearchQuery(this._request).fetch(variables);
-  }
-  /**
-   * Find issue based on the VCS branch name.
-   *
-   * @param branchName - required branchName to pass to issueVcsBranchSearch
-   * @returns Issue
-   */
-  public issueVcsBranchSearch(branchName: string): LinearFetch<Issue | undefined> {
-    return new IssueVcsBranchSearchQuery(this._request).fetch(branchName);
-  }
-  /**
-   * All issues.
-   *
-   * @param variables - variables to pass into the IssuesQuery
-   * @returns IssueConnection
-   */
-  public issues(variables?: L.IssuesQueryVariables): LinearFetch<IssueConnection> {
-    return new IssuesQuery(this._request).fetch(variables);
-  }
-  /**
-   * One specific notification.
-   *
-   * @param id - required id to pass to notification
-   * @returns Notification
-   */
-  public notification(
-    id: string
-  ): LinearFetch<IssueNotification | OauthClientApprovalNotification | ProjectNotification | Notification> {
-    return new NotificationQuery(this._request).fetch(id);
-  }
-  /**
-   * One specific notification subscription.
-   *
-   * @param id - required id to pass to notificationSubscription
-   * @returns NotificationSubscription
-   */
-  public notificationSubscription(
-    id: string
-  ): LinearFetch<
-    | CustomViewNotificationSubscription
-    | CycleNotificationSubscription
-    | LabelNotificationSubscription
-    | ProjectNotificationSubscription
-    | TeamNotificationSubscription
-    | UserNotificationSubscription
-    | NotificationSubscription
-  > {
-    return new NotificationSubscriptionQuery(this._request).fetch(id);
-  }
-  /**
-   * The user's notification subscriptions.
-   *
-   * @param variables - variables to pass into the NotificationSubscriptionsQuery
-   * @returns NotificationSubscriptionConnection
-   */
-  public notificationSubscriptions(
-    variables?: L.NotificationSubscriptionsQueryVariables
-  ): LinearFetch<NotificationSubscriptionConnection> {
-    return new NotificationSubscriptionsQuery(this._request).fetch(variables);
-  }
-  /**
-   * All notifications.
-   *
-   * @param variables - variables to pass into the NotificationsQuery
-   * @returns NotificationConnection
-   */
-  public notifications(variables?: L.NotificationsQueryVariables): LinearFetch<NotificationConnection> {
-    return new NotificationsQuery(this._request).fetch(variables);
-  }
-  /**
-   * The user's organization.
-   *
-   * @returns Organization
-   */
-  public get organization(): LinearFetch<Organization> {
-    return new OrganizationQuery(this._request).fetch();
-  }
-  /**
-   * Does the organization exist.
-   *
-   * @param urlKey - required urlKey to pass to organizationExists
-   * @returns OrganizationExistsPayload
-   */
-  public organizationExists(urlKey: string): LinearFetch<OrganizationExistsPayload> {
-    return new OrganizationExistsQuery(this._request).fetch(urlKey);
-  }
-  /**
-   * One specific organization invite.
-   *
-   * @param id - required id to pass to organizationInvite
-   * @returns OrganizationInvite
-   */
-  public organizationInvite(id: string): LinearFetch<OrganizationInvite> {
-    return new OrganizationInviteQuery(this._request).fetch(id);
-  }
-  /**
-   * All invites for the organization.
-   *
-   * @param variables - variables to pass into the OrganizationInvitesQuery
-   * @returns OrganizationInviteConnection
-   */
-  public organizationInvites(
-    variables?: L.OrganizationInvitesQueryVariables
-  ): LinearFetch<OrganizationInviteConnection> {
-    return new OrganizationInvitesQuery(this._request).fetch(variables);
-  }
-  /**
-   * One specific project.
-   *
-   * @param id - required id to pass to project
-   * @returns Project
-   */
-  public project(id: string): LinearFetch<Project> {
-    return new ProjectQuery(this._request).fetch(id);
-  }
-  /**
-   * Suggests filters for a project view based on a text prompt.
-   *
-   * @param prompt - required prompt to pass to projectFilterSuggestion
-   * @returns ProjectFilterSuggestionPayload
-   */
-  public projectFilterSuggestion(prompt: string): LinearFetch<ProjectFilterSuggestionPayload> {
-    return new ProjectFilterSuggestionQuery(this._request).fetch(prompt);
-  }
-  /**
-   * One specific project link.
-   *
-   * @param id - required id to pass to projectLink
-   * @returns ProjectLink
-   */
-  public projectLink(id: string): LinearFetch<ProjectLink> {
-    return new ProjectLinkQuery(this._request).fetch(id);
-  }
-  /**
-   * All links for the project.
-   *
-   * @param variables - variables to pass into the ProjectLinksQuery
-   * @returns ProjectLinkConnection
-   */
-  public projectLinks(variables?: L.ProjectLinksQueryVariables): LinearFetch<ProjectLinkConnection> {
-    return new ProjectLinksQuery(this._request).fetch(variables);
-  }
-  /**
-   * A specific project update.
-   *
-   * @param id - required id to pass to projectUpdate
-   * @returns ProjectUpdate
-   */
-  public projectUpdate(id: string): LinearFetch<ProjectUpdate> {
-    return new ProjectUpdateQuery(this._request).fetch(id);
-  }
-  /**
-   * A specific interaction on a project update.
-   *
-   * @param id - required id to pass to projectUpdateInteraction
-   * @returns ProjectUpdateInteraction
-   */
-  public projectUpdateInteraction(id: string): LinearFetch<ProjectUpdateInteraction> {
-    return new ProjectUpdateInteractionQuery(this._request).fetch(id);
-  }
-  /**
-   * All interactions on project updates.
-   *
-   * @param variables - variables to pass into the ProjectUpdateInteractionsQuery
-   * @returns ProjectUpdateInteractionConnection
-   */
-  public projectUpdateInteractions(
-    variables?: L.ProjectUpdateInteractionsQueryVariables
-  ): LinearFetch<ProjectUpdateInteractionConnection> {
-    return new ProjectUpdateInteractionsQuery(this._request).fetch(variables);
-  }
-  /**
-   * All project updates.
-   *
-   * @param variables - variables to pass into the ProjectUpdatesQuery
-   * @returns ProjectUpdateConnection
-   */
-  public projectUpdates(variables?: L.ProjectUpdatesQueryVariables): LinearFetch<ProjectUpdateConnection> {
-    return new ProjectUpdatesQuery(this._request).fetch(variables);
-  }
-  /**
-   * All projects.
-   *
-   * @param variables - variables to pass into the ProjectsQuery
-   * @returns ProjectConnection
-   */
-  public projects(variables?: L.ProjectsQueryVariables): LinearFetch<ProjectConnection> {
-    return new ProjectsQuery(this._request).fetch(variables);
-  }
-  /**
-   * Sends a test push message.
-   *
-   * @returns PushSubscriptionTestPayload
-   */
-  public get pushSubscriptionTest(): LinearFetch<PushSubscriptionTestPayload> {
-    return new PushSubscriptionTestQuery(this._request).fetch();
-  }
-  /**
-   * The status of the rate limiter.
-   *
-   * @returns RateLimitPayload
-   */
-  public get rateLimitStatus(): LinearFetch<RateLimitPayload> {
-    return new RateLimitStatusQuery(this._request).fetch();
-  }
-  /**
-   * One specific roadmap.
-   *
-   * @param id - required id to pass to roadmap
-   * @returns Roadmap
-   */
-  public roadmap(id: string): LinearFetch<Roadmap> {
-    return new RoadmapQuery(this._request).fetch(id);
-  }
-  /**
-   * One specific roadmapToProject.
-   *
-   * @param id - required id to pass to roadmapToProject
-   * @returns RoadmapToProject
-   */
-  public roadmapToProject(id: string): LinearFetch<RoadmapToProject> {
-    return new RoadmapToProjectQuery(this._request).fetch(id);
-  }
-  /**
-   * Custom views for the user.
-   *
-   * @param variables - variables to pass into the RoadmapToProjectsQuery
-   * @returns RoadmapToProjectConnection
-   */
-  public roadmapToProjects(variables?: L.RoadmapToProjectsQueryVariables): LinearFetch<RoadmapToProjectConnection> {
-    return new RoadmapToProjectsQuery(this._request).fetch(variables);
-  }
-  /**
-   * All roadmaps in the workspace.
-   *
-   * @param variables - variables to pass into the RoadmapsQuery
-   * @returns RoadmapConnection
-   */
-  public roadmaps(variables?: L.RoadmapsQueryVariables): LinearFetch<RoadmapConnection> {
-    return new RoadmapsQuery(this._request).fetch(variables);
-  }
-  /**
-   * Search documents.
-   *
-   * @param term - required term to pass to searchDocuments
-   * @param variables - variables without 'term' to pass into the SearchDocumentsQuery
-   * @returns DocumentSearchPayload
-   */
-  public searchDocuments(
-    term: string,
-    variables?: Omit<L.SearchDocumentsQueryVariables, "term">
-  ): LinearFetch<DocumentSearchPayload> {
-    return new SearchDocumentsQuery(this._request).fetch(term, variables);
-  }
-  /**
-   * Search issues.
-   *
-   * @param term - required term to pass to searchIssues
-   * @param variables - variables without 'term' to pass into the SearchIssuesQuery
-   * @returns IssueSearchPayload
-   */
-  public searchIssues(
-    term: string,
-    variables?: Omit<L.SearchIssuesQueryVariables, "term">
-  ): LinearFetch<IssueSearchPayload> {
-    return new SearchIssuesQuery(this._request).fetch(term, variables);
-  }
-  /**
-   * Search projects.
-   *
-   * @param term - required term to pass to searchProjects
-   * @param variables - variables without 'term' to pass into the SearchProjectsQuery
-   * @returns ProjectSearchPayload
-   */
-  public searchProjects(
-    term: string,
-    variables?: Omit<L.SearchProjectsQueryVariables, "term">
-  ): LinearFetch<ProjectSearchPayload> {
-    return new SearchProjectsQuery(this._request).fetch(term, variables);
-  }
-  /**
-   * Fetch SSO login URL for the email provided.
-   *
-   * @param email - required email to pass to ssoUrlFromEmail
-   * @param variables - variables without 'email' to pass into the SsoUrlFromEmailQuery
-   * @returns SsoUrlFromEmailResponse
-   */
-  public ssoUrlFromEmail(
-    email: string,
-    variables?: Omit<L.SsoUrlFromEmailQueryVariables, "email">
-  ): LinearFetch<SsoUrlFromEmailResponse> {
-    return new SsoUrlFromEmailQuery(this._request).fetch(email, variables);
-  }
-  /**
-   * One specific team.
-   *
-   * @param id - required id to pass to team
-   * @returns Team
-   */
-  public team(id: string): LinearFetch<Team> {
-    return new TeamQuery(this._request).fetch(id);
-  }
-  /**
-   * One specific team membership.
-   *
-   * @param id - required id to pass to teamMembership
-   * @returns TeamMembership
-   */
-  public teamMembership(id: string): LinearFetch<TeamMembership> {
-    return new TeamMembershipQuery(this._request).fetch(id);
-  }
-  /**
-   * All team memberships.
-   *
-   * @param variables - variables to pass into the TeamMembershipsQuery
-   * @returns TeamMembershipConnection
-   */
-  public teamMemberships(variables?: L.TeamMembershipsQueryVariables): LinearFetch<TeamMembershipConnection> {
-    return new TeamMembershipsQuery(this._request).fetch(variables);
-  }
-  /**
-   * All teams whose issues can be accessed by the user. This might be different from `administrableTeams`, which also includes teams whose settings can be changed by the user.
-   *
-   * @param variables - variables to pass into the TeamsQuery
-   * @returns TeamConnection
-   */
-  public teams(variables?: L.TeamsQueryVariables): LinearFetch<TeamConnection> {
-    return new TeamsQuery(this._request).fetch(variables);
-  }
-  /**
-   * A specific template.
-   *
-   * @param id - required id to pass to template
-   * @returns Template
-   */
-  public template(id: string): LinearFetch<Template> {
-    return new TemplateQuery(this._request).fetch(id);
-  }
-  /**
-   * All templates from all users.
-   *
-   * @returns Template[]
-   */
-  public get templates(): LinearFetch<Template[]> {
-    return new TemplatesQuery(this._request).fetch();
-  }
-  /**
-   * Returns all templates that are associated with the integration type.
-   *
-   * @param integrationType - required integrationType to pass to templatesForIntegration
-   * @returns Template[]
-   */
-  public templatesForIntegration(integrationType: string): LinearFetch<Template[]> {
-    return new TemplatesForIntegrationQuery(this._request).fetch(integrationType);
-  }
-  /**
-   * One specific user.
-   *
-   * @param id - required id to pass to user
-   * @returns User
-   */
-  public user(id: string): LinearFetch<User> {
-    return new UserQuery(this._request).fetch(id);
-  }
-  /**
-   * The user's settings.
-   *
-   * @returns UserSettings
-   */
-  public get userSettings(): LinearFetch<UserSettings> {
-    return new UserSettingsQuery(this._request).fetch();
-  }
-  /**
-   * All users for the organization.
-   *
-   * @param variables - variables to pass into the UsersQuery
-   * @returns UserConnection
-   */
-  public users(variables?: L.UsersQueryVariables): LinearFetch<UserConnection> {
-    return new UsersQuery(this._request).fetch(variables);
-  }
-  /**
-   * The currently authenticated user.
-   *
-   * @returns User
-   */
-  public get viewer(): LinearFetch<User> {
-    return new ViewerQuery(this._request).fetch();
-  }
-  /**
-   * A specific webhook.
-   *
-   * @param id - required id to pass to webhook
-   * @returns Webhook
-   */
-  public webhook(id: string): LinearFetch<Webhook> {
-    return new WebhookQuery(this._request).fetch(id);
-  }
-  /**
-   * All webhooks.
-   *
-   * @param variables - variables to pass into the WebhooksQuery
-   * @returns WebhookConnection
-   */
-  public webhooks(variables?: L.WebhooksQueryVariables): LinearFetch<WebhookConnection> {
-    return new WebhooksQuery(this._request).fetch(variables);
-  }
-  /**
-   * One specific state.
-   *
-   * @param id - required id to pass to workflowState
-   * @returns WorkflowState
-   */
-  public workflowState(id: string): LinearFetch<WorkflowState> {
-    return new WorkflowStateQuery(this._request).fetch(id);
-  }
-  /**
-   * All issue workflow states.
-   *
-   * @param variables - variables to pass into the WorkflowStatesQuery
-   * @returns WorkflowStateConnection
-   */
-  public workflowStates(variables?: L.WorkflowStatesQueryVariables): LinearFetch<WorkflowStateConnection> {
-    return new WorkflowStatesQuery(this._request).fetch(variables);
   }
 }

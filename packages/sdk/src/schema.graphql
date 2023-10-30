@@ -13258,11 +13258,12 @@ enum PushSubscriptionType {
 
 type Query {
   """
-  One specific project milestone.
+  [DEPRECATED] [INTERNAL] One specific project milestone.
   """
   ProjectMilestone(id: String!): ProjectMilestone!
+    @deprecated(reason: "This mutation is deprecated, please use `projectMilestone` instead.")
   """
-  All milestones for the project.
+  [DEPRECATED] [INTERNAL] All milestones for the project.
   """
   ProjectMilestones(
     """
@@ -13294,6 +13295,7 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): ProjectMilestoneConnection!
+    @deprecated(reason: "This mutation is deprecated, please use `projectMilestones` instead.")
   """
   All teams you the user can administrate. Administrable teams are teams whose settings the user can change, but to whose issues the user doesn't necessarily have access to.
   """
@@ -14256,6 +14258,43 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): ProjectLinkConnection!
+  """
+  One specific project milestone.
+  """
+  projectMilestone(id: String!): ProjectMilestone!
+  """
+  All milestones for the project.
+  """
+  projectMilestones(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned project milestones.
+    """
+    filter: ProjectMilestoneFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectMilestoneConnection!
   """
   A specific project update.
   """
@@ -17166,10 +17205,6 @@ type TriageResponsibility implements Node {
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
-  """
-  The responsibility configuration.
-  """
-  config: JSONObject
   """
   The time at which the entity was created.
   """
