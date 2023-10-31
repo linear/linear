@@ -13352,6 +13352,12 @@
             "deprecationReason": null
           },
           {
+            "name": "jiraPersonal",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "loom",
             "description": null,
             "isDeprecated": false,
@@ -27134,6 +27140,39 @@
             "deprecationReason": null
           },
           {
+            "name": "integrationJiraPersonal",
+            "description": "Connect your Jira account to Linear.",
+            "args": [
+              {
+                "name": "code",
+                "description": "The Jira OAuth code.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationIntercom",
             "description": "Integrates the organization with Intercom.",
             "args": [
@@ -32454,7 +32493,7 @@
           },
           {
             "name": "userJiraConnect",
-            "description": "Connects the Jira user to this Linear account via OAuth2.",
+            "description": "[DEPRECATED] Connects the Jira user to this Linear account via OAuth2.",
             "args": [
               {
                 "name": "code",
@@ -32482,8 +32521,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Replaced by integrationJiraPersonal mutation on Integration resolver."
           },
           {
             "name": "userExternalUserDisconnect",

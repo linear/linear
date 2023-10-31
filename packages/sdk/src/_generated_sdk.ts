@@ -13867,6 +13867,35 @@ export class UpdateIntegrationIntercomSettingsMutation extends Request {
 }
 
 /**
+ * A fetchable IntegrationJiraPersonal Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationJiraPersonalMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationJiraPersonal mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationJiraPersonal
+   * @returns parsed response from IntegrationJiraPersonalMutation
+   */
+  public async fetch(code: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<L.IntegrationJiraPersonalMutation, L.IntegrationJiraPersonalMutationVariables>(
+      L.IntegrationJiraPersonalDocument,
+      {
+        code,
+      }
+    );
+    const data = response.integrationJiraPersonal;
+
+    return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable IntegrationLoom Mutation
  *
  * @param request - function to call the graphql client
@@ -22615,6 +22644,15 @@ export class LinearSdk extends Request {
     return new UpdateIntegrationIntercomSettingsMutation(this._request).fetch(input);
   }
   /**
+   * Connect your Jira account to Linear.
+   *
+   * @param code - required code to pass to integrationJiraPersonal
+   * @returns IntegrationPayload
+   */
+  public integrationJiraPersonal(code: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationJiraPersonalMutation(this._request).fetch(code);
+  }
+  /**
    * Enables Loom integration for the organization.
    *
    * @returns IntegrationPayload
@@ -23816,7 +23854,7 @@ export class LinearSdk extends Request {
     return new UserGitHubConnectMutation(this._request).fetch(code);
   }
   /**
-   * Connects the Jira user to this Linear account via OAuth2.
+   * [DEPRECATED] Connects the Jira user to this Linear account via OAuth2.
    *
    * @param code - required code to pass to userJiraConnect
    * @returns UserPayload
