@@ -3529,6 +3529,7 @@ enum IntegrationService {
   googleSheets
   intercom
   jira
+  jiraPersonal
   loom
   notion
   pagerDuty
@@ -7436,6 +7437,15 @@ type Mutation {
   ): IntegrationPayload!
     @deprecated(reason: "This mutation is deprecated, please use `integrationSettingsUpdate` instead")
   """
+  Connect your Jira account to Linear.
+  """
+  integrationJiraPersonal(
+    """
+    The Jira OAuth code.
+    """
+    code: String!
+  ): IntegrationPayload!
+  """
   Enables Loom integration for the organization.
   """
   integrationLoom: IntegrationPayload! @deprecated(reason: "Not available.")
@@ -8875,14 +8885,14 @@ type Mutation {
     code: String!
   ): UserPayload!
   """
-  Connects the Jira user to this Linear account via OAuth2.
+  [DEPRECATED] Connects the Jira user to this Linear account via OAuth2.
   """
   userJiraConnect(
     """
     The Jira OAuth code.
     """
     code: String!
-  ): UserPayload!
+  ): UserPayload! @deprecated(reason: "Replaced by integrationJiraPersonal mutation on Integration resolver.")
   """
   Makes user an admin. Can only be called by an admin.
   """

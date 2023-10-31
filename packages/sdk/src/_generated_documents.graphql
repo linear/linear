@@ -8946,6 +8946,15 @@ mutation updateIntegrationIntercomSettings(
     ...IntegrationPayload
   }
 }
+# Connect your Jira account to Linear.
+mutation integrationJiraPersonal(
+  # The Jira OAuth code.
+  $code: String!
+) {
+  integrationJiraPersonal(code: $code) {
+    ...IntegrationPayload
+  }
+}
 # Enables Loom integration for the organization.
 mutation integrationLoom {
   integrationLoom {
@@ -10188,7 +10197,7 @@ mutation userGitHubConnect(
     ...UserPayload
   }
 }
-# Connects the Jira user to this Linear account via OAuth2.
+# [DEPRECATED] Connects the Jira user to this Linear account via OAuth2.
 mutation userJiraConnect(
   # The Jira OAuth code.
   $code: String!

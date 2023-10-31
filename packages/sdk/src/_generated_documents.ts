@@ -2173,6 +2173,7 @@ export enum IntegrationService {
   GoogleSheets = "googleSheets",
   Intercom = "intercom",
   Jira = "jira",
+  JiraPersonal = "jiraPersonal",
   Loom = "loom",
   Notion = "notion",
   PagerDuty = "pagerDuty",
@@ -4004,6 +4005,8 @@ export type Mutation = {
    * @deprecated This mutation is deprecated, please use `integrationSettingsUpdate` instead
    */
   integrationIntercomSettingsUpdate: IntegrationPayload;
+  /** Connect your Jira account to Linear. */
+  integrationJiraPersonal: IntegrationPayload;
   /**
    * Enables Loom integration for the organization.
    * @deprecated Not available.
@@ -4259,7 +4262,10 @@ export type Mutation = {
   userFlagUpdate: UserSettingsFlagPayload;
   /** Connects the GitHub user to this Linear account via OAuth2. */
   userGitHubConnect: UserPayload;
-  /** Connects the Jira user to this Linear account via OAuth2. */
+  /**
+   * [DEPRECATED] Connects the Jira user to this Linear account via OAuth2.
+   * @deprecated Replaced by integrationJiraPersonal mutation on Integration resolver.
+   */
   userJiraConnect: UserPayload;
   /** Makes user an admin. Can only be called by an admin. */
   userPromoteAdmin: UserAdminPayload;
@@ -4608,6 +4614,10 @@ export type MutationIntegrationIntercomArgs = {
 
 export type MutationIntegrationIntercomSettingsUpdateArgs = {
   input: IntercomSettingsInput;
+};
+
+export type MutationIntegrationJiraPersonalArgs = {
+  code: Scalars["String"];
 };
 
 export type MutationIntegrationPagerDutyConnectArgs = {
@@ -15684,6 +15694,14 @@ export type UpdateIntegrationIntercomSettingsMutationVariables = Exact<{
 
 export type UpdateIntegrationIntercomSettingsMutation = { __typename?: "Mutation" } & {
   integrationIntercomSettingsUpdate: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationJiraPersonalMutationVariables = Exact<{
+  code: Scalars["String"];
+}>;
+
+export type IntegrationJiraPersonalMutation = { __typename?: "Mutation" } & {
+  integrationJiraPersonal: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
 export type IntegrationLoomMutationVariables = Exact<{ [key: string]: never }>;
@@ -41100,6 +41118,44 @@ export const UpdateIntegrationIntercomSettingsDocument = {
   UpdateIntegrationIntercomSettingsMutation,
   UpdateIntegrationIntercomSettingsMutationVariables
 >;
+export const IntegrationJiraPersonalDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationJiraPersonal" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationJiraPersonal" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationJiraPersonalMutation, IntegrationJiraPersonalMutationVariables>;
 export const IntegrationLoomDocument = {
   kind: "Document",
   definitions: [
