@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.15.2
+
+### Patch Changes
+
+- ad7033f: chore(deps): update dependency patch versions
+
 ## 1.15.1
 
 ### Patch Changes
