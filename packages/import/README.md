@@ -41,9 +41,7 @@ Supported fields:
 
 ### Jira CSV
 
-Jira project can be imported into a Linear team from the CSV export file.
-
-Following fields are supported:
+This method is deprecated. We recommend importing Jira projects through the [in-product importer](https://linear.app/docs/import-issues#jira) instead of the CLI, which also offers a CSV import option but imports more fields. If you proceed, the following fields are supported:
 
 - `Summary` - Issue title
 - `Description` - Converted into markdown and used as issue description
