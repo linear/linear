@@ -40,8 +40,6 @@ fragment Comment on Comment {
   botActor {
     ...ActorBot
   }
-  # The comment content as a Prosemirror document.
-  bodyData
   # The comment content in markdown format.
   body
   # The comment that resolved the thread.
@@ -202,6 +200,8 @@ fragment CustomView on CustomView {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The model name of the custom view.
+  modelName
   # The name of the custom view.
   name
   # The team associated with the custom view.
@@ -276,8 +276,6 @@ fragment CycleNotificationSubscription on CycleNotificationSubscription {
 # A document content for a project.
 fragment DocumentContent on DocumentContent {
   __typename
-  # The document content as JSON.
-  contentData
   # The document content in markdown format.
   content
   # The document content state as a base64 encoded string.
@@ -317,8 +315,6 @@ fragment DocumentContentHistory on DocumentContentHistory {
   __typename
   # IDs of actors whose edits went into this history item.
   actorIds
-  # The document content as JSON.
-  contentData
   # The document content that this history item is associated with.
   documentContent {
     ...DocumentContent
@@ -2235,6 +2231,13 @@ fragment IssueRelationHistoryPayload on IssueRelationHistoryPayload {
   type
 }
 
+# Jira personal specific settings.
+fragment JiraPersonalSettings on JiraPersonalSettings {
+  __typename
+  # The name of the Jira site currently authorized through the integration.
+  siteName
+}
+
 # Jira specific settings.
 fragment JiraSettings on JiraSettings {
   __typename
@@ -2504,6 +2507,8 @@ fragment SlackChannelNameMapping on SlackChannelNameMapping {
   autoCreateOnMessage
   # Whether or not using the :ticket: emoji in this channel should automatically create Asks
   autoCreateOnEmoji
+  # Whether or not we the Linear Asks bot has been added to this Slack channel
+  botAdded
   # Which teams are connected to the channel and settings for those teams
   teams {
     ...SlackAsksTeamSettings
@@ -2736,6 +2741,9 @@ fragment IntegrationSettings on IntegrationSettings {
   jira {
     ...JiraSettings
   }
+  jiraPersonal {
+    ...JiraPersonalSettings
+  }
   notion {
     ...NotionSettings
   }
@@ -2894,6 +2902,8 @@ fragment AuthenticationSession on AuthenticationSession {
   operatingSystem
   # Session's user-agent.
   userAgent
+  # Used web browser.
+  browserType
   # When was the session last seen
   lastActiveAt
   id
@@ -3208,6 +3218,8 @@ fragment AuthenticationSessionResponse on AuthenticationSessionResponse {
   operatingSystem
   # Session's user-agent.
   userAgent
+  # Used web browser.
+  browserType
   # When was the session last seen
   lastActiveAt
   id
@@ -3357,8 +3369,6 @@ fragment DocumentContentHistoryType on DocumentContentHistoryType {
   createdAt
   # The date when the document content history snapshot was taken. This can be different than createdAt since the content is captured from its state at the previously known updatedAt timestamp in the case of an update. On document create, these timestamps can be the same.
   contentDataSnapshotAt
-  # The document content as Prosemirror document.
-  contentData
 }
 
 fragment DocumentPayload on DocumentPayload {
@@ -8360,10 +8370,8 @@ mutation attachmentLinkGitLabMR(
   $issueId: String!
   # The GitLab merge request number to link.
   $number: Float!
-  # The owner of the GitLab repository.
-  $owner: String!
-  # The name of the GitLab repository.
-  $repo: String!
+  # The path name to the project including any (sub)groups. E.g. linear/main/client
+  $projectPathWithNamespace: String!
   # The URL of the GitLab merge request to link.
   $url: String!
 ) {
@@ -8373,8 +8381,7 @@ mutation attachmentLinkGitLabMR(
     id: $id
     issueId: $issueId
     number: $number
-    owner: $owner
-    repo: $repo
+    projectPathWithNamespace: $projectPathWithNamespace
     url: $url
   ) {
     ...AttachmentPayload
@@ -8871,6 +8878,15 @@ mutation integrationFront(
   $redirectUri: String!
 ) {
   integrationFront(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
+  }
+}
+# Connect your GitHub account to Linear.
+mutation integrationGitHubPersonal(
+  # The GitHub OAuth code.
+  $code: String!
+) {
+  integrationGitHubPersonal(code: $code) {
     ...IntegrationPayload
   }
 }
@@ -10188,7 +10204,7 @@ mutation updateUserFlag(
     ...UserSettingsFlagPayload
   }
 }
-# Connects the GitHub user to this Linear account via OAuth2.
+# [DEPRECATED] Connects the GitHub user to this Linear account via OAuth2.
 mutation userGitHubConnect(
   # The GitHub OAuth code.
   $code: String!

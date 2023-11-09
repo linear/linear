@@ -354,7 +354,7 @@ input AttachmentCreateInput {
   """
   commentBody: String
   """
-  Create a linked comment with Prosemirror body. Please use `commentBody` instead
+  [Internal] Create a linked comment with Prosemirror body. Please use `commentBody` instead.
   """
   commentBodyData: JSONObject
   """
@@ -762,6 +762,10 @@ User authentication session.
 """
 type AuthenticationSession {
   """
+  Used web browser.
+  """
+  browserType: String
+  """
   Client used for the session
   """
   client: String
@@ -821,6 +825,10 @@ type AuthenticationSession {
 }
 
 type AuthenticationSessionResponse {
+  """
+  Used web browser.
+  """
+  browserType: String
   """
   Client used for the session
   """
@@ -948,7 +956,7 @@ type Comment implements Node {
   """
   body: String!
   """
-  The comment content as a Prosemirror document.
+  [Internal] The comment content as a Prosemirror document.
   """
   bodyData: String!
   """
@@ -995,7 +1003,7 @@ type Comment implements Node {
   """
   The document content that the comment is associated with.
   """
-  documentContent: DocumentContent!
+  documentContent: DocumentContent
   """
   The time user edited the comment.
   """
@@ -1114,7 +1122,7 @@ input CommentCreateInput {
   """
   body: String
   """
-  The comment content as a Prosemirror document.
+  [Internal] The comment content as a Prosemirror document.
   """
   bodyData: JSON
   """
@@ -1462,6 +1470,10 @@ type CustomView implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  The model name of the custom view.
+  """
+  modelName: String!
   """
   The name of the custom view.
   """
@@ -2260,7 +2272,7 @@ type DocumentContent implements Node {
   """
   content: String
   """
-  The document content as JSON.
+  [Internal] The document content as a Prosemirror document.
   """
   contentData: JSONObject
   """
@@ -2334,7 +2346,7 @@ type DocumentContentHistory implements Node {
   """
   archivedAt: DateTime
   """
-  The document content as JSON.
+  [Internal] The document content as a Prosemirror document.
   """
   contentData: JSONObject
   """
@@ -2378,7 +2390,7 @@ type DocumentContentHistoryType {
   """
   actorIds: [String!]
   """
-  The document content as Prosemirror document.
+  [Internal] The document content as Prosemirror document.
   """
   contentData: JSON!
   """
@@ -3524,6 +3536,7 @@ enum IntegrationService {
   gitHubSync
   github
   githubCommit
+  githubPersonal
   gitlab
   googleCalendarPersonal
   googleSheets
@@ -3555,6 +3568,7 @@ type IntegrationSettings {
   googleSheets: GoogleSheetsSettings
   intercom: IntercomSettings
   jira: JiraSettings
+  jiraPersonal: JiraPersonalSettings
   notion: NotionSettings
   pagerDuty: PagerDutySettings
   sentry: SentrySettings
@@ -3574,6 +3588,7 @@ input IntegrationSettingsInput {
   googleSheets: GoogleSheetsSettingsInput
   intercom: IntercomSettingsInput
   jira: JiraSettingsInput
+  jiraPersonal: JiraPersonalSettingsInput
   notion: NotionSettingsInput
   pagerDuty: PagerDutyInput
   sentry: SentrySettingsInput
@@ -4600,7 +4615,7 @@ input IssueCreateInput {
   """
   description: String
   """
-  The issue description as a Prosemirror document.
+  [Internal] The issue description as a Prosemirror document.
   """
   descriptionData: JSON
   """
@@ -6466,6 +6481,23 @@ input JiraLinearMappingInput {
 }
 
 """
+Jira personal specific settings.
+"""
+type JiraPersonalSettings {
+  """
+  The name of the Jira site currently authorized through the integration.
+  """
+  siteName: String
+}
+
+input JiraPersonalSettingsInput {
+  """
+  The name of the Jira site currently authorized through the integration.
+  """
+  siteName: String
+}
+
+"""
 Metadata about a Jira project.
 """
 type JiraProjectData {
@@ -6784,13 +6816,9 @@ type Mutation {
     """
     number: Float!
     """
-    The owner of the GitLab repository.
+    The path name to the project including any (sub)groups. E.g. linear/main/client
     """
-    owner: String!
-    """
-    The name of the GitLab repository.
-    """
-    repo: String!
+    projectPathWithNamespace: String!
     """
     The URL of the GitLab merge request to link.
     """
@@ -7351,6 +7379,15 @@ type Mutation {
     The Front OAuth redirect URI.
     """
     redirectUri: String!
+  ): IntegrationPayload!
+  """
+  Connect your GitHub account to Linear.
+  """
+  integrationGitHubPersonal(
+    """
+    The GitHub OAuth code.
+    """
+    code: String!
   ): IntegrationPayload!
   """
   Generates a webhook for the GitHub commit integration.
@@ -8876,14 +8913,14 @@ type Mutation {
     operation: UserFlagUpdateOperation!
   ): UserSettingsFlagPayload!
   """
-  Connects the GitHub user to this Linear account via OAuth2.
+  [DEPRECATED] Connects the GitHub user to this Linear account via OAuth2.
   """
   userGitHubConnect(
     """
     The GitHub OAuth code.
     """
     code: String!
-  ): UserPayload!
+  ): UserPayload! @deprecated(reason: "Replaced by integrationGitHubPersonal mutation on Integration resolver.")
   """
   [DEPRECATED] Connects the Jira user to this Linear account via OAuth2.
   """
@@ -12139,7 +12176,7 @@ input ProjectMilestoneCreateInput {
   """
   description: String
   """
-  The description of the project milestone as a Prosemirror document.
+  [Internal] The description of the project milestone as a Prosemirror document.
   """
   descriptionData: JSONObject
   """
@@ -12227,7 +12264,7 @@ input ProjectMilestoneUpdateInput {
   """
   description: String
   """
-  The description of the project milestone as a Prosemirror document.
+  [Internal] The description of the project milestone as a Prosemirror document.
   """
   descriptionData: JSONObject
   """
@@ -12872,7 +12909,7 @@ input ProjectUpdateCreateInput {
   """
   body: String
   """
-  The content of the project update as a Prosemirror document.
+  [Internal] The content of the project update as a Prosemirror document.
   """
   bodyData: JSON
   """
@@ -15502,12 +15539,20 @@ Slack Asks specific settings.
 """
 type SlackAsksSettings {
   """
+  The user role type that is allowed to manage Asks settings.
+  """
+  canAdministrate: UserRoleType
+  """
   The mapping of Slack channel ID => Slack channel name for connected channels.
   """
   slackChannelMapping: [SlackChannelNameMapping!]
 }
 
 input SlackAsksSettingsInput {
+  """
+  The user role type that is allowed to manage Asks settings.
+  """
+  canAdministrate: UserRoleType
   """
   The mapping of Slack channel ID => Slack channel name for connected channels.
   """
@@ -15556,6 +15601,10 @@ type SlackChannelNameMapping {
   """
   autoCreateOnMessage: Boolean
   """
+  Whether or not we the Linear Asks bot has been added to this Slack channel
+  """
+  botAdded: Boolean
+  """
   The Slack channel ID.
   """
   id: String!
@@ -15590,6 +15639,10 @@ input SlackChannelNameMappingInput {
   Whether or not top-level messages in this channel should automatically create Asks
   """
   autoCreateOnMessage: Boolean
+  """
+  Whether or not we the Linear Asks bot has been added to this Slack channel
+  """
+  botAdded: Boolean
   """
   The Slack channel ID.
   """
