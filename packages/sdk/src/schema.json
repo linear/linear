@@ -1516,7 +1516,7 @@
           },
           {
             "name": "commentBodyData",
-            "description": "Create a linked comment with Prosemirror body. Please use `commentBody` instead",
+            "description": "[Internal] Create a linked comment with Prosemirror body. Please use `commentBody` instead.",
             "type": {
               "kind": "SCALAR",
               "name": "JSONObject",
@@ -3048,6 +3048,18 @@
             "deprecationReason": null
           },
           {
+            "name": "browserType",
+            "description": "Used web browser.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "lastActiveAt",
             "description": "When was the session last seen",
             "args": [],
@@ -3261,6 +3273,18 @@
           {
             "name": "userAgent",
             "description": "Session's user-agent.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "browserType",
+            "description": "Used web browser.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -3671,13 +3695,9 @@
             "description": "The document content that the comment is associated with.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "DocumentContent",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "DocumentContent",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -3784,7 +3804,7 @@
           },
           {
             "name": "bodyData",
-            "description": "The comment content as a Prosemirror document.",
+            "description": "[Internal] The comment content as a Prosemirror document.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -4231,7 +4251,7 @@
           },
           {
             "name": "bodyData",
-            "description": "The comment content as a Prosemirror document.",
+            "description": "[Internal] The comment content as a Prosemirror document.",
             "type": {
               "kind": "SCALAR",
               "name": "JSON",
@@ -5606,6 +5626,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "modelName",
+            "description": "The model name of the custom view.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -8458,7 +8494,7 @@
           },
           {
             "name": "contentData",
-            "description": "The document content as JSON.",
+            "description": "[Internal] The document content as a Prosemirror document.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -8682,7 +8718,7 @@
           },
           {
             "name": "contentData",
-            "description": "The document content as JSON.",
+            "description": "[Internal] The document content as a Prosemirror document.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -8846,7 +8882,7 @@
           },
           {
             "name": "contentData",
-            "description": "The document content as Prosemirror document.",
+            "description": "[Internal] The document content as Prosemirror document.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -13316,6 +13352,12 @@
             "deprecationReason": null
           },
           {
+            "name": "githubPersonal",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "gitHubSync",
             "description": null,
             "isDeprecated": false,
@@ -13628,6 +13670,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "jiraPersonal",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "JiraPersonalSettings",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -13827,6 +13881,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "PagerDutyInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "jiraPersonal",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "JiraPersonalSettingsInput",
               "ofType": null
             },
             "defaultValue": null,
@@ -17232,7 +17298,7 @@
           },
           {
             "name": "descriptionData",
-            "description": "The issue description as a Prosemirror document.",
+            "description": "[Internal] The issue description as a Prosemirror document.",
             "type": {
               "kind": "SCALAR",
               "name": "JSON",
@@ -23741,6 +23807,52 @@
       },
       {
         "kind": "OBJECT",
+        "name": "JiraPersonalSettings",
+        "description": "Jira personal specific settings.",
+        "fields": [
+          {
+            "name": "siteName",
+            "description": "The name of the Jira site currently authorized through the integration.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "JiraPersonalSettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "siteName",
+            "description": "The name of the Jira site currently authorized through the integration.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "JiraProjectData",
         "description": "Metadata about a Jira project.",
         "fields": [
@@ -24632,24 +24744,8 @@
                 "deprecationReason": null
               },
               {
-                "name": "owner",
-                "description": "The owner of the GitLab repository.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              },
-              {
-                "name": "repo",
-                "description": "The name of the GitLab repository.",
+                "name": "projectPathWithNamespace",
+                "description": "The path name to the project including any (sub)groups. E.g. linear/main/client",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -27146,6 +27242,39 @@
               {
                 "name": "code",
                 "description": "The Jira OAuth code.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integrationGitHubPersonal",
+            "description": "Connect your GitHub account to Linear.",
+            "args": [
+              {
+                "name": "code",
+                "description": "The GitHub OAuth code.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -32460,7 +32589,7 @@
           },
           {
             "name": "userGitHubConnect",
-            "description": "Connects the GitHub user to this Linear account via OAuth2.",
+            "description": "[DEPRECATED] Connects the GitHub user to this Linear account via OAuth2.",
             "args": [
               {
                 "name": "code",
@@ -32488,8 +32617,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Replaced by integrationGitHubPersonal mutation on Integration resolver."
           },
           {
             "name": "userJiraConnect",
@@ -44375,7 +44504,7 @@
           },
           {
             "name": "descriptionData",
-            "description": "The description of the project milestone as a Prosemirror document.",
+            "description": "[Internal] The description of the project milestone as a Prosemirror document.",
             "type": {
               "kind": "SCALAR",
               "name": "JSONObject",
@@ -44675,7 +44804,7 @@
           },
           {
             "name": "descriptionData",
-            "description": "The description of the project milestone as a Prosemirror document.",
+            "description": "[Internal] The description of the project milestone as a Prosemirror document.",
             "type": {
               "kind": "SCALAR",
               "name": "JSONObject",
@@ -47056,7 +47185,7 @@
           },
           {
             "name": "bodyData",
-            "description": "The content of the project update as a Prosemirror document.",
+            "description": "[Internal] The content of the project update as a Prosemirror document.",
             "type": {
               "kind": "SCALAR",
               "name": "JSON",
@@ -56681,6 +56810,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "canAdministrate",
+            "description": "The user role type that is allowed to manage Asks settings.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "UserRoleType",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -56709,6 +56850,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "canAdministrate",
+            "description": "The user role type that is allowed to manage Asks settings.",
+            "type": {
+              "kind": "ENUM",
+              "name": "UserRoleType",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -56867,6 +57020,18 @@
             "deprecationReason": null
           },
           {
+            "name": "botAdded",
+            "description": "Whether or not we the Linear Asks bot has been added to this Slack channel",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "teams",
             "description": "Which teams are connected to the channel and settings for those teams",
             "args": [],
@@ -56985,6 +57150,18 @@
           {
             "name": "isShared",
             "description": "Whether or not the Slack channel is shared with an external org",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "botAdded",
+            "description": "Whether or not we the Linear Asks bot has been added to this Slack channel",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",

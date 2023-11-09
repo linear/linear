@@ -237,7 +237,7 @@ export type AttachmentConnection = {
 export type AttachmentCreateInput = {
   /** Create a linked comment with markdown body. */
   commentBody?: Maybe<Scalars["String"]>;
-  /** Create a linked comment with Prosemirror body. Please use `commentBody` instead */
+  /** [Internal] Create a linked comment with Prosemirror body. Please use `commentBody` instead. */
   commentBodyData?: Maybe<Scalars["JSONObject"]>;
   /** Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode. */
   createAsUser?: Maybe<Scalars["String"]>;
@@ -491,6 +491,8 @@ export type AuthUser = {
 /** User authentication session. */
 export type AuthenticationSession = {
   __typename?: "AuthenticationSession";
+  /** Used web browser. */
+  browserType?: Maybe<Scalars["String"]>;
   /** Client used for the session */
   client?: Maybe<Scalars["String"]>;
   /** Country codes of all seen locations. */
@@ -524,6 +526,8 @@ export type AuthenticationSession = {
 
 export type AuthenticationSessionResponse = {
   __typename?: "AuthenticationSessionResponse";
+  /** Used web browser. */
+  browserType?: Maybe<Scalars["String"]>;
   /** Client used for the session */
   client?: Maybe<Scalars["String"]>;
   /** Country codes of all seen locations. */
@@ -596,7 +600,7 @@ export type Comment = Node & {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The comment content in markdown format. */
   body: Scalars["String"];
-  /** The comment content as a Prosemirror document. */
+  /** [Internal] The comment content as a Prosemirror document. */
   bodyData: Scalars["String"];
   /** The bot that created the comment */
   botActor?: Maybe<ActorBot>;
@@ -605,7 +609,7 @@ export type Comment = Node & {
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The document content that the comment is associated with. */
-  documentContent: DocumentContent;
+  documentContent?: Maybe<DocumentContent>;
   /** The time user edited the comment. */
   editedAt?: Maybe<Scalars["DateTime"]>;
   /** [ALPHA] The external user who wrote the comment. */
@@ -685,7 +689,7 @@ export type CommentConnection = {
 export type CommentCreateInput = {
   /** The comment content in markdown format. */
   body?: Maybe<Scalars["String"]>;
-  /** The comment content as a Prosemirror document. */
+  /** [Internal] The comment content as a Prosemirror document. */
   bodyData?: Maybe<Scalars["JSON"]>;
   /** Create comment as a user with the provided name. This option is only available to OAuth applications creating comments in `actor=application` mode. */
   createAsUser?: Maybe<Scalars["String"]>;
@@ -902,6 +906,8 @@ export type CustomView = Node & {
   icon?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** The model name of the custom view. */
+  modelName: Scalars["String"];
   /** The name of the custom view. */
   name: Scalars["String"];
   /** The organization of the custom view. */
@@ -1369,7 +1375,7 @@ export type DocumentContent = Node & {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The document content in markdown format. */
   content?: Maybe<Scalars["String"]>;
-  /** The document content as JSON. */
+  /** [Internal] The document content as a Prosemirror document. */
   contentData?: Maybe<Scalars["JSONObject"]>;
   /** The document content state as a base64 encoded string. */
   contentState?: Maybe<Scalars["String"]>;
@@ -1412,7 +1418,7 @@ export type DocumentContentHistory = Node & {
   actorIds: Array<Scalars["String"]>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The document content as JSON. */
+  /** [Internal] The document content as a Prosemirror document. */
   contentData?: Maybe<Scalars["JSONObject"]>;
   /** The timestamp associated with the DocumentContent when it was originally saved */
   contentDataSnapshotAt: Scalars["DateTime"];
@@ -1442,7 +1448,7 @@ export type DocumentContentHistoryType = {
   __typename?: "DocumentContentHistoryType";
   /** The ID of the author of the change. */
   actorIds?: Maybe<Array<Scalars["String"]>>;
-  /** The document content as Prosemirror document. */
+  /** [Internal] The document content as Prosemirror document. */
   contentData: Scalars["JSON"];
   /** The date when the document content history snapshot was taken. This can be different than createdAt since the content is captured from its state at the previously known updatedAt timestamp in the case of an update. On document create, these timestamps can be the same. */
   contentDataSnapshotAt: Scalars["DateTime"];
@@ -2168,6 +2174,7 @@ export enum IntegrationService {
   GitHubSync = "gitHubSync",
   Github = "github",
   GithubCommit = "githubCommit",
+  GithubPersonal = "githubPersonal",
   Gitlab = "gitlab",
   GoogleCalendarPersonal = "googleCalendarPersonal",
   GoogleSheets = "googleSheets",
@@ -2198,6 +2205,7 @@ export type IntegrationSettings = {
   googleSheets?: Maybe<GoogleSheetsSettings>;
   intercom?: Maybe<IntercomSettings>;
   jira?: Maybe<JiraSettings>;
+  jiraPersonal?: Maybe<JiraPersonalSettings>;
   notion?: Maybe<NotionSettings>;
   pagerDuty?: Maybe<PagerDutySettings>;
   sentry?: Maybe<SentrySettings>;
@@ -2217,6 +2225,7 @@ export type IntegrationSettingsInput = {
   googleSheets?: Maybe<GoogleSheetsSettingsInput>;
   intercom?: Maybe<IntercomSettingsInput>;
   jira?: Maybe<JiraSettingsInput>;
+  jiraPersonal?: Maybe<JiraPersonalSettingsInput>;
   notion?: Maybe<NotionSettingsInput>;
   pagerDuty?: Maybe<PagerDutyInput>;
   sentry?: Maybe<SentrySettingsInput>;
@@ -2767,7 +2776,7 @@ export type IssueCreateInput = {
   cycleId?: Maybe<Scalars["String"]>;
   /** The issue description in markdown format. */
   description?: Maybe<Scalars["String"]>;
-  /** The issue description as a Prosemirror document. */
+  /** [Internal] The issue description as a Prosemirror document. */
   descriptionData?: Maybe<Scalars["JSON"]>;
   /** Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode. */
   displayIconUrl?: Maybe<Scalars["String"]>;
@@ -3781,6 +3790,18 @@ export type JiraLinearMappingInput = {
   linearTeamId: Scalars["String"];
 };
 
+/** Jira personal specific settings. */
+export type JiraPersonalSettings = {
+  __typename?: "JiraPersonalSettings";
+  /** The name of the Jira site currently authorized through the integration. */
+  siteName?: Maybe<Scalars["String"]>;
+};
+
+export type JiraPersonalSettingsInput = {
+  /** The name of the Jira site currently authorized through the integration. */
+  siteName?: Maybe<Scalars["String"]>;
+};
+
 /** Metadata about a Jira project. */
 export type JiraProjectData = {
   __typename?: "JiraProjectData";
@@ -3984,6 +4005,8 @@ export type Mutation = {
   integrationFigma: IntegrationPayload;
   /** Integrates the organization with Front. */
   integrationFront: IntegrationPayload;
+  /** Connect your GitHub account to Linear. */
+  integrationGitHubPersonal: IntegrationPayload;
   /** Generates a webhook for the GitHub commit integration. */
   integrationGithubCommitCreate: GitHubCommitIntegrationPayload;
   /** Connects the organization with the GitHub App. */
@@ -4260,7 +4283,10 @@ export type Mutation = {
   userExternalUserDisconnect: UserPayload;
   /** Updates a user's settings flag. */
   userFlagUpdate: UserSettingsFlagPayload;
-  /** Connects the GitHub user to this Linear account via OAuth2. */
+  /**
+   * [DEPRECATED] Connects the GitHub user to this Linear account via OAuth2.
+   * @deprecated Replaced by integrationGitHubPersonal mutation on Integration resolver.
+   */
   userGitHubConnect: UserPayload;
   /**
    * [DEPRECATED] Connects the Jira user to this Linear account via OAuth2.
@@ -4362,8 +4388,7 @@ export type MutationAttachmentLinkGitLabMrArgs = {
   id?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
   number: Scalars["Float"];
-  owner: Scalars["String"];
-  repo: Scalars["String"];
+  projectPathWithNamespace: Scalars["String"];
   url: Scalars["String"];
 };
 
@@ -4583,6 +4608,10 @@ export type MutationIntegrationFigmaArgs = {
 export type MutationIntegrationFrontArgs = {
   code: Scalars["String"];
   redirectUri: Scalars["String"];
+};
+
+export type MutationIntegrationGitHubPersonalArgs = {
+  code: Scalars["String"];
 };
 
 export type MutationIntegrationGithubConnectArgs = {
@@ -6964,7 +6993,7 @@ export type ProjectMilestoneConnection = {
 export type ProjectMilestoneCreateInput = {
   /** The description of the project milestone in markdown format. */
   description?: Maybe<Scalars["String"]>;
-  /** The description of the project milestone as a Prosemirror document. */
+  /** [Internal] The description of the project milestone as a Prosemirror document. */
   descriptionData?: Maybe<Scalars["JSONObject"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
@@ -7016,7 +7045,7 @@ export type ProjectMilestonePayload = {
 export type ProjectMilestoneUpdateInput = {
   /** The description of the project milestone in markdown format. */
   description?: Maybe<Scalars["String"]>;
-  /** The description of the project milestone as a Prosemirror document. */
+  /** [Internal] The description of the project milestone as a Prosemirror document. */
   descriptionData?: Maybe<Scalars["JSONObject"]>;
   /** The name of the project milestone. */
   name?: Maybe<Scalars["String"]>;
@@ -7356,7 +7385,7 @@ export type ProjectUpdateConnection = {
 export type ProjectUpdateCreateInput = {
   /** The content of the project update in markdown format. */
   body?: Maybe<Scalars["String"]>;
-  /** The content of the project update as a Prosemirror document. */
+  /** [Internal] The content of the project update as a Prosemirror document. */
   bodyData?: Maybe<Scalars["JSON"]>;
   /** The health of the project at the time of the update. */
   health?: Maybe<ProjectUpdateHealthType>;
@@ -8804,11 +8833,15 @@ export type SlaStatusComparator = {
 /** Slack Asks specific settings. */
 export type SlackAsksSettings = {
   __typename?: "SlackAsksSettings";
+  /** The user role type that is allowed to manage Asks settings. */
+  canAdministrate?: Maybe<UserRoleType>;
   /** The mapping of Slack channel ID => Slack channel name for connected channels. */
   slackChannelMapping?: Maybe<Array<SlackChannelNameMapping>>;
 };
 
 export type SlackAsksSettingsInput = {
+  /** The user role type that is allowed to manage Asks settings. */
+  canAdministrate?: Maybe<UserRoleType>;
   /** The mapping of Slack channel ID => Slack channel name for connected channels. */
   slackChannelMapping?: Maybe<Array<SlackChannelNameMappingInput>>;
 };
@@ -8838,6 +8871,8 @@ export type SlackChannelNameMapping = {
   autoCreateOnEmoji?: Maybe<Scalars["Boolean"]>;
   /** Whether or not top-level messages in this channel should automatically create Asks */
   autoCreateOnMessage?: Maybe<Scalars["Boolean"]>;
+  /** Whether or not we the Linear Asks bot has been added to this Slack channel */
+  botAdded?: Maybe<Scalars["Boolean"]>;
   /** The Slack channel ID. */
   id: Scalars["String"];
   /** Whether or not the Slack channel is private */
@@ -8857,6 +8892,8 @@ export type SlackChannelNameMappingInput = {
   autoCreateOnEmoji?: Maybe<Scalars["Boolean"]>;
   /** Whether or not top-level messages in this channel should automatically create Asks */
   autoCreateOnMessage?: Maybe<Scalars["Boolean"]>;
+  /** Whether or not we the Linear Asks bot has been added to this Slack channel */
+  botAdded?: Maybe<Scalars["Boolean"]>;
   /** The Slack channel ID. */
   id: Scalars["String"];
   /** Whether or not the Slack channel is private */
@@ -10901,20 +10938,11 @@ export type ActorBotFragment = { __typename: "ActorBot" } & Pick<
 
 export type CommentFragment = { __typename: "Comment" } & Pick<
   Comment,
-  | "url"
-  | "reactionData"
-  | "bodyData"
-  | "body"
-  | "updatedAt"
-  | "archivedAt"
-  | "createdAt"
-  | "resolvedAt"
-  | "editedAt"
-  | "id"
+  "url" | "reactionData" | "body" | "updatedAt" | "archivedAt" | "createdAt" | "resolvedAt" | "editedAt" | "id"
 > & {
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     resolvingComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
-    documentContent: { __typename?: "DocumentContent" } & DocumentContentFragment;
+    documentContent?: Maybe<{ __typename?: "DocumentContent" } & DocumentContentFragment>;
     issue: { __typename?: "Issue" } & Pick<Issue, "id">;
     parent?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
     resolvingUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -10960,6 +10988,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
   | "filters"
   | "icon"
   | "updatedAt"
+  | "modelName"
   | "name"
   | "archivedAt"
   | "createdAt"
@@ -10986,7 +11015,7 @@ export type CycleNotificationSubscriptionFragment = { __typename: "CycleNotifica
 
 export type DocumentContentFragment = { __typename: "DocumentContent" } & Pick<
   DocumentContent,
-  "contentData" | "content" | "contentState" | "updatedAt" | "restoredAt" | "archivedAt" | "createdAt" | "id"
+  "content" | "contentState" | "updatedAt" | "restoredAt" | "archivedAt" | "createdAt" | "id"
 > & {
     document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
@@ -10996,7 +11025,7 @@ export type DocumentContentFragment = { __typename: "DocumentContent" } & Pick<
 
 export type DocumentContentHistoryFragment = { __typename: "DocumentContentHistory" } & Pick<
   DocumentContentHistory,
-  "actorIds" | "contentData" | "updatedAt" | "archivedAt" | "createdAt" | "contentDataSnapshotAt" | "id"
+  "actorIds" | "updatedAt" | "archivedAt" | "createdAt" | "contentDataSnapshotAt" | "id"
 > & { documentContent: { __typename?: "DocumentContent" } & DocumentContentFragment };
 
 export type DocumentFragment = { __typename: "Document" } & Pick<
@@ -11752,6 +11781,11 @@ export type IssueRelationHistoryPayloadFragment = { __typename: "IssueRelationHi
   "identifier" | "type"
 >;
 
+export type JiraPersonalSettingsFragment = { __typename: "JiraPersonalSettings" } & Pick<
+  JiraPersonalSettings,
+  "siteName"
+>;
+
 export type JiraSettingsFragment = { __typename: "JiraSettings" } & {
   projects: Array<{ __typename?: "JiraProjectData" } & JiraProjectDataFragment>;
   projectMapping?: Maybe<Array<{ __typename?: "JiraLinearMapping" } & JiraLinearMappingFragment>>;
@@ -11911,7 +11945,14 @@ export type OauthClientFragment = { __typename: "OauthClient" } & Pick<
 
 export type SlackChannelNameMappingFragment = { __typename: "SlackChannelNameMapping" } & Pick<
   SlackChannelNameMapping,
-  "id" | "name" | "autoCreateOnBotMention" | "isPrivate" | "isShared" | "autoCreateOnMessage" | "autoCreateOnEmoji"
+  | "id"
+  | "name"
+  | "autoCreateOnBotMention"
+  | "isPrivate"
+  | "isShared"
+  | "autoCreateOnMessage"
+  | "autoCreateOnEmoji"
+  | "botAdded"
 > & { teams: Array<{ __typename?: "SlackAsksTeamSettings" } & SlackAsksTeamSettingsFragment> };
 
 export type UploadFileFragment = { __typename: "UploadFile" } & Pick<
@@ -12006,6 +12047,7 @@ export type IntegrationSettingsFragment = { __typename: "IntegrationSettings" } 
   googleSheets?: Maybe<{ __typename?: "GoogleSheetsSettings" } & GoogleSheetsSettingsFragment>;
   intercom?: Maybe<{ __typename?: "IntercomSettings" } & IntercomSettingsFragment>;
   jira?: Maybe<{ __typename?: "JiraSettings" } & JiraSettingsFragment>;
+  jiraPersonal?: Maybe<{ __typename?: "JiraPersonalSettings" } & JiraPersonalSettingsFragment>;
   notion?: Maybe<{ __typename?: "NotionSettings" } & NotionSettingsFragment>;
   pagerDuty?: Maybe<{ __typename?: "PagerDutySettings" } & PagerDutySettingsFragment>;
   sentry?: Maybe<{ __typename?: "SentrySettings" } & SentrySettingsFragment>;
@@ -12079,6 +12121,7 @@ export type AuthenticationSessionFragment = { __typename: "AuthenticationSession
   | "name"
   | "operatingSystem"
   | "userAgent"
+  | "browserType"
   | "lastActiveAt"
   | "id"
 >;
@@ -12208,6 +12251,7 @@ export type AuthenticationSessionResponseFragment = { __typename: "Authenticatio
   | "name"
   | "operatingSystem"
   | "userAgent"
+  | "browserType"
   | "lastActiveAt"
   | "id"
 >;
@@ -12280,7 +12324,7 @@ export type DocumentContentHistoryPayloadFragment = { __typename: "DocumentConte
 
 export type DocumentContentHistoryTypeFragment = { __typename: "DocumentContentHistoryType" } & Pick<
   DocumentContentHistoryType,
-  "actorIds" | "id" | "createdAt" | "contentDataSnapshotAt" | "contentData"
+  "actorIds" | "id" | "createdAt" | "contentDataSnapshotAt"
 >;
 
 export type DocumentPayloadFragment = { __typename: "DocumentPayload" } & Pick<
@@ -13495,7 +13539,7 @@ export type Comment_DocumentContentQueryVariables = Exact<{
 
 export type Comment_DocumentContentQuery = { __typename?: "Query" } & {
   comment: { __typename?: "Comment" } & {
-    documentContent: { __typename?: "DocumentContent" } & DocumentContentFragment;
+    documentContent?: Maybe<{ __typename?: "DocumentContent" } & DocumentContentFragment>;
   };
 };
 
@@ -15240,8 +15284,7 @@ export type AttachmentLinkGitLabMrMutationVariables = Exact<{
   id?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
   number: Scalars["Float"];
-  owner: Scalars["String"];
-  repo: Scalars["String"];
+  projectPathWithNamespace: Scalars["String"];
   url: Scalars["String"];
 }>;
 
@@ -15629,6 +15672,14 @@ export type IntegrationFrontMutationVariables = Exact<{
 
 export type IntegrationFrontMutation = { __typename?: "Mutation" } & {
   integrationFront: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationGitHubPersonalMutationVariables = Exact<{
+  code: Scalars["String"];
+}>;
+
+export type IntegrationGitHubPersonalMutation = { __typename?: "Mutation" } & {
+  integrationGitHubPersonal: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
 export type CreateIntegrationGithubCommitMutationVariables = Exact<{ [key: string]: never }>;
@@ -17049,7 +17100,6 @@ export const DocumentContentFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "contentData" } },
           { kind: "Field", name: { kind: "Name", value: "content" } },
           { kind: "Field", name: { kind: "Name", value: "contentState" } },
           {
@@ -17106,7 +17156,6 @@ export const DocumentContentHistoryFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "actorIds" } },
-          { kind: "Field", name: { kind: "Name", value: "contentData" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "documentContent" },
@@ -18688,6 +18737,23 @@ export const JiraSettingsFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<JiraSettingsFragment, unknown>;
+export const JiraPersonalSettingsFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "JiraPersonalSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "JiraPersonalSettings" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "siteName" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<JiraPersonalSettingsFragment, unknown>;
 export const NotionSettingsFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -18819,6 +18885,7 @@ export const SlackChannelNameMappingFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "isShared" } },
           { kind: "Field", name: { kind: "Name", value: "autoCreateOnMessage" } },
           { kind: "Field", name: { kind: "Name", value: "autoCreateOnEmoji" } },
+          { kind: "Field", name: { kind: "Name", value: "botAdded" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "teams" },
@@ -18964,6 +19031,14 @@ export const IntegrationSettingsFragmentDoc = {
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "JiraSettings" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "jiraPersonal" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "JiraPersonalSettings" } }],
             },
           },
           {
@@ -19118,6 +19193,7 @@ export const AuthenticationSessionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "operatingSystem" } },
           { kind: "Field", name: { kind: "Name", value: "userAgent" } },
+          { kind: "Field", name: { kind: "Name", value: "browserType" } },
           { kind: "Field", name: { kind: "Name", value: "lastActiveAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
@@ -19660,6 +19736,7 @@ export const AuthenticationSessionResponseFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "operatingSystem" } },
           { kind: "Field", name: { kind: "Name", value: "userAgent" } },
+          { kind: "Field", name: { kind: "Name", value: "browserType" } },
           { kind: "Field", name: { kind: "Name", value: "lastActiveAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
@@ -19688,7 +19765,6 @@ export const CommentFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "bodyData" } },
           { kind: "Field", name: { kind: "Name", value: "body" } },
           {
             kind: "Field",
@@ -19955,6 +20031,7 @@ export const CustomViewFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "filters" } },
           { kind: "Field", name: { kind: "Name", value: "icon" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "modelName" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           {
             kind: "Field",
@@ -20287,7 +20364,6 @@ export const DocumentContentHistoryTypeFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "contentDataSnapshotAt" } },
-          { kind: "Field", name: { kind: "Name", value: "contentData" } },
         ],
       },
     },
@@ -38650,12 +38726,7 @@ export const AttachmentLinkGitLabMrDocument = {
         },
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "owner" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "repo" } },
+          variable: { kind: "Variable", name: { kind: "Name", value: "projectPathWithNamespace" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
         {
@@ -38698,13 +38769,8 @@ export const AttachmentLinkGitLabMrDocument = {
               },
               {
                 kind: "Argument",
-                name: { kind: "Name", value: "owner" },
-                value: { kind: "Variable", name: { kind: "Name", value: "owner" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "repo" },
-                value: { kind: "Variable", name: { kind: "Name", value: "repo" } },
+                name: { kind: "Name", value: "projectPathWithNamespace" },
+                value: { kind: "Variable", name: { kind: "Name", value: "projectPathWithNamespace" } },
               },
               {
                 kind: "Argument",
@@ -40806,6 +40872,44 @@ export const IntegrationFrontDocument = {
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationFrontMutation, IntegrationFrontMutationVariables>;
+export const IntegrationGitHubPersonalDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationGitHubPersonal" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationGitHubPersonal" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationGitHubPersonalMutation, IntegrationGitHubPersonalMutationVariables>;
 export const CreateIntegrationGithubCommitDocument = {
   kind: "Document",
   definitions: [

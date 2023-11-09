@@ -817,6 +817,7 @@ export class AuthUser extends Request {
 export class AuthenticationSession extends Request {
   public constructor(request: LinearRequest, data: L.AuthenticationSessionFragment) {
     super(request);
+    this.browserType = data.browserType ?? undefined;
     this.client = data.client ?? undefined;
     this.countryCodes = data.countryCodes;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
@@ -833,6 +834,8 @@ export class AuthenticationSession extends Request {
     this.userAgent = data.userAgent ?? undefined;
   }
 
+  /** Used web browser. */
+  public browserType?: string;
   /** Client used for the session */
   public client?: string;
   /** Country codes of all seen locations. */
@@ -870,6 +873,7 @@ export class AuthenticationSession extends Request {
 export class AuthenticationSessionResponse extends Request {
   public constructor(request: LinearRequest, data: L.AuthenticationSessionResponseFragment) {
     super(request);
+    this.browserType = data.browserType ?? undefined;
     this.client = data.client ?? undefined;
     this.countryCodes = data.countryCodes;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
@@ -887,6 +891,8 @@ export class AuthenticationSessionResponse extends Request {
     this.userAgent = data.userAgent ?? undefined;
   }
 
+  /** Used web browser. */
+  public browserType?: string;
   /** Client used for the session */
   public client?: string;
   /** Country codes of all seen locations. */
@@ -934,7 +940,6 @@ export class Comment extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.body = data.body;
-    this.bodyData = data.bodyData;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.editedAt = parseDate(data.editedAt) ?? undefined;
     this.id = data.id;
@@ -943,7 +948,7 @@ export class Comment extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
-    this.documentContent = new DocumentContent(request, data.documentContent);
+    this.documentContent = data.documentContent ? new DocumentContent(request, data.documentContent) : undefined;
     this._issue = data.issue;
     this._parent = data.parent ?? undefined;
     this._resolvingComment = data.resolvingComment ?? undefined;
@@ -955,8 +960,6 @@ export class Comment extends Request {
   public archivedAt?: Date;
   /** The comment content in markdown format. */
   public body: string;
-  /** The comment content as a Prosemirror document. */
-  public bodyData: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The time user edited the comment. */
@@ -978,7 +981,7 @@ export class Comment extends Request {
   /** The bot that created the comment */
   public botActor?: ActorBot;
   /** The document content that the comment is associated with. */
-  public documentContent: DocumentContent;
+  public documentContent?: DocumentContent;
   /** The issue that the comment is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
@@ -1204,6 +1207,7 @@ export class CustomView extends Request {
     this.filters = parseJson(data.filters) ?? {};
     this.icon = data.icon ?? undefined;
     this.id = data.id;
+    this.modelName = data.modelName;
     this.name = data.name;
     this.shared = data.shared;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -1228,6 +1232,8 @@ export class CustomView extends Request {
   public icon?: string;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The model name of the custom view. */
+  public modelName: string;
   /** The name of the custom view. */
   public name: string;
   /** Whether the custom view is shared with everyone in the organization. */
@@ -1812,7 +1818,6 @@ export class DocumentContent extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.content = data.content ?? undefined;
-    this.contentData = parseJson(data.contentData) ?? undefined;
     this.contentState = data.contentState ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
@@ -1827,8 +1832,6 @@ export class DocumentContent extends Request {
   public archivedAt?: Date;
   /** The document content in markdown format. */
   public content?: string;
-  /** The document content as JSON. */
-  public contentData?: Record<string, unknown>;
   /** The document content state as a base64 encoded string. */
   public contentState?: string;
   /** The time at which the entity was created. */
@@ -1867,7 +1870,6 @@ export class DocumentContentHistory extends Request {
     super(request);
     this.actorIds = data.actorIds;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.contentData = parseJson(data.contentData) ?? undefined;
     this.contentDataSnapshotAt = parseDate(data.contentDataSnapshotAt) ?? new Date();
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
@@ -1879,8 +1881,6 @@ export class DocumentContentHistory extends Request {
   public actorIds: string[];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
-  /** The document content as JSON. */
-  public contentData?: Record<string, unknown>;
   /** The timestamp associated with the DocumentContent when it was originally saved */
   public contentDataSnapshotAt: Date;
   /** The time at which the entity was created. */
@@ -1924,7 +1924,6 @@ export class DocumentContentHistoryType extends Request {
   public constructor(request: LinearRequest, data: L.DocumentContentHistoryTypeFragment) {
     super(request);
     this.actorIds = data.actorIds ?? undefined;
-    this.contentData = parseJson(data.contentData) ?? {};
     this.contentDataSnapshotAt = parseDate(data.contentDataSnapshotAt) ?? new Date();
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
@@ -1932,8 +1931,6 @@ export class DocumentContentHistoryType extends Request {
 
   /** The ID of the author of the change. */
   public actorIds?: string[];
-  /** The document content as Prosemirror document. */
-  public contentData: Record<string, unknown>;
   /** The date when the document content history snapshot was taken. This can be different than createdAt since the content is captured from its state at the previously known updatedAt timestamp in the case of an update. On document create, these timestamps can be the same. */
   public contentDataSnapshotAt: Date;
   /** The date when the document content history entry was created. */
@@ -2809,6 +2806,7 @@ export class IntegrationSettings extends Request {
     this.googleSheets = data.googleSheets ? new GoogleSheetsSettings(request, data.googleSheets) : undefined;
     this.intercom = data.intercom ? new IntercomSettings(request, data.intercom) : undefined;
     this.jira = data.jira ? new JiraSettings(request, data.jira) : undefined;
+    this.jiraPersonal = data.jiraPersonal ? new JiraPersonalSettings(request, data.jiraPersonal) : undefined;
     this.notion = data.notion ? new NotionSettings(request, data.notion) : undefined;
     this.pagerDuty = data.pagerDuty ? new PagerDutySettings(request, data.pagerDuty) : undefined;
     this.sentry = data.sentry ? new SentrySettings(request, data.sentry) : undefined;
@@ -2829,6 +2827,7 @@ export class IntegrationSettings extends Request {
   public googleSheets?: GoogleSheetsSettings;
   public intercom?: IntercomSettings;
   public jira?: JiraSettings;
+  public jiraPersonal?: JiraPersonalSettings;
   public notion?: NotionSettings;
   public pagerDuty?: PagerDutySettings;
   public sentry?: SentrySettings;
@@ -4368,6 +4367,21 @@ export class JiraLinearMapping extends Request {
   public jiraProjectId: string;
   /** The Linear team id to map to the given project. */
   public linearTeamId: string;
+}
+/**
+ * Jira personal specific settings.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.JiraPersonalSettingsFragment response data
+ */
+export class JiraPersonalSettings extends Request {
+  public constructor(request: LinearRequest, data: L.JiraPersonalSettingsFragment) {
+    super(request);
+    this.siteName = data.siteName ?? undefined;
+  }
+
+  /** The name of the Jira site currently authorized through the integration. */
+  public siteName?: string;
 }
 /**
  * Metadata about a Jira project.
@@ -7299,6 +7313,7 @@ export class SlackChannelNameMapping extends Request {
     this.autoCreateOnBotMention = data.autoCreateOnBotMention ?? undefined;
     this.autoCreateOnEmoji = data.autoCreateOnEmoji ?? undefined;
     this.autoCreateOnMessage = data.autoCreateOnMessage ?? undefined;
+    this.botAdded = data.botAdded ?? undefined;
     this.id = data.id;
     this.isPrivate = data.isPrivate ?? undefined;
     this.isShared = data.isShared ?? undefined;
@@ -7312,6 +7327,8 @@ export class SlackChannelNameMapping extends Request {
   public autoCreateOnEmoji?: boolean;
   /** Whether or not top-level messages in this channel should automatically create Asks */
   public autoCreateOnMessage?: boolean;
+  /** Whether or not we the Linear Asks bot has been added to this Slack channel */
+  public botAdded?: boolean;
   /** The Slack channel ID. */
   public id: string;
   /** Whether or not the Slack channel is private */
@@ -12301,27 +12318,27 @@ export class AttachmentLinkGitLabMrMutation extends Request {
    *
    * @param issueId - required issueId to pass to attachmentLinkGitLabMR
    * @param number - required number to pass to attachmentLinkGitLabMR
-   * @param owner - required owner to pass to attachmentLinkGitLabMR
-   * @param repo - required repo to pass to attachmentLinkGitLabMR
+   * @param projectPathWithNamespace - required projectPathWithNamespace to pass to attachmentLinkGitLabMR
    * @param url - required url to pass to attachmentLinkGitLabMR
-   * @param variables - variables without 'issueId', 'number', 'owner', 'repo', 'url' to pass into the AttachmentLinkGitLabMrMutation
+   * @param variables - variables without 'issueId', 'number', 'projectPathWithNamespace', 'url' to pass into the AttachmentLinkGitLabMrMutation
    * @returns parsed response from AttachmentLinkGitLabMrMutation
    */
   public async fetch(
     issueId: string,
     number: number,
-    owner: string,
-    repo: string,
+    projectPathWithNamespace: string,
     url: string,
-    variables?: Omit<L.AttachmentLinkGitLabMrMutationVariables, "issueId" | "number" | "owner" | "repo" | "url">
+    variables?: Omit<
+      L.AttachmentLinkGitLabMrMutationVariables,
+      "issueId" | "number" | "projectPathWithNamespace" | "url"
+    >
   ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkGitLabMrMutation, L.AttachmentLinkGitLabMrMutationVariables>(
       L.AttachmentLinkGitLabMrDocument,
       {
         issueId,
         number,
-        owner,
-        repo,
+        projectPathWithNamespace,
         url,
         ...variables,
       }
@@ -13625,6 +13642,35 @@ export class IntegrationFrontMutation extends Request {
       }
     );
     const data = response.integrationFront;
+
+    return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationGitHubPersonal Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationGitHubPersonalMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationGitHubPersonal mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationGitHubPersonal
+   * @returns parsed response from IntegrationGitHubPersonalMutation
+   */
+  public async fetch(code: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<
+      L.IntegrationGitHubPersonalMutation,
+      L.IntegrationGitHubPersonalMutationVariables
+    >(L.IntegrationGitHubPersonalDocument, {
+      code,
+    });
+    const data = response.integrationGitHubPersonal;
 
     return new IntegrationPayload(this._request, data);
   }
@@ -18439,7 +18485,7 @@ export class Comment_DocumentContentQuery extends Request {
    *
    * @returns parsed response from Comment_DocumentContentQuery
    */
-  public async fetch(): LinearFetch<DocumentContent> {
+  public async fetch(): LinearFetch<DocumentContent | undefined> {
     const response = await this._request<L.Comment_DocumentContentQuery, L.Comment_DocumentContentQueryVariables>(
       L.Comment_DocumentContentDocument,
       {
@@ -18448,7 +18494,7 @@ export class Comment_DocumentContentQuery extends Request {
     );
     const data = response.comment.documentContent;
 
-    return new DocumentContent(this._request, data);
+    return data ? new DocumentContent(this._request, data) : undefined;
   }
 }
 
@@ -22101,21 +22147,28 @@ export class LinearSdk extends Request {
    *
    * @param issueId - required issueId to pass to attachmentLinkGitLabMR
    * @param number - required number to pass to attachmentLinkGitLabMR
-   * @param owner - required owner to pass to attachmentLinkGitLabMR
-   * @param repo - required repo to pass to attachmentLinkGitLabMR
+   * @param projectPathWithNamespace - required projectPathWithNamespace to pass to attachmentLinkGitLabMR
    * @param url - required url to pass to attachmentLinkGitLabMR
-   * @param variables - variables without 'issueId', 'number', 'owner', 'repo', 'url' to pass into the AttachmentLinkGitLabMrMutation
+   * @param variables - variables without 'issueId', 'number', 'projectPathWithNamespace', 'url' to pass into the AttachmentLinkGitLabMrMutation
    * @returns AttachmentPayload
    */
   public attachmentLinkGitLabMR(
     issueId: string,
     number: number,
-    owner: string,
-    repo: string,
+    projectPathWithNamespace: string,
     url: string,
-    variables?: Omit<L.AttachmentLinkGitLabMrMutationVariables, "issueId" | "number" | "owner" | "repo" | "url">
+    variables?: Omit<
+      L.AttachmentLinkGitLabMrMutationVariables,
+      "issueId" | "number" | "projectPathWithNamespace" | "url"
+    >
   ): LinearFetch<AttachmentPayload> {
-    return new AttachmentLinkGitLabMrMutation(this._request).fetch(issueId, number, owner, repo, url, variables);
+    return new AttachmentLinkGitLabMrMutation(this._request).fetch(
+      issueId,
+      number,
+      projectPathWithNamespace,
+      url,
+      variables
+    );
   }
   /**
    * Link an existing Intercom conversation to an issue.
@@ -22565,6 +22618,15 @@ export class LinearSdk extends Request {
    */
   public integrationFront(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
     return new IntegrationFrontMutation(this._request).fetch(code, redirectUri);
+  }
+  /**
+   * Connect your GitHub account to Linear.
+   *
+   * @param code - required code to pass to integrationGitHubPersonal
+   * @returns IntegrationPayload
+   */
+  public integrationGitHubPersonal(code: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationGitHubPersonalMutation(this._request).fetch(code);
   }
   /**
    * Generates a webhook for the GitHub commit integration.
@@ -23845,7 +23907,7 @@ export class LinearSdk extends Request {
     return new UpdateUserFlagMutation(this._request).fetch(flag, operation);
   }
   /**
-   * Connects the GitHub user to this Linear account via OAuth2.
+   * [DEPRECATED] Connects the GitHub user to this Linear account via OAuth2.
    *
    * @param code - required code to pass to userGitHubConnect
    * @returns UserPayload
