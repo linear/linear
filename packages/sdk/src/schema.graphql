@@ -659,6 +659,25 @@ type AuthMembership {
   userId: String!
 }
 
+type AuthOauthClient {
+  """
+  OAuth application's client ID.
+  """
+  clientId: String!
+  """
+  OAuth application's client secret.
+  """
+  clientSecret: String!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  List of allowed redirect URIs for the application.
+  """
+  redirectUris: [String!]!
+}
+
 """
 An organization. Organizations are root-level objects that contain users and teams.
 """
@@ -6460,6 +6479,10 @@ Tuple for mapping Jira projects to Linear teams.
 """
 type JiraLinearMapping {
   """
+  Whether the sync for this mapping is bidirectional.
+  """
+  bidirectional: Boolean
+  """
   The Jira id for this project.
   """
   jiraProjectId: String!
@@ -6470,6 +6493,10 @@ type JiraLinearMapping {
 }
 
 input JiraLinearMappingInput {
+  """
+  Whether the sync for this mapping is bidirectional.
+  """
+  bidirectional: Boolean
   """
   The Jira id for this project.
   """
@@ -15541,7 +15568,7 @@ type SlackAsksSettings {
   """
   The user role type that is allowed to manage Asks settings.
   """
-  canAdministrate: UserRoleType
+  canAdministrate: UserRoleType!
   """
   The mapping of Slack channel ID => Slack channel name for connected channels.
   """
@@ -15552,7 +15579,7 @@ input SlackAsksSettingsInput {
   """
   The user role type that is allowed to manage Asks settings.
   """
-  canAdministrate: UserRoleType
+  canAdministrate: UserRoleType!
   """
   The mapping of Slack channel ID => Slack channel name for connected channels.
   """

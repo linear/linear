@@ -431,6 +431,18 @@ export type AuthMembership = {
   userId: Scalars["String"];
 };
 
+export type AuthOauthClient = {
+  __typename?: "AuthOauthClient";
+  /** OAuth application's client ID. */
+  clientId: Scalars["String"];
+  /** OAuth application's client secret. */
+  clientSecret: Scalars["String"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** List of allowed redirect URIs for the application. */
+  redirectUris: Array<Scalars["String"]>;
+};
+
 /** An organization. Organizations are root-level objects that contain users and teams. */
 export type AuthOrganization = {
   __typename?: "AuthOrganization";
@@ -3777,6 +3789,8 @@ export type JiraConfigurationInput = {
 /** Tuple for mapping Jira projects to Linear teams. */
 export type JiraLinearMapping = {
   __typename?: "JiraLinearMapping";
+  /** Whether the sync for this mapping is bidirectional. */
+  bidirectional?: Maybe<Scalars["Boolean"]>;
   /** The Jira id for this project. */
   jiraProjectId: Scalars["String"];
   /** The Linear team id to map to the given project. */
@@ -3784,6 +3798,8 @@ export type JiraLinearMapping = {
 };
 
 export type JiraLinearMappingInput = {
+  /** Whether the sync for this mapping is bidirectional. */
+  bidirectional?: Maybe<Scalars["Boolean"]>;
   /** The Jira id for this project. */
   jiraProjectId: Scalars["String"];
   /** The Linear team id to map to the given project. */
@@ -8834,14 +8850,14 @@ export type SlaStatusComparator = {
 export type SlackAsksSettings = {
   __typename?: "SlackAsksSettings";
   /** The user role type that is allowed to manage Asks settings. */
-  canAdministrate?: Maybe<UserRoleType>;
+  canAdministrate: UserRoleType;
   /** The mapping of Slack channel ID => Slack channel name for connected channels. */
   slackChannelMapping?: Maybe<Array<SlackChannelNameMapping>>;
 };
 
 export type SlackAsksSettingsInput = {
   /** The user role type that is allowed to manage Asks settings. */
-  canAdministrate?: Maybe<UserRoleType>;
+  canAdministrate: UserRoleType;
   /** The mapping of Slack channel ID => Slack channel name for connected channels. */
   slackChannelMapping?: Maybe<Array<SlackChannelNameMappingInput>>;
 };
@@ -12094,7 +12110,7 @@ export type UserSettingsFragment = { __typename: "UserSettings" } & Pick<
 
 export type JiraLinearMappingFragment = { __typename: "JiraLinearMapping" } & Pick<
   JiraLinearMapping,
-  "jiraProjectId" | "linearTeamId"
+  "jiraProjectId" | "linearTeamId" | "bidirectional"
 >;
 
 export type TeamRepoMappingFragment = { __typename: "TeamRepoMapping" } & Pick<
@@ -12226,6 +12242,11 @@ export type AuthApiKeyPayloadFragment = { __typename: "AuthApiKeyPayload" } & Pi
   };
 
 export type AuthIntegrationFragment = { __typename: "AuthIntegration" } & Pick<AuthIntegration, "id">;
+
+export type AuthOauthClientFragment = { __typename: "AuthOauthClient" } & Pick<
+  AuthOauthClient,
+  "redirectUris" | "clientId" | "clientSecret" | "id"
+>;
 
 export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" } & Pick<
   AuthResolverResponse,
@@ -18700,6 +18721,7 @@ export const JiraLinearMappingFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "jiraProjectId" } },
           { kind: "Field", name: { kind: "Name", value: "linearTeamId" } },
+          { kind: "Field", name: { kind: "Name", value: "bidirectional" } },
         ],
       },
     },
@@ -19613,6 +19635,26 @@ export const AuthIntegrationFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AuthIntegrationFragment, unknown>;
+export const AuthOauthClientFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AuthOauthClient" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AuthOauthClient" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "redirectUris" } },
+          { kind: "Field", name: { kind: "Name", value: "clientId" } },
+          { kind: "Field", name: { kind: "Name", value: "clientSecret" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AuthOauthClientFragment, unknown>;
 export const AuthOrganizationFragmentDoc = {
   kind: "Document",
   definitions: [
