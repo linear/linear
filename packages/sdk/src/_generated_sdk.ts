@@ -703,6 +703,30 @@ export class AuthIntegration extends Request {
   public id: string;
 }
 /**
+ * AuthOauthClient model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AuthOauthClientFragment response data
+ */
+export class AuthOauthClient extends Request {
+  public constructor(request: LinearRequest, data: L.AuthOauthClientFragment) {
+    super(request);
+    this.clientId = data.clientId;
+    this.clientSecret = data.clientSecret;
+    this.id = data.id;
+    this.redirectUris = data.redirectUris;
+  }
+
+  /** OAuth application's client ID. */
+  public clientId: string;
+  /** OAuth application's client secret. */
+  public clientSecret: string;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** List of allowed redirect URIs for the application. */
+  public redirectUris: string[];
+}
+/**
  * An organization. Organizations are root-level objects that contain users and teams.
  *
  * @param request - function to call the graphql client
@@ -4359,10 +4383,13 @@ export class IssueSearchResultConnection extends Connection<IssueSearchResult> {
 export class JiraLinearMapping extends Request {
   public constructor(request: LinearRequest, data: L.JiraLinearMappingFragment) {
     super(request);
+    this.bidirectional = data.bidirectional ?? undefined;
     this.jiraProjectId = data.jiraProjectId;
     this.linearTeamId = data.linearTeamId;
   }
 
+  /** Whether the sync for this mapping is bidirectional. */
+  public bidirectional?: boolean;
   /** The Jira id for this project. */
   public jiraProjectId: string;
   /** The Linear team id to map to the given project. */

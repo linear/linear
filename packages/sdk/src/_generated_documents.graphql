@@ -2855,6 +2855,8 @@ fragment JiraLinearMapping on JiraLinearMapping {
   jiraProjectId
   # The Linear team id to map to the given project.
   linearTeamId
+  # Whether the sync for this mapping is bidirectional.
+  bidirectional
 }
 
 # Tuple for mapping Linear teams to GitHub repos.
@@ -3160,6 +3162,18 @@ fragment AuthApiKeyPayload on AuthApiKeyPayload {
 
 fragment AuthIntegration on AuthIntegration {
   __typename
+  # The unique identifier of the entity.
+  id
+}
+
+fragment AuthOauthClient on AuthOauthClient {
+  __typename
+  # List of allowed redirect URIs for the application.
+  redirectUris
+  # OAuth application's client ID.
+  clientId
+  # OAuth application's client secret.
+  clientSecret
   # The unique identifier of the entity.
   id
 }
