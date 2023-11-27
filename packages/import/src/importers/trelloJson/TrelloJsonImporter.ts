@@ -44,7 +44,7 @@ interface TrelloComment {
 
 interface TrelloCommentAction {
   type: "commentCard";
-  memberCreator: { id: string; fullName: string; avatarUrl: string };
+  memberCreator?: { id: string; fullName: string; avatarUrl: string };
   data: TrelloComment;
   date: string;
 }
@@ -92,6 +92,12 @@ export class TrelloJsonImporter implements Importer {
         memberCreator,
         date,
       } = action as TrelloCommentAction;
+
+      // Handle comment creator does not exist in import
+      if (!memberCreator) {
+        continue;
+      }
+
       importData.users[memberCreator.id] = { name: memberCreator.fullName, avatarUrl: memberCreator.avatarUrl };
       const importComment = { body: text, userId: memberCreator.id, createdAt: new Date(date) };
       if (card.id in comments) {
