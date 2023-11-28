@@ -3,7 +3,7 @@ import { LinearClient } from "@linear/sdk";
 import { format } from "date-fns";
 import chalk from "chalk";
 import * as inquirer from "inquirer";
-import _ from "lodash";
+import _, { uniq } from "lodash";
 import { Comment, Importer, ImportResult } from "./types";
 import { replaceImagesInMarkdown } from "./utils/replaceImages";
 
@@ -170,9 +170,23 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
   const teamInfo = await client.team(teamId);
 
-  const teamLabels = await teamInfo?.labels();
-  const workspaceLabels = await (await client.organization).labels();
-  const existingLabels = [...(teamLabels?.nodes ?? []), ...(workspaceLabels?.nodes ?? [])];
+  const existingLabels = [];
+
+  let teamLabels = await teamInfo?.labels();
+  existingLabels.push(...(teamLabels?.nodes ?? []));
+  while (teamLabels?.pageInfo?.hasNextPage) {
+    teamLabels = await teamLabels.fetchNext();
+    existingLabels.push(...(teamLabels?.nodes ?? []));
+  }
+
+  const organization = await client.organization;
+  let workspaceLabels = await organization.labels();
+  existingLabels.push(...(workspaceLabels?.nodes ?? []));
+  while (workspaceLabels?.pageInfo?.hasNextPage) {
+    workspaceLabels = await workspaceLabels.fetchNext();
+    existingLabels.push(...(workspaceLabels?.nodes ?? []));
+  }
+
   const workflowStates = await teamInfo?.states();
 
   const existingLabelMap = {} as { [name: string]: string };
@@ -256,7 +270,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
         ? await buildComments(client, issueDescription || "", issue.comments, importData)
         : issueDescription;
 
-    const labelIds = issue.labels ? issue.labels.map(labelId => labelMapping[labelId]) : undefined;
+    const labelIds = issue.labels ? uniq(issue.labels.map(labelId => labelMapping[labelId])) : undefined;
 
     let stateId = !!issue.status ? existingStateMap[issue.status.toLowerCase()] : undefined;
     // Create a new state since one doesn't already exist with this name
@@ -290,7 +304,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
     if (importAnswers.selfAssign) {
       assigneeId = viewer;
     } else if (importAnswers.targetAssignee === "{{assignee}}") {
-      assigneeId = existingAssigneeId
+      assigneeId = existingAssigneeId;
     } else {
       assigneeId = importAnswers.targetAssignee || undefined;
     }
