@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.9.4
+
+### Patch Changes
+
+- 6119e7a: chore(deps): update dependency patch versions
+- 3e0ce98: fix: Trello import should not fail when a comment creator is missing from import data
+- 0c71792: fix: paginate over existing labels, dedupe imported issues labels
+- Updated dependencies [6119e7a]
+- Updated dependencies [12375bc]
+  - @linear/sdk@12.0.0
+
 ## 1.9.3
 
 ### Patch Changes
