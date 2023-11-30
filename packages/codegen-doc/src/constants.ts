@@ -1,4 +1,5 @@
 export const Doc = {
+  CONNECTION_FIELDS: ["pageInfo", "nodes", "edges"],
   MUTATION_TYPES: [
     "update",
     "archive",

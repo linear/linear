@@ -1,5 +1,6 @@
 import { FieldDefinitionNode } from "graphql";
 import { getRequiredArgs } from "./args";
+import { Doc } from "./constants";
 import { Named, PluginContext } from "./types";
 import { nodeHasSkipComment, reduceListType, reduceTypeName } from "./utils";
 
@@ -15,7 +16,7 @@ export function findQuery(
   const fieldName = typeof field.name === "string" ? field.name : field.name.value;
 
   /** Ignore queries for connections and lists */
-  if (type?.endsWith("Connection")) {
+  if (type?.endsWith("Connection") || Doc.CONNECTION_FIELDS.includes(fieldName)) {
     return undefined;
   }
 
