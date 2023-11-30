@@ -113,7 +113,7 @@ describe("generated", () => {
       }
     });
 
-    /** Test the team model query for Team_Templates */
+    /** Test the team connection query for the Template */
     it("team.templates", async () => {
       if (_team) {
         const templates: L.TemplateConnection | undefined = await _team.templates();
@@ -2279,7 +2279,7 @@ describe("generated", () => {
       }
     });
 
-    /** Test the organization model query for Organization_Templates */
+    /** Test the organization connection query for the Template */
     it("organization.templates", async () => {
       if (_organization) {
         const templates: L.TemplateConnection | undefined = await _organization.templates();
@@ -3013,7 +3013,7 @@ describe("generated", () => {
       }
     });
 
-    /** Test the team model query for Team_Templates */
+    /** Test the team connection query for the Template */
     it("team.templates", async () => {
       if (_team) {
         const templates: L.TemplateConnection | undefined = await _team.templates();

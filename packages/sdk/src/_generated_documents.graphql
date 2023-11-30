@@ -4511,6 +4511,9 @@ fragment TeamPayload on TeamPayload {
 
 fragment TemplateConnection on TemplateConnection {
   __typename
+  nodes {
+    ...Template
+  }
   pageInfo {
     ...PageInfo
   }
