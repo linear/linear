@@ -16,6 +16,6 @@ export const Doc = {
   SCALAR_STRING_TYPE: "string",
   SCALAR_DATE_NAMES: ["DateTime", "TimelessDateScalar"],
   SCALAR_DATE_TYPE: "Date",
-  SCALAR_JSON_NAMES: ["JSON", "JSONObject"],
+  SCALAR_JSON_NAMES: ["JSON"],
   SCALAR_JSON_TYPE: "Record<string, unknown>",
 };

@@ -30,9 +30,18 @@ describe("LinearSdk", () => {
     expect(response?.targetDate).toEqual("2021-02-26");
   });
 
-  it("parses JSONObject", async () => {
+  it("parses JSON", async () => {
     const sdk = new LinearSdk(
-      resolveWithData({ attachment: { id: "test", metadata: JSON.stringify({ some: { nested: { data: 123 } } }) } })
+      resolveWithData({ projectUpdate: { id: "test", diff: JSON.stringify({ some: { nested: { data: 123 } } }) } })
+    );
+    const response = await sdk.projectUpdate("test");
+
+    expect((response?.diff?.some as any)?.nested?.data).toEqual(123);
+  });
+
+  it("does not attempt to parse JSONObject", async () => {
+    const sdk = new LinearSdk(
+      resolveWithData({ attachment: { id: "test", metadata: { some: { nested: { data: 123 } } } } })
     );
     const response = await sdk.attachment("test");
 

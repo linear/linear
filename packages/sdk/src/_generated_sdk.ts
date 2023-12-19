@@ -395,8 +395,8 @@ export class Attachment extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.groupBySource = data.groupBySource;
     this.id = data.id;
-    this.metadata = parseJson(data.metadata) ?? {};
-    this.source = parseJson(data.source) ?? undefined;
+    this.metadata = data.metadata;
+    this.source = data.source ?? undefined;
     this.sourceType = data.sourceType ?? undefined;
     this.subtitle = data.subtitle ?? undefined;
     this.title = data.title;
@@ -415,9 +415,9 @@ export class Attachment extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** Custom metadata related to the attachment. */
-  public metadata: Record<string, unknown>;
+  public metadata: L.Scalars["JSONObject"];
   /** Information about the source which created the attachment. */
-  public source?: Record<string, unknown>;
+  public source?: L.Scalars["JSONObject"];
   /** An accessor helper to source.type, defines the source type of the attachment. */
   public sourceType?: string;
   /** Content for the subtitle line in the Linear attachment widget. */
@@ -538,11 +538,11 @@ export class AttachmentPayload extends Request {
 export class AttachmentSourcesPayload extends Request {
   public constructor(request: LinearRequest, data: L.AttachmentSourcesPayloadFragment) {
     super(request);
-    this.sources = parseJson(data.sources) ?? {};
+    this.sources = data.sources;
   }
 
   /** A unique list of all source types used in this workspace */
-  public sources: Record<string, unknown>;
+  public sources: L.Scalars["JSONObject"];
 }
 /**
  * Workspace audit log entry object.
@@ -561,8 +561,8 @@ export class AuditEntry extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.ip = data.ip ?? undefined;
-    this.metadata = parseJson(data.metadata) ?? undefined;
-    this.requestInformation = parseJson(data.requestInformation) ?? undefined;
+    this.metadata = data.metadata ?? undefined;
+    this.requestInformation = data.requestInformation ?? undefined;
     this.type = data.type;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._actor = data.actor ?? undefined;
@@ -581,9 +581,9 @@ export class AuditEntry extends Request {
   /** IP from actor when entry was recorded. */
   public ip?: string;
   /** Additional metadata related to the audit entry. */
-  public metadata?: Record<string, unknown>;
+  public metadata?: L.Scalars["JSONObject"];
   /** Additional information related to the request which performed the action. */
-  public requestInformation?: Record<string, unknown>;
+  public requestInformation?: L.Scalars["JSONObject"];
   public type: string;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -967,7 +967,7 @@ export class Comment extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.editedAt = parseDate(data.editedAt) ?? undefined;
     this.id = data.id;
-    this.reactionData = parseJson(data.reactionData) ?? {};
+    this.reactionData = data.reactionData;
     this.resolvedAt = parseDate(data.resolvedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
@@ -991,7 +991,7 @@ export class Comment extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** Emoji reaction summary, grouped by emoji type */
-  public reactionData: Record<string, unknown>;
+  public reactionData: L.Scalars["JSONObject"];
   /** The time the resolvingUser resolved the thread. */
   public resolvedAt?: Date;
   /**
@@ -1101,7 +1101,7 @@ export class Company extends Request {
   public constructor(request: LinearRequest, data: L.CompanyFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.companyProperties = parseJson(data.companyProperties) ?? {};
+    this.companyProperties = data.companyProperties;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.externalId = data.externalId;
     this.id = data.id;
@@ -1115,7 +1115,7 @@ export class Company extends Request {
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** Custom company properties. */
-  public companyProperties: Record<string, unknown>;
+  public companyProperties: L.Scalars["JSONObject"];
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Company ID in an external system. */
@@ -1227,8 +1227,8 @@ export class CustomView extends Request {
     this.color = data.color ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
-    this.filterData = parseJson(data.filterData) ?? {};
-    this.filters = parseJson(data.filters) ?? {};
+    this.filterData = data.filterData;
+    this.filters = data.filters;
     this.icon = data.icon ?? undefined;
     this.id = data.id;
     this.modelName = data.modelName;
@@ -1249,9 +1249,9 @@ export class CustomView extends Request {
   /** The description of the custom view. */
   public description?: string;
   /** The filter applied to issues in the custom view. */
-  public filterData: Record<string, unknown>;
+  public filterData: L.Scalars["JSONObject"];
   /** The filters applied to issues in the custom view. */
-  public filters: Record<string, unknown>;
+  public filters: L.Scalars["JSONObject"];
   /** The icon of the custom view. */
   public icon?: string;
   /** The unique identifier of the entity. */
@@ -2030,7 +2030,7 @@ export class DocumentSearchResult extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.icon = data.icon ?? undefined;
     this.id = data.id;
-    this.metadata = parseJson(data.metadata) ?? {};
+    this.metadata = data.metadata;
     this.slugId = data.slugId;
     this.title = data.title;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -2055,7 +2055,7 @@ export class DocumentSearchResult extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** Metadata related to search result */
-  public metadata: Record<string, unknown>;
+  public metadata: L.Scalars["JSONObject"];
   /** The document's unique URL slug. */
   public slugId: string;
   /** The document title. */
@@ -3405,11 +3405,11 @@ export class IssueConnection extends Connection<Issue> {
 export class IssueFilterSuggestionPayload extends Request {
   public constructor(request: LinearRequest, data: L.IssueFilterSuggestionPayloadFragment) {
     super(request);
-    this.filter = parseJson(data.filter) ?? undefined;
+    this.filter = data.filter ?? undefined;
   }
 
   /** The json filter that is suggested. */
-  public filter?: Record<string, unknown>;
+  public filter?: L.Scalars["JSONObject"];
 }
 /**
  * A record of changes to an issue.
@@ -3678,9 +3678,9 @@ export class IssueImport extends Request {
     this.creatorId = data.creatorId;
     this.csvFileUrl = data.csvFileUrl ?? undefined;
     this.error = data.error ?? undefined;
-    this.errorMetadata = parseJson(data.errorMetadata) ?? undefined;
+    this.errorMetadata = data.errorMetadata ?? undefined;
     this.id = data.id;
-    this.mapping = parseJson(data.mapping) ?? undefined;
+    this.mapping = data.mapping ?? undefined;
     this.progress = data.progress ?? undefined;
     this.service = data.service;
     this.status = data.status;
@@ -3699,11 +3699,11 @@ export class IssueImport extends Request {
   /** User readable error message, if one has occurred during the import. */
   public error?: string;
   /** Error code and metadata, if one has occurred during the import */
-  public errorMetadata?: Record<string, unknown>;
+  public errorMetadata?: L.Scalars["JSONObject"];
   /** The unique identifier of the entity. */
   public id: string;
   /** The data mapping configuration for the import job. */
-  public mapping?: Record<string, unknown>;
+  public mapping?: L.Scalars["JSONObject"];
   /** Current step progress in % (0-100). */
   public progress?: number;
   /** The service from which data will be imported. */
@@ -4221,7 +4221,7 @@ export class IssueSearchResult extends Request {
     this.estimate = data.estimate ?? undefined;
     this.id = data.id;
     this.identifier = data.identifier;
-    this.metadata = parseJson(data.metadata) ?? {};
+    this.metadata = data.metadata;
     this.number = data.number;
     this.previousIdentifiers = data.previousIdentifiers;
     this.priority = data.priority;
@@ -4277,7 +4277,7 @@ export class IssueSearchResult extends Request {
   /** Issue's human readable identifier (e.g. ENG-123). */
   public identifier: string;
   /** Metadata related to search result */
-  public metadata: Record<string, unknown>;
+  public metadata: L.Scalars["JSONObject"];
   /** The issue's unique number. */
   public number: number;
   /** Previous identifiers of the issue if it has been moved between teams. */
@@ -5356,7 +5356,7 @@ export class OrganizationInvite extends Request {
     this.expiresAt = parseDate(data.expiresAt) ?? undefined;
     this.external = data.external;
     this.id = data.id;
-    this.metadata = parseJson(data.metadata) ?? {};
+    this.metadata = data.metadata;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._invitee = data.invitee ?? undefined;
     this._inviter = data.inviter;
@@ -5377,7 +5377,7 @@ export class OrganizationInvite extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** Extra metadata associated with the organization invite. */
-  public metadata: Record<string, unknown>;
+  public metadata: L.Scalars["JSONObject"];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -5899,11 +5899,11 @@ export class ProjectConnection extends Connection<Project> {
 export class ProjectFilterSuggestionPayload extends Request {
   public constructor(request: LinearRequest, data: L.ProjectFilterSuggestionPayloadFragment) {
     super(request);
-    this.filter = parseJson(data.filter) ?? undefined;
+    this.filter = data.filter ?? undefined;
   }
 
   /** The json filter that is suggested. */
-  public filter?: Record<string, unknown>;
+  public filter?: L.Scalars["JSONObject"];
 }
 /**
  * An external link for a project.
@@ -6337,7 +6337,7 @@ export class ProjectSearchResult extends Request {
     this.id = data.id;
     this.inProgressScopeHistory = data.inProgressScopeHistory;
     this.issueCountHistory = data.issueCountHistory;
-    this.metadata = parseJson(data.metadata) ?? {};
+    this.metadata = data.metadata;
     this.name = data.name;
     this.progress = data.progress;
     this.projectUpdateRemindersPausedUntilAt = parseDate(data.projectUpdateRemindersPausedUntilAt) ?? undefined;
@@ -6391,7 +6391,7 @@ export class ProjectSearchResult extends Request {
   /** The total number of issues in the project after each week. */
   public issueCountHistory: number[];
   /** Metadata related to search result */
-  public metadata: Record<string, unknown>;
+  public metadata: L.Scalars["JSONObject"];
   /** The project's name. */
   public name: string;
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
@@ -8137,8 +8137,8 @@ export class TriageResponsibility extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
-    this.manualSelection = parseJson(data.manualSelection) ?? undefined;
-    this.schedule = parseJson(data.schedule) ?? undefined;
+    this.manualSelection = data.manualSelection ?? undefined;
+    this.schedule = data.schedule ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._integration = data.integration;
     this._team = data.team;
@@ -8151,9 +8151,9 @@ export class TriageResponsibility extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** Set of users used for triage responsibility. */
-  public manualSelection?: Record<string, unknown>;
+  public manualSelection?: L.Scalars["JSONObject"];
   /** Schedule used for triage responsibility. */
-  public schedule?: Record<string, unknown>;
+  public schedule?: L.Scalars["JSONObject"];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -8202,7 +8202,7 @@ export class UploadFile extends Request {
     this.assetUrl = data.assetUrl;
     this.contentType = data.contentType;
     this.filename = data.filename;
-    this.metaData = parseJson(data.metaData) ?? undefined;
+    this.metaData = data.metaData ?? undefined;
     this.size = data.size;
     this.uploadUrl = data.uploadUrl;
     this.headers = data.headers.map(node => new UploadFileHeader(request, node));
@@ -8214,7 +8214,7 @@ export class UploadFile extends Request {
   public contentType: string;
   /** The filename. */
   public filename: string;
-  public metaData?: Record<string, unknown>;
+  public metaData?: L.Scalars["JSONObject"];
   /** The size of the uploaded file. */
   public size: number;
   /** The signed URL the for the uploaded file. (assigned automatically) */
@@ -8608,7 +8608,7 @@ export class UserSettings extends Request {
     this.calendarHash = data.calendarHash ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
-    this.notificationPreferences = parseJson(data.notificationPreferences) ?? {};
+    this.notificationPreferences = data.notificationPreferences;
     this.showFullUserNames = data.showFullUserNames;
     this.unsubscribedFrom = data.unsubscribedFrom;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -8624,7 +8624,7 @@ export class UserSettings extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** The notification channel settings the user has selected. */
-  public notificationPreferences: Record<string, unknown>;
+  public notificationPreferences: L.Scalars["JSONObject"];
   /** Whether to show full user names instead of display names. */
   public showFullUserNames: boolean;
   /** The email types the user has unsubscribed from. */
@@ -8907,14 +8907,14 @@ export class WorkflowCronJobDefinition extends Request {
 
   public constructor(request: LinearRequest, data: L.WorkflowCronJobDefinitionFragment) {
     super(request);
-    this.activities = parseJson(data.activities) ?? {};
+    this.activities = data.activities;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
     this.enabled = data.enabled;
     this.id = data.id;
     this.name = data.name;
-    this.schedule = parseJson(data.schedule) ?? {};
+    this.schedule = data.schedule;
     this.sortOrder = data.sortOrder;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator;
@@ -8922,7 +8922,7 @@ export class WorkflowCronJobDefinition extends Request {
   }
 
   /** An array of activities that will be executed as part of the workflow cron job. */
-  public activities: Record<string, unknown>;
+  public activities: L.Scalars["JSONObject"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
@@ -8935,7 +8935,7 @@ export class WorkflowCronJobDefinition extends Request {
   /** The name of the workflow cron job. */
   public name: string;
   /** Cron schedule which is used to execute the workflow cron job. */
-  public schedule: Record<string, unknown>;
+  public schedule: L.Scalars["JSONObject"];
   /** The sort order of the workflow cron job definition within its siblings. */
   public sortOrder: string;
   /**
@@ -8993,9 +8993,9 @@ export class WorkflowDefinition extends Request {
 
   public constructor(request: LinearRequest, data: L.WorkflowDefinitionFragment) {
     super(request);
-    this.activities = parseJson(data.activities) ?? {};
+    this.activities = data.activities;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.conditions = parseJson(data.conditions) ?? {};
+    this.conditions = data.conditions;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
     this.enabled = data.enabled;
@@ -9014,11 +9014,11 @@ export class WorkflowDefinition extends Request {
   }
 
   /** An array of activities that will be executed as part of the workflow. */
-  public activities: Record<string, unknown>;
+  public activities: L.Scalars["JSONObject"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The conditions that need to be match for the workflow to be triggered. */
-  public conditions: Record<string, unknown>;
+  public conditions: L.Scalars["JSONObject"];
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The description of the workflow. */
@@ -14878,7 +14878,7 @@ export class IssueImportProcessMutation extends Request {
    * @param mapping - required mapping to pass to issueImportProcess
    * @returns parsed response from IssueImportProcessMutation
    */
-  public async fetch(issueImportId: string, mapping: Record<string, unknown>): LinearFetch<IssueImportPayload> {
+  public async fetch(issueImportId: string, mapping: L.Scalars["JSONObject"]): LinearFetch<IssueImportPayload> {
     const response = await this._request<L.IssueImportProcessMutation, L.IssueImportProcessMutationVariables>(
       L.IssueImportProcessDocument,
       {
@@ -23117,7 +23117,7 @@ export class LinearSdk extends Request {
    * @param mapping - required mapping to pass to issueImportProcess
    * @returns IssueImportPayload
    */
-  public issueImportProcess(issueImportId: string, mapping: Record<string, unknown>): LinearFetch<IssueImportPayload> {
+  public issueImportProcess(issueImportId: string, mapping: L.Scalars["JSONObject"]): LinearFetch<IssueImportPayload> {
     return new IssueImportProcessMutation(this._request).fetch(issueImportId, mapping);
   }
   /**

@@ -15,7 +15,7 @@ export type Scalars = {
   /** The `JSON` scalar type represents arbitrary values as *stringified* JSON */
   JSON: Record<string, unknown>;
   /** The `JSONObject` scalar type represents arbitrary values as *embedded* JSON */
-  JSONObject: Record<string, unknown>;
+  JSONObject: any;
   /** Represents a date in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago) */
   TimelessDate: any;
   /** A universally unique identifier as specified by RFC 4122. */
