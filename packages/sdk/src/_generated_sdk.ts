@@ -8080,17 +8080,21 @@ export class Template extends Request {
  * TemplateConnection model
  *
  * @param request - function to call the graphql client
- * @param data - L.TemplateConnectionFragment response data
+ * @param fetch - function to trigger a refetch of this TemplateConnection model
+ * @param data - TemplateConnection response data
  */
-export class TemplateConnection extends Request {
-  public constructor(request: LinearRequest, data: L.TemplateConnectionFragment) {
-    super(request);
-    this.pageInfo = new PageInfo(request, data.pageInfo);
-  }
-
-  public pageInfo: PageInfo;
-  public get nodes(): LinearFetch<Template[]> {
-    return new TemplatesQuery(this._request).fetch();
+export class TemplateConnection extends Connection<Template> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Template> | undefined>,
+    data: L.TemplateConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new Template(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
   }
 }
 /**
@@ -19812,7 +19816,18 @@ export class Organization_TemplatesQuery extends Request {
     );
     const data = response.organization.templates;
 
-    return new TemplateConnection(this._request, data);
+    return new TemplateConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -20748,7 +20763,18 @@ export class Team_TemplatesQuery extends Request {
     );
     const data = response.team.templates;
 
-    return new TemplateConnection(this._request, data);
+    return new TemplateConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 

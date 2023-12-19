@@ -154,7 +154,7 @@ export function printOperations(
           /** No need to go further than scalar fields */
           isScalarField(context, field) ||
           /** No need to go further if the field is within a connection */
-          ["pageInfo", "nodes"].includes(field.name.value) ||
+          Doc.CONNECTION_FIELDS.includes(field.name.value) ||
           /** No need to go further if this returns a list */
           reduceListType(field.type) ||
           /** No need to go further if we can get this field from a root query */

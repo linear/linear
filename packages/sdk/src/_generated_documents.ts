@@ -13150,6 +13150,7 @@ export type TeamPayloadFragment = { __typename: "TeamPayload" } & Pick<TeamPaylo
   };
 
 export type TemplateConnectionFragment = { __typename: "TemplateConnection" } & {
+  nodes: Array<{ __typename?: "Template" } & TemplateFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
@@ -18116,54 +18117,6 @@ export const TeamNotificationSubscriptionFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<TeamNotificationSubscriptionFragment, unknown>;
-export const TemplateFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Template" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Template" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "templateData" } },
-          { kind: "Field", name: { kind: "Name", value: "description" } },
-          { kind: "Field", name: { kind: "Name", value: "type" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "team" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "lastUpdatedBy" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<TemplateFragment, unknown>;
 export const UserAccountFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -24321,6 +24274,54 @@ export const TeamPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<TeamPayloadFragment, unknown>;
+export const TemplateFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Template" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Template" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "templateData" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "lastUpdatedBy" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<TemplateFragment, unknown>;
 export const TemplateConnectionFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -24332,6 +24333,14 @@ export const TemplateConnectionFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Template" } }],
+            },
+          },
           {
             kind: "Field",
             name: { kind: "Name", value: "pageInfo" },
@@ -32249,6 +32258,7 @@ export const Organization_TemplatesDocument = {
       },
     },
     ...TemplateConnectionFragmentDoc.definitions,
+    ...TemplateFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Organization_TemplatesQuery, Organization_TemplatesQueryVariables>;
@@ -36286,6 +36296,7 @@ export const Team_TemplatesDocument = {
       },
     },
     ...TemplateConnectionFragmentDoc.definitions,
+    ...TemplateFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Team_TemplatesQuery, Team_TemplatesQueryVariables>;
