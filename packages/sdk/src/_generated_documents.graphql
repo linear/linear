@@ -62,6 +62,10 @@ fragment Comment on Comment {
   parent {
     id
   }
+  # The project update that the comment is associated with.
+  projectUpdate {
+    id
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -356,6 +360,8 @@ fragment Document on Document {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The order of the item in the project resources list.
+  sortOrder
   # The project that the document is associated with.
   project {
     id
@@ -455,6 +461,19 @@ fragment RoadmapArchivePayload on RoadmapArchivePayload {
 }
 
 # A generic payload return from entity archive mutations.
+fragment TeamArchivePayload on TeamArchivePayload {
+  __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
 fragment WorkflowStateArchivePayload on WorkflowStateArchivePayload {
   __typename
   # The archived/unarchived entity. Null if entity was deleted.
@@ -501,6 +520,10 @@ fragment ArchivePayload on ArchivePayload {
 
   ... on RoadmapArchivePayload {
     ...RoadmapArchivePayload
+  }
+
+  ... on TeamArchivePayload {
+    ...TeamArchivePayload
   }
 
   ... on WorkflowStateArchivePayload {
@@ -830,17 +853,29 @@ fragment Reaction on Reaction {
   __typename
   # Name of the reaction's emoji.
   emoji
+  # The comment that the reaction is associated with.
+  comment {
+    id
+  }
+  # The issue that the reaction is associated with.
+  issue {
+    id
+  }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The project update that the reaction is associated with.
+  projectUpdate {
+    id
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
   createdAt
   # The unique identifier of the entity.
   id
-  # The user who reacted.
+  # The user that created the reaction.
   user {
     id
   }
@@ -1244,6 +1279,31 @@ fragment Template on Template {
   }
 }
 
+# A trigger that updates the issue status according to Git automations.
+fragment GitAutomationState on GitAutomationState {
+  __typename
+  # The associated workflow state.
+  state {
+    id
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The target branch, if null, the automation will be triggered on any branch.
+  branchPattern
+  # The team to which this automation state belongs.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
 # A update associated with an project.
 fragment ProjectUpdate on ProjectUpdate {
   __typename
@@ -1358,6 +1418,8 @@ fragment AuthUser on AuthUser {
   email
   # The user's full name.
   name
+  # Whether the user is active.
+  active
   id
 }
 
@@ -1481,6 +1543,33 @@ fragment ApiKey on ApiKey {
   id
 }
 
+# An email address that can be used for submitting issues
+fragment EmailIntakeAddress on EmailIntakeAddress {
+  __typename
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The team that the email address is associated with.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the email intake address.
+  creator {
+    id
+  }
+  # Unique email address user name (before @) used for incoming email.
+  address
+  # Whether the email address is enabled.
+  enabled
+}
+
 # An external link for a project.
 fragment ProjectLink on ProjectLink {
   __typename
@@ -1492,6 +1581,8 @@ fragment ProjectLink on ProjectLink {
   url
   # The link's label.
   label
+  # The order of the item in the project resources list.
+  sortOrder
   # The project that the link is associated with.
   project {
     id
@@ -1660,6 +1751,8 @@ fragment Issue on Issue {
   __typename
   # A flag that indicates whether the issue is in the trash bin.
   trashed
+  # Id of the labels associated with this issue.
+  labelIds
   # Issue URL.
   url
   # Issue's human readable identifier (e.g. ENG-123).
@@ -1672,6 +1765,10 @@ fragment Issue on Issue {
   customerTicketCount
   # Suggested branch name for the issue.
   branchName
+  # The bot that created the issue, if applicable.
+  botActor {
+    ...ActorBot
+  }
   # The cycle that the issue is associated with.
   cycle {
     id
@@ -1825,6 +1922,8 @@ fragment Organization on Organization {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The month at which the fiscal year starts. Defaults to January (0).
+  fiscalYearStartMonth
   # The organization's logo URL.
   logoUrl
   # The organization's name.
@@ -1874,9 +1973,12 @@ fragment AuthOrganization on AuthOrganization {
   urlKey
   # The time at which deletion of the organization was requested.
   deletionRequestedAt
+  # The unique identifier of the entity.
+  id
   # Whether SAML authentication is enabled for organization.
   samlEnabled
-  id
+  # Whether SCIM provisioning is enabled for organization.
+  scimEnabled
   userCount
 }
 
@@ -1991,6 +2093,8 @@ fragment Team on Team {
   inviteHash
   # What to use as an default estimate for unestimated issues.
   defaultIssueEstimate
+  # Where to move issues when changing state.
+  setIssueSortOrderOnStateChange
   # Whether an issue needs to have a priority set before leaving triage
   requirePriorityToLeaveTriage
   # Whether issues without priority should be sorted first.
@@ -2005,8 +2109,6 @@ fragment Team on Team {
   issueEstimationAllowZero
   # Whether to group recent issue history entries.
   groupIssueHistory
-  # Whether to move issues to bottom of the column when changing state.
-  issueSortOrderDefaultToBottom
   # Whether to send new issue comment notifications to Slack.
   slackIssueComments
   # Whether to send new issue notifications to Slack.
@@ -2015,23 +2117,80 @@ fragment Team on Team {
   slackIssueStatuses
   # Whether triage mode is enabled for the team or not.
   triageEnabled
+  # [DEPRECATED] Whether to move issues to bottom of the column when changing state. Use setIssueSortOrderOnStateChange instead.
+  issueSortOrderDefaultToBottom
 }
 
-# Contains either the full serialized state of the application or delta packets that the requester can
-# apply to the local data set in order to be up-to-date.
-fragment SyncResponse on SyncResponse {
+# AuthOauthClient with scope from OauthToken, for use in the GraphQL API.
+fragment AuthOauthClientWithScope on AuthOauthClientWithScope {
   __typename
-  # JSON serialized delta changes that the client can apply to its local state in order to catch up with the state of the world.
-  delta
-  # The full state of the organization as a serialized JSON object.
-  #     Mutually exclusive with the delta property
-  state
-  # The last sync id covered by the response.
-  lastSyncId
-  # The sync groups that the user is subscribed to.
-  subscribedSyncGroups
-  # The version of the remote database. Incremented by 1 for each migration run on the database.
-  databaseVersion
+  # Application name.
+  name
+  # Image of the application.
+  imageUrl
+  # OAuth application's ID.
+  appId
+  # OAuth application's client ID.
+  clientId
+  # Scopes that are authorized for this application for a given user.
+  scope
+  # The application's webhook URL.
+  webhookUrl
+}
+
+# AuthOauthClient with token creator IDs and counts (memberships), for use in the GraphQL API.
+fragment AuthOauthClientWithMemberships on AuthOauthClientWithMemberships {
+  __typename
+  # Application name.
+  name
+  # Image of the application.
+  imageUrl
+  # OAuth application's ID.
+  appId
+  # OAuth application's client ID.
+  clientId
+  # Scopes that are authorized for this application for a given user.
+  scope
+  # The application's webhook URL.
+  webhookUrl
+  # Total number of members that authorized the application.
+  totalMembers
+}
+
+# Authentication session information
+fragment AuthenticationSessionResponse on AuthenticationSessionResponse {
+  __typename
+  # Client used for the session
+  client
+  # Country codes of all seen locations.
+  countryCodes
+  # Date when the session was created.
+  createdAt
+  # Date when the session was last updated.
+  updatedAt
+  # Human readable location
+  location
+  # IP address.
+  ip
+  # Identifies the session used to make the request.
+  isCurrentSession
+  # Location city name.
+  locationCity
+  # Location country code.
+  locationCountryCode
+  # Location country name.
+  locationCountry
+  # Name of the session, derived from the client and operating system
+  name
+  # Operating system used for the session
+  operatingSystem
+  # Session's user-agent.
+  userAgent
+  # Used web browser.
+  browserType
+  # When was the session last seen
+  lastActiveAt
+  id
 }
 
 # Contains requested archived model objects.
@@ -2128,7 +2287,7 @@ fragment GithubOAuthTokenPayload on GithubOAuthTokenPayload {
 }
 
 # GitHub repos available to sync.
-fragment GitHubSyncRepo on GitHubSyncRepo {
+fragment GitHubRepo on GitHubRepo {
   __typename
   # The GitHub repo id.
   id
@@ -2249,6 +2408,8 @@ fragment JiraSettings on JiraSettings {
   projectMapping {
     ...JiraLinearMapping
   }
+  # Whether this integration is for Jira Server or not.
+  isJiraServer
 }
 
 # Join table between projects and roadmaps
@@ -2358,28 +2519,28 @@ fragment PagerDutyScheduleInfo on PagerDutyScheduleInfo {
   url
 }
 
-# Metadata and settings for a GitHub Sync integration.
-fragment GitHubSyncSettings on GitHubSyncSettings {
+# Metadata and settings for a GitHub Personal integration.
+fragment GitHubPersonalSettings on GitHubPersonalSettings {
   __typename
-  # Mapping of team to repository for syncing
-  repoMapping {
-    ...TeamRepoMapping
-  }
-  # The names of the repositories connected for the GitHub integration
-  repos {
-    ...GitHubSyncRepo
-  }
+  # The GitHub user's name
+  login
 }
 
 # Metadata and settings for a GitHub integration.
 fragment GitHubSettings on GitHubSettings {
   __typename
+  # Mapping of team to repository for syncing
+  repositoriesMapping {
+    ...TeamRepoMapping
+  }
   # The GitHub organization's name
   orgLogin
   # The avatar URL for the GitHub organization
   orgAvatarUrl
   # The names of the repositories connected for the GitHub integration
-  repositories
+  repositories {
+    ...GitHubRepo
+  }
 }
 
 # Metadata and settings for a GitLab integration.
@@ -2497,6 +2658,8 @@ fragment SlackChannelNameMapping on SlackChannelNameMapping {
   id
   # The Slack channel name.
   name
+  # The optional template ID to use for Asks auto-created in this channel. If not set, auto-created Asks won't use any template.
+  autoCreateTemplateId
   # Whether or not @-mentioning the bot should automatically create an Ask with the message
   autoCreateOnBotMention
   # Whether or not the Slack channel is private
@@ -2726,8 +2889,8 @@ fragment IntegrationSettings on IntegrationSettings {
   gitHub {
     ...GitHubSettings
   }
-  gitHubSync {
-    ...GitHubSyncSettings
+  gitHubPersonal {
+    ...GitHubPersonalSettings
   }
   gitLab {
     ...GitLabSettings
@@ -2857,6 +3020,8 @@ fragment JiraLinearMapping on JiraLinearMapping {
   linearTeamId
   # Whether the sync for this mapping is bidirectional.
   bidirectional
+  # Whether this mapping is the default one for issue creation.
+  default
 }
 
 # Tuple for mapping Linear teams to GitHub repos.
@@ -3086,7 +3251,7 @@ fragment AsksChannelConnectPayload on AsksChannelConnectPayload {
   mapping {
     ...SlackChannelNameMapping
   }
-  # Whether the bot needs to be added to the channel.
+  # Whether the bot needs to be manually added to the channel.
   addBot
   # Whether the operation was successful.
   success
@@ -3144,12 +3309,6 @@ fragment AuthApiKey on AuthApiKey {
   id
 }
 
-fragment AuthApiKeyDeletePayload on AuthApiKeyDeletePayload {
-  __typename
-  # Whether the operation was successful.
-  success
-}
-
 fragment AuthApiKeyPayload on AuthApiKeyPayload {
   __typename
   # The auth API key that was created.
@@ -3160,6 +3319,23 @@ fragment AuthApiKeyPayload on AuthApiKeyPayload {
   success
 }
 
+fragment AuthCreateOrJoinOrganizationResponse on AuthCreateOrJoinOrganizationResponse {
+  __typename
+  authOrganization {
+    ...AuthOrganization
+  }
+  authUser {
+    ...AuthUser
+  }
+  grantDomainAccess
+  organization {
+    ...AuthOrganization
+  }
+  user {
+    ...AuthUser
+  }
+}
+
 fragment AuthIntegration on AuthIntegration {
   __typename
   # The unique identifier of the entity.
@@ -3168,12 +3344,49 @@ fragment AuthIntegration on AuthIntegration {
 
 fragment AuthOauthClient on AuthOauthClient {
   __typename
+  # Image of the application.
+  imageUrl
+  # Information about the application.
+  description
   # List of allowed redirect URIs for the application.
   redirectUris
+  # Name of the developer.
+  developer
   # OAuth application's client ID.
   clientId
+  # OAuth application's client name.
+  name
   # OAuth application's client secret.
   clientSecret
+  # The ID of the user who created the OAuth application.
+  creatorId
+  # The ID of the workspace the OAuth application belongs to.
+  organizationId
+  # The unique identifier of the entity.
+  id
+  # Url of the developer.
+  developerUrl
+  # Webhook URL
+  webhookUrl
+  # Whether the OAuth application can be installed in other organizations.
+  publicEnabled
+  archivedAt
+}
+
+fragment AuthOauthClientWithTokens on AuthOauthClientWithTokens {
+  __typename
+  # The auth OAuth client.
+  client {
+    ...AuthOauthClient
+  }
+  # The token matching the app, scope, and actor.
+  tokens {
+    ...OauthToken
+  }
+}
+
+fragment AuthOrganizationDomain on AuthOrganizationDomain {
+  __typename
   # The unique identifier of the entity.
   id
 }
@@ -3204,39 +3417,24 @@ fragment AuthResolverResponse on AuthResolverResponse {
   }
 }
 
-fragment AuthenticationSessionResponse on AuthenticationSessionResponse {
+fragment AuthSuccessPayload on AuthSuccessPayload {
   __typename
-  # Client used for the session
-  client
-  # Country codes of all seen locations.
-  countryCodes
-  # Date when the session was created.
-  createdAt
-  # Date when the session was last updated.
-  updatedAt
-  # Human readable location
-  location
-  # IP address.
-  ip
-  # Identifies the session used to make the request.
-  isCurrentSession
-  # Location city name.
-  locationCity
-  # Location country code.
-  locationCountryCode
-  # Location country name.
-  locationCountry
-  # Name of the session, derived from the client and operating system
+  # Whether the operation was successful.
+  success
+}
+
+fragment AuthorizedApplicationBase on AuthorizedApplicationBase {
+  __typename
+  # Application name.
   name
-  # Operating system used for the session
-  operatingSystem
-  # Session's user-agent.
-  userAgent
-  # Used web browser.
-  browserType
-  # When was the session last seen
-  lastActiveAt
-  id
+  # Image of the application.
+  imageUrl
+  # OAuth application's ID.
+  appId
+  # OAuth application's client ID.
+  clientId
+  # Scopes that are authorized for this application for a given user.
+  scope
 }
 
 fragment CommentConnection on CommentConnection {
@@ -3437,6 +3635,8 @@ fragment DocumentSearchResult on DocumentSearchResult {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The order of the item in the project resources list.
+  sortOrder
   # The project that the document is associated with.
   project {
     id
@@ -3527,6 +3727,28 @@ fragment FavoritePayload on FavoritePayload {
 
 fragment FrontAttachmentPayload on FrontAttachmentPayload {
   __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment GitAutomationStateConnection on GitAutomationStateConnection {
+  __typename
+  nodes {
+    ...GitAutomationState
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment GitAutomationStatePayload on GitAutomationStatePayload {
+  __typename
+  # The automation state that was created or updated.
+  gitAutomationState {
+    ...GitAutomationState
+  }
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -3781,6 +4003,8 @@ fragment IssueSearchResult on IssueSearchResult {
   __typename
   # A flag that indicates whether the issue is in the trash bin.
   trashed
+  # Id of the labels associated with this issue.
+  labelIds
   # Issue URL.
   url
   # Issue's human readable identifier (e.g. ENG-123).
@@ -3795,6 +4019,10 @@ fragment IssueSearchResult on IssueSearchResult {
   customerTicketCount
   # Suggested branch name for the issue.
   branchName
+  # The bot that created the issue, if applicable.
+  botActor {
+    ...ActorBot
+  }
   # The cycle that the issue is associated with.
   cycle {
     id
@@ -3971,6 +4199,12 @@ fragment OauthClientConnection on OauthClientConnection {
   pageInfo {
     ...PageInfo
   }
+}
+
+fragment OauthToken on OauthToken {
+  __typename
+  createdAt
+  id
 }
 
 fragment OrganizationCancelDeletePayload on OrganizationCancelDeletePayload {
@@ -4451,6 +4685,24 @@ fragment SamlConfiguration on SamlConfiguration {
   ssoSigningCert
 }
 
+fragment SlackChannelConnectPayload on SlackChannelConnectPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The integration that was created or updated.
+  integration {
+    id
+  }
+  # Whether it's recommended to connect main Slack integration.
+  nudgeToConnectMainSlackIntegration
+  # Whether it's recommended to update main Slack integration.
+  nudgeToUpdateMainSlackIntegration
+  # Whether the bot needs to be manually added to the channel.
+  addBot
+  # Whether the operation was successful.
+  success
+}
+
 fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
   __typename
   # SAML SSO sign-in URL.
@@ -4907,6 +5159,17 @@ query attachmentIssue_attachments(
       orderBy: $orderBy
     ) {
       ...AttachmentConnection
+    }
+  }
+}
+# The bot that created the issue, if applicable.
+query attachmentIssue_botActor(
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
+  $id: String!
+) {
+  attachmentIssue(id: $id) {
+    botActor {
+      ...ActorBot
     }
   }
 }
@@ -5717,6 +5980,14 @@ query issue_attachments(
     }
   }
 }
+# The bot that created the issue, if applicable.
+query issue_botActor($id: String!) {
+  issue(id: $id) {
+    botActor {
+      ...ActorBot
+    }
+  }
+}
 # Children of the issue.
 query issue_children(
   $id: String!
@@ -6199,6 +6470,17 @@ query issueVcsBranchSearch_attachments(
       orderBy: $orderBy
     ) {
       ...AttachmentConnection
+    }
+  }
+}
+# The bot that created the issue, if applicable.
+query issueVcsBranchSearch_botActor(
+  # The VCS branch name to search for.
+  $branchName: String!
+) {
+  issueVcsBranchSearch(branchName: $branchName) {
+    botActor {
+      ...ActorBot
     }
   }
 }
@@ -7118,8 +7400,13 @@ query projects(
   }
 }
 # Sends a test push message.
-query pushSubscriptionTest {
-  pushSubscriptionTest {
+query pushSubscriptionTest(
+  # The send strategy to use.
+  $sendStrategy: SendStrategy
+  # Whether to send to mobile devices.
+  $targetMobile: Boolean
+) {
+  pushSubscriptionTest(sendStrategy: $sendStrategy, targetMobile: $targetMobile) {
     ...PushSubscriptionTestPayload
   }
 }
@@ -7462,6 +7749,35 @@ query ssoUrlFromEmail(
 query team($id: String!) {
   team(id: $id) {
     ...Team
+  }
+}
+# The automation states for the team.
+query team_automationStates(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  team(id: $id) {
+    automationStates(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...GitAutomationStateConnection
+    }
   }
 }
 # Cycles associated with the team.
@@ -8343,7 +8659,30 @@ mutation attachmentLinkFront(
     ...FrontAttachmentPayload
   }
 }
-# Link an existing GitHub PR to an issue.
+# Link a GitHub issue to a Linear issue.
+mutation attachmentLinkGitHubIssue(
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  $createAsUser: String
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  $displayIconUrl: String
+  # Optional attachment ID that may be provided through the API
+  $id: String
+  # The Linear issue for which to link the GitHub issue.
+  $issueId: String!
+  # The URL of the GitHub issue to link.
+  $url: String!
+) {
+  attachmentLinkGitHubIssue(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    url: $url
+  ) {
+    ...AttachmentPayload
+  }
+}
+# Link a GitHub pull request to an issue.
 mutation attachmentLinkGitHubPR(
   # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
   $createAsUser: String
@@ -8354,11 +8693,11 @@ mutation attachmentLinkGitHubPR(
   # The issue for which to link the GitHub pull request.
   $issueId: String!
   # The GitHub pull request number to link.
-  $number: Float!
+  $number: Float
   # The owner of the GitHub repository.
-  $owner: String!
+  $owner: String
   # The name of the GitHub repository.
-  $repo: String!
+  $repo: String
   # The URL of the GitHub pull request to link.
   $url: String!
 ) {
@@ -8674,6 +9013,15 @@ mutation createCycle(
     ...CyclePayload
   }
 }
+# Shifts all cycles starts by a certain number of weeks.
+mutation cycleShiftAll(
+  # A partial cycle object to update the cycle with.
+  $input: CycleShiftAllInput!
+) {
+  cycleShiftAll(input: $input) {
+    ...CyclePayload
+  }
+}
 # Updates a cycle.
 mutation updateCycle(
   # The identifier of the cycle to update.
@@ -8812,6 +9160,35 @@ mutation fileUpload(
     ...UploadPayload
   }
 }
+# Creates a new automation state.
+mutation createGitAutomationState(
+  # The automation state to create.
+  $input: GitAutomationStateCreateInput!
+) {
+  gitAutomationStateCreate(input: $input) {
+    ...GitAutomationStatePayload
+  }
+}
+# Archives an automation state.
+mutation deleteGitAutomationState(
+  # The identifier of the automation state to archive.
+  $id: String!
+) {
+  gitAutomationStateDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates an existing state.
+mutation updateGitAutomationState(
+  # The identifier of the state to update.
+  $id: String!
+  # The state to update.
+  $input: GitAutomationStateUpdateInput!
+) {
+  gitAutomationStateUpdate(id: $id, input: $input) {
+    ...GitAutomationStatePayload
+  }
+}
 # Authenticate user account through Google OAuth. This is the 2nd step of OAuth flow.
 mutation googleUserAccountAuth(
   # The data used for Google authentication.
@@ -8922,15 +9299,6 @@ mutation integrationGithubConnect(
     ...IntegrationPayload
   }
 }
-# Connects the organization with the GitHub Sync App.
-mutation integrationGithubSyncConnect(
-  # The GitHub data to connect with.
-  $installationId: String!
-) {
-  integrationGithubSyncConnect(installationId: $installationId) {
-    ...IntegrationPayload
-  }
-}
 # Connects the organization with a GitLab Access Token.
 mutation integrationGitlabConnect(
   # The GitLab Access Token to connect with.
@@ -8981,10 +9349,12 @@ mutation updateIntegrationIntercomSettings(
 }
 # Connect your Jira account to Linear.
 mutation integrationJiraPersonal(
-  # The Jira OAuth code.
-  $code: String!
+  # The Jira personal access token, when connecting using a PAT.
+  $accessToken: String
+  # The Jira OAuth code, when connecting using OAuth.
+  $code: String
 ) {
-  integrationJiraPersonal(code: $code) {
+  integrationJiraPersonal(accessToken: $accessToken, code: $code) {
     ...IntegrationPayload
   }
 }
@@ -9059,7 +9429,7 @@ mutation integrationSlackOrgProjectUpdatesPost(
   $redirectUri: String!
 ) {
   integrationSlackOrgProjectUpdatesPost(code: $code, redirectUri: $redirectUri) {
-    ...IntegrationPayload
+    ...SlackChannelConnectPayload
   }
 }
 # Integrates your personal notifications with Slack.
@@ -9085,7 +9455,7 @@ mutation integrationSlackPost(
   $teamId: String!
 ) {
   integrationSlackPost(code: $code, redirectUri: $redirectUri, shouldUseV2Auth: $shouldUseV2Auth, teamId: $teamId) {
-    ...IntegrationPayload
+    ...SlackChannelConnectPayload
   }
 }
 # Slack integration for project notifications.
@@ -9100,7 +9470,7 @@ mutation integrationSlackProjectPost(
   $service: String!
 ) {
   integrationSlackProjectPost(code: $code, projectId: $projectId, redirectUri: $redirectUri, service: $service) {
-    ...IntegrationPayload
+    ...SlackChannelConnectPayload
   }
 }
 # Creates a new integrationTemplate join.
@@ -9784,10 +10154,12 @@ mutation archiveProject(
 }
 # Creates a new project.
 mutation createProject(
+  # Whether to connect a Slack channel to the project.
+  $connectSlackChannel: Boolean
   # The issue object to create.
   $input: ProjectCreateInput!
 ) {
-  projectCreate(input: $input) {
+  projectCreate(connectSlackChannel: $connectSlackChannel, input: $input) {
     ...ProjectPayload
   }
 }
@@ -10132,6 +10504,15 @@ mutation updateTeamMembership(
     ...TeamMembershipPayload
   }
 }
+# Unarchives a team and cancels deletion.
+mutation unarchiveTeam(
+  # The identifier of the team to delete.
+  $id: String!
+) {
+  teamUnarchive(id: $id) {
+    ...TeamArchivePayload
+  }
+}
 # Updates a team.
 mutation updateTeam(
   # The identifier of the team to update.
@@ -10219,24 +10600,6 @@ mutation updateUserFlag(
 ) {
   userFlagUpdate(flag: $flag, operation: $operation) {
     ...UserSettingsFlagPayload
-  }
-}
-# [DEPRECATED] Connects the GitHub user to this Linear account via OAuth2.
-mutation userGitHubConnect(
-  # The GitHub OAuth code.
-  $code: String!
-) {
-  userGitHubConnect(code: $code) {
-    ...UserPayload
-  }
-}
-# [DEPRECATED] Connects the Jira user to this Linear account via OAuth2.
-mutation userJiraConnect(
-  # The Jira OAuth code.
-  $code: String!
-) {
-  userJiraConnect(code: $code) {
-    ...UserPayload
   }
 }
 # Makes user an admin. Can only be called by an admin.
