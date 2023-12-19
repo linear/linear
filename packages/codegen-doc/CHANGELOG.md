@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.15.5
+
+### Patch Changes
+
+- 8fc3a19: chore(deps): update dependency patch versions
+- dfd34bb: fix: do not re-use query for connection fields
+- 31cb243: fix: do not attempt to parse JSONObject scalars
+
 ## 1.15.4
 
 ### Patch Changes

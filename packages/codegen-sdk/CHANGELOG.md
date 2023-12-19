@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.14.5
+
+### Patch Changes
+
+- 8fc3a19: chore(deps): update dependency patch versions
+- 31cb243: fix: do not attempt to parse JSONObject scalars
+
 ## 1.14.4
 
 ### Patch Changes

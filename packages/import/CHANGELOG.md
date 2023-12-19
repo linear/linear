@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.9.5
+
+### Patch Changes
+
+- 8fc3a19: chore(deps): update dependency patch versions
+- Updated dependencies [8fc3a19]
+- Updated dependencies [05652cb]
+- Updated dependencies [31cb243]
+  - @linear/sdk@13.0.0
+
 ## 1.9.4
 
 ### Patch Changes
