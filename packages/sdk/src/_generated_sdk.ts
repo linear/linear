@@ -366,7 +366,7 @@ export class AsksChannelConnectPayload extends Request {
     this._integration = data.integration ?? undefined;
   }
 
-  /** Whether the bot needs to be added to the channel. */
+  /** Whether the bot needs to be manually added to the channel. */
   public addBot: boolean;
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
@@ -655,21 +655,6 @@ export class AuthApiKey extends Request {
   public id: string;
 }
 /**
- * AuthApiKeyDeletePayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.AuthApiKeyDeletePayloadFragment response data
- */
-export class AuthApiKeyDeletePayload extends Request {
-  public constructor(request: LinearRequest, data: L.AuthApiKeyDeletePayloadFragment) {
-    super(request);
-    this.success = data.success;
-  }
-
-  /** Whether the operation was successful. */
-  public success: boolean;
-}
-/**
  * AuthApiKeyPayload model
  *
  * @param request - function to call the graphql client
@@ -686,6 +671,28 @@ export class AuthApiKeyPayload extends Request {
   public success: boolean;
   /** The auth API key that was created. */
   public authApiKey: AuthApiKey;
+}
+/**
+ * AuthCreateOrJoinOrganizationResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AuthCreateOrJoinOrganizationResponseFragment response data
+ */
+export class AuthCreateOrJoinOrganizationResponse extends Request {
+  public constructor(request: LinearRequest, data: L.AuthCreateOrJoinOrganizationResponseFragment) {
+    super(request);
+    this.grantDomainAccess = data.grantDomainAccess ?? undefined;
+    this.authOrganization = new AuthOrganization(request, data.authOrganization);
+    this.authUser = new AuthUser(request, data.authUser);
+    this.organization = new AuthOrganization(request, data.organization);
+    this.user = new AuthUser(request, data.user);
+  }
+
+  public grantDomainAccess?: boolean;
+  public authOrganization: AuthOrganization;
+  public authUser: AuthUser;
+  public organization: AuthOrganization;
+  public user: AuthUser;
 }
 /**
  * AuthIntegration model
@@ -711,20 +718,130 @@ export class AuthIntegration extends Request {
 export class AuthOauthClient extends Request {
   public constructor(request: LinearRequest, data: L.AuthOauthClientFragment) {
     super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.clientId = data.clientId;
     this.clientSecret = data.clientSecret;
+    this.creatorId = data.creatorId;
+    this.description = data.description ?? undefined;
+    this.developer = data.developer;
+    this.developerUrl = data.developerUrl;
     this.id = data.id;
+    this.imageUrl = data.imageUrl ?? undefined;
+    this.name = data.name;
+    this.organizationId = data.organizationId;
+    this.publicEnabled = data.publicEnabled;
     this.redirectUris = data.redirectUris;
+    this.webhookUrl = data.webhookUrl ?? undefined;
   }
 
+  public archivedAt?: Date;
   /** OAuth application's client ID. */
   public clientId: string;
   /** OAuth application's client secret. */
   public clientSecret: string;
+  /** The ID of the user who created the OAuth application. */
+  public creatorId: string;
+  /** Information about the application. */
+  public description?: string;
+  /** Name of the developer. */
+  public developer: string;
+  /** Url of the developer. */
+  public developerUrl: string;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Image of the application. */
+  public imageUrl?: string;
+  /** OAuth application's client name. */
+  public name: string;
+  /** The ID of the workspace the OAuth application belongs to. */
+  public organizationId: string;
+  /** Whether the OAuth application can be installed in other organizations. */
+  public publicEnabled: boolean;
   /** List of allowed redirect URIs for the application. */
   public redirectUris: string[];
+  /** Webhook URL */
+  public webhookUrl?: string;
+}
+/**
+ * AuthOauthClient with token creator IDs and counts (memberships), for use in the GraphQL API.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AuthOauthClientWithMembershipsFragment response data
+ */
+export class AuthOauthClientWithMemberships extends Request {
+  public constructor(request: LinearRequest, data: L.AuthOauthClientWithMembershipsFragment) {
+    super(request);
+    this.appId = data.appId;
+    this.clientId = data.clientId;
+    this.imageUrl = data.imageUrl ?? undefined;
+    this.name = data.name;
+    this.scope = data.scope;
+    this.totalMembers = data.totalMembers;
+    this.webhookUrl = data.webhookUrl ?? undefined;
+  }
+
+  /** OAuth application's ID. */
+  public appId: string;
+  /** OAuth application's client ID. */
+  public clientId: string;
+  /** Image of the application. */
+  public imageUrl?: string;
+  /** Application name. */
+  public name: string;
+  /** Scopes that are authorized for this application for a given user. */
+  public scope: string[];
+  /** Total number of members that authorized the application. */
+  public totalMembers: number;
+  /** The application's webhook URL. */
+  public webhookUrl?: string;
+}
+/**
+ * AuthOauthClient with scope from OauthToken, for use in the GraphQL API.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AuthOauthClientWithScopeFragment response data
+ */
+export class AuthOauthClientWithScope extends Request {
+  public constructor(request: LinearRequest, data: L.AuthOauthClientWithScopeFragment) {
+    super(request);
+    this.appId = data.appId;
+    this.clientId = data.clientId;
+    this.imageUrl = data.imageUrl ?? undefined;
+    this.name = data.name;
+    this.scope = data.scope;
+    this.webhookUrl = data.webhookUrl ?? undefined;
+  }
+
+  /** OAuth application's ID. */
+  public appId: string;
+  /** OAuth application's client ID. */
+  public clientId: string;
+  /** Image of the application. */
+  public imageUrl?: string;
+  /** Application name. */
+  public name: string;
+  /** Scopes that are authorized for this application for a given user. */
+  public scope: string[];
+  /** The application's webhook URL. */
+  public webhookUrl?: string;
+}
+/**
+ * AuthOauthClientWithTokens model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AuthOauthClientWithTokensFragment response data
+ */
+export class AuthOauthClientWithTokens extends Request {
+  public constructor(request: LinearRequest, data: L.AuthOauthClientWithTokensFragment) {
+    super(request);
+    this.client = new AuthOauthClient(request, data.client);
+    this.tokens = data.tokens.map(node => new OauthToken(request, node));
+  }
+
+  /** The token matching the app, scope, and actor. */
+  public tokens: OauthToken[];
+  /** The auth OAuth client. */
+  public client: AuthOauthClient;
 }
 /**
  * An organization. Organizations are root-level objects that contain users and teams.
@@ -742,6 +859,7 @@ export class AuthOrganization extends Request {
     this.name = data.name;
     this.previousUrlKeys = data.previousUrlKeys;
     this.samlEnabled = data.samlEnabled;
+    this.scimEnabled = data.scimEnabled;
     this.urlKey = data.urlKey;
     this.userCount = data.userCount;
   }
@@ -750,6 +868,7 @@ export class AuthOrganization extends Request {
   public allowedAuthServices: string[];
   /** The time at which deletion of the organization was requested. */
   public deletionRequestedAt?: Date;
+  /** The unique identifier of the entity. */
   public id: string;
   /** The organization's logo URL. */
   public logoUrl?: string;
@@ -759,9 +878,26 @@ export class AuthOrganization extends Request {
   public previousUrlKeys: string[];
   /** Whether SAML authentication is enabled for organization. */
   public samlEnabled: boolean;
+  /** Whether SCIM provisioning is enabled for organization. */
+  public scimEnabled: boolean;
   /** The organization's unique URL key. */
   public urlKey: string;
   public userCount: number;
+}
+/**
+ * AuthOrganizationDomain model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AuthOrganizationDomainFragment response data
+ */
+export class AuthOrganizationDomain extends Request {
+  public constructor(request: LinearRequest, data: L.AuthOrganizationDomainFragment) {
+    super(request);
+    this.id = data.id;
+  }
+
+  /** The unique identifier of the entity. */
+  public id: string;
 }
 /**
  * AuthResolverResponse model
@@ -804,6 +940,21 @@ export class AuthResolverResponse extends Request {
   public users: AuthUser[];
 }
 /**
+ * AuthSuccessPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AuthSuccessPayloadFragment response data
+ */
+export class AuthSuccessPayload extends Request {
+  public constructor(request: LinearRequest, data: L.AuthSuccessPayloadFragment) {
+    super(request);
+    this.success = data.success;
+  }
+
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
  * A user that has access to the the resources of an organization.
  *
  * @param request - function to call the graphql client
@@ -812,6 +963,7 @@ export class AuthResolverResponse extends Request {
 export class AuthUser extends Request {
   public constructor(request: LinearRequest, data: L.AuthUserFragment) {
     super(request);
+    this.active = data.active;
     this.avatarUrl = data.avatarUrl ?? undefined;
     this.displayName = data.displayName;
     this.email = data.email;
@@ -820,6 +972,8 @@ export class AuthUser extends Request {
     this.organization = new AuthOrganization(request, data.organization);
   }
 
+  /** Whether the user is active. */
+  public active: boolean;
   /** An URL to the user's avatar image. */
   public avatarUrl?: string;
   /** The user's display (nick) name. Unique within each organization. */
@@ -889,7 +1043,7 @@ export class AuthenticationSession extends Request {
   public userAgent?: string;
 }
 /**
- * AuthenticationSessionResponse model
+ * Authentication session information
  *
  * @param request - function to call the graphql client
  * @param data - L.AuthenticationSessionResponseFragment response data
@@ -948,14 +1102,42 @@ export class AuthenticationSessionResponse extends Request {
   public userAgent?: string;
 }
 /**
+ * AuthorizedApplicationBase model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AuthorizedApplicationBaseFragment response data
+ */
+export class AuthorizedApplicationBase extends Request {
+  public constructor(request: LinearRequest, data: L.AuthorizedApplicationBaseFragment) {
+    super(request);
+    this.appId = data.appId;
+    this.clientId = data.clientId;
+    this.imageUrl = data.imageUrl ?? undefined;
+    this.name = data.name;
+    this.scope = data.scope;
+  }
+
+  /** OAuth application's ID. */
+  public appId: string;
+  /** OAuth application's client ID. */
+  public clientId: string;
+  /** Image of the application. */
+  public imageUrl?: string;
+  /** Application name. */
+  public name: string;
+  /** Scopes that are authorized for this application for a given user. */
+  public scope: string[];
+}
+/**
  * A comment associated with an issue.
  *
  * @param request - function to call the graphql client
  * @param data - L.CommentFragment response data
  */
 export class Comment extends Request {
-  private _issue: L.CommentFragment["issue"];
+  private _issue?: L.CommentFragment["issue"];
   private _parent?: L.CommentFragment["parent"];
+  private _projectUpdate?: L.CommentFragment["projectUpdate"];
   private _resolvingComment?: L.CommentFragment["resolvingComment"];
   private _resolvingUser?: L.CommentFragment["resolvingUser"];
   private _user?: L.CommentFragment["user"];
@@ -973,8 +1155,9 @@ export class Comment extends Request {
     this.url = data.url;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this.documentContent = data.documentContent ? new DocumentContent(request, data.documentContent) : undefined;
-    this._issue = data.issue;
+    this._issue = data.issue ?? undefined;
     this._parent = data.parent ?? undefined;
+    this._projectUpdate = data.projectUpdate ?? undefined;
     this._resolvingComment = data.resolvingComment ?? undefined;
     this._resolvingUser = data.resolvingUser ?? undefined;
     this._user = data.user ?? undefined;
@@ -1008,11 +1191,15 @@ export class Comment extends Request {
   public documentContent?: DocumentContent;
   /** The issue that the comment is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
-    return new IssueQuery(this._request).fetch(this._issue.id);
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
   /** The parent comment under which the current comment is nested. */
   public get parent(): LinearFetch<Comment> | undefined {
     return this._parent?.id ? new CommentQuery(this._request).fetch(this._parent?.id) : undefined;
+  }
+  /** The project update that the comment is associated with. */
+  public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
+    return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
   }
   /** The comment that resolved the thread. */
   public get resolvingComment(): LinearFetch<Comment> | undefined {
@@ -1742,6 +1929,7 @@ export class Document extends Request {
     this.icon = data.icon ?? undefined;
     this.id = data.id;
     this.slugId = data.slugId;
+    this.sortOrder = data.sortOrder;
     this.title = data.title;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator;
@@ -1766,6 +1954,8 @@ export class Document extends Request {
   public id: string;
   /** The document's unique URL slug. */
   public slugId: string;
+  /** The order of the item in the project resources list. */
+  public sortOrder: number;
   /** The document title. */
   public title: string;
   /**
@@ -2032,6 +2222,7 @@ export class DocumentSearchResult extends Request {
     this.id = data.id;
     this.metadata = data.metadata;
     this.slugId = data.slugId;
+    this.sortOrder = data.sortOrder;
     this.title = data.title;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator;
@@ -2058,6 +2249,8 @@ export class DocumentSearchResult extends Request {
   public metadata: L.Scalars["JSONObject"];
   /** The document's unique URL slug. */
   public slugId: string;
+  /** The order of the item in the project resources list. */
+  public sortOrder: number;
   /** The document title. */
   public title: string;
   /**
@@ -2104,6 +2297,53 @@ export class DocumentSearchResultConnection extends Connection<DocumentSearchRes
       data.nodes.map(node => new DocumentSearchResult(request, node)),
       new PageInfo(request, data.pageInfo)
     );
+  }
+}
+/**
+ * An email address that can be used for submitting issues
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.EmailIntakeAddressFragment response data
+ */
+export class EmailIntakeAddress extends Request {
+  private _creator?: L.EmailIntakeAddressFragment["creator"];
+  private _team: L.EmailIntakeAddressFragment["team"];
+
+  public constructor(request: LinearRequest, data: L.EmailIntakeAddressFragment) {
+    super(request);
+    this.address = data.address;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.enabled = data.enabled;
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._creator = data.creator ?? undefined;
+    this._team = data.team;
+  }
+
+  /** Unique email address user name (before @) used for incoming email. */
+  public address: string;
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** Whether the email address is enabled. */
+  public enabled: boolean;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The user who created the email intake address. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The team that the email address is associated with. */
+  public get team(): LinearFetch<Team> | undefined {
+    return new TeamQuery(this._request).fetch(this._team.id);
   }
 }
 /**
@@ -2491,6 +2731,105 @@ export class FrontSettings extends Request {
   public sendNoteOnStatusChange?: boolean;
 }
 /**
+ * A trigger that updates the issue status according to Git automations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.GitAutomationStateFragment response data
+ */
+export class GitAutomationState extends Request {
+  private _state?: L.GitAutomationStateFragment["state"];
+  private _team: L.GitAutomationStateFragment["team"];
+
+  public constructor(request: LinearRequest, data: L.GitAutomationStateFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.branchPattern = data.branchPattern;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._state = data.state ?? undefined;
+    this._team = data.team;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The target branch, if null, the automation will be triggered on any branch. */
+  public branchPattern: string;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The associated workflow state. */
+  public get state(): LinearFetch<WorkflowState> | undefined {
+    return this._state?.id ? new WorkflowStateQuery(this._request).fetch(this._state?.id) : undefined;
+  }
+  /** The team to which this automation state belongs. */
+  public get team(): LinearFetch<Team> | undefined {
+    return new TeamQuery(this._request).fetch(this._team.id);
+  }
+
+  /** Creates a new automation state. */
+  public create(input: L.GitAutomationStateCreateInput) {
+    return new CreateGitAutomationStateMutation(this._request).fetch(input);
+  }
+  /** Archives an automation state. */
+  public delete() {
+    return new DeleteGitAutomationStateMutation(this._request).fetch(this.id);
+  }
+  /** Updates an existing state. */
+  public update(input: L.GitAutomationStateUpdateInput) {
+    return new UpdateGitAutomationStateMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * GitAutomationStateConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this GitAutomationStateConnection model
+ * @param data - GitAutomationStateConnection response data
+ */
+export class GitAutomationStateConnection extends Connection<GitAutomationState> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<GitAutomationState> | undefined>,
+    data: L.GitAutomationStateConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new GitAutomationState(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * GitAutomationStatePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.GitAutomationStatePayloadFragment response data
+ */
+export class GitAutomationStatePayload extends Request {
+  public constructor(request: LinearRequest, data: L.GitAutomationStatePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this.gitAutomationState = new GitAutomationState(request, data.gitAutomationState);
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The automation state that was created or updated. */
+  public gitAutomationState: GitAutomationState;
+}
+/**
  * GitHubCommitIntegrationPayload model
  *
  * @param request - function to call the graphql client
@@ -2519,34 +2858,28 @@ export class GitHubCommitIntegrationPayload extends Request {
   }
 }
 /**
- * Metadata and settings for a GitHub integration.
+ * Metadata and settings for a GitHub Personal integration.
  *
  * @param request - function to call the graphql client
- * @param data - L.GitHubSettingsFragment response data
+ * @param data - L.GitHubPersonalSettingsFragment response data
  */
-export class GitHubSettings extends Request {
-  public constructor(request: LinearRequest, data: L.GitHubSettingsFragment) {
+export class GitHubPersonalSettings extends Request {
+  public constructor(request: LinearRequest, data: L.GitHubPersonalSettingsFragment) {
     super(request);
-    this.orgAvatarUrl = data.orgAvatarUrl;
-    this.orgLogin = data.orgLogin;
-    this.repositories = data.repositories ?? undefined;
+    this.login = data.login;
   }
 
-  /** The avatar URL for the GitHub organization */
-  public orgAvatarUrl: string;
-  /** The GitHub organization's name */
-  public orgLogin: string;
-  /** The names of the repositories connected for the GitHub integration */
-  public repositories?: string[];
+  /** The GitHub user's name */
+  public login: string;
 }
 /**
  * GitHub repos available to sync.
  *
  * @param request - function to call the graphql client
- * @param data - L.GitHubSyncRepoFragment response data
+ * @param data - L.GitHubRepoFragment response data
  */
-export class GitHubSyncRepo extends Request {
-  public constructor(request: LinearRequest, data: L.GitHubSyncRepoFragment) {
+export class GitHubRepo extends Request {
+  public constructor(request: LinearRequest, data: L.GitHubRepoFragment) {
     super(request);
     this.fullName = data.fullName;
     this.id = data.id;
@@ -2558,22 +2891,30 @@ export class GitHubSyncRepo extends Request {
   public id: number;
 }
 /**
- * Metadata and settings for a GitHub Sync integration.
+ * Metadata and settings for a GitHub integration.
  *
  * @param request - function to call the graphql client
- * @param data - L.GitHubSyncSettingsFragment response data
+ * @param data - L.GitHubSettingsFragment response data
  */
-export class GitHubSyncSettings extends Request {
-  public constructor(request: LinearRequest, data: L.GitHubSyncSettingsFragment) {
+export class GitHubSettings extends Request {
+  public constructor(request: LinearRequest, data: L.GitHubSettingsFragment) {
     super(request);
-    this.repoMapping = data.repoMapping ? data.repoMapping.map(node => new TeamRepoMapping(request, node)) : undefined;
-    this.repos = data.repos ? data.repos.map(node => new GitHubSyncRepo(request, node)) : undefined;
+    this.orgAvatarUrl = data.orgAvatarUrl;
+    this.orgLogin = data.orgLogin;
+    this.repositories = data.repositories ? data.repositories.map(node => new GitHubRepo(request, node)) : undefined;
+    this.repositoriesMapping = data.repositoriesMapping
+      ? data.repositoriesMapping.map(node => new TeamRepoMapping(request, node))
+      : undefined;
   }
 
-  /** Mapping of team to repository for syncing */
-  public repoMapping?: TeamRepoMapping[];
+  /** The avatar URL for the GitHub organization */
+  public orgAvatarUrl: string;
+  /** The GitHub organization's name */
+  public orgLogin: string;
   /** The names of the repositories connected for the GitHub integration */
-  public repos?: GitHubSyncRepo[];
+  public repositories?: GitHubRepo[];
+  /** Mapping of team to repository for syncing */
+  public repositoriesMapping?: TeamRepoMapping[];
 }
 /**
  * Metadata and settings for a GitLab integration.
@@ -2825,7 +3166,7 @@ export class IntegrationSettings extends Request {
     super(request);
     this.front = data.front ? new FrontSettings(request, data.front) : undefined;
     this.gitHub = data.gitHub ? new GitHubSettings(request, data.gitHub) : undefined;
-    this.gitHubSync = data.gitHubSync ? new GitHubSyncSettings(request, data.gitHubSync) : undefined;
+    this.gitHubPersonal = data.gitHubPersonal ? new GitHubPersonalSettings(request, data.gitHubPersonal) : undefined;
     this.gitLab = data.gitLab ? new GitLabSettings(request, data.gitLab) : undefined;
     this.googleSheets = data.googleSheets ? new GoogleSheetsSettings(request, data.googleSheets) : undefined;
     this.intercom = data.intercom ? new IntercomSettings(request, data.intercom) : undefined;
@@ -2846,7 +3187,7 @@ export class IntegrationSettings extends Request {
 
   public front?: FrontSettings;
   public gitHub?: GitHubSettings;
-  public gitHubSync?: GitHubSyncSettings;
+  public gitHubPersonal?: GitHubPersonalSettings;
   public gitLab?: GitLabSettings;
   public googleSheets?: GoogleSheetsSettings;
   public intercom?: IntercomSettings;
@@ -3148,6 +3489,7 @@ export class Issue extends Request {
     this.estimate = data.estimate ?? undefined;
     this.id = data.id;
     this.identifier = data.identifier;
+    this.labelIds = data.labelIds;
     this.number = data.number;
     this.previousIdentifiers = data.previousIdentifiers;
     this.priority = data.priority;
@@ -3162,6 +3504,7 @@ export class Issue extends Request {
     this.triagedAt = parseDate(data.triagedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
     this._cycle = data.cycle ?? undefined;
@@ -3202,6 +3545,8 @@ export class Issue extends Request {
   public id: string;
   /** Issue's human readable identifier (e.g. ENG-123). */
   public identifier: string;
+  /** Id of the labels associated with this issue. */
+  public labelIds: string[];
   /** The issue's unique number. */
   public number: number;
   /** Previous identifiers of the issue if it has been moved between teams. */
@@ -3234,6 +3579,8 @@ export class Issue extends Request {
   public updatedAt: Date;
   /** Issue URL. */
   public url: string;
+  /** The bot that created the issue, if applicable. */
+  public botActor?: ActorBot;
   /** The user to whom the issue is assigned to. */
   public get assignee(): LinearFetch<User> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
@@ -4221,6 +4568,7 @@ export class IssueSearchResult extends Request {
     this.estimate = data.estimate ?? undefined;
     this.id = data.id;
     this.identifier = data.identifier;
+    this.labelIds = data.labelIds;
     this.metadata = data.metadata;
     this.number = data.number;
     this.previousIdentifiers = data.previousIdentifiers;
@@ -4236,6 +4584,7 @@ export class IssueSearchResult extends Request {
     this.triagedAt = parseDate(data.triagedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
     this._cycle = data.cycle ?? undefined;
@@ -4276,6 +4625,8 @@ export class IssueSearchResult extends Request {
   public id: string;
   /** Issue's human readable identifier (e.g. ENG-123). */
   public identifier: string;
+  /** Id of the labels associated with this issue. */
+  public labelIds: string[];
   /** Metadata related to search result */
   public metadata: L.Scalars["JSONObject"];
   /** The issue's unique number. */
@@ -4310,6 +4661,8 @@ export class IssueSearchResult extends Request {
   public updatedAt: Date;
   /** Issue URL. */
   public url: string;
+  /** The bot that created the issue, if applicable. */
+  public botActor?: ActorBot;
   /** The user to whom the issue is assigned to. */
   public get assignee(): LinearFetch<User> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
@@ -4384,12 +4737,15 @@ export class JiraLinearMapping extends Request {
   public constructor(request: LinearRequest, data: L.JiraLinearMappingFragment) {
     super(request);
     this.bidirectional = data.bidirectional ?? undefined;
+    this.default = data.default ?? undefined;
     this.jiraProjectId = data.jiraProjectId;
     this.linearTeamId = data.linearTeamId;
   }
 
   /** Whether the sync for this mapping is bidirectional. */
   public bidirectional?: boolean;
+  /** Whether this mapping is the default one for issue creation. */
+  public default?: boolean;
   /** The Jira id for this project. */
   public jiraProjectId: string;
   /** The Linear team id to map to the given project. */
@@ -4440,12 +4796,15 @@ export class JiraProjectData extends Request {
 export class JiraSettings extends Request {
   public constructor(request: LinearRequest, data: L.JiraSettingsFragment) {
     super(request);
+    this.isJiraServer = data.isJiraServer ?? undefined;
     this.projectMapping = data.projectMapping
       ? data.projectMapping.map(node => new JiraLinearMapping(request, node))
       : undefined;
     this.projects = data.projects.map(node => new JiraProjectData(request, node));
   }
 
+  /** Whether this integration is for Jira Server or not. */
+  public isJiraServer?: boolean;
   /** The mapping of Jira project id => Linear team id. */
   public projectMapping?: JiraLinearMapping[];
   /** The Jira projects for the organization. */
@@ -5124,6 +5483,22 @@ export class OauthClientConnection extends Connection<OauthClient> {
   }
 }
 /**
+ * OauthToken model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OauthTokenFragment response data
+ */
+export class OauthToken extends Request {
+  public constructor(request: LinearRequest, data: L.OauthTokenFragment) {
+    super(request);
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+  }
+
+  public createdAt: Date;
+  public id: string;
+}
+/**
  * An organization. Organizations are root-level objects that contain user accounts and teams.
  *
  * @param request - function to call the graphql client
@@ -5138,6 +5513,7 @@ export class Organization extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.createdIssueCount = data.createdIssueCount;
     this.deletionRequestedAt = parseDate(data.deletionRequestedAt) ?? undefined;
+    this.fiscalYearStartMonth = data.fiscalYearStartMonth;
     this.gitBranchFormat = data.gitBranchFormat ?? undefined;
     this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled;
     this.gitPublicLinkbackMessagesEnabled = data.gitPublicLinkbackMessagesEnabled;
@@ -5169,6 +5545,8 @@ export class Organization extends Request {
   public createdIssueCount: number;
   /** The time at which deletion of the organization was requested. */
   public deletionRequestedAt?: Date;
+  /** The month at which the fiscal year starts. Defaults to January (0). */
+  public fiscalYearStartMonth: number;
   /** How git branches are formatted. If null, default formatting will be used. */
   public gitBranchFormat?: string;
   /** Whether the Git integration linkback messages should be sent to private repositories. */
@@ -5660,7 +6038,7 @@ export class PaidSubscription extends Request {
  */
 export class Project extends Request {
   private _convertedFromIssue?: L.ProjectFragment["convertedFromIssue"];
-  private _creator: L.ProjectFragment["creator"];
+  private _creator?: L.ProjectFragment["creator"];
   private _integrationsSettings?: L.ProjectFragment["integrationsSettings"];
   private _lastAppliedTemplate?: L.ProjectFragment["lastAppliedTemplate"];
   private _lead?: L.ProjectFragment["lead"];
@@ -5699,7 +6077,7 @@ export class Project extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._convertedFromIssue = data.convertedFromIssue ?? undefined;
-    this._creator = data.creator;
+    this._creator = data.creator ?? undefined;
     this._integrationsSettings = data.integrationsSettings ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
     this._lead = data.lead ?? undefined;
@@ -5777,7 +6155,7 @@ export class Project extends Request {
   }
   /** The user who created the project. */
   public get creator(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._creator.id);
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** Settings for all integrations associated with that project. */
   public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
@@ -5828,8 +6206,8 @@ export class Project extends Request {
     return new ArchiveProjectMutation(this._request).fetch(this.id, variables);
   }
   /** Creates a new project. */
-  public create(input: L.ProjectCreateInput) {
-    return new CreateProjectMutation(this._request).fetch(input);
+  public create(input: L.ProjectCreateInput, variables?: Omit<L.CreateProjectMutationVariables, "input">) {
+    return new CreateProjectMutation(this._request).fetch(input, variables);
   }
   /** Deletes (trashes) a project. */
   public delete() {
@@ -5921,6 +6299,7 @@ export class ProjectLink extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.label = data.label;
+    this.sortOrder = data.sortOrder;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._creator = data.creator;
@@ -5935,6 +6314,8 @@ export class ProjectLink extends Request {
   public id: string;
   /** The link's label. */
   public label: string;
+  /** The order of the item in the project resources list. */
+  public sortOrder: number;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -6316,7 +6697,7 @@ export class ProjectSearchPayload extends Request {
  */
 export class ProjectSearchResult extends Request {
   private _convertedFromIssue?: L.ProjectSearchResultFragment["convertedFromIssue"];
-  private _creator: L.ProjectSearchResultFragment["creator"];
+  private _creator?: L.ProjectSearchResultFragment["creator"];
   private _integrationsSettings?: L.ProjectSearchResultFragment["integrationsSettings"];
   private _lastAppliedTemplate?: L.ProjectSearchResultFragment["lastAppliedTemplate"];
   private _lead?: L.ProjectSearchResultFragment["lead"];
@@ -6356,7 +6737,7 @@ export class ProjectSearchResult extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._convertedFromIssue = data.convertedFromIssue ?? undefined;
-    this._creator = data.creator;
+    this._creator = data.creator ?? undefined;
     this._integrationsSettings = data.integrationsSettings ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
     this._lead = data.lead ?? undefined;
@@ -6436,7 +6817,7 @@ export class ProjectSearchResult extends Request {
   }
   /** The user who created the project. */
   public get creator(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._creator.id);
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** Settings for all integrations associated with that project. */
   public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
@@ -6889,6 +7270,9 @@ export class RateLimitResultPayload extends Request {
  * @param data - L.ReactionFragment response data
  */
 export class Reaction extends Request {
+  private _comment?: L.ReactionFragment["comment"];
+  private _issue?: L.ReactionFragment["issue"];
+  private _projectUpdate?: L.ReactionFragment["projectUpdate"];
   private _user?: L.ReactionFragment["user"];
 
   public constructor(request: LinearRequest, data: L.ReactionFragment) {
@@ -6898,6 +7282,9 @@ export class Reaction extends Request {
     this.emoji = data.emoji;
     this.id = data.id;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._comment = data.comment ?? undefined;
+    this._issue = data.issue ?? undefined;
+    this._projectUpdate = data.projectUpdate ?? undefined;
     this._user = data.user ?? undefined;
   }
 
@@ -6915,7 +7302,19 @@ export class Reaction extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The user who reacted. */
+  /** The comment that the reaction is associated with. */
+  public get comment(): LinearFetch<Comment> | undefined {
+    return this._comment?.id ? new CommentQuery(this._request).fetch(this._comment?.id) : undefined;
+  }
+  /** The issue that the reaction is associated with. */
+  public get issue(): LinearFetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** The project update that the reaction is associated with. */
+  public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
+    return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
+  }
+  /** The user that created the reaction. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
@@ -7329,6 +7728,40 @@ export class SlackAsksTeamSettings extends Request {
   public id: string;
 }
 /**
+ * SlackChannelConnectPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SlackChannelConnectPayloadFragment response data
+ */
+export class SlackChannelConnectPayload extends Request {
+  private _integration?: L.SlackChannelConnectPayloadFragment["integration"];
+
+  public constructor(request: LinearRequest, data: L.SlackChannelConnectPayloadFragment) {
+    super(request);
+    this.addBot = data.addBot;
+    this.lastSyncId = data.lastSyncId;
+    this.nudgeToConnectMainSlackIntegration = data.nudgeToConnectMainSlackIntegration ?? undefined;
+    this.nudgeToUpdateMainSlackIntegration = data.nudgeToUpdateMainSlackIntegration ?? undefined;
+    this.success = data.success;
+    this._integration = data.integration ?? undefined;
+  }
+
+  /** Whether the bot needs to be manually added to the channel. */
+  public addBot: boolean;
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether it's recommended to connect main Slack integration. */
+  public nudgeToConnectMainSlackIntegration?: boolean;
+  /** Whether it's recommended to update main Slack integration. */
+  public nudgeToUpdateMainSlackIntegration?: boolean;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The integration that was created or updated. */
+  public get integration(): LinearFetch<Integration> | undefined {
+    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
+  }
+}
+/**
  * Object for mapping Slack channel IDs to names and other settings
  *
  * @param request - function to call the graphql client
@@ -7340,6 +7773,7 @@ export class SlackChannelNameMapping extends Request {
     this.autoCreateOnBotMention = data.autoCreateOnBotMention ?? undefined;
     this.autoCreateOnEmoji = data.autoCreateOnEmoji ?? undefined;
     this.autoCreateOnMessage = data.autoCreateOnMessage ?? undefined;
+    this.autoCreateTemplateId = data.autoCreateTemplateId ?? undefined;
     this.botAdded = data.botAdded ?? undefined;
     this.id = data.id;
     this.isPrivate = data.isPrivate ?? undefined;
@@ -7354,6 +7788,8 @@ export class SlackChannelNameMapping extends Request {
   public autoCreateOnEmoji?: boolean;
   /** Whether or not top-level messages in this channel should automatically create Asks */
   public autoCreateOnMessage?: boolean;
+  /** The optional template ID to use for Asks auto-created in this channel. If not set, auto-created Asks won't use any template. */
+  public autoCreateTemplateId?: string;
   /** Whether or not we the Linear Asks bot has been added to this Slack channel */
   public botAdded?: boolean;
   /** The Slack channel ID. */
@@ -7417,36 +7853,6 @@ export class SsoUrlFromEmailResponse extends Request {
   public samlSsoUrl: string;
   /** Whether the operation was successful. */
   public success: boolean;
-}
-/**
- * Contains either the full serialized state of the application or delta packets that the requester can apply to the local data set in order to be up-to-date.
- *
- * @param request - function to call the graphql client
- * @param data - L.SyncResponseFragment response data
- */
-export class SyncResponse extends Request {
-  public constructor(request: LinearRequest, data: L.SyncResponseFragment) {
-    super(request);
-    this.databaseVersion = data.databaseVersion;
-    this.delta = data.delta ?? undefined;
-    this.lastSyncId = data.lastSyncId;
-    this.state = data.state ?? undefined;
-    this.subscribedSyncGroups = data.subscribedSyncGroups;
-  }
-
-  /** The version of the remote database. Incremented by 1 for each migration run on the database. */
-  public databaseVersion: number;
-  /** JSON serialized delta changes that the client can apply to its local state in order to catch up with the state of the world. */
-  public delta?: string;
-  /** The last sync id covered by the response. */
-  public lastSyncId: number;
-  /**
-   * The full state of the organization as a serialized JSON object.
-   *     Mutually exclusive with the delta property
-   */
-  public state?: string;
-  /** The sync groups that the user is subscribed to. */
-  public subscribedSyncGroups: string[];
 }
 /**
  * SynchronizedPayload model
@@ -7518,6 +7924,7 @@ export class Team extends Request {
     this.name = data.name;
     this.private = data.private;
     this.requirePriorityToLeaveTriage = data.requirePriorityToLeaveTriage;
+    this.setIssueSortOrderOnStateChange = data.setIssueSortOrderOnStateChange;
     this.slackIssueComments = data.slackIssueComments;
     this.slackIssueStatuses = data.slackIssueStatuses;
     this.slackNewIssue = data.slackNewIssue;
@@ -7594,7 +8001,7 @@ export class Team extends Request {
   public issueEstimationType: string;
   /** Whether issues without priority should be sorted first. */
   public issueOrderingNoPriorityFirst: boolean;
-  /** Whether to move issues to bottom of the column when changing state. */
+  /** [DEPRECATED] Whether to move issues to bottom of the column when changing state. Use setIssueSortOrderOnStateChange instead. */
   public issueSortOrderDefaultToBottom: boolean;
   /** The team's unique key. The key is used in URLs. */
   public key: string;
@@ -7604,6 +8011,8 @@ export class Team extends Request {
   public private: boolean;
   /** Whether an issue needs to have a priority set before leaving triage */
   public requirePriorityToLeaveTriage: boolean;
+  /** Where to move issues when changing state. */
+  public setIssueSortOrderOnStateChange: string;
   /** Whether to send new issue comment notifications to Slack. */
   public slackIssueComments: boolean;
   /** Whether to send new issue status updates to Slack. */
@@ -7702,6 +8111,10 @@ export class Team extends Request {
       ? new WorkflowStateQuery(this._request).fetch(this._triageIssueState?.id)
       : undefined;
   }
+  /** The automation states for the team. */
+  public automationStates(variables?: Omit<L.Team_AutomationStatesQueryVariables, "id">) {
+    return new Team_AutomationStatesQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Cycles associated with the team. */
   public cycles(variables?: Omit<L.Team_CyclesQueryVariables, "id">) {
     return new Team_CyclesQuery(this._request, this.id, variables).fetch(variables);
@@ -7746,9 +8159,38 @@ export class Team extends Request {
   public delete() {
     return new DeleteTeamMutation(this._request).fetch(this.id);
   }
+  /** Unarchives a team and cancels deletion. */
+  public unarchive() {
+    return new UnarchiveTeamMutation(this._request).fetch(this.id);
+  }
   /** Updates a team. */
   public update(input: L.TeamUpdateInput) {
     return new UpdateTeamMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * A generic payload return from entity archive mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.TeamArchivePayloadFragment response data
+ */
+export class TeamArchivePayload extends Request {
+  private _entity?: L.TeamArchivePayloadFragment["entity"];
+
+  public constructor(request: LinearRequest, data: L.TeamArchivePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._entity = data.entity ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The archived/unarchived entity. Null if entity was deleted. */
+  public get entity(): LinearFetch<Team> | undefined {
+    return this._entity?.id ? new TeamQuery(this._request).fetch(this._entity?.id) : undefined;
   }
 }
 /**
@@ -11299,12 +11741,13 @@ export class PushSubscriptionTestQuery extends Request {
   /**
    * Call the PushSubscriptionTest query and return a PushSubscriptionTestPayload
    *
+   * @param variables - variables to pass into the PushSubscriptionTestQuery
    * @returns parsed response from PushSubscriptionTestQuery
    */
-  public async fetch(): LinearFetch<PushSubscriptionTestPayload> {
+  public async fetch(variables?: L.PushSubscriptionTestQueryVariables): LinearFetch<PushSubscriptionTestPayload> {
     const response = await this._request<L.PushSubscriptionTestQuery, L.PushSubscriptionTestQueryVariables>(
       L.PushSubscriptionTestDocument,
-      {}
+      variables
     );
     const data = response.pushSubscriptionTest;
 
@@ -12289,6 +12732,43 @@ export class AttachmentLinkFrontMutation extends Request {
 }
 
 /**
+ * A fetchable AttachmentLinkGitHubIssue Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentLinkGitHubIssueMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentLinkGitHubIssue mutation and return a AttachmentPayload
+   *
+   * @param issueId - required issueId to pass to attachmentLinkGitHubIssue
+   * @param url - required url to pass to attachmentLinkGitHubIssue
+   * @param variables - variables without 'issueId', 'url' to pass into the AttachmentLinkGitHubIssueMutation
+   * @returns parsed response from AttachmentLinkGitHubIssueMutation
+   */
+  public async fetch(
+    issueId: string,
+    url: string,
+    variables?: Omit<L.AttachmentLinkGitHubIssueMutationVariables, "issueId" | "url">
+  ): LinearFetch<AttachmentPayload> {
+    const response = await this._request<
+      L.AttachmentLinkGitHubIssueMutation,
+      L.AttachmentLinkGitHubIssueMutationVariables
+    >(L.AttachmentLinkGitHubIssueDocument, {
+      issueId,
+      url,
+      ...variables,
+    });
+    const data = response.attachmentLinkGitHubIssue;
+
+    return new AttachmentPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable AttachmentLinkGitHubPr Mutation
  *
  * @param request - function to call the graphql client
@@ -12302,28 +12782,19 @@ export class AttachmentLinkGitHubPrMutation extends Request {
    * Call the AttachmentLinkGitHubPr mutation and return a AttachmentPayload
    *
    * @param issueId - required issueId to pass to attachmentLinkGitHubPR
-   * @param number - required number to pass to attachmentLinkGitHubPR
-   * @param owner - required owner to pass to attachmentLinkGitHubPR
-   * @param repo - required repo to pass to attachmentLinkGitHubPR
    * @param url - required url to pass to attachmentLinkGitHubPR
-   * @param variables - variables without 'issueId', 'number', 'owner', 'repo', 'url' to pass into the AttachmentLinkGitHubPrMutation
+   * @param variables - variables without 'issueId', 'url' to pass into the AttachmentLinkGitHubPrMutation
    * @returns parsed response from AttachmentLinkGitHubPrMutation
    */
   public async fetch(
     issueId: string,
-    number: number,
-    owner: string,
-    repo: string,
     url: string,
-    variables?: Omit<L.AttachmentLinkGitHubPrMutationVariables, "issueId" | "number" | "owner" | "repo" | "url">
+    variables?: Omit<L.AttachmentLinkGitHubPrMutationVariables, "issueId" | "url">
   ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkGitHubPrMutation, L.AttachmentLinkGitHubPrMutationVariables>(
       L.AttachmentLinkGitHubPrDocument,
       {
         issueId,
-        number,
-        owner,
-        repo,
         url,
         ...variables,
       }
@@ -13046,6 +13517,35 @@ export class CreateCycleMutation extends Request {
 }
 
 /**
+ * A fetchable CycleShiftAll Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CycleShiftAllMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CycleShiftAll mutation and return a CyclePayload
+   *
+   * @param input - required input to pass to cycleShiftAll
+   * @returns parsed response from CycleShiftAllMutation
+   */
+  public async fetch(input: L.CycleShiftAllInput): LinearFetch<CyclePayload> {
+    const response = await this._request<L.CycleShiftAllMutation, L.CycleShiftAllMutationVariables>(
+      L.CycleShiftAllDocument,
+      {
+        input,
+      }
+    );
+    const data = response.cycleShiftAll;
+
+    return new CyclePayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UpdateCycle Mutation
  *
  * @param request - function to call the graphql client
@@ -13428,6 +13928,95 @@ export class FileUploadMutation extends Request {
 }
 
 /**
+ * A fetchable CreateGitAutomationState Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateGitAutomationStateMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateGitAutomationState mutation and return a GitAutomationStatePayload
+   *
+   * @param input - required input to pass to createGitAutomationState
+   * @returns parsed response from CreateGitAutomationStateMutation
+   */
+  public async fetch(input: L.GitAutomationStateCreateInput): LinearFetch<GitAutomationStatePayload> {
+    const response = await this._request<
+      L.CreateGitAutomationStateMutation,
+      L.CreateGitAutomationStateMutationVariables
+    >(L.CreateGitAutomationStateDocument, {
+      input,
+    });
+    const data = response.gitAutomationStateCreate;
+
+    return new GitAutomationStatePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteGitAutomationState Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteGitAutomationStateMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteGitAutomationState mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteGitAutomationState
+   * @returns parsed response from DeleteGitAutomationStateMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<
+      L.DeleteGitAutomationStateMutation,
+      L.DeleteGitAutomationStateMutationVariables
+    >(L.DeleteGitAutomationStateDocument, {
+      id,
+    });
+    const data = response.gitAutomationStateDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateGitAutomationState Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateGitAutomationStateMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateGitAutomationState mutation and return a GitAutomationStatePayload
+   *
+   * @param id - required id to pass to updateGitAutomationState
+   * @param input - required input to pass to updateGitAutomationState
+   * @returns parsed response from UpdateGitAutomationStateMutation
+   */
+  public async fetch(id: string, input: L.GitAutomationStateUpdateInput): LinearFetch<GitAutomationStatePayload> {
+    const response = await this._request<
+      L.UpdateGitAutomationStateMutation,
+      L.UpdateGitAutomationStateMutationVariables
+    >(L.UpdateGitAutomationStateDocument, {
+      id,
+      input,
+    });
+    const data = response.gitAutomationStateUpdate;
+
+    return new GitAutomationStatePayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable GoogleUserAccountAuth Mutation
  *
  * @param request - function to call the graphql client
@@ -13763,35 +14352,6 @@ export class IntegrationGithubConnectMutation extends Request {
 }
 
 /**
- * A fetchable IntegrationGithubSyncConnect Mutation
- *
- * @param request - function to call the graphql client
- */
-export class IntegrationGithubSyncConnectMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IntegrationGithubSyncConnect mutation and return a IntegrationPayload
-   *
-   * @param installationId - required installationId to pass to integrationGithubSyncConnect
-   * @returns parsed response from IntegrationGithubSyncConnectMutation
-   */
-  public async fetch(installationId: string): LinearFetch<IntegrationPayload> {
-    const response = await this._request<
-      L.IntegrationGithubSyncConnectMutation,
-      L.IntegrationGithubSyncConnectMutationVariables
-    >(L.IntegrationGithubSyncConnectDocument, {
-      installationId,
-    });
-    const data = response.integrationGithubSyncConnect;
-
-    return new IntegrationPayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable IntegrationGitlabConnect Mutation
  *
  * @param request - function to call the graphql client
@@ -13956,15 +14516,13 @@ export class IntegrationJiraPersonalMutation extends Request {
   /**
    * Call the IntegrationJiraPersonal mutation and return a IntegrationPayload
    *
-   * @param code - required code to pass to integrationJiraPersonal
+   * @param variables - variables to pass into the IntegrationJiraPersonalMutation
    * @returns parsed response from IntegrationJiraPersonalMutation
    */
-  public async fetch(code: string): LinearFetch<IntegrationPayload> {
+  public async fetch(variables?: L.IntegrationJiraPersonalMutationVariables): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationJiraPersonalMutation, L.IntegrationJiraPersonalMutationVariables>(
       L.IntegrationJiraPersonalDocument,
-      {
-        code,
-      }
+      variables
     );
     const data = response.integrationJiraPersonal;
 
@@ -14170,13 +14728,13 @@ export class IntegrationSlackOrgProjectUpdatesPostMutation extends Request {
   }
 
   /**
-   * Call the IntegrationSlackOrgProjectUpdatesPost mutation and return a IntegrationPayload
+   * Call the IntegrationSlackOrgProjectUpdatesPost mutation and return a SlackChannelConnectPayload
    *
    * @param code - required code to pass to integrationSlackOrgProjectUpdatesPost
    * @param redirectUri - required redirectUri to pass to integrationSlackOrgProjectUpdatesPost
    * @returns parsed response from IntegrationSlackOrgProjectUpdatesPostMutation
    */
-  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public async fetch(code: string, redirectUri: string): LinearFetch<SlackChannelConnectPayload> {
     const response = await this._request<
       L.IntegrationSlackOrgProjectUpdatesPostMutation,
       L.IntegrationSlackOrgProjectUpdatesPostMutationVariables
@@ -14186,7 +14744,7 @@ export class IntegrationSlackOrgProjectUpdatesPostMutation extends Request {
     });
     const data = response.integrationSlackOrgProjectUpdatesPost;
 
-    return new IntegrationPayload(this._request, data);
+    return new SlackChannelConnectPayload(this._request, data);
   }
 }
 
@@ -14232,7 +14790,7 @@ export class IntegrationSlackPostMutation extends Request {
   }
 
   /**
-   * Call the IntegrationSlackPost mutation and return a IntegrationPayload
+   * Call the IntegrationSlackPost mutation and return a SlackChannelConnectPayload
    *
    * @param code - required code to pass to integrationSlackPost
    * @param redirectUri - required redirectUri to pass to integrationSlackPost
@@ -14245,7 +14803,7 @@ export class IntegrationSlackPostMutation extends Request {
     redirectUri: string,
     teamId: string,
     variables?: Omit<L.IntegrationSlackPostMutationVariables, "code" | "redirectUri" | "teamId">
-  ): LinearFetch<IntegrationPayload> {
+  ): LinearFetch<SlackChannelConnectPayload> {
     const response = await this._request<L.IntegrationSlackPostMutation, L.IntegrationSlackPostMutationVariables>(
       L.IntegrationSlackPostDocument,
       {
@@ -14257,7 +14815,7 @@ export class IntegrationSlackPostMutation extends Request {
     );
     const data = response.integrationSlackPost;
 
-    return new IntegrationPayload(this._request, data);
+    return new SlackChannelConnectPayload(this._request, data);
   }
 }
 
@@ -14272,7 +14830,7 @@ export class IntegrationSlackProjectPostMutation extends Request {
   }
 
   /**
-   * Call the IntegrationSlackProjectPost mutation and return a IntegrationPayload
+   * Call the IntegrationSlackProjectPost mutation and return a SlackChannelConnectPayload
    *
    * @param code - required code to pass to integrationSlackProjectPost
    * @param projectId - required projectId to pass to integrationSlackProjectPost
@@ -14285,7 +14843,7 @@ export class IntegrationSlackProjectPostMutation extends Request {
     projectId: string,
     redirectUri: string,
     service: string
-  ): LinearFetch<IntegrationPayload> {
+  ): LinearFetch<SlackChannelConnectPayload> {
     const response = await this._request<
       L.IntegrationSlackProjectPostMutation,
       L.IntegrationSlackProjectPostMutationVariables
@@ -14297,7 +14855,7 @@ export class IntegrationSlackProjectPostMutation extends Request {
     });
     const data = response.integrationSlackProjectPost;
 
-    return new IntegrationPayload(this._request, data);
+    return new SlackChannelConnectPayload(this._request, data);
   }
 }
 
@@ -16089,13 +16647,18 @@ export class CreateProjectMutation extends Request {
    * Call the CreateProject mutation and return a ProjectPayload
    *
    * @param input - required input to pass to createProject
+   * @param variables - variables without 'input' to pass into the CreateProjectMutation
    * @returns parsed response from CreateProjectMutation
    */
-  public async fetch(input: L.ProjectCreateInput): LinearFetch<ProjectPayload> {
+  public async fetch(
+    input: L.ProjectCreateInput,
+    variables?: Omit<L.CreateProjectMutationVariables, "input">
+  ): LinearFetch<ProjectPayload> {
     const response = await this._request<L.CreateProjectMutation, L.CreateProjectMutationVariables>(
       L.CreateProjectDocument,
       {
         input,
+        ...variables,
       }
     );
     const data = response.projectCreate;
@@ -17162,6 +17725,35 @@ export class UpdateTeamMembershipMutation extends Request {
 }
 
 /**
+ * A fetchable UnarchiveTeam Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UnarchiveTeamMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UnarchiveTeam mutation and return a TeamArchivePayload
+   *
+   * @param id - required id to pass to unarchiveTeam
+   * @returns parsed response from UnarchiveTeamMutation
+   */
+  public async fetch(id: string): LinearFetch<TeamArchivePayload> {
+    const response = await this._request<L.UnarchiveTeamMutation, L.UnarchiveTeamMutationVariables>(
+      L.UnarchiveTeamDocument,
+      {
+        id,
+      }
+    );
+    const data = response.teamUnarchive;
+
+    return new TeamArchivePayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UpdateTeam Mutation
  *
  * @param request - function to call the graphql client
@@ -17424,64 +18016,6 @@ export class UpdateUserFlagMutation extends Request {
     const data = response.userFlagUpdate;
 
     return new UserSettingsFlagPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable UserGitHubConnect Mutation
- *
- * @param request - function to call the graphql client
- */
-export class UserGitHubConnectMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the UserGitHubConnect mutation and return a UserPayload
-   *
-   * @param code - required code to pass to userGitHubConnect
-   * @returns parsed response from UserGitHubConnectMutation
-   */
-  public async fetch(code: string): LinearFetch<UserPayload> {
-    const response = await this._request<L.UserGitHubConnectMutation, L.UserGitHubConnectMutationVariables>(
-      L.UserGitHubConnectDocument,
-      {
-        code,
-      }
-    );
-    const data = response.userGitHubConnect;
-
-    return new UserPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable UserJiraConnect Mutation
- *
- * @param request - function to call the graphql client
- */
-export class UserJiraConnectMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the UserJiraConnect mutation and return a UserPayload
-   *
-   * @param code - required code to pass to userJiraConnect
-   * @returns parsed response from UserJiraConnectMutation
-   */
-  public async fetch(code: string): LinearFetch<UserPayload> {
-    const response = await this._request<L.UserJiraConnectMutation, L.UserJiraConnectMutationVariables>(
-      L.UserJiraConnectDocument,
-      {
-        code,
-      }
-    );
-    const data = response.userJiraConnect;
-
-    return new UserPayload(this._request, data);
   }
 }
 
@@ -18034,6 +18568,38 @@ export class AttachmentIssue_AttachmentsQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable AttachmentIssue_BotActor Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ */
+export class AttachmentIssue_BotActorQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the AttachmentIssue_BotActor query and return a ActorBot
+   *
+   * @returns parsed response from AttachmentIssue_BotActorQuery
+   */
+  public async fetch(): LinearFetch<ActorBot | undefined> {
+    const response = await this._request<L.AttachmentIssue_BotActorQuery, L.AttachmentIssue_BotActorQueryVariables>(
+      L.AttachmentIssue_BotActorDocument,
+      {
+        id: this._id,
+      }
+    );
+    const data = response.attachmentIssue.botActor;
+
+    return data ? new ActorBot(this._request, data) : undefined;
   }
 }
 
@@ -18729,6 +19295,38 @@ export class Issue_AttachmentsQuery extends Request {
 }
 
 /**
+ * A fetchable Issue_BotActor Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to issue
+ */
+export class Issue_BotActorQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the Issue_BotActor query and return a ActorBot
+   *
+   * @returns parsed response from Issue_BotActorQuery
+   */
+  public async fetch(): LinearFetch<ActorBot | undefined> {
+    const response = await this._request<L.Issue_BotActorQuery, L.Issue_BotActorQueryVariables>(
+      L.Issue_BotActorDocument,
+      {
+        id: this._id,
+      }
+    );
+    const data = response.issue.botActor;
+
+    return data ? new ActorBot(this._request, data) : undefined;
+  }
+}
+
+/**
  * A fetchable Issue_Children Query
  *
  * @param request - function to call the graphql client
@@ -19224,6 +19822,38 @@ export class IssueVcsBranchSearch_AttachmentsQuery extends Request {
     } else {
       return undefined;
     }
+  }
+}
+
+/**
+ * A fetchable IssueVcsBranchSearch_BotActor Query
+ *
+ * @param request - function to call the graphql client
+ * @param branchName - required branchName to pass to issueVcsBranchSearch
+ */
+export class IssueVcsBranchSearch_BotActorQuery extends Request {
+  private _branchName: string;
+
+  public constructor(request: LinearRequest, branchName: string) {
+    super(request);
+    this._branchName = branchName;
+  }
+
+  /**
+   * Call the IssueVcsBranchSearch_BotActor query and return a ActorBot
+   *
+   * @returns parsed response from IssueVcsBranchSearch_BotActorQuery
+   */
+  public async fetch(): LinearFetch<ActorBot | undefined> {
+    const response = await this._request<
+      L.IssueVcsBranchSearch_BotActorQuery,
+      L.IssueVcsBranchSearch_BotActorQueryVariables
+    >(L.IssueVcsBranchSearch_BotActorDocument, {
+      branchName: this._branchName,
+    });
+    const data = response.issueVcsBranchSearch?.botActor;
+
+    return data ? new ActorBot(this._request, data) : undefined;
   }
 }
 
@@ -20401,6 +21031,61 @@ export class SearchProjects_ArchivePayloadQuery extends Request {
     const data = response.searchProjects.archivePayload;
 
     return new ArchiveResponse(this._request, data);
+  }
+}
+
+/**
+ * A fetchable Team_AutomationStates Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to team
+ * @param variables - variables without 'id' to pass into the Team_AutomationStatesQuery
+ */
+export class Team_AutomationStatesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Team_AutomationStatesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.Team_AutomationStatesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Team_AutomationStates query and return a GitAutomationStateConnection
+   *
+   * @param variables - variables without 'id' to pass into the Team_AutomationStatesQuery
+   * @returns parsed response from Team_AutomationStatesQuery
+   */
+  public async fetch(
+    variables?: Omit<L.Team_AutomationStatesQueryVariables, "id">
+  ): LinearFetch<GitAutomationStateConnection> {
+    const response = await this._request<L.Team_AutomationStatesQuery, L.Team_AutomationStatesQueryVariables>(
+      L.Team_AutomationStatesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.team.automationStates;
+
+    return new GitAutomationStateConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -21853,10 +22538,13 @@ export class LinearSdk extends Request {
   /**
    * Sends a test push message.
    *
+   * @param variables - variables to pass into the PushSubscriptionTestQuery
    * @returns PushSubscriptionTestPayload
    */
-  public get pushSubscriptionTest(): LinearFetch<PushSubscriptionTestPayload> {
-    return new PushSubscriptionTestQuery(this._request).fetch();
+  public pushSubscriptionTest(
+    variables?: L.PushSubscriptionTestQueryVariables
+  ): LinearFetch<PushSubscriptionTestPayload> {
+    return new PushSubscriptionTestQuery(this._request).fetch(variables);
   }
   /**
    * The status of the rate limiter.
@@ -22175,25 +22863,34 @@ export class LinearSdk extends Request {
     return new AttachmentLinkFrontMutation(this._request).fetch(conversationId, issueId, variables);
   }
   /**
-   * Link an existing GitHub PR to an issue.
+   * Link a GitHub issue to a Linear issue.
+   *
+   * @param issueId - required issueId to pass to attachmentLinkGitHubIssue
+   * @param url - required url to pass to attachmentLinkGitHubIssue
+   * @param variables - variables without 'issueId', 'url' to pass into the AttachmentLinkGitHubIssueMutation
+   * @returns AttachmentPayload
+   */
+  public attachmentLinkGitHubIssue(
+    issueId: string,
+    url: string,
+    variables?: Omit<L.AttachmentLinkGitHubIssueMutationVariables, "issueId" | "url">
+  ): LinearFetch<AttachmentPayload> {
+    return new AttachmentLinkGitHubIssueMutation(this._request).fetch(issueId, url, variables);
+  }
+  /**
+   * Link a GitHub pull request to an issue.
    *
    * @param issueId - required issueId to pass to attachmentLinkGitHubPR
-   * @param number - required number to pass to attachmentLinkGitHubPR
-   * @param owner - required owner to pass to attachmentLinkGitHubPR
-   * @param repo - required repo to pass to attachmentLinkGitHubPR
    * @param url - required url to pass to attachmentLinkGitHubPR
-   * @param variables - variables without 'issueId', 'number', 'owner', 'repo', 'url' to pass into the AttachmentLinkGitHubPrMutation
+   * @param variables - variables without 'issueId', 'url' to pass into the AttachmentLinkGitHubPrMutation
    * @returns AttachmentPayload
    */
   public attachmentLinkGitHubPR(
     issueId: string,
-    number: number,
-    owner: string,
-    repo: string,
     url: string,
-    variables?: Omit<L.AttachmentLinkGitHubPrMutationVariables, "issueId" | "number" | "owner" | "repo" | "url">
+    variables?: Omit<L.AttachmentLinkGitHubPrMutationVariables, "issueId" | "url">
   ): LinearFetch<AttachmentPayload> {
-    return new AttachmentLinkGitHubPrMutation(this._request).fetch(issueId, number, owner, repo, url, variables);
+    return new AttachmentLinkGitHubPrMutation(this._request).fetch(issueId, url, variables);
   }
   /**
    * Link an existing GitLab MR to an issue.
@@ -22459,6 +23156,15 @@ export class LinearSdk extends Request {
     return new CreateCycleMutation(this._request).fetch(input);
   }
   /**
+   * Shifts all cycles starts by a certain number of weeks.
+   *
+   * @param input - required input to pass to cycleShiftAll
+   * @returns CyclePayload
+   */
+  public cycleShiftAll(input: L.CycleShiftAllInput): LinearFetch<CyclePayload> {
+    return new CycleShiftAllMutation(this._request).fetch(input);
+  }
+  /**
    * Updates a cycle.
    *
    * @param id - required id to pass to updateCycle
@@ -22589,6 +23295,37 @@ export class LinearSdk extends Request {
     return new FileUploadMutation(this._request).fetch(contentType, filename, size, variables);
   }
   /**
+   * Creates a new automation state.
+   *
+   * @param input - required input to pass to createGitAutomationState
+   * @returns GitAutomationStatePayload
+   */
+  public createGitAutomationState(input: L.GitAutomationStateCreateInput): LinearFetch<GitAutomationStatePayload> {
+    return new CreateGitAutomationStateMutation(this._request).fetch(input);
+  }
+  /**
+   * Archives an automation state.
+   *
+   * @param id - required id to pass to deleteGitAutomationState
+   * @returns DeletePayload
+   */
+  public deleteGitAutomationState(id: string): LinearFetch<DeletePayload> {
+    return new DeleteGitAutomationStateMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates an existing state.
+   *
+   * @param id - required id to pass to updateGitAutomationState
+   * @param input - required input to pass to updateGitAutomationState
+   * @returns GitAutomationStatePayload
+   */
+  public updateGitAutomationState(
+    id: string,
+    input: L.GitAutomationStateUpdateInput
+  ): LinearFetch<GitAutomationStatePayload> {
+    return new UpdateGitAutomationStateMutation(this._request).fetch(id, input);
+  }
+  /**
    * Authenticate user account through Google OAuth. This is the 2nd step of OAuth flow.
    *
    * @param input - required input to pass to googleUserAccountAuth
@@ -22699,15 +23436,6 @@ export class LinearSdk extends Request {
     return new IntegrationGithubConnectMutation(this._request).fetch(installationId);
   }
   /**
-   * Connects the organization with the GitHub Sync App.
-   *
-   * @param installationId - required installationId to pass to integrationGithubSyncConnect
-   * @returns IntegrationPayload
-   */
-  public integrationGithubSyncConnect(installationId: string): LinearFetch<IntegrationPayload> {
-    return new IntegrationGithubSyncConnectMutation(this._request).fetch(installationId);
-  }
-  /**
    * Connects the organization with a GitLab Access Token.
    *
    * @param accessToken - required accessToken to pass to integrationGitlabConnect
@@ -22761,11 +23489,13 @@ export class LinearSdk extends Request {
   /**
    * Connect your Jira account to Linear.
    *
-   * @param code - required code to pass to integrationJiraPersonal
+   * @param variables - variables to pass into the IntegrationJiraPersonalMutation
    * @returns IntegrationPayload
    */
-  public integrationJiraPersonal(code: string): LinearFetch<IntegrationPayload> {
-    return new IntegrationJiraPersonalMutation(this._request).fetch(code);
+  public integrationJiraPersonal(
+    variables?: L.IntegrationJiraPersonalMutationVariables
+  ): LinearFetch<IntegrationPayload> {
+    return new IntegrationJiraPersonalMutation(this._request).fetch(variables);
   }
   /**
    * Enables Loom integration for the organization.
@@ -22839,9 +23569,12 @@ export class LinearSdk extends Request {
    *
    * @param code - required code to pass to integrationSlackOrgProjectUpdatesPost
    * @param redirectUri - required redirectUri to pass to integrationSlackOrgProjectUpdatesPost
-   * @returns IntegrationPayload
+   * @returns SlackChannelConnectPayload
    */
-  public integrationSlackOrgProjectUpdatesPost(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+  public integrationSlackOrgProjectUpdatesPost(
+    code: string,
+    redirectUri: string
+  ): LinearFetch<SlackChannelConnectPayload> {
     return new IntegrationSlackOrgProjectUpdatesPostMutation(this._request).fetch(code, redirectUri);
   }
   /**
@@ -22861,14 +23594,14 @@ export class LinearSdk extends Request {
    * @param redirectUri - required redirectUri to pass to integrationSlackPost
    * @param teamId - required teamId to pass to integrationSlackPost
    * @param variables - variables without 'code', 'redirectUri', 'teamId' to pass into the IntegrationSlackPostMutation
-   * @returns IntegrationPayload
+   * @returns SlackChannelConnectPayload
    */
   public integrationSlackPost(
     code: string,
     redirectUri: string,
     teamId: string,
     variables?: Omit<L.IntegrationSlackPostMutationVariables, "code" | "redirectUri" | "teamId">
-  ): LinearFetch<IntegrationPayload> {
+  ): LinearFetch<SlackChannelConnectPayload> {
     return new IntegrationSlackPostMutation(this._request).fetch(code, redirectUri, teamId, variables);
   }
   /**
@@ -22878,14 +23611,14 @@ export class LinearSdk extends Request {
    * @param projectId - required projectId to pass to integrationSlackProjectPost
    * @param redirectUri - required redirectUri to pass to integrationSlackProjectPost
    * @param service - required service to pass to integrationSlackProjectPost
-   * @returns IntegrationPayload
+   * @returns SlackChannelConnectPayload
    */
   public integrationSlackProjectPost(
     code: string,
     projectId: string,
     redirectUri: string,
     service: string
-  ): LinearFetch<IntegrationPayload> {
+  ): LinearFetch<SlackChannelConnectPayload> {
     return new IntegrationSlackProjectPostMutation(this._request).fetch(code, projectId, redirectUri, service);
   }
   /**
@@ -23523,10 +24256,14 @@ export class LinearSdk extends Request {
    * Creates a new project.
    *
    * @param input - required input to pass to createProject
+   * @param variables - variables without 'input' to pass into the CreateProjectMutation
    * @returns ProjectPayload
    */
-  public createProject(input: L.ProjectCreateInput): LinearFetch<ProjectPayload> {
-    return new CreateProjectMutation(this._request).fetch(input);
+  public createProject(
+    input: L.ProjectCreateInput,
+    variables?: Omit<L.CreateProjectMutationVariables, "input">
+  ): LinearFetch<ProjectPayload> {
+    return new CreateProjectMutation(this._request).fetch(input, variables);
   }
   /**
    * Deletes (trashes) a project.
@@ -23872,6 +24609,15 @@ export class LinearSdk extends Request {
     return new UpdateTeamMembershipMutation(this._request).fetch(id, input);
   }
   /**
+   * Unarchives a team and cancels deletion.
+   *
+   * @param id - required id to pass to unarchiveTeam
+   * @returns TeamArchivePayload
+   */
+  public unarchiveTeam(id: string): LinearFetch<TeamArchivePayload> {
+    return new UnarchiveTeamMutation(this._request).fetch(id);
+  }
+  /**
    * Updates a team.
    *
    * @param id - required id to pass to updateTeam
@@ -23958,24 +24704,6 @@ export class LinearSdk extends Request {
     operation: L.UserFlagUpdateOperation
   ): LinearFetch<UserSettingsFlagPayload> {
     return new UpdateUserFlagMutation(this._request).fetch(flag, operation);
-  }
-  /**
-   * [DEPRECATED] Connects the GitHub user to this Linear account via OAuth2.
-   *
-   * @param code - required code to pass to userGitHubConnect
-   * @returns UserPayload
-   */
-  public userGitHubConnect(code: string): LinearFetch<UserPayload> {
-    return new UserGitHubConnectMutation(this._request).fetch(code);
-  }
-  /**
-   * [DEPRECATED] Connects the Jira user to this Linear account via OAuth2.
-   *
-   * @param code - required code to pass to userJiraConnect
-   * @returns UserPayload
-   */
-  public userJiraConnect(code: string): LinearFetch<UserPayload> {
-    return new UserJiraConnectMutation(this._request).fetch(code);
   }
   /**
    * Makes user an admin. Can only be called by an admin.
