@@ -39,7 +39,7 @@ describe("LinearSdk", () => {
     expect((response?.diff?.some as any)?.nested?.data).toEqual(123);
   });
 
-  it("does not attempt to pars JSONObject", async () => {
+  it("does not attempt to parse JSONObject", async () => {
     const sdk = new LinearSdk(
       resolveWithData({ attachment: { id: "test", metadata: { some: { nested: { data: 123 } } } } })
     );
