@@ -1,5 +1,6 @@
 import {
   getLast,
+  getOptionalVariables,
   nonNullable,
   OperationType,
   printComment,
@@ -7,6 +8,7 @@ import {
   printLines,
   printList,
   printSet,
+  reduceTypeName,
 } from "@linear/codegen-doc";
 import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
 import { ObjectTypeDefinitionNode } from "graphql";
@@ -72,14 +74,14 @@ function printOperationArgs(operation: SdkOperation): string {
       parentArgNames.includes(arg.name)
         ? undefined
         : arg.type === "string"
-        ? `"mock-${arg.name}"`
-        : arg.type === "string[]"
-        ? `["mock-${arg.name}"]`
-        : arg.type === "number"
-        ? `123`
-        : arg.type === "number[]"
-        ? `[123]`
-        : "UNMAPPED_MOCK_TYPE"
+          ? `"mock-${arg.name}"`
+          : arg.type === "string[]"
+            ? `["mock-${arg.name}"]`
+            : arg.type === "number"
+              ? `123`
+              : arg.type === "number[]"
+                ? `[123]`
+                : "UNMAPPED_MOCK_TYPE"
     )
     .filter(nonNullable);
 
@@ -175,6 +177,12 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
       : [];
   const itemTypes = printList([itemType, ...implementations.map(imp => printList([Sdk.NAMESPACE, imp], "."))], " | ");
 
+  /* Extract an optional id argument for the item query if all arguments are optional */
+  const optionalArgs = itemOperation?.node ? getOptionalVariables(itemOperation?.node) : undefined;
+  const optionalIdArg = optionalArgs?.find(
+    arg => arg.variable.name.value === "id" && reduceTypeName(arg.type) === "String"
+  );
+
   return printDescribe(
     operation.name,
     [`Test all ${connectionType} queries`],
@@ -183,6 +191,13 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
         ? printLines([
             `let _${itemField}: ${itemTypes} | undefined`,
             ...(itemArgs.map(arg => `let _${itemField}_${arg.name}: ${arg.type} | undefined`) ?? []),
+            ...(optionalIdArg && itemArgs.length === 0
+              ? [
+                  `let _${itemField}_${optionalIdArg.variable.name.value}: ${reduceTypeName(
+                    optionalIdArg.type
+                  )} | undefined`,
+                ]
+              : []),
             "\n",
           ])
         : undefined,
@@ -220,7 +235,12 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
               printList([sdkKey ? sdkKey : undefined, itemField], "."),
               printElseWarn(
                 printList(
-                  itemArgs.map(arg => `_${itemField}_${arg.name}`),
+                  [
+                    ...itemArgs.map(arg => `_${itemField}_${arg.name}`),
+                    ...(optionalIdArg && itemArgs.length === 0
+                      ? [`_${itemField}_${optionalIdArg.variable.name.value}`]
+                      : []),
+                  ],
                   " && "
                 ),
                 printLines([
