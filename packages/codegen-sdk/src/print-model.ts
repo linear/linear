@@ -69,7 +69,8 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
         printDebug("fields.query"),
         printLines(
           model.fields.query.map(field =>
-            field.args.some(arg => !arg.optional)
+            field.args.some(arg => !arg.optional) ||
+            (field.args.every(arg => arg.optional) && !!field.args.find(arg => arg.name === "id"))
               ? `private _${field.name}${field.nonNull ? "" : "?"}: ${model.fragment}['${field.name}']`
               : undefined
           )
