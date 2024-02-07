@@ -223,6 +223,14 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
               ? printLines([
                   `const ${itemField} = ${fieldName}?.${Sdk.NODE_NAME}?.[0]`,
                   ...(itemArgs.map(arg => printSet(`_${itemField}_${arg.name}`, `${itemField}?.${arg.name}`)) ?? []),
+                  ...(optionalIdArg && itemArgs.length === 0
+                    ? [
+                        printSet(
+                          `_${itemField}_${optionalIdArg.variable.name.value}`,
+                          `${itemField}?.${optionalIdArg.variable.name.value}`
+                        ),
+                      ]
+                    : []),
                 ])
               : undefined,
             operation.print.list
