@@ -32,11 +32,11 @@ describe("LinearSdk", () => {
 
   it("parses JSON", async () => {
     const sdk = new LinearSdk(
-      resolveWithData({ projectUpdate: { id: "test", diff: JSON.stringify({ some: { nested: { data: 123 } } }) } })
+      resolveWithData({ template: { id: "test", templateData: JSON.stringify({ some: { nested: { data: 123 } } }) } })
     );
-    const response = await sdk.projectUpdate("test");
+    const response = await sdk.template("test");
 
-    expect((response?.diff?.some as any)?.nested?.data).toEqual(123);
+    expect((response?.templateData?.some as any)?.nested?.data).toEqual(123);
   });
 
   it("does not attempt to parse JSONObject", async () => {
