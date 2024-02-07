@@ -13,6 +13,7 @@ import {
 import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
 import { ObjectTypeDefinitionNode } from "graphql";
 import { printTestHooks } from "./print-hooks";
+import { lowerCase } from "lodash";
 
 /**
  * Print all tests
@@ -165,7 +166,6 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
   const itemOperations = itemSdkKey ? context.sdkDefinitions[itemSdkKey]?.operations ?? [] : [];
   const itemType = printList([Sdk.NAMESPACE, itemOperation?.print.model], ".");
   const itemArgs = itemOperation?.requiredArgs.args ?? [];
-  const itemOperationArgs = itemArgs.length ? `(${printList(itemArgs.map(arg => `_${itemField}_${arg.name}`))})` : "";
   const itemQueries = itemOperation?.model?.fields.query ?? [];
 
   /* For interfaces the type of item can be any of the implementations (plus the interface type) */
@@ -179,9 +179,17 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
 
   /* Extract an optional id argument for the item query if all arguments are optional */
   const optionalArgs = itemOperation?.node ? getOptionalVariables(itemOperation?.node) : undefined;
+  const allArgsOptional = optionalArgs?.length && itemOperation?.requiredArgs.args.length === 0;
   const optionalIdArg = optionalArgs?.find(
     arg => arg.variable.name.value === "id" && reduceTypeName(arg.type) === "String"
   );
+  const optionalIdArgName = optionalIdArg?.variable.name.value;
+
+  const itemOperationArgs = itemArgs.length
+    ? `(${printList(itemArgs.map(arg => `_${itemField}_${arg.name}`))})`
+    : allArgsOptional && optionalIdArg
+      ? `({${optionalIdArgName}:_${itemField}_${optionalIdArgName}})`
+      : "";
 
   return printDescribe(
     operation.name,
@@ -193,8 +201,8 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
             ...(itemArgs.map(arg => `let _${itemField}_${arg.name}: ${arg.type} | undefined`) ?? []),
             ...(optionalIdArg && itemArgs.length === 0
               ? [
-                  `let _${itemField}_${optionalIdArg.variable.name.value}: ${reduceTypeName(
-                    optionalIdArg.type
+                  `let _${itemField}_${optionalIdArg.variable.name.value}: ${lowerCase(
+                    reduceTypeName(optionalIdArg.type)
                   )} | undefined`,
                 ]
               : []),
