@@ -155,7 +155,11 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
           model.fields.query.map(field => {
             const typeName = printTypescriptType(context, field.node.type);
             const fieldQueryName = `${printPascal(field.query.name.value)}Query`;
-            const fieldQueryArgs = field.args?.map(arg => `this._${field.name}${field.nonNull ? "" : "?"}.${arg.name}`);
+            const allOptional = field.args.every(arg => arg.optional);
+            const optionalIdArg = field.args.find(arg => arg.name === "id" && arg.optional);
+            const fieldQueryArgs = (allOptional && optionalIdArg ? [optionalIdArg] : field.args)?.map(
+              arg => `this._${field.name}${field.nonNull ? "" : "?"}.${arg.name}`
+            );
 
             if (fieldQueryArgs.length) {
               const operationCall = `new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${printList(
