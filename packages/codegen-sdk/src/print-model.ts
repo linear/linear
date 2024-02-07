@@ -163,9 +163,9 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             );
 
             if (fieldQueryArgs.length) {
-              const operationCall = `new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${printList(
-                fieldQueryArgs
-              )})`;
+              const operationCall = `new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${
+                optionalIdArg ? `{${optionalIdArg.name}: ${fieldQueryArgs[0]}}` : printList(fieldQueryArgs)
+              })`;
               return printModelField(
                 field,
                 `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}${
