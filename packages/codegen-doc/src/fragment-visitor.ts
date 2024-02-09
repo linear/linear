@@ -3,6 +3,7 @@ import {
   DocumentNode,
   FieldDefinitionNode,
   InterfaceTypeDefinitionNode,
+  Kind,
   ListTypeNode,
   NamedTypeNode,
   NameNode,
@@ -132,6 +133,17 @@ export class FragmentVisitor {
           const queryRequiredArgs = getRequiredArgs(query.arguments)
             .map(arg => arg.name.value)
             .sort();
+
+          // If the query has 0 required args, check if it has an optional id arg
+          if (!queryRequiredArgs.length) {
+            const optionalIdArg = query.arguments?.find(
+              arg => arg.name.value === "id" && arg.type.kind !== Kind.NON_NULL_TYPE
+            );
+            if (optionalIdArg) {
+              // Use this as a required arg
+              queryRequiredArgs.push(optionalIdArg.name.value);
+            }
+          }
 
           if (queryRequiredArgs.length) {
             return printLines([
