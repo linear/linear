@@ -73,13 +73,13 @@ export class TeamworkCsvImporter implements Importer {
         continue;
       }
 
-      const status = row.Status;
+      const statusRaw = row.Status;
 
-      if (!this.isImportCompleted && status === "completed") {
+      if (!this.isImportCompleted && statusRaw === "completed") {
         continue;
       }
 
-
+      const status = row["Board column"];
 
       const url = this.baseUrl ? `${this.baseUrl}/app/tasks/${row["Task ID"]}` : undefined;
       const mdDesc = j2m.to_markdown(row["Task description"]);
