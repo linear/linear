@@ -760,6 +760,8 @@ export type Comment = Node & {
   resolvingComment?: Maybe<Comment>;
   /** The user that resolved the thread. */
   resolvingUser?: Maybe<User>;
+  /** [Internal] Summary for comment thread. */
+  summaryText?: Maybe<Scalars["String"]>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -1441,23 +1443,6 @@ export type CycleUpdateInput = {
   startsAt?: Maybe<Scalars["DateTime"]>;
 };
 
-/** Data recovery. */
-export type DataRecovery = Node & {
-  __typename?: "DataRecovery";
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The time at which the entity was created. */
-  createdAt: Scalars["DateTime"];
-  /** The unique identifier of the entity. */
-  id: Scalars["ID"];
-  /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  updatedAt: Scalars["DateTime"];
-};
-
 /** Comparator for dates. */
 export type DateComparator = {
   /** Equals constraint. */
@@ -1871,7 +1856,9 @@ export type EmailIntakeAddressCreateInput = {
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
   /** The identifier or key of the team this email address will intake issues for. */
-  teamId: Scalars["String"];
+  teamId?: Maybe<Scalars["String"]>;
+  /** The identifier of the template this email address will intake issues for. */
+  templateId?: Maybe<Scalars["String"]>;
 };
 
 export type EmailIntakeAddressPayload = {
@@ -2191,6 +2178,8 @@ export type FavoriteCreateInput = {
   cycleId?: Maybe<Scalars["String"]>;
   /** The identifier of the document to favorite. */
   documentId?: Maybe<Scalars["String"]>;
+  /** [INTERNAL] The identifier of the facet to favorite. */
+  facetId?: Maybe<Scalars["String"]>;
   /** The name of the favorite folder. */
   folderName?: Maybe<Scalars["String"]>;
   /** The identifier. If none is provided, the backend will generate one. */
@@ -2537,8 +2526,6 @@ export type GithubOrg = {
   isPersonal?: Maybe<Scalars["Boolean"]>;
   /** The login for the GitHub organization. */
   login: Scalars["String"];
-  /** The name of the GitHub organization. */
-  name: Scalars["String"];
   /** Repositories that the organization owns. */
   repositories: Array<GithubRepo>;
 };
@@ -6596,11 +6583,13 @@ export type NullableProjectFilter = {
   null?: Maybe<Scalars["Boolean"]>;
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<NullableProjectFilter>>;
+  /** [Internal] Comparator for the date when the project was last paused. */
+  pausedAt?: Maybe<NullableDateComparator>;
   /** Filters that the project's milestones must satisfy. */
   projectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Filters that the projects roadmaps must satisfy. */
   roadmaps?: Maybe<RoadmapCollectionFilter>;
-  /** [Internal] Comparator for the projects content. */
+  /** [Internal] Comparator for the project's content. */
   searchableContent?: Maybe<ContentComparator>;
   /** Comparator for the project slug ID. */
   slugId?: Maybe<StringComparator>;
@@ -6608,6 +6597,8 @@ export type NullableProjectFilter = {
   startDate?: Maybe<NullableDateComparator>;
   /** Comparator for the project state. */
   state?: Maybe<StringComparator>;
+  /** [Internal] Filters that the project's status must satisfy. */
+  status?: Maybe<ProjectStatusFilter>;
   /** Comparator for the project target date. */
   targetDate?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
@@ -7484,6 +7475,8 @@ export type Project = Node & {
   members: UserConnection;
   /** The project's name. */
   name: Scalars["String"];
+  /** [INTERNAL] The latest time at which the project was paused. */
+  pausedAt?: Maybe<Scalars["DateTime"]>;
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   progress: Scalars["Float"];
   /** Milestones associated with the project. */
@@ -7514,6 +7507,8 @@ export type Project = Node & {
   startedAt?: Maybe<Scalars["DateTime"]>;
   /** The type of the state. */
   state: Scalars["String"];
+  /** [Internal] The status that the project is associated with. */
+  status: ProjectStatus;
   /** The estimated completion date of the project. */
   targetDate?: Maybe<Scalars["TimelessDate"]>;
   /** [INTERNAL] The resolution of the project's estimated completion date. */
@@ -7655,11 +7650,13 @@ export type ProjectCollectionFilter = {
   nextProjectMilestone?: Maybe<ProjectMilestoneFilter>;
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<ProjectCollectionFilter>>;
+  /** [Internal] Comparator for the date when the project was last paused. */
+  pausedAt?: Maybe<NullableDateComparator>;
   /** Filters that the project's milestones must satisfy. */
   projectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Filters that the projects roadmaps must satisfy. */
   roadmaps?: Maybe<RoadmapCollectionFilter>;
-  /** [Internal] Comparator for the projects content. */
+  /** [Internal] Comparator for the project's content. */
   searchableContent?: Maybe<ContentComparator>;
   /** Comparator for the project slug ID. */
   slugId?: Maybe<StringComparator>;
@@ -7669,6 +7666,8 @@ export type ProjectCollectionFilter = {
   startDate?: Maybe<NullableDateComparator>;
   /** Comparator for the project state. */
   state?: Maybe<StringComparator>;
+  /** [Internal] Filters that the project's status must satisfy. */
+  status?: Maybe<ProjectStatusFilter>;
   /** Comparator for the project target date. */
   targetDate?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
@@ -7758,11 +7757,13 @@ export type ProjectFilter = {
   nextProjectMilestone?: Maybe<ProjectMilestoneFilter>;
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<ProjectFilter>>;
+  /** [Internal] Comparator for the date when the project was last paused. */
+  pausedAt?: Maybe<NullableDateComparator>;
   /** Filters that the project's milestones must satisfy. */
   projectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Filters that the projects roadmaps must satisfy. */
   roadmaps?: Maybe<RoadmapCollectionFilter>;
-  /** [Internal] Comparator for the projects content. */
+  /** [Internal] Comparator for the project's content. */
   searchableContent?: Maybe<ContentComparator>;
   /** Comparator for the project slug ID. */
   slugId?: Maybe<StringComparator>;
@@ -7770,6 +7771,8 @@ export type ProjectFilter = {
   startDate?: Maybe<NullableDateComparator>;
   /** Comparator for the project state. */
   state?: Maybe<StringComparator>;
+  /** [Internal] Filters that the project's status must satisfy. */
+  status?: Maybe<ProjectStatusFilter>;
   /** Comparator for the project target date. */
   targetDate?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
@@ -7873,6 +7876,8 @@ export type ProjectMilestone = Node & {
   descriptionState?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** Issues associated with the project milestone. */
+  issues: IssueConnection;
   /** The name of the project milestone. */
   name: Scalars["String"];
   /** The project of the milestone. */
@@ -7887,6 +7892,17 @@ export type ProjectMilestone = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+};
+
+/** A milestone for a project. */
+export type ProjectMilestoneIssuesArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
 };
 
 /** Milestone collection filtering options. */
@@ -8145,6 +8161,8 @@ export type ProjectSearchResult = Node & {
   metadata: Scalars["JSONObject"];
   /** The project's name. */
   name: Scalars["String"];
+  /** [INTERNAL] The latest time at which the project was paused. */
+  pausedAt?: Maybe<Scalars["DateTime"]>;
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   progress: Scalars["Float"];
   /** Milestones associated with the project. */
@@ -8175,6 +8193,8 @@ export type ProjectSearchResult = Node & {
   startedAt?: Maybe<Scalars["DateTime"]>;
   /** The type of the state. */
   state: Scalars["String"];
+  /** [Internal] The status that the project is associated with. */
+  status: ProjectStatus;
   /** The estimated completion date of the project. */
   targetDate?: Maybe<Scalars["TimelessDate"]>;
   /** [INTERNAL] The resolution of the project's estimated completion date. */
@@ -8319,6 +8339,30 @@ export type ProjectStatusEdge = {
   node: ProjectStatus;
 };
 
+/** Project status filtering options. */
+export type ProjectStatusFilter = {
+  /** Compound filters, all of which need to be matched by the project status. */
+  and?: Maybe<Array<ProjectStatusFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the project status description. */
+  description?: Maybe<StringComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the project status name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which needs to be matched by the project status. */
+  or?: Maybe<Array<ProjectStatusFilter>>;
+  /** Comparator for the project status position. */
+  position?: Maybe<NumberComparator>;
+  /** Filters that the project status projects must satisfy. */
+  projects?: Maybe<ProjectCollectionFilter>;
+  /** Comparator for the project status type. */
+  type?: Maybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
 /** A type of project status. */
 export enum ProjectStatusType {
   Backlog = "backlog",
@@ -8450,6 +8494,8 @@ export type ProjectUpdateInput = {
   memberIds?: Maybe<Array<Scalars["String"]>>;
   /** The name of the project. */
   name?: Maybe<Scalars["String"]>;
+  /** [INTERNAL] The date when the project was paused. */
+  pausedAt?: Maybe<Scalars["DateTime"]>;
   /** The time until which project update reminders are paused. */
   projectUpdateRemindersPausedUntilAt?: Maybe<Scalars["DateTime"]>;
   /** Whether to send new issue comment notifications to Slack. */
@@ -8657,6 +8703,8 @@ export type Query = {
   applicationInfo: Application;
   /** [INTERNAL] Get basic information for a list of applications. */
   applicationInfoByIds: Array<Application>;
+  /** [INTERNAL] Get information for a list of applications with memberships */
+  applicationInfoWithMembershipsByIds: Array<WorkspaceAuthorizedApplication>;
   /** Get information for an application and whether a user has approved it for the given scopes. */
   applicationWithAuthorization: UserAuthorizedApplication;
   /** [Internal] All archived teams of the organization. */
@@ -8863,7 +8911,7 @@ export type Query = {
   workflowState: WorkflowState;
   /** All issue workflow states. */
   workflowStates: WorkflowStateConnection;
-  /** [INTERNAL] Get all authorized applications (with limited fields) for a workspace. */
+  /** [INTERNAL] Get non-internal authorized applications (with limited fields) for a workspace */
   workspaceAuthorizedApplications: Array<WorkspaceAuthorizedApplication>;
 };
 
@@ -8892,6 +8940,10 @@ export type QueryApplicationInfoArgs = {
 
 export type QueryApplicationInfoByIdsArgs = {
   ids: Array<Scalars["String"]>;
+};
+
+export type QueryApplicationInfoWithMembershipsByIdsArgs = {
+  clientIds: Array<Scalars["String"]>;
 };
 
 export type QueryApplicationWithAuthorizationArgs = {
@@ -9354,6 +9406,7 @@ export type QuerySearchDocumentsArgs = {
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 };
@@ -9367,6 +9420,7 @@ export type QuerySearchIssuesArgs = {
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 };
@@ -9379,6 +9433,7 @@ export type QuerySearchProjectsArgs = {
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 };
@@ -11571,6 +11626,7 @@ export enum ViewType {
   RoadmapClosed = "roadmapClosed",
   Roadmaps = "roadmaps",
   Search = "search",
+  SplitSearch = "splitSearch",
   Teams = "teams",
   Triage = "triage",
   UserProfile = "userProfile",
@@ -12960,11 +13016,6 @@ export type ArchiveResponseFragment = { __typename: "ArchiveResponse" } & Pick<
   "archive" | "totalCount" | "databaseVersion" | "includesDependencies"
 >;
 
-export type DataRecoveryFragment = { __typename: "DataRecovery" } & Pick<
-  DataRecovery,
-  "updatedAt" | "archivedAt" | "createdAt" | "id"
->;
-
 export type TeamMembershipFragment = { __typename: "TeamMembership" } & Pick<
   TeamMembership,
   "updatedAt" | "sortOrder" | "archivedAt" | "createdAt" | "id" | "owner"
@@ -13249,10 +13300,9 @@ export type ApplicationFragment = { __typename: "Application" } & Pick<
   "name" | "imageUrl" | "description" | "developer" | "id" | "clientId" | "developerUrl"
 >;
 
-export type GithubOrgFragment = { __typename: "GithubOrg" } & Pick<
-  GithubOrg,
-  "id" | "login" | "name" | "isPersonal"
-> & { repositories: Array<{ __typename?: "GithubRepo" } & GithubRepoFragment> };
+export type GithubOrgFragment = { __typename: "GithubOrg" } & Pick<GithubOrg, "id" | "login" | "isPersonal"> & {
+    repositories: Array<{ __typename?: "GithubRepo" } & GithubRepoFragment>;
+  };
 
 export type GithubRepoFragment = { __typename: "GithubRepo" } & Pick<GithubRepo, "id" | "name">;
 
@@ -13891,8 +13941,6 @@ type Node_CycleNotificationSubscription_Fragment = { __typename: "CycleNotificat
   "id"
 >;
 
-type Node_DataRecovery_Fragment = { __typename: "DataRecovery" } & Pick<DataRecovery, "id">;
-
 type Node_Document_Fragment = { __typename: "Document" } & Pick<Document, "id">;
 
 type Node_DocumentContent_Fragment = { __typename: "DocumentContent" } & Pick<DocumentContent, "id">;
@@ -14048,7 +14096,6 @@ export type NodeFragment =
   | Node_CustomViewNotificationSubscription_Fragment
   | Node_Cycle_Fragment
   | Node_CycleNotificationSubscription_Fragment
-  | Node_DataRecovery_Fragment
   | Node_Document_Fragment
   | Node_DocumentContent_Fragment
   | Node_DocumentContentHistory_Fragment
@@ -15955,6 +16002,23 @@ export type ProjectMilestoneQuery = { __typename?: "Query" } & {
   projectMilestone: { __typename?: "ProjectMilestone" } & ProjectMilestoneFragment;
 };
 
+export type ProjectMilestone_IssuesQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type ProjectMilestone_IssuesQuery = { __typename?: "Query" } & {
+  projectMilestone: { __typename?: "ProjectMilestone" } & {
+    issues: { __typename?: "IssueConnection" } & IssueConnectionFragment;
+  };
+};
+
 export type ProjectMilestonesQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
@@ -16106,6 +16170,7 @@ export type SearchDocumentsQueryVariables = Exact<{
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
@@ -16122,6 +16187,7 @@ export type SearchDocuments_ArchivePayloadQueryVariables = Exact<{
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
@@ -16141,6 +16207,7 @@ export type SearchIssuesQueryVariables = Exact<{
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
@@ -16158,6 +16225,7 @@ export type SearchIssues_ArchivePayloadQueryVariables = Exact<{
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
@@ -16176,6 +16244,7 @@ export type SearchProjectsQueryVariables = Exact<{
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
@@ -16192,6 +16261,7 @@ export type SearchProjects_ArchivePayloadQueryVariables = Exact<{
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
@@ -20019,26 +20089,6 @@ export const AuthenticationSessionResponseFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AuthenticationSessionResponseFragment, unknown>;
-export const DataRecoveryFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "DataRecovery" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DataRecovery" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<DataRecoveryFragment, unknown>;
 export const OrganizationDomainFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -20110,7 +20160,6 @@ export const GithubOrgFragmentDoc = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "login" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "isPersonal" } },
         ],
       },
@@ -36444,6 +36493,128 @@ export const ProjectMilestoneDocument = {
     ...ProjectMilestoneFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectMilestoneQuery, ProjectMilestoneQueryVariables>;
+export const ProjectMilestone_IssuesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "projectMilestone_issues" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectMilestone" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "issues" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...IssueConnectionFragmentDoc.definitions,
+    ...IssueFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ProjectMilestone_IssuesQuery, ProjectMilestone_IssuesQueryVariables>;
 export const ProjectMilestonesDocument = {
   kind: "Document",
   definitions: [
@@ -37407,6 +37578,11 @@ export const SearchDocumentsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Float" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -37457,6 +37633,11 @@ export const SearchDocumentsDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "snippetSize" },
+                value: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
               },
               {
                 kind: "Argument",
@@ -37528,6 +37709,11 @@ export const SearchDocuments_ArchivePayloadDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Float" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -37578,6 +37764,11 @@ export const SearchDocuments_ArchivePayloadDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "snippetSize" },
+                value: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
               },
               {
                 kind: "Argument",
@@ -37660,6 +37851,11 @@ export const SearchIssuesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Float" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -37715,6 +37911,11 @@ export const SearchIssuesDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "snippetSize" },
+                value: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
               },
               {
                 kind: "Argument",
@@ -37792,6 +37993,11 @@ export const SearchIssues_ArchivePayloadDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Float" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -37847,6 +38053,11 @@ export const SearchIssues_ArchivePayloadDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "snippetSize" },
+                value: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
               },
               {
                 kind: "Argument",
@@ -37924,6 +38135,11 @@ export const SearchProjectsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Float" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -37974,6 +38190,11 @@ export const SearchProjectsDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "snippetSize" },
+                value: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
               },
               {
                 kind: "Argument",
@@ -38045,6 +38266,11 @@ export const SearchProjects_ArchivePayloadDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Float" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -38095,6 +38321,11 @@ export const SearchProjects_ArchivePayloadDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "snippetSize" },
+                value: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
               },
               {
                 kind: "Argument",

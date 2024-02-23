@@ -1263,6 +1263,10 @@ type Comment implements Node {
   """
   resolvingUser: User
   """
+  [Internal] Summary for comment thread.
+  """
+  summaryText: String
+  """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -2406,30 +2410,6 @@ input CycleUpdateInput {
 }
 
 """
-Data recovery.
-"""
-type DataRecovery implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
-"""
 Comparator for dates.
 """
 input DateComparator {
@@ -3104,7 +3084,11 @@ input EmailIntakeAddressCreateInput {
   """
   The identifier or key of the team this email address will intake issues for.
   """
-  teamId: String!
+  teamId: String
+  """
+  The identifier of the template this email address will intake issues for.
+  """
+  templateId: String
 }
 
 type EmailIntakeAddressPayload {
@@ -3605,6 +3589,10 @@ input FavoriteCreateInput {
   The identifier of the document to favorite.
   """
   documentId: String
+  """
+  [INTERNAL] The identifier of the facet to favorite.
+  """
+  facetId: String
   """
   The name of the favorite folder.
   """
@@ -4166,10 +4154,6 @@ type GithubOrg {
   The login for the GitHub organization.
   """
   login: String!
-  """
-  The name of the GitHub organization.
-  """
-  name: String!
   """
   Repositories that the organization owns.
   """
@@ -11387,6 +11371,10 @@ input NullableProjectFilter {
   """
   or: [NullableProjectFilter!]
   """
+  [Internal] Comparator for the date when the project was last paused.
+  """
+  pausedAt: NullableDateComparator
+  """
   Filters that the project's milestones must satisfy.
   """
   projectMilestones: ProjectMilestoneCollectionFilter
@@ -11395,7 +11383,7 @@ input NullableProjectFilter {
   """
   roadmaps: RoadmapCollectionFilter
   """
-  [Internal] Comparator for the projects content.
+  [Internal] Comparator for the project's content.
   """
   searchableContent: ContentComparator
   """
@@ -11410,6 +11398,10 @@ input NullableProjectFilter {
   Comparator for the project state.
   """
   state: StringComparator
+  """
+  [Internal] Filters that the project's status must satisfy.
+  """
+  status: ProjectStatusFilter
   """
   Comparator for the project target date.
   """
@@ -12518,7 +12510,7 @@ input OrganizationInviteCreateInput {
 }
 
 union OrganizationInviteDetailsPayload =
-    OrganizationAcceptedOrExpiredInviteDetailsPayload
+  | OrganizationAcceptedOrExpiredInviteDetailsPayload
   | OrganizationInviteFullDetailsPayload
 
 type OrganizationInviteEdge {
@@ -13062,6 +13054,10 @@ type Project implements Node {
   """
   name: String!
   """
+  [INTERNAL] The latest time at which the project was paused.
+  """
+  pausedAt: DateTime
+  """
   The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
   """
   progress: Float!
@@ -13175,6 +13171,10 @@ type Project implements Node {
   The type of the state.
   """
   state: String!
+  """
+  [Internal] The status that the project is associated with.
+  """
+  status: ProjectStatus!
   """
   The estimated completion date of the project.
   """
@@ -13323,6 +13323,10 @@ input ProjectCollectionFilter {
   """
   or: [ProjectCollectionFilter!]
   """
+  [Internal] Comparator for the date when the project was last paused.
+  """
+  pausedAt: NullableDateComparator
+  """
   Filters that the project's milestones must satisfy.
   """
   projectMilestones: ProjectMilestoneCollectionFilter
@@ -13331,7 +13335,7 @@ input ProjectCollectionFilter {
   """
   roadmaps: RoadmapCollectionFilter
   """
-  [Internal] Comparator for the projects content.
+  [Internal] Comparator for the project's content.
   """
   searchableContent: ContentComparator
   """
@@ -13350,6 +13354,10 @@ input ProjectCollectionFilter {
   Comparator for the project state.
   """
   state: StringComparator
+  """
+  [Internal] Filters that the project's status must satisfy.
+  """
+  status: ProjectStatusFilter
   """
   Comparator for the project target date.
   """
@@ -13510,6 +13518,10 @@ input ProjectFilter {
   """
   or: [ProjectFilter!]
   """
+  [Internal] Comparator for the date when the project was last paused.
+  """
+  pausedAt: NullableDateComparator
+  """
   Filters that the project's milestones must satisfy.
   """
   projectMilestones: ProjectMilestoneCollectionFilter
@@ -13518,7 +13530,7 @@ input ProjectFilter {
   """
   roadmaps: RoadmapCollectionFilter
   """
-  [Internal] Comparator for the projects content.
+  [Internal] Comparator for the project's content.
   """
   searchableContent: ContentComparator
   """
@@ -13533,6 +13545,10 @@ input ProjectFilter {
   Comparator for the project state.
   """
   state: StringComparator
+  """
+  [Internal] Filters that the project's status must satisfy.
+  """
+  status: ProjectStatusFilter
   """
   Comparator for the project target date.
   """
@@ -13689,6 +13705,39 @@ type ProjectMilestone implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  Issues associated with the project milestone.
+  """
+  issues(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned issues.
+    """
+    filter: IssueFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueConnection!
   """
   The name of the project milestone.
   """
@@ -14264,6 +14313,10 @@ type ProjectSearchResult implements Node {
   """
   name: String!
   """
+  [INTERNAL] The latest time at which the project was paused.
+  """
+  pausedAt: DateTime
+  """
   The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
   """
   progress: Float!
@@ -14377,6 +14430,10 @@ type ProjectSearchResult implements Node {
   The type of the state.
   """
   state: String!
+  """
+  [Internal] The status that the project is associated with.
+  """
+  status: ProjectStatus!
   """
   The estimated completion date of the project.
   """
@@ -14508,6 +14565,52 @@ type ProjectStatusEdge {
   """
   cursor: String!
   node: ProjectStatus!
+}
+
+"""
+Project status filtering options.
+"""
+input ProjectStatusFilter {
+  """
+  Compound filters, all of which need to be matched by the project status.
+  """
+  and: [ProjectStatusFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the project status description.
+  """
+  description: StringComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the project status name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which needs to be matched by the project status.
+  """
+  or: [ProjectStatusFilter!]
+  """
+  Comparator for the project status position.
+  """
+  position: NumberComparator
+  """
+  Filters that the project status projects must satisfy.
+  """
+  projects: ProjectCollectionFilter
+  """
+  Comparator for the project status type.
+  """
+  type: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 """
@@ -14724,6 +14827,10 @@ input ProjectUpdateInput {
   The name of the project.
   """
   name: String
+  """
+  [INTERNAL] The date when the project was paused.
+  """
+  pausedAt: DateTime
   """
   The time until which project update reminders are paused.
   """
@@ -15099,6 +15206,15 @@ type Query {
     ids: [String!]!
   ): [Application!]!
   """
+  [INTERNAL] Get information for a list of applications with memberships
+  """
+  applicationInfoWithMembershipsByIds(
+    """
+    The client IDs to look up.
+    """
+    clientIds: [String!]!
+  ): [WorkspaceAuthorizedApplication!]!
+  """
   Get information for an application and whether a user has approved it for the given scopes.
   """
   applicationWithAuthorization(
@@ -15271,7 +15387,7 @@ type Query {
   """
   comment(
     """
-    The hash of the comment to retrieve, must be combined with an issueId.
+    The hash of the comment to retrieve.
     """
     hash: String
     """
@@ -15279,7 +15395,7 @@ type Query {
     """
     id: String
     """
-    The issue for which to find the comment.
+    [Deprecated] The issue for which to find the comment.
     """
     issueId: String
   ): Comment!
@@ -16341,6 +16457,10 @@ type Query {
     """
     orderBy: PaginationOrderBy
     """
+    Size of search snippet to return (default: 100)
+    """
+    snippetSize: Float
+    """
     UUID of a team to use as a boost.
     """
     teamId: String
@@ -16386,6 +16506,10 @@ type Query {
     """
     orderBy: PaginationOrderBy
     """
+    Size of search snippet to return (default: 100)
+    """
+    snippetSize: Float
+    """
     UUID of a team to use as a boost.
     """
     teamId: String
@@ -16426,6 +16550,10 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    Size of search snippet to return (default: 100)
+    """
+    snippetSize: Float
     """
     UUID of a team to use as a boost.
     """
@@ -16670,7 +16798,7 @@ type Query {
     orderBy: PaginationOrderBy
   ): WorkflowStateConnection!
   """
-  [INTERNAL] Get all authorized applications (with limited fields) for a workspace.
+  [INTERNAL] Get non-internal authorized applications (with limited fields) for a workspace
   """
   workspaceAuthorizedApplications: [WorkspaceAuthorizedApplication!]!
 }
@@ -20320,6 +20448,7 @@ enum ViewType {
   roadmapClosed
   roadmaps
   search
+  splitSearch
   teams
   triage
   userProfile

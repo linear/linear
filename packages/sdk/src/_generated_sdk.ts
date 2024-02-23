@@ -1925,34 +1925,6 @@ export class CyclePayload extends Request {
   }
 }
 /**
- * Data recovery.
- *
- * @param request - function to call the graphql client
- * @param data - L.DataRecoveryFragment response data
- */
-export class DataRecovery extends Request {
-  public constructor(request: LinearRequest, data: L.DataRecoveryFragment) {
-    super(request);
-    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.id = data.id;
-    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-  }
-
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
-  /** The time at which the entity was created. */
-  public createdAt: Date;
-  /** The unique identifier of the entity. */
-  public id: string;
-  /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  public updatedAt: Date;
-}
-/**
  * A generic payload return from entity deletion mutations.
  *
  * @param request - function to call the graphql client
@@ -3225,7 +3197,6 @@ export class GithubOrg extends Request {
     this.id = data.id;
     this.isPersonal = data.isPersonal ?? undefined;
     this.login = data.login;
-    this.name = data.name;
     this.repositories = data.repositories.map(node => new GithubRepo(request, node));
   }
 
@@ -3235,8 +3206,6 @@ export class GithubOrg extends Request {
   public isPersonal?: boolean;
   /** The login for the GitHub organization. */
   public login: string;
-  /** The name of the GitHub organization. */
-  public name: string;
   /** Repositories that the organization owns. */
   public repositories: GithubRepo[];
 }
@@ -6805,7 +6774,10 @@ export class ProjectMilestone extends Request {
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
-
+  /** Issues associated with the project milestone. */
+  public issues(variables?: Omit<L.ProjectMilestone_IssuesQueryVariables, "id">) {
+    return new ProjectMilestone_IssuesQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Creates a new project milestone. */
   public create(input: L.ProjectMilestoneCreateInput) {
     return new CreateProjectMilestoneMutation(this._request).fetch(input);
@@ -21634,6 +21606,59 @@ export class Project_TeamsQuery extends Request {
     const data = response.project.teams;
 
     return new TeamConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ProjectMilestone_Issues Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to projectMilestone
+ * @param variables - variables without 'id' to pass into the ProjectMilestone_IssuesQuery
+ */
+export class ProjectMilestone_IssuesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.ProjectMilestone_IssuesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.ProjectMilestone_IssuesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the ProjectMilestone_Issues query and return a IssueConnection
+   *
+   * @param variables - variables without 'id' to pass into the ProjectMilestone_IssuesQuery
+   * @returns parsed response from ProjectMilestone_IssuesQuery
+   */
+  public async fetch(variables?: Omit<L.ProjectMilestone_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
+    const response = await this._request<L.ProjectMilestone_IssuesQuery, L.ProjectMilestone_IssuesQueryVariables>(
+      L.ProjectMilestone_IssuesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.projectMilestone.issues;
+
+    return new IssueConnection(
       this._request,
       connection =>
         this.fetch(

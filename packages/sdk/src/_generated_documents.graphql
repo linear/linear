@@ -2354,21 +2354,6 @@ fragment ArchiveResponse on ArchiveResponse {
   includesDependencies
 }
 
-# Data recovery.
-fragment DataRecovery on DataRecovery {
-  __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The unique identifier of the entity.
-  id
-}
-
 # Defines the membership of a user to a team.
 fragment TeamMembership on TeamMembership {
   __typename
@@ -2944,8 +2929,6 @@ fragment GithubOrg on GithubOrg {
   }
   # The login for the GitHub organization.
   login
-  # The name of the GitHub organization.
-  name
   # Whether or not this org is the user's personal repositories.
   isPersonal
 }
@@ -5704,11 +5687,11 @@ query availableUsers {
 }
 # A specific comment.
 query comment(
-  # The hash of the comment to retrieve, must be combined with an issueId.
+  # The hash of the comment to retrieve.
   $hash: String
   # The identifier of the comment to retrieve.
   $id: String
-  # The issue for which to find the comment.
+  # [Deprecated] The issue for which to find the comment.
   $issueId: String
 ) {
   comment(hash: $hash, id: $id, issueId: $issueId) {
@@ -5717,11 +5700,11 @@ query comment(
 }
 # The bot that created the comment.
 query comment_botActor(
-  # The hash of the comment to retrieve, must be combined with an issueId.
+  # The hash of the comment to retrieve.
   $hash: String
   # The identifier of the comment to retrieve.
   $id: String
-  # The issue for which to find the comment.
+  # [Deprecated] The issue for which to find the comment.
   $issueId: String
 ) {
   comment(hash: $hash, id: $id, issueId: $issueId) {
@@ -5732,11 +5715,11 @@ query comment_botActor(
 }
 # The children of the comment.
 query comment_children(
-  # The hash of the comment to retrieve, must be combined with an issueId.
+  # The hash of the comment to retrieve.
   $hash: String
   # The identifier of the comment to retrieve.
   $id: String
-  # The issue for which to find the comment.
+  # [Deprecated] The issue for which to find the comment.
   $issueId: String
   # A cursor to be used with first for forward pagination
   $after: String
@@ -5769,11 +5752,11 @@ query comment_children(
 }
 # The document content that the comment is associated with.
 query comment_documentContent(
-  # The hash of the comment to retrieve, must be combined with an issueId.
+  # The hash of the comment to retrieve.
   $hash: String
   # The identifier of the comment to retrieve.
   $id: String
-  # The issue for which to find the comment.
+  # [Deprecated] The issue for which to find the comment.
   $issueId: String
 ) {
   comment(hash: $hash, id: $id, issueId: $issueId) {
@@ -7568,6 +7551,38 @@ query projectMilestone($id: String!) {
     ...ProjectMilestone
   }
 }
+# Issues associated with the project milestone.
+query projectMilestone_issues(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  projectMilestone(id: $id) {
+    issues(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
 # All milestones for the project.
 query projectMilestones(
   # A cursor to be used with first for forward pagination
@@ -7828,6 +7843,8 @@ query searchDocuments(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # Size of search snippet to return (default: 100)
+  $snippetSize: Float
   # UUID of a team to use as a boost.
   $teamId: String
   # Search string to look for.
@@ -7841,6 +7858,7 @@ query searchDocuments(
     includeComments: $includeComments
     last: $last
     orderBy: $orderBy
+    snippetSize: $snippetSize
     teamId: $teamId
     term: $term
   ) {
@@ -7863,6 +7881,8 @@ query searchDocuments_archivePayload(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # Size of search snippet to return (default: 100)
+  $snippetSize: Float
   # UUID of a team to use as a boost.
   $teamId: String
   # Search string to look for.
@@ -7876,6 +7896,7 @@ query searchDocuments_archivePayload(
     includeComments: $includeComments
     last: $last
     orderBy: $orderBy
+    snippetSize: $snippetSize
     teamId: $teamId
     term: $term
   ) {
@@ -7902,6 +7923,8 @@ query searchIssues(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # Size of search snippet to return (default: 100)
+  $snippetSize: Float
   # UUID of a team to use as a boost.
   $teamId: String
   # Search string to look for.
@@ -7916,6 +7939,7 @@ query searchIssues(
     includeComments: $includeComments
     last: $last
     orderBy: $orderBy
+    snippetSize: $snippetSize
     teamId: $teamId
     term: $term
   ) {
@@ -7940,6 +7964,8 @@ query searchIssues_archivePayload(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # Size of search snippet to return (default: 100)
+  $snippetSize: Float
   # UUID of a team to use as a boost.
   $teamId: String
   # Search string to look for.
@@ -7954,6 +7980,7 @@ query searchIssues_archivePayload(
     includeComments: $includeComments
     last: $last
     orderBy: $orderBy
+    snippetSize: $snippetSize
     teamId: $teamId
     term: $term
   ) {
@@ -7978,6 +8005,8 @@ query searchProjects(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # Size of search snippet to return (default: 100)
+  $snippetSize: Float
   # UUID of a team to use as a boost.
   $teamId: String
   # Search string to look for.
@@ -7991,6 +8020,7 @@ query searchProjects(
     includeComments: $includeComments
     last: $last
     orderBy: $orderBy
+    snippetSize: $snippetSize
     teamId: $teamId
     term: $term
   ) {
@@ -8013,6 +8043,8 @@ query searchProjects_archivePayload(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # Size of search snippet to return (default: 100)
+  $snippetSize: Float
   # UUID of a team to use as a boost.
   $teamId: String
   # Search string to look for.
@@ -8026,6 +8058,7 @@ query searchProjects_archivePayload(
     includeComments: $includeComments
     last: $last
     orderBy: $orderBy
+    snippetSize: $snippetSize
     teamId: $teamId
     term: $term
   ) {
