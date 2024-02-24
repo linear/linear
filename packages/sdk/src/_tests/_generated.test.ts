@@ -2690,6 +2690,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the projectMilestone connection query for the Issue */
+    it("projectMilestone.issues", async () => {
+      if (_projectMilestone) {
+        const issues: L.IssueConnection | undefined = await _projectMilestone.issues();
+        expect(issues instanceof L.IssueConnection);
+      } else {
+        console.warn("codegen-doc:print: No projectMilestone found - cannot test _projectMilestone.issues query");
+      }
+    });
+
     /** Test the projectMilestone.project query for L.Project */
     it("projectMilestone.project", async () => {
       if (_projectMilestone) {
