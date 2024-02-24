@@ -4370,6 +4370,56 @@ type InitiativeArchivePayload implements ArchivePayload {
   success: Boolean!
 }
 
+"""
+Initiative collection filtering options.
+"""
+input InitiativeCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the initiative.
+  """
+  and: [InitiativeCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the initiative creator must satisfy.
+  """
+  creator: UserFilter
+  """
+  Filters that needs to be matched by all initiatives.
+  """
+  every: InitiativeFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Comparator for the initiative name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the initiative.
+  """
+  or: [InitiativeCollectionFilter!]
+  """
+  Comparator for the initiative slug ID.
+  """
+  slugId: StringComparator
+  """
+  Filters that needs to be matched by some initiatives.
+  """
+  some: InitiativeFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 type InitiativeConnection {
   edges: [InitiativeEdge!]!
   nodes: [Initiative!]!
@@ -4412,6 +4462,44 @@ type InitiativeEdge {
   """
   cursor: String!
   node: Initiative!
+}
+
+"""
+Initiative filtering options.
+"""
+input InitiativeFilter {
+  """
+  Compound filters, all of which need to be matched by the initiative.
+  """
+  and: [InitiativeFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the initiative creator must satisfy.
+  """
+  creator: UserFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the initiative name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the initiative.
+  """
+  or: [InitiativeFilter!]
+  """
+  Comparator for the initiative slug ID.
+  """
+  slugId: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 """
@@ -10328,6 +10416,46 @@ type Mutation {
     input: TemplateUpdateInput!
   ): TemplatePayload!
   """
+  [ALPHA] Creates a new time schedule.
+  """
+  timeScheduleCreate(
+    """
+    The properties of the time schedule to create.
+    """
+    input: TimeScheduleCreateInput!
+  ): TimeSchedulePayload!
+  """
+  [ALPHA] Deletes a time schedule.
+  """
+  timeScheduleDelete(
+    """
+    The identifier of the time schedule to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  [ALPHA] Refresh the integration schedule information.
+  """
+  timeScheduleRefreshIntegrationSchedule(
+    """
+    The identifier of the time schedule to refresh.
+    """
+    id: String!
+  ): TimeSchedulePayload!
+  """
+  [ALPHA] Updates a time schedule.
+  """
+  timeScheduleUpdate(
+    """
+    The identifier of the time schedule to update.
+    """
+    id: String!
+    """
+    The properties of the time schedule to update.
+    """
+    input: TimeScheduleUpdateInput!
+  ): TimeSchedulePayload!
+  """
   Makes user a regular user. Can only be called by an admin.
   """
   userDemoteAdmin(
@@ -11338,6 +11466,10 @@ input NullableProjectFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Filters that the projects initiatives must satisfy.
+  """
+  initiatives: InitiativeCollectionFilter
   """
   Filters that the projects issues must satisfy.
   """
@@ -13291,6 +13423,10 @@ input ProjectCollectionFilter {
   """
   id: IDComparator
   """
+  Filters that the projects initiatives must satisfy.
+  """
+  initiatives: InitiativeCollectionFilter
+  """
   Filters that the projects issues must satisfy.
   """
   issues: IssueCollectionFilter
@@ -13489,6 +13625,10 @@ input ProjectFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Filters that the projects initiatives must satisfy.
+  """
+  initiatives: InitiativeCollectionFilter
   """
   Filters that the projects issues must satisfy.
   """
@@ -16669,6 +16809,44 @@ type Query {
     integrationType: String!
   ): [Template!]!
   """
+  [ALPHA] A specific time schedule.
+  """
+  timeSchedule(
+    """
+    The identifier of the time schedule to retrieve.
+    """
+    id: String!
+  ): TimeSchedule!
+  """
+  [ALPHA] All time schedules.
+  """
+  timeSchedules(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): TimeScheduleConnection!
+  """
   One specific user.
   """
   user(
@@ -19159,7 +19337,7 @@ type TimeSchedule implements Node {
   """
   The schedule entries.
   """
-  entries: JSONObject!
+  entries: [TimeScheduleEntry!]!
   """
   User presentable error message, if an error occurred while updating the schedule.
   """
@@ -19202,6 +19380,37 @@ type TimeScheduleConnection {
   pageInfo: PageInfo!
 }
 
+input TimeScheduleCreateInput {
+  """
+  The schedule entries.
+  """
+  entries: [TimeScheduleEntryInput!]
+  """
+  User readable error message, if an error occurred while updating the schedule.
+  """
+  error: String
+  """
+  The identifier of the external schedule.
+  """
+  externalId: String
+  """
+  The URL to the external schedule.
+  """
+  externalUrl: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The identifier of the Linear integration populating the schedule.
+  """
+  integrationId: String
+  """
+  The name of the schedule.
+  """
+  name: String!
+}
+
 type TimeScheduleEdge {
   """
   Used in `before` and `after` args
@@ -19210,10 +19419,7 @@ type TimeScheduleEdge {
   node: TimeSchedule!
 }
 
-"""
-The time schedule entry.
-"""
-input TimeScheduleEntry {
+type TimeScheduleEntry {
   """
   The end date of the schedule in ISO 8601 date-time format.
   """
@@ -19223,13 +19429,67 @@ input TimeScheduleEntry {
   """
   startsAt: DateTime!
   """
-  The email of the user on schedule. This is only used in case the user could not be mapped to a Linear user id.
+  The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id.
   """
   userEmail: String
   """
-  The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user, use `userEmail` instead.
+  The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference.
   """
   userId: String
+}
+
+input TimeScheduleEntryInput {
+  """
+  The end date of the schedule in ISO 8601 date-time format.
+  """
+  endsAt: DateTime!
+  """
+  The start date of the schedule in ISO 8601 date-time format.
+  """
+  startsAt: DateTime!
+  """
+  The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id.
+  """
+  userEmail: String
+  """
+  The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference.
+  """
+  userId: String
+}
+
+type TimeSchedulePayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+  timeSchedule: TimeSchedule!
+}
+
+input TimeScheduleUpdateInput {
+  """
+  The schedule entries.
+  """
+  entries: [TimeScheduleEntryInput!]
+  """
+  User readable error message, if an error occurred while updating the schedule.
+  """
+  error: String
+  """
+  The identifier of the external schedule.
+  """
+  externalId: String
+  """
+  The URL to the external schedule.
+  """
+  externalUrl: String
+  """
+  The name of the schedule.
+  """
+  name: String
 }
 
 """

@@ -2653,6 +2653,32 @@ export type InitiativeArchivePayload = ArchivePayload & {
   success: Scalars["Boolean"];
 };
 
+/** Initiative collection filtering options. */
+export type InitiativeCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the initiative. */
+  and?: Maybe<Array<InitiativeCollectionFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the initiative creator must satisfy. */
+  creator?: Maybe<UserFilter>;
+  /** Filters that needs to be matched by all initiatives. */
+  every?: Maybe<InitiativeFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the collection length. */
+  length?: Maybe<NumberComparator>;
+  /** Comparator for the initiative name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the initiative. */
+  or?: Maybe<Array<InitiativeCollectionFilter>>;
+  /** Comparator for the initiative slug ID. */
+  slugId?: Maybe<StringComparator>;
+  /** Filters that needs to be matched by some initiatives. */
+  some?: Maybe<InitiativeFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
 export type InitiativeConnection = {
   __typename?: "InitiativeConnection";
   edges: Array<InitiativeEdge>;
@@ -2681,6 +2707,26 @@ export type InitiativeEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: Initiative;
+};
+
+/** Initiative filtering options. */
+export type InitiativeFilter = {
+  /** Compound filters, all of which need to be matched by the initiative. */
+  and?: Maybe<Array<InitiativeFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the initiative creator must satisfy. */
+  creator?: Maybe<UserFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the initiative name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the initiative. */
+  or?: Maybe<Array<InitiativeFilter>>;
+  /** Comparator for the initiative slug ID. */
+  slugId?: Maybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 /** [Internal] The payload returned by the initiative mutations. */
@@ -5031,6 +5077,14 @@ export type Mutation = {
   templateDelete: DeletePayload;
   /** Updates an existing template. */
   templateUpdate: TemplatePayload;
+  /** [ALPHA] Creates a new time schedule. */
+  timeScheduleCreate: TimeSchedulePayload;
+  /** [ALPHA] Deletes a time schedule. */
+  timeScheduleDelete: DeletePayload;
+  /** [ALPHA] Refresh the integration schedule information. */
+  timeScheduleRefreshIntegrationSchedule: TimeSchedulePayload;
+  /** [ALPHA] Updates a time schedule. */
+  timeScheduleUpdate: TimeSchedulePayload;
   /** Makes user a regular user. Can only be called by an admin. */
   userDemoteAdmin: UserAdminPayload;
   /** Makes user a guest. Can only be called by an admin. */
@@ -6030,6 +6084,23 @@ export type MutationTemplateUpdateArgs = {
   input: TemplateUpdateInput;
 };
 
+export type MutationTimeScheduleCreateArgs = {
+  input: TimeScheduleCreateInput;
+};
+
+export type MutationTimeScheduleDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationTimeScheduleRefreshIntegrationScheduleArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationTimeScheduleUpdateArgs = {
+  id: Scalars["String"];
+  input: TimeScheduleUpdateInput;
+};
+
 export type MutationUserDemoteAdminArgs = {
   id: Scalars["String"];
 };
@@ -6567,6 +6638,8 @@ export type NullableProjectFilter = {
   health?: Maybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Filters that the projects initiatives must satisfy. */
+  initiatives?: Maybe<InitiativeCollectionFilter>;
   /** Filters that the projects issues must satisfy. */
   issues?: Maybe<IssueCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
@@ -7634,6 +7707,8 @@ export type ProjectCollectionFilter = {
   health?: Maybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Filters that the projects initiatives must satisfy. */
+  initiatives?: Maybe<InitiativeCollectionFilter>;
   /** Filters that the projects issues must satisfy. */
   issues?: Maybe<IssueCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
@@ -7743,6 +7818,8 @@ export type ProjectFilter = {
   health?: Maybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Filters that the projects initiatives must satisfy. */
+  initiatives?: Maybe<InitiativeCollectionFilter>;
   /** Filters that the projects issues must satisfy. */
   issues?: Maybe<IssueCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
@@ -8895,6 +8972,10 @@ export type Query = {
   templates: Array<Template>;
   /** Returns all templates that are associated with the integration type. */
   templatesForIntegration: Array<Template>;
+  /** [ALPHA] A specific time schedule. */
+  timeSchedule: TimeSchedule;
+  /** [ALPHA] All time schedules. */
+  timeSchedules: TimeScheduleConnection;
   /** One specific user. */
   user: User;
   /** The user's settings. */
@@ -9476,6 +9557,19 @@ export type QueryTemplateArgs = {
 
 export type QueryTemplatesForIntegrationArgs = {
   integrationType: Scalars["String"];
+};
+
+export type QueryTimeScheduleArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryTimeSchedulesArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
 };
 
 export type QueryUserArgs = {
@@ -10855,7 +10949,7 @@ export type TimeSchedule = Node & {
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The schedule entries. */
-  entries: Scalars["JSONObject"];
+  entries: Array<TimeScheduleEntry>;
   /** User presentable error message, if an error occurred while updating the schedule. */
   error?: Maybe<Scalars["String"]>;
   /** The identifier of the external schedule. */
@@ -10885,6 +10979,23 @@ export type TimeScheduleConnection = {
   pageInfo: PageInfo;
 };
 
+export type TimeScheduleCreateInput = {
+  /** The schedule entries. */
+  entries?: Maybe<Array<TimeScheduleEntryInput>>;
+  /** User readable error message, if an error occurred while updating the schedule. */
+  error?: Maybe<Scalars["String"]>;
+  /** The identifier of the external schedule. */
+  externalId?: Maybe<Scalars["String"]>;
+  /** The URL to the external schedule. */
+  externalUrl?: Maybe<Scalars["String"]>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: Maybe<Scalars["String"]>;
+  /** The identifier of the Linear integration populating the schedule. */
+  integrationId?: Maybe<Scalars["String"]>;
+  /** The name of the schedule. */
+  name: Scalars["String"];
+};
+
 export type TimeScheduleEdge = {
   __typename?: "TimeScheduleEdge";
   /** Used in `before` and `after` args */
@@ -10892,16 +11003,49 @@ export type TimeScheduleEdge = {
   node: TimeSchedule;
 };
 
-/** The time schedule entry. */
 export type TimeScheduleEntry = {
+  __typename?: "TimeScheduleEntry";
   /** The end date of the schedule in ISO 8601 date-time format. */
   endsAt: Scalars["DateTime"];
   /** The start date of the schedule in ISO 8601 date-time format. */
   startsAt: Scalars["DateTime"];
-  /** The email of the user on schedule. This is only used in case the user could not be mapped to a Linear user id. */
+  /** The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
   userEmail?: Maybe<Scalars["String"]>;
-  /** The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user, use `userEmail` instead. */
+  /** The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference. */
   userId?: Maybe<Scalars["String"]>;
+};
+
+export type TimeScheduleEntryInput = {
+  /** The end date of the schedule in ISO 8601 date-time format. */
+  endsAt: Scalars["DateTime"];
+  /** The start date of the schedule in ISO 8601 date-time format. */
+  startsAt: Scalars["DateTime"];
+  /** The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
+  userEmail?: Maybe<Scalars["String"]>;
+  /** The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference. */
+  userId?: Maybe<Scalars["String"]>;
+};
+
+export type TimeSchedulePayload = {
+  __typename?: "TimeSchedulePayload";
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+  timeSchedule: TimeSchedule;
+};
+
+export type TimeScheduleUpdateInput = {
+  /** The schedule entries. */
+  entries?: Maybe<Array<TimeScheduleEntryInput>>;
+  /** User readable error message, if an error occurred while updating the schedule. */
+  error?: Maybe<Scalars["String"]>;
+  /** The identifier of the external schedule. */
+  externalId?: Maybe<Scalars["String"]>;
+  /** The URL to the external schedule. */
+  externalUrl?: Maybe<Scalars["String"]>;
+  /** The name of the schedule. */
+  name?: Maybe<Scalars["String"]>;
 };
 
 /** Comparator for timeless dates. */
@@ -12608,7 +12752,7 @@ export type TriageResponsibilityFragment = { __typename: "TriageResponsibility" 
 > & {
     integration: { __typename?: "Integration" } & Pick<Integration, "id">;
     team: { __typename?: "Team" } & Pick<Team, "id">;
-    timeSchedule: { __typename?: "TimeSchedule" } & TimeScheduleFragment;
+    timeSchedule: { __typename?: "TimeSchedule" } & Pick<TimeSchedule, "id">;
   };
 
 export type TemplateFragment = { __typename: "Template" } & Pick<
@@ -12622,8 +12766,11 @@ export type TemplateFragment = { __typename: "Template" } & Pick<
 
 export type TimeScheduleFragment = { __typename: "TimeSchedule" } & Pick<
   TimeSchedule,
-  "externalUrl" | "externalId" | "updatedAt" | "name" | "entries" | "archivedAt" | "createdAt" | "id" | "error"
-> & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
+  "externalUrl" | "externalId" | "updatedAt" | "name" | "archivedAt" | "createdAt" | "id" | "error"
+> & {
+    integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">>;
+    entries: Array<{ __typename?: "TimeScheduleEntry" } & TimeScheduleEntryFragment>;
+  };
 
 export type GitAutomationStateFragment = { __typename: "GitAutomationState" } & Pick<
   GitAutomationState,
@@ -14525,6 +14672,16 @@ export type TimeScheduleConnectionFragment = { __typename: "TimeScheduleConnecti
   nodes: Array<{ __typename?: "TimeSchedule" } & TimeScheduleFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
+
+export type TimeScheduleEntryFragment = { __typename: "TimeScheduleEntry" } & Pick<
+  TimeScheduleEntry,
+  "userId" | "userEmail" | "endsAt" | "startsAt"
+>;
+
+export type TimeSchedulePayloadFragment = { __typename: "TimeSchedulePayload" } & Pick<
+  TimeSchedulePayload,
+  "lastSyncId" | "success"
+> & { timeSchedule: { __typename?: "TimeSchedule" } & Pick<TimeSchedule, "id"> };
 
 export type TriageResponsibilityConnectionFragment = { __typename: "TriageResponsibilityConnection" } & {
   nodes: Array<{ __typename?: "TriageResponsibility" } & TriageResponsibilityFragment>;
@@ -26634,6 +26791,26 @@ export const TemplatePayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<TemplatePayloadFragment, unknown>;
+export const TimeScheduleEntryFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "TimeScheduleEntry" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TimeScheduleEntry" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "userId" } },
+          { kind: "Field", name: { kind: "Name", value: "userEmail" } },
+          { kind: "Field", name: { kind: "Name", value: "endsAt" } },
+          { kind: "Field", name: { kind: "Name", value: "startsAt" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<TimeScheduleEntryFragment, unknown>;
 export const TimeScheduleFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -26657,7 +26834,14 @@ export const TimeScheduleFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "externalId" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
-          { kind: "Field", name: { kind: "Name", value: "entries" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "entries" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TimeScheduleEntry" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
@@ -26699,6 +26883,32 @@ export const TimeScheduleConnectionFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<TimeScheduleConnectionFragment, unknown>;
+export const TimeSchedulePayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "TimeSchedulePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TimeSchedulePayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "timeSchedule" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<TimeSchedulePayloadFragment, unknown>;
 export const TriageResponsibilityFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -26736,7 +26946,7 @@ export const TriageResponsibilityFragmentDoc = {
             name: { kind: "Name", value: "timeSchedule" },
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TimeSchedule" } }],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           { kind: "Field", name: { kind: "Name", value: "id" } },

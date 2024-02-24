@@ -8889,13 +8889,13 @@ export class TimeSchedule extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.entries = data.entries;
     this.error = data.error ?? undefined;
     this.externalId = data.externalId ?? undefined;
     this.externalUrl = data.externalUrl ?? undefined;
     this.id = data.id;
     this.name = data.name;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.entries = data.entries.map(node => new TimeScheduleEntry(request, node));
     this._integration = data.integration ?? undefined;
   }
 
@@ -8903,8 +8903,6 @@ export class TimeSchedule extends Request {
   public archivedAt?: Date;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** The schedule entries. */
-  public entries: L.Scalars["JSONObject"];
   /** User presentable error message, if an error occurred while updating the schedule. */
   public error?: string;
   /** The identifier of the external schedule. */
@@ -8921,6 +8919,8 @@ export class TimeSchedule extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The schedule entries. */
+  public entries: TimeScheduleEntry[];
   /** The identifier of the Linear integration populating the schedule. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -8952,6 +8952,48 @@ export class TimeScheduleConnection extends Connection<TimeSchedule> {
   }
 }
 /**
+ * TimeScheduleEntry model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.TimeScheduleEntryFragment response data
+ */
+export class TimeScheduleEntry extends Request {
+  public constructor(request: LinearRequest, data: L.TimeScheduleEntryFragment) {
+    super(request);
+    this.endsAt = parseDate(data.endsAt) ?? new Date();
+    this.startsAt = parseDate(data.startsAt) ?? new Date();
+    this.userEmail = data.userEmail ?? undefined;
+    this.userId = data.userId ?? undefined;
+  }
+
+  /** The end date of the schedule in ISO 8601 date-time format. */
+  public endsAt: Date;
+  /** The start date of the schedule in ISO 8601 date-time format. */
+  public startsAt: Date;
+  /** The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
+  public userEmail?: string;
+  /** The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference. */
+  public userId?: string;
+}
+/**
+ * TimeSchedulePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.TimeSchedulePayloadFragment response data
+ */
+export class TimeSchedulePayload extends Request {
+  public constructor(request: LinearRequest, data: L.TimeSchedulePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
  * A team's triage responsibility.
  *
  * @param request - function to call the graphql client
@@ -8969,7 +9011,6 @@ export class TriageResponsibility extends Request {
     this.manualSelection = data.manualSelection ?? undefined;
     this.schedule = data.schedule ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this.timeSchedule = new TimeSchedule(request, data.timeSchedule);
     this._integration = data.integration;
     this._team = data.team;
   }
@@ -8990,8 +9031,6 @@ export class TriageResponsibility extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The time schedule used for scheduling. */
-  public timeSchedule: TimeSchedule;
   /** The integration used for scheduling. */
   public get integration(): LinearFetch<Integration> | undefined {
     return new IntegrationQuery(this._request).fetch(this._integration.id);

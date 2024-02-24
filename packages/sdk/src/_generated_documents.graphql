@@ -1296,7 +1296,7 @@ fragment TriageResponsibility on TriageResponsibility {
   createdAt
   # The time schedule used for scheduling.
   timeSchedule {
-    ...TimeSchedule
+    id
   }
   # The unique identifier of the entity.
   id
@@ -1355,7 +1355,9 @@ fragment TimeSchedule on TimeSchedule {
   # The name of the schedule.
   name
   # The schedule entries.
-  entries
+  entries {
+    ...TimeScheduleEntry
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -4960,6 +4962,29 @@ fragment TimeScheduleConnection on TimeScheduleConnection {
   }
   pageInfo {
     ...PageInfo
+  }
+}
+
+fragment TimeScheduleEntry on TimeScheduleEntry {
+  __typename
+  # The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference.
+  userId
+  # The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id.
+  userEmail
+  # The end date of the schedule in ISO 8601 date-time format.
+  endsAt
+  # The start date of the schedule in ISO 8601 date-time format.
+  startsAt
+}
+
+fragment TimeSchedulePayload on TimeSchedulePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+  timeSchedule {
+    id
   }
 }
 
