@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.0.0
+
+### Major Changes
+
+- 739f63d: add support for root query with all optional args
+
+### Patch Changes
+
+- f1ca7e1: chore(deps): update dependency patch versions
+
 ## 1.11.5
 
 ### Patch Changes
