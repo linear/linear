@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.9.6
+
+### Patch Changes
+
+- f1ca7e1: chore(deps): update dependency patch versions
+- Updated dependencies [f1ca7e1]
+- Updated dependencies [8543031]
+- Updated dependencies [739f63d]
+- Updated dependencies [bd665fc]
+- Updated dependencies [739f63d]
+  - @linear/sdk@14.0.0
+
 ## 1.9.5
 
 ### Patch Changes

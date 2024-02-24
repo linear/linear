@@ -2,7 +2,7 @@
   "name": "@linear/codegen-test",
   "private": true,
   "description": "Plugin for generating jest tests for the Linear Client",
-  "version": "1.11.5",
+  "version": "2.0.0",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
