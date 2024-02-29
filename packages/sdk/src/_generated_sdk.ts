@@ -905,9 +905,12 @@ export class AuthOrganizationDomain extends Request {
 export class AuthOrganizationInvite extends Request {
   public constructor(request: LinearRequest, data: L.AuthOrganizationInviteFragment) {
     super(request);
+    this.expiresAt = parseDate(data.expiresAt) ?? undefined;
     this.id = data.id;
   }
 
+  /** The time at which the invite will be expiring. Null, if the invite shouldn't expire. */
+  public expiresAt?: Date;
   /** The unique identifier of the entity. */
   public id: string;
 }
@@ -8889,7 +8892,6 @@ export class TimeSchedule extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.error = data.error ?? undefined;
     this.externalId = data.externalId ?? undefined;
     this.externalUrl = data.externalUrl ?? undefined;
     this.id = data.id;
@@ -8903,8 +8905,6 @@ export class TimeSchedule extends Request {
   public archivedAt?: Date;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  /** User presentable error message, if an error occurred while updating the schedule. */
-  public error?: string;
   /** The identifier of the external schedule. */
   public externalId?: string;
   /** The URL to the external schedule. */
@@ -9000,7 +9000,7 @@ export class TimeSchedulePayload extends Request {
  * @param data - L.TriageResponsibilityFragment response data
  */
 export class TriageResponsibility extends Request {
-  private _integration: L.TriageResponsibilityFragment["integration"];
+  private _currentUser?: L.TriageResponsibilityFragment["currentUser"];
   private _team: L.TriageResponsibilityFragment["team"];
 
   public constructor(request: LinearRequest, data: L.TriageResponsibilityFragment) {
@@ -9008,10 +9008,11 @@ export class TriageResponsibility extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
-    this.manualSelection = data.manualSelection ?? undefined;
-    this.schedule = data.schedule ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this._integration = data.integration;
+    this.manualSelection = data.manualSelection
+      ? new TriageResponsibilityManualSelection(request, data.manualSelection)
+      : undefined;
+    this._currentUser = data.currentUser ?? undefined;
     this._team = data.team;
   }
 
@@ -9021,19 +9022,17 @@ export class TriageResponsibility extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Set of users used for triage responsibility. */
-  public manualSelection?: L.Scalars["JSONObject"];
-  /** Schedule used for triage responsibility. */
-  public schedule?: L.Scalars["JSONObject"];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** The integration used for scheduling. */
-  public get integration(): LinearFetch<Integration> | undefined {
-    return new IntegrationQuery(this._request).fetch(this._integration.id);
+  /** Set of users used for triage responsibility. */
+  public manualSelection?: TriageResponsibilityManualSelection;
+  /** The user currently responsible for triage. */
+  public get currentUser(): LinearFetch<User> | undefined {
+    return this._currentUser?.id ? new UserQuery(this._request).fetch(this._currentUser?.id) : undefined;
   }
   /** The team to which the triage responsibility belongs to. */
   public get team(): LinearFetch<Team> | undefined {
@@ -9060,6 +9059,39 @@ export class TriageResponsibilityConnection extends Connection<TriageResponsibil
       new PageInfo(request, data.pageInfo)
     );
   }
+}
+/**
+ * TriageResponsibilityManualSelection model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.TriageResponsibilityManualSelectionFragment response data
+ */
+export class TriageResponsibilityManualSelection extends Request {
+  public constructor(request: LinearRequest, data: L.TriageResponsibilityManualSelectionFragment) {
+    super(request);
+    this.userIds = data.userIds;
+  }
+
+  /** The set of users responsible for triage. */
+  public userIds: string[];
+}
+/**
+ * TriageResponsibilityPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.TriageResponsibilityPayloadFragment response data
+ */
+export class TriageResponsibilityPayload extends Request {
+  public constructor(request: LinearRequest, data: L.TriageResponsibilityPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
 }
 /**
  * Object representing Google Cloud upload policy, plus additional data.

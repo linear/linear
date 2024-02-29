@@ -1274,13 +1274,9 @@ fragment TeamNotificationSubscription on TeamNotificationSubscription {
 # A team's triage responsibility.
 fragment TriageResponsibility on TriageResponsibility {
   __typename
-  # Schedule used for triage responsibility.
-  schedule
   # Set of users used for triage responsibility.
-  manualSelection
-  # The integration used for scheduling.
-  integration {
-    id
+  manualSelection {
+    ...TriageResponsibilityManualSelection
   }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -1300,6 +1296,10 @@ fragment TriageResponsibility on TriageResponsibility {
   }
   # The unique identifier of the entity.
   id
+  # The user currently responsible for triage.
+  currentUser {
+    id
+  }
 }
 
 # A template object used for creating entities faster.
@@ -1364,8 +1364,6 @@ fragment TimeSchedule on TimeSchedule {
   createdAt
   # The unique identifier of the entity.
   id
-  # User presentable error message, if an error occurred while updating the schedule.
-  error
 }
 
 # A trigger that updates the issue status according to Git automations.
@@ -1789,6 +1787,8 @@ fragment Integration on Integration {
 # An invitation to the organization that has been sent via email.
 fragment AuthOrganizationInvite on AuthOrganizationInvite {
   __typename
+  # The time at which the invite will be expiring. Null, if the invite shouldn't expire.
+  expiresAt
   # The unique identifier of the entity.
   id
 }
@@ -2157,6 +2157,10 @@ fragment Team on Team {
   }
   # Team's currently active cycle.
   activeCycle {
+    id
+  }
+  # Team's triage responsibility.
+  triageResponsibility {
     id
   }
   # The canceled workflow state which auto closed issues will be set to. Defaults to the first canceled state.
@@ -4998,6 +5002,23 @@ fragment TriageResponsibilityConnection on TriageResponsibilityConnection {
   }
 }
 
+fragment TriageResponsibilityManualSelection on TriageResponsibilityManualSelection {
+  __typename
+  # The set of users responsible for triage.
+  userIds
+}
+
+fragment TriageResponsibilityPayload on TriageResponsibilityPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+  triageResponsibility {
+    id
+  }
+}
+
 fragment UploadFileHeader on UploadFileHeader {
   __typename
   # Upload file header key.
@@ -7027,6 +7048,8 @@ query issues(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned issues.
+  $sort: [IssueSortInput!]
 ) {
   issues(
     after: $after
@@ -7036,6 +7059,7 @@ query issues(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    sort: $sort
   ) {
     ...IssueConnection
   }

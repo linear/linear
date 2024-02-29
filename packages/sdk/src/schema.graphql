@@ -203,6 +203,16 @@ type AsksChannelConnectPayload {
 }
 
 """
+Issue assignee sorting options.
+"""
+input AssigneeSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+}
+
+"""
 Issue attachment (e.g. support ticket, pull request).
 """
 type Attachment implements Node {
@@ -862,6 +872,10 @@ type AuthOrganizationDomain {
 An invitation to the organization that has been sent via email.
 """
 type AuthOrganizationInvite {
+  """
+  The time at which the invite will be expiring. Null, if the invite shouldn't expire.
+  """
+  expiresAt: DateTime
   """
   The unique identifier of the entity.
   """
@@ -1559,6 +1573,16 @@ type CompanyEdge {
   node: Company!
 }
 
+"""
+Issue completion date sorting options.
+"""
+input CompletedAtSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+}
+
 input ContactCreateInput {
   """
   User's browser information.
@@ -1674,6 +1698,16 @@ input CreateOrganizationInput {
   JSON serialized UTM parameters associated with the creation of the workspace.
   """
   utm: String
+}
+
+"""
+Issue creation date sorting options.
+"""
+input CreatedAtSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
 }
 
 """
@@ -2386,6 +2420,16 @@ input CycleShiftAllInput {
   id: String!
 }
 
+"""
+Issue cycle sorting options.
+"""
+input CycleSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+}
+
 input CycleUpdateInput {
   """
   The end date of the cycle.
@@ -3029,6 +3073,16 @@ input DocumentUpdateInput {
 }
 
 """
+Issue due date sorting options.
+"""
+input DueDateSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+}
+
+"""
 An email address that can be used for submitting issues.
 """
 type EmailIntakeAddress implements Node {
@@ -3343,6 +3397,16 @@ input EstimateComparator {
   Compound filters, all of which need to be matched by the estimate.
   """
   or: [NullableNumberComparator!]
+}
+
+"""
+Issue estimate sorting options.
+"""
+input EstimateSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
 }
 
 """
@@ -7574,6 +7638,76 @@ type IssueSearchResultEdge {
   node: IssueSearchResult!
 }
 
+"""
+Issue filtering options.
+"""
+input IssueSortInput {
+  """
+  Sort by assignee name
+  """
+  assignee: AssigneeSort
+  """
+  Sort by issue completion date
+  """
+  completedAt: CompletedAtSort
+  """
+  Sort by issue creation date
+  """
+  createdAt: CreatedAtSort
+  """
+  Sort by Cycle start date
+  """
+  cycle: CycleSort
+  """
+  Sort by issue due date
+  """
+  dueDate: DueDateSort
+  """
+  Sort by estimate
+  """
+  estimate: EstimateSort
+  """
+  Sort by label
+  """
+  label: LabelSort
+  """
+  Sort by manual order
+  """
+  manual: ManualSort
+  """
+  Sort by Project Milestone target date
+  """
+  milestone: MilestoneSort
+  """
+  Sort by priority
+  """
+  priority: PrioritySort
+  """
+  Sort by Project name
+  """
+  project: ProjectSort
+  """
+  Sort by SLA status
+  """
+  slaStatus: SlaStatusSort
+  """
+  Sort by Team name
+  """
+  team: TeamSort
+  """
+  Sort by issue title
+  """
+  title: TitleSort
+  """
+  Sort by issue update date
+  """
+  updatedAt: UpdatedAtSort
+  """
+  Sort by workflow state type
+  """
+  workflowState: WorkflowStateSort
+}
+
 input IssueUpdateInput {
   """
   The identifier of the user to assign the issue to.
@@ -7920,11 +8054,41 @@ type LabelNotificationSubscription implements Entity & Node & NotificationSubscr
   userContextViewType: UserContextViewType
 }
 
+"""
+Issue sorting options.
+"""
+input LabelSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+}
+
 type LogoutResponse {
   """
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+Issue manual sorting options.
+"""
+input ManualSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+}
+
+"""
+Issue project milestone options.
+"""
+input MilestoneSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
 }
 
 type Mutation {
@@ -10456,6 +10620,50 @@ type Mutation {
     input: TimeScheduleUpdateInput!
   ): TimeSchedulePayload!
   """
+  [ALPHA] Upsert an external time schedule.
+  """
+  timeScheduleUpsertExternal(
+    """
+    The unique identifier of the external schedule.
+    """
+    externalId: String!
+    """
+    The properties of the time schedule to insert or update.
+    """
+    input: TimeScheduleUpdateInput!
+  ): TimeSchedulePayload!
+  """
+  [ALPHA] Creates a new triage responsibility.
+  """
+  triageResponsibilityCreate(
+    """
+    The properties of the triage responsibility to create.
+    """
+    input: TriageResponsibilityCreateInput!
+  ): TriageResponsibilityPayload!
+  """
+  [ALPHA] Deletes a triage responsibility.
+  """
+  triageResponsibilityDelete(
+    """
+    The identifier of the triage responsibility to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  [ALPHA] Updates an existing triage responsibility.
+  """
+  triageResponsibilityUpdate(
+    """
+    The identifier of the triage responsibility to update.
+    """
+    id: String!
+    """
+    The properties of the triage responsibility to update.
+    """
+    input: TriageResponsibilityUpdateInput!
+  ): TriageResponsibilityPayload!
+  """
   Makes user a regular user. Can only be called by an admin.
   """
   userDemoteAdmin(
@@ -12894,6 +13102,14 @@ type PagerDutySettings {
 }
 
 """
+How to treat NULL values, whether they should appear first or last
+"""
+enum PaginationNulls {
+  first
+  last
+}
+
+"""
 By which field should the pagination order by
 """
 enum PaginationOrderBy {
@@ -12963,6 +13179,20 @@ type PaidSubscription implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+}
+
+"""
+Issue priority sorting options.
+"""
+input PrioritySort {
+  """
+  Whether to consider no priority as the highest or lowest priority
+  """
+  noPriorityFirst: Boolean = false
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
 }
 
 """
@@ -14646,6 +14876,16 @@ type ProjectSearchResultEdge {
 }
 
 """
+Issue project sorting options.
+"""
+input ProjectSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+}
+
+"""
 [ALPHA] A project status.
 """
 type ProjectStatus implements Node {
@@ -16169,6 +16409,10 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned issues.
+    """
+    sort: [IssueSortInput!]
   ): IssueConnection!
   """
   One specific notification.
@@ -16846,6 +17090,44 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): TimeScheduleConnection!
+  """
+  [ALPHA] All triage responsibilities.
+  """
+  triageResponsibilities(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): TriageResponsibilityConnection!
+  """
+  [ALPHA] A specific triage responsibility.
+  """
+  triageResponsibility(
+    """
+    The identifier of the triage responsibility to retrieve.
+    """
+    id: String!
+  ): TriageResponsibility!
   """
   One specific user.
   """
@@ -17568,6 +17850,16 @@ input SlaStatusComparator {
   Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
   """
   null: Boolean
+}
+
+"""
+Issue SLA status sorting options.
+"""
+input SlaStatusSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
 }
 
 """
@@ -18494,6 +18786,10 @@ type Team implements Node {
   """
   triageIssueState: WorkflowState
   """
+  Team's triage responsibility.
+  """
+  triageResponsibility: TriageResponsibility
+  """
   How many upcoming cycles to create.
   """
   upcomingCycleCount: Float!
@@ -19012,6 +19308,16 @@ input TeamRepoMappingInput {
   linearTeamId: String!
 }
 
+"""
+Issue team sorting options.
+"""
+input TeamSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+}
+
 input TeamUpdateInput {
   """
   Period after which closed and completed issues are automatically archived, in months.
@@ -19339,10 +19645,6 @@ type TimeSchedule implements Node {
   """
   entries: [TimeScheduleEntry!]!
   """
-  User presentable error message, if an error occurred while updating the schedule.
-  """
-  error: String
-  """
   The identifier of the external schedule.
   """
   externalId: String
@@ -19384,13 +19686,9 @@ input TimeScheduleCreateInput {
   """
   The schedule entries.
   """
-  entries: [TimeScheduleEntryInput!]
+  entries: [TimeScheduleEntryInput!]!
   """
-  User readable error message, if an error occurred while updating the schedule.
-  """
-  error: String
-  """
-  The identifier of the external schedule.
+  The unique identifier of the external schedule.
   """
   externalId: String
   """
@@ -19401,10 +19699,6 @@ input TimeScheduleCreateInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
-  """
-  The identifier of the Linear integration populating the schedule.
-  """
-  integrationId: String
   """
   The name of the schedule.
   """
@@ -19475,11 +19769,7 @@ input TimeScheduleUpdateInput {
   """
   entries: [TimeScheduleEntryInput!]
   """
-  User readable error message, if an error occurred while updating the schedule.
-  """
-  error: String
-  """
-  The identifier of the external schedule.
+  The unique identifier of the external schedule.
   """
   externalId: String
   """
@@ -19535,6 +19825,16 @@ input TimelessDateComparator {
   nin: [TimelessDate!]
 }
 
+"""
+Issue title sorting options.
+"""
+input TitleSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+}
+
 input TokenUserAccountAuthInput {
   """
   The email which to login via the magic login code.
@@ -19575,21 +19875,17 @@ type TriageResponsibility implements Node {
   """
   createdAt: DateTime!
   """
+  The user currently responsible for triage.
+  """
+  currentUser: User
+  """
   The unique identifier of the entity.
   """
   id: ID!
   """
-  The integration used for scheduling.
-  """
-  integration: Integration!
-  """
   Set of users used for triage responsibility.
   """
-  manualSelection: JSONObject
-  """
-  Schedule used for triage responsibility.
-  """
-  schedule: JSONObject
+  manualSelection: TriageResponsibilityManualSelection
   """
   The team to which the triage responsibility belongs to.
   """
@@ -19597,7 +19893,7 @@ type TriageResponsibility implements Node {
   """
   The time schedule used for scheduling.
   """
-  timeSchedule: TimeSchedule!
+  timeSchedule: TimeSchedule
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -19620,6 +19916,29 @@ type TriageResponsibilityConnection {
   pageInfo: PageInfo!
 }
 
+input TriageResponsibilityCreateInput {
+  """
+  The action to take when an issue is added to triage.
+  """
+  action: String!
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The manual selection of users responsible for triage.
+  """
+  manualSelection: TriageResponsibilityManualSelectionInput
+  """
+  The identifier of the team associated with the triage responsibility.
+  """
+  teamId: String!
+  """
+  The identifier of the time schedule used for scheduling triage responsibility
+  """
+  timeScheduleId: String
+}
+
 type TriageResponsibilityEdge {
   """
   Used in `before` and `after` args
@@ -19628,10 +19947,7 @@ type TriageResponsibilityEdge {
   node: TriageResponsibility!
 }
 
-"""
-Manual triage responsibility using a set of users.
-"""
-input TriageResponsibilityManualSelection {
+type TriageResponsibilityManualSelection {
   """
   [INTERNAL] The index of the current userId used for the assign action when having more than one user.
   """
@@ -19643,49 +19959,60 @@ input TriageResponsibilityManualSelection {
 }
 
 """
-Triage responsibility schedule.
+Manual triage responsibility using a set of users.
 """
-input TriageResponsibilitySchedule {
+input TriageResponsibilityManualSelectionInput {
   """
-  The schedule entries, undefined if the schedule is not fetched yet or failed.
+  [INTERNAL] The index of the current userId used for the assign action when having more than one user.
   """
-  entries: [TriageResponsibilityScheduleEntry!]
+  assignmentIndex: Int
   """
-  Optional user presentable error message when using an integration.
+  The set of users responsible for triage.
   """
-  integrationError: String
-  """
-  Reference to the integration's schedule when using an integration.
-  """
-  integrationScheduleId: String
+  userIds: [String!]!
 }
 
-"""
-The triage responsibility schedule entry.
-"""
-input TriageResponsibilityScheduleEntry {
+type TriageResponsibilityPayload {
   """
-  The end date in ISO 8601 date-time format.
+  The identifier of the last sync operation.
   """
-  endsAt: DateTime!
+  lastSyncId: Float!
   """
-  The external email of the user on schedule if the external user could not be found in Linear.
+  Whether the operation was successful.
   """
-  externalUserEmail: String
+  success: Boolean!
+  triageResponsibility: TriageResponsibility!
+}
+
+input TriageResponsibilityUpdateInput {
   """
-  The start date in ISO 8601 date-time format.
+  The action to take when an issue is added to triage.
   """
-  startsAt: DateTime!
+  action: String
   """
-  The linear user id of the user on schedule.
+  The manual selection of users responsible for triage.
   """
-  userId: String
+  manualSelection: TriageResponsibilityManualSelectionInput
+  """
+  The identifier of the time schedule used for scheduling triage responsibility.
+  """
+  timeScheduleId: String
 }
 
 """
 A universally unique identifier as specified by RFC 4122.
 """
 scalar UUID
+
+"""
+Issue update date sorting options.
+"""
+input UpdatedAtSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+}
 
 """
 Object representing Google Cloud upload policy, plus additional data.
@@ -21251,6 +21578,16 @@ type WorkflowStatePayload {
   The state that was created or updated.
   """
   workflowState: WorkflowState!
+}
+
+"""
+Issue workflow state sorting options.
+"""
+input WorkflowStateSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
 }
 
 input WorkflowStateUpdateInput {
