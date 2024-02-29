@@ -149,6 +149,12 @@ export type AsksChannelConnectPayload = {
   success: Scalars["Boolean"];
 };
 
+/** Issue assignee sorting options. */
+export type AssigneeSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+};
+
 /** Issue attachment (e.g. support ticket, pull request). */
 export type Attachment = Node & {
   __typename?: "Attachment";
@@ -548,6 +554,8 @@ export type AuthOrganizationDomain = {
 /** An invitation to the organization that has been sent via email. */
 export type AuthOrganizationInvite = {
   __typename?: "AuthOrganizationInvite";
+  /** The time at which the invite will be expiring. Null, if the invite shouldn't expire. */
+  expiresAt?: Maybe<Scalars["DateTime"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
 };
@@ -950,6 +958,12 @@ export type CompanyEdge = {
   node: Company;
 };
 
+/** Issue completion date sorting options. */
+export type CompletedAtSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+};
+
 export type ContactCreateInput = {
   /** User's browser information. */
   browser?: Maybe<Scalars["String"]>;
@@ -1024,6 +1038,12 @@ export type CreateOrganizationInput = {
   urlKey: Scalars["String"];
   /** JSON serialized UTM parameters associated with the creation of the workspace. */
   utm?: Maybe<Scalars["String"]>;
+};
+
+/** Issue creation date sorting options. */
+export type CreatedAtSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
 };
 
 /** A custom view that has been saved by a user. */
@@ -1430,6 +1450,12 @@ export type CycleShiftAllInput = {
   id: Scalars["String"];
 };
 
+/** Issue cycle sorting options. */
+export type CycleSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+};
+
 export type CycleUpdateInput = {
   /** The end date of the cycle. */
   completedAt?: Maybe<Scalars["DateTime"]>;
@@ -1823,6 +1849,12 @@ export type DocumentUpdateInput = {
   title?: Maybe<Scalars["String"]>;
 };
 
+/** Issue due date sorting options. */
+export type DueDateSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+};
+
 /** An email address that can be used for submitting issues. */
 export type EmailIntakeAddress = Node & {
   __typename?: "EmailIntakeAddress";
@@ -2023,6 +2055,12 @@ export type EstimateComparator = {
   null?: Maybe<Scalars["Boolean"]>;
   /** Compound filters, all of which need to be matched by the estimate. */
   or?: Maybe<Array<NullableNumberComparator>>;
+};
+
+/** Issue estimate sorting options. */
+export type EstimateSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
 };
 
 /** An external authenticated (e.g., through Slack) user which doesn't have a Linear account, but can create and update entities in Linear from the external system that authenticated them. */
@@ -4451,6 +4489,42 @@ export type IssueSearchResultEdge = {
   node: IssueSearchResult;
 };
 
+/** Issue filtering options. */
+export type IssueSortInput = {
+  /** Sort by assignee name */
+  assignee?: Maybe<AssigneeSort>;
+  /** Sort by issue completion date */
+  completedAt?: Maybe<CompletedAtSort>;
+  /** Sort by issue creation date */
+  createdAt?: Maybe<CreatedAtSort>;
+  /** Sort by Cycle start date */
+  cycle?: Maybe<CycleSort>;
+  /** Sort by issue due date */
+  dueDate?: Maybe<DueDateSort>;
+  /** Sort by estimate */
+  estimate?: Maybe<EstimateSort>;
+  /** Sort by label */
+  label?: Maybe<LabelSort>;
+  /** Sort by manual order */
+  manual?: Maybe<ManualSort>;
+  /** Sort by Project Milestone target date */
+  milestone?: Maybe<MilestoneSort>;
+  /** Sort by priority */
+  priority?: Maybe<PrioritySort>;
+  /** Sort by Project name */
+  project?: Maybe<ProjectSort>;
+  /** Sort by SLA status */
+  slaStatus?: Maybe<SlaStatusSort>;
+  /** Sort by Team name */
+  team?: Maybe<TeamSort>;
+  /** Sort by issue title */
+  title?: Maybe<TitleSort>;
+  /** Sort by issue update date */
+  updatedAt?: Maybe<UpdatedAtSort>;
+  /** Sort by workflow state type */
+  workflowState?: Maybe<WorkflowStateSort>;
+};
+
 export type IssueUpdateInput = {
   /** The identifier of the user to assign the issue to. */
   assigneeId?: Maybe<Scalars["String"]>;
@@ -4646,10 +4720,28 @@ export type LabelNotificationSubscription = Entity &
     userContextViewType?: Maybe<UserContextViewType>;
   };
 
+/** Issue sorting options. */
+export type LabelSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+};
+
 export type LogoutResponse = {
   __typename?: "LogoutResponse";
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
+};
+
+/** Issue manual sorting options. */
+export type ManualSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+};
+
+/** Issue project milestone options. */
+export type MilestoneSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
 };
 
 export type Mutation = {
@@ -5085,6 +5177,14 @@ export type Mutation = {
   timeScheduleRefreshIntegrationSchedule: TimeSchedulePayload;
   /** [ALPHA] Updates a time schedule. */
   timeScheduleUpdate: TimeSchedulePayload;
+  /** [ALPHA] Upsert an external time schedule. */
+  timeScheduleUpsertExternal: TimeSchedulePayload;
+  /** [ALPHA] Creates a new triage responsibility. */
+  triageResponsibilityCreate: TriageResponsibilityPayload;
+  /** [ALPHA] Deletes a triage responsibility. */
+  triageResponsibilityDelete: DeletePayload;
+  /** [ALPHA] Updates an existing triage responsibility. */
+  triageResponsibilityUpdate: TriageResponsibilityPayload;
   /** Makes user a regular user. Can only be called by an admin. */
   userDemoteAdmin: UserAdminPayload;
   /** Makes user a guest. Can only be called by an admin. */
@@ -6099,6 +6199,24 @@ export type MutationTimeScheduleRefreshIntegrationScheduleArgs = {
 export type MutationTimeScheduleUpdateArgs = {
   id: Scalars["String"];
   input: TimeScheduleUpdateInput;
+};
+
+export type MutationTimeScheduleUpsertExternalArgs = {
+  externalId: Scalars["String"];
+  input: TimeScheduleUpdateInput;
+};
+
+export type MutationTriageResponsibilityCreateArgs = {
+  input: TriageResponsibilityCreateInput;
+};
+
+export type MutationTriageResponsibilityDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationTriageResponsibilityUpdateArgs = {
+  id: Scalars["String"];
+  input: TriageResponsibilityUpdateInput;
 };
 
 export type MutationUserDemoteAdminArgs = {
@@ -7452,6 +7570,12 @@ export type PagerDutySettings = {
   scheduleMapping: Array<PagerDutyScheduleInfo>;
 };
 
+/** How to treat NULL values, whether they should appear first or last */
+export enum PaginationNulls {
+  First = "first",
+  Last = "last",
+}
+
 /** By which field should the pagination order by */
 export enum PaginationOrderBy {
   CreatedAt = "createdAt",
@@ -7493,6 +7617,14 @@ export type PaidSubscription = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+};
+
+/** Issue priority sorting options. */
+export type PrioritySort = {
+  /** Whether to consider no priority as the highest or lowest priority */
+  noPriorityFirst?: Maybe<Scalars["Boolean"]>;
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
 };
 
 /** A project. */
@@ -8373,6 +8505,12 @@ export type ProjectSearchResultEdge = {
   node: ProjectSearchResult;
 };
 
+/** Issue project sorting options. */
+export type ProjectSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+};
+
 /** [ALPHA] A project status. */
 export type ProjectStatus = Node & {
   __typename?: "ProjectStatus";
@@ -8976,6 +9114,10 @@ export type Query = {
   timeSchedule: TimeSchedule;
   /** [ALPHA] All time schedules. */
   timeSchedules: TimeScheduleConnection;
+  /** [ALPHA] All triage responsibilities. */
+  triageResponsibilities: TriageResponsibilityConnection;
+  /** [ALPHA] A specific triage responsibility. */
+  triageResponsibility: TriageResponsibility;
   /** One specific user. */
   user: User;
   /** The user's settings. */
@@ -9323,6 +9465,7 @@ export type QueryIssuesArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  sort?: Maybe<Array<IssueSortInput>>;
 };
 
 export type QueryNotificationArgs = {
@@ -9570,6 +9713,19 @@ export type QueryTimeSchedulesArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type QueryTriageResponsibilitiesArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type QueryTriageResponsibilityArgs = {
+  id: Scalars["String"];
 };
 
 export type QueryUserArgs = {
@@ -9985,6 +10141,12 @@ export type SlaStatusComparator = {
   null?: Maybe<Scalars["Boolean"]>;
 };
 
+/** Issue SLA status sorting options. */
+export type SlaStatusSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+};
+
 /** Slack Asks specific settings. */
 export type SlackAsksSettings = {
   __typename?: "SlackAsksSettings";
@@ -10361,6 +10523,8 @@ export type Team = Node & {
   triageEnabled: Scalars["Boolean"];
   /** The workflow state into which issues are set when they are opened by non-team members or integrations if triage is enabled. */
   triageIssueState?: Maybe<WorkflowState>;
+  /** Team's triage responsibility. */
+  triageResponsibility?: Maybe<TriageResponsibility>;
   /** How many upcoming cycles to create. */
   upcomingCycleCount: Scalars["Float"];
   /**
@@ -10767,6 +10931,12 @@ export type TeamRepoMappingInput = {
   linearTeamId: Scalars["String"];
 };
 
+/** Issue team sorting options. */
+export type TeamSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+};
+
 export type TeamUpdateInput = {
   /** Period after which closed and completed issues are automatically archived, in months. */
   autoArchivePeriod?: Maybe<Scalars["Float"]>;
@@ -10950,8 +11120,6 @@ export type TimeSchedule = Node & {
   createdAt: Scalars["DateTime"];
   /** The schedule entries. */
   entries: Array<TimeScheduleEntry>;
-  /** User presentable error message, if an error occurred while updating the schedule. */
-  error?: Maybe<Scalars["String"]>;
   /** The identifier of the external schedule. */
   externalId?: Maybe<Scalars["String"]>;
   /** The URL to the external schedule. */
@@ -10981,17 +11149,13 @@ export type TimeScheduleConnection = {
 
 export type TimeScheduleCreateInput = {
   /** The schedule entries. */
-  entries?: Maybe<Array<TimeScheduleEntryInput>>;
-  /** User readable error message, if an error occurred while updating the schedule. */
-  error?: Maybe<Scalars["String"]>;
-  /** The identifier of the external schedule. */
+  entries: Array<TimeScheduleEntryInput>;
+  /** The unique identifier of the external schedule. */
   externalId?: Maybe<Scalars["String"]>;
   /** The URL to the external schedule. */
   externalUrl?: Maybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
-  /** The identifier of the Linear integration populating the schedule. */
-  integrationId?: Maybe<Scalars["String"]>;
   /** The name of the schedule. */
   name: Scalars["String"];
 };
@@ -11038,9 +11202,7 @@ export type TimeSchedulePayload = {
 export type TimeScheduleUpdateInput = {
   /** The schedule entries. */
   entries?: Maybe<Array<TimeScheduleEntryInput>>;
-  /** User readable error message, if an error occurred while updating the schedule. */
-  error?: Maybe<Scalars["String"]>;
-  /** The identifier of the external schedule. */
+  /** The unique identifier of the external schedule. */
   externalId?: Maybe<Scalars["String"]>;
   /** The URL to the external schedule. */
   externalUrl?: Maybe<Scalars["String"]>;
@@ -11068,6 +11230,12 @@ export type TimelessDateComparator = {
   nin?: Maybe<Array<Scalars["TimelessDate"]>>;
 };
 
+/** Issue title sorting options. */
+export type TitleSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+};
+
 export type TokenUserAccountAuthInput = {
   /** The email which to login via the magic login code. */
   email: Scalars["String"];
@@ -11090,18 +11258,16 @@ export type TriageResponsibility = Node & {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** The user currently responsible for triage. */
+  currentUser?: Maybe<User>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
-  /** The integration used for scheduling. */
-  integration: Integration;
   /** Set of users used for triage responsibility. */
-  manualSelection?: Maybe<Scalars["JSONObject"]>;
-  /** Schedule used for triage responsibility. */
-  schedule?: Maybe<Scalars["JSONObject"]>;
+  manualSelection?: Maybe<TriageResponsibilityManualSelection>;
   /** The team to which the triage responsibility belongs to. */
   team: Team;
   /** The time schedule used for scheduling. */
-  timeSchedule: TimeSchedule;
+  timeSchedule?: Maybe<TimeSchedule>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -11123,6 +11289,19 @@ export type TriageResponsibilityConnection = {
   pageInfo: PageInfo;
 };
 
+export type TriageResponsibilityCreateInput = {
+  /** The action to take when an issue is added to triage. */
+  action: Scalars["String"];
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: Maybe<Scalars["String"]>;
+  /** The manual selection of users responsible for triage. */
+  manualSelection?: Maybe<TriageResponsibilityManualSelectionInput>;
+  /** The identifier of the team associated with the triage responsibility. */
+  teamId: Scalars["String"];
+  /** The identifier of the time schedule used for scheduling triage responsibility */
+  timeScheduleId?: Maybe<Scalars["String"]>;
+};
+
 export type TriageResponsibilityEdge = {
   __typename?: "TriageResponsibilityEdge";
   /** Used in `before` and `after` args */
@@ -11130,34 +11309,44 @@ export type TriageResponsibilityEdge = {
   node: TriageResponsibility;
 };
 
-/** Manual triage responsibility using a set of users. */
 export type TriageResponsibilityManualSelection = {
+  __typename?: "TriageResponsibilityManualSelection";
   /** [INTERNAL] The index of the current userId used for the assign action when having more than one user. */
   assignmentIndex?: Maybe<Scalars["Int"]>;
   /** The set of users responsible for triage. */
   userIds: Array<Scalars["String"]>;
 };
 
-/** Triage responsibility schedule. */
-export type TriageResponsibilitySchedule = {
-  /** The schedule entries, undefined if the schedule is not fetched yet or failed. */
-  entries?: Maybe<Array<TriageResponsibilityScheduleEntry>>;
-  /** Optional user presentable error message when using an integration. */
-  integrationError?: Maybe<Scalars["String"]>;
-  /** Reference to the integration's schedule when using an integration. */
-  integrationScheduleId?: Maybe<Scalars["String"]>;
+/** Manual triage responsibility using a set of users. */
+export type TriageResponsibilityManualSelectionInput = {
+  /** [INTERNAL] The index of the current userId used for the assign action when having more than one user. */
+  assignmentIndex?: Maybe<Scalars["Int"]>;
+  /** The set of users responsible for triage. */
+  userIds: Array<Scalars["String"]>;
 };
 
-/** The triage responsibility schedule entry. */
-export type TriageResponsibilityScheduleEntry = {
-  /** The end date in ISO 8601 date-time format. */
-  endsAt: Scalars["DateTime"];
-  /** The external email of the user on schedule if the external user could not be found in Linear. */
-  externalUserEmail?: Maybe<Scalars["String"]>;
-  /** The start date in ISO 8601 date-time format. */
-  startsAt: Scalars["DateTime"];
-  /** The linear user id of the user on schedule. */
-  userId?: Maybe<Scalars["String"]>;
+export type TriageResponsibilityPayload = {
+  __typename?: "TriageResponsibilityPayload";
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+  triageResponsibility: TriageResponsibility;
+};
+
+export type TriageResponsibilityUpdateInput = {
+  /** The action to take when an issue is added to triage. */
+  action?: Maybe<Scalars["String"]>;
+  /** The manual selection of users responsible for triage. */
+  manualSelection?: Maybe<TriageResponsibilityManualSelectionInput>;
+  /** The identifier of the time schedule used for scheduling triage responsibility. */
+  timeScheduleId?: Maybe<Scalars["String"]>;
+};
+
+/** Issue update date sorting options. */
+export type UpdatedAtSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
 };
 
 /** Object representing Google Cloud upload policy, plus additional data. */
@@ -12106,6 +12295,12 @@ export type WorkflowStatePayload = {
   workflowState: WorkflowState;
 };
 
+/** Issue workflow state sorting options. */
+export type WorkflowStateSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+};
+
 export type WorkflowStateUpdateInput = {
   /** The color of the state. */
   color?: Maybe<Scalars["String"]>;
@@ -12748,11 +12943,14 @@ export type TeamNotificationSubscriptionFragment = { __typename: "TeamNotificati
 
 export type TriageResponsibilityFragment = { __typename: "TriageResponsibility" } & Pick<
   TriageResponsibility,
-  "schedule" | "manualSelection" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+  "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & {
-    integration: { __typename?: "Integration" } & Pick<Integration, "id">;
+    manualSelection?: Maybe<
+      { __typename?: "TriageResponsibilityManualSelection" } & TriageResponsibilityManualSelectionFragment
+    >;
     team: { __typename?: "Team" } & Pick<Team, "id">;
-    timeSchedule: { __typename?: "TimeSchedule" } & Pick<TimeSchedule, "id">;
+    timeSchedule?: Maybe<{ __typename?: "TimeSchedule" } & Pick<TimeSchedule, "id">>;
+    currentUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
 export type TemplateFragment = { __typename: "Template" } & Pick<
@@ -12766,7 +12964,7 @@ export type TemplateFragment = { __typename: "Template" } & Pick<
 
 export type TimeScheduleFragment = { __typename: "TimeSchedule" } & Pick<
   TimeSchedule,
-  "externalUrl" | "externalId" | "updatedAt" | "name" | "archivedAt" | "createdAt" | "id" | "error"
+  "externalUrl" | "externalId" | "updatedAt" | "name" | "archivedAt" | "createdAt" | "id"
 > & {
     integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">>;
     entries: Array<{ __typename?: "TimeScheduleEntry" } & TimeScheduleEntryFragment>;
@@ -12915,7 +13113,7 @@ export type IntegrationFragment = { __typename: "Integration" } & Pick<
 
 export type AuthOrganizationInviteFragment = { __typename: "AuthOrganizationInvite" } & Pick<
   AuthOrganizationInvite,
-  "id"
+  "expiresAt" | "id"
 >;
 
 export type OrganizationInviteFragment = { __typename: "OrganizationInvite" } & Pick<
@@ -13115,6 +13313,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
 > & {
     integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
     activeCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    triageResponsibility?: Maybe<{ __typename?: "TriageResponsibility" } & Pick<TriageResponsibility, "id">>;
     defaultTemplateForMembers?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     defaultTemplateForNonMembers?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     defaultProjectTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
@@ -14688,6 +14887,16 @@ export type TriageResponsibilityConnectionFragment = { __typename: "TriageRespon
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
+export type TriageResponsibilityManualSelectionFragment = { __typename: "TriageResponsibilityManualSelection" } & Pick<
+  TriageResponsibilityManualSelection,
+  "userIds"
+>;
+
+export type TriageResponsibilityPayloadFragment = { __typename: "TriageResponsibilityPayload" } & Pick<
+  TriageResponsibilityPayload,
+  "lastSyncId" | "success"
+> & { triageResponsibility: { __typename?: "TriageResponsibility" } & Pick<TriageResponsibility, "id"> };
+
 export type UploadFileHeaderFragment = { __typename: "UploadFileHeader" } & Pick<UploadFileHeader, "key" | "value">;
 
 export type UploadPayloadFragment = { __typename: "UploadPayload" } & Pick<UploadPayload, "lastSyncId" | "success"> & {
@@ -15818,6 +16027,7 @@ export type IssuesQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  sort?: Maybe<Array<IssueSortInput> | IssueSortInput>;
 }>;
 
 export type IssuesQuery = { __typename?: "Query" } & {
@@ -20080,6 +20290,7 @@ export const AuthOrganizationInviteFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "expiresAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
         ],
       },
@@ -26406,6 +26617,14 @@ export const TeamFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "triageResponsibility" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "autoCloseStateId" } },
           { kind: "Field", name: { kind: "Name", value: "cycleCooldownTime" } },
           { kind: "Field", name: { kind: "Name", value: "cycleStartDay" } },
@@ -26845,7 +27064,6 @@ export const TimeScheduleFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "error" } },
         ],
       },
     },
@@ -26909,6 +27127,23 @@ export const TimeSchedulePayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<TimeSchedulePayloadFragment, unknown>;
+export const TriageResponsibilityManualSelectionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "TriageResponsibilityManualSelection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TriageResponsibilityManualSelection" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "userIds" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<TriageResponsibilityManualSelectionFragment, unknown>;
 export const TriageResponsibilityFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -26920,14 +27155,14 @@ export const TriageResponsibilityFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "schedule" } },
-          { kind: "Field", name: { kind: "Name", value: "manualSelection" } },
           {
             kind: "Field",
-            name: { kind: "Name", value: "integration" },
+            name: { kind: "Name", value: "manualSelection" },
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "TriageResponsibilityManualSelection" } },
+              ],
             },
           },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
@@ -26950,6 +27185,14 @@ export const TriageResponsibilityFragmentDoc = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "currentUser" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
         ],
       },
     },
@@ -26987,6 +27230,32 @@ export const TriageResponsibilityConnectionFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<TriageResponsibilityConnectionFragment, unknown>;
+export const TriageResponsibilityPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "TriageResponsibilityPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TriageResponsibilityPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "triageResponsibility" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<TriageResponsibilityPayloadFragment, unknown>;
 export const UploadFileHeaderFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -34544,6 +34813,14 @@ export const IssuesDocument = {
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
         },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "sort" } },
+          type: {
+            kind: "ListType",
+            type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "IssueSortInput" } } },
+          },
+        },
       ],
       selectionSet: {
         kind: "SelectionSet",
@@ -34586,6 +34863,11 @@ export const IssuesDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "sort" },
+                value: { kind: "Variable", name: { kind: "Name", value: "sort" } },
               },
             ],
             selectionSet: {
