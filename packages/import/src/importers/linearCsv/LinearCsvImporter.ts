@@ -46,7 +46,9 @@ export class LinearCsvImporter implements Importer {
   }
 
   public import = async (): Promise<ImportResult> => {
-    const data = (await csv().fromFile(this.filePath)) as LinearIssueType[];
+    const data = (await csv({
+      delimiter: ";"
+    }).fromFile(this.filePath)) as LinearIssueType[];
 
     const importData: ImportResult = {
       issues: [],
