@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.9.8
+
+### Patch Changes
+
+- 6aaaa4a: chore(deps): update dependency patch versions
+- 6e6639e: fix: specify CSV delimiter
+- Updated dependencies [6aaaa4a]
+  - @linear/sdk@15.0.1
+
 ## 1.9.7
 
 ### Patch Changes
