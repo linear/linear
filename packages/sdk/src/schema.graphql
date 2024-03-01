@@ -210,6 +210,10 @@ input AssigneeSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 """
@@ -1581,6 +1585,10 @@ input CompletedAtSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 input ContactCreateInput {
@@ -1708,6 +1716,10 @@ input CreatedAtSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 """
@@ -2428,6 +2440,10 @@ input CycleSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Descending
 }
 
 input CycleUpdateInput {
@@ -3080,6 +3096,10 @@ input DueDateSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 """
@@ -3407,6 +3427,10 @@ input EstimateSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 """
@@ -8062,6 +8086,10 @@ input LabelSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 type LogoutResponse {
@@ -8079,6 +8107,10 @@ input ManualSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 """
@@ -8089,6 +8121,10 @@ input MilestoneSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 type Mutation {
@@ -13118,6 +13154,14 @@ enum PaginationOrderBy {
 }
 
 """
+Whether to sort in ascending or descending order
+"""
+enum PaginationSortOrder {
+  Ascending
+  Descending
+}
+
+"""
 The paid subscription of an organization.
 """
 type PaidSubscription implements Node {
@@ -13193,6 +13237,10 @@ input PrioritySort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Descending
 }
 
 """
@@ -14883,6 +14931,10 @@ input ProjectSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 """
@@ -17860,6 +17912,10 @@ input SlaStatusSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 """
@@ -19316,6 +19372,10 @@ input TeamSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 input TeamUpdateInput {
@@ -19833,6 +19893,10 @@ input TitleSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 input TokenUserAccountAuthInput {
@@ -20012,6 +20076,10 @@ input UpdatedAtSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 """
@@ -21588,6 +21656,10 @@ input WorkflowStateSort {
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder = Ascending
 }
 
 input WorkflowStateUpdateInput {

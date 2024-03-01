@@ -153,6 +153,8 @@ export type AsksChannelConnectPayload = {
 export type AssigneeSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 /** Issue attachment (e.g. support ticket, pull request). */
@@ -962,6 +964,8 @@ export type CompanyEdge = {
 export type CompletedAtSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 export type ContactCreateInput = {
@@ -1044,6 +1048,8 @@ export type CreateOrganizationInput = {
 export type CreatedAtSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 /** A custom view that has been saved by a user. */
@@ -1454,6 +1460,8 @@ export type CycleShiftAllInput = {
 export type CycleSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 export type CycleUpdateInput = {
@@ -1853,6 +1861,8 @@ export type DocumentUpdateInput = {
 export type DueDateSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 /** An email address that can be used for submitting issues. */
@@ -2061,6 +2071,8 @@ export type EstimateComparator = {
 export type EstimateSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 /** An external authenticated (e.g., through Slack) user which doesn't have a Linear account, but can create and update entities in Linear from the external system that authenticated them. */
@@ -4724,6 +4736,8 @@ export type LabelNotificationSubscription = Entity &
 export type LabelSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 export type LogoutResponse = {
@@ -4736,12 +4750,16 @@ export type LogoutResponse = {
 export type ManualSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 /** Issue project milestone options. */
 export type MilestoneSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 export type Mutation = {
@@ -7582,6 +7600,12 @@ export enum PaginationOrderBy {
   UpdatedAt = "updatedAt",
 }
 
+/** Whether to sort in ascending or descending order */
+export enum PaginationSortOrder {
+  Ascending = "Ascending",
+  Descending = "Descending",
+}
+
 /** The paid subscription of an organization. */
 export type PaidSubscription = Node & {
   __typename?: "PaidSubscription";
@@ -7625,6 +7649,8 @@ export type PrioritySort = {
   noPriorityFirst?: Maybe<Scalars["Boolean"]>;
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 /** A project. */
@@ -8509,6 +8535,8 @@ export type ProjectSearchResultEdge = {
 export type ProjectSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 /** [ALPHA] A project status. */
@@ -10145,6 +10173,8 @@ export type SlaStatusComparator = {
 export type SlaStatusSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 /** Slack Asks specific settings. */
@@ -10935,6 +10965,8 @@ export type TeamRepoMappingInput = {
 export type TeamSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 export type TeamUpdateInput = {
@@ -11234,6 +11266,8 @@ export type TimelessDateComparator = {
 export type TitleSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 export type TokenUserAccountAuthInput = {
@@ -11347,6 +11381,8 @@ export type TriageResponsibilityUpdateInput = {
 export type UpdatedAtSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 /** Object representing Google Cloud upload policy, plus additional data. */
@@ -12299,6 +12335,8 @@ export type WorkflowStatePayload = {
 export type WorkflowStateSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 export type WorkflowStateUpdateInput = {
