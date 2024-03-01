@@ -1,5 +1,11 @@
 # Change Log
 
+## 15.0.1
+
+### Patch Changes
+
+- 6aaaa4a: chore(deps): update dependency patch versions
+
 ## 15.0.0
 
 ### Major Changes
