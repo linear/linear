@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.9.7
+
+### Patch Changes
+
+- Updated dependencies [ce124ff]
+- Updated dependencies [eb7ec35]
+  - @linear/sdk@15.0.0
+
 ## 1.9.6
 
 ### Patch Changes
