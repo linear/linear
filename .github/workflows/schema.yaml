@@ -45,9 +45,9 @@ jobs:
           fail-on-breaking: false
 
       - name: Create schema pull request
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v6
         with:
-          committer: "GitHub <noreply@github.com>"
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "feat(sdk): update schema"
           title: "feat(sdk): update schema"
           body: "Update schema, regenerate types and SDK"
