@@ -2271,8 +2271,6 @@ fragment Team on Team {
   slackIssueStatuses
   # Whether triage mode is enabled for the team or not.
   triageEnabled
-  # [DEPRECATED] Whether to move issues to bottom of the column when changing state. Use setIssueSortOrderOnStateChange instead.
-  issueSortOrderDefaultToBottom
 }
 
 # AuthOauthClient with scope from OauthToken, for use in the GraphQL API.
@@ -2679,17 +2677,6 @@ fragment JiraProjectData on JiraProjectData {
   name
 }
 
-# Metadata about a PagerDuty schedule.
-fragment PagerDutyScheduleInfo on PagerDutyScheduleInfo {
-  __typename
-  # The PagerDuty schedule id.
-  scheduleId
-  # The PagerDuty schedule name.
-  scheduleName
-  # The URL of the schedule in PagerDuty's web app.
-  url
-}
-
 # Metadata and settings for a GitHub Personal integration.
 fragment GitHubPersonalSettings on GitHubPersonalSettings {
   __typename
@@ -2868,13 +2855,18 @@ fragment UploadFile on UploadFile {
   metaData
 }
 
+# Opsgenie specific settings.
+fragment OpsgenieSettings on OpsgenieSettings {
+  __typename
+  # The date when the Opsgenie API failed with an unauthorized error.
+  apiFailedWithUnauthorizedErrorAt
+}
+
 # PagerDuty specific settings.
 fragment PagerDutySettings on PagerDutySettings {
   __typename
-  # Metadata about a PagerDuty schedule.
-  scheduleMapping {
-    ...PagerDutyScheduleInfo
-  }
+  # The date when the PagerDuty API failed with an unauthorized error.
+  apiFailedWithUnauthorizedErrorAt
 }
 
 # Public information of the OAuth application, plus whether the application has been authorized for
@@ -3078,6 +3070,9 @@ fragment IntegrationSettings on IntegrationSettings {
   }
   notion {
     ...NotionSettings
+  }
+  opsgenie {
+    ...OpsgenieSettings
   }
   pagerDuty {
     ...PagerDutySettings
@@ -6559,8 +6554,12 @@ query issueFigmaFileKeySearch(
   }
 }
 # Suggests filters for an issue view based on a text prompt.
-query issueFilterSuggestion($prompt: String!) {
-  issueFilterSuggestion(prompt: $prompt) {
+query issueFilterSuggestion(
+  # The ID of the project if filtering a project view
+  $projectId: String
+  $prompt: String!
+) {
+  issueFilterSuggestion(projectId: $projectId, prompt: $prompt) {
     ...IssueFilterSuggestionPayload
   }
 }

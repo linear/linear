@@ -3443,6 +3443,7 @@ export class IntegrationSettings extends Request {
     this.jira = data.jira ? new JiraSettings(request, data.jira) : undefined;
     this.jiraPersonal = data.jiraPersonal ? new JiraPersonalSettings(request, data.jiraPersonal) : undefined;
     this.notion = data.notion ? new NotionSettings(request, data.notion) : undefined;
+    this.opsgenie = data.opsgenie ? new OpsgenieSettings(request, data.opsgenie) : undefined;
     this.pagerDuty = data.pagerDuty ? new PagerDutySettings(request, data.pagerDuty) : undefined;
     this.sentry = data.sentry ? new SentrySettings(request, data.sentry) : undefined;
     this.slack = data.slack ? new SlackSettings(request, data.slack) : undefined;
@@ -3464,6 +3465,7 @@ export class IntegrationSettings extends Request {
   public jira?: JiraSettings;
   public jiraPersonal?: JiraPersonalSettings;
   public notion?: NotionSettings;
+  public opsgenie?: OpsgenieSettings;
   public pagerDuty?: PagerDutySettings;
   public sentry?: SentrySettings;
   public slack?: SlackSettings;
@@ -5838,6 +5840,21 @@ export class OauthToken extends Request {
   public user: AuthUser;
 }
 /**
+ * Opsgenie specific settings.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OpsgenieSettingsFragment response data
+ */
+export class OpsgenieSettings extends Request {
+  public constructor(request: LinearRequest, data: L.OpsgenieSettingsFragment) {
+    super(request);
+    this.apiFailedWithUnauthorizedErrorAt = parseDate(data.apiFailedWithUnauthorizedErrorAt) ?? new Date();
+  }
+
+  /** The date when the Opsgenie API failed with an unauthorized error. */
+  public apiFailedWithUnauthorizedErrorAt: Date;
+}
+/**
  * An organization. Organizations are root-level objects that contain user accounts and teams.
  *
  * @param request - function to call the graphql client
@@ -6271,27 +6288,6 @@ export class PageInfo extends Request {
   public startCursor?: string;
 }
 /**
- * Metadata about a PagerDuty schedule.
- *
- * @param request - function to call the graphql client
- * @param data - L.PagerDutyScheduleInfoFragment response data
- */
-export class PagerDutyScheduleInfo extends Request {
-  public constructor(request: LinearRequest, data: L.PagerDutyScheduleInfoFragment) {
-    super(request);
-    this.scheduleId = data.scheduleId;
-    this.scheduleName = data.scheduleName;
-    this.url = data.url;
-  }
-
-  /** The PagerDuty schedule id. */
-  public scheduleId: string;
-  /** The PagerDuty schedule name. */
-  public scheduleName: string;
-  /** The URL of the schedule in PagerDuty's web app. */
-  public url: string;
-}
-/**
  * PagerDuty specific settings.
  *
  * @param request - function to call the graphql client
@@ -6300,11 +6296,11 @@ export class PagerDutyScheduleInfo extends Request {
 export class PagerDutySettings extends Request {
   public constructor(request: LinearRequest, data: L.PagerDutySettingsFragment) {
     super(request);
-    this.scheduleMapping = data.scheduleMapping.map(node => new PagerDutyScheduleInfo(request, node));
+    this.apiFailedWithUnauthorizedErrorAt = parseDate(data.apiFailedWithUnauthorizedErrorAt) ?? new Date();
   }
 
-  /** Metadata about a PagerDuty schedule. */
-  public scheduleMapping: PagerDutyScheduleInfo[];
+  /** The date when the PagerDuty API failed with an unauthorized error. */
+  public apiFailedWithUnauthorizedErrorAt: Date;
 }
 /**
  * The paid subscription of an organization.
@@ -8228,7 +8224,6 @@ export class Team extends Request {
     this.issueEstimationExtended = data.issueEstimationExtended;
     this.issueEstimationType = data.issueEstimationType;
     this.issueOrderingNoPriorityFirst = data.issueOrderingNoPriorityFirst;
-    this.issueSortOrderDefaultToBottom = data.issueSortOrderDefaultToBottom;
     this.key = data.key;
     this.name = data.name;
     this.private = data.private;
@@ -8310,8 +8305,6 @@ export class Team extends Request {
   public issueEstimationType: string;
   /** Whether issues without priority should be sorted first. */
   public issueOrderingNoPriorityFirst: boolean;
-  /** [DEPRECATED] Whether to move issues to bottom of the column when changing state. Use setIssueSortOrderOnStateChange instead. */
-  public issueSortOrderDefaultToBottom: boolean;
   /** The team's unique key. The key is used in URLs. */
   public key: string;
   /** The team's name. */
@@ -11316,13 +11309,18 @@ export class IssueFilterSuggestionQuery extends Request {
    * Call the IssueFilterSuggestion query and return a IssueFilterSuggestionPayload
    *
    * @param prompt - required prompt to pass to issueFilterSuggestion
+   * @param variables - variables without 'prompt' to pass into the IssueFilterSuggestionQuery
    * @returns parsed response from IssueFilterSuggestionQuery
    */
-  public async fetch(prompt: string): LinearFetch<IssueFilterSuggestionPayload> {
+  public async fetch(
+    prompt: string,
+    variables?: Omit<L.IssueFilterSuggestionQueryVariables, "prompt">
+  ): LinearFetch<IssueFilterSuggestionPayload> {
     const response = await this._request<L.IssueFilterSuggestionQuery, L.IssueFilterSuggestionQueryVariables>(
       L.IssueFilterSuggestionDocument,
       {
         prompt,
+        ...variables,
       }
     );
     const data = response.issueFilterSuggestion;
@@ -23171,10 +23169,14 @@ export class LinearSdk extends Request {
    * Suggests filters for an issue view based on a text prompt.
    *
    * @param prompt - required prompt to pass to issueFilterSuggestion
+   * @param variables - variables without 'prompt' to pass into the IssueFilterSuggestionQuery
    * @returns IssueFilterSuggestionPayload
    */
-  public issueFilterSuggestion(prompt: string): LinearFetch<IssueFilterSuggestionPayload> {
-    return new IssueFilterSuggestionQuery(this._request).fetch(prompt);
+  public issueFilterSuggestion(
+    prompt: string,
+    variables?: Omit<L.IssueFilterSuggestionQueryVariables, "prompt">
+  ): LinearFetch<IssueFilterSuggestionPayload> {
+    return new IssueFilterSuggestionQuery(this._request).fetch(prompt, variables);
   }
   /**
    * Checks a CSV file validity against a specific import service.

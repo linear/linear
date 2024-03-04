@@ -213,7 +213,7 @@ input AssigneeSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 """
@@ -1588,7 +1588,7 @@ input CompletedAtSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 input ContactCreateInput {
@@ -1719,7 +1719,7 @@ input CreatedAtSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 """
@@ -2443,7 +2443,7 @@ input CycleSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Descending
+  order: PaginationSortOrder
 }
 
 input CycleUpdateInput {
@@ -3099,7 +3099,7 @@ input DueDateSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 """
@@ -3430,7 +3430,7 @@ input EstimateSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 """
@@ -4856,6 +4856,7 @@ enum IntegrationService {
   jiraPersonal
   loom
   notion
+  opsgenie
   pagerDuty
   sentry
   slack
@@ -4881,6 +4882,7 @@ type IntegrationSettings {
   jira: JiraSettings
   jiraPersonal: JiraPersonalSettings
   notion: NotionSettings
+  opsgenie: OpsgenieSettings
   pagerDuty: PagerDutySettings
   sentry: SentrySettings
   slack: SlackSettings
@@ -4901,6 +4903,7 @@ input IntegrationSettingsInput {
   jira: JiraSettingsInput
   jiraPersonal: JiraPersonalSettingsInput
   notion: NotionSettingsInput
+  opsgenie: OpsgenieInput
   pagerDuty: PagerDutyInput
   sentry: SentrySettingsInput
   slack: SlackSettingsInput
@@ -8089,7 +8092,7 @@ input LabelSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 type LogoutResponse {
@@ -8110,7 +8113,7 @@ input ManualSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 """
@@ -8124,7 +8127,7 @@ input MilestoneSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 type Mutation {
@@ -9229,6 +9232,19 @@ type Mutation {
   Enables Loom integration for the organization.
   """
   integrationLoom: IntegrationPayload! @deprecated(reason: "Not available.")
+  """
+  [INTERNAL] Integrates the organization with Opsgenie.
+  """
+  integrationOpsgenieConnect(
+    """
+    The Opsgenie API key.
+    """
+    apiKey: String!
+  ): IntegrationPayload!
+  """
+  [INTERNAL] Refresh Opsgenie schedule mappings.
+  """
+  integrationOpsgenieRefreshScheduleMappings: IntegrationPayload!
   """
   [INTERNAL] Integrates the organization with PagerDuty.
   """
@@ -12355,6 +12371,23 @@ input OnboardingCustomerSurvey {
   companySize: String
 }
 
+input OpsgenieInput {
+  """
+  The date when the Opsgenie API failed with an unauthorized error.
+  """
+  apiFailedWithUnauthorizedErrorAt: DateTime!
+}
+
+"""
+Opsgenie specific settings.
+"""
+type OpsgenieSettings {
+  """
+  The date when the Opsgenie API failed with an unauthorized error.
+  """
+  apiFailedWithUnauthorizedErrorAt: DateTime!
+}
+
 """
 An organization. Organizations are root-level objects that contain user accounts and teams.
 """
@@ -13089,42 +13122,9 @@ type PageInfo {
 
 input PagerDutyInput {
   """
-  Metadata about a PagerDuty schedule.
+  The date when the PagerDuty API failed with an unauthorized error.
   """
-  scheduleMapping: [PagerDutyScheduleInfoInput!]!
-}
-
-"""
-Metadata about a PagerDuty schedule.
-"""
-type PagerDutyScheduleInfo {
-  """
-  The PagerDuty schedule id.
-  """
-  scheduleId: String!
-  """
-  The PagerDuty schedule name.
-  """
-  scheduleName: String!
-  """
-  The URL of the schedule in PagerDuty's web app.
-  """
-  url: String!
-}
-
-input PagerDutyScheduleInfoInput {
-  """
-  The PagerDuty schedule id.
-  """
-  scheduleId: String!
-  """
-  The PagerDuty schedule name.
-  """
-  scheduleName: String!
-  """
-  The URL of the schedule in PagerDuty's web app.
-  """
-  url: String!
+  apiFailedWithUnauthorizedErrorAt: DateTime!
 }
 
 """
@@ -13132,9 +13132,9 @@ PagerDuty specific settings.
 """
 type PagerDutySettings {
   """
-  Metadata about a PagerDuty schedule.
+  The date when the PagerDuty API failed with an unauthorized error.
   """
-  scheduleMapping: [PagerDutyScheduleInfo!]!
+  apiFailedWithUnauthorizedErrorAt: DateTime!
 }
 
 """
@@ -13240,7 +13240,7 @@ input PrioritySort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Descending
+  order: PaginationSortOrder
 }
 
 """
@@ -14934,7 +14934,7 @@ input ProjectSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 """
@@ -16286,7 +16286,13 @@ type Query {
   """
   Suggests filters for an issue view based on a text prompt.
   """
-  issueFilterSuggestion(prompt: String!): IssueFilterSuggestionPayload!
+  issueFilterSuggestion(
+    """
+    The ID of the project if filtering a project view
+    """
+    projectId: String
+    prompt: String!
+  ): IssueFilterSuggestionPayload!
   """
   Checks a CSV file validity against a specific import service.
   """
@@ -17915,7 +17921,7 @@ input SlaStatusSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 """
@@ -18539,10 +18545,6 @@ type Team implements Node {
   """
   issueOrderingNoPriorityFirst: Boolean!
   """
-  [DEPRECATED] Whether to move issues to bottom of the column when changing state. Use setIssueSortOrderOnStateChange instead.
-  """
-  issueSortOrderDefaultToBottom: Boolean!
-  """
   Issues associated with the team.
   """
   issues(
@@ -19042,10 +19044,6 @@ input TeamCreateInput {
   """
   issueOrderingNoPriorityFirst: Boolean
   """
-  [DEPRECATED] Whether to move issues to bottom of the column when changing state. Use setIssueSortOrderOnStateChange instead.
-  """
-  issueSortOrderDefaultToBottom: Boolean
-  """
   The key of the team. If not given, the key will be generated based on the name of the team.
   """
   key: String
@@ -19375,7 +19373,7 @@ input TeamSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 input TeamUpdateInput {
@@ -19483,10 +19481,6 @@ input TeamUpdateInput {
   Whether issues without priority should be sorted first.
   """
   issueOrderingNoPriorityFirst: Boolean
-  """
-  [DEPRECATED] Whether to move issues to bottom of the column when changing state. Use setIssueSortOrderOnStateChange instead.
-  """
-  issueSortOrderDefaultToBottom: Boolean
   """
   Whether new users should join this team by default. Mutation restricted to workspace admins!
   """
@@ -19896,7 +19890,7 @@ input TitleSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 input TokenUserAccountAuthInput {
@@ -20079,7 +20073,7 @@ input UpdatedAtSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 """
@@ -21659,7 +21653,7 @@ input WorkflowStateSort {
   """
   The order for the individual sort
   """
-  order: PaginationSortOrder = Ascending
+  order: PaginationSortOrder
 }
 
 input WorkflowStateUpdateInput {
