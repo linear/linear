@@ -2960,6 +2960,7 @@ export enum IntegrationService {
   JiraPersonal = "jiraPersonal",
   Loom = "loom",
   Notion = "notion",
+  Opsgenie = "opsgenie",
   PagerDuty = "pagerDuty",
   Sentry = "sentry",
   Slack = "slack",
@@ -2984,6 +2985,7 @@ export type IntegrationSettings = {
   jira?: Maybe<JiraSettings>;
   jiraPersonal?: Maybe<JiraPersonalSettings>;
   notion?: Maybe<NotionSettings>;
+  opsgenie?: Maybe<OpsgenieSettings>;
   pagerDuty?: Maybe<PagerDutySettings>;
   sentry?: Maybe<SentrySettings>;
   slack?: Maybe<SlackSettings>;
@@ -3004,6 +3006,7 @@ export type IntegrationSettingsInput = {
   jira?: Maybe<JiraSettingsInput>;
   jiraPersonal?: Maybe<JiraPersonalSettingsInput>;
   notion?: Maybe<NotionSettingsInput>;
+  opsgenie?: Maybe<OpsgenieInput>;
   pagerDuty?: Maybe<PagerDutyInput>;
   sentry?: Maybe<SentrySettingsInput>;
   slack?: Maybe<SlackSettingsInput>;
@@ -4947,6 +4950,10 @@ export type Mutation = {
    * @deprecated Not available.
    */
   integrationLoom: IntegrationPayload;
+  /** [INTERNAL] Integrates the organization with Opsgenie. */
+  integrationOpsgenieConnect: IntegrationPayload;
+  /** [INTERNAL] Refresh Opsgenie schedule mappings. */
+  integrationOpsgenieRefreshScheduleMappings: IntegrationPayload;
   /** [INTERNAL] Integrates the organization with PagerDuty. */
   integrationPagerDutyConnect: IntegrationPayload;
   /** [INTERNAL] Refresh PagerDuty schedule mappings. */
@@ -5668,6 +5675,10 @@ export type MutationIntegrationJiraPersonalArgs = {
 
 export type MutationIntegrationJiraUpdateArgs = {
   input: JiraUpdateInput;
+};
+
+export type MutationIntegrationOpsgenieConnectArgs = {
+  apiKey: Scalars["String"];
 };
 
 export type MutationIntegrationPagerDutyConnectArgs = {
@@ -7141,6 +7152,18 @@ export type OnboardingCustomerSurvey = {
   companySize?: Maybe<Scalars["String"]>;
 };
 
+export type OpsgenieInput = {
+  /** The date when the Opsgenie API failed with an unauthorized error. */
+  apiFailedWithUnauthorizedErrorAt: Scalars["DateTime"];
+};
+
+/** Opsgenie specific settings. */
+export type OpsgenieSettings = {
+  __typename?: "OpsgenieSettings";
+  /** The date when the Opsgenie API failed with an unauthorized error. */
+  apiFailedWithUnauthorizedErrorAt: Scalars["DateTime"];
+};
+
 /** An organization. Organizations are root-level objects that contain user accounts and teams. */
 export type Organization = Node & {
   __typename?: "Organization";
@@ -7557,35 +7580,15 @@ export type PageInfo = {
 };
 
 export type PagerDutyInput = {
-  /** Metadata about a PagerDuty schedule. */
-  scheduleMapping: Array<PagerDutyScheduleInfoInput>;
-};
-
-/** Metadata about a PagerDuty schedule. */
-export type PagerDutyScheduleInfo = {
-  __typename?: "PagerDutyScheduleInfo";
-  /** The PagerDuty schedule id. */
-  scheduleId: Scalars["String"];
-  /** The PagerDuty schedule name. */
-  scheduleName: Scalars["String"];
-  /** The URL of the schedule in PagerDuty's web app. */
-  url: Scalars["String"];
-};
-
-export type PagerDutyScheduleInfoInput = {
-  /** The PagerDuty schedule id. */
-  scheduleId: Scalars["String"];
-  /** The PagerDuty schedule name. */
-  scheduleName: Scalars["String"];
-  /** The URL of the schedule in PagerDuty's web app. */
-  url: Scalars["String"];
+  /** The date when the PagerDuty API failed with an unauthorized error. */
+  apiFailedWithUnauthorizedErrorAt: Scalars["DateTime"];
 };
 
 /** PagerDuty specific settings. */
 export type PagerDutySettings = {
   __typename?: "PagerDutySettings";
-  /** Metadata about a PagerDuty schedule. */
-  scheduleMapping: Array<PagerDutyScheduleInfo>;
+  /** The date when the PagerDuty API failed with an unauthorized error. */
+  apiFailedWithUnauthorizedErrorAt: Scalars["DateTime"];
 };
 
 /** How to treat NULL values, whether they should appear first or last */
@@ -9431,6 +9434,7 @@ export type QueryIssueFigmaFileKeySearchArgs = {
 };
 
 export type QueryIssueFilterSuggestionArgs = {
+  projectId?: Maybe<Scalars["String"]>;
   prompt: Scalars["String"];
 };
 
@@ -10501,8 +10505,6 @@ export type Team = Node & {
   issueEstimationType: Scalars["String"];
   /** Whether issues without priority should be sorted first. */
   issueOrderingNoPriorityFirst: Scalars["Boolean"];
-  /** [DEPRECATED] Whether to move issues to bottom of the column when changing state. Use setIssueSortOrderOnStateChange instead. */
-  issueSortOrderDefaultToBottom: Scalars["Boolean"];
   /** Issues associated with the team. */
   issues: IssueConnection;
   /** [INTERNAL] Whether new users should join this team by default. */
@@ -10764,8 +10766,6 @@ export type TeamCreateInput = {
   issueEstimationType?: Maybe<Scalars["String"]>;
   /** Whether issues without priority should be sorted first. */
   issueOrderingNoPriorityFirst?: Maybe<Scalars["Boolean"]>;
-  /** [DEPRECATED] Whether to move issues to bottom of the column when changing state. Use setIssueSortOrderOnStateChange instead. */
-  issueSortOrderDefaultToBottom?: Maybe<Scalars["Boolean"]>;
   /** The key of the team. If not given, the key will be generated based on the name of the team. */
   key?: Maybe<Scalars["String"]>;
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. */
@@ -11022,8 +11022,6 @@ export type TeamUpdateInput = {
   issueEstimationType?: Maybe<Scalars["String"]>;
   /** Whether issues without priority should be sorted first. */
   issueOrderingNoPriorityFirst?: Maybe<Scalars["Boolean"]>;
-  /** [DEPRECATED] Whether to move issues to bottom of the column when changing state. Use setIssueSortOrderOnStateChange instead. */
-  issueSortOrderDefaultToBottom?: Maybe<Scalars["Boolean"]>;
   /** Whether new users should join this team by default. Mutation restricted to workspace admins! */
   joinByDefault?: Maybe<Scalars["Boolean"]>;
   /** The key of the team. */
@@ -13347,7 +13345,6 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "slackNewIssue"
   | "slackIssueStatuses"
   | "triageEnabled"
-  | "issueSortOrderDefaultToBottom"
 > & {
     integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
     activeCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -13514,11 +13511,6 @@ export type TeamRepoMappingFragment = { __typename: "TeamRepoMapping" } & Pick<
 
 export type JiraProjectDataFragment = { __typename: "JiraProjectData" } & Pick<JiraProjectData, "id" | "key" | "name">;
 
-export type PagerDutyScheduleInfoFragment = { __typename: "PagerDutyScheduleInfo" } & Pick<
-  PagerDutyScheduleInfo,
-  "scheduleId" | "scheduleName" | "url"
->;
-
 export type GitHubPersonalSettingsFragment = { __typename: "GitHubPersonalSettings" } & Pick<
   GitHubPersonalSettings,
   "login"
@@ -13660,9 +13652,15 @@ export type UploadFileFragment = { __typename: "UploadFile" } & Pick<
   "assetUrl" | "contentType" | "filename" | "uploadUrl" | "size" | "metaData"
 > & { headers: Array<{ __typename?: "UploadFileHeader" } & UploadFileHeaderFragment> };
 
-export type PagerDutySettingsFragment = { __typename: "PagerDutySettings" } & {
-  scheduleMapping: Array<{ __typename?: "PagerDutyScheduleInfo" } & PagerDutyScheduleInfoFragment>;
-};
+export type OpsgenieSettingsFragment = { __typename: "OpsgenieSettings" } & Pick<
+  OpsgenieSettings,
+  "apiFailedWithUnauthorizedErrorAt"
+>;
+
+export type PagerDutySettingsFragment = { __typename: "PagerDutySettings" } & Pick<
+  PagerDutySettings,
+  "apiFailedWithUnauthorizedErrorAt"
+>;
 
 export type UserAuthorizedApplicationFragment = { __typename: "UserAuthorizedApplication" } & Pick<
   UserAuthorizedApplication,
@@ -13748,6 +13746,7 @@ export type IntegrationSettingsFragment = { __typename: "IntegrationSettings" } 
   jira?: Maybe<{ __typename?: "JiraSettings" } & JiraSettingsFragment>;
   jiraPersonal?: Maybe<{ __typename?: "JiraPersonalSettings" } & JiraPersonalSettingsFragment>;
   notion?: Maybe<{ __typename?: "NotionSettings" } & NotionSettingsFragment>;
+  opsgenie?: Maybe<{ __typename?: "OpsgenieSettings" } & OpsgenieSettingsFragment>;
   pagerDuty?: Maybe<{ __typename?: "PagerDutySettings" } & PagerDutySettingsFragment>;
   sentry?: Maybe<{ __typename?: "SentrySettings" } & SentrySettingsFragment>;
   slack?: Maybe<{ __typename?: "SlackSettings" } & SlackSettingsFragment>;
@@ -15781,6 +15780,7 @@ export type IssueFigmaFileKeySearchQuery = { __typename?: "Query" } & {
 };
 
 export type IssueFilterSuggestionQueryVariables = Exact<{
+  projectId?: Maybe<Scalars["String"]>;
   prompt: Scalars["String"];
 }>;
 
@@ -20924,25 +20924,23 @@ export const NotionSettingsFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<NotionSettingsFragment, unknown>;
-export const PagerDutyScheduleInfoFragmentDoc = {
+export const OpsgenieSettingsFragmentDoc = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "PagerDutyScheduleInfo" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "PagerDutyScheduleInfo" } },
+      name: { kind: "Name", value: "OpsgenieSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OpsgenieSettings" } },
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "scheduleId" } },
-          { kind: "Field", name: { kind: "Name", value: "scheduleName" } },
-          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "apiFailedWithUnauthorizedErrorAt" } },
         ],
       },
     },
   ],
-} as unknown as DocumentNode<PagerDutyScheduleInfoFragment, unknown>;
+} as unknown as DocumentNode<OpsgenieSettingsFragment, unknown>;
 export const PagerDutySettingsFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -20954,14 +20952,7 @@ export const PagerDutySettingsFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "scheduleMapping" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PagerDutyScheduleInfo" } }],
-            },
-          },
+          { kind: "Field", name: { kind: "Name", value: "apiFailedWithUnauthorizedErrorAt" } },
         ],
       },
     },
@@ -21200,6 +21191,14 @@ export const IntegrationSettingsFragmentDoc = {
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "NotionSettings" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "opsgenie" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OpsgenieSettings" } }],
             },
           },
           {
@@ -26782,7 +26781,6 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "slackNewIssue" } },
           { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" } },
           { kind: "Field", name: { kind: "Name", value: "triageEnabled" } },
-          { kind: "Field", name: { kind: "Name", value: "issueSortOrderDefaultToBottom" } },
         ],
       },
     },
@@ -33004,6 +33002,11 @@ export const IssueFilterSuggestionDocument = {
       variableDefinitions: [
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "prompt" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -33015,6 +33018,11 @@ export const IssueFilterSuggestionDocument = {
             kind: "Field",
             name: { kind: "Name", value: "issueFilterSuggestion" },
             arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "projectId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
+              },
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "prompt" },
