@@ -958,7 +958,7 @@ type AuthUser {
   """
   organization: AuthOrganization!
   """
-  User account id the user belongs to.
+  User account ID the user belongs to.
   """
   userAccountId: String!
 }
@@ -1794,6 +1794,10 @@ type CustomView implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned issues.
+    """
+    sort: [IssueSortInput!]
   ): IssueConnection!
   """
   The model name of the custom view.
@@ -3185,20 +3189,6 @@ input EmailIntakeAddressUpdateInput {
   Whether the email address is currently enabled. If set to false, the email address will be disabled and no longer accept incoming emails.
   """
   enabled: Boolean!
-}
-
-input EmailSubscribeInput {
-  """
-  [INTERNAL] Email to subscribe.
-  """
-  email: String!
-}
-
-type EmailSubscribePayload {
-  """
-  [INTERNAL] Whether the operation was successful.
-  """
-  success: Boolean!
 }
 
 input EmailUnsubscribeInput {
@@ -8500,7 +8490,7 @@ type Mutation {
     title: String
   ): AttachmentPayload!
   """
-  Unsyncs an existing synced Slack attachment.
+  [DEPRECATED] Unsyncs an existing synced Slack attachment.
   """
   attachmentUnsyncSlack(
     """
@@ -8761,15 +8751,6 @@ type Mutation {
     """
     input: EmailIntakeAddressUpdateInput!
   ): EmailIntakeAddressPayload!
-  """
-  [INTERNAL] Subscribes the email to the newsletter.
-  """
-  emailSubscribe(
-    """
-    Subscription details.
-    """
-    input: EmailSubscribeInput!
-  ): EmailSubscribePayload!
   """
   Authenticates a user account via email and authentication token.
   """
@@ -18545,6 +18526,10 @@ type Team implements Node {
   """
   issueOrderingNoPriorityFirst: Boolean!
   """
+  [DEPRECATED] Whether to move issues to bottom of the column when changing state.
+  """
+  issueSortOrderDefaultToBottom: Boolean! @deprecated(reason: "Use setIssueSortOrderOnStateChange instead.")
+  """
   Issues associated with the team.
   """
   issues(
@@ -20815,9 +20800,29 @@ type UserSettings implements Node {
   """
   showFullUserNames: Boolean!
   """
+  Whether this user is subscribed to changelog email or not.
+  """
+  subscribedToChangelog: Boolean!
+  """
+  Whether this user is subscribed to DPA emails or not.
+  """
+  subscribedToDPA: Boolean!
+  """
+  Whether this user is subscribed to invite accepted emails or not.
+  """
+  subscribedToInviteAccepted: Boolean!
+  """
+  Whether this user is subscribed to privacy and legal update emails or not.
+  """
+  subscribedToPrivacyLegalUpdates: Boolean!
+  """
+  Whether this user is subscribed to unread notifications reminder emails or not.
+  """
+  subscribedToUnreadNotificationsReminder: Boolean!
+  """
   The email types the user has unsubscribed from.
   """
-  unsubscribedFrom: [String!]!
+  unsubscribedFrom: [String!]! @deprecated(reason: "Use individual subscription fields instead.")
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -20884,6 +20889,26 @@ input UserSettingsUpdateInput {
   The user's settings.
   """
   settings: JSONObject
+  """
+  Whether this user is subscribed to changelog email or not.
+  """
+  subscribedToChangelog: Boolean
+  """
+  Whether this user is subscribed to DPA emails or not.
+  """
+  subscribedToDPA: Boolean
+  """
+  Whether this user is subscribed to invite accepted emails or not.
+  """
+  subscribedToInviteAccepted: Boolean
+  """
+  Whether this user is subscribed to privacy and legal update emails or not.
+  """
+  subscribedToPrivacyLegalUpdates: Boolean
+  """
+  Whether this user is subscribed to email notifications reminder or not.
+  """
+  subscribedToUnreadNotificationsReminder: Boolean
   """
   The types of emails the user has unsubscribed from.
   """
