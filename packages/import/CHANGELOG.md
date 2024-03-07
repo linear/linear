@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.10.0
+
+### Minor Changes
+
+- 816094f: feat: use issue.createdAt when creating issues
+
+### Patch Changes
+
+- ec73c7a: chore(deps): update dependency patch versions
+- 028ddbc: fix: do not use .children call to check if label is a group
+- Updated dependencies [ec73c7a]
+- Updated dependencies [3fb7809]
+  - @linear/sdk@17.0.0
+
 ## 1.9.9
 
 ### Patch Changes

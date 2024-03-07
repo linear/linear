@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.3
+
+### Patch Changes
+
+- ec73c7a: chore(deps): update dependency patch versions
+
 ## 2.0.2
 
 ### Patch Changes
