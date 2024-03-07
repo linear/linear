@@ -319,6 +319,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       labelIds,
       stateId,
       assigneeId,
+      createdAt: issue.createdAt,
       dueDate: formattedDueDate,
     });
   }
