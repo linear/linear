@@ -999,7 +999,7 @@ export class AuthUser extends Request {
   public id: string;
   /** The user's full name. */
   public name: string;
-  /** User account id the user belongs to. */
+  /** User account ID the user belongs to. */
   public userAccountId: string;
   /** Organization the user belongs to. */
   public organization: AuthOrganization;
@@ -8224,6 +8224,7 @@ export class Team extends Request {
     this.issueEstimationExtended = data.issueEstimationExtended;
     this.issueEstimationType = data.issueEstimationType;
     this.issueOrderingNoPriorityFirst = data.issueOrderingNoPriorityFirst;
+    this.issueSortOrderDefaultToBottom = data.issueSortOrderDefaultToBottom;
     this.key = data.key;
     this.name = data.name;
     this.private = data.private;
@@ -8305,6 +8306,8 @@ export class Team extends Request {
   public issueEstimationType: string;
   /** Whether issues without priority should be sorted first. */
   public issueOrderingNoPriorityFirst: boolean;
+  /** [DEPRECATED] Whether to move issues to bottom of the column when changing state. */
+  public issueSortOrderDefaultToBottom: boolean;
   /** The team's unique key. The key is used in URLs. */
   public key: string;
   /** The team's name. */
@@ -9509,6 +9512,11 @@ export class UserSettings extends Request {
     this.id = data.id;
     this.notificationPreferences = data.notificationPreferences;
     this.showFullUserNames = data.showFullUserNames;
+    this.subscribedToChangelog = data.subscribedToChangelog;
+    this.subscribedToDPA = data.subscribedToDPA;
+    this.subscribedToInviteAccepted = data.subscribedToInviteAccepted;
+    this.subscribedToPrivacyLegalUpdates = data.subscribedToPrivacyLegalUpdates;
+    this.subscribedToUnreadNotificationsReminder = data.subscribedToUnreadNotificationsReminder;
     this.unsubscribedFrom = data.unsubscribedFrom;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._user = data.user;
@@ -9526,6 +9534,16 @@ export class UserSettings extends Request {
   public notificationPreferences: L.Scalars["JSONObject"];
   /** Whether to show full user names instead of display names. */
   public showFullUserNames: boolean;
+  /** Whether this user is subscribed to changelog email or not. */
+  public subscribedToChangelog: boolean;
+  /** Whether this user is subscribed to DPA emails or not. */
+  public subscribedToDPA: boolean;
+  /** Whether this user is subscribed to invite accepted emails or not. */
+  public subscribedToInviteAccepted: boolean;
+  /** Whether this user is subscribed to privacy and legal update emails or not. */
+  public subscribedToPrivacyLegalUpdates: boolean;
+  /** Whether this user is subscribed to unread notifications reminder emails or not. */
+  public subscribedToUnreadNotificationsReminder: boolean;
   /** The email types the user has unsubscribed from. */
   public unsubscribedFrom: string[];
   /**
@@ -23916,7 +23934,7 @@ export class LinearSdk extends Request {
     return new AttachmentLinkZendeskMutation(this._request).fetch(issueId, ticketId, variables);
   }
   /**
-   * Unsyncs an existing synced Slack attachment.
+   * [DEPRECATED] Unsyncs an existing synced Slack attachment.
    *
    * @param id - required id to pass to attachmentUnsyncSlack
    * @returns AttachmentPayload

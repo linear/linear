@@ -1513,7 +1513,7 @@ fragment AuthUser on AuthUser {
   email
   # The user's full name.
   name
-  # User account id the user belongs to.
+  # User account ID the user belongs to.
   userAccountId
   # Whether the user is active.
   active
@@ -2271,6 +2271,8 @@ fragment Team on Team {
   slackIssueStatuses
   # Whether triage mode is enabled for the team or not.
   triageEnabled
+  # [DEPRECATED] Whether to move issues to bottom of the column when changing state.
+  issueSortOrderDefaultToBottom
 }
 
 # AuthOauthClient with scope from OauthToken, for use in the GraphQL API.
@@ -3158,6 +3160,16 @@ fragment UserSettings on UserSettings {
   user {
     id
   }
+  # Whether this user is subscribed to DPA emails or not.
+  subscribedToDPA
+  # Whether this user is subscribed to changelog email or not.
+  subscribedToChangelog
+  # Whether this user is subscribed to invite accepted emails or not.
+  subscribedToInviteAccepted
+  # Whether this user is subscribed to privacy and legal update emails or not.
+  subscribedToPrivacyLegalUpdates
+  # Whether this user is subscribed to unread notifications reminder emails or not.
+  subscribedToUnreadNotificationsReminder
   # Whether to show full user names instead of display names.
   showFullUserNames
 }
@@ -5858,6 +5870,8 @@ query customView_issues(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned issues.
+  $sort: [IssueSortInput!]
 ) {
   customView(id: $id) {
     issues(
@@ -5868,6 +5882,7 @@ query customView_issues(
       includeArchived: $includeArchived
       last: $last
       orderBy: $orderBy
+      sort: $sort
     ) {
       ...IssueConnection
     }
@@ -9263,7 +9278,7 @@ mutation attachmentLinkZendesk(
     ...AttachmentPayload
   }
 }
-# Unsyncs an existing synced Slack attachment.
+# [DEPRECATED] Unsyncs an existing synced Slack attachment.
 mutation attachmentUnsyncSlack(
   # The identifier of the attachment to unsync.
   $id: String!

@@ -607,7 +607,7 @@ export type AuthUser = {
   name: Scalars["String"];
   /** Organization the user belongs to. */
   organization: AuthOrganization;
-  /** User account id the user belongs to. */
+  /** User account ID the user belongs to. */
   userAccountId: Scalars["String"];
 };
 
@@ -1111,6 +1111,7 @@ export type CustomViewIssuesArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  sort?: Maybe<Array<IssueSortInput>>;
 };
 
 export type CustomViewConnection = {
@@ -1916,17 +1917,6 @@ export type EmailIntakeAddressPayload = {
 export type EmailIntakeAddressUpdateInput = {
   /** Whether the email address is currently enabled. If set to false, the email address will be disabled and no longer accept incoming emails. */
   enabled: Scalars["Boolean"];
-};
-
-export type EmailSubscribeInput = {
-  /** [INTERNAL] Email to subscribe. */
-  email: Scalars["String"];
-};
-
-export type EmailSubscribePayload = {
-  __typename?: "EmailSubscribePayload";
-  /** [INTERNAL] Whether the operation was successful. */
-  success: Scalars["Boolean"];
 };
 
 export type EmailUnsubscribeInput = {
@@ -4802,7 +4792,7 @@ export type Mutation = {
   attachmentLinkURL: AttachmentPayload;
   /** Link an existing Zendesk ticket to an issue. */
   attachmentLinkZendesk: AttachmentPayload;
-  /** Unsyncs an existing synced Slack attachment. */
+  /** [DEPRECATED] Unsyncs an existing synced Slack attachment. */
   attachmentUnsyncSlack: AttachmentPayload;
   /** Updates an existing issue attachment. */
   attachmentUpdate: AttachmentPayload;
@@ -4854,8 +4844,6 @@ export type Mutation = {
   emailIntakeAddressRotate: EmailIntakeAddressPayload;
   /** Updates an existing email intake address. */
   emailIntakeAddressUpdate: EmailIntakeAddressPayload;
-  /** [INTERNAL] Subscribes the email to the newsletter. */
-  emailSubscribe: EmailSubscribePayload;
   /** Authenticates a user account via email and authentication token. */
   emailTokenUserAccountAuth: AuthResolverResponse;
   /** Unsubscribes the user from one type of emails. */
@@ -5487,10 +5475,6 @@ export type MutationEmailIntakeAddressRotateArgs = {
 export type MutationEmailIntakeAddressUpdateArgs = {
   id: Scalars["String"];
   input: EmailIntakeAddressUpdateInput;
-};
-
-export type MutationEmailSubscribeArgs = {
-  input: EmailSubscribeInput;
 };
 
 export type MutationEmailTokenUserAccountAuthArgs = {
@@ -10505,6 +10489,11 @@ export type Team = Node & {
   issueEstimationType: Scalars["String"];
   /** Whether issues without priority should be sorted first. */
   issueOrderingNoPriorityFirst: Scalars["Boolean"];
+  /**
+   * [DEPRECATED] Whether to move issues to bottom of the column when changing state.
+   * @deprecated Use setIssueSortOrderOnStateChange instead.
+   */
+  issueSortOrderDefaultToBottom: Scalars["Boolean"];
   /** Issues associated with the team. */
   issues: IssueConnection;
   /** [INTERNAL] Whether new users should join this team by default. */
@@ -11809,7 +11798,20 @@ export type UserSettings = Node & {
   notificationPreferences: Scalars["JSONObject"];
   /** Whether to show full user names instead of display names. */
   showFullUserNames: Scalars["Boolean"];
-  /** The email types the user has unsubscribed from. */
+  /** Whether this user is subscribed to changelog email or not. */
+  subscribedToChangelog: Scalars["Boolean"];
+  /** Whether this user is subscribed to DPA emails or not. */
+  subscribedToDPA: Scalars["Boolean"];
+  /** Whether this user is subscribed to invite accepted emails or not. */
+  subscribedToInviteAccepted: Scalars["Boolean"];
+  /** Whether this user is subscribed to privacy and legal update emails or not. */
+  subscribedToPrivacyLegalUpdates: Scalars["Boolean"];
+  /** Whether this user is subscribed to unread notifications reminder emails or not. */
+  subscribedToUnreadNotificationsReminder: Scalars["Boolean"];
+  /**
+   * The email types the user has unsubscribed from.
+   * @deprecated Use individual subscription fields instead.
+   */
   unsubscribedFrom: Array<Scalars["String"]>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -11856,6 +11858,16 @@ export type UserSettingsUpdateInput = {
   notificationPreferences?: Maybe<Scalars["JSONObject"]>;
   /** The user's settings. */
   settings?: Maybe<Scalars["JSONObject"]>;
+  /** Whether this user is subscribed to changelog email or not. */
+  subscribedToChangelog?: Maybe<Scalars["Boolean"]>;
+  /** Whether this user is subscribed to DPA emails or not. */
+  subscribedToDPA?: Maybe<Scalars["Boolean"]>;
+  /** Whether this user is subscribed to invite accepted emails or not. */
+  subscribedToInviteAccepted?: Maybe<Scalars["Boolean"]>;
+  /** Whether this user is subscribed to privacy and legal update emails or not. */
+  subscribedToPrivacyLegalUpdates?: Maybe<Scalars["Boolean"]>;
+  /** Whether this user is subscribed to email notifications reminder or not. */
+  subscribedToUnreadNotificationsReminder?: Maybe<Scalars["Boolean"]>;
   /** The types of emails the user has unsubscribed from. */
   unsubscribedFrom?: Maybe<Array<Scalars["String"]>>;
   /** [Internal] The user's usage warning history. */
@@ -13345,6 +13357,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "slackNewIssue"
   | "slackIssueStatuses"
   | "triageEnabled"
+  | "issueSortOrderDefaultToBottom"
 > & {
     integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
     activeCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -13782,6 +13795,11 @@ export type UserSettingsFragment = { __typename: "UserSettings" } & Pick<
   | "archivedAt"
   | "createdAt"
   | "id"
+  | "subscribedToDPA"
+  | "subscribedToChangelog"
+  | "subscribedToInviteAccepted"
+  | "subscribedToPrivacyLegalUpdates"
+  | "subscribedToUnreadNotificationsReminder"
   | "showFullUserNames"
 > & { user: { __typename?: "User" } & Pick<User, "id"> };
 
@@ -15382,6 +15400,7 @@ export type CustomView_IssuesQueryVariables = Exact<{
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  sort?: Maybe<Array<IssueSortInput> | IssueSortInput>;
 }>;
 
 export type CustomView_IssuesQuery = { __typename?: "Query" } & {
@@ -21296,6 +21315,11 @@ export const UserSettingsFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "subscribedToDPA" } },
+          { kind: "Field", name: { kind: "Name", value: "subscribedToChangelog" } },
+          { kind: "Field", name: { kind: "Name", value: "subscribedToInviteAccepted" } },
+          { kind: "Field", name: { kind: "Name", value: "subscribedToPrivacyLegalUpdates" } },
+          { kind: "Field", name: { kind: "Name", value: "subscribedToUnreadNotificationsReminder" } },
           { kind: "Field", name: { kind: "Name", value: "showFullUserNames" } },
         ],
       },
@@ -26781,6 +26805,7 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "slackNewIssue" } },
           { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" } },
           { kind: "Field", name: { kind: "Name", value: "triageEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "issueSortOrderDefaultToBottom" } },
         ],
       },
     },
@@ -30244,6 +30269,14 @@ export const CustomView_IssuesDocument = {
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
         },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "sort" } },
+          type: {
+            kind: "ListType",
+            type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "IssueSortInput" } } },
+          },
+        },
       ],
       selectionSet: {
         kind: "SelectionSet",
@@ -30299,6 +30332,11 @@ export const CustomView_IssuesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "orderBy" },
                       value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "sort" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "sort" } },
                     },
                   ],
                   selectionSet: {
