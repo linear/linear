@@ -194,8 +194,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
   for (const label of existingLabels) {
     const labelName = label.name?.toLowerCase();
-    const children = await label.children();
-    if (children?.nodes?.length > 0) {
+    if (label.isGroup) {
       if (labelName && label.id && !existingLabelGroupsMap[labelName]) {
         existingLabelGroupsMap[labelName] = label.id;
       }
