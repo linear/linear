@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.10.1
+
+### Patch Changes
+
+- 7477da0: chore(deps): update dependency patch versions
+- Updated dependencies [7477da0]
+  - @linear/sdk@17.0.1
+
 ## 1.10.0
 
 ### Minor Changes
