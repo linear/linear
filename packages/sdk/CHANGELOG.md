@@ -1,5 +1,11 @@
 # Change Log
 
+## 17.0.1
+
+### Patch Changes
+
+- 7477da0: chore(deps): update dependency patch versions
+
 ## 17.0.0
 
 ### Major Changes
