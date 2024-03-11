@@ -3744,6 +3744,7 @@ export class Issue extends Request {
   private _project?: L.IssueFragment["project"];
   private _projectMilestone?: L.IssueFragment["projectMilestone"];
   private _snoozedBy?: L.IssueFragment["snoozedBy"];
+  private _sourceComment?: L.IssueFragment["sourceComment"];
   private _state: L.IssueFragment["state"];
   private _team: L.IssueFragment["team"];
 
@@ -3789,6 +3790,7 @@ export class Issue extends Request {
     this._project = data.project ?? undefined;
     this._projectMilestone = data.projectMilestone ?? undefined;
     this._snoozedBy = data.snoozedBy ?? undefined;
+    this._sourceComment = data.sourceComment ?? undefined;
     this._state = data.state;
     this._team = data.team;
   }
@@ -3902,6 +3904,10 @@ export class Issue extends Request {
   /** The user who snoozed the issue. */
   public get snoozedBy(): LinearFetch<User> | undefined {
     return this._snoozedBy?.id ? new UserQuery(this._request).fetch(this._snoozedBy?.id) : undefined;
+  }
+  /** The comment that this issue was created from. */
+  public get sourceComment(): LinearFetch<Comment> | undefined {
+    return this._sourceComment?.id ? new CommentQuery(this._request).fetch({ id: this._sourceComment?.id }) : undefined;
   }
   /** The workflow state that the issue is associated with. */
   public get state(): LinearFetch<WorkflowState> | undefined {
@@ -4847,6 +4853,7 @@ export class IssueSearchResult extends Request {
   private _project?: L.IssueSearchResultFragment["project"];
   private _projectMilestone?: L.IssueSearchResultFragment["projectMilestone"];
   private _snoozedBy?: L.IssueSearchResultFragment["snoozedBy"];
+  private _sourceComment?: L.IssueSearchResultFragment["sourceComment"];
   private _state: L.IssueSearchResultFragment["state"];
   private _team: L.IssueSearchResultFragment["team"];
 
@@ -4893,6 +4900,7 @@ export class IssueSearchResult extends Request {
     this._project = data.project ?? undefined;
     this._projectMilestone = data.projectMilestone ?? undefined;
     this._snoozedBy = data.snoozedBy ?? undefined;
+    this._sourceComment = data.sourceComment ?? undefined;
     this._state = data.state;
     this._team = data.team;
   }
@@ -5008,6 +5016,10 @@ export class IssueSearchResult extends Request {
   /** The user who snoozed the issue. */
   public get snoozedBy(): LinearFetch<User> | undefined {
     return this._snoozedBy?.id ? new UserQuery(this._request).fetch(this._snoozedBy?.id) : undefined;
+  }
+  /** The comment that this issue was created from. */
+  public get sourceComment(): LinearFetch<Comment> | undefined {
+    return this._sourceComment?.id ? new CommentQuery(this._request).fetch({ id: this._sourceComment?.id }) : undefined;
   }
   /** The workflow state that the issue is associated with. */
   public get state(): LinearFetch<WorkflowState> | undefined {
@@ -7998,6 +8010,24 @@ export class SentrySettings extends Request {
   public organizationSlug: string;
 }
 /**
+ * Shared Slack integration settings.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SharedSlackSettingsFragment response data
+ */
+export class SharedSlackSettings extends Request {
+  public constructor(request: LinearRequest, data: L.SharedSlackSettingsFragment) {
+    super(request);
+    this.teamId = data.teamId ?? undefined;
+    this.teamName = data.teamName ?? undefined;
+  }
+
+  /** Slack workspace id */
+  public teamId?: string;
+  /** Slack workspace name */
+  public teamName?: string;
+}
+/**
  * Slack Asks specific settings.
  *
  * @param request - function to call the graphql client
@@ -8006,11 +8036,17 @@ export class SentrySettings extends Request {
 export class SlackAsksSettings extends Request {
   public constructor(request: LinearRequest, data: L.SlackAsksSettingsFragment) {
     super(request);
+    this.teamId = data.teamId ?? undefined;
+    this.teamName = data.teamName ?? undefined;
     this.slackChannelMapping = data.slackChannelMapping
       ? data.slackChannelMapping.map(node => new SlackChannelNameMapping(request, node))
       : undefined;
   }
 
+  /** Slack workspace id */
+  public teamId?: string;
+  /** Slack workspace name */
+  public teamName?: string;
   /** The mapping of Slack channel ID => Slack channel name for connected channels. */
   public slackChannelMapping?: SlackChannelNameMapping[];
 }
@@ -8136,10 +8172,16 @@ export class SlackSettings extends Request {
   public constructor(request: LinearRequest, data: L.SlackSettingsFragment) {
     super(request);
     this.linkOnIssueIdMention = data.linkOnIssueIdMention;
+    this.teamId = data.teamId ?? undefined;
+    this.teamName = data.teamName ?? undefined;
   }
 
   /** Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message. */
   public linkOnIssueIdMention: boolean;
+  /** Slack workspace id */
+  public teamId?: string;
+  /** Slack workspace name */
+  public teamName?: string;
 }
 /**
  * SsoUrlFromEmailResponse model
@@ -8966,7 +9008,7 @@ export class TimeScheduleEntry extends Request {
   public endsAt: Date;
   /** The start date of the schedule in ISO 8601 date-time format. */
   public startsAt: Date;
-  /** The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
+  /** The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
   public userEmail?: string;
   /** The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference. */
   public userId?: string;
@@ -13603,35 +13645,6 @@ export class AttachmentLinkZendeskMutation extends Request {
       }
     );
     const data = response.attachmentLinkZendesk;
-
-    return new AttachmentPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable AttachmentUnsyncSlack Mutation
- *
- * @param request - function to call the graphql client
- */
-export class AttachmentUnsyncSlackMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AttachmentUnsyncSlack mutation and return a AttachmentPayload
-   *
-   * @param id - required id to pass to attachmentUnsyncSlack
-   * @returns parsed response from AttachmentUnsyncSlackMutation
-   */
-  public async fetch(id: string): LinearFetch<AttachmentPayload> {
-    const response = await this._request<L.AttachmentUnsyncSlackMutation, L.AttachmentUnsyncSlackMutationVariables>(
-      L.AttachmentUnsyncSlackDocument,
-      {
-        id,
-      }
-    );
-    const data = response.attachmentUnsyncSlack;
 
     return new AttachmentPayload(this._request, data);
   }
@@ -23932,15 +23945,6 @@ export class LinearSdk extends Request {
     variables?: Omit<L.AttachmentLinkZendeskMutationVariables, "issueId" | "ticketId">
   ): LinearFetch<AttachmentPayload> {
     return new AttachmentLinkZendeskMutation(this._request).fetch(issueId, ticketId, variables);
-  }
-  /**
-   * [DEPRECATED] Unsyncs an existing synced Slack attachment.
-   *
-   * @param id - required id to pass to attachmentUnsyncSlack
-   * @returns AttachmentPayload
-   */
-  public attachmentUnsyncSlack(id: string): LinearFetch<AttachmentPayload> {
-    return new AttachmentUnsyncSlackMutation(this._request).fetch(id);
   }
   /**
    * Updates an existing issue attachment.

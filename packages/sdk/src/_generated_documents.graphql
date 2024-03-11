@@ -1909,6 +1909,10 @@ fragment Issue on Issue {
   botActor {
     ...ActorBot
   }
+  # The comment that this issue was created from.
+  sourceComment {
+    id
+  }
   # The cycle that the issue is associated with.
   cycle {
     id
@@ -2979,13 +2983,30 @@ fragment SentrySettings on SentrySettings {
 # Settings for the regular Slack integration.
 fragment SlackSettings on SlackSettings {
   __typename
+  # Slack workspace id
+  teamId
+  # Slack workspace name
+  teamName
   # Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.
   linkOnIssueIdMention
+}
+
+# Shared Slack integration settings.
+fragment SharedSlackSettings on SharedSlackSettings {
+  __typename
+  # Slack workspace id
+  teamId
+  # Slack workspace name
+  teamName
 }
 
 # Slack Asks specific settings.
 fragment SlackAsksSettings on SlackAsksSettings {
   __typename
+  # Slack workspace id
+  teamId
+  # Slack workspace name
+  teamName
   # The mapping of Slack channel ID => Slack channel name for connected channels.
   slackChannelMapping {
     ...SlackChannelNameMapping
@@ -4204,6 +4225,10 @@ fragment IssueSearchResult on IssueSearchResult {
   botActor {
     ...ActorBot
   }
+  # The comment that this issue was created from.
+  sourceComment {
+    id
+  }
   # The cycle that the issue is associated with.
   cycle {
     id
@@ -4980,7 +5005,7 @@ fragment TimeScheduleEntry on TimeScheduleEntry {
   __typename
   # The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference.
   userId
-  # The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id.
+  # The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id.
   userEmail
   # The end date of the schedule in ISO 8601 date-time format.
   endsAt
@@ -9275,15 +9300,6 @@ mutation attachmentLinkZendesk(
     ticketId: $ticketId
     title: $title
   ) {
-    ...AttachmentPayload
-  }
-}
-# [DEPRECATED] Unsyncs an existing synced Slack attachment.
-mutation attachmentUnsyncSlack(
-  # The identifier of the attachment to unsync.
-  $id: String!
-) {
-  attachmentUnsyncSlack(id: $id) {
     ...AttachmentPayload
   }
 }

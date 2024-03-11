@@ -1376,6 +1376,8 @@ export type CycleFilter = {
   isActive?: Maybe<BooleanComparator>;
   /** Comparator for the filtering future cycles. */
   isFuture?: Maybe<BooleanComparator>;
+  /** Comparator for filtering for whether the cycle is currently in cooldown. */
+  isInCooldown?: Maybe<BooleanComparator>;
   /** Comparator for the filtering next cycle. */
   isNext?: Maybe<BooleanComparator>;
   /** Comparator for the filtering past cycles. */
@@ -3307,6 +3309,8 @@ export type Issue = Node & {
   snoozedUntilAt?: Maybe<Scalars["DateTime"]>;
   /** The order of the item in relation to other items in the organization. */
   sortOrder: Scalars["Float"];
+  /** The comment that this issue was created from. */
+  sourceComment?: Maybe<Comment>;
   /** The time at which the issue was moved into started state. */
   startedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the issue entered triage. */
@@ -3582,6 +3586,8 @@ export type IssueCreateInput = {
   slaBreachesAt?: Maybe<Scalars["DateTime"]>;
   /** The position of the issue related to other issues. */
   sortOrder?: Maybe<Scalars["Float"]>;
+  /** The comment the issue is created from. */
+  sourceCommentId?: Maybe<Scalars["String"]>;
   /** The team state of the issue. */
   stateId?: Maybe<Scalars["String"]>;
   /** The position of the issue in parent's sub-issue list. */
@@ -4374,6 +4380,8 @@ export type IssueSearchResult = Node & {
   snoozedUntilAt?: Maybe<Scalars["DateTime"]>;
   /** The order of the item in relation to other items in the organization. */
   sortOrder: Scalars["Float"];
+  /** The comment that this issue was created from. */
+  sourceComment?: Maybe<Comment>;
   /** The time at which the issue was moved into started state. */
   startedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the issue entered triage. */
@@ -4792,8 +4800,6 @@ export type Mutation = {
   attachmentLinkURL: AttachmentPayload;
   /** Link an existing Zendesk ticket to an issue. */
   attachmentLinkZendesk: AttachmentPayload;
-  /** [DEPRECATED] Unsyncs an existing synced Slack attachment. */
-  attachmentUnsyncSlack: AttachmentPayload;
   /** Updates an existing issue attachment. */
   attachmentUpdate: AttachmentPayload;
   /** Creates a new comment. */
@@ -5362,10 +5368,6 @@ export type MutationAttachmentLinkZendeskArgs = {
   issueId: Scalars["String"];
   ticketId: Scalars["String"];
   title?: Maybe<Scalars["String"]>;
-};
-
-export type MutationAttachmentUnsyncSlackArgs = {
-  id: Scalars["String"];
 };
 
 export type MutationAttachmentUpdateArgs = {
@@ -6559,6 +6561,8 @@ export type NullableCycleFilter = {
   isActive?: Maybe<BooleanComparator>;
   /** Comparator for the filtering future cycles. */
   isFuture?: Maybe<BooleanComparator>;
+  /** Comparator for filtering for whether the cycle is currently in cooldown. */
+  isInCooldown?: Maybe<BooleanComparator>;
   /** Comparator for the filtering next cycle. */
   isNext?: Maybe<BooleanComparator>;
   /** Comparator for the filtering past cycles. */
@@ -6787,8 +6791,6 @@ export type NullableProjectFilter = {
   null?: Maybe<Scalars["Boolean"]>;
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<NullableProjectFilter>>;
-  /** [Internal] Comparator for the date when the project was last paused. */
-  pausedAt?: Maybe<NullableDateComparator>;
   /** Filters that the project's milestones must satisfy. */
   projectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Filters that the projects roadmaps must satisfy. */
@@ -7693,8 +7695,6 @@ export type Project = Node & {
   members: UserConnection;
   /** The project's name. */
   name: Scalars["String"];
-  /** [INTERNAL] The latest time at which the project was paused. */
-  pausedAt?: Maybe<Scalars["DateTime"]>;
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   progress: Scalars["Float"];
   /** Milestones associated with the project. */
@@ -7870,8 +7870,6 @@ export type ProjectCollectionFilter = {
   nextProjectMilestone?: Maybe<ProjectMilestoneFilter>;
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<ProjectCollectionFilter>>;
-  /** [Internal] Comparator for the date when the project was last paused. */
-  pausedAt?: Maybe<NullableDateComparator>;
   /** Filters that the project's milestones must satisfy. */
   projectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Filters that the projects roadmaps must satisfy. */
@@ -7979,8 +7977,6 @@ export type ProjectFilter = {
   nextProjectMilestone?: Maybe<ProjectMilestoneFilter>;
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<ProjectFilter>>;
-  /** [Internal] Comparator for the date when the project was last paused. */
-  pausedAt?: Maybe<NullableDateComparator>;
   /** Filters that the project's milestones must satisfy. */
   projectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Filters that the projects roadmaps must satisfy. */
@@ -8383,8 +8379,6 @@ export type ProjectSearchResult = Node & {
   metadata: Scalars["JSONObject"];
   /** The project's name. */
   name: Scalars["String"];
-  /** [INTERNAL] The latest time at which the project was paused. */
-  pausedAt?: Maybe<Scalars["DateTime"]>;
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   progress: Scalars["Float"];
   /** Milestones associated with the project. */
@@ -8724,8 +8718,6 @@ export type ProjectUpdateInput = {
   memberIds?: Maybe<Array<Scalars["String"]>>;
   /** The name of the project. */
   name?: Maybe<Scalars["String"]>;
-  /** [INTERNAL] The date when the project was paused. */
-  pausedAt?: Maybe<Scalars["DateTime"]>;
   /** The time until which project update reminders are paused. */
   projectUpdateRemindersPausedUntilAt?: Maybe<Scalars["DateTime"]>;
   /** Whether to send new issue comment notifications to Slack. */
@@ -10133,6 +10125,22 @@ export type SentrySettingsInput = {
   organizationSlug: Scalars["String"];
 };
 
+/** Shared Slack integration settings. */
+export type SharedSlackSettings = {
+  __typename?: "SharedSlackSettings";
+  /** Slack workspace id */
+  teamId?: Maybe<Scalars["String"]>;
+  /** Slack workspace name */
+  teamName?: Maybe<Scalars["String"]>;
+};
+
+export type SharedSlackSettingsInput = {
+  /** Slack workspace id */
+  teamId?: Maybe<Scalars["String"]>;
+  /** Slack workspace name */
+  teamName?: Maybe<Scalars["String"]>;
+};
+
 export enum SlaStatus {
   Breached = "Breached",
   Completed = "Completed",
@@ -10172,6 +10180,10 @@ export type SlackAsksSettings = {
   canAdministrate: UserRoleType;
   /** The mapping of Slack channel ID => Slack channel name for connected channels. */
   slackChannelMapping?: Maybe<Array<SlackChannelNameMapping>>;
+  /** Slack workspace id */
+  teamId?: Maybe<Scalars["String"]>;
+  /** Slack workspace name */
+  teamName?: Maybe<Scalars["String"]>;
 };
 
 export type SlackAsksSettingsInput = {
@@ -10179,6 +10191,10 @@ export type SlackAsksSettingsInput = {
   canAdministrate: UserRoleType;
   /** The mapping of Slack channel ID => Slack channel name for connected channels. */
   slackChannelMapping?: Maybe<Array<SlackChannelNameMappingInput>>;
+  /** Slack workspace id */
+  teamId?: Maybe<Scalars["String"]>;
+  /** Slack workspace name */
+  teamName?: Maybe<Scalars["String"]>;
 };
 
 /** Tuple for mapping Slack channel IDs to names. */
@@ -10289,11 +10305,19 @@ export type SlackSettings = {
   __typename?: "SlackSettings";
   /** Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message. */
   linkOnIssueIdMention: Scalars["Boolean"];
+  /** Slack workspace id */
+  teamId?: Maybe<Scalars["String"]>;
+  /** Slack workspace name */
+  teamName?: Maybe<Scalars["String"]>;
 };
 
 export type SlackSettingsInput = {
   /** Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message. */
   linkOnIssueIdMention: Scalars["Boolean"];
+  /** Slack workspace id */
+  teamId?: Maybe<Scalars["String"]>;
+  /** Slack workspace name */
+  teamName?: Maybe<Scalars["String"]>;
 };
 
 /** Comparator for issue source type. */
@@ -10465,7 +10489,10 @@ export type Team = Node & {
   defaultTemplateForNonMembersId?: Maybe<Scalars["String"]>;
   /** The team's description. */
   description?: Maybe<Scalars["String"]>;
-  /** The workflow state into which issues are moved when a PR has been opened as draft. */
+  /**
+   * The workflow state into which issues are moved when a PR has been opened as draft.
+   * @deprecated Use team.gitAutomationStates instead.
+   */
   draftWorkflowState?: Maybe<WorkflowState>;
   /** The Git automation states for the team. */
   gitAutomationStates: GitAutomationStateConnection;
@@ -10508,9 +10535,15 @@ export type Team = Node & {
   members: UserConnection;
   /** Memberships associated with the team. For easier access of the same data, use `members` query. */
   memberships: TeamMembershipConnection;
-  /** The workflow state into which issues are moved when a PR has been merged. */
+  /**
+   * The workflow state into which issues are moved when a PR has been merged.
+   * @deprecated Use team.gitAutomationStates instead.
+   */
   mergeWorkflowState?: Maybe<WorkflowState>;
-  /** The workflow state into which issues are moved when a PR is ready to be merged. */
+  /**
+   * The workflow state into which issues are moved when a PR is ready to be merged.
+   * @deprecated Use team.gitAutomationStates instead.
+   */
   mergeableWorkflowState?: Maybe<WorkflowState>;
   /** The team's name. */
   name: Scalars["String"];
@@ -10522,7 +10555,10 @@ export type Team = Node & {
   projects: ProjectConnection;
   /** Whether an issue needs to have a priority set before leaving triage. */
   requirePriorityToLeaveTriage: Scalars["Boolean"];
-  /** The workflow state into which issues are moved when a review has been requested for the PR. */
+  /**
+   * The workflow state into which issues are moved when a review has been requested for the PR.
+   * @deprecated Use team.gitAutomationStates instead.
+   */
   reviewWorkflowState?: Maybe<WorkflowState>;
   /** Where to move issues when changing state. */
   setIssueSortOrderOnStateChange: Scalars["String"];
@@ -10532,7 +10568,10 @@ export type Team = Node & {
   slackIssueStatuses: Scalars["Boolean"];
   /** Whether to send new issue notifications to Slack. */
   slackNewIssue: Scalars["Boolean"];
-  /** The workflow state into which issues are moved when a PR has been opened. */
+  /**
+   * The workflow state into which issues are moved when a PR has been opened.
+   * @deprecated Use team.gitAutomationStates instead.
+   */
   startWorkflowState?: Maybe<WorkflowState>;
   /** The states that define the workflow associated with the team. */
   states: WorkflowStateConnection;
@@ -11192,7 +11231,7 @@ export type TimeScheduleEntry = {
   endsAt: Scalars["DateTime"];
   /** The start date of the schedule in ISO 8601 date-time format. */
   startsAt: Scalars["DateTime"];
-  /** The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
+  /** The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
   userEmail?: Maybe<Scalars["String"]>;
   /** The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference. */
   userId?: Maybe<Scalars["String"]>;
@@ -11203,7 +11242,7 @@ export type TimeScheduleEntryInput = {
   endsAt: Scalars["DateTime"];
   /** The start date of the schedule in ISO 8601 date-time format. */
   startsAt: Scalars["DateTime"];
-  /** The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
+  /** The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
   userEmail?: Maybe<Scalars["String"]>;
   /** The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference. */
   userId?: Maybe<Scalars["String"]>;
@@ -13249,6 +13288,7 @@ export type IssueFragment = { __typename: "Issue" } & Pick<
   | "id"
 > & {
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
+    sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     externalUserCreator?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
     lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
@@ -13717,11 +13757,22 @@ export type OauthClientApprovalFragment = { __typename: "OauthClientApproval" } 
 
 export type SentrySettingsFragment = { __typename: "SentrySettings" } & Pick<SentrySettings, "organizationSlug">;
 
-export type SlackSettingsFragment = { __typename: "SlackSettings" } & Pick<SlackSettings, "linkOnIssueIdMention">;
+export type SlackSettingsFragment = { __typename: "SlackSettings" } & Pick<
+  SlackSettings,
+  "teamId" | "teamName" | "linkOnIssueIdMention"
+>;
 
-export type SlackAsksSettingsFragment = { __typename: "SlackAsksSettings" } & {
-  slackChannelMapping?: Maybe<Array<{ __typename?: "SlackChannelNameMapping" } & SlackChannelNameMappingFragment>>;
-};
+export type SharedSlackSettingsFragment = { __typename: "SharedSlackSettings" } & Pick<
+  SharedSlackSettings,
+  "teamId" | "teamName"
+>;
+
+export type SlackAsksSettingsFragment = { __typename: "SlackAsksSettings" } & Pick<
+  SlackAsksSettings,
+  "teamId" | "teamName"
+> & {
+    slackChannelMapping?: Maybe<Array<{ __typename?: "SlackChannelNameMapping" } & SlackChannelNameMappingFragment>>;
+  };
 
 export type SlackPostSettingsFragment = { __typename: "SlackPostSettings" } & Pick<
   SlackPostSettings,
@@ -14297,6 +14348,7 @@ export type IssueSearchResultFragment = { __typename: "IssueSearchResult" } & Pi
   | "id"
 > & {
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
+    sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     externalUserCreator?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
     lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
@@ -17308,14 +17360,6 @@ export type AttachmentLinkZendeskMutationVariables = Exact<{
 
 export type AttachmentLinkZendeskMutation = { __typename?: "Mutation" } & {
   attachmentLinkZendesk: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
-};
-
-export type AttachmentUnsyncSlackMutationVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type AttachmentUnsyncSlackMutation = { __typename?: "Mutation" } & {
-  attachmentUnsyncSlack: { __typename?: "AttachmentPayload" } & AttachmentPayloadFragment;
 };
 
 export type UpdateAttachmentMutationVariables = Exact<{
@@ -20666,6 +20710,24 @@ export const ApplicationFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<ApplicationFragment, unknown>;
+export const SharedSlackSettingsFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SharedSlackSettings" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SharedSlackSettings" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "teamId" } },
+          { kind: "Field", name: { kind: "Name", value: "teamName" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SharedSlackSettingsFragment, unknown>;
 export const FrontSettingsFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -21005,6 +21067,8 @@ export const SlackSettingsFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "teamId" } },
+          { kind: "Field", name: { kind: "Name", value: "teamName" } },
           { kind: "Field", name: { kind: "Name", value: "linkOnIssueIdMention" } },
         ],
       },
@@ -21073,6 +21137,8 @@ export const SlackAsksSettingsFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "teamId" } },
+          { kind: "Field", name: { kind: "Name", value: "teamName" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "slackChannelMapping" },
@@ -23887,6 +23953,14 @@ export const IssueFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "sourceComment" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "cycle" },
             selectionSet: {
               kind: "SelectionSet",
@@ -24719,6 +24793,14 @@ export const IssueSearchResultFragmentDoc = {
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "sourceComment" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
           {
@@ -43198,44 +43280,6 @@ export const AttachmentLinkZendeskDocument = {
     ...AttachmentPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentLinkZendeskMutation, AttachmentLinkZendeskMutationVariables>;
-export const AttachmentUnsyncSlackDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "attachmentUnsyncSlack" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "attachmentUnsyncSlack" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AttachmentPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...AttachmentPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<AttachmentUnsyncSlackMutation, AttachmentUnsyncSlackMutationVariables>;
 export const UpdateAttachmentDocument = {
   kind: "Document",
   definitions: [
