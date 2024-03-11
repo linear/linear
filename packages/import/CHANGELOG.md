@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.10.2
+
+### Patch Changes
+
+- d8c54d5: chore(deps): update dependency patch versions
+- b23ab33: fix: revert CSV delimiter change
+- Updated dependencies [d8c54d5]
+- Updated dependencies [5281b01]
+  - @linear/sdk@18.0.0
+
 ## 1.10.1
 
 ### Patch Changes
