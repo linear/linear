@@ -8585,6 +8585,18 @@
             "deprecationReason": null
           },
           {
+            "name": "isInCooldown",
+            "description": "Comparator for filtering for whether the cycle is currently in cooldown.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "BooleanComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "isNext",
             "description": "Comparator for the filtering next cycle.",
             "type": {
@@ -20273,6 +20285,18 @@
             "deprecationReason": null
           },
           {
+            "name": "sourceComment",
+            "description": "The comment that this issue was created from.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Comment",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationSourceType",
             "description": "Integration type that created this issue, if applicable.",
             "args": [],
@@ -22183,6 +22207,18 @@
           {
             "name": "referenceCommentId",
             "description": "The comment the issue is referencing.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sourceCommentId",
+            "description": "The comment the issue is created from.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -26984,6 +27020,18 @@
             "deprecationReason": null
           },
           {
+            "name": "sourceComment",
+            "description": "The comment that this issue was created from.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Comment",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationSourceType",
             "description": "Integration type that created this issue, if applicable.",
             "args": [],
@@ -29702,39 +29750,6 @@
               {
                 "name": "id",
                 "description": "The identifier of the attachment to update.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "AttachmentPayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "attachmentUnsyncSlack",
-            "description": "[DEPRECATED] Unsyncs an existing synced Slack attachment.",
-            "args": [
-              {
-                "name": "id",
-                "description": "The identifier of the attachment to unsync.",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -41608,6 +41623,18 @@
             "deprecationReason": null
           },
           {
+            "name": "isInCooldown",
+            "description": "Comparator for filtering for whether the cycle is currently in cooldown.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "BooleanComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "isNext",
             "description": "Comparator for the filtering next cycle.",
             "type": {
@@ -42848,18 +42875,6 @@
           {
             "name": "completedAt",
             "description": "Comparator for the project completion date.",
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "NullableDateComparator",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "pausedAt",
-            "description": "[Internal] Comparator for the date when the project was last paused.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableDateComparator",
@@ -48418,18 +48433,6 @@
             "deprecationReason": null
           },
           {
-            "name": "pausedAt",
-            "description": "[INTERNAL] The latest time at which the project was paused.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "DateTime",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "completedAt",
             "description": "The time at which the project was moved into completed state.",
             "args": [],
@@ -49668,18 +49671,6 @@
             "deprecationReason": null
           },
           {
-            "name": "pausedAt",
-            "description": "[Internal] Comparator for the date when the project was last paused.",
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "NullableDateComparator",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "startDate",
             "description": "Comparator for the project start date.",
             "type": {
@@ -50390,18 +50381,6 @@
           {
             "name": "completedAt",
             "description": "Comparator for the project completion date.",
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "NullableDateComparator",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "pausedAt",
-            "description": "[Internal] Comparator for the date when the project was last paused.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableDateComparator",
@@ -52874,18 +52853,6 @@
           {
             "name": "startedAt",
             "description": "The time at which the project was moved into started state.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "DateTime",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "pausedAt",
-            "description": "[INTERNAL] The latest time at which the project was paused.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -55444,18 +55411,6 @@
           {
             "name": "canceledAt",
             "description": "The date when the project was canceled.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "DateTime",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "pausedAt",
-            "description": "[INTERNAL] The date when the project was paused.",
             "type": {
               "kind": "SCALAR",
               "name": "DateTime",
@@ -64966,6 +64921,76 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "SharedSlackSettings",
+        "description": "Shared Slack integration settings.",
+        "fields": [
+          {
+            "name": "teamName",
+            "description": "Slack workspace name",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamId",
+            "description": "Slack workspace id",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "SharedSlackSettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "teamName",
+            "description": "Slack workspace name",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamId",
+            "description": "Slack workspace id",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "ENUM",
         "name": "SlaStatus",
         "description": null,
@@ -65146,6 +65171,30 @@
         "description": "Slack Asks specific settings.",
         "fields": [
           {
+            "name": "teamName",
+            "description": "Slack workspace name",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamId",
+            "description": "Slack workspace id",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slackChannelMapping",
             "description": "The mapping of Slack channel ID => Slack channel name for connected channels.",
             "args": [],
@@ -65193,6 +65242,30 @@
         "description": null,
         "fields": null,
         "inputFields": [
+          {
+            "name": "teamName",
+            "description": "Slack workspace name",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamId",
+            "description": "Slack workspace id",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "slackChannelMapping",
             "description": "The mapping of Slack channel ID => Slack channel name for connected channels.",
@@ -65900,6 +65973,30 @@
         "description": "Settings for the regular Slack integration.",
         "fields": [
           {
+            "name": "teamName",
+            "description": "Slack workspace name",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamId",
+            "description": "Slack workspace id",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "linkOnIssueIdMention",
             "description": "Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.",
             "args": [],
@@ -65927,6 +66024,30 @@
         "description": null,
         "fields": null,
         "inputFields": [
+          {
+            "name": "teamName",
+            "description": "Slack workspace name",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamId",
+            "description": "Slack workspace id",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "linkOnIssueIdMention",
             "description": "Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.",
@@ -67164,8 +67285,8 @@
               "name": "WorkflowState",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use team.gitAutomationStates instead."
           },
           {
             "name": "startWorkflowState",
@@ -67176,8 +67297,8 @@
               "name": "WorkflowState",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use team.gitAutomationStates instead."
           },
           {
             "name": "reviewWorkflowState",
@@ -67188,8 +67309,8 @@
               "name": "WorkflowState",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use team.gitAutomationStates instead."
           },
           {
             "name": "mergeableWorkflowState",
@@ -67200,8 +67321,8 @@
               "name": "WorkflowState",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use team.gitAutomationStates instead."
           },
           {
             "name": "mergeWorkflowState",
@@ -67212,8 +67333,8 @@
               "name": "WorkflowState",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use team.gitAutomationStates instead."
           },
           {
             "name": "groupIssueHistory",
@@ -71633,7 +71754,7 @@
           },
           {
             "name": "userEmail",
-            "description": "The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id.",
+            "description": "The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -71701,7 +71822,7 @@
           },
           {
             "name": "userEmail",
-            "description": "The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id.",
+            "description": "The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id.",
             "type": {
               "kind": "SCALAR",
               "name": "String",

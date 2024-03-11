@@ -1491,6 +1491,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue.sourceComment query for L.Comment */
+    it("issue.sourceComment", async () => {
+      if (_issue) {
+        const issue_sourceComment: L.Comment | undefined = await _issue.sourceComment;
+        expect(issue_sourceComment instanceof L.Comment);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.sourceComment query");
+      }
+    });
+
     /** Test the issue.state query for L.WorkflowState */
     it("issue.state", async () => {
       if (_issue) {
@@ -1897,6 +1907,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue.sourceComment query for L.Comment */
+    it("issue.sourceComment", async () => {
+      if (_issue) {
+        const issue_sourceComment: L.Comment | undefined = await _issue.sourceComment;
+        expect(issue_sourceComment instanceof L.Comment);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.sourceComment query");
+      }
+    });
+
     /** Test the issue.state query for L.WorkflowState */
     it("issue.state", async () => {
       if (_issue) {
@@ -2249,6 +2269,16 @@ describe("generated", () => {
         expect(issue_snoozedBy instanceof L.User);
       } else {
         console.warn("codegen-doc:print: No Issue found - cannot test issue.snoozedBy query");
+      }
+    });
+
+    /** Test the issue.sourceComment query for L.Comment */
+    it("issue.sourceComment", async () => {
+      if (_issue) {
+        const issue_sourceComment: L.Comment | undefined = await _issue.sourceComment;
+        expect(issue_sourceComment instanceof L.Comment);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.sourceComment query");
       }
     });
 

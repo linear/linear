@@ -2298,6 +2298,10 @@ input CycleFilter {
   """
   isFuture: BooleanComparator
   """
+  Comparator for filtering for whether the cycle is currently in cooldown.
+  """
+  isInCooldown: BooleanComparator
+  """
   Comparator for the filtering next cycle.
   """
   isNext: BooleanComparator
@@ -5608,6 +5612,10 @@ type Issue implements Node {
   """
   sortOrder: Float!
   """
+  The comment that this issue was created from.
+  """
+  sourceComment: Comment
+  """
   The time at which the issue was moved into started state.
   """
   startedAt: DateTime
@@ -5990,6 +5998,10 @@ input IssueCreateInput {
   The position of the issue related to other issues.
   """
   sortOrder: Float
+  """
+  The comment the issue is created from.
+  """
+  sourceCommentId: String
   """
   The team state of the issue.
   """
@@ -7561,6 +7573,10 @@ type IssueSearchResult implements Node {
   """
   sortOrder: Float!
   """
+  The comment that this issue was created from.
+  """
+  sourceComment: Comment
+  """
   The time at which the issue was moved into started state.
   """
   startedAt: DateTime
@@ -8488,15 +8504,6 @@ type Mutation {
     The title to use for the attachment.
     """
     title: String
-  ): AttachmentPayload!
-  """
-  [DEPRECATED] Unsyncs an existing synced Slack attachment.
-  """
-  attachmentUnsyncSlack(
-    """
-    The identifier of the attachment to unsync.
-    """
-    id: String!
   ): AttachmentPayload!
   """
   Updates an existing issue attachment.
@@ -11300,6 +11307,10 @@ input NullableCycleFilter {
   """
   isFuture: BooleanComparator
   """
+  Comparator for filtering for whether the cycle is currently in cooldown.
+  """
+  isInCooldown: BooleanComparator
+  """
   Comparator for the filtering next cycle.
   """
   isNext: BooleanComparator
@@ -11743,10 +11754,6 @@ input NullableProjectFilter {
   Compound filters, one of which need to be matched by the project.
   """
   or: [NullableProjectFilter!]
-  """
-  [Internal] Comparator for the date when the project was last paused.
-  """
-  pausedAt: NullableDateComparator
   """
   Filters that the project's milestones must satisfy.
   """
@@ -13445,10 +13452,6 @@ type Project implements Node {
   """
   name: String!
   """
-  [INTERNAL] The latest time at which the project was paused.
-  """
-  pausedAt: DateTime
-  """
   The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
   """
   progress: Float!
@@ -13718,10 +13721,6 @@ input ProjectCollectionFilter {
   """
   or: [ProjectCollectionFilter!]
   """
-  [Internal] Comparator for the date when the project was last paused.
-  """
-  pausedAt: NullableDateComparator
-  """
   Filters that the project's milestones must satisfy.
   """
   projectMilestones: ProjectMilestoneCollectionFilter
@@ -13916,10 +13915,6 @@ input ProjectFilter {
   Compound filters, one of which need to be matched by the project.
   """
   or: [ProjectFilter!]
-  """
-  [Internal] Comparator for the date when the project was last paused.
-  """
-  pausedAt: NullableDateComparator
   """
   Filters that the project's milestones must satisfy.
   """
@@ -14712,10 +14707,6 @@ type ProjectSearchResult implements Node {
   """
   name: String!
   """
-  [INTERNAL] The latest time at which the project was paused.
-  """
-  pausedAt: DateTime
-  """
   The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
   """
   progress: Float!
@@ -15240,10 +15231,6 @@ input ProjectUpdateInput {
   The name of the project.
   """
   name: String
-  """
-  [INTERNAL] The date when the project was paused.
-  """
-  pausedAt: DateTime
   """
   The time until which project update reminders are paused.
   """
@@ -17855,6 +17842,31 @@ input SentrySettingsInput {
   organizationSlug: String!
 }
 
+"""
+Shared Slack integration settings.
+"""
+type SharedSlackSettings {
+  """
+  Slack workspace id
+  """
+  teamId: String
+  """
+  Slack workspace name
+  """
+  teamName: String
+}
+
+input SharedSlackSettingsInput {
+  """
+  Slack workspace id
+  """
+  teamId: String
+  """
+  Slack workspace name
+  """
+  teamName: String
+}
+
 enum SlaStatus {
   Breached
   Completed
@@ -17917,6 +17929,14 @@ type SlackAsksSettings {
   The mapping of Slack channel ID => Slack channel name for connected channels.
   """
   slackChannelMapping: [SlackChannelNameMapping!]
+  """
+  Slack workspace id
+  """
+  teamId: String
+  """
+  Slack workspace name
+  """
+  teamName: String
 }
 
 input SlackAsksSettingsInput {
@@ -17928,6 +17948,14 @@ input SlackAsksSettingsInput {
   The mapping of Slack channel ID => Slack channel name for connected channels.
   """
   slackChannelMapping: [SlackChannelNameMappingInput!]
+  """
+  Slack workspace id
+  """
+  teamId: String
+  """
+  Slack workspace name
+  """
+  teamName: String
 }
 
 """
@@ -18103,6 +18131,14 @@ type SlackSettings {
   Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.
   """
   linkOnIssueIdMention: Boolean!
+  """
+  Slack workspace id
+  """
+  teamId: String
+  """
+  Slack workspace name
+  """
+  teamName: String
 }
 
 input SlackSettingsInput {
@@ -18110,6 +18146,14 @@ input SlackSettingsInput {
   Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.
   """
   linkOnIssueIdMention: Boolean!
+  """
+  Slack workspace id
+  """
+  teamId: String
+  """
+  Slack workspace name
+  """
+  teamName: String
 }
 
 """
@@ -18450,7 +18494,7 @@ type Team implements Node {
   """
   The workflow state into which issues are moved when a PR has been opened as draft.
   """
-  draftWorkflowState: WorkflowState
+  draftWorkflowState: WorkflowState @deprecated(reason: "Use team.gitAutomationStates instead.")
   """
   The Git automation states for the team.
   """
@@ -18676,11 +18720,11 @@ type Team implements Node {
   """
   The workflow state into which issues are moved when a PR has been merged.
   """
-  mergeWorkflowState: WorkflowState
+  mergeWorkflowState: WorkflowState @deprecated(reason: "Use team.gitAutomationStates instead.")
   """
   The workflow state into which issues are moved when a PR is ready to be merged.
   """
-  mergeableWorkflowState: WorkflowState
+  mergeableWorkflowState: WorkflowState @deprecated(reason: "Use team.gitAutomationStates instead.")
   """
   The team's name.
   """
@@ -18733,7 +18777,7 @@ type Team implements Node {
   """
   The workflow state into which issues are moved when a review has been requested for the PR.
   """
-  reviewWorkflowState: WorkflowState
+  reviewWorkflowState: WorkflowState @deprecated(reason: "Use team.gitAutomationStates instead.")
   """
   Where to move issues when changing state.
   """
@@ -18753,7 +18797,7 @@ type Team implements Node {
   """
   The workflow state into which issues are moved when a PR has been opened.
   """
-  startWorkflowState: WorkflowState
+  startWorkflowState: WorkflowState @deprecated(reason: "Use team.gitAutomationStates instead.")
   """
   The states that define the workflow associated with the team.
   """
@@ -19762,7 +19806,7 @@ type TimeScheduleEntry {
   """
   startsAt: DateTime!
   """
-  The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id.
+  The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id.
   """
   userEmail: String
   """
@@ -19781,7 +19825,7 @@ input TimeScheduleEntryInput {
   """
   startsAt: DateTime!
   """
-  The email of the user on schedule. This is used in case the external user could not be mapped to a Linear user id.
+  The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id.
   """
   userEmail: String
   """
