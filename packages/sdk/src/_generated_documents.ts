@@ -13863,6 +13863,245 @@ export type ZendeskSettingsFragment = { __typename: "ZendeskSettings" } & Pick<
   | "sendNoteOnComment"
 >;
 
+type Node_ApiKey_Fragment = { __typename: "ApiKey" } & Pick<ApiKey, "id">;
+
+type Node_Attachment_Fragment = { __typename: "Attachment" } & Pick<Attachment, "id">;
+
+type Node_AuditEntry_Fragment = { __typename: "AuditEntry" } & Pick<AuditEntry, "id">;
+
+type Node_Comment_Fragment = { __typename: "Comment" } & Pick<Comment, "id">;
+
+type Node_Company_Fragment = { __typename: "Company" } & Pick<Company, "id">;
+
+type Node_CustomView_Fragment = { __typename: "CustomView" } & Pick<CustomView, "id">;
+
+type Node_CustomViewNotificationSubscription_Fragment = { __typename: "CustomViewNotificationSubscription" } & Pick<
+  CustomViewNotificationSubscription,
+  "id"
+>;
+
+type Node_Cycle_Fragment = { __typename: "Cycle" } & Pick<Cycle, "id">;
+
+type Node_CycleNotificationSubscription_Fragment = { __typename: "CycleNotificationSubscription" } & Pick<
+  CycleNotificationSubscription,
+  "id"
+>;
+
+type Node_Document_Fragment = { __typename: "Document" } & Pick<Document, "id">;
+
+type Node_DocumentContent_Fragment = { __typename: "DocumentContent" } & Pick<DocumentContent, "id">;
+
+type Node_DocumentContentHistory_Fragment = { __typename: "DocumentContentHistory" } & Pick<
+  DocumentContentHistory,
+  "id"
+>;
+
+type Node_DocumentSearchResult_Fragment = { __typename: "DocumentSearchResult" } & Pick<DocumentSearchResult, "id">;
+
+type Node_EmailIntakeAddress_Fragment = { __typename: "EmailIntakeAddress" } & Pick<EmailIntakeAddress, "id">;
+
+type Node_Emoji_Fragment = { __typename: "Emoji" } & Pick<Emoji, "id">;
+
+type Node_ExternalUser_Fragment = { __typename: "ExternalUser" } & Pick<ExternalUser, "id">;
+
+type Node_Facet_Fragment = { __typename: "Facet" } & Pick<Facet, "id">;
+
+type Node_Favorite_Fragment = { __typename: "Favorite" } & Pick<Favorite, "id">;
+
+type Node_GitAutomationState_Fragment = { __typename: "GitAutomationState" } & Pick<GitAutomationState, "id">;
+
+type Node_GitAutomationTargetBranch_Fragment = { __typename: "GitAutomationTargetBranch" } & Pick<
+  GitAutomationTargetBranch,
+  "id"
+>;
+
+type Node_Initiative_Fragment = { __typename: "Initiative" } & Pick<Initiative, "id">;
+
+type Node_InitiativeToProject_Fragment = { __typename: "InitiativeToProject" } & Pick<InitiativeToProject, "id">;
+
+type Node_Integration_Fragment = { __typename: "Integration" } & Pick<Integration, "id">;
+
+type Node_IntegrationTemplate_Fragment = { __typename: "IntegrationTemplate" } & Pick<IntegrationTemplate, "id">;
+
+type Node_IntegrationsSettings_Fragment = { __typename: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">;
+
+type Node_Issue_Fragment = { __typename: "Issue" } & Pick<Issue, "id">;
+
+type Node_IssueDraft_Fragment = { __typename: "IssueDraft" } & Pick<IssueDraft, "id">;
+
+type Node_IssueHistory_Fragment = { __typename: "IssueHistory" } & Pick<IssueHistory, "id">;
+
+type Node_IssueImport_Fragment = { __typename: "IssueImport" } & Pick<IssueImport, "id">;
+
+type Node_IssueLabel_Fragment = { __typename: "IssueLabel" } & Pick<IssueLabel, "id">;
+
+type Node_IssueNotification_Fragment = { __typename: "IssueNotification" } & Pick<IssueNotification, "id">;
+
+type Node_IssueRelation_Fragment = { __typename: "IssueRelation" } & Pick<IssueRelation, "id">;
+
+type Node_IssueSearchResult_Fragment = { __typename: "IssueSearchResult" } & Pick<IssueSearchResult, "id">;
+
+type Node_LabelNotificationSubscription_Fragment = { __typename: "LabelNotificationSubscription" } & Pick<
+  LabelNotificationSubscription,
+  "id"
+>;
+
+type Node_OauthClient_Fragment = { __typename: "OauthClient" } & Pick<OauthClient, "id">;
+
+type Node_OauthClientApproval_Fragment = { __typename: "OauthClientApproval" } & Pick<OauthClientApproval, "id">;
+
+type Node_OauthClientApprovalNotification_Fragment = { __typename: "OauthClientApprovalNotification" } & Pick<
+  OauthClientApprovalNotification,
+  "id"
+>;
+
+type Node_Organization_Fragment = { __typename: "Organization" } & Pick<Organization, "id">;
+
+type Node_OrganizationDomain_Fragment = { __typename: "OrganizationDomain" } & Pick<OrganizationDomain, "id">;
+
+type Node_OrganizationInvite_Fragment = { __typename: "OrganizationInvite" } & Pick<OrganizationInvite, "id">;
+
+type Node_PaidSubscription_Fragment = { __typename: "PaidSubscription" } & Pick<PaidSubscription, "id">;
+
+type Node_Project_Fragment = { __typename: "Project" } & Pick<Project, "id">;
+
+type Node_ProjectLink_Fragment = { __typename: "ProjectLink" } & Pick<ProjectLink, "id">;
+
+type Node_ProjectMilestone_Fragment = { __typename: "ProjectMilestone" } & Pick<ProjectMilestone, "id">;
+
+type Node_ProjectNotification_Fragment = { __typename: "ProjectNotification" } & Pick<ProjectNotification, "id">;
+
+type Node_ProjectNotificationSubscription_Fragment = { __typename: "ProjectNotificationSubscription" } & Pick<
+  ProjectNotificationSubscription,
+  "id"
+>;
+
+type Node_ProjectSearchResult_Fragment = { __typename: "ProjectSearchResult" } & Pick<ProjectSearchResult, "id">;
+
+type Node_ProjectStatus_Fragment = { __typename: "ProjectStatus" } & Pick<ProjectStatus, "id">;
+
+type Node_ProjectUpdate_Fragment = { __typename: "ProjectUpdate" } & Pick<ProjectUpdate, "id">;
+
+type Node_ProjectUpdateInteraction_Fragment = { __typename: "ProjectUpdateInteraction" } & Pick<
+  ProjectUpdateInteraction,
+  "id"
+>;
+
+type Node_PushSubscription_Fragment = { __typename: "PushSubscription" } & Pick<PushSubscription, "id">;
+
+type Node_Reaction_Fragment = { __typename: "Reaction" } & Pick<Reaction, "id">;
+
+type Node_Roadmap_Fragment = { __typename: "Roadmap" } & Pick<Roadmap, "id">;
+
+type Node_RoadmapToProject_Fragment = { __typename: "RoadmapToProject" } & Pick<RoadmapToProject, "id">;
+
+type Node_Team_Fragment = { __typename: "Team" } & Pick<Team, "id">;
+
+type Node_TeamMembership_Fragment = { __typename: "TeamMembership" } & Pick<TeamMembership, "id">;
+
+type Node_TeamNotificationSubscription_Fragment = { __typename: "TeamNotificationSubscription" } & Pick<
+  TeamNotificationSubscription,
+  "id"
+>;
+
+type Node_Template_Fragment = { __typename: "Template" } & Pick<Template, "id">;
+
+type Node_TimeSchedule_Fragment = { __typename: "TimeSchedule" } & Pick<TimeSchedule, "id">;
+
+type Node_TriageResponsibility_Fragment = { __typename: "TriageResponsibility" } & Pick<TriageResponsibility, "id">;
+
+type Node_User_Fragment = { __typename: "User" } & Pick<User, "id">;
+
+type Node_UserNotificationSubscription_Fragment = { __typename: "UserNotificationSubscription" } & Pick<
+  UserNotificationSubscription,
+  "id"
+>;
+
+type Node_UserSettings_Fragment = { __typename: "UserSettings" } & Pick<UserSettings, "id">;
+
+type Node_ViewPreferences_Fragment = { __typename: "ViewPreferences" } & Pick<ViewPreferences, "id">;
+
+type Node_Webhook_Fragment = { __typename: "Webhook" } & Pick<Webhook, "id">;
+
+type Node_WorkflowCronJobDefinition_Fragment = { __typename: "WorkflowCronJobDefinition" } & Pick<
+  WorkflowCronJobDefinition,
+  "id"
+>;
+
+type Node_WorkflowDefinition_Fragment = { __typename: "WorkflowDefinition" } & Pick<WorkflowDefinition, "id">;
+
+type Node_WorkflowState_Fragment = { __typename: "WorkflowState" } & Pick<WorkflowState, "id">;
+
+export type NodeFragment =
+  | Node_ApiKey_Fragment
+  | Node_Attachment_Fragment
+  | Node_AuditEntry_Fragment
+  | Node_Comment_Fragment
+  | Node_Company_Fragment
+  | Node_CustomView_Fragment
+  | Node_CustomViewNotificationSubscription_Fragment
+  | Node_Cycle_Fragment
+  | Node_CycleNotificationSubscription_Fragment
+  | Node_Document_Fragment
+  | Node_DocumentContent_Fragment
+  | Node_DocumentContentHistory_Fragment
+  | Node_DocumentSearchResult_Fragment
+  | Node_EmailIntakeAddress_Fragment
+  | Node_Emoji_Fragment
+  | Node_ExternalUser_Fragment
+  | Node_Facet_Fragment
+  | Node_Favorite_Fragment
+  | Node_GitAutomationState_Fragment
+  | Node_GitAutomationTargetBranch_Fragment
+  | Node_Initiative_Fragment
+  | Node_InitiativeToProject_Fragment
+  | Node_Integration_Fragment
+  | Node_IntegrationTemplate_Fragment
+  | Node_IntegrationsSettings_Fragment
+  | Node_Issue_Fragment
+  | Node_IssueDraft_Fragment
+  | Node_IssueHistory_Fragment
+  | Node_IssueImport_Fragment
+  | Node_IssueLabel_Fragment
+  | Node_IssueNotification_Fragment
+  | Node_IssueRelation_Fragment
+  | Node_IssueSearchResult_Fragment
+  | Node_LabelNotificationSubscription_Fragment
+  | Node_OauthClient_Fragment
+  | Node_OauthClientApproval_Fragment
+  | Node_OauthClientApprovalNotification_Fragment
+  | Node_Organization_Fragment
+  | Node_OrganizationDomain_Fragment
+  | Node_OrganizationInvite_Fragment
+  | Node_PaidSubscription_Fragment
+  | Node_Project_Fragment
+  | Node_ProjectLink_Fragment
+  | Node_ProjectMilestone_Fragment
+  | Node_ProjectNotification_Fragment
+  | Node_ProjectNotificationSubscription_Fragment
+  | Node_ProjectSearchResult_Fragment
+  | Node_ProjectStatus_Fragment
+  | Node_ProjectUpdate_Fragment
+  | Node_ProjectUpdateInteraction_Fragment
+  | Node_PushSubscription_Fragment
+  | Node_Reaction_Fragment
+  | Node_Roadmap_Fragment
+  | Node_RoadmapToProject_Fragment
+  | Node_Team_Fragment
+  | Node_TeamMembership_Fragment
+  | Node_TeamNotificationSubscription_Fragment
+  | Node_Template_Fragment
+  | Node_TimeSchedule_Fragment
+  | Node_TriageResponsibility_Fragment
+  | Node_User_Fragment
+  | Node_UserNotificationSubscription_Fragment
+  | Node_UserSettings_Fragment
+  | Node_ViewPreferences_Fragment
+  | Node_Webhook_Fragment
+  | Node_WorkflowCronJobDefinition_Fragment
+  | Node_WorkflowDefinition_Fragment
+  | Node_WorkflowState_Fragment;
+
 export type ApiKeyConnectionFragment = { __typename: "ApiKeyConnection" } & {
   nodes: Array<{ __typename?: "ApiKey" } & ApiKeyFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
@@ -14299,245 +14538,6 @@ export type IssueSearchResultConnectionFragment = { __typename: "IssueSearchResu
 };
 
 export type LogoutResponseFragment = { __typename: "LogoutResponse" } & Pick<LogoutResponse, "success">;
-
-type Node_ApiKey_Fragment = { __typename: "ApiKey" } & Pick<ApiKey, "id">;
-
-type Node_Attachment_Fragment = { __typename: "Attachment" } & Pick<Attachment, "id">;
-
-type Node_AuditEntry_Fragment = { __typename: "AuditEntry" } & Pick<AuditEntry, "id">;
-
-type Node_Comment_Fragment = { __typename: "Comment" } & Pick<Comment, "id">;
-
-type Node_Company_Fragment = { __typename: "Company" } & Pick<Company, "id">;
-
-type Node_CustomView_Fragment = { __typename: "CustomView" } & Pick<CustomView, "id">;
-
-type Node_CustomViewNotificationSubscription_Fragment = { __typename: "CustomViewNotificationSubscription" } & Pick<
-  CustomViewNotificationSubscription,
-  "id"
->;
-
-type Node_Cycle_Fragment = { __typename: "Cycle" } & Pick<Cycle, "id">;
-
-type Node_CycleNotificationSubscription_Fragment = { __typename: "CycleNotificationSubscription" } & Pick<
-  CycleNotificationSubscription,
-  "id"
->;
-
-type Node_Document_Fragment = { __typename: "Document" } & Pick<Document, "id">;
-
-type Node_DocumentContent_Fragment = { __typename: "DocumentContent" } & Pick<DocumentContent, "id">;
-
-type Node_DocumentContentHistory_Fragment = { __typename: "DocumentContentHistory" } & Pick<
-  DocumentContentHistory,
-  "id"
->;
-
-type Node_DocumentSearchResult_Fragment = { __typename: "DocumentSearchResult" } & Pick<DocumentSearchResult, "id">;
-
-type Node_EmailIntakeAddress_Fragment = { __typename: "EmailIntakeAddress" } & Pick<EmailIntakeAddress, "id">;
-
-type Node_Emoji_Fragment = { __typename: "Emoji" } & Pick<Emoji, "id">;
-
-type Node_ExternalUser_Fragment = { __typename: "ExternalUser" } & Pick<ExternalUser, "id">;
-
-type Node_Facet_Fragment = { __typename: "Facet" } & Pick<Facet, "id">;
-
-type Node_Favorite_Fragment = { __typename: "Favorite" } & Pick<Favorite, "id">;
-
-type Node_GitAutomationState_Fragment = { __typename: "GitAutomationState" } & Pick<GitAutomationState, "id">;
-
-type Node_GitAutomationTargetBranch_Fragment = { __typename: "GitAutomationTargetBranch" } & Pick<
-  GitAutomationTargetBranch,
-  "id"
->;
-
-type Node_Initiative_Fragment = { __typename: "Initiative" } & Pick<Initiative, "id">;
-
-type Node_InitiativeToProject_Fragment = { __typename: "InitiativeToProject" } & Pick<InitiativeToProject, "id">;
-
-type Node_Integration_Fragment = { __typename: "Integration" } & Pick<Integration, "id">;
-
-type Node_IntegrationTemplate_Fragment = { __typename: "IntegrationTemplate" } & Pick<IntegrationTemplate, "id">;
-
-type Node_IntegrationsSettings_Fragment = { __typename: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">;
-
-type Node_Issue_Fragment = { __typename: "Issue" } & Pick<Issue, "id">;
-
-type Node_IssueDraft_Fragment = { __typename: "IssueDraft" } & Pick<IssueDraft, "id">;
-
-type Node_IssueHistory_Fragment = { __typename: "IssueHistory" } & Pick<IssueHistory, "id">;
-
-type Node_IssueImport_Fragment = { __typename: "IssueImport" } & Pick<IssueImport, "id">;
-
-type Node_IssueLabel_Fragment = { __typename: "IssueLabel" } & Pick<IssueLabel, "id">;
-
-type Node_IssueNotification_Fragment = { __typename: "IssueNotification" } & Pick<IssueNotification, "id">;
-
-type Node_IssueRelation_Fragment = { __typename: "IssueRelation" } & Pick<IssueRelation, "id">;
-
-type Node_IssueSearchResult_Fragment = { __typename: "IssueSearchResult" } & Pick<IssueSearchResult, "id">;
-
-type Node_LabelNotificationSubscription_Fragment = { __typename: "LabelNotificationSubscription" } & Pick<
-  LabelNotificationSubscription,
-  "id"
->;
-
-type Node_OauthClient_Fragment = { __typename: "OauthClient" } & Pick<OauthClient, "id">;
-
-type Node_OauthClientApproval_Fragment = { __typename: "OauthClientApproval" } & Pick<OauthClientApproval, "id">;
-
-type Node_OauthClientApprovalNotification_Fragment = { __typename: "OauthClientApprovalNotification" } & Pick<
-  OauthClientApprovalNotification,
-  "id"
->;
-
-type Node_Organization_Fragment = { __typename: "Organization" } & Pick<Organization, "id">;
-
-type Node_OrganizationDomain_Fragment = { __typename: "OrganizationDomain" } & Pick<OrganizationDomain, "id">;
-
-type Node_OrganizationInvite_Fragment = { __typename: "OrganizationInvite" } & Pick<OrganizationInvite, "id">;
-
-type Node_PaidSubscription_Fragment = { __typename: "PaidSubscription" } & Pick<PaidSubscription, "id">;
-
-type Node_Project_Fragment = { __typename: "Project" } & Pick<Project, "id">;
-
-type Node_ProjectLink_Fragment = { __typename: "ProjectLink" } & Pick<ProjectLink, "id">;
-
-type Node_ProjectMilestone_Fragment = { __typename: "ProjectMilestone" } & Pick<ProjectMilestone, "id">;
-
-type Node_ProjectNotification_Fragment = { __typename: "ProjectNotification" } & Pick<ProjectNotification, "id">;
-
-type Node_ProjectNotificationSubscription_Fragment = { __typename: "ProjectNotificationSubscription" } & Pick<
-  ProjectNotificationSubscription,
-  "id"
->;
-
-type Node_ProjectSearchResult_Fragment = { __typename: "ProjectSearchResult" } & Pick<ProjectSearchResult, "id">;
-
-type Node_ProjectStatus_Fragment = { __typename: "ProjectStatus" } & Pick<ProjectStatus, "id">;
-
-type Node_ProjectUpdate_Fragment = { __typename: "ProjectUpdate" } & Pick<ProjectUpdate, "id">;
-
-type Node_ProjectUpdateInteraction_Fragment = { __typename: "ProjectUpdateInteraction" } & Pick<
-  ProjectUpdateInteraction,
-  "id"
->;
-
-type Node_PushSubscription_Fragment = { __typename: "PushSubscription" } & Pick<PushSubscription, "id">;
-
-type Node_Reaction_Fragment = { __typename: "Reaction" } & Pick<Reaction, "id">;
-
-type Node_Roadmap_Fragment = { __typename: "Roadmap" } & Pick<Roadmap, "id">;
-
-type Node_RoadmapToProject_Fragment = { __typename: "RoadmapToProject" } & Pick<RoadmapToProject, "id">;
-
-type Node_Team_Fragment = { __typename: "Team" } & Pick<Team, "id">;
-
-type Node_TeamMembership_Fragment = { __typename: "TeamMembership" } & Pick<TeamMembership, "id">;
-
-type Node_TeamNotificationSubscription_Fragment = { __typename: "TeamNotificationSubscription" } & Pick<
-  TeamNotificationSubscription,
-  "id"
->;
-
-type Node_Template_Fragment = { __typename: "Template" } & Pick<Template, "id">;
-
-type Node_TimeSchedule_Fragment = { __typename: "TimeSchedule" } & Pick<TimeSchedule, "id">;
-
-type Node_TriageResponsibility_Fragment = { __typename: "TriageResponsibility" } & Pick<TriageResponsibility, "id">;
-
-type Node_User_Fragment = { __typename: "User" } & Pick<User, "id">;
-
-type Node_UserNotificationSubscription_Fragment = { __typename: "UserNotificationSubscription" } & Pick<
-  UserNotificationSubscription,
-  "id"
->;
-
-type Node_UserSettings_Fragment = { __typename: "UserSettings" } & Pick<UserSettings, "id">;
-
-type Node_ViewPreferences_Fragment = { __typename: "ViewPreferences" } & Pick<ViewPreferences, "id">;
-
-type Node_Webhook_Fragment = { __typename: "Webhook" } & Pick<Webhook, "id">;
-
-type Node_WorkflowCronJobDefinition_Fragment = { __typename: "WorkflowCronJobDefinition" } & Pick<
-  WorkflowCronJobDefinition,
-  "id"
->;
-
-type Node_WorkflowDefinition_Fragment = { __typename: "WorkflowDefinition" } & Pick<WorkflowDefinition, "id">;
-
-type Node_WorkflowState_Fragment = { __typename: "WorkflowState" } & Pick<WorkflowState, "id">;
-
-export type NodeFragment =
-  | Node_ApiKey_Fragment
-  | Node_Attachment_Fragment
-  | Node_AuditEntry_Fragment
-  | Node_Comment_Fragment
-  | Node_Company_Fragment
-  | Node_CustomView_Fragment
-  | Node_CustomViewNotificationSubscription_Fragment
-  | Node_Cycle_Fragment
-  | Node_CycleNotificationSubscription_Fragment
-  | Node_Document_Fragment
-  | Node_DocumentContent_Fragment
-  | Node_DocumentContentHistory_Fragment
-  | Node_DocumentSearchResult_Fragment
-  | Node_EmailIntakeAddress_Fragment
-  | Node_Emoji_Fragment
-  | Node_ExternalUser_Fragment
-  | Node_Facet_Fragment
-  | Node_Favorite_Fragment
-  | Node_GitAutomationState_Fragment
-  | Node_GitAutomationTargetBranch_Fragment
-  | Node_Initiative_Fragment
-  | Node_InitiativeToProject_Fragment
-  | Node_Integration_Fragment
-  | Node_IntegrationTemplate_Fragment
-  | Node_IntegrationsSettings_Fragment
-  | Node_Issue_Fragment
-  | Node_IssueDraft_Fragment
-  | Node_IssueHistory_Fragment
-  | Node_IssueImport_Fragment
-  | Node_IssueLabel_Fragment
-  | Node_IssueNotification_Fragment
-  | Node_IssueRelation_Fragment
-  | Node_IssueSearchResult_Fragment
-  | Node_LabelNotificationSubscription_Fragment
-  | Node_OauthClient_Fragment
-  | Node_OauthClientApproval_Fragment
-  | Node_OauthClientApprovalNotification_Fragment
-  | Node_Organization_Fragment
-  | Node_OrganizationDomain_Fragment
-  | Node_OrganizationInvite_Fragment
-  | Node_PaidSubscription_Fragment
-  | Node_Project_Fragment
-  | Node_ProjectLink_Fragment
-  | Node_ProjectMilestone_Fragment
-  | Node_ProjectNotification_Fragment
-  | Node_ProjectNotificationSubscription_Fragment
-  | Node_ProjectSearchResult_Fragment
-  | Node_ProjectStatus_Fragment
-  | Node_ProjectUpdate_Fragment
-  | Node_ProjectUpdateInteraction_Fragment
-  | Node_PushSubscription_Fragment
-  | Node_Reaction_Fragment
-  | Node_Roadmap_Fragment
-  | Node_RoadmapToProject_Fragment
-  | Node_Team_Fragment
-  | Node_TeamMembership_Fragment
-  | Node_TeamNotificationSubscription_Fragment
-  | Node_Template_Fragment
-  | Node_TimeSchedule_Fragment
-  | Node_TriageResponsibility_Fragment
-  | Node_User_Fragment
-  | Node_UserNotificationSubscription_Fragment
-  | Node_UserSettings_Fragment
-  | Node_ViewPreferences_Fragment
-  | Node_Webhook_Fragment
-  | Node_WorkflowCronJobDefinition_Fragment
-  | Node_WorkflowDefinition_Fragment
-  | Node_WorkflowState_Fragment;
 
 export type NotificationBatchActionPayloadFragment = { __typename: "NotificationBatchActionPayload" } & Pick<
   NotificationBatchActionPayload,
@@ -21333,6 +21333,23 @@ export const AuthenticationSessionFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AuthenticationSessionFragment, unknown>;
+export const NodeFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Node" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Node" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<NodeFragment, unknown>;
 export const ApiKeyFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -24909,23 +24926,6 @@ export const LogoutResponseFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<LogoutResponseFragment, unknown>;
-export const NodeFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Node" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Node" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<NodeFragment, unknown>;
 export const NotificationBatchActionPayloadFragmentDoc = {
   kind: "Document",
   definitions: [

@@ -6,6 +6,7 @@ type TrelloLabelColor = "green" | "yellow" | "orange" | "red" | "purple" | "blue
 interface TrelloCard {
   name: string;
   desc: string;
+  url: string;
   shortUrl: string;
   closed: boolean;
   labels: {
@@ -73,12 +74,30 @@ export class TrelloJsonImporter implements Importer {
       labels: {},
       users: {},
       statuses: {},
+      subIssues: {}
     };
 
     // Map card id => checklist so we can add them to the issues in the next step
     const checkLists: { [key: string]: TrelloChecklist } = {};
+    const trelloCheckLists: { [key: string]: string[] } = {};
+
+    const urlsToIds: { [key: string]: string } = {}
+    data.cards.forEach((card: TrelloCard) => {
+      urlsToIds[card.url] = card.id
+      urlsToIds[card.shortUrl] = card.id
+    })
+
     for (const checklist of data.checklists as TrelloChecklist[]) {
       checkLists[checklist.idCard] = checklist;
+      checklist.checkItems.forEach((item) => {
+        if (item.name.includes("trello.com")) {
+          trelloCheckLists[checklist.idCard] ||= []
+          const cardId: string = urlsToIds[item.name]
+          if (cardId) {
+            trelloCheckLists[checklist.idCard].push(cardId)
+          }
+        }
+      })
     }
 
     // Map card id => comments so we can add them to the issues in the next step
@@ -114,6 +133,7 @@ export class TrelloJsonImporter implements Importer {
       let formattedChecklist = "";
       if (checklist) {
         formattedChecklist = checklist.checkItems
+          .filter((item) => !urlsToIds[item.name])
           .sort((item1, item2) => item1.pos - item2.pos)
           .map(item => `- [${item.state === "complete" ? "x" : " "}] ${item.name}`)
           .join("\n");
@@ -144,6 +164,7 @@ export class TrelloJsonImporter implements Importer {
         url,
         labels,
         comments: comments[card.id],
+        originalId: card.id
       });
 
       const allLabels = card.labels.map(label => ({
@@ -158,6 +179,7 @@ export class TrelloJsonImporter implements Importer {
         importData.labels[id] = labelData;
       }
     }
+    importData.subIssues = trelloCheckLists
 
     return importData;
   };

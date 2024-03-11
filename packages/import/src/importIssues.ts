@@ -6,6 +6,7 @@ import * as inquirer from "inquirer";
 import _, { uniq } from "lodash";
 import { Comment, Importer, ImportResult } from "./types";
 import { replaceImagesInMarkdown } from "./utils/replaceImages";
+import { IssueUpdateInput } from "packages/sdk/dist/_generated_documents";
 
 interface ImportAnswers {
   newTeam: boolean;
@@ -29,6 +30,7 @@ const defaultStateColors = {
  */
 export const importIssues = async (apiKey: string, importer: Importer): Promise<void> => {
   const client = new LinearClient({ apiKey });
+
   const importData = await importer.import();
 
   const teamsQuery = await client.teams();
@@ -259,6 +261,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
     }
   }
 
+  const idMap = {} as { [key: string]: any }
   // Create issues
   for (const issue of importData.issues) {
     const issueDescription = issue.description
@@ -311,7 +314,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
     const formattedDueDate = issue.dueDate ? format(issue.dueDate, "yyyy-MM-dd") : undefined;
 
-    await client.createIssue({
+    const issueResponse = await client.createIssue({
       teamId,
       projectId: projectId as unknown as string,
       title: issue.title,
@@ -322,6 +325,29 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       assigneeId,
       dueDate: formattedDueDate,
     });
+
+    const newId = (await issueResponse?.issue)?.id
+    if (issue.originalId) {
+      idMap[issue.originalId] = newId
+    }
+  }
+
+  console.info(chalk.green('Starting sub-issue update'))
+
+  if (importData.subIssues) {
+    for (const parentId of Object.keys(importData.subIssues)) {
+      const childIds = importData.subIssues[parentId]
+      for (const childId of childIds) {
+        const newChildId = idMap[childId]
+        const newParentId = idMap[parentId]
+        if (newChildId && newParentId) {
+          const input: IssueUpdateInput = { parentId: newParentId }
+          await client.updateIssue(newChildId, input)
+        } else {
+          console.error(chalk.red(`Couldn't find new IDs for ${childId} or ${parentId}`))
+        }
+      }
+    }
   }
 
   console.info(chalk.green(`${importer.name} issues imported to your team: https://linear.app/team/${teamKey}/all`));

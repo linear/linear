@@ -24,6 +24,7 @@ export interface Issue {
   completedAt?: Date;
   /** When the issue was started. */
   startedAt?: Date;
+  originalId?: string;
 }
 
 /** Issue comment */
@@ -64,6 +65,7 @@ export interface ImportResult {
   };
   /// A suffix to be appended to each resource URL (e.g. to authenticate requests)
   resourceURLSuffix?: string;
+  subIssues?: { [key: string]: string[] };
 }
 
 /**
