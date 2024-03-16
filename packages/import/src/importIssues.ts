@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { LinearClient } from "@linear/sdk";
-import { format } from "date-fns";
 import chalk from "chalk";
+import { format } from "date-fns";
 import * as inquirer from "inquirer";
 import _, { uniq } from "lodash";
 import { Comment, Importer, ImportResult } from "./types";
@@ -310,7 +310,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
     const formattedDueDate = issue.dueDate ? format(issue.dueDate, "yyyy-MM-dd") : undefined;
 
-    await client.createIssue({
+    const createdIssue = await client.createIssue({
       teamId,
       projectId: projectId as unknown as string,
       title: issue.title,
@@ -322,6 +322,10 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       createdAt: issue.createdAt,
       dueDate: formattedDueDate,
     });
+
+    if (issue.archived) {
+      await (await createdIssue.issue)?.archive();
+    }
   }
 
   console.info(chalk.green(`${importer.name} issues imported to your team: https://linear.app/team/${teamKey}/all`));

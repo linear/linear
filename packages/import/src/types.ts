@@ -24,6 +24,8 @@ export interface Issue {
   completedAt?: Date;
   /** When the issue was started. */
   startedAt?: Date;
+  /** Whether issue is archived */
+  archived?: boolean;
 }
 
 /** Issue comment */

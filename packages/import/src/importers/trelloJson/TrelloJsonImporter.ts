@@ -24,6 +24,7 @@ interface TrelloCard {
 
 interface TrelloList {
   id: string;
+  name: string;
   closed: boolean;
 }
 
@@ -50,8 +51,14 @@ interface TrelloCommentAction {
 }
 
 export class TrelloJsonImporter implements Importer {
-  public constructor(filePath: string, discardArchivedCards: boolean, discardArchivedLists: boolean) {
+  public constructor(
+    filePath: string,
+    mapListsToStatuses: boolean,
+    discardArchivedCards: boolean,
+    discardArchivedLists: boolean
+  ) {
     this.filePath = filePath;
+    this.mapListsToStatuses = mapListsToStatuses;
     this.discardArchivedCards = discardArchivedCards;
     this.discardArchivedLists = discardArchivedLists;
   }
@@ -107,6 +114,8 @@ export class TrelloJsonImporter implements Importer {
       }
     }
 
+    const trelloLists = data.lists as TrelloList[];
+
     for (const card of data.cards as TrelloCard[]) {
       const url = card.shortUrl;
       const mdDesc = card.desc;
@@ -121,6 +130,7 @@ export class TrelloJsonImporter implements Importer {
       const formattedAttachments = card.attachments
         .map(attachment => `[${attachment.name}](${attachment.url})`)
         .join("\n");
+      const cardList = trelloLists.find(list => list.id === card.idList);
 
       const description = `${mdDesc}${formattedChecklist && `\n${formattedChecklist}`}${
         formattedAttachments && `\n\nAttachments:\n${formattedAttachments}`
@@ -131,10 +141,7 @@ export class TrelloJsonImporter implements Importer {
         continue;
       }
 
-      if (
-        this.discardArchivedLists &&
-        (data.lists as TrelloList[]).find(list => list.id === card.idList && list.closed)
-      ) {
+      if (this.discardArchivedLists && cardList?.closed) {
         continue;
       }
 
@@ -144,6 +151,8 @@ export class TrelloJsonImporter implements Importer {
         url,
         labels,
         comments: comments[card.id],
+        status: this.mapListsToStatuses ? cardList?.name : undefined,
+        archived: card.closed || cardList?.closed,
       });
 
       const allLabels = card.labels.map(label => ({
@@ -164,6 +173,7 @@ export class TrelloJsonImporter implements Importer {
 
   // -- Private interface
   private filePath: string;
+  private mapListsToStatuses: boolean;
   private discardArchivedCards: boolean;
   private discardArchivedLists: boolean;
 }
