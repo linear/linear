@@ -21,6 +21,8 @@ type MockContext = {
   url: string;
   /** Mock result returned from the test server */
   res: <Spec extends MockSpec>(spec: Spec) => MockResult<Spec>;
+  /** Custom mock results to be returned by the server */
+  customSpecs: Record<string, MockSpec>;
 };
 
 /**
@@ -63,6 +65,7 @@ export function createTestServer(): MockContext {
     ctx.nodeServer.on("request", ctx.server);
     ctx.nodeServer.once("listening", done);
     ctx.url = `http://localhost:${port}`;
+    ctx.customSpecs = {};
 
     /** Provide function for mocking the response */
     ctx.res = function createMockResponse<Spec extends MockSpec>(spec: Spec) {
@@ -90,8 +93,22 @@ export function createTestServer(): MockContext {
             });
           }
 
+          let body;
+          for(const key of Object.keys(ctx.customSpecs)) {
+            if(JSON.stringify(req.body).includes(key)) {
+              body = ctx.customSpecs[key].body;
+            }
+          }
+          if(!body) {
+            body = spec?.body;
+          }
+
+          if (!body) {
+            body = { data: {} };
+          }
+
           /** Return a valid response with mocked response body */
-          res.send(spec?.body ?? { data: {} });
+          res.send(body);
         }
       });
 

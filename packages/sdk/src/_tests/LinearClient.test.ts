@@ -12,7 +12,7 @@ describe("LinearClient", () => {
           viewer: { id: "viewerId" },
           team: {
             id: "teamId",
-            labels: { nodes: [{ id: "labelId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false } },
+            labels: { nodes: [{ id: "labelId" }], pageInfo: { hasNextPage: true, hasPreviousPage: false, endCursor: "endCursorId" } },
             states: { nodes: [{ id: "stateId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false } },
           },
         },
@@ -65,5 +65,24 @@ describe("LinearClient", () => {
       expect(error.message).toEqual(expect.stringContaining("GraphQL Error (Code: 401) - Unauthorized"));
       expect(error.type).toEqual(LinearErrorType.AuthenticationError);
     }
+  });
+
+  it("supports pagination", async () => {
+    const client = new LinearClient({ apiKey: MOCK_API_KEY, apiUrl: ctx.url });
+    const team = await client.team("someTeamId");
+
+    ctx.customSpecs['endCursorId'] = {
+      body: {
+        data: {
+          team: {
+            id: "teamId",
+            labels: { nodes: [{ id: "labelId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false } },
+          },
+        },
+      },
+    }
+
+    const allTeamLabels = await client.paginate(team.labels, {includeArchived: true});
+    expect(allTeamLabels.length).toEqual(2)
   });
 });
