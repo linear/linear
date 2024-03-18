@@ -74,7 +74,7 @@ describe("LinearClient", () => {
 
     let requestCount = 0;
 
-    const {requests } = ctx.res(() =>  {
+    const { requests } = ctx.res(() =>  {
       if(requestCount === 0){
         requestCount++;
         return {

@@ -3,8 +3,7 @@ import { parseLinearError } from "./error";
 import { LinearGraphQLClient } from "./graphql-client";
 import { LinearClientOptions, LinearClientParsedOptions } from "./types";
 import { serializeUserAgent } from "./utils";
-import { Connection, LinearFetch, LinearSdk, Request } from "./_generated_sdk";
-import { Node } from "./_generated_documents";
+import { LinearSdk } from "./_generated_sdk";
 
 /**
  * Validate and return default LinearGraphQLClient options
