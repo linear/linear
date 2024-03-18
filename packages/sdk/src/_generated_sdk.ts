@@ -681,6 +681,33 @@ export class AuthApiKeyPayload extends Request {
   public authApiKey: AuthApiKey;
 }
 /**
+ * An email address that can be used for submitting issues.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AuthEmailIntakeAddressFragment response data
+ */
+export class AuthEmailIntakeAddress extends Request {
+  public constructor(request: LinearRequest, data: L.AuthEmailIntakeAddressFragment) {
+    super(request);
+    this.address = data.address;
+    this.enabled = data.enabled;
+    this.id = data.id;
+    this.creator = data.creator ? new AuthUser(request, data.creator) : undefined;
+    this.organization = new AuthOrganization(request, data.organization);
+  }
+
+  /** Unique email address user name (before @) used for incoming email. */
+  public address: string;
+  /** Whether the email address is enabled. */
+  public enabled: boolean;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The auth user who created the email intake address. */
+  public creator?: AuthUser;
+  /** The auth organization that the email address is associated with. */
+  public organization: AuthOrganization;
+}
+/**
  * AuthIntegration model
  *
  * @param request - function to call the graphql client
@@ -844,6 +871,7 @@ export class AuthOrganization extends Request {
     this.logoUrl = data.logoUrl ?? undefined;
     this.name = data.name;
     this.previousUrlKeys = data.previousUrlKeys;
+    this.region = data.region;
     this.samlEnabled = data.samlEnabled;
     this.scimEnabled = data.scimEnabled;
     this.serviceId = data.serviceId;
@@ -863,6 +891,8 @@ export class AuthOrganization extends Request {
   public name: string;
   /** Previously used URL keys for the organization (last 3 are kept and redirected). */
   public previousUrlKeys: string[];
+  /** The region the organization is hosted in. */
+  public region: string;
   /** Whether SAML authentication is enabled for organization. */
   public samlEnabled: boolean;
   /** Whether SCIM provisioning is enabled for organization. */
@@ -1966,6 +1996,7 @@ export class Document extends Request {
     this.color = data.color ?? undefined;
     this.content = data.content ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.hiddenAt = parseDate(data.hiddenAt) ?? undefined;
     this.icon = data.icon ?? undefined;
     this.id = data.id;
     this.slugId = data.slugId;
@@ -1986,6 +2017,8 @@ export class Document extends Request {
   public content?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** The time at which the document was hidden. Null if the entity has not been hidden. */
+  public hiddenAt?: Date;
   /** The icon of the document. */
   public icon?: string;
   /** The unique identifier of the entity. */
@@ -2263,6 +2296,7 @@ export class DocumentSearchResult extends Request {
     this.color = data.color ?? undefined;
     this.content = data.content ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.hiddenAt = parseDate(data.hiddenAt) ?? undefined;
     this.icon = data.icon ?? undefined;
     this.id = data.id;
     this.metadata = data.metadata;
@@ -2284,6 +2318,8 @@ export class DocumentSearchResult extends Request {
   public content?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** The time at which the document was hidden. Null if the entity has not been hidden. */
+  public hiddenAt?: Date;
   /** The icon of the document. */
   public icon?: string;
   /** The unique identifier of the entity. */
@@ -6187,6 +6223,7 @@ export class OrganizationInviteFullDetailsPayload extends Request {
   public constructor(request: LinearRequest, data: L.OrganizationInviteFullDetailsPayloadFragment) {
     super(request);
     this.accepted = data.accepted;
+    this.allowedAuthServices = data.allowedAuthServices;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.email = data.email;
     this.expired = data.expired;
@@ -6198,6 +6235,8 @@ export class OrganizationInviteFullDetailsPayload extends Request {
 
   /** Whether the invite has already been accepted. */
   public accepted: boolean;
+  /** Allowed authentication providers, empty array means all are allowed. */
+  public allowedAuthServices: string[];
   /** When the invite was created. */
   public createdAt: Date;
   /** The email of the invitee. */
@@ -6212,6 +6251,36 @@ export class OrganizationInviteFullDetailsPayload extends Request {
   public organizationLogoUrl?: string;
   /** Name of the workspace the invite is for. */
   public organizationName: string;
+}
+/**
+ * OrganizationInviteLinkDetailsPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OrganizationInviteLinkDetailsPayloadFragment response data
+ */
+export class OrganizationInviteLinkDetailsPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OrganizationInviteLinkDetailsPayloadFragment) {
+    super(request);
+    this.allowedAuthServices = data.allowedAuthServices;
+    this.organizationId = data.organizationId ?? undefined;
+    this.organizationLogoUrl = data.organizationLogoUrl ?? undefined;
+    this.organizationName = data.organizationName ?? undefined;
+    this.organizationRegion = data.organizationRegion ?? undefined;
+    this.organizationUrlKey = data.organizationUrlKey ?? undefined;
+  }
+
+  /** Allowed authentication providers, empty array means all are allowed. */
+  public allowedAuthServices: string[];
+  /** ID of the workspace the invite link is for. */
+  public organizationId?: string;
+  /** URL of the workspace logo the invite link is for. */
+  public organizationLogoUrl?: string;
+  /** Name of the workspace the invite link is for. */
+  public organizationName?: string;
+  /** Region of the workspace the invite link is for. */
+  public organizationRegion?: string;
+  /** URL key of the workspace the invite link is for. */
+  public organizationUrlKey?: string;
 }
 /**
  * OrganizationInvitePayload model
@@ -6259,6 +6328,24 @@ export class OrganizationPayload extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
+}
+/**
+ * OrganizationRegionResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OrganizationRegionResponseFragment response data
+ */
+export class OrganizationRegionResponse extends Request {
+  public constructor(request: LinearRequest, data: L.OrganizationRegionResponseFragment) {
+    super(request);
+    this.region = data.region ?? undefined;
+    this.success = data.success;
+  }
+
+  /** The region for the organization. */
+  public region?: string;
+  /** Whether the operation was successful. */
+  public success: boolean;
 }
 /**
  * OrganizationStartPlusTrialPayload model
@@ -6386,6 +6473,7 @@ export class PaidSubscription extends Request {
 export class Project extends Request {
   private _convertedFromIssue?: L.ProjectFragment["convertedFromIssue"];
   private _creator?: L.ProjectFragment["creator"];
+  private _favorite?: L.ProjectFragment["favorite"];
   private _integrationsSettings?: L.ProjectFragment["integrationsSettings"];
   private _lastAppliedTemplate?: L.ProjectFragment["lastAppliedTemplate"];
   private _lead?: L.ProjectFragment["lead"];
@@ -6425,6 +6513,7 @@ export class Project extends Request {
     this.url = data.url;
     this._convertedFromIssue = data.convertedFromIssue ?? undefined;
     this._creator = data.creator ?? undefined;
+    this._favorite = data.favorite ?? undefined;
     this._integrationsSettings = data.integrationsSettings ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
     this._lead = data.lead ?? undefined;
@@ -6482,7 +6571,7 @@ export class Project extends Request {
   public startDate?: L.Scalars["TimelessDate"];
   /** The time at which the project was moved into started state. */
   public startedAt?: Date;
-  /** The type of the state. */
+  /** [DEPRECATED] The type of the state. */
   public state: string;
   /** The estimated completion date of the project. */
   public targetDate?: L.Scalars["TimelessDate"];
@@ -6503,6 +6592,10 @@ export class Project extends Request {
   /** The user who created the project. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The user's favorite associated with this project. */
+  public get favorite(): LinearFetch<Favorite> | undefined {
+    return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
   }
   /** Settings for all integrations associated with that project. */
   public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
@@ -7063,6 +7156,7 @@ export class ProjectSearchPayload extends Request {
 export class ProjectSearchResult extends Request {
   private _convertedFromIssue?: L.ProjectSearchResultFragment["convertedFromIssue"];
   private _creator?: L.ProjectSearchResultFragment["creator"];
+  private _favorite?: L.ProjectSearchResultFragment["favorite"];
   private _integrationsSettings?: L.ProjectSearchResultFragment["integrationsSettings"];
   private _lastAppliedTemplate?: L.ProjectSearchResultFragment["lastAppliedTemplate"];
   private _lead?: L.ProjectSearchResultFragment["lead"];
@@ -7103,6 +7197,7 @@ export class ProjectSearchResult extends Request {
     this.url = data.url;
     this._convertedFromIssue = data.convertedFromIssue ?? undefined;
     this._creator = data.creator ?? undefined;
+    this._favorite = data.favorite ?? undefined;
     this._integrationsSettings = data.integrationsSettings ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
     this._lead = data.lead ?? undefined;
@@ -7162,7 +7257,7 @@ export class ProjectSearchResult extends Request {
   public startDate?: L.Scalars["TimelessDate"];
   /** The time at which the project was moved into started state. */
   public startedAt?: Date;
-  /** The type of the state. */
+  /** [DEPRECATED] The type of the state. */
   public state: string;
   /** The estimated completion date of the project. */
   public targetDate?: L.Scalars["TimelessDate"];
@@ -7183,6 +7278,10 @@ export class ProjectSearchResult extends Request {
   /** The user who created the project. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The user's favorite associated with this project. */
+  public get favorite(): LinearFetch<Favorite> | undefined {
+    return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
   }
   /** Settings for all integrations associated with that project. */
   public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
@@ -8018,10 +8117,13 @@ export class SentrySettings extends Request {
 export class SharedSlackSettings extends Request {
   public constructor(request: LinearRequest, data: L.SharedSlackSettingsFragment) {
     super(request);
+    this.enterpriseName = data.enterpriseName ?? undefined;
     this.teamId = data.teamId ?? undefined;
     this.teamName = data.teamName ?? undefined;
   }
 
+  /** Enterprise name of the connected Slack enterprise */
+  public enterpriseName?: string;
   /** Slack workspace id */
   public teamId?: string;
   /** Slack workspace name */
@@ -8036,6 +8138,7 @@ export class SharedSlackSettings extends Request {
 export class SlackAsksSettings extends Request {
   public constructor(request: LinearRequest, data: L.SlackAsksSettingsFragment) {
     super(request);
+    this.enterpriseName = data.enterpriseName ?? undefined;
     this.teamId = data.teamId ?? undefined;
     this.teamName = data.teamName ?? undefined;
     this.slackChannelMapping = data.slackChannelMapping
@@ -8043,6 +8146,8 @@ export class SlackAsksSettings extends Request {
       : undefined;
   }
 
+  /** Enterprise name of the connected Slack enterprise */
+  public enterpriseName?: string;
   /** Slack workspace id */
   public teamId?: string;
   /** Slack workspace name */
@@ -8171,11 +8276,14 @@ export class SlackPostSettings extends Request {
 export class SlackSettings extends Request {
   public constructor(request: LinearRequest, data: L.SlackSettingsFragment) {
     super(request);
+    this.enterpriseName = data.enterpriseName ?? undefined;
     this.linkOnIssueIdMention = data.linkOnIssueIdMention;
     this.teamId = data.teamId ?? undefined;
     this.teamName = data.teamName ?? undefined;
   }
 
+  /** Enterprise name of the connected Slack enterprise */
+  public enterpriseName?: string;
   /** Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message. */
   public linkOnIssueIdMention: boolean;
   /** Slack workspace id */
@@ -11990,6 +12098,35 @@ export class OrganizationInvitesQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable OrganizationRegion Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class OrganizationRegionQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the OrganizationRegion query and return a OrganizationRegionResponse
+   *
+   * @param id - required id to pass to organizationRegion
+   * @returns parsed response from OrganizationRegionQuery
+   */
+  public async fetch(id: string): LinearFetch<OrganizationRegionResponse> {
+    const response = await this._request<L.OrganizationRegionQuery, L.OrganizationRegionQueryVariables>(
+      L.OrganizationRegionDocument,
+      {
+        id,
+      }
+    );
+    const data = response.organizationRegion;
+
+    return new OrganizationRegionResponse(this._request, data);
   }
 }
 
@@ -23387,6 +23524,15 @@ export class LinearSdk extends Request {
     return new OrganizationInvitesQuery(this._request).fetch(variables);
   }
   /**
+   * Fetch the region for the organization.
+   *
+   * @param id - required id to pass to organizationRegion
+   * @returns OrganizationRegionResponse
+   */
+  public organizationRegion(id: string): LinearFetch<OrganizationRegionResponse> {
+    return new OrganizationRegionQuery(this._request).fetch(id);
+  }
+  /**
    * One specific project.
    *
    * @param id - required id to pass to project
@@ -24195,7 +24341,7 @@ export class LinearSdk extends Request {
     return new EmailTokenUserAccountAuthMutation(this._request).fetch(input);
   }
   /**
-   * Unsubscribes the user from one type of emails.
+   * Unsubscribes the user from one type of email.
    *
    * @param input - required input to pass to emailUnsubscribe
    * @returns EmailUnsubscribePayload

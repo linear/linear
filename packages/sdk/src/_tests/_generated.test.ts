@@ -2639,6 +2639,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test OrganizationRegion query */
+  describe("OrganizationRegion", () => {
+    /** Test the root model query for OrganizationRegion */
+    it("organizationRegion", async () => {
+      const organizationRegion: L.OrganizationRegionResponse | undefined = await client.organizationRegion("mock-id");
+      expect(organizationRegion instanceof L.OrganizationRegionResponse);
+    });
+  });
+
   /** Test ProjectFilterSuggestion query */
   describe("ProjectFilterSuggestion", () => {
     /** Test the root model query for ProjectFilterSuggestion */
@@ -2951,6 +2960,16 @@ describe("generated", () => {
         expect(project_creator instanceof L.User);
       } else {
         console.warn("codegen-doc:print: No Project found - cannot test project.creator query");
+      }
+    });
+
+    /** Test the project.favorite query for L.Favorite */
+    it("project.favorite", async () => {
+      if (_project) {
+        const project_favorite: L.Favorite | undefined = await _project.favorite;
+        expect(project_favorite instanceof L.Favorite);
+      } else {
+        console.warn("codegen-doc:print: No Project found - cannot test project.favorite query");
       }
     });
 

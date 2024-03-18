@@ -649,6 +649,32 @@ type AuthApiKeyPayload {
   success: Boolean!
 }
 
+"""
+An email address that can be used for submitting issues.
+"""
+type AuthEmailIntakeAddress {
+  """
+  Unique email address user name (before @) used for incoming email.
+  """
+  address: String!
+  """
+  The auth user who created the email intake address.
+  """
+  creator: AuthUser
+  """
+  Whether the email address is enabled.
+  """
+  enabled: Boolean!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The auth organization that the email address is associated with.
+  """
+  organization: AuthOrganization!
+}
+
 type AuthIntegration {
   """
   The unique identifier of the entity.
@@ -833,6 +859,10 @@ type AuthOrganization {
   Previously used URL keys for the organization (last 3 are kept and redirected).
   """
   previousUrlKeys: [String!]!
+  """
+  The region the organization is hosted in.
+  """
+  region: String!
   """
   The feature release channel the organization belongs to.
   """
@@ -2445,6 +2475,10 @@ Issue cycle sorting options.
 """
 input CycleSort {
   """
+  When set to true, cycles wil be ordered with a custom order. Current cycle comes first, followed by upcoming cycles in ASC order, followed by previous cycles in DESC order.
+  """
+  currentCycleFirst: Boolean = false
+  """
   Whether nulls should be sorted first or last
   """
   nulls: PaginationNulls = last
@@ -2600,6 +2634,10 @@ type Document implements Node {
   The user who created the document.
   """
   creator: User!
+  """
+  The time at which the document was hidden. Null if the entity has not been hidden.
+  """
+  hiddenAt: DateTime
   """
   The icon of the document.
   """
@@ -3004,6 +3042,10 @@ type DocumentSearchResult implements Node {
   """
   creator: User!
   """
+  The time at which the document was hidden. Null if the entity has not been hidden.
+  """
+  hiddenAt: DateTime
+  """
   The icon of the document.
   """
   icon: String
@@ -3074,6 +3116,10 @@ input DocumentUpdateInput {
   [Internal] The document content as a Prosemirror document.
   """
   contentData: JSONObject
+  """
+  The time at which the document was hidden.
+  """
+  hiddenAt: DateTime
   """
   The icon of the document.
   """
@@ -8768,7 +8814,7 @@ type Mutation {
     input: TokenUserAccountAuthInput!
   ): AuthResolverResponse!
   """
-  Unsubscribes the user from one type of emails.
+  Unsubscribes the user from one type of email.
   """
   emailUnsubscribe(
     """
@@ -11775,11 +11821,11 @@ input NullableProjectFilter {
   """
   startDate: NullableDateComparator
   """
-  Comparator for the project state.
+  [DEPRECATED] Comparator for the project state.
   """
   state: StringComparator
   """
-  [Internal] Filters that the project's status must satisfy.
+  Filters that the project's status must satisfy.
   """
   status: ProjectStatusFilter
   """
@@ -12924,6 +12970,10 @@ type OrganizationInviteFullDetailsPayload {
   """
   accepted: Boolean!
   """
+  Allowed authentication providers, empty array means all are allowed.
+  """
+  allowedAuthServices: [String!]!
+  """
   When the invite was created.
   """
   createdAt: DateTime!
@@ -12959,6 +13009,33 @@ type OrganizationInviteFullDetailsPayload {
   The status of the invite.
   """
   status: OrganizationInviteStatus!
+}
+
+type OrganizationInviteLinkDetailsPayload {
+  """
+  Allowed authentication providers, empty array means all are allowed.
+  """
+  allowedAuthServices: [String!]!
+  """
+  ID of the workspace the invite link is for.
+  """
+  organizationId: String
+  """
+  URL of the workspace logo the invite link is for.
+  """
+  organizationLogoUrl: String
+  """
+  Name of the workspace the invite link is for.
+  """
+  organizationName: String
+  """
+  Region of the workspace the invite link is for.
+  """
+  organizationRegion: String
+  """
+  URL key of the workspace the invite link is for.
+  """
+  organizationUrlKey: String
 }
 
 type OrganizationInvitePayload {
@@ -13001,6 +13078,17 @@ type OrganizationPayload {
   The organization that was created or updated.
   """
   organization: Organization
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+type OrganizationRegionResponse {
+  """
+  The region for the organization.
+  """
+  region: String
   """
   Whether the operation was successful.
   """
@@ -13321,6 +13409,10 @@ type Project implements Node {
     orderBy: PaginationOrderBy
   ): DocumentConnection!
   """
+  The user's favorite associated with this project.
+  """
+  favorite: Favorite
+  """
   The icon of the project.
   """
   icon: String
@@ -13562,11 +13654,11 @@ type Project implements Node {
   """
   startedAt: DateTime
   """
-  The type of the state.
+  [DEPRECATED] The type of the state.
   """
-  state: String!
+  state: String! @deprecated(reason: "Use project.status instead")
   """
-  [Internal] The status that the project is associated with.
+  The status that the project is associated with.
   """
   status: ProjectStatus!
   """
@@ -13745,11 +13837,11 @@ input ProjectCollectionFilter {
   """
   startDate: NullableDateComparator
   """
-  Comparator for the project state.
+  [DEPRECATED] Comparator for the project state.
   """
   state: StringComparator
   """
-  [Internal] Filters that the project's status must satisfy.
+  Filters that the project's status must satisfy.
   """
   status: ProjectStatusFilter
   """
@@ -13818,11 +13910,11 @@ input ProjectCreateInput {
   """
   startDateResolution: DateResolutionType
   """
-  The state of the project.
+  [DEPRECATED] The state of the project.
   """
   state: String
   """
-  [INTERNAL] The ID of the project status.
+  The ID of the project status.
   """
   statusId: String
   """
@@ -13936,11 +14028,11 @@ input ProjectFilter {
   """
   startDate: NullableDateComparator
   """
-  Comparator for the project state.
+  [DEPRECATED] Comparator for the project state.
   """
   state: StringComparator
   """
-  [Internal] Filters that the project's status must satisfy.
+  Filters that the project's status must satisfy.
   """
   status: ProjectStatusFilter
   """
@@ -14572,6 +14664,10 @@ type ProjectSearchResult implements Node {
     orderBy: PaginationOrderBy
   ): DocumentConnection!
   """
+  The user's favorite associated with this project.
+  """
+  favorite: Favorite
+  """
   The icon of the project.
   """
   icon: String
@@ -14817,11 +14913,11 @@ type ProjectSearchResult implements Node {
   """
   startedAt: DateTime
   """
-  The type of the state.
+  [DEPRECATED] The type of the state.
   """
-  state: String!
+  state: String! @deprecated(reason: "Use project.status instead")
   """
-  [Internal] The status that the project is associated with.
+  The status that the project is associated with.
   """
   status: ProjectStatus!
   """
@@ -14948,7 +15044,7 @@ type ProjectStatus implements Node {
   """
   The type of the project status.
   """
-  type: ProjectStatusType
+  type: ProjectStatusType!
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -15260,11 +15356,11 @@ input ProjectUpdateInput {
   """
   startDateResolution: DateResolutionType
   """
-  The state of the project.
+  [DEPRECATED] The state of the project.
   """
   state: String
   """
-  [INTERNAL] The ID of the project status.
+  The ID of the project status.
   """
   statusId: String
   """
@@ -16561,6 +16657,15 @@ type Query {
     orderBy: PaginationOrderBy
   ): OrganizationInviteConnection!
   """
+  Fetch the region for the organization.
+  """
+  organizationRegion(
+    """
+    The ID of the organization to retrieve.
+    """
+    id: String!
+  ): OrganizationRegionResponse!
+  """
   One specific project.
   """
   project(id: String!): Project!
@@ -17847,6 +17952,10 @@ Shared Slack integration settings.
 """
 type SharedSlackSettings {
   """
+  Enterprise name of the connected Slack enterprise
+  """
+  enterpriseName: String
+  """
   Slack workspace id
   """
   teamId: String
@@ -17857,6 +17966,10 @@ type SharedSlackSettings {
 }
 
 input SharedSlackSettingsInput {
+  """
+  Enterprise name of the connected Slack enterprise
+  """
+  enterpriseName: String
   """
   Slack workspace id
   """
@@ -17926,6 +18039,10 @@ type SlackAsksSettings {
   """
   canAdministrate: UserRoleType!
   """
+  Enterprise name of the connected Slack enterprise
+  """
+  enterpriseName: String
+  """
   The mapping of Slack channel ID => Slack channel name for connected channels.
   """
   slackChannelMapping: [SlackChannelNameMapping!]
@@ -17944,6 +18061,10 @@ input SlackAsksSettingsInput {
   The user role type that is allowed to manage Asks settings.
   """
   canAdministrate: UserRoleType!
+  """
+  Enterprise name of the connected Slack enterprise
+  """
+  enterpriseName: String
   """
   The mapping of Slack channel ID => Slack channel name for connected channels.
   """
@@ -18128,6 +18249,10 @@ Settings for the regular Slack integration.
 """
 type SlackSettings {
   """
+  Enterprise name of the connected Slack enterprise
+  """
+  enterpriseName: String
+  """
   Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.
   """
   linkOnIssueIdMention: Boolean!
@@ -18142,6 +18267,10 @@ type SlackSettings {
 }
 
 input SlackSettingsInput {
+  """
+  Enterprise name of the connected Slack enterprise
+  """
+  enterpriseName: String
   """
   Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.
   """
@@ -20866,7 +20995,8 @@ type UserSettings implements Node {
   """
   The email types the user has unsubscribed from.
   """
-  unsubscribedFrom: [String!]! @deprecated(reason: "Use individual subscription fields instead.")
+  unsubscribedFrom: [String!]!
+    @deprecated(reason: "Use individual subscription fields instead. This field's value is now outdated.")
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -21148,6 +21278,7 @@ enum ViewType {
   inbox
   initiative
   initiatives
+  issueIdentifiers
   label
   myIssues
   myIssuesActivity
