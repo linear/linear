@@ -18,6 +18,22 @@ export class Request {
   public constructor(request: LinearRequest) {
     this._request = request;
   }
+
+  /**
+   * Helper to paginate over all pages of a given connection query.
+   * @param fn The query to paginate
+   * @param args The arguments to pass to the query
+   */
+  public async paginate<T extends Node, U>(fn: (variables: U) => LinearFetch<Connection<T>>, args: U): Promise<T[]> {
+    const boundFn = fn.bind(this);
+    let connection: Connection<T> = await boundFn(args);
+    const nodes = connection.nodes;
+    while (connection.pageInfo.hasNextPage) {
+      connection = await boundFn({ ...args, after: connection.pageInfo.endCursor });
+      nodes.push(...connection.nodes);
+    }
+    return nodes;
+  }
 }
 
 /** Fetch return type wrapped in a promise */
