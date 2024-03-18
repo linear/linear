@@ -399,6 +399,8 @@ fragment Document on Document {
   project {
     id
   }
+  # The time at which the document was hidden. Null if the entity has not been hidden.
+  hiddenAt
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -886,12 +888,14 @@ fragment Project on Project {
   scopeHistory
   # The total number of issues in the project after each week.
   issueCountHistory
-  # The type of the state.
-  state
   # The unique identifier of the entity.
   id
   # The user who created the project.
   creator {
+    id
+  }
+  # The user's favorite associated with this project.
+  favorite {
     id
   }
   # Whether to send new issue comment notifications to Slack.
@@ -900,6 +904,8 @@ fragment Project on Project {
   slackNewIssue
   # Whether to send new issue status updates to Slack.
   slackIssueStatuses
+  # [DEPRECATED] The type of the state.
+  state
 }
 
 # A reaction associated with a comment or a project update.
@@ -1641,6 +1647,25 @@ fragment ApiKey on ApiKey {
 }
 
 # An email address that can be used for submitting issues.
+fragment AuthEmailIntakeAddress on AuthEmailIntakeAddress {
+  __typename
+  # The auth organization that the email address is associated with.
+  organization {
+    ...AuthOrganization
+  }
+  # The auth user who created the email intake address.
+  creator {
+    ...AuthUser
+  }
+  # The unique identifier of the entity.
+  id
+  # Unique email address user name (before @) used for incoming email.
+  address
+  # Whether the email address is enabled.
+  enabled
+}
+
+# An email address that can be used for submitting issues.
 fragment EmailIntakeAddress on EmailIntakeAddress {
   __typename
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -2125,6 +2150,8 @@ fragment AuthOrganization on AuthOrganization {
   name
   # The organization's unique URL key.
   urlKey
+  # The region the organization is hosted in.
+  region
   # The time at which deletion of the organization was requested.
   deletionRequestedAt
   # The unique identifier of the entity.
@@ -2983,6 +3010,8 @@ fragment SentrySettings on SentrySettings {
 # Settings for the regular Slack integration.
 fragment SlackSettings on SlackSettings {
   __typename
+  # Enterprise name of the connected Slack enterprise
+  enterpriseName
   # Slack workspace id
   teamId
   # Slack workspace name
@@ -2994,6 +3023,8 @@ fragment SlackSettings on SlackSettings {
 # Shared Slack integration settings.
 fragment SharedSlackSettings on SharedSlackSettings {
   __typename
+  # Enterprise name of the connected Slack enterprise
+  enterpriseName
   # Slack workspace id
   teamId
   # Slack workspace name
@@ -3003,6 +3034,8 @@ fragment SharedSlackSettings on SharedSlackSettings {
 # Slack Asks specific settings.
 fragment SlackAsksSettings on SlackAsksSettings {
   __typename
+  # Enterprise name of the connected Slack enterprise
+  enterpriseName
   # Slack workspace id
   teamId
   # Slack workspace name
@@ -3801,6 +3834,8 @@ fragment DocumentSearchResult on DocumentSearchResult {
   project {
     id
   }
+  # The time at which the document was hidden. Null if the entity has not been hidden.
+  hiddenAt
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -4461,6 +4496,8 @@ fragment OrganizationInviteConnection on OrganizationInviteConnection {
 
 fragment OrganizationInviteFullDetailsPayload on OrganizationInviteFullDetailsPayload {
   __typename
+  # Allowed authentication providers, empty array means all are allowed.
+  allowedAuthServices
   # ID of the workspace the invite is for.
   organizationId
   # Name of the workspace the invite is for.
@@ -4479,6 +4516,22 @@ fragment OrganizationInviteFullDetailsPayload on OrganizationInviteFullDetailsPa
   expired
 }
 
+fragment OrganizationInviteLinkDetailsPayload on OrganizationInviteLinkDetailsPayload {
+  __typename
+  # Allowed authentication providers, empty array means all are allowed.
+  allowedAuthServices
+  # ID of the workspace the invite link is for.
+  organizationId
+  # Name of the workspace the invite link is for.
+  organizationName
+  # Region of the workspace the invite link is for.
+  organizationRegion
+  # URL key of the workspace the invite link is for.
+  organizationUrlKey
+  # URL of the workspace logo the invite link is for.
+  organizationLogoUrl
+}
+
 fragment OrganizationInvitePayload on OrganizationInvitePayload {
   __typename
   # The identifier of the last sync operation.
@@ -4495,6 +4548,14 @@ fragment OrganizationPayload on OrganizationPayload {
   __typename
   # The identifier of the last sync operation.
   lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment OrganizationRegionResponse on OrganizationRegionResponse {
+  __typename
+  # The region for the organization.
+  region
   # Whether the operation was successful.
   success
 }
@@ -4679,12 +4740,14 @@ fragment ProjectSearchResult on ProjectSearchResult {
   scopeHistory
   # The total number of issues in the project after each week.
   issueCountHistory
-  # The type of the state.
-  state
   # The unique identifier of the entity.
   id
   # The user who created the project.
   creator {
+    id
+  }
+  # The user's favorite associated with this project.
+  favorite {
     id
   }
   # Whether to send new issue comment notifications to Slack.
@@ -4693,6 +4756,8 @@ fragment ProjectSearchResult on ProjectSearchResult {
   slackNewIssue
   # Whether to send new issue status updates to Slack.
   slackIssueStatuses
+  # [DEPRECATED] The type of the state.
+  state
 }
 
 fragment ProjectSearchResultConnection on ProjectSearchResultConnection {
@@ -7368,6 +7433,15 @@ query organizationInvites(
     ...OrganizationInviteConnection
   }
 }
+# Fetch the region for the organization.
+query organizationRegion(
+  # The ID of the organization to retrieve.
+  $id: String!
+) {
+  organizationRegion(id: $id) {
+    ...OrganizationRegionResponse
+  }
+}
 # One specific project.
 query project($id: String!) {
   project(id: $id) {
@@ -9542,7 +9616,7 @@ mutation emailTokenUserAccountAuth(
     ...AuthResolverResponse
   }
 }
-# Unsubscribes the user from one type of emails.
+# Unsubscribes the user from one type of email.
 mutation emailUnsubscribe(
   # Unsubscription details.
   $input: EmailUnsubscribeInput!

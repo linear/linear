@@ -2483,6 +2483,93 @@
       },
       {
         "kind": "OBJECT",
+        "name": "AuthEmailIntakeAddress",
+        "description": "An email address that can be used for submitting issues.",
+        "fields": [
+          {
+            "name": "id",
+            "description": "The unique identifier of the entity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "address",
+            "description": "Unique email address user name (before @) used for incoming email.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "enabled",
+            "description": "Whether the email address is enabled.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "organization",
+            "description": "The auth organization that the email address is associated with.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AuthOrganization",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "creator",
+            "description": "The auth user who created the email intake address.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AuthUser",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "AuthIntegration",
         "description": null,
         "fields": [
@@ -3271,6 +3358,22 @@
           {
             "name": "serviceId",
             "description": "The email domain or URL key for the organization.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "region",
+            "description": "The region the organization is hosted in.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -9083,6 +9186,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "currentCycleFirst",
+            "description": "When set to true, cycles wil be ordered with a custom order. Current cycle comes first, followed by upcoming cycles in ASC order, followed by previous cycles in DESC order.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": "false",
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -9649,6 +9764,18 @@
             "type": {
               "kind": "OBJECT",
               "name": "Template",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hiddenAt",
+            "description": "The time at which the document was hidden. Null if the entity has not been hidden.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
               "ofType": null
             },
             "isDeprecated": false,
@@ -11148,6 +11275,18 @@
             "deprecationReason": null
           },
           {
+            "name": "hiddenAt",
+            "description": "The time at which the document was hidden. Null if the entity has not been hidden.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "sortOrder",
             "description": "The order of the item in the project resources list.",
             "args": [],
@@ -11429,6 +11568,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hiddenAt",
+            "description": "The time at which the document was hidden.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
               "ofType": null
             },
             "defaultValue": null,
@@ -32019,7 +32170,7 @@
           },
           {
             "name": "emailUnsubscribe",
-            "description": "Unsubscribes the user from one type of emails.",
+            "description": "Unsubscribes the user from one type of email.",
             "args": [
               {
                 "name": "input",
@@ -42838,7 +42989,7 @@
           },
           {
             "name": "state",
-            "description": "Comparator for the project state.",
+            "description": "[DEPRECATED] Comparator for the project state.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "StringComparator",
@@ -42850,7 +43001,7 @@
           },
           {
             "name": "status",
-            "description": "[Internal] Filters that the project's status must satisfy.",
+            "description": "Filters that the project's status must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "ProjectStatusFilter",
@@ -47286,6 +47437,125 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "allowedAuthServices",
+            "description": "Allowed authentication providers, empty array means all are allowed.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OrganizationInviteLinkDetailsPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "organizationName",
+            "description": "Name of the workspace the invite link is for.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "organizationId",
+            "description": "ID of the workspace the invite link is for.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "organizationLogoUrl",
+            "description": "URL of the workspace logo the invite link is for.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "organizationUrlKey",
+            "description": "URL key of the workspace the invite link is for.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "organizationRegion",
+            "description": "Region of the workspace the invite link is for.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "allowedAuthServices",
+            "description": "Allowed authentication providers, empty array means all are allowed.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -47461,6 +47731,45 @@
                 "name": "Boolean",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OrganizationRegionResponse",
+        "description": null,
+        "fields": [
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "region",
+            "description": "The region for the organization.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -48322,7 +48631,7 @@
           },
           {
             "name": "status",
-            "description": "[Internal] The status that the project is associated with.",
+            "description": "The status that the project is associated with.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -48684,6 +48993,18 @@
                 "name": "Boolean",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "favorite",
+            "description": "The user's favorite associated with this project.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Favorite",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -49469,7 +49790,7 @@
           },
           {
             "name": "state",
-            "description": "The type of the state.",
+            "description": "[DEPRECATED] The type of the state.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -49480,8 +49801,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use project.status instead"
           }
         ],
         "inputFields": null,
@@ -49624,7 +49945,7 @@
           },
           {
             "name": "state",
-            "description": "Comparator for the project state.",
+            "description": "[DEPRECATED] Comparator for the project state.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "StringComparator",
@@ -49636,7 +49957,7 @@
           },
           {
             "name": "status",
-            "description": "[Internal] Filters that the project's status must satisfy.",
+            "description": "Filters that the project's status must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "ProjectStatusFilter",
@@ -50054,7 +50375,7 @@
           },
           {
             "name": "state",
-            "description": "The state of the project.",
+            "description": "[DEPRECATED] The state of the project.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -50066,7 +50387,7 @@
           },
           {
             "name": "statusId",
-            "description": "[INTERNAL] The ID of the project status.",
+            "description": "The ID of the project status.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -50344,7 +50665,7 @@
           },
           {
             "name": "state",
-            "description": "Comparator for the project state.",
+            "description": "[DEPRECATED] Comparator for the project state.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "StringComparator",
@@ -50356,7 +50677,7 @@
           },
           {
             "name": "status",
-            "description": "[Internal] Filters that the project's status must satisfy.",
+            "description": "Filters that the project's status must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "ProjectStatusFilter",
@@ -52752,7 +53073,7 @@
           },
           {
             "name": "status",
-            "description": "[Internal] The status that the project is associated with.",
+            "description": "The status that the project is associated with.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -53114,6 +53435,18 @@
                 "name": "Boolean",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "favorite",
+            "description": "The user's favorite associated with this project.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Favorite",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -53899,7 +54232,7 @@
           },
           {
             "name": "state",
-            "description": "The type of the state.",
+            "description": "[DEPRECATED] The type of the state.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -53910,8 +54243,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use project.status instead"
           },
           {
             "name": "metadata",
@@ -54224,9 +54557,13 @@
             "description": "The type of the project status.",
             "args": [],
             "type": {
-              "kind": "ENUM",
-              "name": "ProjectStatusType",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "ProjectStatusType",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -55190,7 +55527,7 @@
         "inputFields": [
           {
             "name": "state",
-            "description": "The state of the project.",
+            "description": "[DEPRECATED] The state of the project.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -55202,7 +55539,7 @@
           },
           {
             "name": "statusId",
-            "description": "[INTERNAL] The ID of the project status.",
+            "description": "The ID of the project status.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -57295,6 +57632,39 @@
                     "ofType": null
                   }
                 }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "organizationRegion",
+            "description": "Fetch the region for the organization.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The ID of the organization to retrieve.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "OrganizationRegionResponse",
+                "ofType": null
               }
             },
             "isDeprecated": false,
@@ -64948,6 +65318,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "enterpriseName",
+            "description": "Enterprise name of the connected Slack enterprise",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -64976,6 +65358,18 @@
           {
             "name": "teamId",
             "description": "Slack workspace id",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "enterpriseName",
+            "description": "Enterprise name of the connected Slack enterprise",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -65195,6 +65589,18 @@
             "deprecationReason": null
           },
           {
+            "name": "enterpriseName",
+            "description": "Enterprise name of the connected Slack enterprise",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slackChannelMapping",
             "description": "The mapping of Slack channel ID => Slack channel name for connected channels.",
             "args": [],
@@ -65257,6 +65663,18 @@
           {
             "name": "teamId",
             "description": "Slack workspace id",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "enterpriseName",
+            "description": "Enterprise name of the connected Slack enterprise",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -65997,6 +66415,18 @@
             "deprecationReason": null
           },
           {
+            "name": "enterpriseName",
+            "description": "Enterprise name of the connected Slack enterprise",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "linkOnIssueIdMention",
             "description": "Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.",
             "args": [],
@@ -66039,6 +66469,18 @@
           {
             "name": "teamId",
             "description": "Slack workspace id",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "enterpriseName",
+            "description": "Enterprise name of the connected Slack enterprise",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -75517,7 +75959,7 @@
               }
             },
             "isDeprecated": true,
-            "deprecationReason": "Use individual subscription fields instead."
+            "deprecationReason": "Use individual subscription fields instead. This field's value is now outdated."
           },
           {
             "name": "user",
@@ -76727,6 +77169,12 @@
           },
           {
             "name": "quickView",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueIdentifiers",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
