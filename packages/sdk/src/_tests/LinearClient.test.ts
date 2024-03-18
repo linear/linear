@@ -1,23 +1,24 @@
 import { LinearClient } from "../index";
-import { LinearErrorType } from "./../types";
+import { LinearErrorType } from "../types";
 import { createTestServer, MOCK_API_KEY } from "./_mock";
 
 const ctx = createTestServer();
 
 describe("LinearClient", () => {
-  beforeAll(() => {
-    ctx.res({
-      body: {
-        data: {
-          viewer: { id: "viewerId" },
-          team: {
-            id: "teamId",
-            labels: { nodes: [{ id: "labelId" }], pageInfo: { hasNextPage: true, hasPreviousPage: false, endCursor: "endCursorId" } },
-            states: { nodes: [{ id: "stateId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false } },
+  beforeEach(() => {
+    ctx.res(() =>  {
+      return {
+        body: {
+          data: {
+            viewer: { id: "viewerId" },
+            team: {
+              id: "teamId",
+              labels: { nodes: [{ id: "labelId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false } },
+              states: { nodes: [{ id: "stateId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false } },
+            },
           },
         },
-      },
-    });
+      }});
   });
 
   it("makes query to apiUrl", async () => {
@@ -71,16 +72,41 @@ describe("LinearClient", () => {
     const client = new LinearClient({ apiKey: MOCK_API_KEY, apiUrl: ctx.url });
     const team = await client.team("someTeamId");
 
-    ctx.customSpecs['endCursorId'] = {
-      body: {
-        data: {
-          team: {
-            id: "teamId",
-            labels: { nodes: [{ id: "labelId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false } },
+    let requestCount = 0;
+
+    ctx.res(() =>  {
+      if(requestCount === 0){
+        requestCount++;
+        return {
+          body: {
+            data: {
+              viewer: { id: "viewerId" },
+              team: {
+                id: "teamId",
+                labels: { nodes: [{ id: "labelId" }], pageInfo: { hasNextPage: true, hasPreviousPage: false, endCursor: "endCursorId" } },
+                states: { nodes: [{ id: "stateId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false } },
+              },
+            },
           },
-        },
-      },
-    }
+        }
+      } else if (requestCount === 1) {
+        requestCount++;
+        return {
+          body: {
+            data: {
+              viewer: { id: "viewerId" },
+              team: {
+                id: "teamId",
+                labels: { nodes: [{ id: "labelId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false, endCursor: null! } },
+                states: { nodes: [{ id: "stateId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false } },
+              },
+            },
+          },
+        }
+      } else {
+        throw new Error("Unexpected request");
+      }
+      });
 
     const allTeamLabels = await client.paginate(team.labels, {includeArchived: true});
     expect(allTeamLabels.length).toEqual(2)
