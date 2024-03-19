@@ -10,6 +10,7 @@ export const Sdk = {
   CONNECTION_LAST: "last",
   CONNECTION_FIRST: "first",
   CONNECTION_DEFAULT: "defaultConnection",
+  CONNECTION_DEFAULT_FIRST: "50",
   DATA_NAME: "data",
   DATA_TYPE: "Data",
   FETCH_NAME: "fetch",

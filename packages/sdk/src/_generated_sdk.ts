@@ -29,7 +29,7 @@ export class Request {
     let connection: Connection<T> = await boundFn(args);
     const nodes = connection.nodes;
     while (connection.pageInfo.hasNextPage) {
-      connection = await boundFn({ ...args, after: connection.pageInfo.endCursor });
+      connection = await boundFn({ first: 50, ...args, after: connection.pageInfo.endCursor });
       nodes.push(...connection.nodes);
     }
     return nodes;
