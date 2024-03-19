@@ -74,7 +74,7 @@ describe("LinearClient", () => {
 
     let requestCount = 0;
 
-    ctx.res(() =>  {
+    const { requests } = ctx.res(() =>  {
       if(requestCount === 0){
         requestCount++;
         return {
@@ -108,7 +108,8 @@ describe("LinearClient", () => {
       }
       });
 
-    const allTeamLabels = await client.paginate(team.labels, {includeArchived: true});
+    const allTeamLabels = await team.paginate(team.labels, {includeArchived: true});
     expect(allTeamLabels.length).toEqual(2)
+    expect(requests.at(-1)?.body.variables?.["id"]).toEqual("teamId");
   });
 });
