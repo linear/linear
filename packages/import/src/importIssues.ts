@@ -31,12 +31,10 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
   const client = new LinearClient({ apiKey });
   const importData = await importer.import();
 
-  const teamsQuery = await client.teams();
   const viewerQuery = await client.viewer;
-  const usersQuery = await client.users();
 
-  const teams = teamsQuery?.nodes ?? [];
-  const users = usersQuery?.nodes?.filter(user => user.active) ?? [];
+  const allTeams = await client.paginate(client.teams, {});
+  const allUsers = await client.paginate(client.users, {includeDisabled: false});
   const viewer = viewerQuery?.id;
 
   // Prompt the user to either get or create a team
@@ -61,7 +59,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       name: "targetTeamId",
       message: "Import into team:",
       choices: async () => {
-        return teams.map(team => ({
+        return allTeams.map(team => ({
           name: `[${team.key}] ${team.name}`,
           value: team.id,
         }));
@@ -129,7 +127,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       name: "targetAssignee",
       message: "Assign to user:",
       choices: () => {
-        const map = users.map(user => ({
+        const map = allUsers.map(user => ({
           name: user.name,
           value: user.id,
         }));
@@ -158,7 +156,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
     teamId = team?.id;
   } else {
     // Use existing team
-    const existingTeam = teams?.find(team => team.id === importAnswers.targetTeamId);
+    const existingTeam = allTeams?.find(team => team.id === importAnswers.targetTeamId);
 
     teamKey = existingTeam?.key;
     teamId = importAnswers.targetTeamId as string;
@@ -169,23 +167,14 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
   }
 
   const teamInfo = await client.team(teamId);
+  const organization = await client.organization;
 
   const existingLabels = [];
 
-  let teamLabels = await teamInfo?.labels();
-  existingLabels.push(...(teamLabels?.nodes ?? []));
-  while (teamLabels?.pageInfo?.hasNextPage) {
-    teamLabels = await teamLabels.fetchNext();
-    existingLabels.push(...(teamLabels?.nodes ?? []));
-  }
+  const allTeamLabels = await teamInfo.paginate(teamInfo.labels, {});
+  const allWorkspaceLabels = await client.paginate(organization.labels, {});
 
-  const organization = await client.organization;
-  let workspaceLabels = await organization.labels();
-  existingLabels.push(...(workspaceLabels?.nodes ?? []));
-  while (workspaceLabels?.pageInfo?.hasNextPage) {
-    workspaceLabels = await workspaceLabels.fetchNext();
-    existingLabels.push(...(workspaceLabels?.nodes ?? []));
-  }
+  existingLabels.push(...allTeamLabels, ...allWorkspaceLabels);
 
   const workflowStates = await teamInfo?.states();
 
@@ -251,7 +240,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
   }
 
   const existingUserMap = {} as { [name: string]: string };
-  for (const user of users) {
+  for (const user of allUsers) {
     const userName = user.name?.toLowerCase();
     if (userName && user.id && !existingUserMap[userName]) {
       existingUserMap[userName] = user.id;
