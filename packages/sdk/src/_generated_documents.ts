@@ -5366,12 +5366,12 @@ export type MutationAttachmentLinkJiraIssueArgs = {
 };
 
 export type MutationAttachmentLinkSlackArgs = {
-  channel: Scalars["String"];
+  channel?: Maybe<Scalars["String"]>;
   createAsUser?: Maybe<Scalars["String"]>;
   displayIconUrl?: Maybe<Scalars["String"]>;
   id?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
-  latest: Scalars["String"];
+  latest?: Maybe<Scalars["String"]>;
   title?: Maybe<Scalars["String"]>;
   ts?: Maybe<Scalars["String"]>;
   url: Scalars["String"];
@@ -9122,8 +9122,6 @@ export type Query = {
   organizationInviteDetails: OrganizationInviteDetailsPayload;
   /** All invites for the organization. */
   organizationInvites: OrganizationInviteConnection;
-  /** Fetch the region for the organization. */
-  organizationRegion: OrganizationRegionResponse;
   /** One specific project. */
   project: Project;
   /** Suggests filters for a project view based on a text prompt. */
@@ -9588,10 +9586,6 @@ export type QueryOrganizationInvitesArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
-};
-
-export type QueryOrganizationRegionArgs = {
-  id: Scalars["String"];
 };
 
 export type QueryProjectArgs = {
@@ -16443,14 +16437,6 @@ export type OrganizationInvitesQuery = { __typename?: "Query" } & {
   organizationInvites: { __typename?: "OrganizationInviteConnection" } & OrganizationInviteConnectionFragment;
 };
 
-export type OrganizationRegionQueryVariables = Exact<{
-  id: Scalars["String"];
-}>;
-
-export type OrganizationRegionQuery = { __typename?: "Query" } & {
-  organizationRegion: { __typename?: "OrganizationRegionResponse" } & OrganizationRegionResponseFragment;
-};
-
 export type ProjectQueryVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -17449,12 +17435,12 @@ export type AttachmentLinkJiraIssueMutation = { __typename?: "Mutation" } & {
 };
 
 export type AttachmentLinkSlackMutationVariables = Exact<{
-  channel: Scalars["String"];
+  channel?: Maybe<Scalars["String"]>;
   createAsUser?: Maybe<Scalars["String"]>;
   displayIconUrl?: Maybe<Scalars["String"]>;
   id?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
-  latest: Scalars["String"];
+  latest?: Maybe<Scalars["String"]>;
   title?: Maybe<Scalars["String"]>;
   ts?: Maybe<Scalars["String"]>;
   url: Scalars["String"];
@@ -36295,44 +36281,6 @@ export const OrganizationInvitesDocument = {
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<OrganizationInvitesQuery, OrganizationInvitesQueryVariables>;
-export const OrganizationRegionDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "organizationRegion" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "organizationRegion" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "OrganizationRegionResponse" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...OrganizationRegionResponseFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<OrganizationRegionQuery, OrganizationRegionQueryVariables>;
 export const ProjectDocument = {
   kind: "Document",
   definitions: [
@@ -43261,7 +43209,7 @@ export const AttachmentLinkSlackDocument = {
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "channel" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
         {
           kind: "VariableDefinition",
@@ -43286,7 +43234,7 @@ export const AttachmentLinkSlackDocument = {
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "latest" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
         {
           kind: "VariableDefinition",

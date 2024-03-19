@@ -8457,9 +8457,9 @@ type Mutation {
   """
   attachmentLinkSlack(
     """
-    The Slack channel ID for the message to link.
+    [DEPRECATED] The Slack channel ID for the message to link.
     """
-    channel: String!
+    channel: String
     """
     Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
     """
@@ -8477,15 +8477,15 @@ type Mutation {
     """
     issueId: String!
     """
-    The latest timestamp for the Slack message.
+    [DEPRECATED] The latest timestamp for the Slack message.
     """
-    latest: String!
+    latest: String
     """
     The title to use for the attachment.
     """
     title: String
     """
-    Unique identifier of either a thread's parent message or a message in the thread.
+    [DEPRECATED] Unique identifier of either a thread's parent message or a message in the thread.
     """
     ts: String
     """
@@ -16656,15 +16656,6 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): OrganizationInviteConnection!
-  """
-  Fetch the region for the organization.
-  """
-  organizationRegion(
-    """
-    The ID of the organization to retrieve.
-    """
-    id: String!
-  ): OrganizationRegionResponse!
   """
   One specific project.
   """

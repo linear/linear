@@ -7433,15 +7433,6 @@ query organizationInvites(
     ...OrganizationInviteConnection
   }
 }
-# Fetch the region for the organization.
-query organizationRegion(
-  # The ID of the organization to retrieve.
-  $id: String!
-) {
-  organizationRegion(id: $id) {
-    ...OrganizationRegionResponse
-  }
-}
 # One specific project.
 query project($id: String!) {
   project(id: $id) {
@@ -9292,8 +9283,8 @@ mutation attachmentLinkJiraIssue(
 }
 # Link an existing Slack message to an issue.
 mutation attachmentLinkSlack(
-  # The Slack channel ID for the message to link.
-  $channel: String!
+  # [DEPRECATED] The Slack channel ID for the message to link.
+  $channel: String
   # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
   $createAsUser: String
   # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
@@ -9302,11 +9293,11 @@ mutation attachmentLinkSlack(
   $id: String
   # The issue to which to link the Slack message.
   $issueId: String!
-  # The latest timestamp for the Slack message.
-  $latest: String!
+  # [DEPRECATED] The latest timestamp for the Slack message.
+  $latest: String
   # The title to use for the attachment.
   $title: String
-  # Unique identifier of either a thread's parent message or a message in the thread.
+  # [DEPRECATED] Unique identifier of either a thread's parent message or a message in the thread.
   $ts: String
   # The Slack message URL for the message to link.
   $url: String!
