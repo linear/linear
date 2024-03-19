@@ -243,11 +243,11 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
   const existingUserMapByEmail = {} as { [email: string]: string };
   for (const user of allUsers) {
     const userName = user.name?.toLowerCase();
-    if (userName && user.id && !existingUserMapByName[userName]) {
+    if (userName && !existingUserMapByName[userName]) {
       existingUserMapByName[userName] = user.id;
     }
 
-    if (user.id && !existingUserMapByEmail[user.email]) {
+    if (!existingUserMapByEmail[user.email]) {
       existingUserMapByEmail[user.email] = user.id;
     }
   }
