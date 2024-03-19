@@ -1,5 +1,11 @@
 # Change Log
 
+## 19.1.0
+
+### Minor Changes
+
+- 3c08a47: feat: provide default value for `first` in pagination helper
+
 ## 19.0.0
 
 ### Major Changes
