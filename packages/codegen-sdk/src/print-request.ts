@@ -64,9 +64,9 @@ export function printRequest(): string {
         public constructor(${args.printInput}) {
           this._${Sdk.REQUEST_NAME} = ${Sdk.REQUEST_NAME}
         }`,
-        "\n",
-        printPaginate(),
-      `}`,
+    "\n",
+    printPaginate(),
+    `}`,
     "\n",
   ]);
 }
@@ -76,16 +76,22 @@ export function printRequest(): string {
  */
 function printPaginate(): string {
   return printLines([
-    printComment([`Helper to paginate over all pages of a given connection query.`, `@param fn The query to paginate`, `@param args The arguments to pass to the query`]),
-    printLines([`public async paginate<T extends ${Sdk.NODE_TYPE}, U>(fn: (variables: U) => ${Sdk.FETCH_TYPE}<${Sdk.CONNECTION_CLASS}<T>>, args: U): Promise<T[]> {
+    printComment([
+      `Helper to paginate over all pages of a given connection query.`,
+      `@param fn The query to paginate`,
+      `@param args The arguments to pass to the query`,
+    ]),
+    printLines([
+      `public async paginate<T extends ${Sdk.NODE_TYPE}, U>(fn: (variables: U) => ${Sdk.FETCH_TYPE}<${Sdk.CONNECTION_CLASS}<T>>, args: U): Promise<T[]> {
       const boundFn = fn.bind(this)
       let connection: ${Sdk.CONNECTION_CLASS}<T> =  (await boundFn(args));
       const nodes = connection.${Sdk.NODE_NAME};
       while(connection.${Sdk.PAGEINFO_NAME}.hasNextPage) {
-        connection = (await boundFn({...args, after: connection.${Sdk.PAGEINFO_NAME}.endCursor}));
+        connection = (await boundFn({first: ${Sdk.CONNECTION_DEFAULT_FIRST}, ...args, after: connection.${Sdk.PAGEINFO_NAME}.endCursor}));
         nodes.push(...connection.${Sdk.NODE_NAME});
       }
       return nodes;
-    }`])
-  ])
+    }`,
+    ]),
+  ]);
 }

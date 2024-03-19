@@ -6,7 +6,7 @@ const ctx = createTestServer();
 
 describe("LinearClient", () => {
   beforeEach(() => {
-    ctx.res(() =>  {
+    ctx.res(() => {
       return {
         body: {
           data: {
@@ -18,7 +18,8 @@ describe("LinearClient", () => {
             },
           },
         },
-      }});
+      };
+    });
   });
 
   it("makes query to apiUrl", async () => {
@@ -74,8 +75,8 @@ describe("LinearClient", () => {
 
     let requestCount = 0;
 
-    const { requests } = ctx.res(() =>  {
-      if(requestCount === 0){
+    const { requests } = ctx.res(() => {
+      if (requestCount === 0) {
         requestCount++;
         return {
           body: {
@@ -83,12 +84,15 @@ describe("LinearClient", () => {
               viewer: { id: "viewerId" },
               team: {
                 id: "teamId",
-                labels: { nodes: [{ id: "labelId" }], pageInfo: { hasNextPage: true, hasPreviousPage: false, endCursor: "endCursorId" } },
+                labels: {
+                  nodes: [{ id: "labelId" }],
+                  pageInfo: { hasNextPage: true, hasPreviousPage: false, endCursor: "endCursorId" },
+                },
                 states: { nodes: [{ id: "stateId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false } },
               },
             },
           },
-        }
+        };
       } else if (requestCount === 1) {
         requestCount++;
         return {
@@ -97,19 +101,22 @@ describe("LinearClient", () => {
               viewer: { id: "viewerId" },
               team: {
                 id: "teamId",
-                labels: { nodes: [{ id: "labelId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false, endCursor: null! } },
+                labels: {
+                  nodes: [{ id: "labelId" }],
+                  pageInfo: { hasNextPage: false, hasPreviousPage: false, endCursor: null! },
+                },
                 states: { nodes: [{ id: "stateId" }], pageInfo: { hasNextPage: false, hasPreviousPage: false } },
               },
             },
           },
-        }
+        };
       } else {
         throw new Error("Unexpected request");
       }
-      });
+    });
 
-    const allTeamLabels = await team.paginate(team.labels, {includeArchived: true});
-    expect(allTeamLabels.length).toEqual(2)
+    const allTeamLabels = await team.paginate(team.labels, { includeArchived: true });
+    expect(allTeamLabels.length).toEqual(2);
     expect(requests.at(-1)?.body.variables?.["id"]).toEqual("teamId");
   });
 });
