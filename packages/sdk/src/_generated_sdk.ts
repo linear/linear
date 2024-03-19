@@ -12118,35 +12118,6 @@ export class OrganizationInvitesQuery extends Request {
 }
 
 /**
- * A fetchable OrganizationRegion Query
- *
- * @param request - function to call the graphql client
- */
-export class OrganizationRegionQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the OrganizationRegion query and return a OrganizationRegionResponse
-   *
-   * @param id - required id to pass to organizationRegion
-   * @returns parsed response from OrganizationRegionQuery
-   */
-  public async fetch(id: string): LinearFetch<OrganizationRegionResponse> {
-    const response = await this._request<L.OrganizationRegionQuery, L.OrganizationRegionQueryVariables>(
-      L.OrganizationRegionDocument,
-      {
-        id,
-      }
-    );
-    const data = response.organizationRegion;
-
-    return new OrganizationRegionResponse(this._request, data);
-  }
-}
-
-/**
  * A fetchable Project Query
  *
  * @param request - function to call the graphql client
@@ -13699,26 +13670,20 @@ export class AttachmentLinkSlackMutation extends Request {
   /**
    * Call the AttachmentLinkSlack mutation and return a AttachmentPayload
    *
-   * @param channel - required channel to pass to attachmentLinkSlack
    * @param issueId - required issueId to pass to attachmentLinkSlack
-   * @param latest - required latest to pass to attachmentLinkSlack
    * @param url - required url to pass to attachmentLinkSlack
-   * @param variables - variables without 'channel', 'issueId', 'latest', 'url' to pass into the AttachmentLinkSlackMutation
+   * @param variables - variables without 'issueId', 'url' to pass into the AttachmentLinkSlackMutation
    * @returns parsed response from AttachmentLinkSlackMutation
    */
   public async fetch(
-    channel: string,
     issueId: string,
-    latest: string,
     url: string,
-    variables?: Omit<L.AttachmentLinkSlackMutationVariables, "channel" | "issueId" | "latest" | "url">
+    variables?: Omit<L.AttachmentLinkSlackMutationVariables, "issueId" | "url">
   ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkSlackMutation, L.AttachmentLinkSlackMutationVariables>(
       L.AttachmentLinkSlackDocument,
       {
-        channel,
         issueId,
-        latest,
         url,
         ...variables,
       }
@@ -23540,15 +23505,6 @@ export class LinearSdk extends Request {
     return new OrganizationInvitesQuery(this._request).fetch(variables);
   }
   /**
-   * Fetch the region for the organization.
-   *
-   * @param id - required id to pass to organizationRegion
-   * @returns OrganizationRegionResponse
-   */
-  public organizationRegion(id: string): LinearFetch<OrganizationRegionResponse> {
-    return new OrganizationRegionQuery(this._request).fetch(id);
-  }
-  /**
    * One specific project.
    *
    * @param id - required id to pass to project
@@ -24062,21 +24018,17 @@ export class LinearSdk extends Request {
   /**
    * Link an existing Slack message to an issue.
    *
-   * @param channel - required channel to pass to attachmentLinkSlack
    * @param issueId - required issueId to pass to attachmentLinkSlack
-   * @param latest - required latest to pass to attachmentLinkSlack
    * @param url - required url to pass to attachmentLinkSlack
-   * @param variables - variables without 'channel', 'issueId', 'latest', 'url' to pass into the AttachmentLinkSlackMutation
+   * @param variables - variables without 'issueId', 'url' to pass into the AttachmentLinkSlackMutation
    * @returns AttachmentPayload
    */
   public attachmentLinkSlack(
-    channel: string,
     issueId: string,
-    latest: string,
     url: string,
-    variables?: Omit<L.AttachmentLinkSlackMutationVariables, "channel" | "issueId" | "latest" | "url">
+    variables?: Omit<L.AttachmentLinkSlackMutationVariables, "issueId" | "url">
   ): LinearFetch<AttachmentPayload> {
-    return new AttachmentLinkSlackMutation(this._request).fetch(channel, issueId, latest, url, variables);
+    return new AttachmentLinkSlackMutation(this._request).fetch(issueId, url, variables);
   }
   /**
    * Link any url to an issue.

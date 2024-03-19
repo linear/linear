@@ -2639,15 +2639,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test OrganizationRegion query */
-  describe("OrganizationRegion", () => {
-    /** Test the root model query for OrganizationRegion */
-    it("organizationRegion", async () => {
-      const organizationRegion: L.OrganizationRegionResponse | undefined = await client.organizationRegion("mock-id");
-      expect(organizationRegion instanceof L.OrganizationRegionResponse);
-    });
-  });
-
   /** Test ProjectFilterSuggestion query */
   describe("ProjectFilterSuggestion", () => {
     /** Test the root model query for ProjectFilterSuggestion */
