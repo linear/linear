@@ -239,11 +239,16 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
     }
   }
 
-  const existingUserMap = {} as { [name: string]: string };
+  const existingUserMapByName = {} as { [name: string]: string };
+  const existingUserMapByEmail = {} as { [email: string]: string };
   for (const user of allUsers) {
     const userName = user.name?.toLowerCase();
-    if (userName && user.id && !existingUserMap[userName]) {
-      existingUserMap[userName] = user.id;
+    if (userName && user.id && !existingUserMapByName[userName]) {
+      existingUserMapByName[userName] = user.id;
+    }
+
+    if (user.id && !existingUserMapByEmail[user.email]) {
+      existingUserMapByEmail[user.email] = user.id;
     }
   }
 
@@ -284,8 +289,9 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       }
     }
 
-    const existingAssigneeId: string | undefined = !!issue.assigneeId
-      ? existingUserMap[issue.assigneeId.toLowerCase()]
+    const issueAssigneeId = issue.assigneeId?.toLowerCase();
+    const existingAssigneeId: string | undefined = !!issueAssigneeId
+      ? existingUserMapByEmail[issueAssigneeId] ?? existingUserMapByName[issueAssigneeId]
       : undefined;
 
     let assigneeId: string | undefined;
