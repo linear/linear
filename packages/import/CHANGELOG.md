@@ -1,5 +1,18 @@
 # Change Log
 
+## 1.11.0
+
+### Minor Changes
+
+- 37c0d1c: fix: map assignees by email before name
+
+### Patch Changes
+
+- a2b3f67: chore(deps): update dependency patch versions
+- 46e881c: fix: properly paginate teams and users in CLI importer
+- Updated dependencies [a2b3f67]
+  - @linear/sdk@19.1.1
+
 ## 1.10.4
 
 ### Patch Changes
