@@ -6,6 +6,8 @@ import * as inquirer from "inquirer";
 import _, { uniq } from "lodash";
 import { Comment, Importer, ImportResult } from "./types";
 import { replaceImagesInMarkdown } from "./utils/replaceImages";
+import { Presets, SingleBar } from "cli-progress";
+import ora from "ora";
 
 interface ImportAnswers {
   newTeam: boolean;
@@ -33,8 +35,12 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
   const viewerQuery = await client.viewer;
 
+  let spinner = ora("Fetching teams and users").start();
+
   const allTeams = await client.paginate(client.teams, {});
-  const allUsers = await client.paginate(client.users, {includeDisabled: false});
+  const allUsers = await client.paginate(client.users, { includeDisabled: false });
+
+  spinner.stop();
   const viewer = viewerQuery?.id;
 
   // Prompt the user to either get or create a team
@@ -171,10 +177,15 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
   const existingLabels = [];
 
+  spinner = ora("Fetching labels").start();
+
   const allTeamLabels = await teamInfo.paginate(teamInfo.labels, {});
   const allWorkspaceLabels = await client.paginate(organization.labels, {});
 
   existingLabels.push(...allTeamLabels, ...allWorkspaceLabels);
+
+  spinner.stop();
+  spinner = ora("Fetching workflow states").start();
 
   const workflowStates = await teamInfo?.states();
 
@@ -252,6 +263,11 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
     }
   }
 
+  spinner.stop();
+  const issuesProgressBar = new SingleBar({}, Presets.shades_classic);
+  issuesProgressBar.start(importData.issues.length, 0);
+  let issueCursor = 0;
+
   // Create issues
   for (const issue of importData.issues) {
     const issueDescription = issue.description
@@ -317,7 +333,11 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       createdAt: issue.createdAt,
       dueDate: formattedDueDate,
     });
+    issueCursor++;
+    issuesProgressBar.update(issueCursor);
   }
+
+  issuesProgressBar.stop();
 
   console.info(chalk.green(`${importer.name} issues imported to your team: https://linear.app/team/${teamKey}/all`));
 };
