@@ -10,6 +10,8 @@ import { Presets, SingleBar } from "cli-progress";
 import ora from "ora";
 
 interface ImportAnswers {
+  parentIdConfirmation: boolean;
+  parentId?: string;
   newTeam: boolean;
   includeComments?: boolean;
   includeProject?: string;
@@ -45,6 +47,37 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
   // Prompt the user to either get or create a team
   const importAnswers = await inquirer.prompt<ImportAnswers>([
+    {
+      type: "confirm",
+      name: "parentIdConfirmation",
+      message: "Do you want to have a parent issue?",
+      default: false,
+    },
+    {
+      type: "input",
+      name: "parentId",
+      message: "The Parent Issue Id:",
+      default: undefined,
+      when: (answers: ImportAnswers) => {
+        return answers.parentIdConfirmation;
+      },
+    },
+    {
+      type: "list",
+      name: "targetAssignee",
+      message: "Assign to user:",
+      choices: () => {
+        const map = users.map(user => ({
+          name: user.name,
+          value: user.id,
+        }));
+        map.push({ name: "[Unassigned]", value: "" });
+        return map;
+      },
+      when: (answers: ImportAnswers) => {
+        return answers.parentIdConfirmation;
+      },
+    },
     {
       type: "confirm",
       name: "newTeam",
@@ -332,6 +365,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       assigneeId,
       createdAt: issue.createdAt,
       dueDate: formattedDueDate,
+      parentId: issue.parentId ?? importAnswers.parentId,
     });
     issueCursor++;
     issuesProgressBar.update(issueCursor);
