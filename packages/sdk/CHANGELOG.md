@@ -1,5 +1,29 @@
 # Change Log
 
+## 19.2.0
+
+### Minor Changes
+
+- a9fe3ae: feat(schema): [dangerous] Input field 'shouldUnfurl' was added to input object type 'SharedSlackSettingsInput' (SharedSlackSettingsInput.shouldUnfurl)
+
+  feat(schema): [dangerous] Input field 'shouldUnfurl' was added to input object type 'SlackAsksSettingsInput' (SlackAsksSettingsInput.shouldUnfurl)
+
+  feat(schema): [dangerous] Input field 'shouldUnfurl' was added to input object type 'SlackSettingsInput' (SlackSettingsInput.shouldUnfurl)
+
+  feat(schema): [non_breaking] Type 'SummaryPayload' was added (SummaryPayload)
+
+  feat(schema): [non_breaking] Field 'summarizeProjectUpdates' was added to object type 'Query' (Query.summarizeProjectUpdates)
+
+  feat(schema): [non_breaking] Field 'shouldUnfurl' was added to object type 'SharedSlackSettings' (SharedSlackSettings.shouldUnfurl)
+
+  feat(schema): [non_breaking] Field 'shouldUnfurl' was added to object type 'SlackAsksSettings' (SlackAsksSettings.shouldUnfurl)
+
+  feat(schema): [non_breaking] Field 'shouldUnfurl' was added to object type 'SlackSettings' (SlackSettings.shouldUnfurl)
+
+### Patch Changes
+
+- 8bb1e78: chore(deps): update dependency patch versions
+
 ## 19.1.1
 
 ### Patch Changes

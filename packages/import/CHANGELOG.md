@@ -1,5 +1,18 @@
 # Change Log
 
+## 1.12.0
+
+### Minor Changes
+
+- 37d1923: feat: add spinners and progress bar
+
+### Patch Changes
+
+- 8bb1e78: chore(deps): update dependency patch versions
+- Updated dependencies [8bb1e78]
+- Updated dependencies [a9fe3ae]
+  - @linear/sdk@19.2.0
+
 ## 1.11.0
 
 ### Minor Changes
