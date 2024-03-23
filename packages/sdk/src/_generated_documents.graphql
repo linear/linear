@@ -3018,6 +3018,8 @@ fragment SlackSettings on SlackSettings {
   teamName
   # Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.
   linkOnIssueIdMention
+  # Whether to show unfurl previews in Slack
+  shouldUnfurl
 }
 
 # Shared Slack integration settings.
@@ -3029,6 +3031,8 @@ fragment SharedSlackSettings on SharedSlackSettings {
   teamId
   # Slack workspace name
   teamName
+  # Whether to show unfurl previews in Slack
+  shouldUnfurl
 }
 
 # Slack Asks specific settings.
@@ -3044,6 +3048,8 @@ fragment SlackAsksSettings on SlackAsksSettings {
   slackChannelMapping {
     ...SlackChannelNameMapping
   }
+  # Whether to show unfurl previews in Slack
+  shouldUnfurl
 }
 
 # Slack notification specific settings.
@@ -4982,6 +4988,12 @@ fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
   samlSsoUrl
   # Whether the operation was successful.
   success
+}
+
+fragment SummaryPayload on SummaryPayload {
+  __typename
+  # Summary for project updates.
+  summary
 }
 
 fragment SynchronizedPayload on SynchronizedPayload {

@@ -61266,6 +61266,47 @@
             "deprecationReason": null
           },
           {
+            "name": "summarizeProjectUpdates",
+            "description": "[Internal] AI summary of the latest project updates for the given projects",
+            "args": [
+              {
+                "name": "ids",
+                "description": "The identifiers of the projects to summarize.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "SummaryPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "pushSubscriptionTest",
             "description": "Sends a test push message.",
             "args": [
@@ -65289,6 +65330,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "shouldUnfurl",
+            "description": "Whether to show unfurl previews in Slack",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -65332,6 +65385,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "shouldUnfurl",
+            "description": "Whether to show unfurl previews in Slack",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -65560,6 +65625,18 @@
             "deprecationReason": null
           },
           {
+            "name": "shouldUnfurl",
+            "description": "Whether to show unfurl previews in Slack",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slackChannelMapping",
             "description": "The mapping of Slack channel ID => Slack channel name for connected channels.",
             "args": [],
@@ -65637,6 +65714,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "shouldUnfurl",
+            "description": "Whether to show unfurl previews in Slack",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -66386,6 +66475,18 @@
             "deprecationReason": null
           },
           {
+            "name": "shouldUnfurl",
+            "description": "Whether to show unfurl previews in Slack",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "linkOnIssueIdMention",
             "description": "Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.",
             "args": [],
@@ -66443,6 +66544,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "shouldUnfurl",
+            "description": "Whether to show unfurl previews in Slack",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -67110,6 +67223,33 @@
           }
         ],
         "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SummaryPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "summary",
+            "description": "Summary for project updates.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },

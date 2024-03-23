@@ -8134,12 +8134,15 @@ export class SharedSlackSettings extends Request {
   public constructor(request: LinearRequest, data: L.SharedSlackSettingsFragment) {
     super(request);
     this.enterpriseName = data.enterpriseName ?? undefined;
+    this.shouldUnfurl = data.shouldUnfurl ?? undefined;
     this.teamId = data.teamId ?? undefined;
     this.teamName = data.teamName ?? undefined;
   }
 
   /** Enterprise name of the connected Slack enterprise */
   public enterpriseName?: string;
+  /** Whether to show unfurl previews in Slack */
+  public shouldUnfurl?: boolean;
   /** Slack workspace id */
   public teamId?: string;
   /** Slack workspace name */
@@ -8155,6 +8158,7 @@ export class SlackAsksSettings extends Request {
   public constructor(request: LinearRequest, data: L.SlackAsksSettingsFragment) {
     super(request);
     this.enterpriseName = data.enterpriseName ?? undefined;
+    this.shouldUnfurl = data.shouldUnfurl ?? undefined;
     this.teamId = data.teamId ?? undefined;
     this.teamName = data.teamName ?? undefined;
     this.slackChannelMapping = data.slackChannelMapping
@@ -8164,6 +8168,8 @@ export class SlackAsksSettings extends Request {
 
   /** Enterprise name of the connected Slack enterprise */
   public enterpriseName?: string;
+  /** Whether to show unfurl previews in Slack */
+  public shouldUnfurl?: boolean;
   /** Slack workspace id */
   public teamId?: string;
   /** Slack workspace name */
@@ -8294,6 +8300,7 @@ export class SlackSettings extends Request {
     super(request);
     this.enterpriseName = data.enterpriseName ?? undefined;
     this.linkOnIssueIdMention = data.linkOnIssueIdMention;
+    this.shouldUnfurl = data.shouldUnfurl ?? undefined;
     this.teamId = data.teamId ?? undefined;
     this.teamName = data.teamName ?? undefined;
   }
@@ -8302,6 +8309,8 @@ export class SlackSettings extends Request {
   public enterpriseName?: string;
   /** Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message. */
   public linkOnIssueIdMention: boolean;
+  /** Whether to show unfurl previews in Slack */
+  public shouldUnfurl?: boolean;
   /** Slack workspace id */
   public teamId?: string;
   /** Slack workspace name */
@@ -8324,6 +8333,21 @@ export class SsoUrlFromEmailResponse extends Request {
   public samlSsoUrl: string;
   /** Whether the operation was successful. */
   public success: boolean;
+}
+/**
+ * SummaryPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SummaryPayloadFragment response data
+ */
+export class SummaryPayload extends Request {
+  public constructor(request: LinearRequest, data: L.SummaryPayloadFragment) {
+    super(request);
+    this.summary = data.summary;
+  }
+
+  /** Summary for project updates. */
+  public summary: string;
 }
 /**
  * SynchronizedPayload model
