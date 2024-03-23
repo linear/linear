@@ -17083,6 +17083,15 @@ type Query {
     isDesktop: Boolean
   ): SsoUrlFromEmailResponse!
   """
+  [Internal] AI summary of the latest project updates for the given projects
+  """
+  summarizeProjectUpdates(
+    """
+    The identifiers of the projects to summarize.
+    """
+    ids: [String!]!
+  ): SummaryPayload!
+  """
   One specific team.
   """
   team(id: String!): Team!
@@ -17947,6 +17956,10 @@ type SharedSlackSettings {
   """
   enterpriseName: String
   """
+  Whether to show unfurl previews in Slack
+  """
+  shouldUnfurl: Boolean
+  """
   Slack workspace id
   """
   teamId: String
@@ -17961,6 +17974,10 @@ input SharedSlackSettingsInput {
   Enterprise name of the connected Slack enterprise
   """
   enterpriseName: String
+  """
+  Whether to show unfurl previews in Slack
+  """
+  shouldUnfurl: Boolean
   """
   Slack workspace id
   """
@@ -18034,6 +18051,10 @@ type SlackAsksSettings {
   """
   enterpriseName: String
   """
+  Whether to show unfurl previews in Slack
+  """
+  shouldUnfurl: Boolean
+  """
   The mapping of Slack channel ID => Slack channel name for connected channels.
   """
   slackChannelMapping: [SlackChannelNameMapping!]
@@ -18056,6 +18077,10 @@ input SlackAsksSettingsInput {
   Enterprise name of the connected Slack enterprise
   """
   enterpriseName: String
+  """
+  Whether to show unfurl previews in Slack
+  """
+  shouldUnfurl: Boolean
   """
   The mapping of Slack channel ID => Slack channel name for connected channels.
   """
@@ -18248,6 +18273,10 @@ type SlackSettings {
   """
   linkOnIssueIdMention: Boolean!
   """
+  Whether to show unfurl previews in Slack
+  """
+  shouldUnfurl: Boolean
+  """
   Slack workspace id
   """
   teamId: String
@@ -18266,6 +18295,10 @@ input SlackSettingsInput {
   Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.
   """
   linkOnIssueIdMention: Boolean!
+  """
+  Whether to show unfurl previews in Slack
+  """
+  shouldUnfurl: Boolean
   """
   Slack workspace id
   """
@@ -18473,6 +18506,13 @@ input SubTypeComparator {
   Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
   """
   null: Boolean
+}
+
+type SummaryPayload {
+  """
+  Summary for project updates.
+  """
+  summary: String!
 }
 
 type SynchronizedPayload {

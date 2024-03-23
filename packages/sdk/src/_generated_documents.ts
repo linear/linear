@@ -9164,6 +9164,8 @@ export type Query = {
   searchProjects: ProjectSearchPayload;
   /** Fetch SSO login URL for the email provided. */
   ssoUrlFromEmail: SsoUrlFromEmailResponse;
+  /** [Internal] AI summary of the latest project updates for the given projects */
+  summarizeProjectUpdates: SummaryPayload;
   /** One specific team. */
   team: Team;
   /** One specific team membership. */
@@ -9736,6 +9738,10 @@ export type QuerySsoUrlFromEmailArgs = {
   isDesktop?: Maybe<Scalars["Boolean"]>;
 };
 
+export type QuerySummarizeProjectUpdatesArgs = {
+  ids: Array<Scalars["String"]>;
+};
+
 export type QueryTeamArgs = {
   id: Scalars["String"];
 };
@@ -10191,6 +10197,8 @@ export type SharedSlackSettings = {
   __typename?: "SharedSlackSettings";
   /** Enterprise name of the connected Slack enterprise */
   enterpriseName?: Maybe<Scalars["String"]>;
+  /** Whether to show unfurl previews in Slack */
+  shouldUnfurl?: Maybe<Scalars["Boolean"]>;
   /** Slack workspace id */
   teamId?: Maybe<Scalars["String"]>;
   /** Slack workspace name */
@@ -10200,6 +10208,8 @@ export type SharedSlackSettings = {
 export type SharedSlackSettingsInput = {
   /** Enterprise name of the connected Slack enterprise */
   enterpriseName?: Maybe<Scalars["String"]>;
+  /** Whether to show unfurl previews in Slack */
+  shouldUnfurl?: Maybe<Scalars["Boolean"]>;
   /** Slack workspace id */
   teamId?: Maybe<Scalars["String"]>;
   /** Slack workspace name */
@@ -10245,6 +10255,8 @@ export type SlackAsksSettings = {
   canAdministrate: UserRoleType;
   /** Enterprise name of the connected Slack enterprise */
   enterpriseName?: Maybe<Scalars["String"]>;
+  /** Whether to show unfurl previews in Slack */
+  shouldUnfurl?: Maybe<Scalars["Boolean"]>;
   /** The mapping of Slack channel ID => Slack channel name for connected channels. */
   slackChannelMapping?: Maybe<Array<SlackChannelNameMapping>>;
   /** Slack workspace id */
@@ -10258,6 +10270,8 @@ export type SlackAsksSettingsInput = {
   canAdministrate: UserRoleType;
   /** Enterprise name of the connected Slack enterprise */
   enterpriseName?: Maybe<Scalars["String"]>;
+  /** Whether to show unfurl previews in Slack */
+  shouldUnfurl?: Maybe<Scalars["Boolean"]>;
   /** The mapping of Slack channel ID => Slack channel name for connected channels. */
   slackChannelMapping?: Maybe<Array<SlackChannelNameMappingInput>>;
   /** Slack workspace id */
@@ -10376,6 +10390,8 @@ export type SlackSettings = {
   enterpriseName?: Maybe<Scalars["String"]>;
   /** Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message. */
   linkOnIssueIdMention: Scalars["Boolean"];
+  /** Whether to show unfurl previews in Slack */
+  shouldUnfurl?: Maybe<Scalars["Boolean"]>;
   /** Slack workspace id */
   teamId?: Maybe<Scalars["String"]>;
   /** Slack workspace name */
@@ -10387,6 +10403,8 @@ export type SlackSettingsInput = {
   enterpriseName?: Maybe<Scalars["String"]>;
   /** Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message. */
   linkOnIssueIdMention: Scalars["Boolean"];
+  /** Whether to show unfurl previews in Slack */
+  shouldUnfurl?: Maybe<Scalars["Boolean"]>;
   /** Slack workspace id */
   teamId?: Maybe<Scalars["String"]>;
   /** Slack workspace name */
@@ -10497,6 +10515,12 @@ export type SubTypeComparator = {
   nin?: Maybe<Array<Scalars["String"]>>;
   /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
   null?: Maybe<Scalars["Boolean"]>;
+};
+
+export type SummaryPayload = {
+  __typename?: "SummaryPayload";
+  /** Summary for project updates. */
+  summary: Scalars["String"];
 };
 
 export type SynchronizedPayload = {
@@ -13853,17 +13877,17 @@ export type SentrySettingsFragment = { __typename: "SentrySettings" } & Pick<Sen
 
 export type SlackSettingsFragment = { __typename: "SlackSettings" } & Pick<
   SlackSettings,
-  "enterpriseName" | "teamId" | "teamName" | "linkOnIssueIdMention"
+  "enterpriseName" | "teamId" | "teamName" | "linkOnIssueIdMention" | "shouldUnfurl"
 >;
 
 export type SharedSlackSettingsFragment = { __typename: "SharedSlackSettings" } & Pick<
   SharedSlackSettings,
-  "enterpriseName" | "teamId" | "teamName"
+  "enterpriseName" | "teamId" | "teamName" | "shouldUnfurl"
 >;
 
 export type SlackAsksSettingsFragment = { __typename: "SlackAsksSettings" } & Pick<
   SlackAsksSettings,
-  "enterpriseName" | "teamId" | "teamName"
+  "enterpriseName" | "teamId" | "teamName" | "shouldUnfurl"
 > & {
     slackChannelMapping?: Maybe<Array<{ __typename?: "SlackChannelNameMapping" } & SlackChannelNameMappingFragment>>;
   };
@@ -15053,6 +15077,8 @@ export type SsoUrlFromEmailResponseFragment = { __typename: "SsoUrlFromEmailResp
   SsoUrlFromEmailResponse,
   "samlSsoUrl" | "success"
 >;
+
+export type SummaryPayloadFragment = { __typename: "SummaryPayload" } & Pick<SummaryPayload, "summary">;
 
 export type SynchronizedPayloadFragment = { __typename: "SynchronizedPayload" } & Pick<
   SynchronizedPayload,
@@ -20932,6 +20958,7 @@ export const SharedSlackSettingsFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "enterpriseName" } },
           { kind: "Field", name: { kind: "Name", value: "teamId" } },
           { kind: "Field", name: { kind: "Name", value: "teamName" } },
+          { kind: "Field", name: { kind: "Name", value: "shouldUnfurl" } },
         ],
       },
     },
@@ -21280,6 +21307,7 @@ export const SlackSettingsFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "teamId" } },
           { kind: "Field", name: { kind: "Name", value: "teamName" } },
           { kind: "Field", name: { kind: "Name", value: "linkOnIssueIdMention" } },
+          { kind: "Field", name: { kind: "Name", value: "shouldUnfurl" } },
         ],
       },
     },
@@ -21358,6 +21386,7 @@ export const SlackAsksSettingsFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SlackChannelNameMapping" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "shouldUnfurl" } },
         ],
       },
     },
@@ -26920,6 +26949,23 @@ export const SsoUrlFromEmailResponseFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<SsoUrlFromEmailResponseFragment, unknown>;
+export const SummaryPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SummaryPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SummaryPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "summary" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SummaryPayloadFragment, unknown>;
 export const SynchronizedPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
