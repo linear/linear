@@ -3,6 +3,7 @@
 import chalk from "chalk";
 import * as inquirer from "inquirer";
 import { asanaCsvImport } from "./importers/asanaCsv";
+import { clickupCsvImport } from "./importers/clickupCsv";
 import { githubImport } from "./importers/github";
 import { jiraCsvImport } from "./importers/jiraCsv";
 import { linearCsvImporter } from "./importers/linearCsv";
@@ -55,6 +56,10 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
             name: "Linear (CSV export)",
             value: "linearCsv",
           },
+          {
+            name: "ClickUp (CSV export)",
+            value: "clickupCsv",
+          },
         ],
       },
     ]);
@@ -70,6 +75,9 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
         break;
       case "asanaCsv":
         importer = await asanaCsvImport();
+        break;
+      case "clickupCsv":
+        importer = await clickupCsvImport();
         break;
       case "pivotalCsv":
         importer = await pivotalCsvImport();
