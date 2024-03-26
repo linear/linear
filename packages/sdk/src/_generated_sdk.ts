@@ -893,6 +893,7 @@ export class AuthOrganization extends Request {
     this.serviceId = data.serviceId;
     this.urlKey = data.urlKey;
     this.userCount = data.userCount;
+    this.releaseChannel = data.releaseChannel;
   }
 
   /** Allowed authentication providers, empty array means all are allowed */
@@ -918,6 +919,8 @@ export class AuthOrganization extends Request {
   /** The organization's unique URL key. */
   public urlKey: string;
   public userCount: number;
+  /** The feature release channel the organization belongs to. */
+  public releaseChannel: L.ReleaseChannel;
 }
 /**
  * AuthOrganizationDomain model
@@ -933,6 +936,7 @@ export class AuthOrganizationDomain extends Request {
     this.name = data.name;
     this.organizationId = data.organizationId;
     this.verified = data.verified;
+    this.authType = data.authType;
   }
 
   public claimed?: boolean;
@@ -941,6 +945,7 @@ export class AuthOrganizationDomain extends Request {
   public name: string;
   public organizationId: string;
   public verified: boolean;
+  public authType: L.OrganizationDomainAuthType;
 }
 /**
  * An invitation to the organization that has been sent via email.
@@ -1074,6 +1079,7 @@ export class AuthenticationSession extends Request {
     this.operatingSystem = data.operatingSystem ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.userAgent = data.userAgent ?? undefined;
+    this.type = data.type;
   }
 
   /** Used web browser. */
@@ -1105,6 +1111,8 @@ export class AuthenticationSession extends Request {
   public updatedAt: Date;
   /** Session's user-agent. */
   public userAgent?: string;
+  /** Type of application used to authenticate. */
+  public type: L.AuthenticationSessionType;
 }
 /**
  * Authentication session information.
@@ -1131,6 +1139,7 @@ export class AuthenticationSessionResponse extends Request {
     this.operatingSystem = data.operatingSystem ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.userAgent = data.userAgent ?? undefined;
+    this.type = data.type;
   }
 
   /** Used web browser. */
@@ -1164,6 +1173,8 @@ export class AuthenticationSessionResponse extends Request {
   public updatedAt: Date;
   /** Session's user-agent. */
   public userAgent?: string;
+  /** Type of application used to authenticate. */
+  public type: L.AuthenticationSessionType;
 }
 /**
  * AuthorizedApplicationBase model
@@ -1631,6 +1642,8 @@ export class CustomViewNotificationSubscription extends Request {
     this.id = data.id;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.contextViewType = data.contextViewType ?? undefined;
+    this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView;
     this._cycle = data.cycle ?? undefined;
     this._label = data.label ?? undefined;
@@ -1656,6 +1669,10 @@ export class CustomViewNotificationSubscription extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The type of view to which the notification subscription context is associated with. */
+  public contextViewType?: L.ContextViewType;
+  /** The type of user view to which the notification subscription context is associated with. */
+  public userContextViewType?: L.UserContextViewType;
   /** The custom view subscribed to. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return new CustomViewQuery(this._request).fetch(this._customView.id);
@@ -1894,6 +1911,8 @@ export class CycleNotificationSubscription extends Request {
     this.id = data.id;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.contextViewType = data.contextViewType ?? undefined;
+    this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle;
     this._label = data.label ?? undefined;
@@ -1919,6 +1938,10 @@ export class CycleNotificationSubscription extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The type of view to which the notification subscription context is associated with. */
+  public contextViewType?: L.ContextViewType;
+  /** The type of user view to which the notification subscription context is associated with. */
+  public userContextViewType?: L.UserContextViewType;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -2747,6 +2770,7 @@ export class Favorite extends Request {
     this.sortOrder = data.sortOrder;
     this.type = data.type;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.projectTab = data.projectTab ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
     this._document = data.document ?? undefined;
@@ -2781,6 +2805,8 @@ export class Favorite extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The targeted tab of the project. */
+  public projectTab?: L.ProjectTab;
   /** The favorited custom view. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -2955,6 +2981,7 @@ export class GitAutomationState extends Request {
     this.id = data.id;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.targetBranch = data.targetBranch ? new GitAutomationTargetBranch(request, data.targetBranch) : undefined;
+    this.event = data.event;
     this._state = data.state ?? undefined;
     this._team = data.team;
   }
@@ -2975,6 +3002,8 @@ export class GitAutomationState extends Request {
   public updatedAt: Date;
   /** The target branch associated to this automation state. */
   public targetBranch?: GitAutomationTargetBranch;
+  /** The event that triggers the automation. */
+  public event: L.GitAutomationStates;
   /** The associated workflow state. */
   public get state(): LinearFetch<WorkflowState> | undefined {
     return this._state?.id ? new WorkflowStateQuery(this._request).fetch(this._state?.id) : undefined;
@@ -3832,6 +3861,7 @@ export class Issue extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.integrationSourceType = data.integrationSourceType ?? undefined;
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
     this._cycle = data.cycle ?? undefined;
@@ -3911,6 +3941,8 @@ export class Issue extends Request {
   public url: string;
   /** The bot that created the issue, if applicable. */
   public botActor?: ActorBot;
+  /** Integration type that created this issue, if applicable. */
+  public integrationSourceType?: L.IntegrationService;
   /** The user to whom the issue is assigned to. */
   public get assignee(): LinearFetch<User> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
@@ -4942,6 +4974,7 @@ export class IssueSearchResult extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.integrationSourceType = data.integrationSourceType ?? undefined;
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
     this._cycle = data.cycle ?? undefined;
@@ -5023,6 +5056,8 @@ export class IssueSearchResult extends Request {
   public url: string;
   /** The bot that created the issue, if applicable. */
   public botActor?: ActorBot;
+  /** Integration type that created this issue, if applicable. */
+  public integrationSourceType?: L.IntegrationService;
   /** The user to whom the issue is assigned to. */
   public get assignee(): LinearFetch<User> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
@@ -5209,6 +5244,8 @@ export class LabelNotificationSubscription extends Request {
     this.id = data.id;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.contextViewType = data.contextViewType ?? undefined;
+    this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
     this._label = data.label;
@@ -5234,6 +5271,10 @@ export class LabelNotificationSubscription extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The type of view to which the notification subscription context is associated with. */
+  public contextViewType?: L.ContextViewType;
+  /** The type of user view to which the notification subscription context is associated with. */
+  public userContextViewType?: L.UserContextViewType;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -5495,6 +5536,8 @@ export class NotificationSubscription extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.contextViewType = data.contextViewType ?? undefined;
+    this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
     this._label = data.label ?? undefined;
@@ -5518,6 +5561,10 @@ export class NotificationSubscription extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The type of view to which the notification subscription context is associated with. */
+  public contextViewType?: L.ContextViewType;
+  /** The type of user view to which the notification subscription context is associated with. */
+  public userContextViewType?: L.UserContextViewType;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -5753,6 +5800,7 @@ export class OauthClientApproval extends Request {
     this.responderId = data.responderId ?? undefined;
     this.scopes = data.scopes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.status = data.status;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -5779,6 +5827,8 @@ export class OauthClientApproval extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The status for the OAuth client approval request. */
+  public status: L.OAuthClientApprovalStatus;
 }
 /**
  * An oauth client approval related notification.
@@ -5951,6 +6001,10 @@ export class Organization extends Request {
     this.urlKey = data.urlKey;
     this.userCount = data.userCount;
     this.subscription = data.subscription ? new PaidSubscription(request, data.subscription) : undefined;
+    this.projectUpdateRemindersDay = data.projectUpdateRemindersDay;
+    this.projectUpdatesReminderFrequency = data.projectUpdatesReminderFrequency;
+    this.releaseChannel = data.releaseChannel;
+    this.slaDayCount = data.slaDayCount;
   }
 
   /** Whether member users are allowed to send invites. */
@@ -6005,6 +6059,14 @@ export class Organization extends Request {
   public userCount: number;
   /** The organization's subscription to a paid plan. */
   public subscription?: PaidSubscription;
+  /** The day at which to prompt for project updates. */
+  public projectUpdateRemindersDay: L.Day;
+  /** The frequency at which to prompt for project updates. */
+  public projectUpdatesReminderFrequency: L.ProjectUpdateReminderFrequency;
+  /** The feature release channel the organization belongs to. */
+  public releaseChannel: L.ReleaseChannel;
+  /** Which day count to use for SLA calculations. */
+  public slaDayCount: L.SLADayCountType;
 
   /** Integrations associated with the organization. */
   public integrations(variables?: L.Organization_IntegrationsQueryVariables) {
@@ -6034,6 +6096,21 @@ export class Organization extends Request {
   public update(input: L.OrganizationUpdateInput) {
     return new UpdateOrganizationMutation(this._request).fetch(input);
   }
+}
+/**
+ * OrganizationAcceptedOrExpiredInviteDetailsPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OrganizationAcceptedOrExpiredInviteDetailsPayloadFragment response data
+ */
+export class OrganizationAcceptedOrExpiredInviteDetailsPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OrganizationAcceptedOrExpiredInviteDetailsPayloadFragment) {
+    super(request);
+    this.status = data.status;
+  }
+
+  /** The status of the invite. */
+  public status: L.OrganizationInviteStatus;
 }
 /**
  * OrganizationCancelDeletePayload model
@@ -6084,6 +6161,7 @@ export class OrganizationDomain extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.verificationEmail = data.verificationEmail ?? undefined;
     this.verified = data.verified;
+    this.authType = data.authType;
     this._creator = data.creator ?? undefined;
   }
 
@@ -6107,6 +6185,8 @@ export class OrganizationDomain extends Request {
   public verificationEmail?: string;
   /** Is this domain verified. */
   public verified: boolean;
+  /** What type of auth is the domain used for. */
+  public authType: L.OrganizationDomainAuthType;
   /** The user who added the domain. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -6156,6 +6236,7 @@ export class OrganizationInvite extends Request {
     this.id = data.id;
     this.metadata = data.metadata;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.role = data.role;
     this._invitee = data.invitee ?? undefined;
     this._inviter = data.inviter;
   }
@@ -6182,6 +6263,8 @@ export class OrganizationInvite extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The user role that the invitee will receive upon accepting the invite. */
+  public role: L.UserRoleType;
   /** The user who has accepted the invite. Null, if the invite hasn't been accepted. */
   public get invitee(): LinearFetch<User> | undefined {
     return this._invitee?.id ? new UserQuery(this._request).fetch(this._invitee?.id) : undefined;
@@ -6247,6 +6330,8 @@ export class OrganizationInviteFullDetailsPayload extends Request {
     this.organizationId = data.organizationId;
     this.organizationLogoUrl = data.organizationLogoUrl ?? undefined;
     this.organizationName = data.organizationName;
+    this.role = data.role;
+    this.status = data.status;
   }
 
   /** Whether the invite has already been accepted. */
@@ -6267,6 +6352,10 @@ export class OrganizationInviteFullDetailsPayload extends Request {
   public organizationLogoUrl?: string;
   /** Name of the workspace the invite is for. */
   public organizationName: string;
+  /** What user role the invite should grant. */
+  public role: L.UserRoleType;
+  /** The status of the invite. */
+  public status: L.OrganizationInviteStatus;
 }
 /**
  * OrganizationInviteLinkDetailsPayload model
@@ -7062,6 +7151,8 @@ export class ProjectNotificationSubscription extends Request {
     this.id = data.id;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.contextViewType = data.contextViewType ?? undefined;
+    this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
     this._label = data.label ?? undefined;
@@ -7087,6 +7178,10 @@ export class ProjectNotificationSubscription extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The type of view to which the notification subscription context is associated with. */
+  public contextViewType?: L.ContextViewType;
+  /** The type of user view to which the notification subscription context is associated with. */
+  public userContextViewType?: L.UserContextViewType;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -7359,6 +7454,7 @@ export class ProjectUpdate extends Request {
     this.isDiffHidden = data.isDiffHidden;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
+    this.health = data.health;
     this._project = data.project;
     this._user = data.user;
   }
@@ -7387,6 +7483,8 @@ export class ProjectUpdate extends Request {
   public updatedAt: Date;
   /** The URL to the project update. */
   public url: string;
+  /** The health of the project at the time of the update. */
+  public health: L.ProjectUpdateHealthType;
   /** The project that the update is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
@@ -8164,6 +8262,7 @@ export class SlackAsksSettings extends Request {
     this.slackChannelMapping = data.slackChannelMapping
       ? data.slackChannelMapping.map(node => new SlackChannelNameMapping(request, node))
       : undefined;
+    this.canAdministrate = data.canAdministrate;
   }
 
   /** Enterprise name of the connected Slack enterprise */
@@ -8176,6 +8275,8 @@ export class SlackAsksSettings extends Request {
   public teamName?: string;
   /** The mapping of Slack channel ID => Slack channel name for connected channels. */
   public slackChannelMapping?: SlackChannelNameMapping[];
+  /** The user role type that is allowed to manage Asks settings. */
+  public canAdministrate: L.UserRoleType;
 }
 /**
  * Tuple for mapping Slack channel IDs to names.
@@ -8283,11 +8384,13 @@ export class SlackPostSettings extends Request {
     this.channel = data.channel;
     this.channelId = data.channelId;
     this.configurationUrl = data.configurationUrl;
+    this.channelType = data.channelType ?? undefined;
   }
 
   public channel: string;
   public channelId: string;
   public configurationUrl: string;
+  public channelType?: L.SlackChannelType;
 }
 /**
  * Settings for the regular Slack integration.
@@ -8840,6 +8943,8 @@ export class TeamNotificationSubscription extends Request {
     this.id = data.id;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.contextViewType = data.contextViewType ?? undefined;
+    this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
     this._label = data.label ?? undefined;
@@ -8865,6 +8970,10 @@ export class TeamNotificationSubscription extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The type of view to which the notification subscription context is associated with. */
+  public contextViewType?: L.ContextViewType;
+  /** The type of user view to which the notification subscription context is associated with. */
+  public userContextViewType?: L.UserContextViewType;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -9198,6 +9307,7 @@ export class TriageResponsibility extends Request {
     this.manualSelection = data.manualSelection
       ? new TriageResponsibilityManualSelection(request, data.manualSelection)
       : undefined;
+    this.action = data.action;
     this._currentUser = data.currentUser ?? undefined;
     this._team = data.team;
   }
@@ -9216,6 +9326,8 @@ export class TriageResponsibility extends Request {
   public updatedAt: Date;
   /** Set of users used for triage responsibility. */
   public manualSelection?: TriageResponsibilityManualSelection;
+  /** The action to take when an issue is added to triage. */
+  public action: L.TriageResponsibilityAction;
   /** The user currently responsible for triage. */
   public get currentUser(): LinearFetch<User> | undefined {
     return this._currentUser?.id ? new UserQuery(this._request).fetch(this._currentUser?.id) : undefined;
@@ -9606,6 +9718,8 @@ export class UserNotificationSubscription extends Request {
     this.id = data.id;
     this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.contextViewType = data.contextViewType ?? undefined;
+    this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
     this._label = data.label ?? undefined;
@@ -9631,6 +9745,10 @@ export class UserNotificationSubscription extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The type of view to which the notification subscription context is associated with. */
+  public contextViewType?: L.ContextViewType;
+  /** The type of user view to which the notification subscription context is associated with. */
+  public userContextViewType?: L.UserContextViewType;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -10111,6 +10229,11 @@ export class WorkflowDefinition extends Request {
     this.name = data.name;
     this.sortOrder = data.sortOrder;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.contextViewType = data.contextViewType ?? undefined;
+    this.trigger = data.trigger;
+    this.triggerType = data.triggerType;
+    this.type = data.type;
+    this.userContextViewType = data.userContextViewType ?? undefined;
     this._creator = data.creator;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
@@ -10145,6 +10268,16 @@ export class WorkflowDefinition extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The type of view to which this workflow's context is associated with. */
+  public contextViewType?: L.ContextViewType;
+  /** The type of the event that triggers off the workflow. */
+  public trigger: L.WorkflowTrigger;
+  /** The object type (e.g. Issue) that triggers this workflow. */
+  public triggerType: L.WorkflowTriggerType;
+  /** The type of the workflow. */
+  public type: L.WorkflowType;
+  /** The type of user view to which this workflow's context is associated with. */
+  public userContextViewType?: L.UserContextViewType;
   /** The user who created the workflow. */
   public get creator(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);

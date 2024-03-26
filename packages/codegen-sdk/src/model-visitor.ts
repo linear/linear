@@ -1,4 +1,5 @@
 import {
+  findEnum,
   findObject,
   findQuery,
   getObjectName,
@@ -27,7 +28,7 @@ import {
 import { Sdk } from "./constants";
 import { printNamespaced } from "./print";
 import {
-  SdkConnectionField,
+  SdkConnectionField, SdkEnumField,
   SdkInterfaceField,
   SdkListField,
   SdkModel,
@@ -190,6 +191,18 @@ export class ModelVisitor {
             };
           }
         }
+
+        /** Identify enum fields */
+        const enumField = findEnum(this._context, node);
+        if(enumField) {
+          return {
+            __typename: SdkModelFieldType.enum,
+            node,
+            name,
+            type,
+            nonNull,
+          };
+        }
       }
 
       /** Ignore the field */
@@ -220,6 +233,7 @@ function leaveObjectOrInterface(_node: ObjectTypeDefinitionNode | InterfaceTypeD
           []) as SdkScalarListField[],
         connection: (fields?.filter(field => field.__typename === SdkModelFieldType.connection) ??
           []) as SdkConnectionField[],
+        enum: (fields?.filter(field => field.__typename === SdkModelFieldType.enum) ?? []) as SdkEnumField[],
       },
     };
   } else {

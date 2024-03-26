@@ -7229,7 +7229,7 @@ export type Organization = Node & {
   /** Whether SCIM provisioning is enabled for organization. */
   scimEnabled: Scalars["Boolean"];
   /** Which day count to use for SLA calculations. */
-  slaDayCount: SlaDayCountType;
+  slaDayCount: SLADayCountType;
   /** The organization's subscription to a paid plan. */
   subscription?: Maybe<PaidSubscription>;
   /** Teams associated with the organization. */
@@ -7597,7 +7597,7 @@ export type OrganizationUpdateInput = {
   /** Whether the organization is using roadmap. */
   roadmapEnabled?: Maybe<Scalars["Boolean"]>;
   /** Which day count to use for SLA calculation. */
-  slaDayCount?: Maybe<SlaDayCountType>;
+  slaDayCount?: Maybe<SLADayCountType>;
   /** Internal. Whether SLAs have been enabled for the organization. */
   slaEnabled?: Maybe<Scalars["Boolean"]>;
   /** The URL key of the organization. */
@@ -10168,7 +10168,7 @@ export type RoadmapUpdateInput = {
 };
 
 /** Which day count to use for SLA calculations. */
-export enum SlaDayCountType {
+export enum SLADayCountType {
   All = "all",
   OnlyBusinessDays = "onlyBusinessDays",
 }
@@ -12687,7 +12687,14 @@ export type EmojiFragment = { __typename: "Emoji" } & Pick<
 
 export type CustomViewNotificationSubscriptionFragment = { __typename: "CustomViewNotificationSubscription" } & Pick<
   CustomViewNotificationSubscription,
-  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id" | "active"
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "notificationSubscriptionTypes"
+  | "userContextViewType"
+  | "contextViewType"
+  | "id"
+  | "active"
 > & {
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -12722,7 +12729,14 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
 
 export type CycleNotificationSubscriptionFragment = { __typename: "CycleNotificationSubscription" } & Pick<
   CycleNotificationSubscription,
-  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id" | "active"
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "notificationSubscriptionTypes"
+  | "userContextViewType"
+  | "contextViewType"
+  | "id"
+  | "active"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -12898,7 +12912,14 @@ export type DeletePayloadFragment = { __typename: "DeletePayload" } & Pick<
 
 export type LabelNotificationSubscriptionFragment = { __typename: "LabelNotificationSubscription" } & Pick<
   LabelNotificationSubscription,
-  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id" | "active"
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "notificationSubscriptionTypes"
+  | "userContextViewType"
+  | "contextViewType"
+  | "id"
+  | "active"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -12951,7 +12972,14 @@ export type NotificationFragment =
 
 export type ProjectNotificationSubscriptionFragment = { __typename: "ProjectNotificationSubscription" } & Pick<
   ProjectNotificationSubscription,
-  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id" | "active"
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "notificationSubscriptionTypes"
+  | "userContextViewType"
+  | "contextViewType"
+  | "id"
+  | "active"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -13126,7 +13154,14 @@ export type WorkflowStateFragment = { __typename: "WorkflowState" } & Pick<
 
 export type TeamNotificationSubscriptionFragment = { __typename: "TeamNotificationSubscription" } & Pick<
   TeamNotificationSubscription,
-  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id" | "active"
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "notificationSubscriptionTypes"
+  | "userContextViewType"
+  | "contextViewType"
+  | "id"
+  | "active"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -13139,7 +13174,7 @@ export type TeamNotificationSubscriptionFragment = { __typename: "TeamNotificati
 
 export type TriageResponsibilityFragment = { __typename: "TriageResponsibility" } & Pick<
   TriageResponsibility,
-  "updatedAt" | "archivedAt" | "createdAt" | "id"
+  "action" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & {
     manualSelection?: Maybe<
       { __typename?: "TriageResponsibilityManualSelection" } & TriageResponsibilityManualSelectionFragment
@@ -13168,7 +13203,7 @@ export type TimeScheduleFragment = { __typename: "TimeSchedule" } & Pick<
 
 export type GitAutomationStateFragment = { __typename: "GitAutomationState" } & Pick<
   GitAutomationState,
-  "updatedAt" | "archivedAt" | "createdAt" | "id" | "branchPattern"
+  "event" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "branchPattern"
 > & {
     state?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     targetBranch?: Maybe<{ __typename?: "GitAutomationTargetBranch" } & GitAutomationTargetBranchFragment>;
@@ -13180,6 +13215,7 @@ export type ProjectUpdateFragment = { __typename: "ProjectUpdate" } & Pick<
   | "url"
   | "diffMarkdown"
   | "diff"
+  | "health"
   | "updatedAt"
   | "archivedAt"
   | "createdAt"
@@ -13196,7 +13232,14 @@ export type UserAccountFragment = { __typename: "UserAccount" } & Pick<
 
 export type UserNotificationSubscriptionFragment = { __typename: "UserNotificationSubscription" } & Pick<
   UserNotificationSubscription,
-  "updatedAt" | "archivedAt" | "createdAt" | "notificationSubscriptionTypes" | "id" | "active"
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "notificationSubscriptionTypes"
+  | "userContextViewType"
+  | "contextViewType"
+  | "id"
+  | "active"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -13322,7 +13365,16 @@ export type AuthOrganizationInviteFragment = { __typename: "AuthOrganizationInvi
 
 export type OrganizationInviteFragment = { __typename: "OrganizationInvite" } & Pick<
   OrganizationInvite,
-  "metadata" | "external" | "email" | "updatedAt" | "archivedAt" | "createdAt" | "acceptedAt" | "expiresAt" | "id"
+  | "metadata"
+  | "external"
+  | "email"
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "acceptedAt"
+  | "expiresAt"
+  | "id"
+  | "role"
 > & {
     inviter: { __typename?: "User" } & Pick<User, "id">;
     invitee?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -13376,6 +13428,7 @@ export type IssueFragment = { __typename: "Issue" } & Pick<
   Issue,
   | "trashed"
   | "labelIds"
+  | "integrationSourceType"
   | "url"
   | "identifier"
   | "priorityLabel"
@@ -13439,6 +13492,9 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "createdIssueCount"
   | "previousUrlKeys"
   | "periodUploadVolume"
+  | "projectUpdateRemindersDay"
+  | "releaseChannel"
+  | "projectUpdatesReminderFrequency"
   | "projectUpdateRemindersHour"
   | "updatedAt"
   | "fiscalYearStartMonth"
@@ -13456,6 +13512,7 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "gitLinkbackMessagesEnabled"
   | "gitPublicLinkbackMessagesEnabled"
   | "roadmapEnabled"
+  | "slaDayCount"
 > & { subscription?: Maybe<{ __typename?: "PaidSubscription" } & PaidSubscriptionFragment> };
 
 export type AuthOrganizationFragment = { __typename: "AuthOrganization" } & Pick<
@@ -13463,6 +13520,7 @@ export type AuthOrganizationFragment = { __typename: "AuthOrganization" } & Pick
   | "allowedAuthServices"
   | "previousUrlKeys"
   | "serviceId"
+  | "releaseChannel"
   | "logoUrl"
   | "name"
   | "urlKey"
@@ -13558,6 +13616,7 @@ export type AuthenticationSessionResponseFragment = { __typename: "Authenticatio
   | "name"
   | "operatingSystem"
   | "userAgent"
+  | "type"
   | "browserType"
   | "lastActiveAt"
   | "id"
@@ -13575,7 +13634,7 @@ export type TeamMembershipFragment = { __typename: "TeamMembership" } & Pick<
 
 export type OrganizationDomainFragment = { __typename: "OrganizationDomain" } & Pick<
   OrganizationDomain,
-  "name" | "verificationEmail" | "verified" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "claimed"
+  "name" | "verificationEmail" | "verified" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "authType" | "claimed"
 > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
 export type FrontSettingsFragment = { __typename: "FrontSettings" } & Pick<
@@ -13702,7 +13761,10 @@ export type GitLabSettingsFragment = { __typename: "GitLabSettings" } & Pick<
 
 type NotificationSubscription_CustomViewNotificationSubscription_Fragment = {
   __typename: "CustomViewNotificationSubscription";
-} & Pick<CustomViewNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id" | "active"> & {
+} & Pick<
+  CustomViewNotificationSubscription,
+  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+> & {
     customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -13714,7 +13776,10 @@ type NotificationSubscription_CustomViewNotificationSubscription_Fragment = {
 
 type NotificationSubscription_CycleNotificationSubscription_Fragment = {
   __typename: "CycleNotificationSubscription";
-} & Pick<CycleNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id" | "active"> & {
+} & Pick<
+  CycleNotificationSubscription,
+  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+> & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -13726,7 +13791,10 @@ type NotificationSubscription_CycleNotificationSubscription_Fragment = {
 
 type NotificationSubscription_LabelNotificationSubscription_Fragment = {
   __typename: "LabelNotificationSubscription";
-} & Pick<LabelNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id" | "active"> & {
+} & Pick<
+  LabelNotificationSubscription,
+  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+> & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
@@ -13738,7 +13806,10 @@ type NotificationSubscription_LabelNotificationSubscription_Fragment = {
 
 type NotificationSubscription_ProjectNotificationSubscription_Fragment = {
   __typename: "ProjectNotificationSubscription";
-} & Pick<ProjectNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id" | "active"> & {
+} & Pick<
+  ProjectNotificationSubscription,
+  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+> & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -13750,7 +13821,10 @@ type NotificationSubscription_ProjectNotificationSubscription_Fragment = {
 
 type NotificationSubscription_TeamNotificationSubscription_Fragment = {
   __typename: "TeamNotificationSubscription";
-} & Pick<TeamNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id" | "active"> & {
+} & Pick<
+  TeamNotificationSubscription,
+  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+> & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -13762,7 +13836,10 @@ type NotificationSubscription_TeamNotificationSubscription_Fragment = {
 
 type NotificationSubscription_UserNotificationSubscription_Fragment = {
   __typename: "UserNotificationSubscription";
-} & Pick<UserNotificationSubscription, "updatedAt" | "archivedAt" | "createdAt" | "id" | "active"> & {
+} & Pick<
+  UserNotificationSubscription,
+  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+> & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
@@ -13867,6 +13944,7 @@ export type OauthClientApprovalFragment = { __typename: "OauthClientApproval" } 
   | "requestReason"
   | "denyReason"
   | "scopes"
+  | "status"
   | "archivedAt"
   | "createdAt"
   | "id"
@@ -13887,14 +13965,14 @@ export type SharedSlackSettingsFragment = { __typename: "SharedSlackSettings" } 
 
 export type SlackAsksSettingsFragment = { __typename: "SlackAsksSettings" } & Pick<
   SlackAsksSettings,
-  "enterpriseName" | "teamId" | "teamName" | "shouldUnfurl"
+  "enterpriseName" | "teamId" | "teamName" | "canAdministrate" | "shouldUnfurl"
 > & {
     slackChannelMapping?: Maybe<Array<{ __typename?: "SlackChannelNameMapping" } & SlackChannelNameMappingFragment>>;
   };
 
 export type SlackPostSettingsFragment = { __typename: "SlackPostSettings" } & Pick<
   SlackPostSettings,
-  "channel" | "channelId" | "configurationUrl"
+  "channel" | "channelId" | "channelType" | "configurationUrl"
 >;
 
 export type IntegrationsSettingsFragment = { __typename: "IntegrationsSettings" } & Pick<
@@ -13996,6 +14074,7 @@ export type AuthenticationSessionFragment = { __typename: "AuthenticationSession
   | "name"
   | "operatingSystem"
   | "userAgent"
+  | "type"
   | "browserType"
   | "lastActiveAt"
   | "id"
@@ -14003,7 +14082,15 @@ export type AuthenticationSessionFragment = { __typename: "AuthenticationSession
 
 export type FavoriteFragment = { __typename: "Favorite" } & Pick<
   Favorite,
-  "updatedAt" | "folderName" | "sortOrder" | "archivedAt" | "createdAt" | "predefinedViewType" | "type" | "id"
+  | "updatedAt"
+  | "folderName"
+  | "sortOrder"
+  | "projectTab"
+  | "archivedAt"
+  | "createdAt"
+  | "predefinedViewType"
+  | "type"
+  | "id"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -14122,7 +14209,7 @@ export type AuthOauthClientWithTokensFragment = { __typename: "AuthOauthClientWi
 
 export type AuthOrganizationDomainFragment = { __typename: "AuthOrganizationDomain" } & Pick<
   AuthOrganizationDomain,
-  "id" | "claimed" | "name" | "organizationId" | "verified"
+  "id" | "authType" | "claimed" | "name" | "organizationId" | "verified"
 >;
 
 export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" } & Pick<
@@ -14437,6 +14524,7 @@ export type IssueSearchResultFragment = { __typename: "IssueSearchResult" } & Pi
   IssueSearchResult,
   | "trashed"
   | "labelIds"
+  | "integrationSourceType"
   | "url"
   | "identifier"
   | "priorityLabel"
@@ -14816,6 +14904,10 @@ export type OauthTokenFragment = { __typename: "OauthToken" } & Pick<
     client: { __typename?: "AuthOauthClient" } & AuthOauthClientFragment;
   };
 
+export type OrganizationAcceptedOrExpiredInviteDetailsPayloadFragment = {
+  __typename: "OrganizationAcceptedOrExpiredInviteDetailsPayload";
+} & Pick<OrganizationAcceptedOrExpiredInviteDetailsPayload, "status">;
+
 export type OrganizationCancelDeletePayloadFragment = { __typename: "OrganizationCancelDeletePayload" } & Pick<
   OrganizationCancelDeletePayload,
   "success"
@@ -14845,7 +14937,9 @@ export type OrganizationInviteFullDetailsPayloadFragment = {
   | "organizationName"
   | "email"
   | "inviter"
+  | "status"
   | "organizationLogoUrl"
+  | "role"
   | "createdAt"
   | "accepted"
   | "expired"
@@ -15218,9 +15312,14 @@ export type WorkflowDefinitionFragment = { __typename: "WorkflowDefinition" } & 
   | "updatedAt"
   | "groupName"
   | "name"
+  | "triggerType"
   | "sortOrder"
   | "archivedAt"
   | "createdAt"
+  | "trigger"
+  | "type"
+  | "userContextViewType"
+  | "contextViewType"
   | "id"
   | "enabled"
 > & {
@@ -19219,6 +19318,8 @@ export const CustomViewNotificationSubscriptionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "notificationSubscriptionTypes" } },
+          { kind: "Field", name: { kind: "Name", value: "userContextViewType" } },
+          { kind: "Field", name: { kind: "Name", value: "contextViewType" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
@@ -19297,6 +19398,8 @@ export const CycleNotificationSubscriptionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "notificationSubscriptionTypes" } },
+          { kind: "Field", name: { kind: "Name", value: "userContextViewType" } },
+          { kind: "Field", name: { kind: "Name", value: "contextViewType" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
@@ -19596,6 +19699,8 @@ export const NotificationSubscriptionFragmentDoc = {
           },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "userContextViewType" } },
+          { kind: "Field", name: { kind: "Name", value: "contextViewType" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
@@ -19726,6 +19831,7 @@ export const OauthClientApprovalFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "requestReason" } },
           { kind: "Field", name: { kind: "Name", value: "denyReason" } },
           { kind: "Field", name: { kind: "Name", value: "scopes" } },
+          { kind: "Field", name: { kind: "Name", value: "status" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
@@ -20239,6 +20345,8 @@ export const LabelNotificationSubscriptionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "notificationSubscriptionTypes" } },
+          { kind: "Field", name: { kind: "Name", value: "userContextViewType" } },
+          { kind: "Field", name: { kind: "Name", value: "contextViewType" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
@@ -20317,6 +20425,8 @@ export const ProjectNotificationSubscriptionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "notificationSubscriptionTypes" } },
+          { kind: "Field", name: { kind: "Name", value: "userContextViewType" } },
+          { kind: "Field", name: { kind: "Name", value: "contextViewType" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
@@ -20395,6 +20505,8 @@ export const TeamNotificationSubscriptionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "notificationSubscriptionTypes" } },
+          { kind: "Field", name: { kind: "Name", value: "userContextViewType" } },
+          { kind: "Field", name: { kind: "Name", value: "contextViewType" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
@@ -20497,6 +20609,8 @@ export const UserNotificationSubscriptionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "notificationSubscriptionTypes" } },
+          { kind: "Field", name: { kind: "Name", value: "userContextViewType" } },
+          { kind: "Field", name: { kind: "Name", value: "contextViewType" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",
@@ -20534,6 +20648,7 @@ export const AuthOrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "allowedAuthServices" } },
           { kind: "Field", name: { kind: "Name", value: "previousUrlKeys" } },
           { kind: "Field", name: { kind: "Name", value: "serviceId" } },
+          { kind: "Field", name: { kind: "Name", value: "releaseChannel" } },
           { kind: "Field", name: { kind: "Name", value: "logoUrl" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "urlKey" } },
@@ -20685,6 +20800,9 @@ export const OrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "createdIssueCount" } },
           { kind: "Field", name: { kind: "Name", value: "previousUrlKeys" } },
           { kind: "Field", name: { kind: "Name", value: "periodUploadVolume" } },
+          { kind: "Field", name: { kind: "Name", value: "projectUpdateRemindersDay" } },
+          { kind: "Field", name: { kind: "Name", value: "releaseChannel" } },
+          { kind: "Field", name: { kind: "Name", value: "projectUpdatesReminderFrequency" } },
           { kind: "Field", name: { kind: "Name", value: "projectUpdateRemindersHour" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "fiscalYearStartMonth" } },
@@ -20710,6 +20828,7 @@ export const OrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "gitLinkbackMessagesEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "gitPublicLinkbackMessagesEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "roadmapEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "slaDayCount" } },
         ],
       },
     },
@@ -20784,6 +20903,7 @@ export const AuthenticationSessionResponseFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "operatingSystem" } },
           { kind: "Field", name: { kind: "Name", value: "userAgent" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "browserType" } },
           { kind: "Field", name: { kind: "Name", value: "lastActiveAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
@@ -20818,6 +20938,7 @@ export const OrganizationDomainFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "authType" } },
           { kind: "Field", name: { kind: "Name", value: "claimed" } },
         ],
       },
@@ -21386,6 +21507,7 @@ export const SlackAsksSettingsFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SlackChannelNameMapping" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "canAdministrate" } },
           { kind: "Field", name: { kind: "Name", value: "shouldUnfurl" } },
         ],
       },
@@ -21405,6 +21527,7 @@ export const SlackPostSettingsFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "channel" } },
           { kind: "Field", name: { kind: "Name", value: "channelId" } },
+          { kind: "Field", name: { kind: "Name", value: "channelType" } },
           { kind: "Field", name: { kind: "Name", value: "configurationUrl" } },
         ],
       },
@@ -21655,6 +21778,7 @@ export const AuthenticationSessionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "operatingSystem" } },
           { kind: "Field", name: { kind: "Name", value: "userAgent" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "browserType" } },
           { kind: "Field", name: { kind: "Name", value: "lastActiveAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
@@ -22177,6 +22301,7 @@ export const AuthOrganizationDomainFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "authType" } },
           { kind: "Field", name: { kind: "Name", value: "claimed" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "organizationId" } },
@@ -23480,6 +23605,7 @@ export const FavoriteFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "projectTab" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "predefinedViewTeam" },
@@ -23623,6 +23749,7 @@ export const GitAutomationStateFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "event" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
@@ -24121,6 +24248,7 @@ export const IssueFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "trashed" } },
           { kind: "Field", name: { kind: "Name", value: "labelIds" } },
+          { kind: "Field", name: { kind: "Name", value: "integrationSourceType" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "identifier" } },
           { kind: "Field", name: { kind: "Name", value: "priorityLabel" } },
@@ -24964,6 +25092,7 @@ export const IssueSearchResultFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "trashed" } },
           { kind: "Field", name: { kind: "Name", value: "labelIds" } },
+          { kind: "Field", name: { kind: "Name", value: "integrationSourceType" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "identifier" } },
           { kind: "Field", name: { kind: "Name", value: "priorityLabel" } },
@@ -25430,6 +25559,26 @@ export const OauthClientConnectionFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<OauthClientConnectionFragment, unknown>;
+export const OrganizationAcceptedOrExpiredInviteDetailsPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OrganizationAcceptedOrExpiredInviteDetailsPayload" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "OrganizationAcceptedOrExpiredInviteDetailsPayload" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "status" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<OrganizationAcceptedOrExpiredInviteDetailsPayloadFragment, unknown>;
 export const OrganizationCancelDeletePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -25502,6 +25651,7 @@ export const OrganizationInviteFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "acceptedAt" } },
           { kind: "Field", name: { kind: "Name", value: "expiresAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "role" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "inviter" },
@@ -25571,7 +25721,9 @@ export const OrganizationInviteFullDetailsPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "organizationName" } },
           { kind: "Field", name: { kind: "Name", value: "email" } },
           { kind: "Field", name: { kind: "Name", value: "inviter" } },
+          { kind: "Field", name: { kind: "Name", value: "status" } },
           { kind: "Field", name: { kind: "Name", value: "organizationLogoUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "role" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "accepted" } },
           { kind: "Field", name: { kind: "Name", value: "expired" } },
@@ -26221,6 +26373,7 @@ export const ProjectUpdateFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "diffMarkdown" } },
           { kind: "Field", name: { kind: "Name", value: "diff" } },
+          { kind: "Field", name: { kind: "Name", value: "health" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
@@ -27566,6 +27719,7 @@ export const TriageResponsibilityFragmentDoc = {
               ],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "action" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
@@ -28180,6 +28334,7 @@ export const WorkflowDefinitionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "groupName" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "triggerType" } },
           { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
           {
             kind: "Field",
@@ -28191,6 +28346,10 @@ export const WorkflowDefinitionFragmentDoc = {
           },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "trigger" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "userContextViewType" } },
+          { kind: "Field", name: { kind: "Name", value: "contextViewType" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           {
             kind: "Field",

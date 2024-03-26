@@ -5,6 +5,7 @@ import {
   GraphQLSchema,
   InterfaceTypeDefinitionNode,
   ObjectTypeDefinitionNode,
+  EnumTypeDefinitionNode
 } from "graphql";
 
 /**
@@ -112,6 +113,8 @@ export interface PluginContext<C extends PluginConfig = PluginConfig> {
   operationMap: Record<OperationType, string>;
   /** All implementations of an interface */
   interfaceImplementations: { [interfaceName: string]: ObjectTypeDefinitionNode[] };
+  /** All enums */
+  enums: readonly EnumTypeDefinitionNode[];
   /** The plugin config */
   config: C;
 }

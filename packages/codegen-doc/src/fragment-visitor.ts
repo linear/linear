@@ -11,7 +11,7 @@ import {
   ObjectTypeDefinitionNode,
 } from "graphql";
 import { getRequiredArgs } from "./args";
-import { isValidField } from "./field";
+import { findEnum, isValidField } from "./field";
 import { isValidFragment } from "./fragment";
 import { findInterface, findObject, isConnection } from "./object";
 import { printGraphqlComment, printGraphqlDebug, printGraphqlDescription, printLines } from "./print";
@@ -121,8 +121,8 @@ export class FragmentVisitor {
         const node = _node as unknown as Named<FieldDefinitionNode>;
         const description = node.description?.value ? printGraphqlComment([node.description?.value]) : undefined;
 
-        /** Print field name if it is a scalar */
-        if (Object.values(this._context.scalars).includes(type)) {
+        /** Print field name if it is a scalar or an enum */
+        if (Object.values(this._context.scalars).includes(type) || findEnum(this._context, node)) {
           return printLines([description, printGraphqlDebug(_node), node.name]);
         }
 

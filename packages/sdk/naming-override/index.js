@@ -5,6 +5,9 @@ const changeCaseAll = require("change-case-all");
 // counter.
 const duplicateQueries = ["ProjectMilestone", "ProjectMilestones"];
 
+// We have some non pascal cased types that we need to keep as is.
+const incorrectCase = ["SLADayCountType"];
+
 // Object containing counters of how many times we've seen each DuplicateQueryNameArgs type.
 const deduplicate = Object.fromEntries(duplicateQueries.map(query => [`Query${query}Args`, 0]));
 
@@ -14,6 +17,9 @@ exports.case = (type) => {
       type = type + deduplicate[type];
     }
     deduplicate[type] += 1
+  }
+  if(incorrectCase.includes(type)) {
+    return type;
   }
   return changeCaseAll.pascalCase(type)
 }
