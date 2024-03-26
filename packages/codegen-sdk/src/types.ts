@@ -129,6 +129,7 @@ export enum SdkModelFieldType {
   list = "SdkListField ",
   scalarList = "SdkScalarListField",
   connection = "SdkConnectionField",
+  enum = "SdkEnumField"
 }
 
 /**
@@ -203,6 +204,14 @@ export interface SdkListField extends Omit<SdkScalarField, "__typename"> {
 }
 
 /**
+ * A field with enum type
+ */
+export interface SdkEnumField extends Omit<SdkScalarField, "__typename"> {
+  __typename: SdkModelFieldType.enum;
+}
+
+
+/**
  * One of the model field types
  */
 export type SdkModelField =
@@ -212,7 +221,8 @@ export type SdkModelField =
   | SdkInterfaceField
   | SdkListField
   | SdkScalarListField
-  | SdkConnectionField;
+  | SdkConnectionField
+  | SdkEnumField;
 
 /**
  * The processed sdk model node
@@ -242,5 +252,6 @@ export interface SdkModel {
     list: SdkListField[];
     scalarList: SdkScalarListField[];
     connection: SdkConnectionField[];
+    enum: SdkEnumField[];
   };
 }

@@ -110,6 +110,12 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                 : printTernary(printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}`), operationCall);
             })
           ),
+          printDebug("fields.enum"),
+          printLines(
+            model.fields.enum.map(field =>
+              printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}${field.nonNull ? "" : " ?? undefined"}`)
+            )
+          ),
           printDebug("fields.query"),
           printLines(
             model.fields.query.map(field =>
@@ -121,7 +127,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                   )
                 : undefined
             )
-          ),
+          )
         ])}
       }
 
@@ -148,6 +154,12 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
         printLines(
           model.fields.object.map((field /** Ignore objects returned by an operation */) =>
             printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.object.name.value}`)
+          )
+        ),
+        printDebug("fields.enum"),
+        printLines(
+          model.fields.enum.map(field =>
+            printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}`)
           )
         ),
       ])}

@@ -202,6 +202,10 @@ fragment CustomViewNotificationSubscription on CustomViewNotificationSubscriptio
   createdAt
   # The type of subscription.
   notificationSubscriptionTypes
+  # The type of user view to which the notification subscription context is associated with.
+  userContextViewType
+  # The type of view to which the notification subscription context is associated with.
+  contextViewType
   # The unique identifier of the entity.
   id
   # The user that subscribed to receive notifications.
@@ -298,6 +302,10 @@ fragment CycleNotificationSubscription on CycleNotificationSubscription {
   createdAt
   # The type of subscription.
   notificationSubscriptionTypes
+  # The type of user view to which the notification subscription context is associated with.
+  userContextViewType
+  # The type of view to which the notification subscription context is associated with.
+  contextViewType
   # The unique identifier of the entity.
   id
   # The user that subscribed to receive notifications.
@@ -623,6 +631,10 @@ fragment LabelNotificationSubscription on LabelNotificationSubscription {
   createdAt
   # The type of subscription.
   notificationSubscriptionTypes
+  # The type of user view to which the notification subscription context is associated with.
+  userContextViewType
+  # The type of view to which the notification subscription context is associated with.
+  contextViewType
   # The unique identifier of the entity.
   id
   # The user that subscribed to receive notifications.
@@ -751,6 +763,10 @@ fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
   createdAt
   # The type of subscription.
   notificationSubscriptionTypes
+  # The type of user view to which the notification subscription context is associated with.
+  userContextViewType
+  # The type of view to which the notification subscription context is associated with.
+  contextViewType
   # The unique identifier of the entity.
   id
   # The user that subscribed to receive notifications.
@@ -1263,6 +1279,10 @@ fragment TeamNotificationSubscription on TeamNotificationSubscription {
   createdAt
   # The type of subscription.
   notificationSubscriptionTypes
+  # The type of user view to which the notification subscription context is associated with.
+  userContextViewType
+  # The type of view to which the notification subscription context is associated with.
+  contextViewType
   # The unique identifier of the entity.
   id
   # The user that subscribed to receive notifications.
@@ -1284,6 +1304,8 @@ fragment TriageResponsibility on TriageResponsibility {
   manualSelection {
     ...TriageResponsibilityManualSelection
   }
+  # The action to take when an issue is added to triage.
+  action
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -1379,6 +1401,8 @@ fragment GitAutomationState on GitAutomationState {
   state {
     id
   }
+  # The event that triggers the automation.
+  event
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -1410,6 +1434,8 @@ fragment ProjectUpdate on ProjectUpdate {
   diffMarkdown
   # The diff between the current update and the previous one.
   diff
+  # The health of the project at the time of the update.
+  health
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -1490,6 +1516,10 @@ fragment UserNotificationSubscription on UserNotificationSubscription {
   createdAt
   # The type of subscription.
   notificationSubscriptionTypes
+  # The type of user view to which the notification subscription context is associated with.
+  userContextViewType
+  # The type of view to which the notification subscription context is associated with.
+  contextViewType
   # The unique identifier of the entity.
   id
   # The user subscribed to.
@@ -1841,6 +1871,8 @@ fragment OrganizationInvite on OrganizationInvite {
   expiresAt
   # The unique identifier of the entity.
   id
+  # The user role that the invitee will receive upon accepting the invite.
+  role
   # The user who created the invitation.
   inviter {
     id
@@ -1918,6 +1950,8 @@ fragment Issue on Issue {
   trashed
   # Id of the labels associated with this issue.
   labelIds
+  # Integration type that created this issue, if applicable.
+  integrationSourceType
   # Issue URL.
   url
   # Issue's human readable identifier (e.g. ENG-123).
@@ -2093,6 +2127,12 @@ fragment Organization on Organization {
   previousUrlKeys
   # Rolling 30-day total upload volume for the organization, in megabytes.
   periodUploadVolume
+  # The day at which to prompt for project updates.
+  projectUpdateRemindersDay
+  # The feature release channel the organization belongs to.
+  releaseChannel
+  # The frequency at which to prompt for project updates.
+  projectUpdatesReminderFrequency
   # The hour at which to prompt for project updates.
   projectUpdateRemindersHour
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -2133,6 +2173,8 @@ fragment Organization on Organization {
   gitPublicLinkbackMessagesEnabled
   # Whether the organization is using a roadmap.
   roadmapEnabled
+  # Which day count to use for SLA calculations.
+  slaDayCount
 }
 
 # An organization. Organizations are root-level objects that contain users and teams.
@@ -2144,6 +2186,8 @@ fragment AuthOrganization on AuthOrganization {
   previousUrlKeys
   # The email domain or URL key for the organization.
   serviceId
+  # The feature release channel the organization belongs to.
+  releaseChannel
   # The organization's logo URL.
   logoUrl
   # The organization's name.
@@ -2371,6 +2415,8 @@ fragment AuthenticationSessionResponse on AuthenticationSessionResponse {
   operatingSystem
   # Session's user-agent.
   userAgent
+  # Type of application used to authenticate.
+  type
   # Used web browser.
   browserType
   # When was the session last seen
@@ -2441,6 +2487,8 @@ fragment OrganizationDomain on OrganizationDomain {
   creator {
     id
   }
+  # What type of auth is the domain used for.
+  authType
   # Whether the domains was claimed by the organization through DNS verification.
   claimed
 }
@@ -2776,6 +2824,10 @@ fragment NotificationSubscription on NotificationSubscription {
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The type of user view to which the notification subscription context is associated with.
+  userContextViewType
+  # The type of view to which the notification subscription context is associated with.
+  contextViewType
   # The unique identifier of the entity.
   id
   # The user that subscribed to receive notifications.
@@ -2990,6 +3042,8 @@ fragment OauthClientApproval on OauthClientApproval {
   denyReason
   # The scopes the app has requested.
   scopes
+  # The status for the OAuth client approval request.
+  status
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -3048,6 +3102,8 @@ fragment SlackAsksSettings on SlackAsksSettings {
   slackChannelMapping {
     ...SlackChannelNameMapping
   }
+  # The user role type that is allowed to manage Asks settings.
+  canAdministrate
   # Whether to show unfurl previews in Slack
   shouldUnfurl
 }
@@ -3057,6 +3113,7 @@ fragment SlackPostSettings on SlackPostSettings {
   __typename
   channel
   channelId
+  channelType
   configurationUrl
 }
 
@@ -3283,6 +3340,8 @@ fragment AuthenticationSession on AuthenticationSession {
   operatingSystem
   # Session's user-agent.
   userAgent
+  # Type of application used to authenticate.
+  type
   # Used web browser.
   browserType
   # When was the session last seen
@@ -3345,6 +3404,8 @@ fragment Favorite on Favorite {
   parent {
     id
   }
+  # The targeted tab of the project.
+  projectTab
   # The team of the favorited predefined view.
   predefinedViewTeam {
     id
@@ -3586,6 +3647,7 @@ fragment AuthOrganizationDomain on AuthOrganizationDomain {
   __typename
   # The unique identifier of the entity.
   id
+  authType
   claimed
   name
   organizationId
@@ -4248,6 +4310,8 @@ fragment IssueSearchResult on IssueSearchResult {
   trashed
   # Id of the labels associated with this issue.
   labelIds
+  # Integration type that created this issue, if applicable.
+  integrationSourceType
   # Issue URL.
   url
   # Issue's human readable identifier (e.g. ENG-123).
@@ -4470,6 +4534,12 @@ fragment OauthToken on OauthToken {
   revokedAt
 }
 
+fragment OrganizationAcceptedOrExpiredInviteDetailsPayload on OrganizationAcceptedOrExpiredInviteDetailsPayload {
+  __typename
+  # The status of the invite.
+  status
+}
+
 fragment OrganizationCancelDeletePayload on OrganizationCancelDeletePayload {
   __typename
   # Whether the operation was successful.
@@ -4512,8 +4582,12 @@ fragment OrganizationInviteFullDetailsPayload on OrganizationInviteFullDetailsPa
   email
   # The name of the inviter.
   inviter
+  # The status of the invite.
+  status
   # URL of the workspace logo the invite is for.
   organizationLogoUrl
+  # What user role the invite should grant.
+  role
   # When the invite was created.
   createdAt
   # Whether the invite has already been accepted.
@@ -5317,6 +5391,8 @@ fragment WorkflowDefinition on WorkflowDefinition {
   groupName
   # The name of the workflow.
   name
+  # The object type (e.g. Issue) that triggers this workflow.
+  triggerType
   # The sort order of the workflow definition within its siblings.
   sortOrder
   # The team associated with the workflow. If not set, the workflow is associated with the entire organization.
@@ -5327,6 +5403,14 @@ fragment WorkflowDefinition on WorkflowDefinition {
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The type of the event that triggers off the workflow.
+  trigger
+  # The type of the workflow.
+  type
+  # The type of user view to which this workflow's context is associated with.
+  userContextViewType
+  # The type of view to which this workflow's context is associated with.
+  contextViewType
   # The unique identifier of the entity.
   id
   # The user who created the workflow.

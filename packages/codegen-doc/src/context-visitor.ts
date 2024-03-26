@@ -1,6 +1,7 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
 import autoBind from "auto-bind";
 import {
+  EnumTypeDefinitionNode,
   FieldDefinitionNode,
   GraphQLSchema,
   InterfaceTypeDefinitionNode,
@@ -21,6 +22,7 @@ export class ContextVisitor<Config extends PluginConfig> {
   private _queries: FieldDefinitionNode[] = [];
   private _mutations: FieldDefinitionNode[] = [];
   private _interfaceImplementations: { [interfaceName: string]: ObjectTypeDefinitionNode[] } = {};
+  private _enums: EnumTypeDefinitionNode[] = [];
 
   /** Initialize the visitor */
   public constructor(schema: GraphQLSchema, config: Config) {
@@ -56,6 +58,7 @@ export class ContextVisitor<Config extends PluginConfig> {
             ),
           ])
       ),
+      enums: this._enums,
     };
   }
 
@@ -90,6 +93,14 @@ export class ContextVisitor<Config extends PluginConfig> {
     /** Record all interface types */
     enter: (node: InterfaceTypeDefinitionNode): InterfaceTypeDefinitionNode => {
       this._interfaces = [...this._interfaces, node];
+      return node;
+    },
+  };
+
+  public EnumTypeDefinition = {
+    /** Record all enums types */
+    enter: (node: EnumTypeDefinitionNode): EnumTypeDefinitionNode => {
+      this._enums = [...this._enums, node];
       return node;
     },
   };
