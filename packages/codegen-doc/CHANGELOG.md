@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- ed56f64: feat: add support for enums
+
+### Patch Changes
+
+- 9ed01fe: chore(deps): update dependency patch versions
+
 ## 2.0.9
 
 ### Patch Changes
