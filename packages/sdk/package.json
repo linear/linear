@@ -53,7 +53,7 @@
     "dotenv": "^16.3.1",
     "execa": "^5.0.0",
     "get-port": "^5.1.1",
-    "graphql-request": "^3.3.0",
+    "graphql-request": "^6.1.0",
     "replace-in-file": "^6.2.0",
     "rollup": "^2.38.3",
     "rollup-plugin-gzip": "^2.5.0",
