@@ -1,5 +1,15 @@
 # Change Log
 
+## 19.3.0
+
+### Minor Changes
+
+- ed56f64: feat: add support for enums
+
+### Patch Changes
+
+- 9ed01fe: chore(deps): update dependency patch versions
+
 ## 19.2.0
 
 ### Minor Changes
