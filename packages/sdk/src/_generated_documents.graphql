@@ -1139,6 +1139,43 @@ fragment IssueRelation on IssueRelation {
   id
 }
 
+# A relation between two projects.
+fragment ProjectRelation on ProjectRelation {
+  __typename
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The milestone within the project whose relationship is being described.
+  projectMilestone {
+    id
+  }
+  # The milestone within the related project whose relationship is being described.
+  relatedProjectMilestone {
+    id
+  }
+  # The project whose relationship is being described.
+  project {
+    id
+  }
+  # The related project.
+  relatedProject {
+    id
+  }
+  # The relationship of the project with the related project.
+  type
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of anchor on the project end of the relation.
+  anchorType
+  # The type of anchor on the relatedProject end of the relation.
+  relatedAnchorType
+  # The unique identifier of the entity.
+  id
+}
+
 # A roadmap for projects.
 fragment Roadmap on Roadmap {
   __typename
@@ -1428,6 +1465,8 @@ fragment GitAutomationState on GitAutomationState {
 # A update associated with an project.
 fragment ProjectUpdate on ProjectUpdate {
   __typename
+  # Emoji reaction summary, grouped by emoji type.
+  reactionData
   # The URL to the project update.
   url
   # The diff between the current update and the previous one, formatted as markdown.
@@ -4730,6 +4769,28 @@ fragment ProjectPayload on ProjectPayload {
   success
 }
 
+fragment ProjectRelationConnection on ProjectRelationConnection {
+  __typename
+  nodes {
+    ...ProjectRelation
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ProjectRelationPayload on ProjectRelationPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The project relation that was created or updated.
+  projectRelation {
+    id
+  }
+  # Whether the operation was successful.
+  success
+}
+
 fragment ProjectSearchPayload on ProjectSearchPayload {
   __typename
   # Archived entities matching the search term along with all their dependencies.
@@ -7861,6 +7922,38 @@ query projectMilestones(
     ...ProjectMilestoneConnection
   }
 }
+# One specific project relation.
+query projectRelation($id: String!) {
+  projectRelation(id: $id) {
+    ...ProjectRelation
+  }
+}
+# All project relationships.
+query projectRelations(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  projectRelations(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...ProjectRelationConnection
+  }
+}
 # A specific project update.
 query projectUpdate(
   # The identifier of the project update to retrieve.
@@ -7868,6 +7961,39 @@ query projectUpdate(
 ) {
   projectUpdate(id: $id) {
     ...ProjectUpdate
+  }
+}
+# Comments associated with the project update.
+query projectUpdate_comments(
+  # The identifier of the project update to retrieve.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned comments.
+  $filter: CommentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  projectUpdate(id: $id) {
+    comments(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CommentConnection
+    }
   }
 }
 # A specific interaction on a project update.
@@ -10898,6 +11024,35 @@ mutation updateProjectMilestone(
 ) {
   projectMilestoneUpdate(id: $id, input: $input) {
     ...ProjectMilestonePayload
+  }
+}
+# Creates a new project relation.
+mutation createProjectRelation(
+  # The project relation to create.
+  $input: ProjectRelationCreateInput!
+) {
+  projectRelationCreate(input: $input) {
+    ...ProjectRelationPayload
+  }
+}
+# Deletes a project relation.
+mutation deleteProjectRelation(
+  # The identifier of the project relation to delete.
+  $id: String!
+) {
+  projectRelationDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates a project relation.
+mutation updateProjectRelation(
+  # The identifier of the project relation to update.
+  $id: String!
+  # The properties of the project relation to update.
+  $input: ProjectRelationUpdateInput!
+) {
+  projectRelationUpdate(id: $id, input: $input) {
+    ...ProjectRelationPayload
   }
 }
 # Unarchives a project.

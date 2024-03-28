@@ -827,11 +827,13 @@ export type CommentCollectionFilter = {
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
   /** Filters that the comments issue must satisfy. */
-  issue?: Maybe<IssueFilter>;
+  issue?: Maybe<NullableIssueFilter>;
   /** Comparator for the collection length. */
   length?: Maybe<NumberComparator>;
   /** Compound filters, one of which need to be matched by the comment. */
   or?: Maybe<Array<CommentCollectionFilter>>;
+  /** Filters that the comment parent must satisfy. */
+  parent?: Maybe<NullableCommentFilter>;
   /** Filters that the comments project update must satisfy. */
   projectUpdate?: Maybe<ProjectUpdateFilter>;
   /** Filters that needs to be matched by some comments. */
@@ -898,9 +900,11 @@ export type CommentFilter = {
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
   /** Filters that the comments issue must satisfy. */
-  issue?: Maybe<IssueFilter>;
+  issue?: Maybe<NullableIssueFilter>;
   /** Compound filters, one of which need to be matched by the comment. */
   or?: Maybe<Array<CommentFilter>>;
+  /** Filters that the comment parent must satisfy. */
+  parent?: Maybe<NullableCommentFilter>;
   /** Filters that the comments project update must satisfy. */
   projectUpdate?: Maybe<ProjectUpdateFilter>;
   /** Comparator for the updated at date. */
@@ -1655,6 +1659,8 @@ export type DocumentContent = Node & {
   document?: Maybe<Document>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** The initiative that the content is associated with. */
+  initiative?: Maybe<Initiative>;
   /** The issue that the content is associated with. */
   issue?: Maybe<Issue>;
   /** The project that the content is associated with. */
@@ -5145,6 +5151,12 @@ export type Mutation = {
   projectMilestoneDelete: DeletePayload;
   /** Updates a project milestone. */
   projectMilestoneUpdate: ProjectMilestonePayload;
+  /** Creates a new project relation. */
+  projectRelationCreate: ProjectRelationPayload;
+  /** Deletes a project relation. */
+  projectRelationDelete: DeletePayload;
+  /** Updates a project relation. */
+  projectRelationUpdate: ProjectRelationPayload;
   /** Unarchives a project. */
   projectUnarchive: ProjectArchivePayload;
   /** Updates a project. */
@@ -6080,6 +6092,19 @@ export type MutationProjectMilestoneUpdateArgs = {
   input: ProjectMilestoneUpdateInput;
 };
 
+export type MutationProjectRelationCreateArgs = {
+  input: ProjectRelationCreateInput;
+};
+
+export type MutationProjectRelationDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationProjectRelationUpdateArgs = {
+  id: Scalars["String"];
+  input: ProjectRelationUpdateInput;
+};
+
 export type MutationProjectUnarchiveArgs = {
   id: Scalars["String"];
 };
@@ -6568,6 +6593,34 @@ export type NotionSettingsInput = {
   workspaceId: Scalars["String"];
   /** The name of the Notion workspace being connected. */
   workspaceName: Scalars["String"];
+};
+
+/** Comment filtering options. */
+export type NullableCommentFilter = {
+  /** Compound filters, all of which need to be matched by the comment. */
+  and?: Maybe<Array<NullableCommentFilter>>;
+  /** Comparator for the comments body. */
+  body?: Maybe<StringComparator>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the comments document content must satisfy. */
+  documentContent?: Maybe<DocumentContentFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Filters that the comments issue must satisfy. */
+  issue?: Maybe<NullableIssueFilter>;
+  /** Filter based on the existence of the relation. */
+  null?: Maybe<Scalars["Boolean"]>;
+  /** Compound filters, one of which need to be matched by the comment. */
+  or?: Maybe<Array<NullableCommentFilter>>;
+  /** Filters that the comment parent must satisfy. */
+  parent?: Maybe<NullableCommentFilter>;
+  /** Filters that the comments project update must satisfy. */
+  projectUpdate?: Maybe<ProjectUpdateFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+  /** Filters that the comments creator must satisfy. */
+  user?: Maybe<UserFilter>;
 };
 
 /** Cycle filtering options. */
@@ -8370,6 +8423,95 @@ export type ProjectPayload = {
   success: Scalars["Boolean"];
 };
 
+/** A relation between two projects. */
+export type ProjectRelation = Node & {
+  __typename?: "ProjectRelation";
+  /** The type of anchor on the project end of the relation. */
+  anchorType: Scalars["String"];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The project whose relationship is being described. */
+  project: Project;
+  /** The milestone within the project whose relationship is being described. */
+  projectMilestone?: Maybe<ProjectMilestone>;
+  /** The type of anchor on the relatedProject end of the relation. */
+  relatedAnchorType: Scalars["String"];
+  /** The related project. */
+  relatedProject: Project;
+  /** The milestone within the related project whose relationship is being described. */
+  relatedProjectMilestone?: Maybe<ProjectMilestone>;
+  /** The relationship of the project with the related project. */
+  type: Scalars["String"];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+export type ProjectRelationConnection = {
+  __typename?: "ProjectRelationConnection";
+  edges: Array<ProjectRelationEdge>;
+  nodes: Array<ProjectRelation>;
+  pageInfo: PageInfo;
+};
+
+export type ProjectRelationCreateInput = {
+  /** The type of the anchor for the project. */
+  anchorType: Scalars["String"];
+  /** The identifier of the project that is related to another project. */
+  projectId: Scalars["String"];
+  /** The identifier of the project milestone. */
+  projectMilestoneId?: Maybe<Scalars["String"]>;
+  /** The type of the anchor for the related project. */
+  relatedAnchorType: Scalars["String"];
+  /** The identifier of the related project. */
+  relatedProjectId: Scalars["String"];
+  /** The identifier of the related project milestone. */
+  relatedProjectMilestoneId?: Maybe<Scalars["String"]>;
+  /** The type of relation of the project to the related project. */
+  type: Scalars["String"];
+};
+
+export type ProjectRelationEdge = {
+  __typename?: "ProjectRelationEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: ProjectRelation;
+};
+
+export type ProjectRelationPayload = {
+  __typename?: "ProjectRelationPayload";
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** The project relation that was created or updated. */
+  projectRelation: ProjectRelation;
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+export type ProjectRelationUpdateInput = {
+  /** The type of the anchor for the project. */
+  anchorType?: Maybe<Scalars["String"]>;
+  /** The identifier of the project that is related to another project. */
+  projectId?: Maybe<Scalars["String"]>;
+  /** The identifier of the project milestone. */
+  projectMilestoneId?: Maybe<Scalars["String"]>;
+  /** The type of the anchor for the related project. */
+  relatedAnchorType?: Maybe<Scalars["String"]>;
+  /** The identifier of the related project. */
+  relatedProjectId?: Maybe<Scalars["String"]>;
+  /** The identifier of the related project milestone. */
+  relatedProjectMilestoneId?: Maybe<Scalars["String"]>;
+  /** The type of relation of the project to the related project. */
+  type?: Maybe<Scalars["String"]>;
+};
+
 export type ProjectSearchPayload = {
   __typename?: "ProjectSearchPayload";
   /** Archived entities matching the search term along with all their dependencies. */
@@ -8674,6 +8816,8 @@ export type ProjectUpdate = Node & {
   body: Scalars["String"];
   /** [Internal] The content of the project update as a Prosemirror document. */
   bodyData: Scalars["String"];
+  /** Comments associated with the project update. */
+  comments: CommentConnection;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The diff between the current update and the previous one. */
@@ -8692,6 +8836,8 @@ export type ProjectUpdate = Node & {
   isDiffHidden: Scalars["Boolean"];
   /** The project that the update is associated with. */
   project: Project;
+  /** Emoji reaction summary, grouped by emoji type. */
+  reactionData: Scalars["JSONObject"];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -8702,6 +8848,17 @@ export type ProjectUpdate = Node & {
   url: Scalars["String"];
   /** The user who wrote the update. */
   user: User;
+};
+
+/** A update associated with an project. */
+export type ProjectUpdateCommentsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CommentFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
 };
 
 export type ProjectUpdateConnection = {
@@ -9134,6 +9291,10 @@ export type Query = {
   projectMilestone: ProjectMilestone;
   /** All milestones for the project. */
   projectMilestones: ProjectMilestoneConnection;
+  /** One specific project relation. */
+  projectRelation: ProjectRelation;
+  /** All project relationships. */
+  projectRelations: ProjectRelationConnection;
   /** A specific project update. */
   projectUpdate: ProjectUpdate;
   /** A specific interaction on a project update. */
@@ -9619,6 +9780,19 @@ export type QueryProjectMilestonesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
   filter?: Maybe<ProjectMilestoneFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type QueryProjectRelationArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryProjectRelationsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -13121,6 +13295,16 @@ export type IssueRelationFragment = { __typename: "IssueRelation" } & Pick<
   "updatedAt" | "type" | "archivedAt" | "createdAt" | "id"
 > & { issue: { __typename?: "Issue" } & Pick<Issue, "id">; relatedIssue: { __typename?: "Issue" } & Pick<Issue, "id"> };
 
+export type ProjectRelationFragment = { __typename: "ProjectRelation" } & Pick<
+  ProjectRelation,
+  "updatedAt" | "type" | "archivedAt" | "createdAt" | "anchorType" | "relatedAnchorType" | "id"
+> & {
+    projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
+    relatedProjectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
+    project: { __typename?: "Project" } & Pick<Project, "id">;
+    relatedProject: { __typename?: "Project" } & Pick<Project, "id">;
+  };
+
 export type RoadmapFragment = { __typename: "Roadmap" } & Pick<
   Roadmap,
   "description" | "updatedAt" | "name" | "color" | "slugId" | "sortOrder" | "archivedAt" | "createdAt" | "id"
@@ -13212,6 +13396,7 @@ export type GitAutomationStateFragment = { __typename: "GitAutomationState" } & 
 
 export type ProjectUpdateFragment = { __typename: "ProjectUpdate" } & Pick<
   ProjectUpdate,
+  | "reactionData"
   | "url"
   | "diffMarkdown"
   | "diff"
@@ -14690,6 +14875,8 @@ type Node_ProjectNotificationSubscription_Fragment = { __typename: "ProjectNotif
   "id"
 >;
 
+type Node_ProjectRelation_Fragment = { __typename: "ProjectRelation" } & Pick<ProjectRelation, "id">;
+
 type Node_ProjectSearchResult_Fragment = { __typename: "ProjectSearchResult" } & Pick<ProjectSearchResult, "id">;
 
 type Node_ProjectStatus_Fragment = { __typename: "ProjectStatus" } & Pick<ProjectStatus, "id">;
@@ -14793,6 +14980,7 @@ export type NodeFragment =
   | Node_ProjectMilestone_Fragment
   | Node_ProjectNotification_Fragment
   | Node_ProjectNotificationSubscription_Fragment
+  | Node_ProjectRelation_Fragment
   | Node_ProjectSearchResult_Fragment
   | Node_ProjectStatus_Fragment
   | Node_ProjectUpdate_Fragment
@@ -15016,6 +15204,16 @@ export type ProjectPayloadFragment = { __typename: "ProjectPayload" } & Pick<
   ProjectPayload,
   "lastSyncId" | "success"
 > & { project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">> };
+
+export type ProjectRelationConnectionFragment = { __typename: "ProjectRelationConnection" } & {
+  nodes: Array<{ __typename?: "ProjectRelation" } & ProjectRelationFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
+export type ProjectRelationPayloadFragment = { __typename: "ProjectRelationPayload" } & Pick<
+  ProjectRelationPayload,
+  "lastSyncId" | "success"
+> & { projectRelation: { __typename?: "ProjectRelation" } & Pick<ProjectRelation, "id"> };
 
 export type ProjectSearchPayloadFragment = { __typename: "ProjectSearchPayload" } & Pick<
   ProjectSearchPayload,
@@ -16748,12 +16946,50 @@ export type ProjectMilestonesQuery = { __typename?: "Query" } & {
   projectMilestones: { __typename?: "ProjectMilestoneConnection" } & ProjectMilestoneConnectionFragment;
 };
 
+export type ProjectRelationQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ProjectRelationQuery = { __typename?: "Query" } & {
+  projectRelation: { __typename?: "ProjectRelation" } & ProjectRelationFragment;
+};
+
+export type ProjectRelationsQueryVariables = Exact<{
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type ProjectRelationsQuery = { __typename?: "Query" } & {
+  projectRelations: { __typename?: "ProjectRelationConnection" } & ProjectRelationConnectionFragment;
+};
+
 export type ProjectUpdateQueryVariables = Exact<{
   id: Scalars["String"];
 }>;
 
 export type ProjectUpdateQuery = { __typename?: "Query" } & {
   projectUpdate: { __typename?: "ProjectUpdate" } & ProjectUpdateFragment;
+};
+
+export type ProjectUpdate_CommentsQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CommentFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type ProjectUpdate_CommentsQuery = { __typename?: "Query" } & {
+  projectUpdate: { __typename?: "ProjectUpdate" } & {
+    comments: { __typename?: "CommentConnection" } & CommentConnectionFragment;
+  };
 };
 
 export type ProjectUpdateInteractionQueryVariables = Exact<{
@@ -18774,6 +19010,31 @@ export type UpdateProjectMilestoneMutationVariables = Exact<{
 
 export type UpdateProjectMilestoneMutation = { __typename?: "Mutation" } & {
   projectMilestoneUpdate: { __typename?: "ProjectMilestonePayload" } & ProjectMilestonePayloadFragment;
+};
+
+export type CreateProjectRelationMutationVariables = Exact<{
+  input: ProjectRelationCreateInput;
+}>;
+
+export type CreateProjectRelationMutation = { __typename?: "Mutation" } & {
+  projectRelationCreate: { __typename?: "ProjectRelationPayload" } & ProjectRelationPayloadFragment;
+};
+
+export type DeleteProjectRelationMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteProjectRelationMutation = { __typename?: "Mutation" } & {
+  projectRelationDelete: { __typename?: "DeletePayload" } & DeletePayloadFragment;
+};
+
+export type UpdateProjectRelationMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: ProjectRelationUpdateInput;
+}>;
+
+export type UpdateProjectRelationMutation = { __typename?: "Mutation" } & {
+  projectRelationUpdate: { __typename?: "ProjectRelationPayload" } & ProjectRelationPayloadFragment;
 };
 
 export type UnarchiveProjectMutationVariables = Exact<{
@@ -26190,6 +26451,119 @@ export const ProjectPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<ProjectPayloadFragment, unknown>;
+export const ProjectRelationFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectRelation" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectRelation" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectMilestone" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "relatedProjectMilestone" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "relatedProject" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "anchorType" } },
+          { kind: "Field", name: { kind: "Name", value: "relatedAnchorType" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ProjectRelationFragment, unknown>;
+export const ProjectRelationConnectionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectRelationConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectRelationConnection" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectRelation" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ProjectRelationConnectionFragment, unknown>;
+export const ProjectRelationPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectRelationPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectRelationPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectRelation" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ProjectRelationPayloadFragment, unknown>;
 export const ProjectSearchResultFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -26370,6 +26744,7 @@ export const ProjectUpdateFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "reactionData" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "diffMarkdown" } },
           { kind: "Field", name: { kind: "Name", value: "diff" } },
@@ -37790,6 +38165,134 @@ export const ProjectMilestonesDocument = {
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectMilestonesQuery, ProjectMilestonesQueryVariables>;
+export const ProjectRelationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "projectRelation" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectRelation" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectRelation" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectRelationFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ProjectRelationQuery, ProjectRelationQueryVariables>;
+export const ProjectRelationsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "projectRelations" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectRelations" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectRelationConnection" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectRelationConnectionFragmentDoc.definitions,
+    ...ProjectRelationFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ProjectRelationsQuery, ProjectRelationsQueryVariables>;
 export const ProjectUpdateDocument = {
   kind: "Document",
   definitions: [
@@ -37828,6 +38331,129 @@ export const ProjectUpdateDocument = {
     ...ProjectUpdateFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectUpdateQuery, ProjectUpdateQueryVariables>;
+export const ProjectUpdate_CommentsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "projectUpdate_comments" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "CommentFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "comments" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...CommentConnectionFragmentDoc.definitions,
+    ...CommentFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...DocumentContentFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ProjectUpdate_CommentsQuery, ProjectUpdate_CommentsQueryVariables>;
 export const ProjectUpdateInteractionDocument = {
   kind: "Document",
   definitions: [
@@ -49976,6 +50602,136 @@ export const UpdateProjectMilestoneDocument = {
     ...ProjectMilestonePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateProjectMilestoneMutation, UpdateProjectMilestoneMutationVariables>;
+export const CreateProjectRelationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createProjectRelation" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectRelationCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectRelationCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectRelationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectRelationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateProjectRelationMutation, CreateProjectRelationMutationVariables>;
+export const DeleteProjectRelationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteProjectRelation" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectRelationDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DeletePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...DeletePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteProjectRelationMutation, DeleteProjectRelationMutationVariables>;
+export const UpdateProjectRelationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateProjectRelation" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ProjectRelationUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectRelationUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectRelationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectRelationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateProjectRelationMutation, UpdateProjectRelationMutationVariables>;
 export const UnarchiveProjectDocument = {
   kind: "Document",
   definitions: [

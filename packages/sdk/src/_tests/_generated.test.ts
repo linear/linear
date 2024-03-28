@@ -2741,6 +2741,79 @@ describe("generated", () => {
     });
   });
 
+  /** Test all ProjectRelation queries */
+  describe("ProjectRelations", () => {
+    let _projectRelation: L.ProjectRelation | undefined;
+    let _projectRelation_id: string | undefined;
+
+    /** Test the root connection query for the ProjectRelation */
+    it("projectRelations", async () => {
+      const projectRelations: L.ProjectRelationConnection | undefined = await client.projectRelations();
+      const projectRelation = projectRelations?.nodes?.[0];
+      _projectRelation_id = projectRelation?.id;
+      expect(projectRelations instanceof L.ProjectRelationConnection);
+    });
+
+    /** Test the root query for a single ProjectRelation */
+    it("projectRelation", async () => {
+      if (_projectRelation_id) {
+        const projectRelation: L.ProjectRelation | undefined = await client.projectRelation(_projectRelation_id);
+        _projectRelation = projectRelation;
+        expect(projectRelation instanceof L.ProjectRelation);
+      } else {
+        console.warn(
+          "codegen-doc:print: No first ProjectRelation found in connection - cannot test projectRelation query"
+        );
+      }
+    });
+
+    /** Test the projectRelation.project query for L.Project */
+    it("projectRelation.project", async () => {
+      if (_projectRelation) {
+        const projectRelation_project: L.Project | undefined = await _projectRelation.project;
+        expect(projectRelation_project instanceof L.Project);
+      } else {
+        console.warn("codegen-doc:print: No ProjectRelation found - cannot test projectRelation.project query");
+      }
+    });
+
+    /** Test the projectRelation.projectMilestone query for L.ProjectMilestone */
+    it("projectRelation.projectMilestone", async () => {
+      if (_projectRelation) {
+        const projectRelation_projectMilestone: L.ProjectMilestone | undefined =
+          await _projectRelation.projectMilestone;
+        expect(projectRelation_projectMilestone instanceof L.ProjectMilestone);
+      } else {
+        console.warn(
+          "codegen-doc:print: No ProjectRelation found - cannot test projectRelation.projectMilestone query"
+        );
+      }
+    });
+
+    /** Test the projectRelation.relatedProject query for L.Project */
+    it("projectRelation.relatedProject", async () => {
+      if (_projectRelation) {
+        const projectRelation_relatedProject: L.Project | undefined = await _projectRelation.relatedProject;
+        expect(projectRelation_relatedProject instanceof L.Project);
+      } else {
+        console.warn("codegen-doc:print: No ProjectRelation found - cannot test projectRelation.relatedProject query");
+      }
+    });
+
+    /** Test the projectRelation.relatedProjectMilestone query for L.ProjectMilestone */
+    it("projectRelation.relatedProjectMilestone", async () => {
+      if (_projectRelation) {
+        const projectRelation_relatedProjectMilestone: L.ProjectMilestone | undefined =
+          await _projectRelation.relatedProjectMilestone;
+        expect(projectRelation_relatedProjectMilestone instanceof L.ProjectMilestone);
+      } else {
+        console.warn(
+          "codegen-doc:print: No ProjectRelation found - cannot test projectRelation.relatedProjectMilestone query"
+        );
+      }
+    });
+  });
+
   /** Test all ProjectUpdateInteraction queries */
   describe("ProjectUpdateInteractions", () => {
     let _projectUpdateInteraction: L.ProjectUpdateInteraction | undefined;
@@ -2816,6 +2889,16 @@ describe("generated", () => {
         expect(projectUpdate instanceof L.ProjectUpdate);
       } else {
         console.warn("codegen-doc:print: No first ProjectUpdate found in connection - cannot test projectUpdate query");
+      }
+    });
+
+    /** Test the projectUpdate connection query for the Comment */
+    it("projectUpdate.comments", async () => {
+      if (_projectUpdate) {
+        const comments: L.CommentConnection | undefined = await _projectUpdate.comments();
+        expect(comments instanceof L.CommentConnection);
+      } else {
+        console.warn("codegen-doc:print: No projectUpdate found - cannot test _projectUpdate.comments query");
       }
     });
 

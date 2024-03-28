@@ -1361,7 +1361,7 @@ input CommentCollectionFilter {
   """
   Filters that the comments issue must satisfy.
   """
-  issue: IssueFilter
+  issue: NullableIssueFilter
   """
   Comparator for the collection length.
   """
@@ -1370,6 +1370,10 @@ input CommentCollectionFilter {
   Compound filters, one of which need to be matched by the comment.
   """
   or: [CommentCollectionFilter!]
+  """
+  Filters that the comment parent must satisfy.
+  """
+  parent: NullableCommentFilter
   """
   Filters that the comments project update must satisfy.
   """
@@ -1484,11 +1488,15 @@ input CommentFilter {
   """
   Filters that the comments issue must satisfy.
   """
-  issue: IssueFilter
+  issue: NullableIssueFilter
   """
   Compound filters, one of which need to be matched by the comment.
   """
   or: [CommentFilter!]
+  """
+  Filters that the comment parent must satisfy.
+  """
+  parent: NullableCommentFilter
   """
   Filters that the comments project update must satisfy.
   """
@@ -2770,6 +2778,10 @@ type DocumentContent implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  The initiative that the content is associated with.
+  """
+  initiative: Initiative
   """
   The issue that the content is associated with.
   """
@@ -10328,6 +10340,37 @@ type Mutation {
     input: ProjectMilestoneUpdateInput!
   ): ProjectMilestonePayload!
   """
+  Creates a new project relation.
+  """
+  projectRelationCreate(
+    """
+    The project relation to create.
+    """
+    input: ProjectRelationCreateInput!
+  ): ProjectRelationPayload!
+  """
+  Deletes a project relation.
+  """
+  projectRelationDelete(
+    """
+    The identifier of the project relation to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  Updates a project relation.
+  """
+  projectRelationUpdate(
+    """
+    The identifier of the project relation to update.
+    """
+    id: String!
+    """
+    The properties of the project relation to update.
+    """
+    input: ProjectRelationUpdateInput!
+  ): ProjectRelationPayload!
+  """
   Unarchives a project.
   """
   projectUnarchive(
@@ -11318,6 +11361,60 @@ input NotionSettingsInput {
   The name of the Notion workspace being connected.
   """
   workspaceName: String!
+}
+
+"""
+Comment filtering options.
+"""
+input NullableCommentFilter {
+  """
+  Compound filters, all of which need to be matched by the comment.
+  """
+  and: [NullableCommentFilter!]
+  """
+  Comparator for the comments body.
+  """
+  body: StringComparator
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the comments document content must satisfy.
+  """
+  documentContent: DocumentContentFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filters that the comments issue must satisfy.
+  """
+  issue: NullableIssueFilter
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the comment.
+  """
+  or: [NullableCommentFilter!]
+  """
+  Filters that the comment parent must satisfy.
+  """
+  parent: NullableCommentFilter
+  """
+  Filters that the comments project update must satisfy.
+  """
+  projectUpdate: ProjectUpdateFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+  """
+  Filters that the comments creator must satisfy.
+  """
+  user: UserFilter
 }
 
 """
@@ -14563,6 +14660,149 @@ type ProjectPayload {
   success: Boolean!
 }
 
+"""
+A relation between two projects.
+"""
+type ProjectRelation implements Node {
+  """
+  The type of anchor on the project end of the relation.
+  """
+  anchorType: String!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The project whose relationship is being described.
+  """
+  project: Project!
+  """
+  The milestone within the project whose relationship is being described.
+  """
+  projectMilestone: ProjectMilestone
+  """
+  The type of anchor on the relatedProject end of the relation.
+  """
+  relatedAnchorType: String!
+  """
+  The related project.
+  """
+  relatedProject: Project!
+  """
+  The milestone within the related project whose relationship is being described.
+  """
+  relatedProjectMilestone: ProjectMilestone
+  """
+  The relationship of the project with the related project.
+  """
+  type: String!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type ProjectRelationConnection {
+  edges: [ProjectRelationEdge!]!
+  nodes: [ProjectRelation!]!
+  pageInfo: PageInfo!
+}
+
+input ProjectRelationCreateInput {
+  """
+  The type of the anchor for the project.
+  """
+  anchorType: String!
+  """
+  The identifier of the project that is related to another project.
+  """
+  projectId: String!
+  """
+  The identifier of the project milestone.
+  """
+  projectMilestoneId: String
+  """
+  The type of the anchor for the related project.
+  """
+  relatedAnchorType: String!
+  """
+  The identifier of the related project.
+  """
+  relatedProjectId: String!
+  """
+  The identifier of the related project milestone.
+  """
+  relatedProjectMilestoneId: String
+  """
+  The type of relation of the project to the related project.
+  """
+  type: String!
+}
+
+type ProjectRelationEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: ProjectRelation!
+}
+
+type ProjectRelationPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The project relation that was created or updated.
+  """
+  projectRelation: ProjectRelation!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+input ProjectRelationUpdateInput {
+  """
+  The type of the anchor for the project.
+  """
+  anchorType: String
+  """
+  The identifier of the project that is related to another project.
+  """
+  projectId: String
+  """
+  The identifier of the project milestone.
+  """
+  projectMilestoneId: String
+  """
+  The type of the anchor for the related project.
+  """
+  relatedAnchorType: String
+  """
+  The identifier of the related project.
+  """
+  relatedProjectId: String
+  """
+  The identifier of the related project milestone.
+  """
+  relatedProjectMilestoneId: String
+  """
+  The type of relation of the project to the related project.
+  """
+  type: String
+}
+
 type ProjectSearchPayload {
   """
   Archived entities matching the search term along with all their dependencies.
@@ -15151,6 +15391,39 @@ type ProjectUpdate implements Node {
   """
   bodyData: String!
   """
+  Comments associated with the project update.
+  """
+  comments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned comments.
+    """
+    filter: CommentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CommentConnection!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -15186,6 +15459,10 @@ type ProjectUpdate implements Node {
   The project that the update is associated with.
   """
   project: Project!
+  """
+  Emoji reaction summary, grouped by emoji type.
+  """
+  reactionData: JSONObject!
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -16734,6 +17011,39 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): ProjectMilestoneConnection!
+  """
+  One specific project relation.
+  """
+  projectRelation(id: String!): ProjectRelation!
+  """
+  All project relationships.
+  """
+  projectRelations(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectRelationConnection!
   """
   A specific project update.
   """

@@ -7237,6 +7237,131 @@ export class ProjectPayload extends Request {
   }
 }
 /**
+ * A relation between two projects.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectRelationFragment response data
+ */
+export class ProjectRelation extends Request {
+  private _project: L.ProjectRelationFragment["project"];
+  private _projectMilestone?: L.ProjectRelationFragment["projectMilestone"];
+  private _relatedProject: L.ProjectRelationFragment["relatedProject"];
+  private _relatedProjectMilestone?: L.ProjectRelationFragment["relatedProjectMilestone"];
+
+  public constructor(request: LinearRequest, data: L.ProjectRelationFragment) {
+    super(request);
+    this.anchorType = data.anchorType;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.relatedAnchorType = data.relatedAnchorType;
+    this.type = data.type;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._project = data.project;
+    this._projectMilestone = data.projectMilestone ?? undefined;
+    this._relatedProject = data.relatedProject;
+    this._relatedProjectMilestone = data.relatedProjectMilestone ?? undefined;
+  }
+
+  /** The type of anchor on the project end of the relation. */
+  public anchorType: string;
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The type of anchor on the relatedProject end of the relation. */
+  public relatedAnchorType: string;
+  /** The relationship of the project with the related project. */
+  public type: string;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The project whose relationship is being described. */
+  public get project(): LinearFetch<Project> | undefined {
+    return new ProjectQuery(this._request).fetch(this._project.id);
+  }
+  /** The milestone within the project whose relationship is being described. */
+  public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
+    return this._projectMilestone?.id
+      ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
+      : undefined;
+  }
+  /** The related project. */
+  public get relatedProject(): LinearFetch<Project> | undefined {
+    return new ProjectQuery(this._request).fetch(this._relatedProject.id);
+  }
+  /** The milestone within the related project whose relationship is being described. */
+  public get relatedProjectMilestone(): LinearFetch<ProjectMilestone> | undefined {
+    return this._relatedProjectMilestone?.id
+      ? new ProjectMilestoneQuery(this._request).fetch(this._relatedProjectMilestone?.id)
+      : undefined;
+  }
+
+  /** Creates a new project relation. */
+  public create(input: L.ProjectRelationCreateInput) {
+    return new CreateProjectRelationMutation(this._request).fetch(input);
+  }
+  /** Deletes a project relation. */
+  public delete() {
+    return new DeleteProjectRelationMutation(this._request).fetch(this.id);
+  }
+  /** Updates a project relation. */
+  public update(input: L.ProjectRelationUpdateInput) {
+    return new UpdateProjectRelationMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * ProjectRelationConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this ProjectRelationConnection model
+ * @param data - ProjectRelationConnection response data
+ */
+export class ProjectRelationConnection extends Connection<ProjectRelation> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ProjectRelation> | undefined>,
+    data: L.ProjectRelationConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new ProjectRelation(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * ProjectRelationPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectRelationPayloadFragment response data
+ */
+export class ProjectRelationPayload extends Request {
+  private _projectRelation: L.ProjectRelationPayloadFragment["projectRelation"];
+
+  public constructor(request: LinearRequest, data: L.ProjectRelationPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._projectRelation = data.projectRelation;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The project relation that was created or updated. */
+  public get projectRelation(): LinearFetch<ProjectRelation> | undefined {
+    return new ProjectRelationQuery(this._request).fetch(this._projectRelation.id);
+  }
+}
+/**
  * ProjectSearchPayload model
  *
  * @param request - function to call the graphql client
@@ -7452,6 +7577,7 @@ export class ProjectUpdate extends Request {
     this.editedAt = parseDate(data.editedAt) ?? undefined;
     this.id = data.id;
     this.isDiffHidden = data.isDiffHidden;
+    this.reactionData = data.reactionData;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.health = data.health;
@@ -7475,6 +7601,8 @@ export class ProjectUpdate extends Request {
   public id: string;
   /** Whether project update diff should be hidden. */
   public isDiffHidden: boolean;
+  /** Emoji reaction summary, grouped by emoji type. */
+  public reactionData: L.Scalars["JSONObject"];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -7493,7 +7621,10 @@ export class ProjectUpdate extends Request {
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
-
+  /** Comments associated with the project update. */
+  public comments(variables?: Omit<L.ProjectUpdate_CommentsQueryVariables, "id">) {
+    return new ProjectUpdate_CommentsQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Creates a new project update. */
   public create(input: L.ProjectUpdateCreateInput) {
     return new CreateProjectUpdateMutation(this._request).fetch(input);
@@ -12445,6 +12576,72 @@ export class ProjectMilestonesQuery extends Request {
     const data = response.projectMilestones;
 
     return new ProjectMilestoneConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable ProjectRelation Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectRelationQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectRelation query and return a ProjectRelation
+   *
+   * @param id - required id to pass to projectRelation
+   * @returns parsed response from ProjectRelationQuery
+   */
+  public async fetch(id: string): LinearFetch<ProjectRelation> {
+    const response = await this._request<L.ProjectRelationQuery, L.ProjectRelationQueryVariables>(
+      L.ProjectRelationDocument,
+      {
+        id,
+      }
+    );
+    const data = response.projectRelation;
+
+    return new ProjectRelation(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ProjectRelations Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectRelationsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectRelations query and return a ProjectRelationConnection
+   *
+   * @param variables - variables to pass into the ProjectRelationsQuery
+   * @returns parsed response from ProjectRelationsQuery
+   */
+  public async fetch(variables?: L.ProjectRelationsQueryVariables): LinearFetch<ProjectRelationConnection> {
+    const response = await this._request<L.ProjectRelationsQuery, L.ProjectRelationsQueryVariables>(
+      L.ProjectRelationsDocument,
+      variables
+    );
+    const data = response.projectRelations;
+
+    return new ProjectRelationConnection(
       this._request,
       connection =>
         this.fetch(
@@ -17974,6 +18171,95 @@ export class UpdateProjectMilestoneMutation extends Request {
 }
 
 /**
+ * A fetchable CreateProjectRelation Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateProjectRelationMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateProjectRelation mutation and return a ProjectRelationPayload
+   *
+   * @param input - required input to pass to createProjectRelation
+   * @returns parsed response from CreateProjectRelationMutation
+   */
+  public async fetch(input: L.ProjectRelationCreateInput): LinearFetch<ProjectRelationPayload> {
+    const response = await this._request<L.CreateProjectRelationMutation, L.CreateProjectRelationMutationVariables>(
+      L.CreateProjectRelationDocument,
+      {
+        input,
+      }
+    );
+    const data = response.projectRelationCreate;
+
+    return new ProjectRelationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteProjectRelation Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteProjectRelationMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteProjectRelation mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteProjectRelation
+   * @returns parsed response from DeleteProjectRelationMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<L.DeleteProjectRelationMutation, L.DeleteProjectRelationMutationVariables>(
+      L.DeleteProjectRelationDocument,
+      {
+        id,
+      }
+    );
+    const data = response.projectRelationDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateProjectRelation Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateProjectRelationMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateProjectRelation mutation and return a ProjectRelationPayload
+   *
+   * @param id - required id to pass to updateProjectRelation
+   * @param input - required input to pass to updateProjectRelation
+   * @returns parsed response from UpdateProjectRelationMutation
+   */
+  public async fetch(id: string, input: L.ProjectRelationUpdateInput): LinearFetch<ProjectRelationPayload> {
+    const response = await this._request<L.UpdateProjectRelationMutation, L.UpdateProjectRelationMutationVariables>(
+      L.UpdateProjectRelationDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.projectRelationUpdate;
+
+    return new ProjectRelationPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UnarchiveProject Mutation
  *
  * @param request - function to call the graphql client
@@ -22049,6 +22335,59 @@ export class ProjectMilestone_IssuesQuery extends Request {
 }
 
 /**
+ * A fetchable ProjectUpdate_Comments Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to projectUpdate
+ * @param variables - variables without 'id' to pass into the ProjectUpdate_CommentsQuery
+ */
+export class ProjectUpdate_CommentsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.ProjectUpdate_CommentsQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.ProjectUpdate_CommentsQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the ProjectUpdate_Comments query and return a CommentConnection
+   *
+   * @param variables - variables without 'id' to pass into the ProjectUpdate_CommentsQuery
+   * @returns parsed response from ProjectUpdate_CommentsQuery
+   */
+  public async fetch(variables?: Omit<L.ProjectUpdate_CommentsQueryVariables, "id">): LinearFetch<CommentConnection> {
+    const response = await this._request<L.ProjectUpdate_CommentsQuery, L.ProjectUpdate_CommentsQueryVariables>(
+      L.ProjectUpdate_CommentsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.projectUpdate.comments;
+
+    return new CommentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Roadmap_Projects Query
  *
  * @param request - function to call the graphql client
@@ -23714,6 +24053,24 @@ export class LinearSdk extends Request {
    */
   public projectMilestones(variables?: L.ProjectMilestonesQueryVariables): LinearFetch<ProjectMilestoneConnection> {
     return new ProjectMilestonesQuery(this._request).fetch(variables);
+  }
+  /**
+   * One specific project relation.
+   *
+   * @param id - required id to pass to projectRelation
+   * @returns ProjectRelation
+   */
+  public projectRelation(id: string): LinearFetch<ProjectRelation> {
+    return new ProjectRelationQuery(this._request).fetch(id);
+  }
+  /**
+   * All project relationships.
+   *
+   * @param variables - variables to pass into the ProjectRelationsQuery
+   * @returns ProjectRelationConnection
+   */
+  public projectRelations(variables?: L.ProjectRelationsQueryVariables): LinearFetch<ProjectRelationConnection> {
+    return new ProjectRelationsQuery(this._request).fetch(variables);
   }
   /**
    * A specific project update.
@@ -25628,6 +25985,34 @@ export class LinearSdk extends Request {
     input: L.ProjectMilestoneUpdateInput
   ): LinearFetch<ProjectMilestonePayload> {
     return new UpdateProjectMilestoneMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Creates a new project relation.
+   *
+   * @param input - required input to pass to createProjectRelation
+   * @returns ProjectRelationPayload
+   */
+  public createProjectRelation(input: L.ProjectRelationCreateInput): LinearFetch<ProjectRelationPayload> {
+    return new CreateProjectRelationMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes a project relation.
+   *
+   * @param id - required id to pass to deleteProjectRelation
+   * @returns DeletePayload
+   */
+  public deleteProjectRelation(id: string): LinearFetch<DeletePayload> {
+    return new DeleteProjectRelationMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates a project relation.
+   *
+   * @param id - required id to pass to updateProjectRelation
+   * @param input - required input to pass to updateProjectRelation
+   * @returns ProjectRelationPayload
+   */
+  public updateProjectRelation(id: string, input: L.ProjectRelationUpdateInput): LinearFetch<ProjectRelationPayload> {
+    return new UpdateProjectRelationMutation(this._request).fetch(id, input);
   }
   /**
    * Unarchives a project.
