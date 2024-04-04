@@ -80,7 +80,7 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
         importer = await pivotalCsvImport();
         break;
       case "pivotalSQLite":
-        importer = await pivotalSQLiteImport();
+        importer = await pivotalSQLiteImport(importAnswers.linearApiKey);
         break;
       case "shortcutCsv":
         importer = await shortcutCsvImport();

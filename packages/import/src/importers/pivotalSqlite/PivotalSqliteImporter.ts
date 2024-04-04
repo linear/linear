@@ -1,9 +1,19 @@
-import { Importer, ImportResult } from "../../types";
+import {File} from '@web-std/file';
+import { Comment, Importer, ImportResult } from "../../types";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
-import { commentTable, labelTable, personTable, storyLabelTable, storyTable } from "./schema";
+import {
+  commentTable,
+  fileAttachmentFileTable,
+  fileAttachmentTable,
+  labelTable,
+  personTable,
+  storyLabelTable,
+  storyTable,
+} from "./schema";
 import { eq } from "drizzle-orm";
 import invariant from "tiny-invariant";
+import { LinearClient } from "@linear/sdk";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const j2m = require("jira2md");
@@ -14,10 +24,12 @@ type PivotalStoryType = "epic" | "feature" | "bug" | "chore" | "release";
  * Import issues from an Pivotal Tracker CSV export.
  *
  * @param filePath  path to SQLite database file
+ * @param apiKey Linear API key for file uploads
  */
 export class PivotalSQLiteImporter implements Importer {
-  public constructor(filePath: string) {
+  public constructor(filePath: string, apiKey: string) {
     this.filePath = filePath;
+    this.linearClient = new LinearClient({ apiKey });
   }
 
   public get name(): string {
@@ -132,7 +144,54 @@ export class PivotalSQLiteImporter implements Importer {
         // noop
       }
 
-      const comments = await db.select().from(commentTable).where(eq(commentTable.story_id, story.id));
+      const pivotalComments = await db.select().from(commentTable).where(eq(commentTable.story_id, story.id));
+      const comments: Comment[] = [];
+
+      for (const comment of pivotalComments) {
+        const pivotalFiles = await db
+          .select()
+          .from(fileAttachmentFileTable)
+          .innerJoin(fileAttachmentTable, eq(fileAttachmentFileTable.file_attachment_id, fileAttachmentTable.id))
+          .where(eq(fileAttachmentTable.comment_id, comment.id));
+
+        const files: { url: string; content_type: string; filename: string }[] = [];
+        for (const { file_attachment, file_attachment_file } of pivotalFiles) {
+          invariant(file_attachment.content_type, "expected file_attachment to have a content_type");
+          invariant(file_attachment.filename, "expected file_attachment to have a filename");
+          const file = new File([file_attachment_file.blob], file_attachment.filename, {
+            type: file_attachment.content_type,
+          });
+          console.log('uploading file', file_attachment.filename);
+          const fileUrl = await this.uploadFileToLinear(file);
+          files.push({ url: fileUrl, content_type: file_attachment.content_type, filename: file_attachment.filename });
+        }
+
+        const fileMarkdown =
+          files.length > 0
+            ? files
+                .map(file => {
+                  if (file.content_type.startsWith("image")) {
+                    return `- ![${file.filename}](${file.url})`;
+                  } else {
+                    return `- [${file.filename}](${file.url})`;
+                  }
+                })
+                .join("\n")
+            : null;
+
+        const body = j2m.to_markdown(comment.text ?? "") + (fileMarkdown ? `\n\n${fileMarkdown}` : "");
+
+        comments.push({
+          userId: comment.person_id.toString(),
+          body: body ?? "",
+          createdAt: new Date(comment.created_at),
+        });
+      }
+      // .map(comment => ({
+      //           userId: comment.person_id.toString(),
+      //           body: comment.text ? j2m.to_markdown(comment.text) : "TODO - no comment text, attachments?",
+      //           createdAt: new Date(comment.created_at),
+      //         }))
 
       importData.issues.push({
         title,
@@ -142,18 +201,46 @@ export class PivotalSQLiteImporter implements Importer {
         assigneeId,
         labels,
         createdAt,
-        comments: comments.map(comment => ({
-          userId: comment.person_id.toString(),
-          body: comment.text ? j2m.to_markdown(comment.text) : "TODO - no comment text, attachments?",
-          createdAt: new Date(comment.created_at),
-        })),
+        comments: comments,
       });
     }
 
     return importData;
   };
 
+  /** Uploads a file to Linear, returning the uploaded URL. @throws */
+  private uploadFileToLinear = async (file: File): Promise<string> => {
+    const uploadPayload = await this.linearClient.fileUpload(file.type, file.name, file.size);
+
+    if (!uploadPayload.success || !uploadPayload.uploadFile) {
+      throw new Error("Failed to request upload URL");
+    }
+
+    const uploadUrl = uploadPayload.uploadFile.uploadUrl;
+    const assetUrl = uploadPayload.uploadFile.assetUrl;
+
+    // Make sure to copy the response headers for the PUT request
+    const headers = new Headers();
+    headers.set("Content-Type", file.type);
+    headers.set("Cache-Control", "public, max-age=31536000");
+    uploadPayload.uploadFile.headers.forEach(({ key, value }) => headers.set(key, value));
+
+    try {
+      await fetch(uploadUrl, {
+        method: "PUT",
+        headers,
+        body: file,
+      });
+
+      return assetUrl;
+    } catch (e) {
+      console.error(e);
+      throw new Error("Failed to upload file to Linear");
+    }
+  };
+
   // -- Private interface
 
   private filePath: string;
+  private linearClient: LinearClient;
 }

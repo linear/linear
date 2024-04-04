@@ -4,9 +4,9 @@ import { PivotalSQLiteImporter } from "./PivotalSqliteImporter";
 
 const BASE_PATH = process.cwd();
 
-export const pivotalSQLiteImport = async (): Promise<Importer> => {
+export const pivotalSQLiteImport = async (linearApiKey: string): Promise<Importer> => {
   const answers = await inquirer.prompt<PivotalImportAnswers>(questions);
-  const pivotalImporter = new PivotalSQLiteImporter(answers.pivotalFilePath);
+  const pivotalImporter = new PivotalSQLiteImporter(answers.pivotalFilePath, linearApiKey);
   return pivotalImporter;
 };
 
