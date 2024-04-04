@@ -218,14 +218,14 @@ export function parseLinearError(error?: LinearErrorRaw | LinearError): LinearEr
     (status === 403
       ? LinearErrorType.Forbidden
       : status === 429
-      ? LinearErrorType.Ratelimited
-      : `${status}`.startsWith("4")
-      ? LinearErrorType.AuthenticationError
-      : status === 500
-      ? LinearErrorType.InternalError
-      : `${status}`.startsWith("5")
-      ? LinearErrorType.NetworkError
-      : LinearErrorType.Unknown);
+        ? LinearErrorType.Ratelimited
+        : `${status}`.startsWith("4")
+          ? LinearErrorType.AuthenticationError
+          : status === 500
+            ? LinearErrorType.InternalError
+            : `${status}`.startsWith("5")
+              ? LinearErrorType.NetworkError
+              : LinearErrorType.Unknown);
 
   const LinearErrorConstructor = errorConstructorMap[type] ?? LinearError;
 

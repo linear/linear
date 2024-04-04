@@ -142,6 +142,7 @@ export class PivotalSQLiteImporter implements Importer {
         assigneeId,
         labels,
         createdAt,
+        creatorId: story.requested_by_id.toString(),
         comments: comments.map(comment => ({
           userId: comment.person_id.toString(),
           body: comment.text ? j2m.to_markdown(comment.text) : "TODO - no comment text, attachments?",

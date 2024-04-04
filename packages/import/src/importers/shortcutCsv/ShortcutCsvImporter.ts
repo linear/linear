@@ -79,7 +79,11 @@ const colParser = {
  * @param apiToken  A Shortcut API token (https://app.shortcut.com/settings/account/api-tokens)
  */
 export class ShortcutCsvImporter implements Importer {
-  public constructor(private filePath: string, workspaceSlug: string, private apiToken: string) {
+  public constructor(
+    private filePath: string,
+    workspaceSlug: string,
+    private apiToken: string
+  ) {
     this.shortcutBaseURL = "https://app.shortcut.com/" + workspaceSlug;
   }
 

@@ -11,15 +11,15 @@ const incorrectCase = ["SLADayCountType"];
 // Object containing counters of how many times we've seen each DuplicateQueryNameArgs type.
 const deduplicate = Object.fromEntries(duplicateQueries.map(query => [`Query${query}Args`, 0]));
 
-exports.case = (type) => {
+exports.case = type => {
   if (type in deduplicate) {
     if (deduplicate[type] > 0) {
       type = type + deduplicate[type];
     }
-    deduplicate[type] += 1
+    deduplicate[type] += 1;
   }
-  if(incorrectCase.includes(type)) {
+  if (incorrectCase.includes(type)) {
     return type;
   }
-  return changeCaseAll.pascalCase(type)
-}
+  return changeCaseAll.pascalCase(type);
+};

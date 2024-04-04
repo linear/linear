@@ -19,14 +19,14 @@ export function reduceTypeName(type: string | NameNode | NonNullTypeNode | Named
   return typeof type === "string"
     ? type
     : type.kind === Kind.NON_NULL_TYPE
-    ? reduceTypeName(type.type)
-    : type.kind === Kind.NAMED_TYPE
-    ? reduceTypeName(type.name)
-    : type.kind === Kind.NAME
-    ? reduceTypeName(type.value)
-    : type.kind === Kind.LIST_TYPE
-    ? reduceTypeName(type.type)
-    : "UNKNOWN_TYPE_NAME";
+      ? reduceTypeName(type.type)
+      : type.kind === Kind.NAMED_TYPE
+        ? reduceTypeName(type.name)
+        : type.kind === Kind.NAME
+          ? reduceTypeName(type.value)
+          : type.kind === Kind.LIST_TYPE
+            ? reduceTypeName(type.type)
+            : "UNKNOWN_TYPE_NAME";
 }
 
 /**
@@ -38,14 +38,14 @@ export function reduceListType(
   return typeof type === "string"
     ? undefined
     : type.kind === Kind.NON_NULL_TYPE
-    ? reduceListType(type.type)
-    : type.kind === Kind.NAMED_TYPE
-    ? undefined
-    : type.kind === Kind.NAME
-    ? undefined
-    : type.kind === Kind.LIST_TYPE
-    ? reduceTypeName(type.type)
-    : undefined;
+      ? reduceListType(type.type)
+      : type.kind === Kind.NAMED_TYPE
+        ? undefined
+        : type.kind === Kind.NAME
+          ? undefined
+          : type.kind === Kind.LIST_TYPE
+            ? reduceTypeName(type.type)
+            : undefined;
 }
 
 /**
@@ -57,14 +57,14 @@ export function reduceNonNullType(
   return typeof type === "string"
     ? undefined
     : type.kind === Kind.NON_NULL_TYPE
-    ? reduceTypeName(type.type)
-    : type.kind === Kind.NAMED_TYPE
-    ? undefined
-    : type.kind === Kind.NAME
-    ? undefined
-    : type.kind === Kind.LIST_TYPE
-    ? undefined
-    : undefined;
+      ? reduceTypeName(type.type)
+      : type.kind === Kind.NAMED_TYPE
+        ? undefined
+        : type.kind === Kind.NAME
+          ? undefined
+          : type.kind === Kind.LIST_TYPE
+            ? undefined
+            : undefined;
 }
 
 /**
