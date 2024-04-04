@@ -332,6 +332,9 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       assigneeId,
       createdAt: issue.createdAt,
       dueDate: formattedDueDate,
+      ...(issue.creatorId && {
+        createAsUser: issue.creatorId,
+      }),
     });
     issueCursor++;
     issuesProgressBar.update(issueCursor);

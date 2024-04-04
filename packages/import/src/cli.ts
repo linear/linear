@@ -11,6 +11,7 @@ import { shortcutCsvImport } from "./importers/shortcutCsv";
 import { trelloJsonImport } from "./importers/trelloJson";
 import { importIssues } from "./importIssues";
 import { ImportAnswers } from "./types";
+import { pivotalSQLiteImport } from "./importers/pivotalSqlite";
 
 inquirer.registerPrompt("filePath", require("inquirer-file-path"));
 
@@ -44,6 +45,10 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
             value: "pivotalCsv",
           },
           {
+            name: "Pivotal (SQLite export)",
+            value: "pivotalSQLite",
+          },
+          {
             name: "Shortcut (CSV export)",
             value: "shortcutCsv",
           },
@@ -73,6 +78,9 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
         break;
       case "pivotalCsv":
         importer = await pivotalCsvImport();
+        break;
+      case "pivotalSQLite":
+        importer = await pivotalSQLiteImport();
         break;
       case "shortcutCsv":
         importer = await shortcutCsvImport();

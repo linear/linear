@@ -8,6 +8,8 @@ export interface Issue {
   status?: string;
   /** Assigned user */
   assigneeId?: string;
+  /** Creator user */
+  creatorId?: string;
   /** Issue's priority from 0-4, with 0 being the most important. Undefined for non-prioritized. */
   priority?: number;
   /** Issue's comments */

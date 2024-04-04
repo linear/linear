@@ -45,14 +45,14 @@ export const commentTable = sqliteTable('comment', {
   story_id: integer('story_id').notNull().references(() => storyTable.id),
   text: text('text'),
   person_id: integer('person_id').notNull().references(() => personTable.id),
-  created_at: text('created_at'),
+  created_at: text('created_at').notNull(),
   updatedAt: text('updated_at'),
 })
 
 export const labelTable = sqliteTable('label', {
   id: integer('id').primaryKey().notNull(),
   project_id: integer('project_id').notNull().references(() => projectTable.id),
-  name: text('name'),
+  name: text('name').notNull(),
   description: text('description'),
   created_at: text('created_at'),
   updatedAt: text('updated_at'),

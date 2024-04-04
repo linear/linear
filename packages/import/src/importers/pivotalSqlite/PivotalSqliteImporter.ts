@@ -1,4 +1,9 @@
 import { Importer, ImportResult } from "../../types";
+import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import { commentTable, labelTable, personTable, storyLabelTable, storyTable } from "./schema";
+import { eq } from "drizzle-orm";
+import invariant from "tiny-invariant"
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const j2m = require("jira2md");
@@ -30,10 +35,9 @@ interface PivotalIssueType {
 /**
  * Import issues from an Pivotal Tracker CSV export.
  *
- * @param filePath  path to csv file
- * @param orgSlug   base Pivotal project url
+ * @param filePath  path to SQLite database file
  */
-export class PivotalSqliteImporter implements Importer {
+export class PivotalSQLiteImporter implements Importer {
   public constructor(filePath: string) {
     this.filePath = filePath;
   }
@@ -47,6 +51,9 @@ export class PivotalSqliteImporter implements Importer {
   }
 
   public import = async (): Promise<ImportResult> => {
+    const sqlite = new Database(this.filePath);
+    const db = drizzle(sqlite);
+
     const importData: ImportResult = {
       issues: [],
       labels: {},
@@ -54,40 +61,70 @@ export class PivotalSqliteImporter implements Importer {
       statuses: {},
     };
 
-    const assignees = Array.from(new Set(data.map(row => row["Owned By"])));
+    const people = await db.select().from(personTable);
 
-    for (const user of assignees) {
-      importData.users[user] = {
-        name: user,
+    for (const user of people) {
+      importData.users[user.id.toString()] = {
+        name: user.name ?? "Unknown",
+        email: user.email ?? undefined,
       };
     }
 
-    for (const row of data) {
-      const type = row.Type;
-      if (type === "epic" || type === "release") {
-        continue;
-      }
+    const labels = await db.select().from(labelTable);
+    for (const label of labels) {
+      invariant(label.name, "expected label to have a name");
+      importData.labels[label.id.toString()] = {
+        name: label.name,
+      };
+    }
 
-      const title = row.Title;
-      if (!title) {
-        continue;
-      }
+    const stories = await db.select().from(storyTable);
+    for (const story of stories) {
+      const type = story.story_type;
+      const title = story.name;
+      const url = `https://www.pivotaltracker.com/story/show/${story.id}`;
+      const mdDesc = story.description ? j2m.to_markdown(story.description) : "";
+      const description = `${mdDesc}\n\n[View original issue in Pivotal](${url})`;
 
-      const url = row.URL;
-      const mdDesc = j2m.to_markdown(row.Description);
-      const description = url ? `${mdDesc}\n\n[View original issue in Pivotal](${url})` : mdDesc;
+      type TrackerStoryState =
+        | "planned"
+        | "unscheduled"
+        | "unstarted"
+        | "started"
+        | "finished"
+        | "delivered"
+        | "accepted"
+        | "rejected";
 
-      // const priority = parseInt(row['Estimate']) || undefined;
+      // XXX: This is specific to our linear workflow states
+      type LinearWorkflowState = "Backlog" | "Ready" | "Rejected" | "In Progress" | "Ready for PM QA" | "Done";
 
-      const tags = row.Labels.split(",");
+      const storyStateMap: Record<TrackerStoryState, LinearWorkflowState> = {
+        planned: "Backlog",
+        unscheduled: "Backlog",
+        unstarted: "Ready",
+        started: "In Progress",
+        finished: "In Progress",
+        delivered: "Ready for PM QA",
+        accepted: "Done",
+        rejected: "Rejected",
+      };
 
-      const assigneeId = row["Owned By"] && row["Owned By"].length > 0 ? row["Owned By"] : undefined;
+      const status: LinearWorkflowState = storyStateMap[story.current_state] ?? "Backlog";
 
-      const status = !!row["Accepted at"] ? "Done" : "Todo";
+      const createdAt = new Date(story.created_at);
+      const isCreatedAtValid = !isNaN(createdAt.getTime());
+      invariant(isCreatedAtValid, "expected createdAt to be a valid date");
 
-      const labels = tags.filter(tag => !!tag);
+      const assigneeId = story.owned_by_id ? story.owned_by_id.toString() : undefined;
 
-      const createdAt = row["Created at"];
+      const storyLabels = await db
+        .select()
+        .from(labelTable)
+        .innerJoin(storyLabelTable, eq(labelTable.id, storyLabelTable.label_id))
+        .where(eq(storyLabelTable.story_id, story.id));
+
+      const comments = await db.select().from(commentTable).where(eq(commentTable.story_id, story.id))
 
       importData.issues.push({
         title,
@@ -95,17 +132,14 @@ export class PivotalSqliteImporter implements Importer {
         status,
         url,
         assigneeId,
-        labels,
+        labels: storyLabels.map(({ label }) => label.id.toString()),
         createdAt,
+        comments: comments.map((comment) => ({
+          userId: comment.person_id.toString(),
+          body: j2m.to_markdown(comment.text),
+          createdAt: new Date(comment.created_at),
+        }))
       });
-
-      for (const lab of labels) {
-        if (!importData.labels[lab]) {
-          importData.labels[lab] = {
-            name: lab,
-          };
-        }
-      }
     }
 
     return importData;
@@ -115,4 +149,3 @@ export class PivotalSqliteImporter implements Importer {
 
   private filePath: string;
 }
-
