@@ -3,34 +3,12 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { commentTable, labelTable, personTable, storyLabelTable, storyTable } from "./schema";
 import { eq } from "drizzle-orm";
-import invariant from "tiny-invariant"
+import invariant from "tiny-invariant";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const j2m = require("jira2md");
 
 type PivotalStoryType = "epic" | "feature" | "bug" | "chore" | "release";
-
-interface PivotalIssueType {
-  Id: string;
-  Title: string;
-  Labels: string;
-  Iteration: string;
-  "Iteration Start": string;
-  "Iteration End": string;
-  Type: PivotalStoryType;
-  Estimate: string;
-  "Current State": string;
-  "Created at": Date;
-  "Accepted at": Date;
-  Deadline: string;
-  "Requested By": string;
-  Description: string;
-  URL: string;
-  "Owned By": string;
-  Blocker: string;
-  "Blocker Status": string;
-  Comment: string;
-}
 
 /**
  * Import issues from an Pivotal Tracker CSV export.
@@ -70,17 +48,29 @@ export class PivotalSQLiteImporter implements Importer {
       };
     }
 
-    const labels = await db.select().from(labelTable);
-    for (const label of labels) {
+    const allLabels = await db.select().from(labelTable);
+    for (const label of allLabels) {
       invariant(label.name, "expected label to have a name");
       importData.labels[label.id.toString()] = {
         name: label.name,
       };
     }
 
+    const workspaceLabels = {
+      bug: "Bug",
+      feature: "Feature",
+      chore: "Chore",
+    } as const;
+
+    for (const [, name] of Object.entries(workspaceLabels)) {
+      importData.labels[name] = {
+        name: name,
+      };
+    }
+
     const stories = await db.select().from(storyTable);
     for (const story of stories) {
-      const type = story.story_type;
+      const type = story.story_type as PivotalStoryType;
       const title = story.name;
       const url = `https://www.pivotaltracker.com/story/show/${story.id}`;
       const mdDesc = story.description ? j2m.to_markdown(story.description) : "";
@@ -124,7 +114,25 @@ export class PivotalSQLiteImporter implements Importer {
         .innerJoin(storyLabelTable, eq(labelTable.id, storyLabelTable.label_id))
         .where(eq(storyLabelTable.story_id, story.id));
 
-      const comments = await db.select().from(commentTable).where(eq(commentTable.story_id, story.id))
+      const labels = storyLabels.map(({ label }) => label.id.toString());
+      switch (type) {
+        case "bug": {
+          labels.push(workspaceLabels.bug);
+          break;
+        }
+        case "chore": {
+          labels.push(workspaceLabels.chore);
+          break;
+        }
+        case "feature": {
+          labels.push(workspaceLabels.feature);
+          break;
+        }
+        default:
+        // noop
+      }
+
+      const comments = await db.select().from(commentTable).where(eq(commentTable.story_id, story.id));
 
       importData.issues.push({
         title,
@@ -132,13 +140,13 @@ export class PivotalSQLiteImporter implements Importer {
         status,
         url,
         assigneeId,
-        labels: storyLabels.map(({ label }) => label.id.toString()),
+        labels,
         createdAt,
-        comments: comments.map((comment) => ({
+        comments: comments.map(comment => ({
           userId: comment.person_id.toString(),
-          body: j2m.to_markdown(comment.text),
+          body: comment.text ? j2m.to_markdown(comment.text) : "TODO - no comment text, attachments?",
           createdAt: new Date(comment.created_at),
-        }))
+        })),
       });
     }
 
