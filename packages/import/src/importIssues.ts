@@ -1,21 +1,21 @@
 /* eslint-disable no-console */
 import { LinearClient } from "@linear/sdk";
-import { format } from "date-fns";
 import chalk from "chalk";
+import { Presets, SingleBar } from "cli-progress";
+import { format } from "date-fns";
 import * as inquirer from "inquirer";
 import _, { uniq } from "lodash";
-import { Comment, Importer, ImportResult } from "./types";
-import { replaceImagesInMarkdown } from "./utils/replaceImages";
-import { Presets, SingleBar } from "cli-progress";
 import ora from "ora";
+import { Comment, ImportResult, Importer } from "./types";
+import { replaceImagesInMarkdown } from "./utils/replaceImages";
 
 interface ImportAnswers {
   newTeam: boolean;
   includeComments?: boolean;
-  includeProject?: string;
+  includeProject?: boolean;
   selfAssign?: boolean;
   targetAssignee?: string;
-  targetProjectId?: boolean;
+  targetProjectId?: string;
   targetTeamId?: string;
   teamName?: string;
 }
@@ -240,6 +240,45 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       existingLabelMap[labelName.toLowerCase()] = actualLabelId;
     }
     labelMapping[labelId] = actualLabelId;
+  }
+
+  if (projectId && importData.milestones) {
+    const project = await client.project(projectId);
+    const allProjectMilestones = await project.projectMilestones();
+    const existingMilestoneMap = {} as { [name: string]: string };
+    for (const milestone of allProjectMilestones?.nodes ?? []) {
+      const milestoneName = milestone.name?.toLowerCase();
+      if (milestoneName && milestone.id && !existingMilestoneMap[milestoneName]) {
+        existingMilestoneMap[milestoneName] = milestone.id;
+      }
+    }
+    const milestoneMapping = {} as { [id: string]: string };
+    for (const milestoneId of Object.keys(importData.milestones)) {
+      const milestone = importData.milestones[milestoneId];
+      let milestoneName = _.truncate(milestone.name.trim(), { length: 20 });
+
+      let actualMilestoneId: string | undefined = existingMilestoneMap[milestoneName.toLowerCase()];
+
+      if (actualMilestoneId) {
+        actualMilestoneId = undefined;
+        milestoneName = `${milestoneName} (imported)`;
+      }
+
+      actualMilestoneId = existingMilestoneMap[milestoneName.toLowerCase()];
+      if (!actualMilestoneId) {
+        const milestoneResponse = await client.createProjectMilestone({
+          name: milestoneName,
+          projectId: projectId,
+        });
+
+        const projectMilestone = await milestoneResponse?.projectMilestone;
+        if (projectMilestone?.id) {
+          actualMilestoneId = projectMilestone?.id;
+        }
+        existingMilestoneMap[milestoneName.toLowerCase()] = actualMilestoneId;
+      }
+      milestoneMapping[milestoneId] = actualMilestoneId;
+    }
   }
 
   const existingStateMap = {} as { [name: string]: string };

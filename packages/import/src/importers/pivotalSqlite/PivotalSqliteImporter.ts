@@ -1,4 +1,4 @@
-import {File} from '@web-std/file';
+import { File } from "@web-std/file";
 import { Comment, Importer, ImportResult } from "../../types";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
@@ -161,7 +161,7 @@ export class PivotalSQLiteImporter implements Importer {
           const file = new File([file_attachment_file.blob], file_attachment.filename, {
             type: file_attachment.content_type,
           });
-          console.log('uploading file', file_attachment.filename);
+          console.log("uploading file", file_attachment.filename);
           const fileUrl = await this.uploadFileToLinear(file);
           files.push({ url: fileUrl, content_type: file_attachment.content_type, filename: file_attachment.filename });
         }

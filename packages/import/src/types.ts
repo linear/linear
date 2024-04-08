@@ -14,6 +14,8 @@ export interface Issue {
   comments?: Comment[];
   /** Issue's label IDs */
   labels?: string[];
+  /** Issue milestone */
+  milestoneId?: string;
   /** Link to original issue. */
   url?: string;
   /** When the issue was created. */
@@ -60,6 +62,11 @@ export interface ImportResult {
       name: string;
       color?: string;
       description?: string;
+    };
+  };
+  milestones?: {
+    [id: string]: {
+      name: string;
     };
   };
   /// A suffix to be appended to each resource URL (e.g. to authenticate requests)
