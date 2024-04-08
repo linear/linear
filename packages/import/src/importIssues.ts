@@ -242,6 +242,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
     labelMapping[labelId] = actualLabelId;
   }
 
+  const milestoneMapping = {} as { [id: string]: string };
   if (projectId && importData.milestones) {
     const project = await client.project(projectId);
     const allProjectMilestones = await project.projectMilestones();
@@ -252,7 +253,6 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
         existingMilestoneMap[milestoneName] = milestone.id;
       }
     }
-    const milestoneMapping = {} as { [id: string]: string };
     for (const milestoneId of Object.keys(importData.milestones)) {
       const milestone = importData.milestones[milestoneId];
       let milestoneName = _.truncate(milestone.name.trim(), { length: 20 });
@@ -371,6 +371,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       assigneeId,
       createdAt: issue.createdAt,
       dueDate: formattedDueDate,
+      projectMilestoneId: issue.milestoneId ? milestoneMapping[issue.milestoneId] : undefined,
     });
     issueCursor++;
     issuesProgressBar.update(issueCursor);

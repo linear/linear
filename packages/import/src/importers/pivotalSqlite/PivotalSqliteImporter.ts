@@ -1,9 +1,13 @@
+import { LinearClient } from "@linear/sdk";
 import { File } from "@web-std/file";
-import { Comment, Importer, ImportResult } from "../../types";
 import Database from "better-sqlite3";
+import { eq, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/better-sqlite3";
+import invariant from "tiny-invariant";
+import { Comment, ImportResult, Importer } from "../../types";
 import {
   commentTable,
+  epicTable,
   fileAttachmentFileTable,
   fileAttachmentTable,
   labelTable,
@@ -11,9 +15,6 @@ import {
   storyLabelTable,
   storyTable,
 } from "./schema";
-import { eq } from "drizzle-orm";
-import invariant from "tiny-invariant";
-import { LinearClient } from "@linear/sdk";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const j2m = require("jira2md");
@@ -49,7 +50,11 @@ export class PivotalSQLiteImporter implements Importer {
       labels: {},
       users: {},
       statuses: {},
+      milestones: {},
     };
+
+    // narrow the type
+    invariant(importData.milestones);
 
     const people = await db.select().from(personTable);
 
@@ -60,11 +65,23 @@ export class PivotalSQLiteImporter implements Importer {
       };
     }
 
-    const allLabels = await db.select().from(labelTable);
-    for (const label of allLabels) {
+    const allLabels = await db
+      .select()
+      .from(labelTable)
+      .leftJoin(epicTable, eq(labelTable.id, epicTable.label_id))
+      .where(isNull(epicTable.id));
+
+    for (const { label } of allLabels) {
       invariant(label.name, "expected label to have a name");
       importData.labels[label.id.toString()] = {
         name: label.name,
+      };
+    }
+
+    const allEpics = await db.select().from(epicTable);
+    for (const epic of allEpics) {
+      importData.milestones[epic.label_id.toString()] = {
+        name: epic.name ?? "Unknown",
       };
     }
 
@@ -98,7 +115,7 @@ export class PivotalSQLiteImporter implements Importer {
         | "accepted"
         | "rejected";
 
-      // XXX: This is specific to our linear workflow states
+      // XXX: This is specific to Tanooki's linear workflow states
       type LinearWorkflowState = "Backlog" | "Ready" | "Rejected" | "In Progress" | "Ready for PM QA" | "Done";
 
       const storyStateMap: Record<TrackerStoryState, LinearWorkflowState> = {
@@ -124,9 +141,12 @@ export class PivotalSQLiteImporter implements Importer {
         .select()
         .from(labelTable)
         .innerJoin(storyLabelTable, eq(labelTable.id, storyLabelTable.label_id))
+        .leftJoin(epicTable, eq(epicTable.label_id, labelTable.id))
         .where(eq(storyLabelTable.story_id, story.id));
 
-      const labels = storyLabels.map(({ label }) => label.id.toString());
+      const labels = storyLabels.filter(sl => !sl.epic).map(({ label }) => label.id.toString());
+      const milestone = storyLabels.find(sl => sl.epic)?.epic;
+
       switch (type) {
         case "bug": {
           labels.push(workspaceLabels.bug);
@@ -171,9 +191,9 @@ export class PivotalSQLiteImporter implements Importer {
             ? files
                 .map(file => {
                   if (file.content_type.startsWith("image")) {
-                    return `- ![${file.filename}](${file.url})`;
+                    return `![${file.filename}](${file.url})`;
                   } else {
-                    return `- [${file.filename}](${file.url})`;
+                    return `[${file.filename}](${file.url})`;
                   }
                 })
                 .join("\n")
@@ -202,6 +222,7 @@ export class PivotalSQLiteImporter implements Importer {
         labels,
         createdAt,
         comments: comments,
+        ...(milestone ? { milestoneId: milestone.label_id.toString() } : {}),
       });
     }
 
