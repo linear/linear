@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.12.2
+
+### Patch Changes
+
+- 38f50d7: chore(deps): update dependency patch versions
+- Updated dependencies [38f50d7]
+- Updated dependencies [6c91afd]
+- Updated dependencies [68026c8]
+- Updated dependencies [6c91afd]
+- Updated dependencies [6c91afd]
+  - @linear/sdk@20.0.0
+
 ## 1.12.1
 
 ### Patch Changes
