@@ -10,21 +10,25 @@ function resolveWithData(data: unknown) {
 
 describe("LinearSdk", () => {
   it("returns data", async () => {
-    const sdk = new LinearSdk(resolveWithData({ project: { id: "test" } }));
+    const sdk = new LinearSdk(resolveWithData({ project: { id: "test", status: { id: "test" } } }));
     const response = await sdk.project("test");
 
     expect(response).toEqual(expect.objectContaining({ id: "test" }));
   });
 
   it("parses DateTime", async () => {
-    const sdk = new LinearSdk(resolveWithData({ project: { id: "test", createdAt: "2020-10-02T13:01:55.852Z" } }));
+    const sdk = new LinearSdk(
+      resolveWithData({ project: { id: "test", createdAt: "2020-10-02T13:01:55.852Z", status: { id: "test" } } })
+    );
     const response = await sdk.project("test");
 
     expect(response?.createdAt?.getFullYear()).toEqual(2020);
   });
 
   it("parses TimelessDateScalar", async () => {
-    const sdk = new LinearSdk(resolveWithData({ project: { id: "test", targetDate: "2021-02-26" } }));
+    const sdk = new LinearSdk(
+      resolveWithData({ project: { id: "test", targetDate: "2021-02-26", status: { id: "test" } } })
+    );
     const response = await sdk.project("test");
 
     expect(response?.targetDate).toEqual("2021-02-26");
