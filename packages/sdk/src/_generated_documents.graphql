@@ -223,8 +223,16 @@ fragment CustomViewNotificationSubscription on CustomViewNotificationSubscriptio
 # A custom view that has been saved by a user.
 fragment CustomView on CustomView {
   __typename
+  # The calculated view preferences values for this custom view.
+  viewPreferencesValues {
+    ...ViewPreferencesValues
+  }
   # The color of the icon of the custom view.
   color
+  # The current users view preferences for this custom view.
+  userViewPreferences {
+    ...ViewPreferences
+  }
   # The description of the custom view.
   description
   # The filter applied to issues in the custom view.
@@ -243,6 +251,10 @@ fragment CustomView on CustomView {
   modelName
   # The name of the custom view.
   name
+  # The organizations default view preferences for this custom view.
+  organizationViewPreferences {
+    ...ViewPreferences
+  }
   # The team associated with the custom view.
   team {
     id
@@ -380,9 +392,53 @@ fragment DocumentContentHistory on DocumentContentHistory {
   id
 }
 
-# A document for a project.
+# A document related notification.
+fragment DocumentNotification on DocumentNotification {
+  __typename
+  # Notification type.
+  type
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The external user that caused the notification.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at when an email reminder for this notification was sent to the user. Null, if no email
+  #     reminder has been sent.
+  emailedAt
+  # The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  readAt
+  # The time at which a notification was unsnoozed..
+  unsnoozedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification.
+  actor {
+    id
+  }
+  # The user that received the notification.
+  user {
+    id
+  }
+}
+
+# A document that can be attached to different entities.
 fragment Document on Document {
   __typename
+  # The canonical url for the document.
+  url
   # The color of the icon.
   color
   # The document title.
@@ -401,7 +457,7 @@ fragment Document on Document {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The order of the item in the project resources list.
+  # The order of the item in the resources list.
   sortOrder
   # The project that the document is associated with.
   project {
@@ -717,6 +773,10 @@ fragment Notification on Notification {
     id
   }
 
+  ... on DocumentNotification {
+    ...DocumentNotification
+  }
+
   ... on IssueNotification {
     ...IssueNotification
   }
@@ -831,6 +891,33 @@ fragment ProjectNotification on ProjectNotification {
   }
 }
 
+# A project status.
+fragment ProjectStatus on ProjectStatus {
+  __typename
+  # Description of the status.
+  description
+  # The UI color of the status as a HEX string.
+  color
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The name of the status.
+  name
+  # The position of the status in the workspace's project flow.
+  position
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of the project status.
+  type
+  # The unique identifier of the entity.
+  id
+  # Whether or not a project can be in this status indefinitely.
+  indefinite
+}
+
 # A project.
 fragment Project on Project {
   __typename
@@ -886,6 +973,10 @@ fragment Project on Project {
   slugId
   # The sort order for the project within the organization.
   sortOrder
+  # The status that the project is associated with.
+  status {
+    ...ProjectStatus
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -1112,6 +1203,9 @@ fragment IssueHistory on IssueHistory {
   removedLabels {
     ...IssueLabel
   }
+  triageResponsibilityNotifiedUsers {
+    ...User
+  }
 }
 
 # A relation between two issues.
@@ -1139,9 +1233,48 @@ fragment IssueRelation on IssueRelation {
   id
 }
 
+# A relation between two projects.
+fragment ProjectRelation on ProjectRelation {
+  __typename
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The milestone within the project whose relationship is being described.
+  projectMilestone {
+    id
+  }
+  # The milestone within the related project whose relationship is being described.
+  relatedProjectMilestone {
+    id
+  }
+  # The project whose relationship is being described.
+  project {
+    id
+  }
+  # The related project.
+  relatedProject {
+    id
+  }
+  # The relationship of the project with the related project.
+  type
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of anchor on the project end of the relation.
+  anchorType
+  # The type of anchor on the relatedProject end of the relation.
+  relatedAnchorType
+  # The unique identifier of the entity.
+  id
+}
+
 # A roadmap for projects.
 fragment Roadmap on Roadmap {
   __typename
+  # The canonical url for the roadmap.
+  url
   # The description of the roadmap.
   description
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -1428,6 +1561,8 @@ fragment GitAutomationState on GitAutomationState {
 # A update associated with an project.
 fragment ProjectUpdate on ProjectUpdate {
   __typename
+  # Emoji reaction summary, grouped by emoji type.
+  reactionData
   # The URL to the project update.
   url
   # The diff between the current update and the previous one, formatted as markdown.
@@ -1781,6 +1916,31 @@ fragment ProjectLink on ProjectLink {
   }
 }
 
+# An external link for an entity like initiative, etc...
+fragment EntityExternalLink on EntityExternalLink {
+  __typename
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The link's URL.
+  url
+  # The link's label.
+  label
+  # The order of the item in the resources list.
+  sortOrder
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the link.
+  creator {
+    id
+  }
+}
+
 # An import job for data from an external service.
 fragment IssueImport on IssueImport {
   __typename
@@ -2040,6 +2200,10 @@ fragment Issue on Issue {
   completedAt
   # The time at which the issue was moved into started state.
   startedAt
+  # The time at which the issue's SLA began.
+  slaStartedAt
+  # The time at which the issue's SLA will breach.
+  slaBreachesAt
   # The time until an issue will be snoozed in Triage view.
   snoozedUntilAt
   # The unique identifier of the entity.
@@ -2145,6 +2309,10 @@ fragment Organization on Organization {
   logoUrl
   # The organization's name.
   name
+  # The organization's project statuses.
+  projectStatuses {
+    ...ProjectStatus
+  }
   # The organization's subscription to a paid plan.
   subscription {
     ...PaidSubscription
@@ -2328,6 +2496,8 @@ fragment Team on Team {
   requirePriorityToLeaveTriage
   # Whether issues without priority should be sorted first.
   issueOrderingNoPriorityFirst
+  # Whether the team is managed by SCIM.
+  scimManaged
   # Whether the team is private or not.
   private
   # Whether the team uses cycles.
@@ -2409,6 +2579,8 @@ fragment AuthenticationSessionResponse on AuthenticationSessionResponse {
   locationCountryCode
   # Location country name.
   locationCountry
+  # Location region code.
+  locationRegionCode
   # Name of the session, derived from the client and operating system
   name
   # Operating system used for the session
@@ -2905,6 +3077,10 @@ fragment SlackChannelNameMapping on SlackChannelNameMapping {
   autoCreateTemplateId
   # Whether or not @-mentioning the bot should automatically create an Ask with the message.
   autoCreateOnBotMention
+  # Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled.
+  postCancellationUpdates
+  # Whether or not the Linear Asks bot has been added to this Slack channel.
+  botAdded
   # Whether or not the Slack channel is private.
   isPrivate
   # Whether or not the Slack channel is shared with an external org.
@@ -2913,8 +3089,6 @@ fragment SlackChannelNameMapping on SlackChannelNameMapping {
   autoCreateOnMessage
   # Whether or not using the :ticket: emoji in this channel should automatically create Asks.
   autoCreateOnEmoji
-  # Whether or not we the Linear Asks bot has been added to this Slack channel.
-  botAdded
   # Which teams are connected to the channel and settings for those teams.
   teams {
     ...SlackAsksTeamSettings
@@ -3334,6 +3508,8 @@ fragment AuthenticationSession on AuthenticationSession {
   locationCountryCode
   # Location country name.
   locationCountry
+  # Location region code.
+  locationRegionCode
   # Name of the session, derived from the client and operating system
   name
   # Operating system used for the session
@@ -3437,6 +3613,10 @@ fragment ViewPreferences on ViewPreferences {
   id
   # The view preference type.
   type
+  # The view preferences
+  preferences {
+    ...ViewPreferencesValues
+  }
   # The view type.
   viewType
 }
@@ -3652,6 +3832,24 @@ fragment AuthOrganizationDomain on AuthOrganizationDomain {
   name
   organizationId
   verified
+}
+
+fragment AuthOrganizationExistsPayload on AuthOrganizationExistsPayload {
+  __typename
+  # Whether the operation was successful.
+  success
+  # Whether the organization exists.
+  exists
+}
+
+fragment AuthOrganizationPayload on AuthOrganizationPayload {
+  __typename
+  # The auth organization that was updated.
+  authOrganization {
+    ...AuthOrganization
+  }
+  # Whether the operation was successful.
+  success
 }
 
 fragment AuthResolverResponse on AuthResolverResponse {
@@ -3878,6 +4076,8 @@ fragment DocumentSearchResult on DocumentSearchResult {
   __typename
   # Metadata related to search result.
   metadata
+  # The canonical url for the document.
+  url
   # The color of the icon.
   color
   # The document title.
@@ -3896,7 +4096,7 @@ fragment DocumentSearchResult on DocumentSearchResult {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The order of the item in the project resources list.
+  # The order of the item in the resources list.
   sortOrder
   # The project that the document is associated with.
   project {
@@ -3974,6 +4174,28 @@ fragment EmojiPayload on EmojiPayload {
   }
   # The identifier of the last sync operation.
   lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment EntityExternalLinkConnection on EntityExternalLinkConnection {
+  __typename
+  nodes {
+    ...EntityExternalLink
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment EntityExternalLinkPayload on EntityExternalLinkPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The link that was created or updated.
+  entityExternalLink {
+    id
+  }
   # Whether the operation was successful.
   success
 }
@@ -4402,6 +4624,10 @@ fragment IssueSearchResult on IssueSearchResult {
   completedAt
   # The time at which the issue was moved into started state.
   startedAt
+  # The time at which the issue's SLA began.
+  slaStartedAt
+  # The time at which the issue's SLA will breach.
+  slaBreachesAt
   # The time until an issue will be snoozed in Triage view.
   snoozedUntilAt
   # The unique identifier of the entity.
@@ -4528,6 +4754,8 @@ fragment OauthToken on OauthToken {
   client {
     ...AuthOauthClient
   }
+  # Scopes associated with the access token.
+  scope
   clientId
   createdAt
   id
@@ -4730,6 +4958,28 @@ fragment ProjectPayload on ProjectPayload {
   success
 }
 
+fragment ProjectRelationConnection on ProjectRelationConnection {
+  __typename
+  nodes {
+    ...ProjectRelation
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ProjectRelationPayload on ProjectRelationPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The project relation that was created or updated.
+  projectRelation {
+    id
+  }
+  # Whether the operation was successful.
+  success
+}
+
 fragment ProjectSearchPayload on ProjectSearchPayload {
   __typename
   # Archived entities matching the search term along with all their dependencies.
@@ -4802,6 +5052,10 @@ fragment ProjectSearchResult on ProjectSearchResult {
   slugId
   # The sort order for the project within the organization.
   sortOrder
+  # The status that the project is associated with.
+  status {
+    ...ProjectStatus
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -4844,6 +5098,16 @@ fragment ProjectSearchResultConnection on ProjectSearchResultConnection {
   __typename
   nodes {
     ...ProjectSearchResult
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ProjectStatusConnection on ProjectStatusConnection {
+  __typename
+  nodes {
+    ...ProjectStatus
   }
   pageInfo {
     ...PageInfo
@@ -5288,6 +5552,16 @@ fragment ViewPreferencesPayload on ViewPreferencesPayload {
   }
   # Whether the operation was successful.
   success
+}
+
+fragment ViewPreferencesValues on ViewPreferencesValues {
+  __typename
+  # The issue grouping.
+  issueGrouping
+  # The issue ordering.
+  viewOrdering
+  # Whether to show completed issues.
+  showCompletedIssues
 }
 
 fragment WebhookConnection on WebhookConnection {
@@ -6074,6 +6348,50 @@ query customView_issues(
     }
   }
 }
+# The organizations default view preferences for this custom view.
+query customView_organizationViewPreferences($id: String!) {
+  customView(id: $id) {
+    organizationViewPreferences {
+      ...ViewPreferences
+    }
+  }
+}
+# The view preferences
+query customView_organizationViewPreferences_preferences($id: String!) {
+  customView(id: $id) {
+    organizationViewPreferences {
+      preferences {
+        ...ViewPreferencesValues
+      }
+    }
+  }
+}
+# The current users view preferences for this custom view.
+query customView_userViewPreferences($id: String!) {
+  customView(id: $id) {
+    userViewPreferences {
+      ...ViewPreferences
+    }
+  }
+}
+# The view preferences
+query customView_userViewPreferences_preferences($id: String!) {
+  customView(id: $id) {
+    userViewPreferences {
+      preferences {
+        ...ViewPreferencesValues
+      }
+    }
+  }
+}
+# The calculated view preferences values for this custom view.
+query customView_viewPreferencesValues($id: String!) {
+  customView(id: $id) {
+    viewPreferencesValues {
+      ...ViewPreferencesValues
+    }
+  }
+}
 # Whether a custom view has other subscribers than the current user in the organization.
 query customViewHasSubscribers(
   # The identifier of the custom view.
@@ -6282,6 +6600,12 @@ query emojis(
     orderBy: $orderBy
   ) {
     ...EmojiConnection
+  }
+}
+# One specific entity link.
+query entityExternalLink($id: String!) {
+  entityExternalLink(id: $id) {
+    ...EntityExternalLink
   }
 }
 # One specific external user.
@@ -7724,6 +8048,14 @@ query project_projectUpdates(
     }
   }
 }
+# The status that the project is associated with.
+query project_status($id: String!) {
+  project(id: $id) {
+    status {
+      ...ProjectStatus
+    }
+  }
+}
 # Teams associated with this project.
 query project_teams(
   $id: String!
@@ -7861,6 +8193,38 @@ query projectMilestones(
     ...ProjectMilestoneConnection
   }
 }
+# One specific project relation.
+query projectRelation($id: String!) {
+  projectRelation(id: $id) {
+    ...ProjectRelation
+  }
+}
+# All project relationships.
+query projectRelations(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  projectRelations(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...ProjectRelationConnection
+  }
+}
 # A specific project update.
 query projectUpdate(
   # The identifier of the project update to retrieve.
@@ -7868,6 +8232,39 @@ query projectUpdate(
 ) {
   projectUpdate(id: $id) {
     ...ProjectUpdate
+  }
+}
+# Comments associated with the project update.
+query projectUpdate_comments(
+  # The identifier of the project update to retrieve.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned comments.
+  $filter: CommentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  projectUpdate(id: $id) {
+    comments(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CommentConnection
+    }
   }
 }
 # A specific interaction on a project update.
@@ -9391,6 +9788,8 @@ mutation attachmentLinkSlack(
   $issueId: String!
   # [DEPRECATED] The latest timestamp for the Slack message.
   $latest: String
+  # Whether to begin syncing the message's Slack thread with a comment thread on the issue.
+  $syncToCommentThread: Boolean
   # The title to use for the attachment.
   $title: String
   # [DEPRECATED] Unique identifier of either a thread's parent message or a message in the thread.
@@ -9405,6 +9804,7 @@ mutation attachmentLinkSlack(
     id: $id
     issueId: $issueId
     latest: $latest
+    syncToCommentThread: $syncToCommentThread
     title: $title
     ts: $ts
     url: $url
@@ -9737,6 +10137,35 @@ mutation deleteEmoji(
 ) {
   emojiDelete(id: $id) {
     ...DeletePayload
+  }
+}
+# Creates a new entity link.
+mutation createEntityExternalLink(
+  # The entity link object to create.
+  $input: EntityExternalLinkCreateInput!
+) {
+  entityExternalLinkCreate(input: $input) {
+    ...EntityExternalLinkPayload
+  }
+}
+# Deletes an entity link.
+mutation deleteEntityExternalLink(
+  # The identifier of the entity link to delete.
+  $id: String!
+) {
+  entityExternalLinkDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates an entity link.
+mutation updateEntityExternalLink(
+  # The identifier of the entity link to update.
+  $id: String!
+  # The entity link object to update.
+  $input: EntityExternalLinkUpdateInput!
+) {
+  entityExternalLinkUpdate(id: $id, input: $input) {
+    ...EntityExternalLinkPayload
   }
 }
 # Creates a new favorite (project, cycle etc).
@@ -10462,7 +10891,7 @@ mutation updateIssueImport(
 mutation createIssueLabel(
   # The issue label to create.
   $input: IssueLabelCreateInput!
-  # Whether to replace all team-specific labels with the same name with this newly created workspace label.
+  # Whether to replace all team-specific labels with the same name with this newly created workspace label (default: false).
   $replaceTeamLabels: Boolean
 ) {
   issueLabelCreate(input: $input, replaceTeamLabels: $replaceTeamLabels) {
@@ -10484,8 +10913,10 @@ mutation updateIssueLabel(
   $id: String!
   # A partial label object to update.
   $input: IssueLabelUpdateInput!
+  # Whether to replace all team-specific labels with the same name with this updated workspace label (default: false).
+  $replaceTeamLabels: Boolean
 ) {
-  issueLabelUpdate(id: $id, input: $input) {
+  issueLabelUpdate(id: $id, input: $input, replaceTeamLabels: $replaceTeamLabels) {
     ...IssueLabelPayload
   }
 }
