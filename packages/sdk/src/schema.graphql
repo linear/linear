@@ -902,6 +902,17 @@ type AuthOrganizationDomain {
   verified: Boolean!
 }
 
+type AuthOrganizationExistsPayload {
+  """
+  Whether the organization exists.
+  """
+  exists: Boolean!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 """
 An invitation to the organization that has been sent via email.
 """
@@ -914,6 +925,28 @@ type AuthOrganizationInvite {
   The unique identifier of the entity.
   """
   id: ID!
+}
+
+type AuthOrganizationPayload {
+  """
+  The auth organization that was updated.
+  """
+  authOrganization: AuthOrganization!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+input AuthOrganizationUpdateInput {
+  """
+  The organization's unique invite hash.
+  """
+  inviteHash: String
+  """
+  The organization's unique URL key.
+  """
+  urlKey: String
 }
 
 type AuthResolverResponse {
@@ -1039,6 +1072,10 @@ type AuthenticationSession {
   """
   locationCountryCode: String
   """
+  Location region code.
+  """
+  locationRegionCode: String
+  """
   Name of the session, derived from the client and operating system
   """
   name: String!
@@ -1109,6 +1146,10 @@ type AuthenticationSessionResponse {
   Location country code.
   """
   locationCountryCode: String
+  """
+  Location region code.
+  """
+  locationRegionCode: String
   """
   Name of the session, derived from the client and operating system
   """
@@ -1361,7 +1402,7 @@ input CommentCollectionFilter {
   """
   Filters that the comments issue must satisfy.
   """
-  issue: IssueFilter
+  issue: NullableIssueFilter
   """
   Comparator for the collection length.
   """
@@ -1370,6 +1411,10 @@ input CommentCollectionFilter {
   Compound filters, one of which need to be matched by the comment.
   """
   or: [CommentCollectionFilter!]
+  """
+  Filters that the comment parent must satisfy.
+  """
+  parent: NullableCommentFilter
   """
   Filters that the comments project update must satisfy.
   """
@@ -1484,11 +1529,15 @@ input CommentFilter {
   """
   Filters that the comments issue must satisfy.
   """
-  issue: IssueFilter
+  issue: NullableIssueFilter
   """
   Compound filters, one of which need to be matched by the comment.
   """
   or: [CommentFilter!]
+  """
+  Filters that the comment parent must satisfy.
+  """
+  parent: NullableCommentFilter
   """
   Filters that the comments project update must satisfy.
   """
@@ -1842,6 +1891,10 @@ type CustomView implements Node {
   """
   organization: Organization!
   """
+  The organizations default view preferences for this custom view.
+  """
+  organizationViewPreferences: ViewPreferences
+  """
   The user who owns the custom view.
   """
   owner: User!
@@ -1867,6 +1920,14 @@ type CustomView implements Node {
   The user who last updated the custom view.
   """
   updatedBy: User!
+  """
+  The current users view preferences for this custom view.
+  """
+  userViewPreferences: ViewPreferences
+  """
+  The calculated view preferences values for this custom view.
+  """
+  viewPreferencesValues: ViewPreferencesValues
 }
 
 type CustomViewConnection {
@@ -1887,7 +1948,7 @@ input CustomViewCreateInput {
   """
   The filter applied to issues in the custom view.
   """
-  filterData: JSONObject
+  filterData: IssueFilter
   """
   The filters applied to issues in the custom view.
   """
@@ -1911,7 +1972,7 @@ input CustomViewCreateInput {
   """
   The project filter applied to issues in the custom view.
   """
-  projectFilterData: JSONObject
+  projectFilterData: ProjectFilter
   """
   [Internal] The id of the project associated with the custom view.
   """
@@ -2051,7 +2112,7 @@ input CustomViewUpdateInput {
   """
   The filter applied to issues in the custom view.
   """
-  filterData: JSONObject
+  filterData: IssueFilter
   """
   The filters applied to issues in the custom view.
   """
@@ -2071,7 +2132,7 @@ input CustomViewUpdateInput {
   """
   The project filter applied to issues in the custom view.
   """
-  projectFilterData: JSONObject
+  projectFilterData: ProjectFilter
   """
   [Internal] The id of the project associated with the custom view.
   """
@@ -2603,7 +2664,7 @@ type DeletePayload implements ArchivePayload {
 }
 
 """
-A document for a project.
+A document that can be attached to different entities.
 """
 type Document implements Node {
   """
@@ -2647,19 +2708,23 @@ type Document implements Node {
   """
   id: ID!
   """
+  [Internal] The initiative that the document is associated with.
+  """
+  initiative: Initiative
+  """
   The last template that was applied to this document.
   """
   lastAppliedTemplate: Template
   """
   The project that the document is associated with.
   """
-  project: Project!
+  project: Project
   """
   The document's unique URL slug.
   """
   slugId: String!
   """
-  The order of the item in the project resources list.
+  The order of the item in the resources list.
   """
   sortOrder: Float!
   """
@@ -2676,6 +2741,10 @@ type Document implements Node {
   The user who last updated the document.
   """
   updatedBy: User!
+  """
+  The canonical url for the document.
+  """
+  url: String!
 }
 
 """
@@ -2770,6 +2839,10 @@ type DocumentContent implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  The initiative that the content is associated with.
+  """
+  initiative: Initiative
   """
   The issue that the content is associated with.
   """
@@ -2916,15 +2989,19 @@ input DocumentCreateInput {
   """
   id: String
   """
+  [Internal] Related initiative for the document.
+  """
+  initiativeId: String
+  """
   The ID of the last template applied to the document.
   """
   lastAppliedTemplateId: String
   """
   Related project for the document.
   """
-  projectId: String!
+  projectId: String
   """
-  The order of the item in the project resources list.
+  The order of the item in the resources list.
   """
   sortOrder: Float
   """
@@ -2981,6 +3058,67 @@ input DocumentFilter {
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+}
+
+"""
+A document related notification.
+"""
+type DocumentNotification implements Entity & Node & Notification {
+  """
+  The user that caused the notification.
+  """
+  actor: User
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time at when an email reminder for this notification was sent to the user. Null, if no email
+      reminder has been sent.
+  """
+  emailedAt: DateTime
+  """
+  The external user that caused the notification.
+  """
+  externalUserActor: ExternalUser
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  """
+  readAt: DateTime
+  """
+  The time until a notification will be snoozed. After that it will appear in the inbox again.
+  """
+  snoozedUntilAt: DateTime
+  """
+  Notification type.
+  """
+  type: String!
+  """
+  The time at which a notification was unsnoozed..
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user that received the notification.
+  """
+  user: User!
 }
 
 type DocumentPayload {
@@ -3054,6 +3192,10 @@ type DocumentSearchResult implements Node {
   """
   id: ID!
   """
+  [Internal] The initiative that the document is associated with.
+  """
+  initiative: Initiative
+  """
   The last template that was applied to this document.
   """
   lastAppliedTemplate: Template
@@ -3064,13 +3206,13 @@ type DocumentSearchResult implements Node {
   """
   The project that the document is associated with.
   """
-  project: Project!
+  project: Project
   """
   The document's unique URL slug.
   """
   slugId: String!
   """
-  The order of the item in the project resources list.
+  The order of the item in the resources list.
   """
   sortOrder: Float!
   """
@@ -3087,6 +3229,10 @@ type DocumentSearchResult implements Node {
   The user who last updated the document.
   """
   updatedBy: User!
+  """
+  The canonical url for the document.
+  """
+  url: String!
 }
 
 type DocumentSearchResultConnection {
@@ -3125,6 +3271,10 @@ input DocumentUpdateInput {
   """
   icon: String
   """
+  [Internal] Related initiative for the document.
+  """
+  initiativeId: String
+  """
   The ID of the last template applied to the document.
   """
   lastAppliedTemplateId: String
@@ -3133,7 +3283,7 @@ input DocumentUpdateInput {
   """
   projectId: String
   """
-  The order of the item in the project resources list.
+  The order of the item in the resources list.
   """
   sortOrder: Float
   """
@@ -3281,6 +3431,10 @@ input EmailUserAccountAuthChallengeInput {
   """
   isDesktop: Boolean
   """
+  Whether to only return the login code. This is used by mobile apps to skip showing the login link.
+  """
+  loginCodeOnly: Boolean
+  """
   Signup code.
   """
   signupCode: String
@@ -3407,6 +3561,117 @@ interface Entity implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+}
+
+"""
+An external link for an entity like initiative, etc...
+"""
+type EntityExternalLink implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the link.
+  """
+  creator: User!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The initiative that the link is associated with.
+  """
+  initiative: Initiative!
+  """
+  The link's label.
+  """
+  label: String!
+  """
+  The order of the item in the resources list.
+  """
+  sortOrder: Float!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The link's URL.
+  """
+  url: String!
+}
+
+type EntityExternalLinkConnection {
+  edges: [EntityExternalLinkEdge!]!
+  nodes: [EntityExternalLink!]!
+  pageInfo: PageInfo!
+}
+
+input EntityExternalLinkCreateInput {
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  Related initiative link.
+  """
+  initiativeId: String!
+  """
+  The label for the link.
+  """
+  label: String!
+  """
+  The order of the item in the entities resources list.
+  """
+  sortOrder: Float
+  """
+  The URL of the link.
+  """
+  url: String!
+}
+
+type EntityExternalLinkEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: EntityExternalLink!
+}
+
+type EntityExternalLinkPayload {
+  """
+  The link that was created or updated.
+  """
+  entityExternalLink: EntityExternalLink!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+input EntityExternalLinkUpdateInput {
+  """
+  The label for the link.
+  """
+  label: String
+  """
+  The order of the item in the entities resources list.
+  """
+  sortOrder: Float
+  """
+  The URL of the link.
+  """
+  url: String
 }
 
 """
@@ -4404,13 +4669,42 @@ type Initiative implements Node {
   """
   creator: User!
   """
-  The description of the initiative.
+  [Internal] The description of the initiative.
   """
   description: String
   """
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  Links associated with the initiative.
+  """
+  links(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): EntityExternalLinkConnection!
   """
   The name of the initiative.
   """
@@ -4563,7 +4857,7 @@ input InitiativeCreateInput {
   """
   color: String
   """
-  The description of the initiative.
+  [Internal] The description of the initiative.
   """
   description: String
   """
@@ -4757,7 +5051,7 @@ input InitiativeUpdateInput {
   """
   color: String
   """
-  The description of the initiative.
+  [Internal] The description of the initiative.
   """
   description: String
   """
@@ -5638,11 +5932,11 @@ type Issue implements Node {
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
   """
-  [Internal] The time at which the issue's SLA will breach.
+  The time at which the issue's SLA will breach.
   """
   slaBreachesAt: DateTime
   """
-  [Internal] The time at which the issue's SLA began.
+  The time at which the issue's SLA began.
   """
   slaStartedAt: DateTime
   """
@@ -6565,6 +6859,7 @@ type IssueHistory implements Node {
   Whether the issue was trashed or un-trashed.
   """
   trashed: Boolean
+  triageResponsibilityNotifiedUsers: [User!]
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -7599,11 +7894,11 @@ type IssueSearchResult implements Node {
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
   """
-  [Internal] The time at which the issue's SLA will breach.
+  The time at which the issue's SLA will breach.
   """
   slaBreachesAt: DateTime
   """
-  [Internal] The time at which the issue's SLA began.
+  The time at which the issue's SLA began.
   """
   slaStartedAt: DateTime
   """
@@ -8481,6 +8776,10 @@ type Mutation {
     """
     latest: String
     """
+    Whether to begin syncing the message's Slack thread with a comment thread on the issue.
+    """
+    syncToCommentThread: Boolean
+    """
     The title to use for the attachment.
     """
     title: String
@@ -8849,6 +9148,37 @@ type Mutation {
     """
     id: String!
   ): DeletePayload!
+  """
+  Creates a new entity link.
+  """
+  entityExternalLinkCreate(
+    """
+    The entity link object to create.
+    """
+    input: EntityExternalLinkCreateInput!
+  ): EntityExternalLinkPayload!
+  """
+  Deletes an entity link.
+  """
+  entityExternalLinkDelete(
+    """
+    The identifier of the entity link to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  Updates an entity link.
+  """
+  entityExternalLinkUpdate(
+    """
+    The identifier of the entity link to update.
+    """
+    id: String!
+    """
+    The entity link object to update.
+    """
+    input: EntityExternalLinkUpdateInput!
+  ): EntityExternalLinkPayload!
   """
   Creates a new favorite (project, cycle etc).
   """
@@ -9831,7 +10161,7 @@ type Mutation {
     """
     input: IssueLabelCreateInput!
     """
-    Whether to replace all team-specific labels with the same name with this newly created workspace label.
+    Whether to replace all team-specific labels with the same name with this newly created workspace label (default: false).
     """
     replaceTeamLabels: Boolean
   ): IssueLabelPayload!
@@ -9856,6 +10186,10 @@ type Mutation {
     A partial label object to update.
     """
     input: IssueLabelUpdateInput!
+    """
+    Whether to replace all team-specific labels with the same name with this updated workspace label (default: false).
+    """
+    replaceTeamLabels: Boolean
   ): IssueLabelPayload!
   """
   Creates a new issue relation.
@@ -10327,6 +10661,37 @@ type Mutation {
     """
     input: ProjectMilestoneUpdateInput!
   ): ProjectMilestonePayload!
+  """
+  [ALPHA] Creates a new project relation.
+  """
+  projectRelationCreate(
+    """
+    The project relation to create.
+    """
+    input: ProjectRelationCreateInput!
+  ): ProjectRelationPayload!
+  """
+  [ALPHA] Deletes a project relation.
+  """
+  projectRelationDelete(
+    """
+    The identifier of the project relation to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  [ALPHA] Updates a project relation.
+  """
+  projectRelationUpdate(
+    """
+    The identifier of the project relation to update.
+    """
+    id: String!
+    """
+    The properties of the project relation to update.
+    """
+    input: ProjectRelationUpdateInput!
+  ): ProjectRelationPayload!
   """
   Unarchives a project.
   """
@@ -11318,6 +11683,60 @@ input NotionSettingsInput {
   The name of the Notion workspace being connected.
   """
   workspaceName: String!
+}
+
+"""
+Comment filtering options.
+"""
+input NullableCommentFilter {
+  """
+  Compound filters, all of which need to be matched by the comment.
+  """
+  and: [NullableCommentFilter!]
+  """
+  Comparator for the comments body.
+  """
+  body: StringComparator
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the comments document content must satisfy.
+  """
+  documentContent: DocumentContentFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filters that the comments issue must satisfy.
+  """
+  issue: NullableIssueFilter
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the comment.
+  """
+  or: [NullableCommentFilter!]
+  """
+  Filters that the comment parent must satisfy.
+  """
+  parent: NullableCommentFilter
+  """
+  Filters that the comments project update must satisfy.
+  """
+  projectUpdate: ProjectUpdateFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+  """
+  Filters that the comments creator must satisfy.
+  """
+  user: UserFilter
 }
 
 """
@@ -12391,6 +12810,10 @@ type OauthToken {
   id: Float!
   revokedAt: DateTime
   """
+  Scopes associated with the access token.
+  """
+  scope: [String!]!
+  """
   Auth user who authorized the OAuth application.
   """
   user: AuthUser!
@@ -12548,6 +12971,10 @@ type Organization implements Node {
   Previously used URL keys for the organization (last 3 are kept and redirected).
   """
   previousUrlKeys: [String!]!
+  """
+  The organization's project statuses.
+  """
+  projectStatuses: [ProjectStatus!]!
   """
   The day at which to prompt for project updates.
   """
@@ -14563,6 +14990,153 @@ type ProjectPayload {
   success: Boolean!
 }
 
+"""
+A relation between two projects.
+"""
+type ProjectRelation implements Node {
+  """
+  The type of anchor on the project end of the relation.
+  """
+  anchorType: String!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The project whose relationship is being described.
+  """
+  project: Project!
+  """
+  The milestone within the project whose relationship is being described.
+  """
+  projectMilestone: ProjectMilestone
+  """
+  The type of anchor on the relatedProject end of the relation.
+  """
+  relatedAnchorType: String!
+  """
+  The related project.
+  """
+  relatedProject: Project!
+  """
+  The milestone within the related project whose relationship is being described.
+  """
+  relatedProjectMilestone: ProjectMilestone
+  """
+  The relationship of the project with the related project.
+  """
+  type: String!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type ProjectRelationConnection {
+  edges: [ProjectRelationEdge!]!
+  nodes: [ProjectRelation!]!
+  pageInfo: PageInfo!
+}
+
+input ProjectRelationCreateInput {
+  """
+  The type of the anchor for the project.
+  """
+  anchorType: String!
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The identifier of the project that is related to another project.
+  """
+  projectId: String!
+  """
+  The identifier of the project milestone.
+  """
+  projectMilestoneId: String
+  """
+  The type of the anchor for the related project.
+  """
+  relatedAnchorType: String!
+  """
+  The identifier of the related project.
+  """
+  relatedProjectId: String!
+  """
+  The identifier of the related project milestone.
+  """
+  relatedProjectMilestoneId: String
+  """
+  The type of relation of the project to the related project.
+  """
+  type: String!
+}
+
+type ProjectRelationEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: ProjectRelation!
+}
+
+type ProjectRelationPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The project relation that was created or updated.
+  """
+  projectRelation: ProjectRelation!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+input ProjectRelationUpdateInput {
+  """
+  The type of the anchor for the project.
+  """
+  anchorType: String
+  """
+  The identifier of the project that is related to another project.
+  """
+  projectId: String
+  """
+  The identifier of the project milestone.
+  """
+  projectMilestoneId: String
+  """
+  The type of the anchor for the related project.
+  """
+  relatedAnchorType: String
+  """
+  The identifier of the related project.
+  """
+  relatedProjectId: String
+  """
+  The identifier of the related project milestone.
+  """
+  relatedProjectMilestoneId: String
+  """
+  The type of relation of the project to the related project.
+  """
+  type: String
+}
+
 type ProjectSearchPayload {
   """
   Archived entities matching the search term along with all their dependencies.
@@ -15006,7 +15580,7 @@ input ProjectSort {
 }
 
 """
-[ALPHA] A project status.
+A project status.
 """
 type ProjectStatus implements Node {
   """
@@ -15151,6 +15725,39 @@ type ProjectUpdate implements Node {
   """
   bodyData: String!
   """
+  Comments associated with the project update.
+  """
+  comments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned comments.
+    """
+    filter: CommentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CommentConnection!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -15186,6 +15793,10 @@ type ProjectUpdate implements Node {
   The project that the update is associated with.
   """
   project: Project!
+  """
+  Emoji reaction summary, grouped by emoji type.
+  """
+  reactionData: JSONObject!
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -16091,6 +16702,10 @@ type Query {
     orderBy: PaginationOrderBy
   ): EmojiConnection!
   """
+  One specific entity link.
+  """
+  entityExternalLink(id: String!): EntityExternalLink!
+  """
   One specific external user.
   """
   externalUser(
@@ -16734,6 +17349,39 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): ProjectMilestoneConnection!
+  """
+  One specific project relation.
+  """
+  projectRelation(id: String!): ProjectRelation!
+  """
+  All project relationships.
+  """
+  projectRelations(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectRelationConnection!
   """
   A specific project update.
   """
@@ -17637,6 +18285,10 @@ type Roadmap implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  The canonical url for the roadmap.
+  """
+  url: String!
 }
 
 """
@@ -18168,7 +18820,7 @@ type SlackChannelNameMapping {
   """
   autoCreateTemplateId: String
   """
-  Whether or not we the Linear Asks bot has been added to this Slack channel.
+  Whether or not the Linear Asks bot has been added to this Slack channel.
   """
   botAdded: Boolean
   """
@@ -18187,6 +18839,10 @@ type SlackChannelNameMapping {
   The Slack channel name.
   """
   name: String!
+  """
+  Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled.
+  """
+  postCancellationUpdates: Boolean
   """
   Which teams are connected to the channel and settings for those teams.
   """
@@ -18211,7 +18867,7 @@ input SlackChannelNameMappingInput {
   """
   autoCreateTemplateId: String
   """
-  Whether or not we the Linear Asks bot has been added to this Slack channel.
+  Whether or not the Linear Asks bot has been added to this Slack channel.
   """
   botAdded: Boolean
   """
@@ -18230,6 +18886,10 @@ input SlackChannelNameMappingInput {
   The Slack channel name.
   """
   name: String!
+  """
+  Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled.
+  """
+  postCancellationUpdates: Boolean
   """
   Which teams are connected to the channel and settings for those teams.
   """
@@ -18938,6 +19598,10 @@ type Team implements Node {
   The workflow state into which issues are moved when a review has been requested for the PR.
   """
   reviewWorkflowState: WorkflowState @deprecated(reason: "Use team.gitAutomationStates instead.")
+  """
+  Whether the team is managed by SCIM.
+  """
+  scimManaged: Boolean!
   """
   Where to move issues when changing state.
   """
@@ -20840,10 +21504,12 @@ enum UserFlagType {
   desktopInstalled
   desktopTabsOnboardingDismissed
   dueDateShortcutMigration
+  editorSlashCommandUsed
   emptyActiveIssuesDismissed
   emptyBacklogDismissed
   emptyCustomViewsDismissed
   emptyMyIssuesDismissed
+  emptyParagraphSlashCommandTip
   figmaPluginBannerDismissed
   figmaPromptDismissed
   helpIslandFeatureInsightsDismissed
@@ -21188,6 +21854,10 @@ type ViewPreferences implements Node {
   """
   id: ID!
   """
+  The view preferences
+  """
+  preferences: ViewPreferencesValues!
+  """
   The view preference type.
   """
   type: String!
@@ -21292,6 +21962,21 @@ input ViewPreferencesUpdateInput {
   preferences: JSONObject
 }
 
+type ViewPreferencesValues {
+  """
+  The issue grouping.
+  """
+  issueGrouping: String
+  """
+  Whether to show completed issues.
+  """
+  showCompletedIssues: String
+  """
+  The issue ordering.
+  """
+  viewOrdering: String
+}
+
 """
 The client view this custom view is targeting.
 """
@@ -21315,6 +22000,7 @@ enum ViewType {
   myIssuesActivity
   myIssuesCreatedByMe
   myIssuesSubscribedTo
+  myViews
   project
   projectDocuments
   projects
