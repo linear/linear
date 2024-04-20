@@ -9,6 +9,7 @@ import { linearCsvImporter } from "./importers/linearCsv";
 import { pivotalCsvImport } from "./importers/pivotalCsv";
 import { shortcutCsvImport } from "./importers/shortcutCsv";
 import { trelloJsonImport } from "./importers/trelloJson";
+import { teamworkCsvImport } from "./importers/teamworkCsv";
 import { importIssues } from "./importIssues";
 import { ImportAnswers } from "./types";
 
@@ -55,6 +56,10 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
             name: "Linear (CSV export)",
             value: "linearCsv",
           },
+          {
+            name: "Teamwork (CSV export)",
+            value: "teamworkCsv",
+          },
         ],
       },
     ]);
@@ -82,6 +87,9 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
         break;
       case "linearCsv":
         importer = await linearCsvImporter();
+        break;
+      case "teamworkCsv":
+        importer = await teamworkCsvImport();
         break;
       default:
         console.log(chalk.red(`Invalid importer`));
