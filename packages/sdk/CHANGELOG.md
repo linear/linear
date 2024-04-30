@@ -1,5 +1,11 @@
 # Change Log
 
+## 21.1.0
+
+### Minor Changes
+
+- b2fd91c: fix: map DateTimeOrDuration scalar to string | Date type
+
 ## 21.0.0
 
 ### Major Changes
