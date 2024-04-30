@@ -5044,6 +5044,8 @@ export type Mutation = {
   documentCreate: DocumentPayload;
   /** Deletes a document. */
   documentDelete: DeletePayload;
+  /** Adds a document reminder. Will cause a notification to be sent when the issue reminder time is reached. */
+  documentReminder: DocumentPayload;
   /** Updates a document. */
   documentUpdate: DocumentPayload;
   /** Creates a new email intake address. */
@@ -5404,21 +5406,21 @@ export type Mutation = {
   templateDelete: DeletePayload;
   /** Updates an existing template. */
   templateUpdate: TemplatePayload;
-  /** [ALPHA] Creates a new time schedule. */
+  /** Creates a new time schedule. */
   timeScheduleCreate: TimeSchedulePayload;
-  /** [ALPHA] Deletes a time schedule. */
+  /** Deletes a time schedule. */
   timeScheduleDelete: DeletePayload;
-  /** [ALPHA] Refresh the integration schedule information. */
+  /** Refresh the integration schedule information. */
   timeScheduleRefreshIntegrationSchedule: TimeSchedulePayload;
-  /** [ALPHA] Updates a time schedule. */
+  /** Updates a time schedule. */
   timeScheduleUpdate: TimeSchedulePayload;
-  /** [ALPHA] Upsert an external time schedule. */
+  /** Upsert an external time schedule. */
   timeScheduleUpsertExternal: TimeSchedulePayload;
-  /** [ALPHA] Creates a new triage responsibility. */
+  /** Creates a new triage responsibility. */
   triageResponsibilityCreate: TriageResponsibilityPayload;
-  /** [ALPHA] Deletes a triage responsibility. */
+  /** Deletes a triage responsibility. */
   triageResponsibilityDelete: DeletePayload;
-  /** [ALPHA] Updates an existing triage responsibility. */
+  /** Updates an existing triage responsibility. */
   triageResponsibilityUpdate: TriageResponsibilityPayload;
   /** Makes user a regular user. Can only be called by an admin. */
   userDemoteAdmin: UserAdminPayload;
@@ -5672,6 +5674,11 @@ export type MutationDocumentCreateArgs = {
 
 export type MutationDocumentDeleteArgs = {
   id: Scalars["String"];
+};
+
+export type MutationDocumentReminderArgs = {
+  id: Scalars["String"];
+  reminderAt: Scalars["DateTime"];
 };
 
 export type MutationDocumentUpdateArgs = {
@@ -7181,6 +7188,7 @@ export type NullableTemplateFilter = {
   updatedAt?: Maybe<DateComparator>;
 };
 
+/** Comparator for optional timeless dates. */
 export type NullableTimelessDateComparator = {
   /** Equals constraint. */
   eq?: Maybe<Scalars["TimelessDate"]>;
@@ -9543,13 +9551,13 @@ export type Query = {
   templates: Array<Template>;
   /** Returns all templates that are associated with the integration type. */
   templatesForIntegration: Array<Template>;
-  /** [ALPHA] A specific time schedule. */
+  /** A specific time schedule. */
   timeSchedule: TimeSchedule;
-  /** [ALPHA] All time schedules. */
+  /** All time schedules. */
   timeSchedules: TimeScheduleConnection;
-  /** [ALPHA] All triage responsibilities. */
+  /** All triage responsibilities. */
   triageResponsibilities: TriageResponsibilityConnection;
-  /** [ALPHA] A specific triage responsibility. */
+  /** A specific triage responsibility. */
   triageResponsibility: TriageResponsibility;
   /** One specific user. */
   user: User;
@@ -10329,6 +10337,35 @@ export enum ReleaseChannel {
   Public = "public",
 }
 
+/** A reminder that can be attached to different entities. */
+export type Reminder = Node & {
+  __typename?: "Reminder";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The reminder's comment. */
+  comment?: Maybe<Scalars["String"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The document that the reminder is associated with. */
+  documentId?: Maybe<Document>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The issue that the reminder is associated with. */
+  issueId?: Maybe<Issue>;
+  /** The project that the reminder is associated with. */
+  projectId?: Maybe<Project>;
+  /** The time when a reminder triggers a notification in users inbox. */
+  remindAt: Scalars["DateTime"];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** The user that created a reminder. */
+  user: User;
+};
+
 /** A roadmap for projects. */
 export type Roadmap = Node & {
   __typename?: "Roadmap";
@@ -11043,7 +11080,7 @@ export type Team = Node & {
    * @deprecated Use team.gitAutomationStates instead.
    */
   reviewWorkflowState?: Maybe<WorkflowState>;
-  /** Whether the team is managed by SCIM. */
+  /** Whether the team is managed by SCIM integration. */
   scimManaged: Scalars["Boolean"];
   /** Where to move issues when changing state. */
   setIssueSortOrderOnStateChange: Scalars["String"];
@@ -11553,6 +11590,8 @@ export type TeamUpdateInput = {
   requirePriorityToLeaveTriage?: Maybe<Scalars["Boolean"]>;
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
   reviewWorkflowStateId?: Maybe<Scalars["String"]>;
+  /** Whether the team is managed by SCIM integration. Mutation restricted to workspace admins and only unsetting is allowed! */
+  scimManaged?: Maybe<Scalars["Boolean"]>;
   /** Whether to move issues to bottom of the column when changing state. */
   setIssueSortOrderOnStateChange?: Maybe<Scalars["String"]>;
   /** Whether to send new issue comment notifications to Slack. */
@@ -11590,6 +11629,8 @@ export type Template = Node & {
   name: Scalars["String"];
   /** The organization that the template is associated with. If null, the template is associated with a particular team. */
   organization?: Maybe<Organization>;
+  /** The sort order of the template. */
+  sortOrder: Scalars["Float"];
   /** The team that the template is associated with. If null, the template is global to the workspace. */
   team?: Maybe<Team>;
   /** Template data. */
@@ -11618,6 +11659,8 @@ export type TemplateCreateInput = {
   id?: Maybe<Scalars["String"]>;
   /** The template name. */
   name: Scalars["String"];
+  /** The position of the template in the templates list. */
+  sortOrder?: Maybe<Scalars["Float"]>;
   /** The identifier or key of the team associated with the template. If not given, the template will be shared across all teams. */
   teamId?: Maybe<Scalars["String"]>;
   /** The template data as JSON encoded attributes of the type of entity, such as an issue. */
@@ -11648,6 +11691,8 @@ export type TemplateUpdateInput = {
   description?: Maybe<Scalars["String"]>;
   /** The template name. */
   name?: Maybe<Scalars["String"]>;
+  /** The position of the template in the templates list. */
+  sortOrder?: Maybe<Scalars["Float"]>;
   /** The identifier or key of the team associated with the template. If set to null, the template will be shared across all teams. */
   teamId?: Maybe<Scalars["String"]>;
   /** The template data as JSON encoded attributes of the type of entity, such as an issue. */
@@ -13582,6 +13627,16 @@ export type ProjectRelationFragment = { __typename: "ProjectRelation" } & Pick<
     relatedProject: { __typename?: "Project" } & Pick<Project, "id">;
   };
 
+export type ReminderFragment = { __typename: "Reminder" } & Pick<
+  Reminder,
+  "updatedAt" | "comment" | "archivedAt" | "createdAt" | "remindAt" | "id"
+> & {
+    documentId?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+    issueId?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+    projectId?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    user: { __typename?: "User" } & Pick<User, "id">;
+  };
+
 export type RoadmapFragment = { __typename: "Roadmap" } & Pick<
   Roadmap,
   "url" | "description" | "updatedAt" | "name" | "color" | "slugId" | "sortOrder" | "archivedAt" | "createdAt" | "id"
@@ -13647,7 +13702,7 @@ export type TriageResponsibilityFragment = { __typename: "TriageResponsibility" 
 
 export type TemplateFragment = { __typename: "Template" } & Pick<
   Template,
-  "templateData" | "description" | "type" | "updatedAt" | "name" | "archivedAt" | "createdAt" | "id"
+  "templateData" | "description" | "type" | "updatedAt" | "name" | "sortOrder" | "archivedAt" | "createdAt" | "id"
 > & {
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -15210,6 +15265,8 @@ type Node_PushSubscription_Fragment = { __typename: "PushSubscription" } & Pick<
 
 type Node_Reaction_Fragment = { __typename: "Reaction" } & Pick<Reaction, "id">;
 
+type Node_Reminder_Fragment = { __typename: "Reminder" } & Pick<Reminder, "id">;
+
 type Node_Roadmap_Fragment = { __typename: "Roadmap" } & Pick<Roadmap, "id">;
 
 type Node_RoadmapToProject_Fragment = { __typename: "RoadmapToProject" } & Pick<RoadmapToProject, "id">;
@@ -15307,6 +15364,7 @@ export type NodeFragment =
   | Node_ProjectUpdateInteraction_Fragment
   | Node_PushSubscription_Fragment
   | Node_Reaction_Fragment
+  | Node_Reminder_Fragment
   | Node_Roadmap_Fragment
   | Node_RoadmapToProject_Fragment
   | Node_Team_Fragment
@@ -17855,6 +17913,60 @@ export type TemplatesForIntegrationQuery = { __typename?: "Query" } & {
   templatesForIntegration: Array<{ __typename?: "Template" } & TemplateFragment>;
 };
 
+export type TimeScheduleQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type TimeScheduleQuery = { __typename?: "Query" } & {
+  timeSchedule: { __typename?: "TimeSchedule" } & TimeScheduleFragment;
+};
+
+export type TimeSchedulesQueryVariables = Exact<{
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type TimeSchedulesQuery = { __typename?: "Query" } & {
+  timeSchedules: { __typename?: "TimeScheduleConnection" } & TimeScheduleConnectionFragment;
+};
+
+export type TriageResponsibilitiesQueryVariables = Exact<{
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type TriageResponsibilitiesQuery = { __typename?: "Query" } & {
+  triageResponsibilities: { __typename?: "TriageResponsibilityConnection" } & TriageResponsibilityConnectionFragment;
+};
+
+export type TriageResponsibilityQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type TriageResponsibilityQuery = { __typename?: "Query" } & {
+  triageResponsibility: { __typename?: "TriageResponsibility" } & TriageResponsibilityFragment;
+};
+
+export type TriageResponsibility_ManualSelectionQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type TriageResponsibility_ManualSelectionQuery = { __typename?: "Query" } & {
+  triageResponsibility: { __typename?: "TriageResponsibility" } & {
+    manualSelection?: Maybe<
+      { __typename?: "TriageResponsibilityManualSelection" } & TriageResponsibilityManualSelectionFragment
+    >;
+  };
+};
+
 export type UserQueryVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -18406,6 +18518,15 @@ export type DeleteDocumentMutationVariables = Exact<{
 
 export type DeleteDocumentMutation = { __typename?: "Mutation" } & {
   documentDelete: { __typename?: "DeletePayload" } & DeletePayloadFragment;
+};
+
+export type DocumentReminderMutationVariables = Exact<{
+  id: Scalars["String"];
+  reminderAt: Scalars["DateTime"];
+}>;
+
+export type DocumentReminderMutation = { __typename?: "Mutation" } & {
+  documentReminder: { __typename?: "DocumentPayload" } & DocumentPayloadFragment;
 };
 
 export type UpdateDocumentMutationVariables = Exact<{
@@ -19730,6 +19851,73 @@ export type UpdateTemplateMutationVariables = Exact<{
 
 export type UpdateTemplateMutation = { __typename?: "Mutation" } & {
   templateUpdate: { __typename?: "TemplatePayload" } & TemplatePayloadFragment;
+};
+
+export type CreateTimeScheduleMutationVariables = Exact<{
+  input: TimeScheduleCreateInput;
+}>;
+
+export type CreateTimeScheduleMutation = { __typename?: "Mutation" } & {
+  timeScheduleCreate: { __typename?: "TimeSchedulePayload" } & TimeSchedulePayloadFragment;
+};
+
+export type DeleteTimeScheduleMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteTimeScheduleMutation = { __typename?: "Mutation" } & {
+  timeScheduleDelete: { __typename?: "DeletePayload" } & DeletePayloadFragment;
+};
+
+export type TimeScheduleRefreshIntegrationScheduleMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type TimeScheduleRefreshIntegrationScheduleMutation = { __typename?: "Mutation" } & {
+  timeScheduleRefreshIntegrationSchedule: { __typename?: "TimeSchedulePayload" } & TimeSchedulePayloadFragment;
+};
+
+export type UpdateTimeScheduleMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: TimeScheduleUpdateInput;
+}>;
+
+export type UpdateTimeScheduleMutation = { __typename?: "Mutation" } & {
+  timeScheduleUpdate: { __typename?: "TimeSchedulePayload" } & TimeSchedulePayloadFragment;
+};
+
+export type TimeScheduleUpsertExternalMutationVariables = Exact<{
+  externalId: Scalars["String"];
+  input: TimeScheduleUpdateInput;
+}>;
+
+export type TimeScheduleUpsertExternalMutation = { __typename?: "Mutation" } & {
+  timeScheduleUpsertExternal: { __typename?: "TimeSchedulePayload" } & TimeSchedulePayloadFragment;
+};
+
+export type CreateTriageResponsibilityMutationVariables = Exact<{
+  input: TriageResponsibilityCreateInput;
+}>;
+
+export type CreateTriageResponsibilityMutation = { __typename?: "Mutation" } & {
+  triageResponsibilityCreate: { __typename?: "TriageResponsibilityPayload" } & TriageResponsibilityPayloadFragment;
+};
+
+export type DeleteTriageResponsibilityMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteTriageResponsibilityMutation = { __typename?: "Mutation" } & {
+  triageResponsibilityDelete: { __typename?: "DeletePayload" } & DeletePayloadFragment;
+};
+
+export type UpdateTriageResponsibilityMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: TriageResponsibilityUpdateInput;
+}>;
+
+export type UpdateTriageResponsibilityMutation = { __typename?: "Mutation" } & {
+  triageResponsibilityUpdate: { __typename?: "TriageResponsibilityPayload" } & TriageResponsibilityPayloadFragment;
 };
 
 export type UserDemoteAdminMutationVariables = Exact<{
@@ -21187,6 +21375,60 @@ export const ProjectNotificationSubscriptionFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<ProjectNotificationSubscriptionFragment, unknown>;
+export const ReminderFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Reminder" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Reminder" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "documentId" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueId" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectId" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "comment" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "remindAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ReminderFragment, unknown>;
 export const TeamNotificationSubscriptionFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -28671,6 +28913,7 @@ export const TemplateFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "team" },
@@ -42786,6 +43029,318 @@ export const TemplatesForIntegrationDocument = {
     ...TemplateFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<TemplatesForIntegrationQuery, TemplatesForIntegrationQueryVariables>;
+export const TimeScheduleDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "timeSchedule" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "timeSchedule" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TimeSchedule" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TimeScheduleFragmentDoc.definitions,
+    ...TimeScheduleEntryFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<TimeScheduleQuery, TimeScheduleQueryVariables>;
+export const TimeSchedulesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "timeSchedules" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "timeSchedules" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TimeScheduleConnection" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TimeScheduleConnectionFragmentDoc.definitions,
+    ...TimeScheduleFragmentDoc.definitions,
+    ...TimeScheduleEntryFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<TimeSchedulesQuery, TimeSchedulesQueryVariables>;
+export const TriageResponsibilitiesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "triageResponsibilities" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "triageResponsibilities" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "before" },
+                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "last" },
+                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "orderBy" },
+                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TriageResponsibilityConnection" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TriageResponsibilityConnectionFragmentDoc.definitions,
+    ...TriageResponsibilityFragmentDoc.definitions,
+    ...TriageResponsibilityManualSelectionFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<TriageResponsibilitiesQuery, TriageResponsibilitiesQueryVariables>;
+export const TriageResponsibilityDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "triageResponsibility" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "triageResponsibility" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TriageResponsibility" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TriageResponsibilityFragmentDoc.definitions,
+    ...TriageResponsibilityManualSelectionFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<TriageResponsibilityQuery, TriageResponsibilityQueryVariables>;
+export const TriageResponsibility_ManualSelectionDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "triageResponsibility_manualSelection" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "triageResponsibility" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "manualSelection" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "TriageResponsibilityManualSelection" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...TriageResponsibilityManualSelectionFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<
+  TriageResponsibility_ManualSelectionQuery,
+  TriageResponsibility_ManualSelectionQueryVariables
+>;
 export const UserDocument = {
   kind: "Document",
   definitions: [
@@ -46291,6 +46846,54 @@ export const DeleteDocumentDocument = {
     ...DeletePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DeleteDocumentMutation, DeleteDocumentMutationVariables>;
+export const DocumentReminderDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "documentReminder" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "reminderAt" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "DateTime" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "documentReminder" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "reminderAt" },
+                value: { kind: "Variable", name: { kind: "Name", value: "reminderAt" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DocumentPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...DocumentPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DocumentReminderMutation, DocumentReminderMutationVariables>;
 export const UpdateDocumentDocument = {
   kind: "Document",
   definitions: [
@@ -53315,6 +53918,358 @@ export const UpdateTemplateDocument = {
     ...TemplatePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateTemplateMutation, UpdateTemplateMutationVariables>;
+export const CreateTimeScheduleDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createTimeSchedule" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "TimeScheduleCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "timeScheduleCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TimeSchedulePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TimeSchedulePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateTimeScheduleMutation, CreateTimeScheduleMutationVariables>;
+export const DeleteTimeScheduleDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteTimeSchedule" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "timeScheduleDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DeletePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...DeletePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteTimeScheduleMutation, DeleteTimeScheduleMutationVariables>;
+export const TimeScheduleRefreshIntegrationScheduleDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "timeScheduleRefreshIntegrationSchedule" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "timeScheduleRefreshIntegrationSchedule" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TimeSchedulePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TimeSchedulePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<
+  TimeScheduleRefreshIntegrationScheduleMutation,
+  TimeScheduleRefreshIntegrationScheduleMutationVariables
+>;
+export const UpdateTimeScheduleDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateTimeSchedule" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "TimeScheduleUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "timeScheduleUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TimeSchedulePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TimeSchedulePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateTimeScheduleMutation, UpdateTimeScheduleMutationVariables>;
+export const TimeScheduleUpsertExternalDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "timeScheduleUpsertExternal" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "externalId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "TimeScheduleUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "timeScheduleUpsertExternal" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "externalId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "externalId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TimeSchedulePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TimeSchedulePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<TimeScheduleUpsertExternalMutation, TimeScheduleUpsertExternalMutationVariables>;
+export const CreateTriageResponsibilityDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createTriageResponsibility" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "TriageResponsibilityCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "triageResponsibilityCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TriageResponsibilityPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TriageResponsibilityPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateTriageResponsibilityMutation, CreateTriageResponsibilityMutationVariables>;
+export const DeleteTriageResponsibilityDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteTriageResponsibility" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "triageResponsibilityDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DeletePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...DeletePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteTriageResponsibilityMutation, DeleteTriageResponsibilityMutationVariables>;
+export const UpdateTriageResponsibilityDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateTriageResponsibility" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "TriageResponsibilityUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "triageResponsibilityUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TriageResponsibilityPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...TriageResponsibilityPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateTriageResponsibilityMutation, UpdateTriageResponsibilityMutationVariables>;
 export const UserDemoteAdminDocument = {
   kind: "Document",
   definitions: [
