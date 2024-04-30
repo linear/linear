@@ -332,6 +332,29 @@ fragment CycleNotificationSubscription on CycleNotificationSubscription {
   active
 }
 
+# A diary entry
+fragment DiaryEntry on DiaryEntry {
+  __typename
+  # The canonical url for the DiaryEntry.
+  url
+  # The date for which the entry is created
+  date
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who the diary belongs to.
+  user {
+    id
+  }
+}
+
 # A document content for a project.
 fragment DocumentContent on DocumentContent {
   __typename
@@ -4049,6 +4072,28 @@ fragment CyclePayload on CyclePayload {
   success
 }
 
+fragment DiaryEntryConnection on DiaryEntryConnection {
+  __typename
+  nodes {
+    ...DiaryEntry
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment DiaryEntryPayload on DiaryEntryPayload {
+  __typename
+  # The diary entry that was created or updated.
+  diaryEntry {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
 fragment DocumentConnection on DocumentConnection {
   __typename
   nodes {
@@ -6561,6 +6606,12 @@ query cycles(
     orderBy: $orderBy
   ) {
     ...CycleConnection
+  }
+}
+# One specific diary entry.
+query diaryEntry($id: String!) {
+  diaryEntry(id: $id) {
+    ...DiaryEntry
   }
 }
 # One specific document.
@@ -10143,6 +10194,35 @@ mutation updateCycle(
 ) {
   cycleUpdate(id: $id, input: $input) {
     ...CyclePayload
+  }
+}
+# Creates a new diary entry.
+mutation createDiaryEntry(
+  # The diary entry to create.
+  $input: DiaryEntryCreateInput!
+) {
+  diaryEntryCreate(input: $input) {
+    ...DiaryEntryPayload
+  }
+}
+# Deletes a diaryEntry.
+mutation deleteDiaryEntry(
+  # The identifier of the diaryEntry to delete.
+  $id: String!
+) {
+  diaryEntryDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates a diaryEntry.
+mutation updateDiaryEntry(
+  # The identifier of the diary entry to update.
+  $id: String!
+  # A partial diary entry object to update the diary entry with.
+  $input: DiaryEntryUpdateInput!
+) {
+  diaryEntryUpdate(id: $id, input: $input) {
+    ...DiaryEntryPayload
   }
 }
 # Creates a new document.

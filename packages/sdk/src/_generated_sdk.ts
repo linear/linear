@@ -2075,6 +2075,106 @@ export class DeletePayload extends Request {
   public success: boolean;
 }
 /**
+ * A diary entry
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.DiaryEntryFragment response data
+ */
+export class DiaryEntry extends Request {
+  private _user: L.DiaryEntryFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.DiaryEntryFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.date = data.date;
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The date for which the entry is created */
+  public date: L.Scalars["TimelessDate"];
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The canonical url for the DiaryEntry. */
+  public url: string;
+  /** The user who the diary belongs to. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+
+  /** Creates a new diary entry. */
+  public create(input: L.DiaryEntryCreateInput) {
+    return new CreateDiaryEntryMutation(this._request).fetch(input);
+  }
+  /** Deletes a diaryEntry. */
+  public delete() {
+    return new DeleteDiaryEntryMutation(this._request).fetch(this.id);
+  }
+  /** Updates a diaryEntry. */
+  public update(input: L.DiaryEntryUpdateInput) {
+    return new UpdateDiaryEntryMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * DiaryEntryConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this DiaryEntryConnection model
+ * @param data - DiaryEntryConnection response data
+ */
+export class DiaryEntryConnection extends Connection<DiaryEntry> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<DiaryEntry> | undefined>,
+    data: L.DiaryEntryConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new DiaryEntry(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * DiaryEntryPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.DiaryEntryPayloadFragment response data
+ */
+export class DiaryEntryPayload extends Request {
+  private _diaryEntry: L.DiaryEntryPayloadFragment["diaryEntry"];
+
+  public constructor(request: LinearRequest, data: L.DiaryEntryPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._diaryEntry = data.diaryEntry;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The diary entry that was created or updated. */
+  public get diaryEntry(): LinearFetch<DiaryEntry> | undefined {
+    return new DiaryEntryQuery(this._request).fetch(this._diaryEntry.id);
+  }
+}
+/**
  * A document that can be attached to different entities.
  *
  * @param request - function to call the graphql client
@@ -11709,6 +11809,32 @@ export class CyclesQuery extends Request {
 }
 
 /**
+ * A fetchable DiaryEntry Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class DiaryEntryQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DiaryEntry query and return a DiaryEntry
+   *
+   * @param id - required id to pass to diaryEntry
+   * @returns parsed response from DiaryEntryQuery
+   */
+  public async fetch(id: string): LinearFetch<DiaryEntry> {
+    const response = await this._request<L.DiaryEntryQuery, L.DiaryEntryQueryVariables>(L.DiaryEntryDocument, {
+      id,
+    });
+    const data = response.diaryEntry;
+
+    return new DiaryEntry(this._request, data);
+  }
+}
+
+/**
  * A fetchable Document Query
  *
  * @param request - function to call the graphql client
@@ -15262,6 +15388,95 @@ export class UpdateCycleMutation extends Request {
     const data = response.cycleUpdate;
 
     return new CyclePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateDiaryEntry Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateDiaryEntryMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateDiaryEntry mutation and return a DiaryEntryPayload
+   *
+   * @param input - required input to pass to createDiaryEntry
+   * @returns parsed response from CreateDiaryEntryMutation
+   */
+  public async fetch(input: L.DiaryEntryCreateInput): LinearFetch<DiaryEntryPayload> {
+    const response = await this._request<L.CreateDiaryEntryMutation, L.CreateDiaryEntryMutationVariables>(
+      L.CreateDiaryEntryDocument,
+      {
+        input,
+      }
+    );
+    const data = response.diaryEntryCreate;
+
+    return new DiaryEntryPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteDiaryEntry Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteDiaryEntryMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteDiaryEntry mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteDiaryEntry
+   * @returns parsed response from DeleteDiaryEntryMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<L.DeleteDiaryEntryMutation, L.DeleteDiaryEntryMutationVariables>(
+      L.DeleteDiaryEntryDocument,
+      {
+        id,
+      }
+    );
+    const data = response.diaryEntryDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateDiaryEntry Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateDiaryEntryMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateDiaryEntry mutation and return a DiaryEntryPayload
+   *
+   * @param id - required id to pass to updateDiaryEntry
+   * @param input - required input to pass to updateDiaryEntry
+   * @returns parsed response from UpdateDiaryEntryMutation
+   */
+  public async fetch(id: string, input: L.DiaryEntryUpdateInput): LinearFetch<DiaryEntryPayload> {
+    const response = await this._request<L.UpdateDiaryEntryMutation, L.UpdateDiaryEntryMutationVariables>(
+      L.UpdateDiaryEntryDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.diaryEntryUpdate;
+
+    return new DiaryEntryPayload(this._request, data);
   }
 }
 
@@ -24785,6 +25000,15 @@ export class LinearSdk extends Request {
     return new CyclesQuery(this._request).fetch(variables);
   }
   /**
+   * One specific diary entry.
+   *
+   * @param id - required id to pass to diaryEntry
+   * @returns DiaryEntry
+   */
+  public diaryEntry(id: string): LinearFetch<DiaryEntry> {
+    return new DiaryEntryQuery(this._request).fetch(id);
+  }
+  /**
    * One specific document.
    *
    * @param id - required id to pass to document
@@ -25927,6 +26151,34 @@ export class LinearSdk extends Request {
    */
   public updateCycle(id: string, input: L.CycleUpdateInput): LinearFetch<CyclePayload> {
     return new UpdateCycleMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Creates a new diary entry.
+   *
+   * @param input - required input to pass to createDiaryEntry
+   * @returns DiaryEntryPayload
+   */
+  public createDiaryEntry(input: L.DiaryEntryCreateInput): LinearFetch<DiaryEntryPayload> {
+    return new CreateDiaryEntryMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes a diaryEntry.
+   *
+   * @param id - required id to pass to deleteDiaryEntry
+   * @returns DeletePayload
+   */
+  public deleteDiaryEntry(id: string): LinearFetch<DeletePayload> {
+    return new DeleteDiaryEntryMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates a diaryEntry.
+   *
+   * @param id - required id to pass to updateDiaryEntry
+   * @param input - required input to pass to updateDiaryEntry
+   * @returns DiaryEntryPayload
+   */
+  public updateDiaryEntry(id: string, input: L.DiaryEntryUpdateInput): LinearFetch<DiaryEntryPayload> {
+    return new UpdateDiaryEntryMutation(this._request).fetch(id, input);
   }
   /**
    * Creates a new document.

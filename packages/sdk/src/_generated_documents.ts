@@ -12,12 +12,16 @@ export type Scalars = {
   Float: number;
   /** Represents a date and time in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago) */
   DateTime: Date;
+  /** Represents a date and time in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago) */
+  DateTimeOrDuration: any;
   /** The `JSON` scalar type represents arbitrary values as *stringified* JSON */
   JSON: Record<string, unknown>;
   /** The `JSONObject` scalar type represents arbitrary values as *embedded* JSON */
   JSONObject: any;
   /** Represents a date in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago) */
   TimelessDate: any;
+  /** Represents a date in ISO 8601 format or a duration. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings (e.g '-P2W1D'), which are not converted to dates. */
+  TimelessDateOrDuration: any;
   /** A universally unique identifier as specified by RFC 4122. */
   UUID: any;
 };
@@ -1539,21 +1543,21 @@ export type CycleUpdateInput = {
 /** Comparator for dates. */
 export type DateComparator = {
   /** Equals constraint. */
-  eq?: Maybe<Scalars["DateTime"]>;
+  eq?: Maybe<Scalars["DateTimeOrDuration"]>;
   /** Greater-than constraint. Matches any values that are greater than the given value. */
-  gt?: Maybe<Scalars["DateTime"]>;
+  gt?: Maybe<Scalars["DateTimeOrDuration"]>;
   /** Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value. */
-  gte?: Maybe<Scalars["DateTime"]>;
+  gte?: Maybe<Scalars["DateTimeOrDuration"]>;
   /** In-array constraint. */
-  in?: Maybe<Array<Scalars["DateTime"]>>;
+  in?: Maybe<Array<Scalars["DateTimeOrDuration"]>>;
   /** Less-than constraint. Matches any values that are less than the given value. */
-  lt?: Maybe<Scalars["DateTime"]>;
+  lt?: Maybe<Scalars["DateTimeOrDuration"]>;
   /** Less-than-or-equal constraint. Matches any values that are less than or equal to the given value. */
-  lte?: Maybe<Scalars["DateTime"]>;
+  lte?: Maybe<Scalars["DateTimeOrDuration"]>;
   /** Not-equals constraint. */
-  neq?: Maybe<Scalars["DateTime"]>;
+  neq?: Maybe<Scalars["DateTimeOrDuration"]>;
   /** Not-in-array constraint. */
-  nin?: Maybe<Array<Scalars["DateTime"]>>;
+  nin?: Maybe<Array<Scalars["DateTimeOrDuration"]>>;
 };
 
 /** [INTERNAL] By which resolution is a date defined. */
@@ -1589,6 +1593,71 @@ export type DeletePayload = ArchivePayload & {
   lastSyncId: Scalars["Float"];
   /** Whether the operation was successful. */
   success: Scalars["Boolean"];
+};
+
+/** A diary entry */
+export type DiaryEntry = Node & {
+  __typename?: "DiaryEntry";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] The entry content as a Prosemirror document. */
+  bodyData: Scalars["String"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The date for which the entry is created */
+  date: Scalars["TimelessDate"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** The canonical url for the DiaryEntry. */
+  url: Scalars["String"];
+  /** The user who the diary belongs to. */
+  user: User;
+};
+
+export type DiaryEntryConnection = {
+  __typename?: "DiaryEntryConnection";
+  edges: Array<DiaryEntryEdge>;
+  nodes: Array<DiaryEntry>;
+  pageInfo: PageInfo;
+};
+
+export type DiaryEntryCreateInput = {
+  /** [Internal] The comment content as a Prosemirror diaryEntry. */
+  bodyData?: Maybe<Scalars["JSON"]>;
+  /** The date for which the entry is created. */
+  date?: Maybe<Scalars["TimelessDate"]>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: Maybe<Scalars["String"]>;
+};
+
+export type DiaryEntryEdge = {
+  __typename?: "DiaryEntryEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: DiaryEntry;
+};
+
+export type DiaryEntryPayload = {
+  __typename?: "DiaryEntryPayload";
+  /** The diary entry that was created or updated. */
+  diaryEntry: DiaryEntry;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+export type DiaryEntryUpdateInput = {
+  /** [Internal] The comment content as a Prosemirror diaryEntry. */
+  bodyData?: Maybe<Scalars["JSON"]>;
+  /** The date for which the entry is created. */
+  date?: Maybe<Scalars["TimelessDate"]>;
 };
 
 /** A document that can be attached to different entities. */
@@ -5040,6 +5109,12 @@ export type Mutation = {
   cycleShiftAll: CyclePayload;
   /** Updates a cycle. */
   cycleUpdate: CyclePayload;
+  /** Creates a new diary entry. */
+  diaryEntryCreate: DiaryEntryPayload;
+  /** Deletes a diaryEntry. */
+  diaryEntryDelete: DeletePayload;
+  /** Updates a diaryEntry. */
+  diaryEntryUpdate: DiaryEntryPayload;
   /** Creates a new document. */
   documentCreate: DocumentPayload;
   /** Deletes a document. */
@@ -5666,6 +5741,19 @@ export type MutationCycleShiftAllArgs = {
 export type MutationCycleUpdateArgs = {
   id: Scalars["String"];
   input: CycleUpdateInput;
+};
+
+export type MutationDiaryEntryCreateArgs = {
+  input: DiaryEntryCreateInput;
+};
+
+export type MutationDiaryEntryDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationDiaryEntryUpdateArgs = {
+  id: Scalars["String"];
+  input: DiaryEntryUpdateInput;
 };
 
 export type MutationDocumentCreateArgs = {
@@ -6869,21 +6957,21 @@ export type NullableCycleFilter = {
 /** Comparator for optional dates. */
 export type NullableDateComparator = {
   /** Equals constraint. */
-  eq?: Maybe<Scalars["DateTime"]>;
+  eq?: Maybe<Scalars["DateTimeOrDuration"]>;
   /** Greater-than constraint. Matches any values that are greater than the given value. */
-  gt?: Maybe<Scalars["DateTime"]>;
+  gt?: Maybe<Scalars["DateTimeOrDuration"]>;
   /** Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value. */
-  gte?: Maybe<Scalars["DateTime"]>;
+  gte?: Maybe<Scalars["DateTimeOrDuration"]>;
   /** In-array constraint. */
-  in?: Maybe<Array<Scalars["DateTime"]>>;
+  in?: Maybe<Array<Scalars["DateTimeOrDuration"]>>;
   /** Less-than constraint. Matches any values that are less than the given value. */
-  lt?: Maybe<Scalars["DateTime"]>;
+  lt?: Maybe<Scalars["DateTimeOrDuration"]>;
   /** Less-than-or-equal constraint. Matches any values that are less than or equal to the given value. */
-  lte?: Maybe<Scalars["DateTime"]>;
+  lte?: Maybe<Scalars["DateTimeOrDuration"]>;
   /** Not-equals constraint. */
-  neq?: Maybe<Scalars["DateTime"]>;
+  neq?: Maybe<Scalars["DateTimeOrDuration"]>;
   /** Not-in-array constraint. */
-  nin?: Maybe<Array<Scalars["DateTime"]>>;
+  nin?: Maybe<Array<Scalars["DateTimeOrDuration"]>>;
   /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
   null?: Maybe<Scalars["Boolean"]>;
 };
@@ -7191,21 +7279,21 @@ export type NullableTemplateFilter = {
 /** Comparator for optional timeless dates. */
 export type NullableTimelessDateComparator = {
   /** Equals constraint. */
-  eq?: Maybe<Scalars["TimelessDate"]>;
+  eq?: Maybe<Scalars["TimelessDateOrDuration"]>;
   /** Greater-than constraint. Matches any values that are greater than the given value. */
-  gt?: Maybe<Scalars["TimelessDate"]>;
+  gt?: Maybe<Scalars["TimelessDateOrDuration"]>;
   /** Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value. */
-  gte?: Maybe<Scalars["TimelessDate"]>;
+  gte?: Maybe<Scalars["TimelessDateOrDuration"]>;
   /** In-array constraint. */
-  in?: Maybe<Array<Scalars["TimelessDate"]>>;
+  in?: Maybe<Array<Scalars["TimelessDateOrDuration"]>>;
   /** Less-than constraint. Matches any values that are less than the given value. */
-  lt?: Maybe<Scalars["TimelessDate"]>;
+  lt?: Maybe<Scalars["TimelessDateOrDuration"]>;
   /** Less-than-or-equal constraint. Matches any values that are less than or equal to the given value. */
-  lte?: Maybe<Scalars["TimelessDate"]>;
+  lte?: Maybe<Scalars["TimelessDateOrDuration"]>;
   /** Not-equals constraint. */
-  neq?: Maybe<Scalars["TimelessDate"]>;
+  neq?: Maybe<Scalars["TimelessDateOrDuration"]>;
   /** Not-in-array constraint. */
-  nin?: Maybe<Array<Scalars["TimelessDate"]>>;
+  nin?: Maybe<Array<Scalars["TimelessDateOrDuration"]>>;
   /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
   null?: Maybe<Scalars["Boolean"]>;
 };
@@ -7495,6 +7583,8 @@ export type Organization = Node & {
   teams: TeamConnection;
   /** Templates associated with the organization. */
   templates: TemplateConnection;
+  /** [ALPHA] Theme settings for the organization. */
+  themeSettings?: Maybe<Scalars["JSONObject"]>;
   /** The time at which the trial of the plus plan will end. */
   trialEndsAt?: Maybe<Scalars["DateTime"]>;
   /**
@@ -7859,6 +7949,8 @@ export type OrganizationUpdateInput = {
   slaDayCount?: Maybe<SLADayCountType>;
   /** Internal. Whether SLAs have been enabled for the organization. */
   slaEnabled?: Maybe<Scalars["Boolean"]>;
+  /** [ALPHA] Theme settings for the organization. */
+  themeSettings?: Maybe<Scalars["JSONObject"]>;
   /** The URL key of the organization. */
   urlKey?: Maybe<Scalars["String"]>;
 };
@@ -9403,6 +9495,8 @@ export type Query = {
   cycle: Cycle;
   /** All cycles. */
   cycles: CycleConnection;
+  /** One specific diary entry. */
+  diaryEntry: DiaryEntry;
   /** One specific document. */
   document: Document;
   /** A collection of document content history entries. */
@@ -9709,6 +9803,10 @@ export type QueryCyclesArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type QueryDiaryEntryArgs = {
+  id: Scalars["String"];
 };
 
 export type QueryDocumentArgs = {
@@ -11801,21 +11899,21 @@ export type TimeScheduleUpdateInput = {
 /** Comparator for timeless dates. */
 export type TimelessDateComparator = {
   /** Equals constraint. */
-  eq?: Maybe<Scalars["TimelessDate"]>;
+  eq?: Maybe<Scalars["TimelessDateOrDuration"]>;
   /** Greater-than constraint. Matches any values that are greater than the given value. */
-  gt?: Maybe<Scalars["TimelessDate"]>;
+  gt?: Maybe<Scalars["TimelessDateOrDuration"]>;
   /** Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value. */
-  gte?: Maybe<Scalars["TimelessDate"]>;
+  gte?: Maybe<Scalars["TimelessDateOrDuration"]>;
   /** In-array constraint. */
-  in?: Maybe<Array<Scalars["TimelessDate"]>>;
+  in?: Maybe<Array<Scalars["TimelessDateOrDuration"]>>;
   /** Less-than constraint. Matches any values that are less than the given value. */
-  lt?: Maybe<Scalars["TimelessDate"]>;
+  lt?: Maybe<Scalars["TimelessDateOrDuration"]>;
   /** Less-than-or-equal constraint. Matches any values that are less than or equal to the given value. */
-  lte?: Maybe<Scalars["TimelessDate"]>;
+  lte?: Maybe<Scalars["TimelessDateOrDuration"]>;
   /** Not-equals constraint. */
-  neq?: Maybe<Scalars["TimelessDate"]>;
+  neq?: Maybe<Scalars["TimelessDateOrDuration"]>;
   /** Not-in-array constraint. */
-  nin?: Maybe<Array<Scalars["TimelessDate"]>>;
+  nin?: Maybe<Array<Scalars["TimelessDateOrDuration"]>>;
 };
 
 /** Issue title sorting options. */
@@ -13203,6 +13301,11 @@ export type CycleNotificationSubscriptionFragment = { __typename: "CycleNotifica
     subscriber: { __typename?: "User" } & Pick<User, "id">;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
+
+export type DiaryEntryFragment = { __typename: "DiaryEntry" } & Pick<
+  DiaryEntry,
+  "url" | "date" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+> & { user: { __typename?: "User" } & Pick<User, "id"> };
 
 export type DocumentContentFragment = { __typename: "DocumentContent" } & Pick<
   DocumentContent,
@@ -14825,6 +14928,16 @@ export type CyclePayloadFragment = { __typename: "CyclePayload" } & Pick<CyclePa
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
   };
 
+export type DiaryEntryConnectionFragment = { __typename: "DiaryEntryConnection" } & {
+  nodes: Array<{ __typename?: "DiaryEntry" } & DiaryEntryFragment>;
+  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
+};
+
+export type DiaryEntryPayloadFragment = { __typename: "DiaryEntryPayload" } & Pick<
+  DiaryEntryPayload,
+  "lastSyncId" | "success"
+> & { diaryEntry: { __typename?: "DiaryEntry" } & Pick<DiaryEntry, "id"> };
+
 export type DocumentConnectionFragment = { __typename: "DocumentConnection" } & {
   nodes: Array<{ __typename?: "Document" } & DocumentFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
@@ -15155,6 +15268,8 @@ type Node_CycleNotificationSubscription_Fragment = { __typename: "CycleNotificat
   "id"
 >;
 
+type Node_DiaryEntry_Fragment = { __typename: "DiaryEntry" } & Pick<DiaryEntry, "id">;
+
 type Node_Document_Fragment = { __typename: "Document" } & Pick<Document, "id">;
 
 type Node_DocumentContent_Fragment = { __typename: "DocumentContent" } & Pick<DocumentContent, "id">;
@@ -15318,6 +15433,7 @@ export type NodeFragment =
   | Node_CustomViewNotificationSubscription_Fragment
   | Node_Cycle_Fragment
   | Node_CycleNotificationSubscription_Fragment
+  | Node_DiaryEntry_Fragment
   | Node_Document_Fragment
   | Node_DocumentContent_Fragment
   | Node_DocumentContentHistory_Fragment
@@ -16419,6 +16535,14 @@ export type CyclesQueryVariables = Exact<{
 
 export type CyclesQuery = { __typename?: "Query" } & {
   cycles: { __typename?: "CycleConnection" } & CycleConnectionFragment;
+};
+
+export type DiaryEntryQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DiaryEntryQuery = { __typename?: "Query" } & {
+  diaryEntry: { __typename?: "DiaryEntry" } & DiaryEntryFragment;
 };
 
 export type DocumentQueryVariables = Exact<{
@@ -18502,6 +18626,31 @@ export type UpdateCycleMutationVariables = Exact<{
 
 export type UpdateCycleMutation = { __typename?: "Mutation" } & {
   cycleUpdate: { __typename?: "CyclePayload" } & CyclePayloadFragment;
+};
+
+export type CreateDiaryEntryMutationVariables = Exact<{
+  input: DiaryEntryCreateInput;
+}>;
+
+export type CreateDiaryEntryMutation = { __typename?: "Mutation" } & {
+  diaryEntryCreate: { __typename?: "DiaryEntryPayload" } & DiaryEntryPayloadFragment;
+};
+
+export type DeleteDiaryEntryMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type DeleteDiaryEntryMutation = { __typename?: "Mutation" } & {
+  diaryEntryDelete: { __typename?: "DeletePayload" } & DeletePayloadFragment;
+};
+
+export type UpdateDiaryEntryMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: DiaryEntryUpdateInput;
+}>;
+
+export type UpdateDiaryEntryMutation = { __typename?: "Mutation" } & {
+  diaryEntryUpdate: { __typename?: "DiaryEntryPayload" } & DiaryEntryPayloadFragment;
 };
 
 export type CreateDocumentMutationVariables = Exact<{
@@ -24068,6 +24217,94 @@ export const CyclePayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<CyclePayloadFragment, unknown>;
+export const DiaryEntryFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "DiaryEntry" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DiaryEntry" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "date" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DiaryEntryFragment, unknown>;
+export const DiaryEntryConnectionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "DiaryEntryConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DiaryEntryConnection" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DiaryEntry" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DiaryEntryConnectionFragment, unknown>;
+export const DiaryEntryPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "DiaryEntryPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DiaryEntryPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "diaryEntry" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DiaryEntryPayloadFragment, unknown>;
 export const DocumentFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -33019,6 +33256,44 @@ export const CyclesDocument = {
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CyclesQuery, CyclesQueryVariables>;
+export const DiaryEntryDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "diaryEntry" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "diaryEntry" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DiaryEntry" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...DiaryEntryFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DiaryEntryQuery, DiaryEntryQueryVariables>;
 export const DocumentDocument = {
   kind: "Document",
   definitions: [
@@ -46767,6 +47042,136 @@ export const UpdateCycleDocument = {
     ...CyclePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateCycleMutation, UpdateCycleMutationVariables>;
+export const CreateDiaryEntryDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "createDiaryEntry" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "DiaryEntryCreateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "diaryEntryCreate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DiaryEntryPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...DiaryEntryPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CreateDiaryEntryMutation, CreateDiaryEntryMutationVariables>;
+export const DeleteDiaryEntryDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "deleteDiaryEntry" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "diaryEntryDelete" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DeletePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...DeletePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<DeleteDiaryEntryMutation, DeleteDiaryEntryMutationVariables>;
+export const UpdateDiaryEntryDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "updateDiaryEntry" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "DiaryEntryUpdateInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "diaryEntryUpdate" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DiaryEntryPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...DiaryEntryPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UpdateDiaryEntryMutation, UpdateDiaryEntryMutationVariables>;
 export const CreateDocumentDocument = {
   kind: "Document",
   definitions: [

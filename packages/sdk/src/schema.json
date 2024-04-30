@@ -9491,7 +9491,7 @@
             "description": "Equals constraint.",
             "type": {
               "kind": "SCALAR",
-              "name": "DateTime",
+              "name": "DateTimeOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -9503,7 +9503,7 @@
             "description": "Not-equals constraint.",
             "type": {
               "kind": "SCALAR",
-              "name": "DateTime",
+              "name": "DateTimeOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -9521,7 +9521,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "DateTime",
+                  "name": "DateTimeOrDuration",
                   "ofType": null
                 }
               }
@@ -9541,7 +9541,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "DateTime",
+                  "name": "DateTimeOrDuration",
                   "ofType": null
                 }
               }
@@ -9555,7 +9555,7 @@
             "description": "Less-than constraint. Matches any values that are less than the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "DateTime",
+              "name": "DateTimeOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -9567,7 +9567,7 @@
             "description": "Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "DateTime",
+              "name": "DateTimeOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -9579,7 +9579,7 @@
             "description": "Greater-than constraint. Matches any values that are greater than the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "DateTime",
+              "name": "DateTimeOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -9591,7 +9591,7 @@
             "description": "Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "DateTime",
+              "name": "DateTimeOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -9641,6 +9641,16 @@
       {
         "kind": "SCALAR",
         "name": "DateTime",
+        "description": "Represents a date and time in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago) ",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "DateTimeOrDuration",
         "description": "Represents a date and time in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago) ",
         "fields": null,
         "inputFields": null,
@@ -9790,6 +9800,406 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "DiaryEntry",
+        "description": "A diary entry",
+        "fields": [
+          {
+            "name": "id",
+            "description": "The unique identifier of the entity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those\n    for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't\n    been updated after creation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "archivedAt",
+            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "bodyData",
+            "description": "[Internal] The entry content as a Prosemirror document.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": "The user who the diary belongs to.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "date",
+            "description": "The date for which the entry is created",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "TimelessDate",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "url",
+            "description": "The canonical url for the DiaryEntry.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Node",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "DiaryEntryConnection",
+        "description": null,
+        "fields": [
+          {
+            "name": "edges",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "DiaryEntryEdge",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nodes",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "DiaryEntry",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pageInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "DiaryEntryCreateInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "The identifier in UUID v4 format. If none is provided, the backend will generate one.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "date",
+            "description": "The date for which the entry is created.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDate",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "bodyData",
+            "description": "[Internal] The comment content as a Prosemirror diaryEntry.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "DiaryEntryEdge",
+        "description": null,
+        "fields": [
+          {
+            "name": "node",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DiaryEntry",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cursor",
+            "description": "Used in `before` and `after` args",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "DiaryEntryPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "lastSyncId",
+            "description": "The identifier of the last sync operation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "diaryEntry",
+            "description": "The diary entry that was created or updated.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DiaryEntry",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "DiaryEntryUpdateInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "bodyData",
+            "description": "[Internal] The comment content as a Prosemirror diaryEntry.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "date",
+            "description": "The date for which the entry is created.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "TimelessDate",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -32988,6 +33398,121 @@
             "deprecationReason": null
           },
           {
+            "name": "diaryEntryCreate",
+            "description": "Creates a new diary entry.",
+            "args": [
+              {
+                "name": "input",
+                "description": "The diary entry to create.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "DiaryEntryCreateInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DiaryEntryPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "diaryEntryUpdate",
+            "description": "Updates a diaryEntry.",
+            "args": [
+              {
+                "name": "input",
+                "description": "A partial diary entry object to update the diary entry with.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "DiaryEntryUpdateInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "id",
+                "description": "The identifier of the diary entry to update.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DiaryEntryPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "diaryEntryDelete",
+            "description": "Deletes a diaryEntry.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the diaryEntry to delete.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DeletePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "documentCreate",
             "description": "Creates a new document.",
             "args": [
@@ -41414,6 +41939,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "DiaryEntry",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "Document",
             "ofType": null
           },
@@ -43494,7 +44024,7 @@
             "description": "Equals constraint.",
             "type": {
               "kind": "SCALAR",
-              "name": "DateTime",
+              "name": "DateTimeOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -43506,7 +44036,7 @@
             "description": "Not-equals constraint.",
             "type": {
               "kind": "SCALAR",
-              "name": "DateTime",
+              "name": "DateTimeOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -43524,7 +44054,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "DateTime",
+                  "name": "DateTimeOrDuration",
                   "ofType": null
                 }
               }
@@ -43544,7 +44074,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "DateTime",
+                  "name": "DateTimeOrDuration",
                   "ofType": null
                 }
               }
@@ -43570,7 +44100,7 @@
             "description": "Less-than constraint. Matches any values that are less than the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "DateTime",
+              "name": "DateTimeOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -43582,7 +44112,7 @@
             "description": "Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "DateTime",
+              "name": "DateTimeOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -43594,7 +44124,7 @@
             "description": "Greater-than constraint. Matches any values that are greater than the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "DateTime",
+              "name": "DateTimeOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -43606,7 +44136,7 @@
             "description": "Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "DateTime",
+              "name": "DateTimeOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -45440,7 +45970,7 @@
             "description": "Equals constraint.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDate",
+              "name": "TimelessDateOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -45452,7 +45982,7 @@
             "description": "Not-equals constraint.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDate",
+              "name": "TimelessDateOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -45470,7 +46000,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "TimelessDate",
+                  "name": "TimelessDateOrDuration",
                   "ofType": null
                 }
               }
@@ -45490,7 +46020,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "TimelessDate",
+                  "name": "TimelessDateOrDuration",
                   "ofType": null
                 }
               }
@@ -45516,7 +46046,7 @@
             "description": "Less-than constraint. Matches any values that are less than the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDate",
+              "name": "TimelessDateOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -45528,7 +46058,7 @@
             "description": "Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDate",
+              "name": "TimelessDateOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -45540,7 +46070,7 @@
             "description": "Greater-than constraint. Matches any values that are greater than the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDate",
+              "name": "TimelessDateOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -45552,7 +46082,7 @@
             "description": "Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDate",
+              "name": "TimelessDateOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -47326,6 +47856,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "themeSettings",
+            "description": "[ALPHA] Theme settings for the organization.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
               "ofType": null
             },
             "isDeprecated": false,
@@ -49648,6 +50190,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "themeSettings",
+            "description": "[ALPHA] Theme settings for the organization.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
               "ofType": null
             },
             "defaultValue": null,
@@ -60478,6 +61032,39 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Cycle",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "diaryEntry",
+            "description": "One specific diary entry.",
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DiaryEntry",
                 "ofType": null
               }
             },
@@ -75267,7 +75854,7 @@
             "description": "Equals constraint.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDate",
+              "name": "TimelessDateOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -75279,7 +75866,7 @@
             "description": "Not-equals constraint.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDate",
+              "name": "TimelessDateOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -75297,7 +75884,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "TimelessDate",
+                  "name": "TimelessDateOrDuration",
                   "ofType": null
                 }
               }
@@ -75317,7 +75904,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "TimelessDate",
+                  "name": "TimelessDateOrDuration",
                   "ofType": null
                 }
               }
@@ -75331,7 +75918,7 @@
             "description": "Less-than constraint. Matches any values that are less than the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDate",
+              "name": "TimelessDateOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -75343,7 +75930,7 @@
             "description": "Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDate",
+              "name": "TimelessDateOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -75355,7 +75942,7 @@
             "description": "Greater-than constraint. Matches any values that are greater than the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDate",
+              "name": "TimelessDateOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -75367,7 +75954,7 @@
             "description": "Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.",
             "type": {
               "kind": "SCALAR",
-              "name": "TimelessDate",
+              "name": "TimelessDateOrDuration",
               "ofType": null
             },
             "defaultValue": null,
@@ -75375,6 +75962,16 @@
             "deprecationReason": null
           }
         ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "TimelessDateOrDuration",
+        "description": "Represents a date in ISO 8601 format or a duration. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings (e.g '-P2W1D'), which are not converted to dates.",
+        "fields": null,
+        "inputFields": null,
         "interfaces": null,
         "enumValues": null,
         "possibleTypes": null

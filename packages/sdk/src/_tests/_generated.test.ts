@@ -910,6 +910,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test DiaryEntry query */
+  describe("DiaryEntry", () => {
+    /** Test the root model query for DiaryEntry */
+    it("diaryEntry", async () => {
+      const diaryEntry: L.DiaryEntry | undefined = await client.diaryEntry("mock-id");
+      expect(diaryEntry instanceof L.DiaryEntry);
+    });
+  });
+
   /** Test DocumentContentHistory query */
   describe("DocumentContentHistory", () => {
     /** Test the root model query for DocumentContentHistory */
