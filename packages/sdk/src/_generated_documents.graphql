@@ -1270,6 +1270,41 @@ fragment ProjectRelation on ProjectRelation {
   id
 }
 
+# A reminder that can be attached to different entities.
+fragment Reminder on Reminder {
+  __typename
+  # The document that the reminder is associated with.
+  documentId {
+    id
+  }
+  # The issue that the reminder is associated with.
+  issueId {
+    id
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The project that the reminder is associated with.
+  projectId {
+    id
+  }
+  # The reminder's comment.
+  comment
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time when a reminder triggers a notification in users inbox.
+  remindAt
+  # The unique identifier of the entity.
+  id
+  # The user that created a reminder.
+  user {
+    id
+  }
+}
+
 # A roadmap for projects.
 fragment Roadmap on Roadmap {
   __typename
@@ -1478,6 +1513,8 @@ fragment Template on Template {
   updatedAt
   # The name of the template.
   name
+  # The sort order of the template.
+  sortOrder
   # The team that the template is associated with. If null, the template is global to the workspace.
   team {
     id
@@ -2496,7 +2533,7 @@ fragment Team on Team {
   requirePriorityToLeaveTriage
   # Whether issues without priority should be sorted first.
   issueOrderingNoPriorityFirst
-  # Whether the team is managed by SCIM.
+  # Whether the team is managed by SCIM integration.
   scimManaged
   # Whether the team is private or not.
   private
@@ -8483,7 +8520,7 @@ query searchDocuments(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
-  # Should associated comments be searched (default: true).
+  # Should associated comments be searched (default: false).
   $includeComments: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
@@ -8521,7 +8558,7 @@ query searchDocuments_archivePayload(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
-  # Should associated comments be searched (default: true).
+  # Should associated comments be searched (default: false).
   $includeComments: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
@@ -8563,7 +8600,7 @@ query searchIssues(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
-  # Should associated comments be searched (default: true).
+  # Should associated comments be searched (default: false).
   $includeComments: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
@@ -8604,7 +8641,7 @@ query searchIssues_archivePayload(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
-  # Should associated comments be searched (default: true).
+  # Should associated comments be searched (default: false).
   $includeComments: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
@@ -8645,7 +8682,7 @@ query searchProjects(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
-  # Should associated comments be searched (default: true).
+  # Should associated comments be searched (default: false).
   $includeComments: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
@@ -8683,7 +8720,7 @@ query searchProjects_archivePayload(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
-  # Should associated comments be searched (default: true).
+  # Should associated comments be searched (default: false).
   $includeComments: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
@@ -9125,6 +9162,87 @@ query templatesForIntegration(
 ) {
   templatesForIntegration(integrationType: $integrationType) {
     ...Template
+  }
+}
+# A specific time schedule.
+query timeSchedule(
+  # The identifier of the time schedule to retrieve.
+  $id: String!
+) {
+  timeSchedule(id: $id) {
+    ...TimeSchedule
+  }
+}
+# All time schedules.
+query timeSchedules(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  timeSchedules(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...TimeScheduleConnection
+  }
+}
+# All triage responsibilities.
+query triageResponsibilities(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  triageResponsibilities(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...TriageResponsibilityConnection
+  }
+}
+# A specific triage responsibility.
+query triageResponsibility(
+  # The identifier of the triage responsibility to retrieve.
+  $id: String!
+) {
+  triageResponsibility(id: $id) {
+    ...TriageResponsibility
+  }
+}
+# Set of users used for triage responsibility.
+query triageResponsibility_manualSelection(
+  # The identifier of the triage responsibility to retrieve.
+  $id: String!
+) {
+  triageResponsibility(id: $id) {
+    manualSelection {
+      ...TriageResponsibilityManualSelection
+    }
   }
 }
 # One specific user.
@@ -10043,6 +10161,18 @@ mutation deleteDocument(
 ) {
   documentDelete(id: $id) {
     ...DeletePayload
+  }
+}
+# Adds a document reminder. Will cause a notification to be sent when the issue reminder time is
+# reached.
+mutation documentReminder(
+  # The identifier of the document to add a reminder for.
+  $id: String!
+  # The time when a reminder notification will be sent.
+  $reminderAt: DateTime!
+) {
+  documentReminder(id: $id, reminderAt: $reminderAt) {
+    ...DocumentPayload
   }
 }
 # Updates a document.
@@ -11652,6 +11782,84 @@ mutation updateTemplate(
 ) {
   templateUpdate(id: $id, input: $input) {
     ...TemplatePayload
+  }
+}
+# Creates a new time schedule.
+mutation createTimeSchedule(
+  # The properties of the time schedule to create.
+  $input: TimeScheduleCreateInput!
+) {
+  timeScheduleCreate(input: $input) {
+    ...TimeSchedulePayload
+  }
+}
+# Deletes a time schedule.
+mutation deleteTimeSchedule(
+  # The identifier of the time schedule to delete.
+  $id: String!
+) {
+  timeScheduleDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Refresh the integration schedule information.
+mutation timeScheduleRefreshIntegrationSchedule(
+  # The identifier of the time schedule to refresh.
+  $id: String!
+) {
+  timeScheduleRefreshIntegrationSchedule(id: $id) {
+    ...TimeSchedulePayload
+  }
+}
+# Updates a time schedule.
+mutation updateTimeSchedule(
+  # The identifier of the time schedule to update.
+  $id: String!
+  # The properties of the time schedule to update.
+  $input: TimeScheduleUpdateInput!
+) {
+  timeScheduleUpdate(id: $id, input: $input) {
+    ...TimeSchedulePayload
+  }
+}
+# Upsert an external time schedule.
+mutation timeScheduleUpsertExternal(
+  # The unique identifier of the external schedule.
+  $externalId: String!
+  # The properties of the time schedule to insert or update.
+  $input: TimeScheduleUpdateInput!
+) {
+  timeScheduleUpsertExternal(externalId: $externalId, input: $input) {
+    ...TimeSchedulePayload
+  }
+}
+# Creates a new triage responsibility.
+mutation createTriageResponsibility(
+  # The properties of the triage responsibility to create.
+  $input: TriageResponsibilityCreateInput!
+) {
+  triageResponsibilityCreate(input: $input) {
+    ...TriageResponsibilityPayload
+  }
+}
+# Deletes a triage responsibility.
+mutation deleteTriageResponsibility(
+  # The identifier of the triage responsibility to delete.
+  $id: String!
+) {
+  triageResponsibilityDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates an existing triage responsibility.
+mutation updateTriageResponsibility(
+  # The identifier of the triage responsibility to update.
+  $id: String!
+  # The properties of the triage responsibility to update.
+  $input: TriageResponsibilityUpdateInput!
+) {
+  triageResponsibilityUpdate(id: $id, input: $input) {
+    ...TriageResponsibilityPayload
   }
 }
 # Makes user a regular user. Can only be called by an admin.

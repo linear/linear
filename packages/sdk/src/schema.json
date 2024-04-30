@@ -33103,6 +33103,55 @@
             "deprecationReason": null
           },
           {
+            "name": "documentReminder",
+            "description": "Adds a document reminder. Will cause a notification to be sent when the issue reminder time is reached.",
+            "args": [
+              {
+                "name": "reminderAt",
+                "description": "The time when a reminder notification will be sent.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "DateTime",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "id",
+                "description": "The identifier of the document to add a reminder for.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DocumentPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "emailIntakeAddressCreate",
             "description": "Creates a new email intake address.",
             "args": [
@@ -40134,7 +40183,7 @@
           },
           {
             "name": "timeScheduleCreate",
-            "description": "[ALPHA] Creates a new time schedule.",
+            "description": "Creates a new time schedule.",
             "args": [
               {
                 "name": "input",
@@ -40167,7 +40216,7 @@
           },
           {
             "name": "timeScheduleUpdate",
-            "description": "[ALPHA] Updates a time schedule.",
+            "description": "Updates a time schedule.",
             "args": [
               {
                 "name": "input",
@@ -40216,7 +40265,7 @@
           },
           {
             "name": "timeScheduleUpsertExternal",
-            "description": "[ALPHA] Upsert an external time schedule.",
+            "description": "Upsert an external time schedule.",
             "args": [
               {
                 "name": "input",
@@ -40265,7 +40314,7 @@
           },
           {
             "name": "timeScheduleDelete",
-            "description": "[ALPHA] Deletes a time schedule.",
+            "description": "Deletes a time schedule.",
             "args": [
               {
                 "name": "id",
@@ -40298,7 +40347,7 @@
           },
           {
             "name": "timeScheduleRefreshIntegrationSchedule",
-            "description": "[ALPHA] Refresh the integration schedule information.",
+            "description": "Refresh the integration schedule information.",
             "args": [
               {
                 "name": "id",
@@ -40331,7 +40380,7 @@
           },
           {
             "name": "triageResponsibilityCreate",
-            "description": "[ALPHA] Creates a new triage responsibility.",
+            "description": "Creates a new triage responsibility.",
             "args": [
               {
                 "name": "input",
@@ -40364,7 +40413,7 @@
           },
           {
             "name": "triageResponsibilityUpdate",
-            "description": "[ALPHA] Updates an existing triage responsibility.",
+            "description": "Updates an existing triage responsibility.",
             "args": [
               {
                 "name": "input",
@@ -40413,7 +40462,7 @@
           },
           {
             "name": "triageResponsibilityDelete",
-            "description": "[ALPHA] Deletes a triage responsibility.",
+            "description": "Deletes a triage responsibility.",
             "args": [
               {
                 "name": "id",
@@ -41591,6 +41640,11 @@
           {
             "kind": "OBJECT",
             "name": "Reaction",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Reminder",
             "ofType": null
           },
           {
@@ -45378,7 +45432,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "NullableTimelessDateComparator",
-        "description": null,
+        "description": "Comparator for optional timeless dates.",
         "fields": null,
         "inputFields": [
           {
@@ -64136,7 +64190,7 @@
               },
               {
                 "name": "includeComments",
-                "description": "Should associated comments be searched (default: true).",
+                "description": "Should associated comments be searched (default: false).",
                 "type": {
                   "kind": "SCALAR",
                   "name": "Boolean",
@@ -64277,7 +64331,7 @@
               },
               {
                 "name": "includeComments",
-                "description": "Should associated comments be searched (default: true).",
+                "description": "Should associated comments be searched (default: false).",
                 "type": {
                   "kind": "SCALAR",
                   "name": "Boolean",
@@ -64430,7 +64484,7 @@
               },
               {
                 "name": "includeComments",
-                "description": "Should associated comments be searched (default: true).",
+                "description": "Should associated comments be searched (default: false).",
                 "type": {
                   "kind": "SCALAR",
                   "name": "Boolean",
@@ -64922,7 +64976,7 @@
           },
           {
             "name": "timeSchedules",
-            "description": "[ALPHA] All time schedules.",
+            "description": "All time schedules.",
             "args": [
               {
                 "name": "before",
@@ -65011,7 +65065,7 @@
           },
           {
             "name": "timeSchedule",
-            "description": "[ALPHA] A specific time schedule.",
+            "description": "A specific time schedule.",
             "args": [
               {
                 "name": "id",
@@ -65044,7 +65098,7 @@
           },
           {
             "name": "triageResponsibilities",
-            "description": "[ALPHA] All triage responsibilities.",
+            "description": "All triage responsibilities.",
             "args": [
               {
                 "name": "before",
@@ -65133,7 +65187,7 @@
           },
           {
             "name": "triageResponsibility",
-            "description": "[ALPHA] A specific triage responsibility.",
+            "description": "A specific triage responsibility.",
             "args": [
               {
                 "name": "id",
@@ -66231,6 +66285,163 @@
             "deprecationReason": null
           }
         ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Reminder",
+        "description": "A reminder that can be attached to different entities.",
+        "fields": [
+          {
+            "name": "id",
+            "description": "The unique identifier of the entity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those\n    for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't\n    been updated after creation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "archivedAt",
+            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": "The user that created a reminder.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "remindAt",
+            "description": "The time when a reminder triggers a notification in users inbox.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "comment",
+            "description": "The reminder's comment.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueId",
+            "description": "The issue that the reminder is associated with.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Issue",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentId",
+            "description": "The document that the reminder is associated with.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Document",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectId",
+            "description": "The project that the reminder is associated with.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Project",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Node",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
         "possibleTypes": null
       },
       {
@@ -70282,7 +70493,7 @@
           },
           {
             "name": "scimManaged",
-            "description": "Whether the team is managed by SCIM.",
+            "description": "Whether the team is managed by SCIM integration.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -73827,6 +74038,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "scimManaged",
+            "description": "Whether the team is managed by SCIM integration. Mutation restricted to workspace admins and only unsetting is allowed!",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -73952,6 +74175,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "JSON",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sortOrder",
+            "description": "The sort order of the template.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
                 "ofType": null
               }
             },
@@ -74182,6 +74421,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "sortOrder",
+            "description": "The position of the template in the templates list.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -74338,6 +74589,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "JSON",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sortOrder",
+            "description": "The position of the template in the templates list.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
               "ofType": null
             },
             "defaultValue": null,

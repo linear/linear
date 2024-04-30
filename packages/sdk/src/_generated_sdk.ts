@@ -8407,6 +8407,65 @@ export class ReactionPayload extends Request {
   public reaction: Reaction;
 }
 /**
+ * A reminder that can be attached to different entities.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReminderFragment response data
+ */
+export class Reminder extends Request {
+  private _documentId?: L.ReminderFragment["documentId"];
+  private _issueId?: L.ReminderFragment["issueId"];
+  private _projectId?: L.ReminderFragment["projectId"];
+  private _user: L.ReminderFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.ReminderFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.comment = data.comment ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.remindAt = parseDate(data.remindAt) ?? new Date();
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._documentId = data.documentId ?? undefined;
+    this._issueId = data.issueId ?? undefined;
+    this._projectId = data.projectId ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The reminder's comment. */
+  public comment?: string;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The time when a reminder triggers a notification in users inbox. */
+  public remindAt: Date;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The document that the reminder is associated with. */
+  public get documentId(): LinearFetch<Document> | undefined {
+    return this._documentId?.id ? new DocumentQuery(this._request).fetch(this._documentId?.id) : undefined;
+  }
+  /** The issue that the reminder is associated with. */
+  public get issueId(): LinearFetch<Issue> | undefined {
+    return this._issueId?.id ? new IssueQuery(this._request).fetch(this._issueId?.id) : undefined;
+  }
+  /** The project that the reminder is associated with. */
+  public get projectId(): LinearFetch<Project> | undefined {
+    return this._projectId?.id ? new ProjectQuery(this._request).fetch(this._projectId?.id) : undefined;
+  }
+  /** The user that created a reminder. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+}
+/**
  * A roadmap for projects.
  *
  * @param request - function to call the graphql client
@@ -8950,6 +9009,7 @@ export class Team extends Request {
   private _reviewWorkflowState?: L.TeamFragment["reviewWorkflowState"];
   private _startWorkflowState?: L.TeamFragment["startWorkflowState"];
   private _triageIssueState?: L.TeamFragment["triageIssueState"];
+  private _triageResponsibility?: L.TeamFragment["triageResponsibility"];
 
   public constructor(request: LinearRequest, data: L.TeamFragment) {
     super(request);
@@ -9007,6 +9067,7 @@ export class Team extends Request {
     this._reviewWorkflowState = data.reviewWorkflowState ?? undefined;
     this._startWorkflowState = data.startWorkflowState ?? undefined;
     this._triageIssueState = data.triageIssueState ?? undefined;
+    this._triageResponsibility = data.triageResponsibility ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -9073,7 +9134,7 @@ export class Team extends Request {
   public private: boolean;
   /** Whether an issue needs to have a priority set before leaving triage. */
   public requirePriorityToLeaveTriage: boolean;
-  /** Whether the team is managed by SCIM. */
+  /** Whether the team is managed by SCIM integration. */
   public scimManaged: boolean;
   /** Where to move issues when changing state. */
   public setIssueSortOrderOnStateChange: string;
@@ -9173,6 +9234,12 @@ export class Team extends Request {
   public get triageIssueState(): LinearFetch<WorkflowState> | undefined {
     return this._triageIssueState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._triageIssueState?.id)
+      : undefined;
+  }
+  /** Team's triage responsibility. */
+  public get triageResponsibility(): LinearFetch<TriageResponsibility> | undefined {
+    return this._triageResponsibility?.id
+      ? new TriageResponsibilityQuery(this._request).fetch(this._triageResponsibility?.id)
       : undefined;
   }
   /** Cycles associated with the team. */
@@ -9536,6 +9603,7 @@ export class Template extends Request {
     this.description = data.description ?? undefined;
     this.id = data.id;
     this.name = data.name;
+    this.sortOrder = data.sortOrder;
     this.templateData = parseJson(data.templateData) ?? {};
     this.type = data.type;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -9554,6 +9622,8 @@ export class Template extends Request {
   public id: string;
   /** The name of the template. */
   public name: string;
+  /** The sort order of the template. */
+  public sortOrder: number;
   /** Template data. */
   public templateData: Record<string, unknown>;
   /** The entity type this template is for. */
@@ -9690,6 +9760,19 @@ export class TimeSchedule extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
+
+  /** Creates a new time schedule. */
+  public create(input: L.TimeScheduleCreateInput) {
+    return new CreateTimeScheduleMutation(this._request).fetch(input);
+  }
+  /** Deletes a time schedule. */
+  public delete() {
+    return new DeleteTimeScheduleMutation(this._request).fetch(this.id);
+  }
+  /** Updates a time schedule. */
+  public update(input: L.TimeScheduleUpdateInput) {
+    return new UpdateTimeScheduleMutation(this._request).fetch(this.id, input);
+  }
 }
 /**
  * TimeScheduleConnection model
@@ -9743,16 +9826,22 @@ export class TimeScheduleEntry extends Request {
  * @param data - L.TimeSchedulePayloadFragment response data
  */
 export class TimeSchedulePayload extends Request {
+  private _timeSchedule: L.TimeSchedulePayloadFragment["timeSchedule"];
+
   public constructor(request: LinearRequest, data: L.TimeSchedulePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
+    this._timeSchedule = data.timeSchedule;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  public get timeSchedule(): LinearFetch<TimeSchedule> | undefined {
+    return new TimeScheduleQuery(this._request).fetch(this._timeSchedule.id);
+  }
 }
 /**
  * A team's triage responsibility.
@@ -9763,6 +9852,7 @@ export class TimeSchedulePayload extends Request {
 export class TriageResponsibility extends Request {
   private _currentUser?: L.TriageResponsibilityFragment["currentUser"];
   private _team: L.TriageResponsibilityFragment["team"];
+  private _timeSchedule?: L.TriageResponsibilityFragment["timeSchedule"];
 
   public constructor(request: LinearRequest, data: L.TriageResponsibilityFragment) {
     super(request);
@@ -9776,6 +9866,7 @@ export class TriageResponsibility extends Request {
     this.action = data.action;
     this._currentUser = data.currentUser ?? undefined;
     this._team = data.team;
+    this._timeSchedule = data.timeSchedule ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -9801,6 +9892,23 @@ export class TriageResponsibility extends Request {
   /** The team to which the triage responsibility belongs to. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
+  }
+  /** The time schedule used for scheduling. */
+  public get timeSchedule(): LinearFetch<TimeSchedule> | undefined {
+    return this._timeSchedule?.id ? new TimeScheduleQuery(this._request).fetch(this._timeSchedule?.id) : undefined;
+  }
+
+  /** Creates a new triage responsibility. */
+  public create(input: L.TriageResponsibilityCreateInput) {
+    return new CreateTriageResponsibilityMutation(this._request).fetch(input);
+  }
+  /** Deletes a triage responsibility. */
+  public delete() {
+    return new DeleteTriageResponsibilityMutation(this._request).fetch(this.id);
+  }
+  /** Updates an existing triage responsibility. */
+  public update(input: L.TriageResponsibilityUpdateInput) {
+    return new UpdateTriageResponsibilityMutation(this._request).fetch(this.id, input);
   }
 }
 /**
@@ -9846,16 +9954,22 @@ export class TriageResponsibilityManualSelection extends Request {
  * @param data - L.TriageResponsibilityPayloadFragment response data
  */
 export class TriageResponsibilityPayload extends Request {
+  private _triageResponsibility: L.TriageResponsibilityPayloadFragment["triageResponsibility"];
+
   public constructor(request: LinearRequest, data: L.TriageResponsibilityPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
+    this._triageResponsibility = data.triageResponsibility;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  public get triageResponsibility(): LinearFetch<TriageResponsibility> | undefined {
+    return new TriageResponsibilityQuery(this._request).fetch(this._triageResponsibility.id);
+  }
 }
 /**
  * Object representing Google Cloud upload policy, plus additional data.
@@ -13733,6 +13847,135 @@ export class TemplatesForIntegrationQuery extends Request {
 }
 
 /**
+ * A fetchable TimeSchedule Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class TimeScheduleQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TimeSchedule query and return a TimeSchedule
+   *
+   * @param id - required id to pass to timeSchedule
+   * @returns parsed response from TimeScheduleQuery
+   */
+  public async fetch(id: string): LinearFetch<TimeSchedule> {
+    const response = await this._request<L.TimeScheduleQuery, L.TimeScheduleQueryVariables>(L.TimeScheduleDocument, {
+      id,
+    });
+    const data = response.timeSchedule;
+
+    return new TimeSchedule(this._request, data);
+  }
+}
+
+/**
+ * A fetchable TimeSchedules Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class TimeSchedulesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TimeSchedules query and return a TimeScheduleConnection
+   *
+   * @param variables - variables to pass into the TimeSchedulesQuery
+   * @returns parsed response from TimeSchedulesQuery
+   */
+  public async fetch(variables?: L.TimeSchedulesQueryVariables): LinearFetch<TimeScheduleConnection> {
+    const response = await this._request<L.TimeSchedulesQuery, L.TimeSchedulesQueryVariables>(
+      L.TimeSchedulesDocument,
+      variables
+    );
+    const data = response.timeSchedules;
+
+    return new TimeScheduleConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable TriageResponsibilities Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class TriageResponsibilitiesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TriageResponsibilities query and return a TriageResponsibilityConnection
+   *
+   * @param variables - variables to pass into the TriageResponsibilitiesQuery
+   * @returns parsed response from TriageResponsibilitiesQuery
+   */
+  public async fetch(variables?: L.TriageResponsibilitiesQueryVariables): LinearFetch<TriageResponsibilityConnection> {
+    const response = await this._request<L.TriageResponsibilitiesQuery, L.TriageResponsibilitiesQueryVariables>(
+      L.TriageResponsibilitiesDocument,
+      variables
+    );
+    const data = response.triageResponsibilities;
+
+    return new TriageResponsibilityConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable TriageResponsibility Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class TriageResponsibilityQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TriageResponsibility query and return a TriageResponsibility
+   *
+   * @param id - required id to pass to triageResponsibility
+   * @returns parsed response from TriageResponsibilityQuery
+   */
+  public async fetch(id: string): LinearFetch<TriageResponsibility> {
+    const response = await this._request<L.TriageResponsibilityQuery, L.TriageResponsibilityQueryVariables>(
+      L.TriageResponsibilityDocument,
+      {
+        id,
+      }
+    );
+    const data = response.triageResponsibility;
+
+    return new TriageResponsibility(this._request, data);
+  }
+}
+
+/**
  * A fetchable User Query
  *
  * @param request - function to call the graphql client
@@ -15077,6 +15320,37 @@ export class DeleteDocumentMutation extends Request {
     const data = response.documentDelete;
 
     return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DocumentReminder Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DocumentReminderMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DocumentReminder mutation and return a DocumentPayload
+   *
+   * @param id - required id to pass to documentReminder
+   * @param reminderAt - required reminderAt to pass to documentReminder
+   * @returns parsed response from DocumentReminderMutation
+   */
+  public async fetch(id: string, reminderAt: Date): LinearFetch<DocumentPayload> {
+    const response = await this._request<L.DocumentReminderMutation, L.DocumentReminderMutationVariables>(
+      L.DocumentReminderDocument,
+      {
+        id,
+        reminderAt,
+      }
+    );
+    const data = response.documentReminder;
+
+    return new DocumentPayload(this._request, data);
   }
 }
 
@@ -19654,6 +19928,244 @@ export class UpdateTemplateMutation extends Request {
 }
 
 /**
+ * A fetchable CreateTimeSchedule Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateTimeScheduleMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateTimeSchedule mutation and return a TimeSchedulePayload
+   *
+   * @param input - required input to pass to createTimeSchedule
+   * @returns parsed response from CreateTimeScheduleMutation
+   */
+  public async fetch(input: L.TimeScheduleCreateInput): LinearFetch<TimeSchedulePayload> {
+    const response = await this._request<L.CreateTimeScheduleMutation, L.CreateTimeScheduleMutationVariables>(
+      L.CreateTimeScheduleDocument,
+      {
+        input,
+      }
+    );
+    const data = response.timeScheduleCreate;
+
+    return new TimeSchedulePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteTimeSchedule Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteTimeScheduleMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteTimeSchedule mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteTimeSchedule
+   * @returns parsed response from DeleteTimeScheduleMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<L.DeleteTimeScheduleMutation, L.DeleteTimeScheduleMutationVariables>(
+      L.DeleteTimeScheduleDocument,
+      {
+        id,
+      }
+    );
+    const data = response.timeScheduleDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable TimeScheduleRefreshIntegrationSchedule Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class TimeScheduleRefreshIntegrationScheduleMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TimeScheduleRefreshIntegrationSchedule mutation and return a TimeSchedulePayload
+   *
+   * @param id - required id to pass to timeScheduleRefreshIntegrationSchedule
+   * @returns parsed response from TimeScheduleRefreshIntegrationScheduleMutation
+   */
+  public async fetch(id: string): LinearFetch<TimeSchedulePayload> {
+    const response = await this._request<
+      L.TimeScheduleRefreshIntegrationScheduleMutation,
+      L.TimeScheduleRefreshIntegrationScheduleMutationVariables
+    >(L.TimeScheduleRefreshIntegrationScheduleDocument, {
+      id,
+    });
+    const data = response.timeScheduleRefreshIntegrationSchedule;
+
+    return new TimeSchedulePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateTimeSchedule Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateTimeScheduleMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateTimeSchedule mutation and return a TimeSchedulePayload
+   *
+   * @param id - required id to pass to updateTimeSchedule
+   * @param input - required input to pass to updateTimeSchedule
+   * @returns parsed response from UpdateTimeScheduleMutation
+   */
+  public async fetch(id: string, input: L.TimeScheduleUpdateInput): LinearFetch<TimeSchedulePayload> {
+    const response = await this._request<L.UpdateTimeScheduleMutation, L.UpdateTimeScheduleMutationVariables>(
+      L.UpdateTimeScheduleDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.timeScheduleUpdate;
+
+    return new TimeSchedulePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable TimeScheduleUpsertExternal Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class TimeScheduleUpsertExternalMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the TimeScheduleUpsertExternal mutation and return a TimeSchedulePayload
+   *
+   * @param externalId - required externalId to pass to timeScheduleUpsertExternal
+   * @param input - required input to pass to timeScheduleUpsertExternal
+   * @returns parsed response from TimeScheduleUpsertExternalMutation
+   */
+  public async fetch(externalId: string, input: L.TimeScheduleUpdateInput): LinearFetch<TimeSchedulePayload> {
+    const response = await this._request<
+      L.TimeScheduleUpsertExternalMutation,
+      L.TimeScheduleUpsertExternalMutationVariables
+    >(L.TimeScheduleUpsertExternalDocument, {
+      externalId,
+      input,
+    });
+    const data = response.timeScheduleUpsertExternal;
+
+    return new TimeSchedulePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateTriageResponsibility Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateTriageResponsibilityMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateTriageResponsibility mutation and return a TriageResponsibilityPayload
+   *
+   * @param input - required input to pass to createTriageResponsibility
+   * @returns parsed response from CreateTriageResponsibilityMutation
+   */
+  public async fetch(input: L.TriageResponsibilityCreateInput): LinearFetch<TriageResponsibilityPayload> {
+    const response = await this._request<
+      L.CreateTriageResponsibilityMutation,
+      L.CreateTriageResponsibilityMutationVariables
+    >(L.CreateTriageResponsibilityDocument, {
+      input,
+    });
+    const data = response.triageResponsibilityCreate;
+
+    return new TriageResponsibilityPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteTriageResponsibility Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteTriageResponsibilityMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteTriageResponsibility mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteTriageResponsibility
+   * @returns parsed response from DeleteTriageResponsibilityMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<
+      L.DeleteTriageResponsibilityMutation,
+      L.DeleteTriageResponsibilityMutationVariables
+    >(L.DeleteTriageResponsibilityDocument, {
+      id,
+    });
+    const data = response.triageResponsibilityDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateTriageResponsibility Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateTriageResponsibilityMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateTriageResponsibility mutation and return a TriageResponsibilityPayload
+   *
+   * @param id - required id to pass to updateTriageResponsibility
+   * @param input - required input to pass to updateTriageResponsibility
+   * @returns parsed response from UpdateTriageResponsibilityMutation
+   */
+  public async fetch(id: string, input: L.TriageResponsibilityUpdateInput): LinearFetch<TriageResponsibilityPayload> {
+    const response = await this._request<
+      L.UpdateTriageResponsibilityMutation,
+      L.UpdateTriageResponsibilityMutationVariables
+    >(L.UpdateTriageResponsibilityDocument, {
+      id,
+      input,
+    });
+    const data = response.triageResponsibilityUpdate;
+
+    return new TriageResponsibilityPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UserDemoteAdmin Mutation
  *
  * @param request - function to call the graphql client
@@ -23634,6 +24146,38 @@ export class Team_WebhooksQuery extends Request {
 }
 
 /**
+ * A fetchable TriageResponsibility_ManualSelection Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to triageResponsibility
+ */
+export class TriageResponsibility_ManualSelectionQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the TriageResponsibility_ManualSelection query and return a TriageResponsibilityManualSelection
+   *
+   * @returns parsed response from TriageResponsibility_ManualSelectionQuery
+   */
+  public async fetch(): LinearFetch<TriageResponsibilityManualSelection | undefined> {
+    const response = await this._request<
+      L.TriageResponsibility_ManualSelectionQuery,
+      L.TriageResponsibility_ManualSelectionQueryVariables
+    >(L.TriageResponsibility_ManualSelectionDocument, {
+      id: this._id,
+    });
+    const data = response.triageResponsibility.manualSelection;
+
+    return data ? new TriageResponsibilityManualSelection(this._request, data) : undefined;
+  }
+}
+
+/**
  * A fetchable User_AssignedIssues Query
  *
  * @param request - function to call the graphql client
@@ -24890,6 +25434,44 @@ export class LinearSdk extends Request {
     return new TemplatesForIntegrationQuery(this._request).fetch(integrationType);
   }
   /**
+   * A specific time schedule.
+   *
+   * @param id - required id to pass to timeSchedule
+   * @returns TimeSchedule
+   */
+  public timeSchedule(id: string): LinearFetch<TimeSchedule> {
+    return new TimeScheduleQuery(this._request).fetch(id);
+  }
+  /**
+   * All time schedules.
+   *
+   * @param variables - variables to pass into the TimeSchedulesQuery
+   * @returns TimeScheduleConnection
+   */
+  public timeSchedules(variables?: L.TimeSchedulesQueryVariables): LinearFetch<TimeScheduleConnection> {
+    return new TimeSchedulesQuery(this._request).fetch(variables);
+  }
+  /**
+   * All triage responsibilities.
+   *
+   * @param variables - variables to pass into the TriageResponsibilitiesQuery
+   * @returns TriageResponsibilityConnection
+   */
+  public triageResponsibilities(
+    variables?: L.TriageResponsibilitiesQueryVariables
+  ): LinearFetch<TriageResponsibilityConnection> {
+    return new TriageResponsibilitiesQuery(this._request).fetch(variables);
+  }
+  /**
+   * A specific triage responsibility.
+   *
+   * @param id - required id to pass to triageResponsibility
+   * @returns TriageResponsibility
+   */
+  public triageResponsibility(id: string): LinearFetch<TriageResponsibility> {
+    return new TriageResponsibilityQuery(this._request).fetch(id);
+  }
+  /**
    * One specific user.
    *
    * @param id - required id to pass to user
@@ -25363,6 +25945,16 @@ export class LinearSdk extends Request {
    */
   public deleteDocument(id: string): LinearFetch<DeletePayload> {
     return new DeleteDocumentMutation(this._request).fetch(id);
+  }
+  /**
+   * Adds a document reminder. Will cause a notification to be sent when the issue reminder time is reached.
+   *
+   * @param id - required id to pass to documentReminder
+   * @param reminderAt - required reminderAt to pass to documentReminder
+   * @returns DocumentPayload
+   */
+  public documentReminder(id: string, reminderAt: Date): LinearFetch<DocumentPayload> {
+    return new DocumentReminderMutation(this._request).fetch(id, reminderAt);
   }
   /**
    * Updates a document.
@@ -26944,6 +27536,89 @@ export class LinearSdk extends Request {
    */
   public updateTemplate(id: string, input: L.TemplateUpdateInput): LinearFetch<TemplatePayload> {
     return new UpdateTemplateMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Creates a new time schedule.
+   *
+   * @param input - required input to pass to createTimeSchedule
+   * @returns TimeSchedulePayload
+   */
+  public createTimeSchedule(input: L.TimeScheduleCreateInput): LinearFetch<TimeSchedulePayload> {
+    return new CreateTimeScheduleMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes a time schedule.
+   *
+   * @param id - required id to pass to deleteTimeSchedule
+   * @returns DeletePayload
+   */
+  public deleteTimeSchedule(id: string): LinearFetch<DeletePayload> {
+    return new DeleteTimeScheduleMutation(this._request).fetch(id);
+  }
+  /**
+   * Refresh the integration schedule information.
+   *
+   * @param id - required id to pass to timeScheduleRefreshIntegrationSchedule
+   * @returns TimeSchedulePayload
+   */
+  public timeScheduleRefreshIntegrationSchedule(id: string): LinearFetch<TimeSchedulePayload> {
+    return new TimeScheduleRefreshIntegrationScheduleMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates a time schedule.
+   *
+   * @param id - required id to pass to updateTimeSchedule
+   * @param input - required input to pass to updateTimeSchedule
+   * @returns TimeSchedulePayload
+   */
+  public updateTimeSchedule(id: string, input: L.TimeScheduleUpdateInput): LinearFetch<TimeSchedulePayload> {
+    return new UpdateTimeScheduleMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Upsert an external time schedule.
+   *
+   * @param externalId - required externalId to pass to timeScheduleUpsertExternal
+   * @param input - required input to pass to timeScheduleUpsertExternal
+   * @returns TimeSchedulePayload
+   */
+  public timeScheduleUpsertExternal(
+    externalId: string,
+    input: L.TimeScheduleUpdateInput
+  ): LinearFetch<TimeSchedulePayload> {
+    return new TimeScheduleUpsertExternalMutation(this._request).fetch(externalId, input);
+  }
+  /**
+   * Creates a new triage responsibility.
+   *
+   * @param input - required input to pass to createTriageResponsibility
+   * @returns TriageResponsibilityPayload
+   */
+  public createTriageResponsibility(
+    input: L.TriageResponsibilityCreateInput
+  ): LinearFetch<TriageResponsibilityPayload> {
+    return new CreateTriageResponsibilityMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes a triage responsibility.
+   *
+   * @param id - required id to pass to deleteTriageResponsibility
+   * @returns DeletePayload
+   */
+  public deleteTriageResponsibility(id: string): LinearFetch<DeletePayload> {
+    return new DeleteTriageResponsibilityMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates an existing triage responsibility.
+   *
+   * @param id - required id to pass to updateTriageResponsibility
+   * @param input - required input to pass to updateTriageResponsibility
+   * @returns TriageResponsibilityPayload
+   */
+  public updateTriageResponsibility(
+    id: string,
+    input: L.TriageResponsibilityUpdateInput
+  ): LinearFetch<TriageResponsibilityPayload> {
+    return new UpdateTriageResponsibilityMutation(this._request).fetch(id, input);
   }
   /**
    * Makes user a regular user. Can only be called by an admin.

@@ -9051,6 +9051,19 @@ type Mutation {
     id: String!
   ): DeletePayload!
   """
+  Adds a document reminder. Will cause a notification to be sent when the issue reminder time is reached.
+  """
+  documentReminder(
+    """
+    The identifier of the document to add a reminder for.
+    """
+    id: String!
+    """
+    The time when a reminder notification will be sent.
+    """
+    reminderAt: DateTime!
+  ): DocumentPayload!
+  """
   Updates a document.
   """
   documentUpdate(
@@ -11031,7 +11044,7 @@ type Mutation {
     input: TemplateUpdateInput!
   ): TemplatePayload!
   """
-  [ALPHA] Creates a new time schedule.
+  Creates a new time schedule.
   """
   timeScheduleCreate(
     """
@@ -11040,7 +11053,7 @@ type Mutation {
     input: TimeScheduleCreateInput!
   ): TimeSchedulePayload!
   """
-  [ALPHA] Deletes a time schedule.
+  Deletes a time schedule.
   """
   timeScheduleDelete(
     """
@@ -11049,7 +11062,7 @@ type Mutation {
     id: String!
   ): DeletePayload!
   """
-  [ALPHA] Refresh the integration schedule information.
+  Refresh the integration schedule information.
   """
   timeScheduleRefreshIntegrationSchedule(
     """
@@ -11058,7 +11071,7 @@ type Mutation {
     id: String!
   ): TimeSchedulePayload!
   """
-  [ALPHA] Updates a time schedule.
+  Updates a time schedule.
   """
   timeScheduleUpdate(
     """
@@ -11071,7 +11084,7 @@ type Mutation {
     input: TimeScheduleUpdateInput!
   ): TimeSchedulePayload!
   """
-  [ALPHA] Upsert an external time schedule.
+  Upsert an external time schedule.
   """
   timeScheduleUpsertExternal(
     """
@@ -11084,7 +11097,7 @@ type Mutation {
     input: TimeScheduleUpdateInput!
   ): TimeSchedulePayload!
   """
-  [ALPHA] Creates a new triage responsibility.
+  Creates a new triage responsibility.
   """
   triageResponsibilityCreate(
     """
@@ -11093,7 +11106,7 @@ type Mutation {
     input: TriageResponsibilityCreateInput!
   ): TriageResponsibilityPayload!
   """
-  [ALPHA] Deletes a triage responsibility.
+  Deletes a triage responsibility.
   """
   triageResponsibilityDelete(
     """
@@ -11102,7 +11115,7 @@ type Mutation {
     id: String!
   ): DeletePayload!
   """
-  [ALPHA] Updates an existing triage responsibility.
+  Updates an existing triage responsibility.
   """
   triageResponsibilityUpdate(
     """
@@ -12445,6 +12458,9 @@ input NullableTemplateFilter {
   updatedAt: DateComparator
 }
 
+"""
+Comparator for optional timeless dates.
+"""
 input NullableTimelessDateComparator {
   """
   Equals constraint.
@@ -17599,7 +17615,7 @@ type Query {
     """
     includeArchived: Boolean
     """
-    Should associated comments be searched (default: true).
+    Should associated comments be searched (default: false).
     """
     includeComments: Boolean
     """
@@ -17648,7 +17664,7 @@ type Query {
     """
     includeArchived: Boolean
     """
-    Should associated comments be searched (default: true).
+    Should associated comments be searched (default: false).
     """
     includeComments: Boolean
     """
@@ -17693,7 +17709,7 @@ type Query {
     """
     includeArchived: Boolean
     """
-    Should associated comments be searched (default: true).
+    Should associated comments be searched (default: false).
     """
     includeComments: Boolean
     """
@@ -17832,7 +17848,7 @@ type Query {
     integrationType: String!
   ): [Template!]!
   """
-  [ALPHA] A specific time schedule.
+  A specific time schedule.
   """
   timeSchedule(
     """
@@ -17841,7 +17857,7 @@ type Query {
     id: String!
   ): TimeSchedule!
   """
-  [ALPHA] All time schedules.
+  All time schedules.
   """
   timeSchedules(
     """
@@ -17870,7 +17886,7 @@ type Query {
     orderBy: PaginationOrderBy
   ): TimeScheduleConnection!
   """
-  [ALPHA] All triage responsibilities.
+  All triage responsibilities.
   """
   triageResponsibilities(
     """
@@ -17899,7 +17915,7 @@ type Query {
     orderBy: PaginationOrderBy
   ): TriageResponsibilityConnection!
   """
-  [ALPHA] A specific triage responsibility.
+  A specific triage responsibility.
   """
   triageResponsibility(
     """
@@ -18196,6 +18212,54 @@ enum ReleaseChannel {
   internal
   preRelease
   public
+}
+
+"""
+A reminder that can be attached to different entities.
+"""
+type Reminder implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The reminder's comment.
+  """
+  comment: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The document that the reminder is associated with.
+  """
+  documentId: Document
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The issue that the reminder is associated with.
+  """
+  issueId: Issue
+  """
+  The project that the reminder is associated with.
+  """
+  projectId: Project
+  """
+  The time when a reminder triggers a notification in users inbox.
+  """
+  remindAt: DateTime!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user that created a reminder.
+  """
+  user: User!
 }
 
 """
@@ -19599,7 +19663,7 @@ type Team implements Node {
   """
   reviewWorkflowState: WorkflowState @deprecated(reason: "Use team.gitAutomationStates instead.")
   """
-  Whether the team is managed by SCIM.
+  Whether the team is managed by SCIM integration.
   """
   scimManaged: Boolean!
   """
@@ -20371,6 +20435,10 @@ input TeamUpdateInput {
   """
   reviewWorkflowStateId: String
   """
+  Whether the team is managed by SCIM integration. Mutation restricted to workspace admins and only unsetting is allowed!
+  """
+  scimManaged: Boolean
+  """
   Whether to move issues to bottom of the column when changing state.
   """
   setIssueSortOrderOnStateChange: String
@@ -20441,6 +20509,10 @@ type Template implements Node {
   """
   organization: Organization
   """
+  The sort order of the template.
+  """
+  sortOrder: Float!
+  """
   The team that the template is associated with. If null, the template is global to the workspace.
   """
   team: Team
@@ -20479,6 +20551,10 @@ input TemplateCreateInput {
   The template name.
   """
   name: String!
+  """
+  The position of the template in the templates list.
+  """
+  sortOrder: Float
   """
   The identifier or key of the team associated with the template. If not given, the template will be shared across all teams.
   """
@@ -20525,6 +20601,10 @@ input TemplateUpdateInput {
   The template name.
   """
   name: String
+  """
+  The position of the template in the templates list.
+  """
+  sortOrder: Float
   """
   The identifier or key of the team associated with the template. If set to null, the template will be shared across all teams.
   """

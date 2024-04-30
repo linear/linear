@@ -283,6 +283,16 @@ describe("generated", () => {
         console.warn("codegen-doc:print: No Team found - cannot test team.triageIssueState query");
       }
     });
+
+    /** Test the team.triageResponsibility query for L.TriageResponsibility */
+    it("team.triageResponsibility", async () => {
+      if (_team) {
+        const team_triageResponsibility: L.TriageResponsibility | undefined = await _team.triageResponsibility;
+        expect(team_triageResponsibility instanceof L.TriageResponsibility);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.triageResponsibility query");
+      }
+    });
   });
 
   /** Test all ApiKey queries */
@@ -3638,6 +3648,16 @@ describe("generated", () => {
         console.warn("codegen-doc:print: No Team found - cannot test team.triageIssueState query");
       }
     });
+
+    /** Test the team.triageResponsibility query for L.TriageResponsibility */
+    it("team.triageResponsibility", async () => {
+      if (_team) {
+        const team_triageResponsibility: L.TriageResponsibility | undefined = await _team.triageResponsibility;
+        expect(team_triageResponsibility instanceof L.TriageResponsibility);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.triageResponsibility query");
+      }
+    });
   });
 
   /** Test Template query */
@@ -3665,6 +3685,127 @@ describe("generated", () => {
       const templatesForIntegration: L.Template[] | undefined =
         await client.templatesForIntegration("mock-integrationType");
       templatesForIntegration?.map(node => expect(node instanceof L.Template));
+    });
+  });
+
+  /** Test all TimeSchedule queries */
+  describe("TimeSchedules", () => {
+    let _timeSchedule: L.TimeSchedule | undefined;
+    let _timeSchedule_id: string | undefined;
+
+    /** Test the root connection query for the TimeSchedule */
+    it("timeSchedules", async () => {
+      const timeSchedules: L.TimeScheduleConnection | undefined = await client.timeSchedules();
+      const timeSchedule = timeSchedules?.nodes?.[0];
+      _timeSchedule_id = timeSchedule?.id;
+      expect(timeSchedules instanceof L.TimeScheduleConnection);
+    });
+
+    /** Test the root query for a single TimeSchedule */
+    it("timeSchedule", async () => {
+      if (_timeSchedule_id) {
+        const timeSchedule: L.TimeSchedule | undefined = await client.timeSchedule(_timeSchedule_id);
+        _timeSchedule = timeSchedule;
+        expect(timeSchedule instanceof L.TimeSchedule);
+      } else {
+        console.warn("codegen-doc:print: No first TimeSchedule found in connection - cannot test timeSchedule query");
+      }
+    });
+
+    /** Test the timeSchedule.integration query for L.Integration */
+    it("timeSchedule.integration", async () => {
+      if (_timeSchedule) {
+        const timeSchedule_integration: L.Integration | undefined = await _timeSchedule.integration;
+        expect(timeSchedule_integration instanceof L.Integration);
+      } else {
+        console.warn("codegen-doc:print: No TimeSchedule found - cannot test timeSchedule.integration query");
+      }
+    });
+
+    /** Test the timeSchedule.organization query for L.Organization */
+    it("timeSchedule.organization", async () => {
+      if (_timeSchedule) {
+        const timeSchedule_organization: L.Organization | undefined = await _timeSchedule.organization;
+        expect(timeSchedule_organization instanceof L.Organization);
+      } else {
+        console.warn("codegen-doc:print: No TimeSchedule found - cannot test timeSchedule.organization query");
+      }
+    });
+  });
+
+  /** Test all TriageResponsibility queries */
+  describe("TriageResponsibilities", () => {
+    let _triageResponsibility: L.TriageResponsibility | undefined;
+    let _triageResponsibility_id: string | undefined;
+
+    /** Test the root connection query for the TriageResponsibility */
+    it("triageResponsibilities", async () => {
+      const triageResponsibilities: L.TriageResponsibilityConnection | undefined =
+        await client.triageResponsibilities();
+      const triageResponsibility = triageResponsibilities?.nodes?.[0];
+      _triageResponsibility_id = triageResponsibility?.id;
+      expect(triageResponsibilities instanceof L.TriageResponsibilityConnection);
+    });
+
+    /** Test the root query for a single TriageResponsibility */
+    it("triageResponsibility", async () => {
+      if (_triageResponsibility_id) {
+        const triageResponsibility: L.TriageResponsibility | undefined =
+          await client.triageResponsibility(_triageResponsibility_id);
+        _triageResponsibility = triageResponsibility;
+        expect(triageResponsibility instanceof L.TriageResponsibility);
+      } else {
+        console.warn(
+          "codegen-doc:print: No first TriageResponsibility found in connection - cannot test triageResponsibility query"
+        );
+      }
+    });
+
+    /** Test the triageResponsibility model query for TriageResponsibility_ManualSelection */
+    it("triageResponsibility.manualSelection", async () => {
+      if (_triageResponsibility) {
+        const manualSelection: L.TriageResponsibilityManualSelection | undefined =
+          _triageResponsibility.manualSelection;
+        expect(manualSelection instanceof L.TriageResponsibilityManualSelection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No triageResponsibility found - cannot test _triageResponsibility.manualSelection query"
+        );
+      }
+    });
+
+    /** Test the triageResponsibility.currentUser query for L.User */
+    it("triageResponsibility.currentUser", async () => {
+      if (_triageResponsibility) {
+        const triageResponsibility_currentUser: L.User | undefined = await _triageResponsibility.currentUser;
+        expect(triageResponsibility_currentUser instanceof L.User);
+      } else {
+        console.warn(
+          "codegen-doc:print: No TriageResponsibility found - cannot test triageResponsibility.currentUser query"
+        );
+      }
+    });
+
+    /** Test the triageResponsibility.team query for L.Team */
+    it("triageResponsibility.team", async () => {
+      if (_triageResponsibility) {
+        const triageResponsibility_team: L.Team | undefined = await _triageResponsibility.team;
+        expect(triageResponsibility_team instanceof L.Team);
+      } else {
+        console.warn("codegen-doc:print: No TriageResponsibility found - cannot test triageResponsibility.team query");
+      }
+    });
+
+    /** Test the triageResponsibility.timeSchedule query for L.TimeSchedule */
+    it("triageResponsibility.timeSchedule", async () => {
+      if (_triageResponsibility) {
+        const triageResponsibility_timeSchedule: L.TimeSchedule | undefined = await _triageResponsibility.timeSchedule;
+        expect(triageResponsibility_timeSchedule instanceof L.TimeSchedule);
+      } else {
+        console.warn(
+          "codegen-doc:print: No TriageResponsibility found - cannot test triageResponsibility.timeSchedule query"
+        );
+      }
     });
   });
 
