@@ -1,5 +1,153 @@
 # Change Log
 
+## 21.0.0
+
+### Major Changes
+
+- b9ef98d: feat(schema): [breaking] Input field 'DateComparator.eq' changed type from 'DateTime' to 'DateTimeOrDuration' (DateComparator.eq)
+
+  feat(schema): [breaking] Input field 'DateComparator.gt' changed type from 'DateTime' to 'DateTimeOrDuration' (DateComparator.gt)
+
+  feat(schema): [breaking] Input field 'DateComparator.gte' changed type from 'DateTime' to 'DateTimeOrDuration' (DateComparator.gte)
+
+  feat(schema): [breaking] Input field 'DateComparator.in' changed type from '[DateTime!]' to '[DateTimeOrDuration!]' (DateComparator.in)
+
+  feat(schema): [breaking] Input field 'DateComparator.lt' changed type from 'DateTime' to 'DateTimeOrDuration' (DateComparator.lt)
+
+  feat(schema): [breaking] Input field 'DateComparator.lte' changed type from 'DateTime' to 'DateTimeOrDuration' (DateComparator.lte)
+
+  feat(schema): [breaking] Input field 'DateComparator.neq' changed type from 'DateTime' to 'DateTimeOrDuration' (DateComparator.neq)
+
+  feat(schema): [breaking] Input field 'DateComparator.nin' changed type from '[DateTime!]' to '[DateTimeOrDuration!]' (DateComparator.nin)
+
+  feat(schema): [breaking] Input field 'NullableDateComparator.eq' changed type from 'DateTime' to 'DateTimeOrDuration' (NullableDateComparator.eq)
+
+  feat(schema): [breaking] Input field 'NullableDateComparator.gt' changed type from 'DateTime' to 'DateTimeOrDuration' (NullableDateComparator.gt)
+
+  feat(schema): [breaking] Input field 'NullableDateComparator.gte' changed type from 'DateTime' to 'DateTimeOrDuration' (NullableDateComparator.gte)
+
+  feat(schema): [breaking] Input field 'NullableDateComparator.in' changed type from '[DateTime!]' to '[DateTimeOrDuration!]' (NullableDateComparator.in)
+
+  feat(schema): [breaking] Input field 'NullableDateComparator.lt' changed type from 'DateTime' to 'DateTimeOrDuration' (NullableDateComparator.lt)
+
+  feat(schema): [breaking] Input field 'NullableDateComparator.lte' changed type from 'DateTime' to 'DateTimeOrDuration' (NullableDateComparator.lte)
+
+  feat(schema): [breaking] Input field 'NullableDateComparator.neq' changed type from 'DateTime' to 'DateTimeOrDuration' (NullableDateComparator.neq)
+
+  feat(schema): [breaking] Input field 'NullableDateComparator.nin' changed type from '[DateTime!]' to '[DateTimeOrDuration!]' (NullableDateComparator.nin)
+
+  feat(schema): [breaking] Input field 'NullableTimelessDateComparator.eq' changed type from 'TimelessDate' to 'TimelessDateOrDuration' (NullableTimelessDateComparator.eq)
+
+  feat(schema): [breaking] Input field 'NullableTimelessDateComparator.gt' changed type from 'TimelessDate' to 'TimelessDateOrDuration' (NullableTimelessDateComparator.gt)
+
+  feat(schema): [breaking] Input field 'NullableTimelessDateComparator.gte' changed type from 'TimelessDate' to 'TimelessDateOrDuration' (NullableTimelessDateComparator.gte)
+
+  feat(schema): [breaking] Input field 'NullableTimelessDateComparator.in' changed type from '[TimelessDate!]' to '[TimelessDateOrDuration!]' (NullableTimelessDateComparator.in)
+
+  feat(schema): [breaking] Input field 'NullableTimelessDateComparator.lt' changed type from 'TimelessDate' to 'TimelessDateOrDuration' (NullableTimelessDateComparator.lt)
+
+  feat(schema): [breaking] Input field 'NullableTimelessDateComparator.lte' changed type from 'TimelessDate' to 'TimelessDateOrDuration' (NullableTimelessDateComparator.lte)
+
+  feat(schema): [breaking] Input field 'NullableTimelessDateComparator.neq' changed type from 'TimelessDate' to 'TimelessDateOrDuration' (NullableTimelessDateComparator.neq)
+
+  feat(schema): [breaking] Input field 'NullableTimelessDateComparator.nin' changed type from '[TimelessDate!]' to '[TimelessDateOrDuration!]' (NullableTimelessDateComparator.nin)
+
+  feat(schema): [breaking] Input field 'TimelessDateComparator.eq' changed type from 'TimelessDate' to 'TimelessDateOrDuration' (TimelessDateComparator.eq)
+
+  feat(schema): [breaking] Input field 'TimelessDateComparator.gt' changed type from 'TimelessDate' to 'TimelessDateOrDuration' (TimelessDateComparator.gt)
+
+  feat(schema): [breaking] Input field 'TimelessDateComparator.gte' changed type from 'TimelessDate' to 'TimelessDateOrDuration' (TimelessDateComparator.gte)
+
+  feat(schema): [breaking] Input field 'TimelessDateComparator.in' changed type from '[TimelessDate!]' to '[TimelessDateOrDuration!]' (TimelessDateComparator.in)
+
+  feat(schema): [breaking] Input field 'TimelessDateComparator.lt' changed type from 'TimelessDate' to 'TimelessDateOrDuration' (TimelessDateComparator.lt)
+
+  feat(schema): [breaking] Input field 'TimelessDateComparator.lte' changed type from 'TimelessDate' to 'TimelessDateOrDuration' (TimelessDateComparator.lte)
+
+  feat(schema): [breaking] Input field 'TimelessDateComparator.neq' changed type from 'TimelessDate' to 'TimelessDateOrDuration' (TimelessDateComparator.neq)
+
+  feat(schema): [breaking] Input field 'TimelessDateComparator.nin' changed type from '[TimelessDate!]' to '[TimelessDateOrDuration!]' (TimelessDateComparator.nin)
+
+  feat(schema): [dangerous] Input field 'themeSettings' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.themeSettings)
+
+  feat(schema): [non_breaking] Type 'DateTimeOrDuration' was added (DateTimeOrDuration)
+
+  feat(schema): [non_breaking] Type 'DiaryEntry' was added (DiaryEntry)
+
+  feat(schema): [non_breaking] Type 'DiaryEntryConnection' was added (DiaryEntryConnection)
+
+  feat(schema): [non_breaking] Type 'DiaryEntryCreateInput' was added (DiaryEntryCreateInput)
+
+  feat(schema): [non_breaking] Type 'DiaryEntryEdge' was added (DiaryEntryEdge)
+
+  feat(schema): [non_breaking] Type 'DiaryEntryPayload' was added (DiaryEntryPayload)
+
+  feat(schema): [non_breaking] Type 'DiaryEntryUpdateInput' was added (DiaryEntryUpdateInput)
+
+  feat(schema): [non_breaking] Type 'TimelessDateOrDuration' was added (TimelessDateOrDuration)
+
+  feat(schema): [non_breaking] Field 'diaryEntryCreate' was added to object type 'Mutation' (Mutation.diaryEntryCreate)
+
+  feat(schema): [non_breaking] Field 'diaryEntryDelete' was added to object type 'Mutation' (Mutation.diaryEntryDelete)
+
+  feat(schema): [non_breaking] Field 'diaryEntryUpdate' was added to object type 'Mutation' (Mutation.diaryEntryUpdate)
+
+  feat(schema): [non_breaking] Field 'themeSettings' was added to object type 'Organization' (Organization.themeSettings)
+
+  feat(schema): [non_breaking] Field 'diaryEntry' was added to object type 'Query' (Query.diaryEntry)
+
+### Minor Changes
+
+- 8d21ed1: feat(schema): [dangerous] Input field 'scimManaged' was added to input object type 'TeamUpdateInput' (TeamUpdateInput.scimManaged)
+
+  feat(schema): [dangerous] Input field 'sortOrder' was added to input object type 'TemplateCreateInput' (TemplateCreateInput.sortOrder)
+
+  feat(schema): [dangerous] Input field 'sortOrder' was added to input object type 'TemplateUpdateInput' (TemplateUpdateInput.sortOrder)
+
+  feat(schema): [non_breaking] Type 'Reminder' was added (Reminder)
+
+  feat(schema): [non_breaking] Field 'documentReminder' was added to object type 'Mutation' (Mutation.documentReminder)
+
+  feat(schema): [non_breaking] Field 'Mutation.timeScheduleCreate' description changed from '[ALPHA] Creates a new time schedule.' to 'Creates a new time schedule.' (Mutation.timeScheduleCreate)
+
+  feat(schema): [non_breaking] Field 'Mutation.timeScheduleDelete' description changed from '[ALPHA] Deletes a time schedule.' to 'Deletes a time schedule.' (Mutation.timeScheduleDelete)
+
+  feat(schema): [non_breaking] Field 'Mutation.timeScheduleRefreshIntegrationSchedule' description changed from '[ALPHA] Refresh the integration schedule information.' to 'Refresh the integration schedule information.' (Mutation.timeScheduleRefreshIntegrationSchedule)
+
+  feat(schema): [non_breaking] Field 'Mutation.timeScheduleUpdate' description changed from '[ALPHA] Updates a time schedule.' to 'Updates a time schedule.' (Mutation.timeScheduleUpdate)
+
+  feat(schema): [non_breaking] Field 'Mutation.timeScheduleUpsertExternal' description changed from '[ALPHA] Upsert an external time schedule.' to 'Upsert an external time schedule.' (Mutation.timeScheduleUpsertExternal)
+
+  feat(schema): [non_breaking] Field 'Mutation.triageResponsibilityCreate' description changed from '[ALPHA] Creates a new triage responsibility.' to 'Creates a new triage responsibility.' (Mutation.triageResponsibilityCreate)
+
+  feat(schema): [non_breaking] Field 'Mutation.triageResponsibilityDelete' description changed from '[ALPHA] Deletes a triage responsibility.' to 'Deletes a triage responsibility.' (Mutation.triageResponsibilityDelete)
+
+  feat(schema): [non_breaking] Field 'Mutation.triageResponsibilityUpdate' description changed from '[ALPHA] Updates an existing triage responsibility.' to 'Updates an existing triage responsibility.' (Mutation.triageResponsibilityUpdate)
+
+  feat(schema): [non_breaking] Object type 'NullableTimelessDateComparator' has description 'Comparator for optional timeless dates.' (NullableTimelessDateComparator)
+
+  feat(schema): [non_breaking] Description for argument 'includeComments' on field 'Query.searchDocuments' changed from 'Should associated comments be searched (default: true).' to 'Should associated comments be searched (default: false).' (Query.searchDocuments.includeComments)
+
+  feat(schema): [non_breaking] Description for argument 'includeComments' on field 'Query.searchIssues' changed from 'Should associated comments be searched (default: true).' to 'Should associated comments be searched (default: false).' (Query.searchIssues.includeComments)
+
+  feat(schema): [non_breaking] Description for argument 'includeComments' on field 'Query.searchProjects' changed from 'Should associated comments be searched (default: true).' to 'Should associated comments be searched (default: false).' (Query.searchProjects.includeComments)
+
+  feat(schema): [non_breaking] Field 'Query.timeSchedule' description changed from '[ALPHA] A specific time schedule.' to 'A specific time schedule.' (Query.timeSchedule)
+
+  feat(schema): [non_breaking] Field 'Query.timeSchedules' description changed from '[ALPHA] All time schedules.' to 'All time schedules.' (Query.timeSchedules)
+
+  feat(schema): [non_breaking] Field 'Query.triageResponsibilities' description changed from '[ALPHA] All triage responsibilities.' to 'All triage responsibilities.' (Query.triageResponsibilities)
+
+  feat(schema): [non_breaking] Field 'Query.triageResponsibility' description changed from '[ALPHA] A specific triage responsibility.' to 'A specific triage responsibility.' (Query.triageResponsibility)
+
+  feat(schema): [non_breaking] Field 'Team.scimManaged' description changed from 'Whether the team is managed by SCIM.' to 'Whether the team is managed by SCIM integration.' (Team.scimManaged)
+
+  feat(schema): [non_breaking] Field 'sortOrder' was added to object type 'Template' (Template.sortOrder)
+
+### Patch Changes
+
+- f52a85f: chore(deps): update dependency patch versions
+
 ## 20.0.0
 
 ### Major Changes

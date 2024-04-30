@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.13.0
+
+### Minor Changes
+
+- 2425171: enable mapping Trello lists to Linear workflow states
+
+### Patch Changes
+
+- f52a85f: chore(deps): update dependency patch versions
+- Updated dependencies [f52a85f]
+- Updated dependencies [b9ef98d]
+- Updated dependencies [8d21ed1]
+  - @linear/sdk@21.0.0
+
 ## 1.12.2
 
 ### Patch Changes
