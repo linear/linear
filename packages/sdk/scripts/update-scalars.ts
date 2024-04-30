@@ -5,7 +5,7 @@ function updateScalars() {
   try {
     const results = replaceInFileSync({
       files: "src/_generated_documents.ts",
-      from: [...Doc.SCALAR_STRING_NAMES, ...Doc.SCALAR_DATE_NAMES, ...Doc.SCALAR_JSON_NAMES].map(
+      from: [...Doc.SCALAR_STRING_NAMES, ...Doc.SCALAR_DATE_NAMES, ...Doc.SCALAR_JSON_NAMES, ...Doc.SCALAR_DATE_OR_STRING_NAMES].map(
         name => `${name}: any`
       ),
       to: match => {
@@ -17,6 +17,8 @@ function updateScalars() {
           return `${name}: ${Doc.SCALAR_DATE_TYPE}`;
         } else if (Doc.SCALAR_JSON_NAMES.includes(name)) {
           return `${name}: ${Doc.SCALAR_JSON_TYPE}`;
+        } else if (Doc.SCALAR_DATE_OR_STRING_NAMES.includes(name)) {
+          return `${name}: ${Doc.SCALAR_DATE_OR_STRING_TYPE}`;
         } else {
           return match;
         }

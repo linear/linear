@@ -18,4 +18,6 @@ export const Doc = {
   SCALAR_DATE_TYPE: "Date",
   SCALAR_JSON_NAMES: ["JSON"],
   SCALAR_JSON_TYPE: "Record<string, unknown>",
+  SCALAR_DATE_OR_STRING_NAMES: ["DateTimeOrDuration"],
+  SCALAR_DATE_OR_STRING_TYPE: "Date | string",
 };

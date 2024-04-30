@@ -20,6 +20,8 @@ export function printTypescriptScalar(name: string, namespace?: string): string 
       return Doc.SCALAR_DATE_TYPE;
     } else if (Doc.SCALAR_JSON_NAMES.includes(name)) {
       return Doc.SCALAR_JSON_TYPE;
+    } else if (Doc.SCALAR_DATE_OR_STRING_NAMES.includes(name)) {
+      return Doc.SCALAR_DATE_OR_STRING_TYPE;
     } else {
       return `${printList([namespace, "Scalars"], ".")}['${name}']`;
     }

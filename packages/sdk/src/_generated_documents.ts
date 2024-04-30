@@ -13,7 +13,7 @@ export type Scalars = {
   /** Represents a date and time in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago) */
   DateTime: Date;
   /** Represents a date and time in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago) */
-  DateTimeOrDuration: any;
+  DateTimeOrDuration: Date | string;
   /** The `JSON` scalar type represents arbitrary values as *stringified* JSON */
   JSON: Record<string, unknown>;
   /** The `JSONObject` scalar type represents arbitrary values as *embedded* JSON */
