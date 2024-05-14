@@ -769,6 +769,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the customView connection query for the Project */
+    it("customView.projects", async () => {
+      if (_customView) {
+        const projects: L.ProjectConnection | undefined = await _customView.projects();
+        expect(projects instanceof L.ProjectConnection);
+      } else {
+        console.warn("codegen-doc:print: No customView found - cannot test _customView.projects query");
+      }
+    });
+
     let _userViewPreferences: L.ViewPreferences | undefined;
 
     /** Test the customView model query for CustomView_UserViewPreferences */
@@ -1631,6 +1641,16 @@ describe("generated", () => {
         "mock-service"
       );
       expect(issueImportCheckCSV instanceof L.IssueImportCheckPayload);
+    });
+  });
+
+  /** Test IssueImportCheckSync query */
+  describe("IssueImportCheckSync", () => {
+    /** Test the root model query for IssueImportCheckSync */
+    it("issueImportCheckSync", async () => {
+      const issueImportCheckSync: L.IssueImportSyncCheckPayload | undefined =
+        await client.issueImportCheckSync("mock-issueImportId");
+      expect(issueImportCheckSync instanceof L.IssueImportSyncCheckPayload);
     });
   });
 
@@ -2527,6 +2547,7 @@ describe("generated", () => {
     let _notification:
       | L.Notification
       | L.DocumentNotification
+      | L.InitiativeNotification
       | L.IssueNotification
       | L.OauthClientApprovalNotification
       | L.ProjectNotification
@@ -2547,6 +2568,7 @@ describe("generated", () => {
         const notification:
           | L.Notification
           | L.DocumentNotification
+          | L.InitiativeNotification
           | L.IssueNotification
           | L.OauthClientApprovalNotification
           | L.ProjectNotification

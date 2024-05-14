@@ -760,6 +760,8 @@ export class AuthOauthClient extends Request {
     this.organizationId = data.organizationId;
     this.publicEnabled = data.publicEnabled;
     this.redirectUris = data.redirectUris;
+    this.webhookResourceTypes = data.webhookResourceTypes;
+    this.webhookSecret = data.webhookSecret ?? undefined;
     this.webhookUrl = data.webhookUrl ?? undefined;
   }
 
@@ -788,6 +790,10 @@ export class AuthOauthClient extends Request {
   public publicEnabled: boolean;
   /** List of allowed redirect URIs for the application. */
   public redirectUris: string[];
+  /** The resource types to request when creating new webhooks. */
+  public webhookResourceTypes: string[];
+  /** Webhook secret */
+  public webhookSecret?: string;
   /** Webhook URL */
   public webhookUrl?: string;
 }
@@ -1626,6 +1632,10 @@ export class CustomView extends Request {
   /** Issues associated with the custom view. */
   public issues(variables?: Omit<L.CustomView_IssuesQueryVariables, "id">) {
     return new CustomView_IssuesQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Projects associated with the custom view. */
+  public projects(variables?: Omit<L.CustomView_ProjectsQueryVariables, "id">) {
+    return new CustomView_ProjectsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Creates a new custom view. */
   public create(input: L.CustomViewCreateInput) {
@@ -3707,6 +3717,76 @@ export class InitiativeArchivePayload extends Request {
   public success: boolean;
 }
 /**
+ * An initiative related notification.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InitiativeNotificationFragment response data
+ */
+export class InitiativeNotification extends Request {
+  private _actor?: L.InitiativeNotificationFragment["actor"];
+  private _externalUserActor?: L.InitiativeNotificationFragment["externalUserActor"];
+  private _user: L.InitiativeNotificationFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.InitiativeNotificationFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.emailedAt = parseDate(data.emailedAt) ?? undefined;
+    this.id = data.id;
+    this.readAt = parseDate(data.readAt) ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
+    this.type = data.type;
+    this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this._actor = data.actor ?? undefined;
+    this._externalUserActor = data.externalUserActor ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /**
+   * The time at when an email reminder for this notification was sent to the user. Null, if no email
+   *     reminder has been sent.
+   */
+  public emailedAt?: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  public readAt?: Date;
+  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  public snoozedUntilAt?: Date;
+  /** Notification type. */
+  public type: string;
+  /** The time at which a notification was unsnoozed.. */
+  public unsnoozedAt?: Date;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot;
+  /** The user that caused the notification. */
+  public get actor(): LinearFetch<User> | undefined {
+    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
+  }
+  /** The external user that caused the notification. */
+  public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
+    return this._externalUserActor?.id
+      ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
+      : undefined;
+  }
+  /** The user that received the notification. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+}
+/**
  * An integration with an external service.
  *
  * @param request - function to call the graphql client
@@ -4857,6 +4937,24 @@ export class IssueImportPayload extends Request {
   public issueImport?: IssueImport;
 }
 /**
+ * Whether an issue import can be synced at the end of an import or not
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueImportSyncCheckPayloadFragment response data
+ */
+export class IssueImportSyncCheckPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IssueImportSyncCheckPayloadFragment) {
+    super(request);
+    this.canSync = data.canSync;
+    this.error = data.error ?? undefined;
+  }
+
+  /** Returns true if the import can be synced, false otherwise */
+  public canSync: boolean;
+  /** An error message with a root cause of why the import cannot be synced */
+  public error?: string;
+}
+/**
  * Labels that can be associated with issues.
  *
  * @param request - function to call the graphql client
@@ -5560,6 +5658,7 @@ export class JiraSettings extends Request {
   public constructor(request: LinearRequest, data: L.JiraSettingsFragment) {
     super(request);
     this.isJiraServer = data.isJiraServer ?? undefined;
+    this.needsManualSetup = data.needsManualSetup ?? undefined;
     this.projectMapping = data.projectMapping
       ? data.projectMapping.map(node => new JiraLinearMapping(request, node))
       : undefined;
@@ -5568,6 +5667,8 @@ export class JiraSettings extends Request {
 
   /** Whether this integration is for Jira Server or not. */
   public isJiraServer?: boolean;
+  /** Whether the user needs to provide setup information about the webhook to complete the integration setup. */
+  public needsManualSetup?: boolean;
   /** The mapping of Jira project id => Linear team id. */
   public projectMapping?: JiraLinearMapping[];
   /** The Jira projects for the organization. */
@@ -5816,7 +5917,12 @@ export class NotificationBatchActionPayload extends Request {
  * @param data - NotificationConnection response data
  */
 export class NotificationConnection extends Connection<
-  DocumentNotification | IssueNotification | OauthClientApprovalNotification | ProjectNotification | Notification
+  | DocumentNotification
+  | InitiativeNotification
+  | IssueNotification
+  | OauthClientApprovalNotification
+  | ProjectNotification
+  | Notification
 > {
   public constructor(
     request: LinearRequest,
@@ -5825,6 +5931,7 @@ export class NotificationConnection extends Connection<
     ) => LinearFetch<
       | LinearConnection<
           | DocumentNotification
+          | InitiativeNotification
           | IssueNotification
           | OauthClientApprovalNotification
           | ProjectNotification
@@ -5841,6 +5948,8 @@ export class NotificationConnection extends Connection<
         switch (node.__typename) {
           case "DocumentNotification":
             return new DocumentNotification(request, node as L.DocumentNotificationFragment);
+          case "InitiativeNotification":
+            return new InitiativeNotification(request, node as L.InitiativeNotificationFragment);
           case "IssueNotification":
             return new IssueNotification(request, node as L.IssueNotificationFragment);
           case "OauthClientApprovalNotification":
@@ -6779,6 +6888,24 @@ export class OrganizationInvitePayload extends Request {
   }
 }
 /**
+ * OrganizationMeta model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OrganizationMetaFragment response data
+ */
+export class OrganizationMeta extends Request {
+  public constructor(request: LinearRequest, data: L.OrganizationMetaFragment) {
+    super(request);
+    this.allowedAuthServices = data.allowedAuthServices;
+    this.region = data.region;
+  }
+
+  /** Allowed authentication providers, empty array means all are allowed. */
+  public allowedAuthServices: string[];
+  /** The region the organization is hosted in. */
+  public region: string;
+}
+/**
  * OrganizationPayload model
  *
  * @param request - function to call the graphql client
@@ -7181,6 +7308,24 @@ export class ProjectConnection extends Connection<Project> {
       new PageInfo(request, data.pageInfo)
     );
   }
+}
+/**
+ * ProjectDetailSuggestionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectDetailSuggestionPayloadFragment response data
+ */
+export class ProjectDetailSuggestionPayload extends Request {
+  public constructor(request: LinearRequest, data: L.ProjectDetailSuggestionPayloadFragment) {
+    super(request);
+    this.color = data.color ?? undefined;
+    this.icon = data.icon ?? undefined;
+  }
+
+  /** The suggested project color. */
+  public color?: string;
+  /** The suggested view icon. */
+  public icon?: string;
 }
 /**
  * ProjectFilterSuggestionPayload model
@@ -8524,7 +8669,8 @@ export class Reminder extends Request {
     this.comment = data.comment ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
-    this.remindAt = parseDate(data.remindAt) ?? new Date();
+    this.remindAt = parseDate(data.remindAt) ?? undefined;
+    this.schedule = data.schedule ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._documentId = data.documentId ?? undefined;
     this._issueId = data.issueId ?? undefined;
@@ -8540,8 +8686,10 @@ export class Reminder extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The time when a reminder triggers a notification in users inbox. */
-  public remindAt: Date;
+  /** The time when a reminder triggers a notification in the user's inbox. */
+  public remindAt?: Date;
+  /** Scheduling settings for recurring reminders. */
+  public schedule?: L.Scalars["JSONObject"];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -9808,6 +9956,71 @@ export class TemplatePayload extends Request {
   /** The template that was created or updated. */
   public get template(): LinearFetch<Template> | undefined {
     return new TemplateQuery(this._request).fetch(this._template.id);
+  }
+}
+/**
+ * A text draft, used for comments and project updates.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.TextDraftFragment response data
+ */
+export class TextDraft extends Request {
+  private _issue?: L.TextDraftFragment["issue"];
+  private _parentComment?: L.TextDraftFragment["parentComment"];
+  private _project?: L.TextDraftFragment["project"];
+  private _projectUpdate?: L.TextDraftFragment["projectUpdate"];
+  private _user: L.TextDraftFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.TextDraftFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.bodyData = parseJson(data.bodyData) ?? {};
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.isAutogenerated = data.isAutogenerated;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._issue = data.issue ?? undefined;
+    this._parentComment = data.parentComment ?? undefined;
+    this._project = data.project ?? undefined;
+    this._projectUpdate = data.projectUpdate ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The text content as a Prosemirror document. */
+  public bodyData: Record<string, unknown>;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Whether the draft was autogenerated for the user. */
+  public isAutogenerated: boolean;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The issue for which this is a draft comment. */
+  public get issue(): LinearFetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** The comment for which this is a draft comment reply. */
+  public get parentComment(): LinearFetch<Comment> | undefined {
+    return this._parentComment?.id ? new CommentQuery(this._request).fetch({ id: this._parentComment?.id }) : undefined;
+  }
+  /** The project for which this is a draft project update. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The project update for which this is a draft comment. */
+  public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
+    return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
+  }
+  /** The user who created the draft. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
   }
 }
 /**
@@ -12461,6 +12674,35 @@ export class IssueImportCheckCsvQuery extends Request {
 }
 
 /**
+ * A fetchable IssueImportCheckSync Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueImportCheckSyncQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueImportCheckSync query and return a IssueImportSyncCheckPayload
+   *
+   * @param issueImportId - required issueImportId to pass to issueImportCheckSync
+   * @returns parsed response from IssueImportCheckSyncQuery
+   */
+  public async fetch(issueImportId: string): LinearFetch<IssueImportSyncCheckPayload> {
+    const response = await this._request<L.IssueImportCheckSyncQuery, L.IssueImportCheckSyncQueryVariables>(
+      L.IssueImportCheckSyncDocument,
+      {
+        issueImportId,
+      }
+    );
+    const data = response.issueImportCheckSync;
+
+    return new IssueImportSyncCheckPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable IssueImportFinishGithubOAuth Query
  *
  * @param request - function to call the graphql client
@@ -12762,7 +13004,12 @@ export class NotificationQuery extends Request {
   public async fetch(
     id: string
   ): LinearFetch<
-    DocumentNotification | IssueNotification | OauthClientApprovalNotification | ProjectNotification | Notification
+    | DocumentNotification
+    | InitiativeNotification
+    | IssueNotification
+    | OauthClientApprovalNotification
+    | ProjectNotification
+    | Notification
   > {
     const response = await this._request<L.NotificationQuery, L.NotificationQueryVariables>(L.NotificationDocument, {
       id,
@@ -12772,6 +13019,8 @@ export class NotificationQuery extends Request {
     switch (data.__typename) {
       case "DocumentNotification":
         return new DocumentNotification(this._request, data as L.DocumentNotificationFragment);
+      case "InitiativeNotification":
+        return new InitiativeNotification(this._request, data as L.InitiativeNotificationFragment);
       case "IssueNotification":
         return new IssueNotification(this._request, data as L.IssueNotificationFragment);
       case "OauthClientApprovalNotification":
@@ -15535,37 +15784,6 @@ export class DeleteDocumentMutation extends Request {
     const data = response.documentDelete;
 
     return new DeletePayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable DocumentReminder Mutation
- *
- * @param request - function to call the graphql client
- */
-export class DocumentReminderMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the DocumentReminder mutation and return a DocumentPayload
-   *
-   * @param id - required id to pass to documentReminder
-   * @param reminderAt - required reminderAt to pass to documentReminder
-   * @returns parsed response from DocumentReminderMutation
-   */
-  public async fetch(id: string, reminderAt: Date): LinearFetch<DocumentPayload> {
-    const response = await this._request<L.DocumentReminderMutation, L.DocumentReminderMutationVariables>(
-      L.DocumentReminderDocument,
-      {
-        id,
-        reminderAt,
-      }
-    );
-    const data = response.documentReminder;
-
-    return new DocumentPayload(this._request, data);
   }
 }
 
@@ -21681,6 +21899,55 @@ export class CustomView_OrganizationViewPreferencesQuery extends Request {
 }
 
 /**
+ * A fetchable CustomView_Projects Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to customView
+ * @param variables - variables without 'id' to pass into the CustomView_ProjectsQuery
+ */
+export class CustomView_ProjectsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.CustomView_ProjectsQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.CustomView_ProjectsQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the CustomView_Projects query and return a ProjectConnection
+   *
+   * @param variables - variables without 'id' to pass into the CustomView_ProjectsQuery
+   * @returns parsed response from CustomView_ProjectsQuery
+   */
+  public async fetch(variables?: Omit<L.CustomView_ProjectsQueryVariables, "id">): LinearFetch<ProjectConnection> {
+    const response = await this._request<L.CustomView_ProjectsQuery, L.CustomView_ProjectsQueryVariables>(
+      L.CustomView_ProjectsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.customView.projects;
+
+    return new ProjectConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable CustomView_UserViewPreferences Query
  *
  * @param request - function to call the graphql client
@@ -25201,6 +25468,15 @@ export class LinearSdk extends Request {
     return new IssueImportCheckCsvQuery(this._request).fetch(csvUrl, service);
   }
   /**
+   * Checks whether it will be possible to setup sync for this project or repository at the end of import
+   *
+   * @param issueImportId - required issueImportId to pass to issueImportCheckSync
+   * @returns IssueImportSyncCheckPayload
+   */
+  public issueImportCheckSync(issueImportId: string): LinearFetch<IssueImportSyncCheckPayload> {
+    return new IssueImportCheckSyncQuery(this._request).fetch(issueImportId);
+  }
+  /**
    * Fetches the GitHub token, completing the OAuth flow.
    *
    * @param code - required code to pass to issueImportFinishGithubOAuth
@@ -25289,7 +25565,12 @@ export class LinearSdk extends Request {
   public notification(
     id: string
   ): LinearFetch<
-    DocumentNotification | IssueNotification | OauthClientApprovalNotification | ProjectNotification | Notification
+    | DocumentNotification
+    | InitiativeNotification
+    | IssueNotification
+    | OauthClientApprovalNotification
+    | ProjectNotification
+    | Notification
   > {
     return new NotificationQuery(this._request).fetch(id);
   }
@@ -26197,16 +26478,6 @@ export class LinearSdk extends Request {
    */
   public deleteDocument(id: string): LinearFetch<DeletePayload> {
     return new DeleteDocumentMutation(this._request).fetch(id);
-  }
-  /**
-   * Adds a document reminder. Will cause a notification to be sent when the issue reminder time is reached.
-   *
-   * @param id - required id to pass to documentReminder
-   * @param reminderAt - required reminderAt to pass to documentReminder
-   * @returns DocumentPayload
-   */
-  public documentReminder(id: string, reminderAt: Date): LinearFetch<DocumentPayload> {
-    return new DocumentReminderMutation(this._request).fetch(id, reminderAt);
   }
   /**
    * Updates a document.
