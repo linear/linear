@@ -747,6 +747,14 @@ type AuthOauthClient {
   """
   redirectUris: [String!]!
   """
+  The resource types to request when creating new webhooks.
+  """
+  webhookResourceTypes: [String!]!
+  """
+  Webhook secret
+  """
+  webhookSecret: String
+  """
   Webhook URL
   """
   webhookUrl: String
@@ -1902,6 +1910,39 @@ type CustomView implements Node {
   The filter applied to projects in the custom view.
   """
   projectFilterData: JSONObject
+  """
+  Projects associated with the custom view.
+  """
+  projects(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned projects.
+    """
+    filter: ProjectFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectConnection!
   """
   Whether the custom view is shared with everyone in the organization.
   """
@@ -5025,6 +5066,67 @@ input InitiativeFilter {
 }
 
 """
+An initiative related notification.
+"""
+type InitiativeNotification implements Entity & Node & Notification {
+  """
+  The user that caused the notification.
+  """
+  actor: User
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time at when an email reminder for this notification was sent to the user. Null, if no email
+      reminder has been sent.
+  """
+  emailedAt: DateTime
+  """
+  The external user that caused the notification.
+  """
+  externalUserActor: ExternalUser
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  """
+  readAt: DateTime
+  """
+  The time until a notification will be snoozed. After that it will appear in the inbox again.
+  """
+  snoozedUntilAt: DateTime
+  """
+  Notification type.
+  """
+  type: String!
+  """
+  The time at which a notification was unsnoozed..
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user that received the notification.
+  """
+  user: User!
+}
+
+"""
 [Internal] The payload returned by the initiative mutations.
 """
 type InitiativePayload {
@@ -5276,6 +5378,7 @@ Linear supported integration services.
 enum IntegrationService {
   airbyte
   discord
+  email
   figma
   figmaPlugin
   front
@@ -7101,6 +7204,20 @@ type IssueImportPayload {
   success: Boolean!
 }
 
+"""
+Whether an issue import can be synced at the end of an import or not
+"""
+type IssueImportSyncCheckPayload {
+  """
+  Returns true if the import can be synced, false otherwise
+  """
+  canSync: Boolean!
+  """
+  An error message with a root cause of why the import cannot be synced
+  """
+  error: String
+}
+
 input IssueImportUpdateInput {
   """
   The mapping configuration for the import.
@@ -8410,6 +8527,10 @@ type JiraSettings {
   """
   isJiraServer: Boolean
   """
+  Whether the user needs to provide setup information about the webhook to complete the integration setup.
+  """
+  needsManualSetup: Boolean
+  """
   The mapping of Jira project id => Linear team id.
   """
   projectMapping: [JiraLinearMapping!]
@@ -8425,6 +8546,10 @@ input JiraSettingsInput {
   """
   isJiraServer: Boolean = false
   """
+  Whether the user needs to provide setup information about the webhook to complete the integration setup.
+  """
+  needsManualSetup: Boolean
+  """
   The mapping of Jira project id => Linear team id.
   """
   projectMapping: [JiraLinearMappingInput!]
@@ -8435,6 +8560,10 @@ input JiraSettingsInput {
 }
 
 input JiraUpdateInput {
+  """
+  Whether to delete the current manual webhook configuration.
+  """
+  deleteWebhook: Boolean
   """
   The id of the integration to update.
   """
@@ -8447,6 +8576,10 @@ input JiraUpdateInput {
   Whether to refresh Jira Projects for the integration.
   """
   updateProjects: Boolean
+  """
+  Webhook secret for a new manual configuration.
+  """
+  webhookSecret: String
 }
 
 input JoinOrganizationInput {
@@ -9181,19 +9314,6 @@ type Mutation {
     """
     id: String!
   ): DeletePayload!
-  """
-  Adds a document reminder. Will cause a notification to be sent when the issue reminder time is reached.
-  """
-  documentReminder(
-    """
-    The identifier of the document to add a reminder for.
-    """
-    id: String!
-    """
-    The time when a reminder notification will be sent.
-    """
-    reminderAt: DateTime!
-  ): DocumentPayload!
   """
   Updates a document.
   """
@@ -10175,6 +10295,10 @@ type Mutation {
   Kicks off a GitHub import job.
   """
   issueImportCreateGithub(
+    """
+    ID of the Github repository from which we will import data.
+    """
+    githubRepoId: String
     """
     GitHub repository name from which we will import data.
     """
@@ -11605,6 +11729,10 @@ type NotificationEdge {
 Describes the type and id of the entity to target for notifications.
 """
 input NotificationEntityInput {
+  """
+  The id of the initiative related to the notification.
+  """
+  initiativeId: String
   """
   The id of the issue related to the notification.
   """
@@ -13647,6 +13775,17 @@ input OrganizationInviteUpdateInput {
   teamIds: [String!]!
 }
 
+type OrganizationMeta {
+  """
+  Allowed authentication providers, empty array means all are allowed.
+  """
+  allowedAuthServices: [String!]!
+  """
+  The region the organization is hosted in.
+  """
+  region: String!
+}
+
 type OrganizationPayload {
   """
   The identifier of the last sync operation.
@@ -14511,6 +14650,32 @@ input ProjectCreateInput {
   The identifiers of the teams this project is associated with.
   """
   teamIds: [String!]!
+}
+
+input ProjectDetailSuggestionInput {
+  """
+  The description for the project.
+  """
+  description: String
+  """
+  The content of the project as markdown.
+  """
+  documentContent: String
+  """
+  The name of the project.
+  """
+  name: String!
+}
+
+type ProjectDetailSuggestionPayload {
+  """
+  The suggested project color.
+  """
+  color: String
+  """
+  The suggested view icon.
+  """
+  icon: String
 }
 
 type ProjectEdge {
@@ -17145,6 +17310,15 @@ type Query {
     service: String!
   ): IssueImportCheckPayload!
   """
+  Checks whether it will be possible to setup sync for this project or repository at the end of import
+  """
+  issueImportCheckSync(
+    """
+    The ID of the issue import for which to check sync eligibility
+    """
+    issueImportId: String!
+  ): IssueImportSyncCheckPayload!
+  """
   Fetches the GitHub token, completing the OAuth flow.
   """
   issueImportFinishGithubOAuth(
@@ -17431,9 +17605,17 @@ type Query {
     orderBy: PaginationOrderBy
   ): OrganizationInviteConnection!
   """
+  [INTERNAL] Get organization metadata by urlKey or organization id.
+  """
+  organizationMeta(urlKey: String!): OrganizationMeta
+  """
   One specific project.
   """
   project(id: String!): Project!
+  """
+  [INTERNAL] Suggests icon, color for a project based on its info while composing.
+  """
+  projectDetailsSuggestion(project: ProjectDetailSuggestionInput!): ProjectDetailSuggestionPayload!
   """
   Suggests filters for a project view based on a text prompt.
   """
@@ -18390,9 +18572,13 @@ type Reminder implements Node {
   """
   projectId: Project
   """
-  The time when a reminder triggers a notification in users inbox.
+  The time when a reminder triggers a notification in the user's inbox.
   """
-  remindAt: DateTime!
+  remindAt: DateTime
+  """
+  Scheduling settings for recurring reminders.
+  """
+  schedule: JSONObject
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -20756,6 +20942,58 @@ input TemplateUpdateInput {
   The template data as JSON encoded attributes of the type of entity, such as an issue.
   """
   templateData: JSON
+}
+
+"""
+A text draft, used for comments and project updates.
+"""
+type TextDraft implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The text content as a Prosemirror document.
+  """
+  bodyData: JSON!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Whether the draft was autogenerated for the user.
+  """
+  isAutogenerated: Boolean!
+  """
+  The issue for which this is a draft comment.
+  """
+  issue: Issue
+  """
+  The comment for which this is a draft comment reply.
+  """
+  parentComment: Comment
+  """
+  The project for which this is a draft project update.
+  """
+  project: Project
+  """
+  The project update for which this is a draft comment.
+  """
+  projectUpdate: ProjectUpdate
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user who created the draft.
+  """
+  user: User!
 }
 
 """
