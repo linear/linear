@@ -237,15 +237,6 @@ export class ApiKey extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-
-  /** Creates a new API key. */
-  public create(input: L.ApiKeyCreateInput) {
-    return new CreateApiKeyMutation(this._request).fetch(input);
-  }
-  /** Deletes an API key. */
-  public delete() {
-    return new DeleteApiKeyMutation(this._request).fetch(this.id);
-  }
 }
 /**
  * ApiKeyConnection model
@@ -889,6 +880,7 @@ export class AuthOrganization extends Request {
     super(request);
     this.allowedAuthServices = data.allowedAuthServices;
     this.deletionRequestedAt = parseDate(data.deletionRequestedAt) ?? undefined;
+    this.enabled = data.enabled;
     this.id = data.id;
     this.logoUrl = data.logoUrl ?? undefined;
     this.name = data.name;
@@ -906,6 +898,8 @@ export class AuthOrganization extends Request {
   public allowedAuthServices: string[];
   /** The time at which deletion of the organization was requested. */
   public deletionRequestedAt?: Date;
+  /** Whether the organization is enabled. Used as a superuser tool to lock down the org. */
+  public enabled: boolean;
   /** The unique identifier of the entity. */
   public id: string;
   /** The organization's logo URL. */
@@ -938,6 +932,7 @@ export class AuthOrganizationDomain extends Request {
   public constructor(request: LinearRequest, data: L.AuthOrganizationDomainFragment) {
     super(request);
     this.claimed = data.claimed ?? undefined;
+    this.disableOrganizationCreation = data.disableOrganizationCreation ?? undefined;
     this.id = data.id;
     this.name = data.name;
     this.organizationId = data.organizationId;
@@ -946,6 +941,8 @@ export class AuthOrganizationDomain extends Request {
   }
 
   public claimed?: boolean;
+  /** Prevent users with this domain to create new workspaces. */
+  public disableOrganizationCreation?: boolean;
   /** The unique identifier of the entity. */
   public id: string;
   public name: string;
@@ -1027,6 +1024,7 @@ export class AuthResolverResponse extends Request {
     this.lockedOrganizations = data.lockedOrganizations
       ? data.lockedOrganizations.map(node => new AuthOrganization(request, node))
       : undefined;
+    this.lockedUsers = data.lockedUsers.map(node => new AuthUser(request, node));
     this.users = data.users.map(node => new AuthUser(request, node));
   }
 
@@ -1044,6 +1042,8 @@ export class AuthResolverResponse extends Request {
   public availableOrganizations?: AuthOrganization[];
   /** List of organization available to this user account but locked due to the current auth method. */
   public lockedOrganizations?: AuthOrganization[];
+  /** List of locked users that are locked by login restrictions */
+  public lockedUsers: AuthUser[];
   /** List of active users that belong to the user account. */
   public users: AuthUser[];
 }
@@ -1079,6 +1079,7 @@ export class AuthUser extends Request {
     this.name = data.name;
     this.userAccountId = data.userAccountId;
     this.organization = new AuthOrganization(request, data.organization);
+    this.role = data.role;
   }
 
   /** Whether the user is active. */
@@ -1096,6 +1097,8 @@ export class AuthUser extends Request {
   public userAccountId: string;
   /** Organization the user belongs to. */
   public organization: AuthOrganization;
+  /** Whether the user is an organization admin or guest on a database level. */
+  public role: L.UserRoleType;
 }
 /**
  * User authentication session.
@@ -3087,6 +3090,58 @@ export class ExternalUserConnection extends Connection<ExternalUser> {
   }
 }
 /**
+ * A facet. Facets are joins between entities. A facet can tie a custom view to a project, or a a project to a roadmap for example.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.FacetFragment response data
+ */
+export class Facet extends Request {
+  public constructor(request: LinearRequest, data: L.FacetFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.sortOrder = data.sortOrder;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The sort order of the facet. */
+  public sortOrder: number;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+}
+/**
+ * FacetConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this FacetConnection model
+ * @param data - FacetConnection response data
+ */
+export class FacetConnection extends Connection<Facet> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Facet> | undefined>,
+    data: L.FacetConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new Facet(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
  * User favorites presented in the sidebar.
  *
  * @param request - function to call the graphql client
@@ -3518,6 +3573,30 @@ export class GitHubCommitIntegrationPayload extends Request {
   }
 }
 /**
+ * Metadata and settings for a GitHub import integration.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.GitHubImportSettingsFragment response data
+ */
+export class GitHubImportSettings extends Request {
+  public constructor(request: LinearRequest, data: L.GitHubImportSettingsFragment) {
+    super(request);
+    this.orgAvatarUrl = data.orgAvatarUrl;
+    this.orgLogin = data.orgLogin;
+    this.repositories = data.repositories.map(node => new GitHubRepo(request, node));
+    this.orgType = data.orgType;
+  }
+
+  /** The avatar URL for the GitHub organization. */
+  public orgAvatarUrl: string;
+  /** The GitHub organization's name. */
+  public orgLogin: string;
+  /** The names of the repositories connected for the GitHub integration. */
+  public repositories: GitHubRepo[];
+  /** The type of Github org */
+  public orgType: L.GithubOrgType;
+}
+/**
  * Metadata and settings for a GitHub Personal integration.
  *
  * @param request - function to call the graphql client
@@ -3565,6 +3644,7 @@ export class GitHubSettings extends Request {
     this.repositoriesMapping = data.repositoriesMapping
       ? data.repositoriesMapping.map(node => new TeamRepoMapping(request, node))
       : undefined;
+    this.orgType = data.orgType ?? undefined;
   }
 
   /** The avatar URL for the GitHub organization. */
@@ -3575,6 +3655,8 @@ export class GitHubSettings extends Request {
   public repositories?: GitHubRepo[];
   /** Mapping of team to repository for syncing. */
   public repositoriesMapping?: TeamRepoMapping[];
+  /** The type of Github org */
+  public orgType?: L.GithubOrgType;
 }
 /**
  * Metadata and settings for a GitLab integration.
@@ -3596,66 +3678,6 @@ export class GitLabSettings extends Request {
   public readonly?: boolean;
   /** The self-hosted URL of the GitLab instance. */
   public url?: string;
-}
-/**
- * GitHub OAuth token, plus information about the organizations the user is a member of.
- *
- * @param request - function to call the graphql client
- * @param data - L.GithubOAuthTokenPayloadFragment response data
- */
-export class GithubOAuthTokenPayload extends Request {
-  public constructor(request: LinearRequest, data: L.GithubOAuthTokenPayloadFragment) {
-    super(request);
-    this.token = data.token ?? undefined;
-    this.organizations = data.organizations ? data.organizations.map(node => new GithubOrg(request, node)) : undefined;
-  }
-
-  /** The OAuth token if the operation to fetch it was successful. */
-  public token?: string;
-  /** A list of the GitHub organizations the user is a member of with attached repositories. */
-  public organizations?: GithubOrg[];
-}
-/**
- * Relevant information for the GitHub organization.
- *
- * @param request - function to call the graphql client
- * @param data - L.GithubOrgFragment response data
- */
-export class GithubOrg extends Request {
-  public constructor(request: LinearRequest, data: L.GithubOrgFragment) {
-    super(request);
-    this.id = data.id;
-    this.isPersonal = data.isPersonal ?? undefined;
-    this.login = data.login;
-    this.repositories = data.repositories.map(node => new GithubRepo(request, node));
-  }
-
-  /** GitHub organization id. */
-  public id: string;
-  /** Whether or not this org is the user's personal repositories. */
-  public isPersonal?: boolean;
-  /** The login for the GitHub organization. */
-  public login: string;
-  /** Repositories that the organization owns. */
-  public repositories: GithubRepo[];
-}
-/**
- * Relevant information for the GitHub repository.
- *
- * @param request - function to call the graphql client
- * @param data - L.GithubRepoFragment response data
- */
-export class GithubRepo extends Request {
-  public constructor(request: LinearRequest, data: L.GithubRepoFragment) {
-    super(request);
-    this.id = data.id;
-    this.name = data.name;
-  }
-
-  /** The id of the GitHub repository. */
-  public id: string;
-  /** The name of the GitHub repository. */
-  public name: string;
 }
 /**
  * Google Sheets specific settings.
@@ -3933,6 +3955,7 @@ export class IntegrationSettings extends Request {
     super(request);
     this.front = data.front ? new FrontSettings(request, data.front) : undefined;
     this.gitHub = data.gitHub ? new GitHubSettings(request, data.gitHub) : undefined;
+    this.gitHubImport = data.gitHubImport ? new GitHubImportSettings(request, data.gitHubImport) : undefined;
     this.gitHubPersonal = data.gitHubPersonal ? new GitHubPersonalSettings(request, data.gitHubPersonal) : undefined;
     this.gitLab = data.gitLab ? new GitLabSettings(request, data.gitLab) : undefined;
     this.googleSheets = data.googleSheets ? new GoogleSheetsSettings(request, data.googleSheets) : undefined;
@@ -3945,6 +3968,9 @@ export class IntegrationSettings extends Request {
     this.sentry = data.sentry ? new SentrySettings(request, data.sentry) : undefined;
     this.slack = data.slack ? new SlackSettings(request, data.slack) : undefined;
     this.slackAsks = data.slackAsks ? new SlackAsksSettings(request, data.slackAsks) : undefined;
+    this.slackCustomViewNotifications = data.slackCustomViewNotifications
+      ? new SlackPostSettings(request, data.slackCustomViewNotifications)
+      : undefined;
     this.slackOrgProjectUpdatesPost = data.slackOrgProjectUpdatesPost
       ? new SlackPostSettings(request, data.slackOrgProjectUpdatesPost)
       : undefined;
@@ -3955,6 +3981,7 @@ export class IntegrationSettings extends Request {
 
   public front?: FrontSettings;
   public gitHub?: GitHubSettings;
+  public gitHubImport?: GitHubImportSettings;
   public gitHubPersonal?: GitHubPersonalSettings;
   public gitLab?: GitLabSettings;
   public googleSheets?: GoogleSheetsSettings;
@@ -3967,6 +3994,7 @@ export class IntegrationSettings extends Request {
   public sentry?: SentrySettings;
   public slack?: SlackSettings;
   public slackAsks?: SlackAsksSettings;
+  public slackCustomViewNotifications?: SlackPostSettings;
   public slackOrgProjectUpdatesPost?: SlackPostSettings;
   public slackPost?: SlackPostSettings;
   public slackProjectPost?: SlackPostSettings;
@@ -4620,6 +4648,7 @@ export class IssueHistory extends Request {
     this.updatedDescription = data.updatedDescription ?? undefined;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this.issueImport = data.issueImport ? new IssueImport(request, data.issueImport) : undefined;
+    this.actors = data.actors.map(node => new User(request, node));
     this.addedLabels = data.addedLabels ? data.addedLabels.map(node => new IssueLabel(request, node)) : undefined;
     this.relationChanges = data.relationChanges
       ? data.relationChanges.map(node => new IssueRelationHistoryPayload(request, node))
@@ -4718,10 +4747,15 @@ export class IssueHistory extends Request {
   public updatedAt: Date;
   /** Whether the issue's description was updated. */
   public updatedDescription?: boolean;
+  /** The actors that performed the actions. This field may be empty in the case of integrations or automations. */
+  public actors: User[];
+  /** The labels that were added to the issue. */
   public addedLabels?: IssueLabel[];
   /** Changed issue relationships. */
   public relationChanges?: IssueRelationHistoryPayload[];
+  /** The labels that were removed from the issue. */
   public removedLabels?: IssueLabel[];
+  /** The users that were notified of the issue. */
   public triageResponsibilityNotifiedUsers?: User[];
   /** The bot that performed the action. */
   public botActor?: ActorBot;
@@ -4834,6 +4868,7 @@ export class IssueImport extends Request {
     this.mapping = data.mapping ?? undefined;
     this.progress = data.progress ?? undefined;
     this.service = data.service;
+    this.serviceMetadata = data.serviceMetadata ?? undefined;
     this.status = data.status;
     this.teamName = data.teamName ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -4859,6 +4894,8 @@ export class IssueImport extends Request {
   public progress?: number;
   /** The service from which data will be imported. */
   public service: string;
+  /** Metadata related to import service. */
+  public serviceMetadata?: L.Scalars["JSONObject"];
   /** The status for the import job. */
   public status: string;
   /** New team's name in cases when teamId not set. */
@@ -5266,8 +5303,8 @@ export class IssueRelation extends Request {
   }
 
   /** Creates a new issue relation. */
-  public create(input: L.IssueRelationCreateInput) {
-    return new CreateIssueRelationMutation(this._request).fetch(input);
+  public create(input: L.IssueRelationCreateInput, variables?: Omit<L.CreateIssueRelationMutationVariables, "input">) {
+    return new CreateIssueRelationMutation(this._request).fetch(input, variables);
   }
   /** Deletes an issue relation. */
   public delete() {
@@ -5658,7 +5695,8 @@ export class JiraSettings extends Request {
   public constructor(request: LinearRequest, data: L.JiraSettingsFragment) {
     super(request);
     this.isJiraServer = data.isJiraServer ?? undefined;
-    this.needsManualSetup = data.needsManualSetup ?? undefined;
+    this.manualSetup = data.manualSetup ?? undefined;
+    this.setupPending = data.setupPending ?? undefined;
     this.projectMapping = data.projectMapping
       ? data.projectMapping.map(node => new JiraLinearMapping(request, node))
       : undefined;
@@ -5667,8 +5705,10 @@ export class JiraSettings extends Request {
 
   /** Whether this integration is for Jira Server or not. */
   public isJiraServer?: boolean;
-  /** Whether the user needs to provide setup information about the webhook to complete the integration setup. */
-  public needsManualSetup?: boolean;
+  /** Whether this integration is using a manual setup flow. */
+  public manualSetup?: boolean;
+  /** Whether the user needs to provide setup information about the webhook to complete the integration setup. Only relevant for integrations that use a manual setup flow */
+  public setupPending?: boolean;
   /** The mapping of Jira project id => Linear team id. */
   public projectMapping?: JiraLinearMapping[];
   /** The Jira projects for the organization. */
@@ -5964,6 +6004,93 @@ export class NotificationConnection extends Connection<
       new PageInfo(request, data.pageInfo)
     );
   }
+}
+/**
+ * A user's notification delivery preferences.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.NotificationDeliveryPreferencesFragment response data
+ */
+export class NotificationDeliveryPreferences extends Request {
+  public constructor(request: LinearRequest, data: L.NotificationDeliveryPreferencesFragment) {
+    super(request);
+    this.mobile = data.mobile ? new NotificationDeliveryPreferencesChannel(request, data.mobile) : undefined;
+  }
+
+  /** The delivery preferences for the mobile channel. */
+  public mobile?: NotificationDeliveryPreferencesChannel;
+}
+/**
+ * A user's notification delivery preferences.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.NotificationDeliveryPreferencesChannelFragment response data
+ */
+export class NotificationDeliveryPreferencesChannel extends Request {
+  public constructor(request: LinearRequest, data: L.NotificationDeliveryPreferencesChannelFragment) {
+    super(request);
+    this.notificationsDisabled = data.notificationsDisabled ?? undefined;
+    this.schedule = new NotificationDeliveryPreferencesSchedule(request, data.schedule);
+  }
+
+  /** Whether notifications are enabled for this channel. */
+  public notificationsDisabled?: boolean;
+  /** The schedule for notifications on this channel. */
+  public schedule: NotificationDeliveryPreferencesSchedule;
+}
+/**
+ * A user's notification delivery schedule for a particular day.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.NotificationDeliveryPreferencesDayFragment response data
+ */
+export class NotificationDeliveryPreferencesDay extends Request {
+  public constructor(request: LinearRequest, data: L.NotificationDeliveryPreferencesDayFragment) {
+    super(request);
+    this.end = data.end ?? undefined;
+    this.start = data.start ?? undefined;
+  }
+
+  /** The time notifications end. */
+  public end?: string;
+  /** The time notifications start. */
+  public start?: string;
+}
+/**
+ * A user's notification delivery schedule for a particular day.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.NotificationDeliveryPreferencesScheduleFragment response data
+ */
+export class NotificationDeliveryPreferencesSchedule extends Request {
+  public constructor(request: LinearRequest, data: L.NotificationDeliveryPreferencesScheduleFragment) {
+    super(request);
+    this.disabled = data.disabled ?? undefined;
+    this.friday = new NotificationDeliveryPreferencesDay(request, data.friday);
+    this.monday = new NotificationDeliveryPreferencesDay(request, data.monday);
+    this.saturday = new NotificationDeliveryPreferencesDay(request, data.saturday);
+    this.sunday = new NotificationDeliveryPreferencesDay(request, data.sunday);
+    this.thursday = new NotificationDeliveryPreferencesDay(request, data.thursday);
+    this.tuesday = new NotificationDeliveryPreferencesDay(request, data.tuesday);
+    this.wednesday = new NotificationDeliveryPreferencesDay(request, data.wednesday);
+  }
+
+  /** Whether the schedule is disabled. */
+  public disabled?: boolean;
+  /** Delivery preferences for Friday. */
+  public friday: NotificationDeliveryPreferencesDay;
+  /** Delivery preferences for Monday. */
+  public monday: NotificationDeliveryPreferencesDay;
+  /** Delivery preferences for Saturday. */
+  public saturday: NotificationDeliveryPreferencesDay;
+  /** Delivery preferences for Sunday. */
+  public sunday: NotificationDeliveryPreferencesDay;
+  /** Delivery preferences for Thursday. */
+  public thursday: NotificationDeliveryPreferencesDay;
+  /** Delivery preferences for Tuesday. */
+  public tuesday: NotificationDeliveryPreferencesDay;
+  /** Delivery preferences for Wednesday. */
+  public wednesday: NotificationDeliveryPreferencesDay;
 }
 /**
  * NotificationPayload model
@@ -6518,7 +6645,7 @@ export class Organization extends Request {
   public samlEnabled: boolean;
   /** Whether SCIM provisioning is enabled for organization. */
   public scimEnabled: boolean;
-  /** The time at which the trial of the plus plan will end. */
+  /** The time at which the trial will end. */
   public trialEndsAt?: Date;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -6631,6 +6758,7 @@ export class OrganizationDomain extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.claimed = data.claimed ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.disableOrganizationCreation = data.disableOrganizationCreation ?? undefined;
     this.id = data.id;
     this.name = data.name;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -6646,6 +6774,8 @@ export class OrganizationDomain extends Request {
   public claimed?: boolean;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** Prevent users with this domain to create new workspaces. */
+  public disableOrganizationCreation?: boolean;
   /** The unique identifier of the entity. */
   public id: string;
   /** Domain name. */
@@ -6946,13 +7076,13 @@ export class OrganizationRegionResponse extends Request {
   public success: boolean;
 }
 /**
- * OrganizationStartPlusTrialPayload model
+ * OrganizationStartTrialPayload model
  *
  * @param request - function to call the graphql client
- * @param data - L.OrganizationStartPlusTrialPayloadFragment response data
+ * @param data - L.OrganizationStartTrialPayloadFragment response data
  */
-export class OrganizationStartPlusTrialPayload extends Request {
-  public constructor(request: LinearRequest, data: L.OrganizationStartPlusTrialPayloadFragment) {
+export class OrganizationStartTrialPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OrganizationStartTrialPayloadFragment) {
     super(request);
     this.success = data.success;
   }
@@ -7061,6 +7191,75 @@ export class PaidSubscription extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
+}
+/**
+ * Registered passkey for authentication.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.PasskeyFragment response data
+ */
+export class Passkey extends Request {
+  public constructor(request: LinearRequest, data: L.PasskeyFragment) {
+    super(request);
+    this.aaguid = data.aaguid;
+    this.browserType = data.browserType ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.ip = data.ip ?? undefined;
+    this.label = data.label;
+    this.lastUsedAt = parseDate(data.lastUsedAt) ?? new Date();
+    this.lastUsedSessionId = data.lastUsedSessionId ?? undefined;
+    this.locationCity = data.locationCity ?? undefined;
+    this.locationCountry = data.locationCountry ?? undefined;
+    this.locationCountryCode = data.locationCountryCode ?? undefined;
+    this.locationRegionCode = data.locationRegionCode ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.userAgent = data.userAgent ?? undefined;
+    this.clientType = data.clientType;
+  }
+
+  public aaguid: string;
+  /** Used web browser. Only set on creation. */
+  public browserType?: string;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  public id: string;
+  /** IP address. Only set on creation. */
+  public ip?: string;
+  public label: string;
+  /** The time when the passkey was last used. */
+  public lastUsedAt: Date;
+  public lastUsedSessionId?: string;
+  /** Location city name. Only set on creation. */
+  public locationCity?: string;
+  /** Location country name. Only set on creation. */
+  public locationCountry?: string;
+  /** Location country code. Only set on creation. */
+  public locationCountryCode?: string;
+  /** Location region code. Only set on creation. */
+  public locationRegionCode?: string;
+  /** Date when the passkey was last updated. */
+  public updatedAt: Date;
+  /** Creating session's user-agent. Only set on creation. */
+  public userAgent?: string;
+  /** Type of application used to create. */
+  public clientType: L.AuthenticationSessionType;
+}
+/**
+ * PasskeyLoginStartResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.PasskeyLoginStartResponseFragment response data
+ */
+export class PasskeyLoginStartResponse extends Request {
+  public constructor(request: LinearRequest, data: L.PasskeyLoginStartResponseFragment) {
+    super(request);
+    this.options = data.options;
+    this.success = data.success;
+  }
+
+  public options: L.Scalars["JSONObject"];
+  public success: boolean;
 }
 /**
  * A project.
@@ -8998,12 +9197,15 @@ export class SentrySettings extends Request {
 export class SharedSlackSettings extends Request {
   public constructor(request: LinearRequest, data: L.SharedSlackSettingsFragment) {
     super(request);
+    this.enterpriseId = data.enterpriseId ?? undefined;
     this.enterpriseName = data.enterpriseName ?? undefined;
     this.shouldUnfurl = data.shouldUnfurl ?? undefined;
     this.teamId = data.teamId ?? undefined;
     this.teamName = data.teamName ?? undefined;
   }
 
+  /** Enterprise id of the connected Slack enterprise */
+  public enterpriseId?: string;
   /** Enterprise name of the connected Slack enterprise */
   public enterpriseName?: string;
   /** Whether to show unfurl previews in Slack */
@@ -9022,6 +9224,7 @@ export class SharedSlackSettings extends Request {
 export class SlackAsksSettings extends Request {
   public constructor(request: LinearRequest, data: L.SlackAsksSettingsFragment) {
     super(request);
+    this.enterpriseId = data.enterpriseId ?? undefined;
     this.enterpriseName = data.enterpriseName ?? undefined;
     this.shouldUnfurl = data.shouldUnfurl ?? undefined;
     this.teamId = data.teamId ?? undefined;
@@ -9032,6 +9235,8 @@ export class SlackAsksSettings extends Request {
     this.canAdministrate = data.canAdministrate;
   }
 
+  /** Enterprise id of the connected Slack enterprise */
+  public enterpriseId?: string;
   /** Enterprise name of the connected Slack enterprise */
   public enterpriseName?: string;
   /** Whether to show unfurl previews in Slack */
@@ -9171,6 +9376,7 @@ export class SlackPostSettings extends Request {
 export class SlackSettings extends Request {
   public constructor(request: LinearRequest, data: L.SlackSettingsFragment) {
     super(request);
+    this.enterpriseId = data.enterpriseId ?? undefined;
     this.enterpriseName = data.enterpriseName ?? undefined;
     this.linkOnIssueIdMention = data.linkOnIssueIdMention;
     this.shouldUnfurl = data.shouldUnfurl ?? undefined;
@@ -9178,6 +9384,8 @@ export class SlackSettings extends Request {
     this.teamName = data.teamName ?? undefined;
   }
 
+  /** Enterprise id of the connected Slack enterprise */
+  public enterpriseId?: string;
   /** Enterprise name of the connected Slack enterprise */
   public enterpriseName?: string;
   /** Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message. */
@@ -9204,6 +9412,24 @@ export class SsoUrlFromEmailResponse extends Request {
 
   /** SAML SSO sign-in URL. */
   public samlSsoUrl: string;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
+ * SuccessPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SuccessPayloadFragment response data
+ */
+export class SuccessPayload extends Request {
+  public constructor(request: LinearRequest, data: L.SuccessPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
 }
@@ -10720,6 +10946,10 @@ export class UserSettings extends Request {
     this.subscribedToUnreadNotificationsReminder = data.subscribedToUnreadNotificationsReminder;
     this.unsubscribedFrom = data.unsubscribedFrom;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.notificationDeliveryPreferences = new NotificationDeliveryPreferences(
+      request,
+      data.notificationDeliveryPreferences
+    );
     this._user = data.user;
   }
 
@@ -10753,6 +10983,8 @@ export class UserSettings extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The notification delivery preferences for the user. */
+  public notificationDeliveryPreferences: NotificationDeliveryPreferences;
   /** The user associated with these settings. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
@@ -12703,35 +12935,6 @@ export class IssueImportCheckSyncQuery extends Request {
 }
 
 /**
- * A fetchable IssueImportFinishGithubOAuth Query
- *
- * @param request - function to call the graphql client
- */
-export class IssueImportFinishGithubOAuthQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueImportFinishGithubOAuth query and return a GithubOAuthTokenPayload
-   *
-   * @param code - required code to pass to issueImportFinishGithubOAuth
-   * @returns parsed response from IssueImportFinishGithubOAuthQuery
-   */
-  public async fetch(code: string): LinearFetch<GithubOAuthTokenPayload> {
-    const response = await this._request<
-      L.IssueImportFinishGithubOAuthQuery,
-      L.IssueImportFinishGithubOAuthQueryVariables
-    >(L.IssueImportFinishGithubOAuthDocument, {
-      code,
-    });
-    const data = response.issueImportFinishGithubOAuth;
-
-    return new GithubOAuthTokenPayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable IssueLabel Query
  *
  * @param request - function to call the graphql client
@@ -14609,64 +14812,6 @@ export class AirbyteIntegrationConnectMutation extends Request {
 }
 
 /**
- * A fetchable CreateApiKey Mutation
- *
- * @param request - function to call the graphql client
- */
-export class CreateApiKeyMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the CreateApiKey mutation and return a ApiKeyPayload
-   *
-   * @param input - required input to pass to createApiKey
-   * @returns parsed response from CreateApiKeyMutation
-   */
-  public async fetch(input: L.ApiKeyCreateInput): LinearFetch<ApiKeyPayload> {
-    const response = await this._request<L.CreateApiKeyMutation, L.CreateApiKeyMutationVariables>(
-      L.CreateApiKeyDocument,
-      {
-        input,
-      }
-    );
-    const data = response.apiKeyCreate;
-
-    return new ApiKeyPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable DeleteApiKey Mutation
- *
- * @param request - function to call the graphql client
- */
-export class DeleteApiKeyMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the DeleteApiKey mutation and return a DeletePayload
-   *
-   * @param id - required id to pass to deleteApiKey
-   * @returns parsed response from DeleteApiKeyMutation
-   */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
-    const response = await this._request<L.DeleteApiKeyMutation, L.DeleteApiKeyMutationVariables>(
-      L.DeleteApiKeyDocument,
-      {
-        id,
-      }
-    );
-    const data = response.apiKeyDelete;
-
-    return new DeletePayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable ArchiveAttachment Mutation
  *
  * @param request - function to call the graphql client
@@ -15127,6 +15272,35 @@ export class AttachmentLinkZendeskMutation extends Request {
       }
     );
     const data = response.attachmentLinkZendesk;
+
+    return new AttachmentPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AttachmentSyncToSlack Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentSyncToSlackMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentSyncToSlack mutation and return a AttachmentPayload
+   *
+   * @param id - required id to pass to attachmentSyncToSlack
+   * @returns parsed response from AttachmentSyncToSlackMutation
+   */
+  public async fetch(id: string): LinearFetch<AttachmentPayload> {
+    const response = await this._request<L.AttachmentSyncToSlackMutation, L.AttachmentSyncToSlackMutationVariables>(
+      L.AttachmentSyncToSlackDocument,
+      {
+        id,
+      }
+    );
+    const data = response.attachmentSyncToSlack;
 
     return new AttachmentPayload(this._request, data);
   }
@@ -16836,6 +17010,35 @@ export class IntegrationGithubConnectMutation extends Request {
 }
 
 /**
+ * A fetchable IntegrationGithubImportConnect Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationGithubImportConnectMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationGithubImportConnect mutation and return a IntegrationPayload
+   *
+   * @param installationId - required installationId to pass to integrationGithubImportConnect
+   * @returns parsed response from IntegrationGithubImportConnectMutation
+   */
+  public async fetch(installationId: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<
+      L.IntegrationGithubImportConnectMutation,
+      L.IntegrationGithubImportConnectMutationVariables
+    >(L.IntegrationGithubImportConnectDocument, {
+      installationId,
+    });
+    const data = response.integrationGithubImportConnect;
+
+    return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable IntegrationGitlabConnect Mutation
  *
  * @param request - function to call the graphql client
@@ -17167,6 +17370,39 @@ export class IntegrationSlackAsksMutation extends Request {
     const data = response.integrationSlackAsks;
 
     return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationSlackCustomViewNotifications Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationSlackCustomViewNotificationsMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationSlackCustomViewNotifications mutation and return a SlackChannelConnectPayload
+   *
+   * @param code - required code to pass to integrationSlackCustomViewNotifications
+   * @param customViewId - required customViewId to pass to integrationSlackCustomViewNotifications
+   * @param redirectUri - required redirectUri to pass to integrationSlackCustomViewNotifications
+   * @returns parsed response from IntegrationSlackCustomViewNotificationsMutation
+   */
+  public async fetch(code: string, customViewId: string, redirectUri: string): LinearFetch<SlackChannelConnectPayload> {
+    const response = await this._request<
+      L.IntegrationSlackCustomViewNotificationsMutation,
+      L.IntegrationSlackCustomViewNotificationsMutationVariables
+    >(L.IntegrationSlackCustomViewNotificationsDocument, {
+      code,
+      customViewId,
+      redirectUri,
+    });
+    const data = response.integrationSlackCustomViewNotifications;
+
+    return new SlackChannelConnectPayload(this._request, data);
   }
 }
 
@@ -17801,24 +18037,18 @@ export class IssueImportCreateGithubMutation extends Request {
   /**
    * Call the IssueImportCreateGithub mutation and return a IssueImportPayload
    *
-   * @param githubRepoName - required githubRepoName to pass to issueImportCreateGithub
-   * @param githubRepoOwner - required githubRepoOwner to pass to issueImportCreateGithub
-   * @param githubToken - required githubToken to pass to issueImportCreateGithub
-   * @param variables - variables without 'githubRepoName', 'githubRepoOwner', 'githubToken' to pass into the IssueImportCreateGithubMutation
+   * @param integrationId - required integrationId to pass to issueImportCreateGithub
+   * @param variables - variables without 'integrationId' to pass into the IssueImportCreateGithubMutation
    * @returns parsed response from IssueImportCreateGithubMutation
    */
   public async fetch(
-    githubRepoName: string,
-    githubRepoOwner: string,
-    githubToken: string,
-    variables?: Omit<L.IssueImportCreateGithubMutationVariables, "githubRepoName" | "githubRepoOwner" | "githubToken">
+    integrationId: string,
+    variables?: Omit<L.IssueImportCreateGithubMutationVariables, "integrationId">
   ): LinearFetch<IssueImportPayload> {
     const response = await this._request<L.IssueImportCreateGithubMutation, L.IssueImportCreateGithubMutationVariables>(
       L.IssueImportCreateGithubDocument,
       {
-        githubRepoName,
-        githubRepoOwner,
-        githubToken,
+        integrationId,
         ...variables,
       }
     );
@@ -18079,13 +18309,18 @@ export class CreateIssueRelationMutation extends Request {
    * Call the CreateIssueRelation mutation and return a IssueRelationPayload
    *
    * @param input - required input to pass to createIssueRelation
+   * @param variables - variables without 'input' to pass into the CreateIssueRelationMutation
    * @returns parsed response from CreateIssueRelationMutation
    */
-  public async fetch(input: L.IssueRelationCreateInput): LinearFetch<IssueRelationPayload> {
+  public async fetch(
+    input: L.IssueRelationCreateInput,
+    variables?: Omit<L.CreateIssueRelationMutationVariables, "input">
+  ): LinearFetch<IssueRelationPayload> {
     const response = await this._request<L.CreateIssueRelationMutation, L.CreateIssueRelationMutationVariables>(
       L.CreateIssueRelationDocument,
       {
         input,
+        ...variables,
       }
     );
     const data = response.issueRelationCreate;
@@ -19035,28 +19270,28 @@ export class UpdateOrganizationInviteMutation extends Request {
 }
 
 /**
- * A fetchable OrganizationStartPlusTrial Mutation
+ * A fetchable OrganizationStartTrial Mutation
  *
  * @param request - function to call the graphql client
  */
-export class OrganizationStartPlusTrialMutation extends Request {
+export class OrganizationStartTrialMutation extends Request {
   public constructor(request: LinearRequest) {
     super(request);
   }
 
   /**
-   * Call the OrganizationStartPlusTrial mutation and return a OrganizationStartPlusTrialPayload
+   * Call the OrganizationStartTrial mutation and return a OrganizationStartTrialPayload
    *
-   * @returns parsed response from OrganizationStartPlusTrialMutation
+   * @returns parsed response from OrganizationStartTrialMutation
    */
-  public async fetch(): LinearFetch<OrganizationStartPlusTrialPayload> {
-    const response = await this._request<
-      L.OrganizationStartPlusTrialMutation,
-      L.OrganizationStartPlusTrialMutationVariables
-    >(L.OrganizationStartPlusTrialDocument, {});
-    const data = response.organizationStartPlusTrial;
+  public async fetch(): LinearFetch<OrganizationStartTrialPayload> {
+    const response = await this._request<L.OrganizationStartTrialMutation, L.OrganizationStartTrialMutationVariables>(
+      L.OrganizationStartTrialDocument,
+      {}
+    );
+    const data = response.organizationStartTrial;
 
-    return new OrganizationStartPlusTrialPayload(this._request, data);
+    return new OrganizationStartTrialPayload(this._request, data);
   }
 }
 
@@ -24855,6 +25090,266 @@ export class User_TeamsQuery extends Request {
 }
 
 /**
+ * A fetchable UserSettings_NotificationDeliveryPreferences Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationDeliveryPreferencesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationDeliveryPreferences query and return a NotificationDeliveryPreferences
+   *
+   * @returns parsed response from UserSettings_NotificationDeliveryPreferencesQuery
+   */
+  public async fetch(): LinearFetch<NotificationDeliveryPreferences> {
+    const response = await this._request<
+      L.UserSettings_NotificationDeliveryPreferencesQuery,
+      L.UserSettings_NotificationDeliveryPreferencesQueryVariables
+    >(L.UserSettings_NotificationDeliveryPreferencesDocument, {});
+    const data = response.userSettings.notificationDeliveryPreferences;
+
+    return new NotificationDeliveryPreferences(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationDeliveryPreferences_Mobile Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationDeliveryPreferences_MobileQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationDeliveryPreferences_Mobile query and return a NotificationDeliveryPreferencesChannel
+   *
+   * @returns parsed response from UserSettings_NotificationDeliveryPreferences_MobileQuery
+   */
+  public async fetch(): LinearFetch<NotificationDeliveryPreferencesChannel | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationDeliveryPreferences_MobileQuery,
+      L.UserSettings_NotificationDeliveryPreferences_MobileQueryVariables
+    >(L.UserSettings_NotificationDeliveryPreferences_MobileDocument, {});
+    const data = response.userSettings.notificationDeliveryPreferences.mobile;
+
+    return data ? new NotificationDeliveryPreferencesChannel(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationDeliveryPreferences_Mobile_Schedule Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationDeliveryPreferences_Mobile_ScheduleQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationDeliveryPreferences_Mobile_Schedule query and return a NotificationDeliveryPreferencesSchedule
+   *
+   * @returns parsed response from UserSettings_NotificationDeliveryPreferences_Mobile_ScheduleQuery
+   */
+  public async fetch(): LinearFetch<NotificationDeliveryPreferencesSchedule | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_ScheduleQuery,
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_ScheduleQueryVariables
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_ScheduleDocument, {});
+    const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule;
+
+    return data ? new NotificationDeliveryPreferencesSchedule(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Friday Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_FridayQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Friday query and return a NotificationDeliveryPreferencesDay
+   *
+   * @returns parsed response from UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_FridayQuery
+   */
+  public async fetch(): LinearFetch<NotificationDeliveryPreferencesDay | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_FridayQuery,
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_FridayQueryVariables
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_FridayDocument, {});
+    const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.friday;
+
+    return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Monday Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_MondayQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Monday query and return a NotificationDeliveryPreferencesDay
+   *
+   * @returns parsed response from UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_MondayQuery
+   */
+  public async fetch(): LinearFetch<NotificationDeliveryPreferencesDay | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_MondayQuery,
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_MondayQueryVariables
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_MondayDocument, {});
+    const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.monday;
+
+    return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Saturday Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SaturdayQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Saturday query and return a NotificationDeliveryPreferencesDay
+   *
+   * @returns parsed response from UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SaturdayQuery
+   */
+  public async fetch(): LinearFetch<NotificationDeliveryPreferencesDay | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SaturdayQuery,
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SaturdayQueryVariables
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SaturdayDocument, {});
+    const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.saturday;
+
+    return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Sunday Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SundayQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Sunday query and return a NotificationDeliveryPreferencesDay
+   *
+   * @returns parsed response from UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SundayQuery
+   */
+  public async fetch(): LinearFetch<NotificationDeliveryPreferencesDay | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SundayQuery,
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SundayQueryVariables
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SundayDocument, {});
+    const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.sunday;
+
+    return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Thursday Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_ThursdayQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Thursday query and return a NotificationDeliveryPreferencesDay
+   *
+   * @returns parsed response from UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_ThursdayQuery
+   */
+  public async fetch(): LinearFetch<NotificationDeliveryPreferencesDay | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_ThursdayQuery,
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_ThursdayQueryVariables
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_ThursdayDocument, {});
+    const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.thursday;
+
+    return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Tuesday Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_TuesdayQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Tuesday query and return a NotificationDeliveryPreferencesDay
+   *
+   * @returns parsed response from UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_TuesdayQuery
+   */
+  public async fetch(): LinearFetch<NotificationDeliveryPreferencesDay | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_TuesdayQuery,
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_TuesdayQueryVariables
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_TuesdayDocument, {});
+    const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.tuesday;
+
+    return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Wednesday Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_WednesdayQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Wednesday query and return a NotificationDeliveryPreferencesDay
+   *
+   * @returns parsed response from UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_WednesdayQuery
+   */
+  public async fetch(): LinearFetch<NotificationDeliveryPreferencesDay | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_WednesdayQuery,
+      L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_WednesdayQueryVariables
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_WednesdayDocument, {});
+    const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.wednesday;
+
+    return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
+  }
+}
+
+/**
  * A fetchable Viewer_AssignedIssues Query
  *
  * @param request - function to call the graphql client
@@ -25477,15 +25972,6 @@ export class LinearSdk extends Request {
     return new IssueImportCheckSyncQuery(this._request).fetch(issueImportId);
   }
   /**
-   * Fetches the GitHub token, completing the OAuth flow.
-   *
-   * @param code - required code to pass to issueImportFinishGithubOAuth
-   * @returns GithubOAuthTokenPayload
-   */
-  public issueImportFinishGithubOAuth(code: string): LinearFetch<GithubOAuthTokenPayload> {
-    return new IssueImportFinishGithubOAuthQuery(this._request).fetch(code);
-  }
-  /**
    * One specific label.
    *
    * @param id - required id to pass to issueLabel
@@ -26056,24 +26542,6 @@ export class LinearSdk extends Request {
     return new AirbyteIntegrationConnectMutation(this._request).fetch(input);
   }
   /**
-   * Creates a new API key.
-   *
-   * @param input - required input to pass to createApiKey
-   * @returns ApiKeyPayload
-   */
-  public createApiKey(input: L.ApiKeyCreateInput): LinearFetch<ApiKeyPayload> {
-    return new CreateApiKeyMutation(this._request).fetch(input);
-  }
-  /**
-   * Deletes an API key.
-   *
-   * @param id - required id to pass to deleteApiKey
-   * @returns DeletePayload
-   */
-  public deleteApiKey(id: string): LinearFetch<DeletePayload> {
-    return new DeleteApiKeyMutation(this._request).fetch(id);
-  }
-  /**
    * [DEPRECATED] Archives an issue attachment.
    *
    * @param id - required id to pass to archiveAttachment
@@ -26261,6 +26729,15 @@ export class LinearSdk extends Request {
     variables?: Omit<L.AttachmentLinkZendeskMutationVariables, "issueId" | "ticketId">
   ): LinearFetch<AttachmentPayload> {
     return new AttachmentLinkZendeskMutation(this._request).fetch(issueId, ticketId, variables);
+  }
+  /**
+   * Begin syncing the thread for an existing Slack message attachment with a comment thread on its issue.
+   *
+   * @param id - required id to pass to attachmentSyncToSlack
+   * @returns AttachmentPayload
+   */
+  public attachmentSyncToSlack(id: string): LinearFetch<AttachmentPayload> {
+    return new AttachmentSyncToSlackMutation(this._request).fetch(id);
   }
   /**
    * Updates an existing issue attachment.
@@ -26836,6 +27313,15 @@ export class LinearSdk extends Request {
     return new IntegrationGithubConnectMutation(this._request).fetch(installationId);
   }
   /**
+   * Connects the organization with the GitHub Import App.
+   *
+   * @param installationId - required installationId to pass to integrationGithubImportConnect
+   * @returns IntegrationPayload
+   */
+  public integrationGithubImportConnect(installationId: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationGithubImportConnectMutation(this._request).fetch(installationId);
+  }
+  /**
    * Connects the organization with a GitLab Access Token.
    *
    * @param accessToken - required accessToken to pass to integrationGitlabConnect
@@ -26953,6 +27439,21 @@ export class LinearSdk extends Request {
    */
   public integrationSlackAsks(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
     return new IntegrationSlackAsksMutation(this._request).fetch(code, redirectUri);
+  }
+  /**
+   * Slack integration for custom view notifications.
+   *
+   * @param code - required code to pass to integrationSlackCustomViewNotifications
+   * @param customViewId - required customViewId to pass to integrationSlackCustomViewNotifications
+   * @param redirectUri - required redirectUri to pass to integrationSlackCustomViewNotifications
+   * @returns SlackChannelConnectPayload
+   */
+  public integrationSlackCustomViewNotifications(
+    code: string,
+    customViewId: string,
+    redirectUri: string
+  ): LinearFetch<SlackChannelConnectPayload> {
+    return new IntegrationSlackCustomViewNotificationsMutation(this._request).fetch(code, customViewId, redirectUri);
   }
   /**
    * Imports custom emojis from your Slack workspace.
@@ -27187,24 +27688,15 @@ export class LinearSdk extends Request {
   /**
    * Kicks off a GitHub import job.
    *
-   * @param githubRepoName - required githubRepoName to pass to issueImportCreateGithub
-   * @param githubRepoOwner - required githubRepoOwner to pass to issueImportCreateGithub
-   * @param githubToken - required githubToken to pass to issueImportCreateGithub
-   * @param variables - variables without 'githubRepoName', 'githubRepoOwner', 'githubToken' to pass into the IssueImportCreateGithubMutation
+   * @param integrationId - required integrationId to pass to issueImportCreateGithub
+   * @param variables - variables without 'integrationId' to pass into the IssueImportCreateGithubMutation
    * @returns IssueImportPayload
    */
   public issueImportCreateGithub(
-    githubRepoName: string,
-    githubRepoOwner: string,
-    githubToken: string,
-    variables?: Omit<L.IssueImportCreateGithubMutationVariables, "githubRepoName" | "githubRepoOwner" | "githubToken">
+    integrationId: string,
+    variables?: Omit<L.IssueImportCreateGithubMutationVariables, "integrationId">
   ): LinearFetch<IssueImportPayload> {
-    return new IssueImportCreateGithubMutation(this._request).fetch(
-      githubRepoName,
-      githubRepoOwner,
-      githubToken,
-      variables
-    );
+    return new IssueImportCreateGithubMutation(this._request).fetch(integrationId, variables);
   }
   /**
    * Kicks off a Jira import job.
@@ -27304,10 +27796,14 @@ export class LinearSdk extends Request {
    * Creates a new issue relation.
    *
    * @param input - required input to pass to createIssueRelation
+   * @param variables - variables without 'input' to pass into the CreateIssueRelationMutation
    * @returns IssueRelationPayload
    */
-  public createIssueRelation(input: L.IssueRelationCreateInput): LinearFetch<IssueRelationPayload> {
-    return new CreateIssueRelationMutation(this._request).fetch(input);
+  public createIssueRelation(
+    input: L.IssueRelationCreateInput,
+    variables?: Omit<L.CreateIssueRelationMutationVariables, "input">
+  ): LinearFetch<IssueRelationPayload> {
+    return new CreateIssueRelationMutation(this._request).fetch(input, variables);
   }
   /**
    * Deletes an issue relation.
@@ -27628,12 +28124,12 @@ export class LinearSdk extends Request {
     return new UpdateOrganizationInviteMutation(this._request).fetch(id, input);
   }
   /**
-   * Starts a plus trial for the organization. Administrator privileges required.
+   * Starts a trial for the organization. Administrator privileges required.
    *
-   * @returns OrganizationStartPlusTrialPayload
+   * @returns OrganizationStartTrialPayload
    */
-  public get organizationStartPlusTrial(): LinearFetch<OrganizationStartPlusTrialPayload> {
-    return new OrganizationStartPlusTrialMutation(this._request).fetch();
+  public get organizationStartTrial(): LinearFetch<OrganizationStartTrialPayload> {
+    return new OrganizationStartTrialMutation(this._request).fetch();
   }
   /**
    * Updates the user's organization.

@@ -1654,16 +1654,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test IssueImportFinishGithubOAuth query */
-  describe("IssueImportFinishGithubOAuth", () => {
-    /** Test the root model query for IssueImportFinishGithubOAuth */
-    it("issueImportFinishGithubOAuth", async () => {
-      const issueImportFinishGithubOAuth: L.GithubOAuthTokenPayload | undefined =
-        await client.issueImportFinishGithubOAuth("mock-code");
-      expect(issueImportFinishGithubOAuth instanceof L.GithubOAuthTokenPayload);
-    });
-  });
-
   /** Test all IssueLabel queries */
   describe("IssueLabels", () => {
     let _issueLabel: L.IssueLabel | undefined;
@@ -3842,10 +3832,44 @@ describe("generated", () => {
 
   /** Test UserSettings query */
   describe("UserSettings", () => {
+    let _userSettings: L.UserSettings | undefined;
+
     /** Test the root model query for UserSettings */
     it("userSettings", async () => {
       const userSettings: L.UserSettings | undefined = await client.userSettings;
+      _userSettings = userSettings;
       expect(userSettings instanceof L.UserSettings);
+    });
+
+    let _notificationDeliveryPreferences: L.NotificationDeliveryPreferences | undefined;
+
+    /** Test the userSettings model query for UserSettings_NotificationDeliveryPreferences */
+    it("userSettings.notificationDeliveryPreferences", async () => {
+      if (_userSettings) {
+        const notificationDeliveryPreferences: L.NotificationDeliveryPreferences | undefined =
+          _userSettings.notificationDeliveryPreferences;
+        _notificationDeliveryPreferences = notificationDeliveryPreferences;
+        expect(notificationDeliveryPreferences instanceof L.NotificationDeliveryPreferences);
+      } else {
+        console.warn(
+          "codegen-doc:print: No userSettings found - cannot test _userSettings.notificationDeliveryPreferences query"
+        );
+      }
+    });
+
+    let _mobile: L.NotificationDeliveryPreferencesChannel | undefined;
+
+    /** Test the userSettings_notificationDeliveryPreferences model query for UserSettings_NotificationDeliveryPreferences_Mobile */
+    it("userSettings_notificationDeliveryPreferences.mobile", async () => {
+      if (_notificationDeliveryPreferences) {
+        const mobile: L.NotificationDeliveryPreferencesChannel | undefined = _notificationDeliveryPreferences.mobile;
+        _mobile = mobile;
+        expect(mobile instanceof L.NotificationDeliveryPreferencesChannel);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationDeliveryPreferences found - cannot test _notificationDeliveryPreferences.mobile query"
+        );
+      }
     });
   });
 

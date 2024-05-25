@@ -852,6 +852,10 @@ type AuthOrganization {
   """
   deletionRequestedAt: DateTime
   """
+  Whether the organization is enabled. Used as a superuser tool to lock down the org.
+  """
+  enabled: Boolean!
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -901,6 +905,10 @@ type AuthOrganization {
 type AuthOrganizationDomain {
   authType: OrganizationDomainAuthType!
   claimed: Boolean
+  """
+  Prevent users with this domain to create new workspaces.
+  """
+  disableOrganizationCreation: Boolean
   """
   The unique identifier of the entity.
   """
@@ -983,6 +991,10 @@ type AuthResolverResponse {
   """
   lockedOrganizations: [AuthOrganization!]
   """
+  List of locked users that are locked by login restrictions
+  """
+  lockedUsers: [AuthUser!]!
+  """
   Application token.
   """
   token: String @deprecated(reason: "Deprecated and not used anymore. Never populated.")
@@ -1028,6 +1040,10 @@ type AuthUser {
   Organization the user belongs to.
   """
   organization: AuthOrganization!
+  """
+  Whether the user is an organization admin or guest on a database level.
+  """
+  role: UserRoleType!
   """
   User account ID the user belongs to.
   """
@@ -3762,11 +3778,15 @@ input EntityExternalLinkCreateInput {
   """
   Related initiative link.
   """
-  initiativeId: String!
+  initiativeId: String
   """
   The label for the link.
   """
   label: String!
+  """
+  Related project link.
+  """
+  projectId: String
   """
   The order of the item in the entities resources list.
   """
@@ -3942,7 +3962,7 @@ type ExternalUserEdge {
 }
 
 """
-[ALPHA] A facet. Facets are joins between entities. A facet can tie a custom view to a project, or a a project to a roadmap for example.
+A facet. Facets are joins between entities. A facet can tie a custom view to a project, or a a project to a roadmap for example.
 """
 type Facet implements Node {
   """
@@ -4543,6 +4563,47 @@ type GitHubCommitIntegrationPayload {
 }
 
 """
+Metadata and settings for a GitHub import integration.
+"""
+type GitHubImportSettings {
+  """
+  The avatar URL for the GitHub organization.
+  """
+  orgAvatarUrl: String!
+  """
+  The GitHub organization's name.
+  """
+  orgLogin: String!
+  """
+  The type of Github org
+  """
+  orgType: GithubOrgType!
+  """
+  The names of the repositories connected for the GitHub integration.
+  """
+  repositories: [GitHubRepo!]!
+}
+
+input GitHubImportSettingsInput {
+  """
+  The avatar URL for the GitHub organization.
+  """
+  orgAvatarUrl: String!
+  """
+  The GitHub organization's name.
+  """
+  orgLogin: String!
+  """
+  The type of Github org
+  """
+  orgType: GithubOrgType!
+  """
+  The names of the repositories connected for the GitHub integration.
+  """
+  repositories: [GitHubRepoInput!]!
+}
+
+"""
 Metadata and settings for a GitHub Personal integration.
 """
 type GitHubPersonalSettings {
@@ -4597,6 +4658,10 @@ type GitHubSettings {
   """
   orgLogin: String!
   """
+  The type of Github org
+  """
+  orgType: GithubOrgType
+  """
   The names of the repositories connected for the GitHub integration.
   """
   repositories: [GitHubRepo!]
@@ -4615,6 +4680,10 @@ input GitHubSettingsInput {
   The GitHub organization's name.
   """
   orgLogin: String!
+  """
+  The type of Github org
+  """
+  orgType: GithubOrgType
   """
   The names of the repositories connected for the GitHub integration.
   """
@@ -4658,54 +4727,9 @@ input GitLabSettingsInput {
   url: String
 }
 
-"""
-GitHub OAuth token, plus information about the organizations the user is a member of.
-"""
-type GithubOAuthTokenPayload {
-  """
-  A list of the GitHub organizations the user is a member of with attached repositories.
-  """
-  organizations: [GithubOrg!]
-  """
-  The OAuth token if the operation to fetch it was successful.
-  """
-  token: String
-}
-
-"""
-Relevant information for the GitHub organization.
-"""
-type GithubOrg {
-  """
-  GitHub organization id.
-  """
-  id: String!
-  """
-  Whether or not this org is the user's personal repositories.
-  """
-  isPersonal: Boolean
-  """
-  The login for the GitHub organization.
-  """
-  login: String!
-  """
-  Repositories that the organization owns.
-  """
-  repositories: [GithubRepo!]!
-}
-
-"""
-Relevant information for the GitHub repository.
-"""
-type GithubRepo {
-  """
-  The id of the GitHub repository.
-  """
-  id: String!
-  """
-  The name of the GitHub repository.
-  """
-  name: String!
+enum GithubOrgType {
+  organization
+  user
 }
 
 """
@@ -4730,6 +4754,10 @@ input GoogleUserAccountAuthInput {
   Code returned from Google's OAuth flow.
   """
   code: String!
+  """
+  An optional parameter to disable new user signup and force login. Default: false.
+  """
+  disallowSignup: Boolean
   """
   An optional invite link for an organization used to populate available organizations.
   """
@@ -4813,6 +4841,10 @@ type Initiative implements Node {
   [Internal] The description of the initiative.
   """
   description: String
+  """
+  The icon of the initiative.
+  """
+  icon: String
   """
   The unique identifier of the entity.
   """
@@ -4899,6 +4931,10 @@ type Initiative implements Node {
   The sort order of the initiative within the organization.
   """
   sortOrder: Float!
+  """
+  The status of the initiative. One of Planned, Active, Completed
+  """
+  status: InitiativeStatus!
   """
   The estimated completion date of the initiative.
   """
@@ -5002,6 +5038,10 @@ input InitiativeCreateInput {
   """
   description: String
   """
+  The initiative's icon.
+  """
+  icon: String
+  """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
@@ -5017,6 +5057,10 @@ input InitiativeCreateInput {
   The sort order of the initiative within the organization.
   """
   sortOrder: Float
+  """
+  The initiative's status.
+  """
+  status: InitiativeStatus
 }
 
 type InitiativeEdge {
@@ -5144,6 +5188,12 @@ type InitiativePayload {
   success: Boolean!
 }
 
+enum InitiativeStatus {
+  Active
+  Completed
+  Planned
+}
+
 """
 [INTERNAL] Join table between projects and initiatives.
 """
@@ -5257,6 +5307,10 @@ input InitiativeUpdateInput {
   """
   description: String
   """
+  The initiative's icon.
+  """
+  icon: String
+  """
   The name of the initiative.
   """
   name: String
@@ -5268,6 +5322,10 @@ input InitiativeUpdateInput {
   The sort order of the initiative within the organization.
   """
   sortOrder: Float
+  """
+  The initiative's status.
+  """
+  status: InitiativeStatus
   """
   The estimated completion date of the initiative.
   """
@@ -5384,6 +5442,7 @@ enum IntegrationService {
   front
   github
   githubCommit
+  githubImport
   githubPersonal
   gitlab
   googleCalendarPersonal
@@ -5398,6 +5457,7 @@ enum IntegrationService {
   sentry
   slack
   slackAsks
+  slackCustomViewNotifications
   slackOrgProjectUpdatesPost
   slackPersonal
   slackPost
@@ -5412,6 +5472,7 @@ The integration resource's settings.
 type IntegrationSettings {
   front: FrontSettings
   gitHub: GitHubSettings
+  gitHubImport: GitHubImportSettings
   gitHubPersonal: GitHubPersonalSettings
   gitLab: GitLabSettings
   googleSheets: GoogleSheetsSettings
@@ -5424,6 +5485,7 @@ type IntegrationSettings {
   sentry: SentrySettings
   slack: SlackSettings
   slackAsks: SlackAsksSettings
+  slackCustomViewNotifications: SlackPostSettings
   slackOrgProjectUpdatesPost: SlackPostSettings
   slackPost: SlackPostSettings
   slackProjectPost: SlackPostSettings
@@ -5433,6 +5495,7 @@ type IntegrationSettings {
 input IntegrationSettingsInput {
   front: FrontSettingsInput
   gitHub: GitHubSettingsInput
+  gitHubImport: GitHubImportSettingsInput
   gitHubPersonal: GitHubPersonalSettingsInput
   gitLab: GitLabSettingsInput
   googleSheets: GoogleSheetsSettingsInput
@@ -5445,6 +5508,7 @@ input IntegrationSettingsInput {
   sentry: SentrySettingsInput
   slack: SlackSettingsInput
   slackAsks: SlackAsksSettingsInput
+  slackCustomViewNotifications: SlackPostSettingsInput
   slackOrgProjectUpdatesPost: SlackPostSettingsInput
   slackPost: SlackPostSettingsInput
   slackProjectPost: SlackPostSettingsInput
@@ -6861,9 +6925,16 @@ type IssueHistory implements Node {
   """
   actorId: String
   """
+  The actors that performed the actions. This field may be empty in the case of integrations or automations.
+  """
+  actors: [User!]!
+  """
   ID's of labels that were added.
   """
   addedLabelIds: [String!]
+  """
+  The labels that were added to the issue.
+  """
   addedLabels: [IssueLabel!]
   """
   Whether the issue is archived at the time of this history entry.
@@ -6985,6 +7056,9 @@ type IssueHistory implements Node {
   ID's of labels that were removed.
   """
   removedLabelIds: [String!]
+  """
+  The labels that were removed from the issue.
+  """
   removedLabels: [IssueLabel!]
   """
   The user to whom the issue was assigned to.
@@ -7062,6 +7136,9 @@ type IssueHistory implements Node {
   Whether the issue was trashed or un-trashed.
   """
   trashed: Boolean
+  """
+  The users that were notified of the issue.
+  """
   triageResponsibilityNotifiedUsers: [User!]
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -7133,6 +7210,10 @@ type IssueImport implements Node {
   The service from which data will be imported.
   """
   service: String!
+  """
+  Metadata related to import service.
+  """
+  serviceMetadata: JSONObject
   """
   The status for the import job.
   """
@@ -8422,7 +8503,11 @@ input JiraConfigurationInput {
   """
   hostname: String!
   """
-  The Jira project keys to scope the integration to.
+  Whether this integration will be setup using the manual webhook flow.
+  """
+  manualSetup: Boolean
+  """
+  [DEPRECATED] The Jira project keys to scope the integration to.
   """
   project: String
 }
@@ -8527,9 +8612,9 @@ type JiraSettings {
   """
   isJiraServer: Boolean
   """
-  Whether the user needs to provide setup information about the webhook to complete the integration setup.
+  Whether this integration is using a manual setup flow.
   """
-  needsManualSetup: Boolean
+  manualSetup: Boolean
   """
   The mapping of Jira project id => Linear team id.
   """
@@ -8538,6 +8623,10 @@ type JiraSettings {
   The Jira projects for the organization.
   """
   projects: [JiraProjectData!]!
+  """
+  Whether the user needs to provide setup information about the webhook to complete the integration setup. Only relevant for integrations that use a manual setup flow
+  """
+  setupPending: Boolean
 }
 
 input JiraSettingsInput {
@@ -8546,9 +8635,9 @@ input JiraSettingsInput {
   """
   isJiraServer: Boolean = false
   """
-  Whether the user needs to provide setup information about the webhook to complete the integration setup.
+  Whether this integration is using a manual setup flow.
   """
-  needsManualSetup: Boolean
+  manualSetup: Boolean
   """
   The mapping of Jira project id => Linear team id.
   """
@@ -8557,6 +8646,10 @@ input JiraSettingsInput {
   The Jira projects for the organization.
   """
   projects: [JiraProjectDataInput!]!
+  """
+  Whether the user needs to provide setup information about the webhook to complete the integration setup. Only relevant for integrations that use a manual setup flow
+  """
+  setupPending: Boolean
 }
 
 input JiraUpdateInput {
@@ -8721,7 +8814,7 @@ type Mutation {
     input: AirbyteConfigurationInput!
   ): IntegrationPayload!
   """
-  Creates a new API key.
+  [INTERNAL] Creates a new API key.
   """
   apiKeyCreate(
     """
@@ -8730,7 +8823,7 @@ type Mutation {
     input: ApiKeyCreateInput!
   ): ApiKeyPayload!
   """
-  Deletes an API key.
+  [INTERNAL] Deletes an API key.
   """
   apiKeyDelete(
     """
@@ -9082,6 +9175,15 @@ type Mutation {
     The title to use for the attachment.
     """
     title: String
+  ): AttachmentPayload!
+  """
+  Begin syncing the thread for an existing Slack message attachment with a comment thread on its issue.
+  """
+  attachmentSyncToSlack(
+    """
+    The ID of the Slack attachment to begin syncing.
+    """
+    id: String!
   ): AttachmentPayload!
   """
   Updates an existing issue attachment.
@@ -9773,6 +9875,15 @@ type Mutation {
     installationId: String!
   ): IntegrationPayload!
   """
+  Connects the organization with the GitHub Import App.
+  """
+  integrationGithubImportConnect(
+    """
+    The GitHub data to connect with.
+    """
+    installationId: String!
+  ): IntegrationPayload!
+  """
   Connects the organization with a GitLab Access Token.
   """
   integrationGitlabConnect(
@@ -9959,6 +10070,23 @@ type Mutation {
     """
     redirectUri: String!
   ): IntegrationPayload!
+  """
+  Slack integration for custom view notifications.
+  """
+  integrationSlackCustomViewNotifications(
+    """
+    The Slack OAuth code.
+    """
+    code: String!
+    """
+    Integration's associated custom view.
+    """
+    customViewId: String!
+    """
+    The Slack OAuth redirect URI.
+    """
+    redirectUri: String!
+  ): SlackChannelConnectPayload!
   """
   Imports custom emojis from your Slack workspace.
   """
@@ -10296,29 +10424,29 @@ type Mutation {
   """
   issueImportCreateGithub(
     """
-    ID of the Github repository from which we will import data.
+    [DEPRECATED] ID of the Github repository from which we will import data.
     """
     githubRepoId: String
     """
-    GitHub repository name from which we will import data.
+    IDs of the Github repositories from which we will import data.
     """
-    githubRepoName: String!
+    githubRepoIds: [Int!]
     """
-    GitHub owner (user or org) for the repository from which we will import data.
+    [DEPRECATED] GitHub repository name from which we will import data.
     """
-    githubRepoOwner: String!
+    githubRepoName: String
+    """
+    [DEPRECATED] GitHub owner (user or org) for the repository from which we will import data.
+    """
+    githubRepoOwner: String
     """
     Whether or not we should import GitHub organization level projects.
     """
     githubShouldImportOrgProjects: Boolean
     """
-    GitHub token to fetch information from the GitHub API.
+    [DEPRECATED] GitHub token to fetch information from the GitHub API.
     """
-    githubToken: String!
-    """
-    ID of issue import. If not provided it will be generated.
-    """
-    id: String
+    githubToken: String
     """
     Whether or not we should collect the data for closed issues.
     """
@@ -10327,6 +10455,10 @@ type Mutation {
     Whether to instantly process the import with the default configuration mapping.
     """
     instantProcess: Boolean
+    """
+    ID of the Github import integration to use to access issues.
+    """
+    integrationId: String!
     """
     ID of the organization into which to import data.
     """
@@ -10384,6 +10516,19 @@ type Mutation {
     Name of new team. When teamId is not set.
     """
     teamName: String
+  ): IssueImportPayload!
+  """
+  [INTERNAL] Kicks off a Linear to Linear import job.
+  """
+  issueImportCreateLinearV2(
+    """
+    ID of issue import. If not provided it will be generated.
+    """
+    id: String
+    """
+    The source organization to import from.
+    """
+    linearSourceOrganizationId: String!
   ): IssueImportPayload!
   """
   Deletes an import job.
@@ -10467,6 +10612,10 @@ type Mutation {
     The issue relation to create.
     """
     input: IssueRelationCreateInput!
+    """
+    Used by client undo operations. Should not be set directly.
+    """
+    overrideCreatedAt: DateTime
   ): IssueRelationPayload!
   """
   Deletes an issue relation.
@@ -10780,6 +10929,19 @@ type Mutation {
     id: String!
   ): DeletePayload!
   """
+  [INTERNAL] Updates an organization domain settings.
+  """
+  organizationDomainUpdate(
+    """
+    The identifier of the domain to update.
+    """
+    id: String!
+    """
+    The organization domain entry to update.
+    """
+    input: OrganizationDomainUpdateInput!
+  ): OrganizationDomainPayload!
+  """
   [INTERNAL] Verifies a domain to be added to an organization.
   """
   organizationDomainVerify(
@@ -10820,9 +10982,9 @@ type Mutation {
     input: OrganizationInviteUpdateInput!
   ): OrganizationInvitePayload!
   """
-  Starts a plus trial for the organization. Administrator privileges required.
+  Starts a trial for the organization. Administrator privileges required.
   """
-  organizationStartPlusTrial: OrganizationStartPlusTrialPayload!
+  organizationStartTrial: OrganizationStartTrialPayload!
   """
   Updates the user's organization.
   """
@@ -10832,6 +10994,25 @@ type Mutation {
     """
     input: OrganizationUpdateInput!
   ): OrganizationPayload!
+  """
+  [INTERNAL] Finish passkey login process.
+  """
+  passkeyLoginFinish(
+    """
+    Random ID to start passkey login with.
+    """
+    authId: String!
+    response: JSONObject!
+  ): AuthResolverResponse!
+  """
+  [INTERNAL] Starts passkey login process.
+  """
+  passkeyLoginStart(
+    """
+    Random ID to start passkey login with.
+    """
+    authId: String!
+  ): PasskeyLoginStartResponse!
   """
   Archives a project.
   """
@@ -10929,6 +11110,19 @@ type Mutation {
     """
     input: ProjectMilestoneUpdateInput!
   ): ProjectMilestonePayload!
+  """
+  [INTERNAL] Updates all projects currently assigned to to a project status to a new project status.
+  """
+  projectReassignStatus(
+    """
+    The identifier of the new project status to update the projects to.
+    """
+    newProjectStatusId: String!
+    """
+    The identifier of the project status with which projects will be updated.
+    """
+    originalProjectStatusId: String!
+  ): SuccessPayload!
   """
   [ALPHA] Creates a new project relation.
   """
@@ -11715,6 +11909,146 @@ type NotificationConnection {
   edges: [NotificationEdge!]!
   nodes: [Notification!]!
   pageInfo: PageInfo!
+}
+
+"""
+A user's notification delivery preferences.
+"""
+type NotificationDeliveryPreferences {
+  """
+  The delivery preferences for the mobile channel.
+  """
+  mobile: NotificationDeliveryPreferencesChannel
+}
+
+"""
+A user's notification delivery preferences.
+"""
+type NotificationDeliveryPreferencesChannel {
+  """
+  Whether notifications are enabled for this channel.
+  """
+  notificationsDisabled: Boolean
+  """
+  The schedule for notifications on this channel.
+  """
+  schedule: NotificationDeliveryPreferencesSchedule!
+}
+
+input NotificationDeliveryPreferencesChannelInput {
+  """
+  Whether notifications are enabled for this channel.
+  """
+  notificationsDisabled: Boolean
+  """
+  The schedule for notifications on this channel.
+  """
+  schedule: NotificationDeliveryPreferencesScheduleInput!
+}
+
+"""
+A user's notification delivery schedule for a particular day.
+"""
+type NotificationDeliveryPreferencesDay {
+  """
+  The time notifications end.
+  """
+  end: String
+  """
+  The time notifications start.
+  """
+  start: String
+}
+
+input NotificationDeliveryPreferencesDayInput {
+  """
+  The time notifications end.
+  """
+  end: String
+  """
+  The time notifications start.
+  """
+  start: String
+}
+
+input NotificationDeliveryPreferencesInput {
+  """
+  The delivery preferences for the mobile channel.
+  """
+  mobile: NotificationDeliveryPreferencesChannelInput
+}
+
+"""
+A user's notification delivery schedule for a particular day.
+"""
+type NotificationDeliveryPreferencesSchedule {
+  """
+  Whether the schedule is disabled.
+  """
+  disabled: Boolean
+  """
+  Delivery preferences for Friday.
+  """
+  friday: NotificationDeliveryPreferencesDay!
+  """
+  Delivery preferences for Monday.
+  """
+  monday: NotificationDeliveryPreferencesDay!
+  """
+  Delivery preferences for Saturday.
+  """
+  saturday: NotificationDeliveryPreferencesDay!
+  """
+  Delivery preferences for Sunday.
+  """
+  sunday: NotificationDeliveryPreferencesDay!
+  """
+  Delivery preferences for Thursday.
+  """
+  thursday: NotificationDeliveryPreferencesDay!
+  """
+  Delivery preferences for Tuesday.
+  """
+  tuesday: NotificationDeliveryPreferencesDay!
+  """
+  Delivery preferences for Wednesday.
+  """
+  wednesday: NotificationDeliveryPreferencesDay!
+}
+
+input NotificationDeliveryPreferencesScheduleInput {
+  """
+  Whether the schedule is disabled.
+  """
+  disabled: Boolean
+  """
+  Delivery preferences for Friday.
+  """
+  friday: NotificationDeliveryPreferencesDayInput!
+  """
+  Delivery preferences for Monday.
+  """
+  monday: NotificationDeliveryPreferencesDayInput!
+  """
+  Delivery preferences for Saturday.
+  """
+  saturday: NotificationDeliveryPreferencesDayInput!
+  """
+  Delivery preferences for Sunday.
+  """
+  sunday: NotificationDeliveryPreferencesDayInput!
+  """
+  Delivery preferences for Thursday.
+  """
+  thursday: NotificationDeliveryPreferencesDayInput!
+  """
+  Delivery preferences for Tuesday.
+  """
+  tuesday: NotificationDeliveryPreferencesDayInput!
+  """
+  Delivery preferences for Wednesday.
+  """
+  wednesday: NotificationDeliveryPreferencesDayInput!
 }
 
 type NotificationEdge {
@@ -13251,6 +13585,10 @@ type Organization implements Node {
   """
   projectStatuses: [ProjectStatus!]!
   """
+  [ALPHA] The n-weekly frequency at which to prompt for project updates. When not set, reminders are off.
+  """
+  projectUpdateReminderFrequencyInWeeks: Float
+  """
   The day at which to prompt for project updates.
   """
   projectUpdateRemindersDay: Day!
@@ -13357,7 +13695,7 @@ type Organization implements Node {
   """
   themeSettings: JSONObject
   """
-  The time at which the trial of the plus plan will end.
+  The time at which the trial will end.
   """
   trialEndsAt: DateTime
   """
@@ -13455,6 +13793,10 @@ type OrganizationDomain implements Node {
   """
   creator: User
   """
+  Prevent users with this domain to create new workspaces.
+  """
+  disableOrganizationCreation: Boolean
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -13541,6 +13883,13 @@ type OrganizationDomainSimplePayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+input OrganizationDomainUpdateInput {
+  """
+  Prevent users with this domain to create new workspaces. Only allowed to set on claimed domains!
+  """
+  disableOrganizationCreation: Boolean
 }
 
 input OrganizationDomainVerificationInput {
@@ -13812,7 +14161,7 @@ type OrganizationRegionResponse {
   success: Boolean!
 }
 
-type OrganizationStartPlusTrialPayload {
+type OrganizationStartTrialPayload {
   """
   Whether the operation was successful.
   """
@@ -13860,6 +14209,10 @@ input OrganizationUpdateInput {
   Whether the organization has opted for having to approve all OAuth applications for install.
   """
   oauthAppReview: Boolean
+  """
+  [ALPHA] The n-weekly frequency at which to prompt for project updates.
+  """
+  projectUpdateReminderFrequencyInWeeks: Float
   """
   The day at which project updates are sent.
   """
@@ -14020,6 +14373,65 @@ type PaidSubscription implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+}
+
+"""
+Registered passkey for authentication.
+"""
+type Passkey {
+  aaguid: String!
+  """
+  Used web browser. Only set on creation.
+  """
+  browserType: String
+  """
+  Type of application used to create.
+  """
+  clientType: AuthenticationSessionType!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  id: String!
+  """
+  IP address. Only set on creation.
+  """
+  ip: String
+  label: String!
+  """
+  The time when the passkey was last used.
+  """
+  lastUsedAt: DateTime!
+  lastUsedSessionId: String
+  """
+  Location city name. Only set on creation.
+  """
+  locationCity: String
+  """
+  Location country name. Only set on creation.
+  """
+  locationCountry: String
+  """
+  Location country code. Only set on creation.
+  """
+  locationCountryCode: String
+  """
+  Location region code. Only set on creation.
+  """
+  locationRegionCode: String
+  """
+  Date when the passkey was last updated.
+  """
+  updatedAt: DateTime!
+  """
+  Creating session's user-agent. Only set on creation.
+  """
+  userAgent: String
+}
+
+type PasskeyLoginStartResponse {
+  options: JSONObject!
+  success: Boolean!
 }
 
 """
@@ -17319,15 +17731,6 @@ type Query {
     issueImportId: String!
   ): IssueImportSyncCheckPayload!
   """
-  Fetches the GitHub token, completing the OAuth flow.
-  """
-  issueImportFinishGithubOAuth(
-    """
-    OAuth code.
-    """
-    code: String!
-  ): GithubOAuthTokenPayload!
-  """
   One specific label.
   """
   issueLabel(id: String!): IssueLabel!
@@ -18997,6 +19400,10 @@ Shared Slack integration settings.
 """
 type SharedSlackSettings {
   """
+  Enterprise id of the connected Slack enterprise
+  """
+  enterpriseId: String
+  """
   Enterprise name of the connected Slack enterprise
   """
   enterpriseName: String
@@ -19015,6 +19422,10 @@ type SharedSlackSettings {
 }
 
 input SharedSlackSettingsInput {
+  """
+  Enterprise id of the connected Slack enterprise
+  """
+  enterpriseId: String
   """
   Enterprise name of the connected Slack enterprise
   """
@@ -19092,6 +19503,10 @@ type SlackAsksSettings {
   """
   canAdministrate: UserRoleType!
   """
+  Enterprise id of the connected Slack enterprise
+  """
+  enterpriseId: String
+  """
   Enterprise name of the connected Slack enterprise
   """
   enterpriseName: String
@@ -19118,6 +19533,10 @@ input SlackAsksSettingsInput {
   The user role type that is allowed to manage Asks settings.
   """
   canAdministrate: UserRoleType!
+  """
+  Enterprise id of the connected Slack enterprise
+  """
+  enterpriseId: String
   """
   Enterprise name of the connected Slack enterprise
   """
@@ -19318,6 +19737,10 @@ Settings for the regular Slack integration.
 """
 type SlackSettings {
   """
+  Enterprise id of the connected Slack enterprise
+  """
+  enterpriseId: String
+  """
   Enterprise name of the connected Slack enterprise
   """
   enterpriseName: String
@@ -19340,6 +19763,10 @@ type SlackSettings {
 }
 
 input SlackSettingsInput {
+  """
+  Enterprise id of the connected Slack enterprise
+  """
+  enterpriseId: String
   """
   Enterprise name of the connected Slack enterprise
   """
@@ -19559,6 +19986,17 @@ input SubTypeComparator {
   Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
   """
   null: Boolean
+}
+
+type SuccessPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 type SummaryPayload {
@@ -21666,6 +22104,10 @@ type User implements Node {
     orderBy: PaginationOrderBy
   ): TeamConnection!
   """
+  [Internal] Text drafts created by the user.
+  """
+  textDrafts: [TextDraft!]!
+  """
   The local timezone of the user.
   """
   timezone: String
@@ -22128,6 +22570,10 @@ type UserSettings implements Node {
   """
   id: ID!
   """
+  The notification delivery preferences for the user.
+  """
+  notificationDeliveryPreferences: NotificationDeliveryPreferences!
+  """
   The notification channel settings the user has selected.
   """
   notificationPreferences: JSONObject!
@@ -22218,6 +22664,10 @@ type UserSettingsPayload {
 }
 
 input UserSettingsUpdateInput {
+  """
+  The user's notification delivery preferences.
+  """
+  notificationDeliveryPreferences: NotificationDeliveryPreferencesInput
   """
   The user's notification preferences.
   """
@@ -22456,17 +22906,20 @@ enum ViewType {
   customRoadmap
   customView
   customViews
+  customViewsPersonal
   cycle
   inbox
   initiative
   initiatives
+  initiativesAll
+  initiativesCompleted
+  initiativesPlanned
   issueIdentifiers
   label
   myIssues
   myIssuesActivity
   myIssuesCreatedByMe
   myIssuesSubscribedTo
-  myViews
   project
   projectDocuments
   projects

@@ -504,6 +504,24 @@ fragment Document on Document {
   }
 }
 
+# A facet. Facets are joins between entities. A facet can tie a custom view to a project, or a a
+# project to a roadmap for example.
+fragment Facet on Facet {
+  __typename
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The sort order of the facet.
+  sortOrder
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
 # A generic payload return from entity archive mutations.
 fragment AttachmentArchivePayload on AttachmentArchivePayload {
   __typename
@@ -1086,6 +1104,10 @@ fragment IssueHistory on IssueHistory {
   addedLabelIds
   # ID's of labels that were removed.
   removedLabelIds
+  # The actors that performed the actions. This field may be empty in the case of integrations or automations.
+  actors {
+    ...User
+  }
   # The bot that performed the action.
   botActor {
     ...ActorBot
@@ -1127,6 +1149,14 @@ fragment IssueHistory on IssueHistory {
   # The issue that was changed.
   issue {
     id
+  }
+  # The labels that were added to the issue.
+  addedLabels {
+    ...IssueLabel
+  }
+  # The labels that were removed from the issue.
+  removedLabels {
+    ...IssueLabel
   }
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -1198,6 +1228,10 @@ fragment IssueHistory on IssueHistory {
   actor {
     id
   }
+  # The users that were notified of the issue.
+  triageResponsibilityNotifiedUsers {
+    ...User
+  }
   # What the due date was changed from.
   fromDueDate
   # What the due date was changed to.
@@ -1224,15 +1258,6 @@ fragment IssueHistory on IssueHistory {
   trashed
   # Whether the issue's description was updated.
   updatedDescription
-  addedLabels {
-    ...IssueLabel
-  }
-  removedLabels {
-    ...IssueLabel
-  }
-  triageResponsibilityNotifiedUsers {
-    ...User
-  }
 }
 
 # A relation between two issues.
@@ -1793,6 +1818,8 @@ fragment AuthUser on AuthUser {
   userAccountId
   # Whether the user is active.
   active
+  # Whether the user is an organization admin or guest on a database level.
+  role
   id
 }
 
@@ -1847,6 +1874,70 @@ fragment User on User {
   isMe
   # [DEPRECATED] Hash for the user to be used in calendar URLs.
   calendarHash
+}
+
+# A user's notification delivery preferences.
+fragment NotificationDeliveryPreferences on NotificationDeliveryPreferences {
+  __typename
+  # The delivery preferences for the mobile channel.
+  mobile {
+    ...NotificationDeliveryPreferencesChannel
+  }
+}
+
+# A user's notification delivery preferences.
+fragment NotificationDeliveryPreferencesChannel on NotificationDeliveryPreferencesChannel {
+  __typename
+  # The schedule for notifications on this channel.
+  schedule {
+    ...NotificationDeliveryPreferencesSchedule
+  }
+  # Whether notifications are enabled for this channel.
+  notificationsDisabled
+}
+
+# A user's notification delivery schedule for a particular day.
+fragment NotificationDeliveryPreferencesDay on NotificationDeliveryPreferencesDay {
+  __typename
+  # The time notifications end.
+  end
+  # The time notifications start.
+  start
+}
+
+# A user's notification delivery schedule for a particular day.
+fragment NotificationDeliveryPreferencesSchedule on NotificationDeliveryPreferencesSchedule {
+  __typename
+  # Delivery preferences for Friday.
+  friday {
+    ...NotificationDeliveryPreferencesDay
+  }
+  # Delivery preferences for Monday.
+  monday {
+    ...NotificationDeliveryPreferencesDay
+  }
+  # Delivery preferences for Saturday.
+  saturday {
+    ...NotificationDeliveryPreferencesDay
+  }
+  # Delivery preferences for Sunday.
+  sunday {
+    ...NotificationDeliveryPreferencesDay
+  }
+  # Delivery preferences for Thursday.
+  thursday {
+    ...NotificationDeliveryPreferencesDay
+  }
+  # Delivery preferences for Tuesday.
+  tuesday {
+    ...NotificationDeliveryPreferencesDay
+  }
+  # Delivery preferences for Wednesday.
+  wednesday {
+    ...NotificationDeliveryPreferencesDay
+  }
+  # Whether the schedule is disabled.
+  disabled
 }
 
 # A user's web browser push notification subscription.
@@ -2055,6 +2146,8 @@ fragment IssueImport on IssueImport {
   errorMetadata
   # File URL for the uploaded CSV for the import, if there is one.
   csvFileUrl
+  # Metadata related to import service.
+  serviceMetadata
   # New team's name in cases when teamId not set.
   teamName
   # The data mapping configuration for the import job.
@@ -2472,7 +2565,7 @@ fragment Organization on Organization {
   archivedAt
   # The time at which the entity was created.
   createdAt
-  # The time at which the trial of the plus plan will end.
+  # The time at which the trial will end.
   trialEndsAt
   # The unique identifier of the entity.
   id
@@ -2519,6 +2612,8 @@ fragment AuthOrganization on AuthOrganization {
   samlEnabled
   # Whether SCIM provisioning is enabled for organization.
   scimEnabled
+  # Whether the organization is enabled. Used as a superuser tool to lock down the org.
+  enabled
   userCount
 }
 
@@ -2792,6 +2887,8 @@ fragment OrganizationDomain on OrganizationDomain {
   verificationEmail
   # Is this domain verified.
   verified
+  # Prevent users with this domain to create new workspaces.
+  disableOrganizationCreation
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
@@ -2825,17 +2922,6 @@ fragment FrontSettings on FrontSettings {
   sendNoteOnStatusChange
   # Whether an internal message should be added when someone comments on an issue.
   sendNoteOnComment
-}
-
-# GitHub OAuth token, plus information about the organizations the user is a member of.
-fragment GithubOAuthTokenPayload on GithubOAuthTokenPayload {
-  __typename
-  # A list of the GitHub organizations the user is a member of with attached repositories.
-  organizations {
-    ...GithubOrg
-  }
-  # The OAuth token if the operation to fetch it was successful.
-  token
 }
 
 # GitHub repos available to sync.
@@ -2964,10 +3050,12 @@ fragment JiraSettings on JiraSettings {
   projectMapping {
     ...JiraLinearMapping
   }
-  # Whether the user needs to provide setup information about the webhook to complete the integration setup.
-  needsManualSetup
+  # Whether the user needs to provide setup information about the webhook to complete the integration setup. Only relevant for integrations that use a manual setup flow
+  setupPending
   # Whether this integration is for Jira Server or not.
   isJiraServer
+  # Whether this integration is using a manual setup flow.
+  manualSetup
 }
 
 # Join table between projects and roadmaps.
@@ -3086,6 +3174,21 @@ fragment GitHubPersonalSettings on GitHubPersonalSettings {
   login
 }
 
+# Metadata and settings for a GitHub import integration.
+fragment GitHubImportSettings on GitHubImportSettings {
+  __typename
+  # The GitHub organization's name.
+  orgLogin
+  # The avatar URL for the GitHub organization.
+  orgAvatarUrl
+  # The names of the repositories connected for the GitHub integration.
+  repositories {
+    ...GitHubRepo
+  }
+  # The type of Github org
+  orgType
+}
+
 # Metadata and settings for a GitHub integration.
 fragment GitHubSettings on GitHubSettings {
   __typename
@@ -3101,6 +3204,8 @@ fragment GitHubSettings on GitHubSettings {
   repositories {
     ...GitHubRepo
   }
+  # The type of Github org
+  orgType
 }
 
 # Metadata and settings for a GitLab integration.
@@ -3324,28 +3429,35 @@ fragment Application on Application {
   developerUrl
 }
 
-# Relevant information for the GitHub organization.
-fragment GithubOrg on GithubOrg {
+# Registered passkey for authentication.
+fragment Passkey on Passkey {
   __typename
-  # GitHub organization id.
+  # Creating session's user-agent. Only set on creation.
+  userAgent
+  # Date when the passkey was last updated.
+  updatedAt
+  # IP address. Only set on creation.
+  ip
+  # Location city name. Only set on creation.
+  locationCity
+  # Location country code. Only set on creation.
+  locationCountryCode
+  # Location country name. Only set on creation.
+  locationCountry
+  # Location region code. Only set on creation.
+  locationRegionCode
+  # The time at which the entity was created.
+  createdAt
+  # The time when the passkey was last used.
+  lastUsedAt
+  # Type of application used to create.
+  clientType
+  # Used web browser. Only set on creation.
+  browserType
+  aaguid
   id
-  # Repositories that the organization owns.
-  repositories {
-    ...GithubRepo
-  }
-  # The login for the GitHub organization.
-  login
-  # Whether or not this org is the user's personal repositories.
-  isPersonal
-}
-
-# Relevant information for the GitHub repository.
-fragment GithubRepo on GithubRepo {
-  __typename
-  # The id of the GitHub repository.
-  id
-  # The name of the GitHub repository.
-  name
+  label
+  lastUsedSessionId
 }
 
 # Request to install OAuth clients on organizations and the response to the request.
@@ -3387,6 +3499,8 @@ fragment SentrySettings on SentrySettings {
 # Settings for the regular Slack integration.
 fragment SlackSettings on SlackSettings {
   __typename
+  # Enterprise id of the connected Slack enterprise
+  enterpriseId
   # Enterprise name of the connected Slack enterprise
   enterpriseName
   # Slack workspace id
@@ -3402,6 +3516,8 @@ fragment SlackSettings on SlackSettings {
 # Shared Slack integration settings.
 fragment SharedSlackSettings on SharedSlackSettings {
   __typename
+  # Enterprise id of the connected Slack enterprise
+  enterpriseId
   # Enterprise name of the connected Slack enterprise
   enterpriseName
   # Slack workspace id
@@ -3415,6 +3531,8 @@ fragment SharedSlackSettings on SharedSlackSettings {
 # Slack Asks specific settings.
 fragment SlackAsksSettings on SlackAsksSettings {
   __typename
+  # Enterprise id of the connected Slack enterprise
+  enterpriseId
   # Enterprise name of the connected Slack enterprise
   enterpriseName
   # Slack workspace id
@@ -3492,6 +3610,9 @@ fragment IntegrationSettings on IntegrationSettings {
   gitHub {
     ...GitHubSettings
   }
+  gitHubImport {
+    ...GitHubImportSettings
+  }
   gitHubPersonal {
     ...GitHubPersonalSettings
   }
@@ -3527,6 +3648,9 @@ fragment IntegrationSettings on IntegrationSettings {
   }
   slackAsks {
     ...SlackAsksSettings
+  }
+  slackCustomViewNotifications {
+    ...SlackPostSettings
   }
   slackOrgProjectUpdatesPost {
     ...SlackPostSettings
@@ -3590,6 +3714,10 @@ fragment UserSettings on UserSettings {
   updatedAt
   # The notification channel settings the user has selected.
   notificationPreferences
+  # The notification delivery preferences for the user.
+  notificationDeliveryPreferences {
+    ...NotificationDeliveryPreferences
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -3987,6 +4115,8 @@ fragment AuthOauthClientWithTokens on AuthOauthClientWithTokens {
 
 fragment AuthOrganizationDomain on AuthOrganizationDomain {
   __typename
+  # Prevent users with this domain to create new workspaces.
+  disableOrganizationCreation
   # The unique identifier of the entity.
   id
   authType
@@ -4024,6 +4154,10 @@ fragment AuthResolverResponse on AuthResolverResponse {
   lastUsedOrganizationId
   # List of active users that belong to the user account.
   users {
+    ...AuthUser
+  }
+  # List of locked users that are locked by login restrictions
+  lockedUsers {
     ...AuthUser
   }
   # List of organization available to this user account but locked due to the current auth method.
@@ -4388,6 +4522,16 @@ fragment ExternalUserConnection on ExternalUserConnection {
   __typename
   nodes {
     ...ExternalUser
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment FacetConnection on FacetConnection {
+  __typename
+  nodes {
+    ...Facet
   }
   pageInfo {
     ...PageInfo
@@ -5060,7 +5204,7 @@ fragment OrganizationRegionResponse on OrganizationRegionResponse {
   success
 }
 
-fragment OrganizationStartPlusTrialPayload on OrganizationStartPlusTrialPayload {
+fragment OrganizationStartTrialPayload on OrganizationStartTrialPayload {
   __typename
   # Whether the operation was successful.
   success
@@ -5076,6 +5220,12 @@ fragment PageInfo on PageInfo {
   hasPreviousPage
   # Indicates if there are more results when paginating forward.
   hasNextPage
+}
+
+fragment PasskeyLoginStartResponse on PasskeyLoginStartResponse {
+  __typename
+  options
+  success
 }
 
 fragment ProjectConnection on ProjectConnection {
@@ -5524,6 +5674,14 @@ fragment SsoUrlFromEmailResponse on SsoUrlFromEmailResponse {
   __typename
   # SAML SSO sign-in URL.
   samlSsoUrl
+  # Whether the operation was successful.
+  success
+}
+
+fragment SuccessPayload on SuccessPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
   # Whether the operation was successful.
   success
 }
@@ -7344,15 +7502,6 @@ query issueImportCheckSync(
 ) {
   issueImportCheckSync(issueImportId: $issueImportId) {
     ...IssueImportSyncCheckPayload
-  }
-}
-# Fetches the GitHub token, completing the OAuth flow.
-query issueImportFinishGithubOAuth(
-  # OAuth code.
-  $code: String!
-) {
-  issueImportFinishGithubOAuth(code: $code) {
-    ...GithubOAuthTokenPayload
   }
 }
 # One specific label.
@@ -9599,6 +9748,134 @@ query userSettings {
     ...UserSettings
   }
 }
+# The notification delivery preferences for the user.
+query userSettings_notificationDeliveryPreferences {
+  userSettings {
+    notificationDeliveryPreferences {
+      ...NotificationDeliveryPreferences
+    }
+  }
+}
+# The delivery preferences for the mobile channel.
+query userSettings_notificationDeliveryPreferences_mobile {
+  userSettings {
+    notificationDeliveryPreferences {
+      mobile {
+        ...NotificationDeliveryPreferencesChannel
+      }
+    }
+  }
+}
+# The schedule for notifications on this channel.
+query userSettings_notificationDeliveryPreferences_mobile_schedule {
+  userSettings {
+    notificationDeliveryPreferences {
+      mobile {
+        schedule {
+          ...NotificationDeliveryPreferencesSchedule
+        }
+      }
+    }
+  }
+}
+# Delivery preferences for Friday.
+query userSettings_notificationDeliveryPreferences_mobile_schedule_friday {
+  userSettings {
+    notificationDeliveryPreferences {
+      mobile {
+        schedule {
+          friday {
+            ...NotificationDeliveryPreferencesDay
+          }
+        }
+      }
+    }
+  }
+}
+# Delivery preferences for Monday.
+query userSettings_notificationDeliveryPreferences_mobile_schedule_monday {
+  userSettings {
+    notificationDeliveryPreferences {
+      mobile {
+        schedule {
+          monday {
+            ...NotificationDeliveryPreferencesDay
+          }
+        }
+      }
+    }
+  }
+}
+# Delivery preferences for Saturday.
+query userSettings_notificationDeliveryPreferences_mobile_schedule_saturday {
+  userSettings {
+    notificationDeliveryPreferences {
+      mobile {
+        schedule {
+          saturday {
+            ...NotificationDeliveryPreferencesDay
+          }
+        }
+      }
+    }
+  }
+}
+# Delivery preferences for Sunday.
+query userSettings_notificationDeliveryPreferences_mobile_schedule_sunday {
+  userSettings {
+    notificationDeliveryPreferences {
+      mobile {
+        schedule {
+          sunday {
+            ...NotificationDeliveryPreferencesDay
+          }
+        }
+      }
+    }
+  }
+}
+# Delivery preferences for Thursday.
+query userSettings_notificationDeliveryPreferences_mobile_schedule_thursday {
+  userSettings {
+    notificationDeliveryPreferences {
+      mobile {
+        schedule {
+          thursday {
+            ...NotificationDeliveryPreferencesDay
+          }
+        }
+      }
+    }
+  }
+}
+# Delivery preferences for Tuesday.
+query userSettings_notificationDeliveryPreferences_mobile_schedule_tuesday {
+  userSettings {
+    notificationDeliveryPreferences {
+      mobile {
+        schedule {
+          tuesday {
+            ...NotificationDeliveryPreferencesDay
+          }
+        }
+      }
+    }
+  }
+}
+# Delivery preferences for Wednesday.
+query userSettings_notificationDeliveryPreferences_mobile_schedule_wednesday {
+  userSettings {
+    notificationDeliveryPreferences {
+      mobile {
+        schedule {
+          wednesday {
+            ...NotificationDeliveryPreferencesDay
+          }
+        }
+      }
+    }
+  }
+}
 # All users for the organization.
 query users(
   # A cursor to be used with first for forward pagination
@@ -9867,24 +10144,6 @@ mutation airbyteIntegrationConnect(
 ) {
   airbyteIntegrationConnect(input: $input) {
     ...IntegrationPayload
-  }
-}
-# Creates a new API key.
-mutation createApiKey(
-  # The api key object to create.
-  $input: ApiKeyCreateInput!
-) {
-  apiKeyCreate(input: $input) {
-    ...ApiKeyPayload
-  }
-}
-# Deletes an API key.
-mutation deleteApiKey(
-  # The identifier of the API key to delete.
-  $id: String!
-) {
-  apiKeyDelete(id: $id) {
-    ...DeletePayload
   }
 }
 # [DEPRECATED] Archives an issue attachment.
@@ -10189,6 +10448,16 @@ mutation attachmentLinkZendesk(
     ticketId: $ticketId
     title: $title
   ) {
+    ...AttachmentPayload
+  }
+}
+# Begin syncing the thread for an existing Slack message attachment with a comment thread on its
+# issue.
+mutation attachmentSyncToSlack(
+  # The ID of the Slack attachment to begin syncing.
+  $id: String!
+) {
+  attachmentSyncToSlack(id: $id) {
     ...AttachmentPayload
   }
 }
@@ -10755,6 +11024,15 @@ mutation integrationGithubConnect(
     ...IntegrationPayload
   }
 }
+# Connects the organization with the GitHub Import App.
+mutation integrationGithubImportConnect(
+  # The GitHub data to connect with.
+  $installationId: String!
+) {
+  integrationGithubImportConnect(installationId: $installationId) {
+    ...IntegrationPayload
+  }
+}
 # Connects the organization with a GitLab Access Token.
 mutation integrationGitlabConnect(
   # The GitLab Access Token to connect with.
@@ -10864,6 +11142,19 @@ mutation integrationSlackAsks(
 ) {
   integrationSlackAsks(code: $code, redirectUri: $redirectUri) {
     ...IntegrationPayload
+  }
+}
+# Slack integration for custom view notifications.
+mutation integrationSlackCustomViewNotifications(
+  # The Slack OAuth code.
+  $code: String!
+  # Integration's associated custom view.
+  $customViewId: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationSlackCustomViewNotifications(code: $code, customViewId: $customViewId, redirectUri: $redirectUri) {
+    ...SlackChannelConnectPayload
   }
 }
 # Imports custom emojis from your Slack workspace.
@@ -11139,22 +11430,24 @@ mutation issueImportCreateClubhouse(
 }
 # Kicks off a GitHub import job.
 mutation issueImportCreateGithub(
-  # ID of the Github repository from which we will import data.
+  # [DEPRECATED] ID of the Github repository from which we will import data.
   $githubRepoId: String
-  # GitHub repository name from which we will import data.
-  $githubRepoName: String!
-  # GitHub owner (user or org) for the repository from which we will import data.
-  $githubRepoOwner: String!
+  # IDs of the Github repositories from which we will import data.
+  $githubRepoIds: [Int!]
+  # [DEPRECATED] GitHub repository name from which we will import data.
+  $githubRepoName: String
+  # [DEPRECATED] GitHub owner (user or org) for the repository from which we will import data.
+  $githubRepoOwner: String
   # Whether or not we should import GitHub organization level projects.
   $githubShouldImportOrgProjects: Boolean
-  # GitHub token to fetch information from the GitHub API.
-  $githubToken: String!
-  # ID of issue import. If not provided it will be generated.
-  $id: String
+  # [DEPRECATED] GitHub token to fetch information from the GitHub API.
+  $githubToken: String
   # Whether or not we should collect the data for closed issues.
   $includeClosedIssues: Boolean
   # Whether to instantly process the import with the default configuration mapping.
   $instantProcess: Boolean
+  # ID of the Github import integration to use to access issues.
+  $integrationId: String!
   # ID of the organization into which to import data.
   $organizationId: String
   # ID of the team into which to import data.
@@ -11164,13 +11457,14 @@ mutation issueImportCreateGithub(
 ) {
   issueImportCreateGithub(
     githubRepoId: $githubRepoId
+    githubRepoIds: $githubRepoIds
     githubRepoName: $githubRepoName
     githubRepoOwner: $githubRepoOwner
     githubShouldImportOrgProjects: $githubShouldImportOrgProjects
     githubToken: $githubToken
-    id: $id
     includeClosedIssues: $includeClosedIssues
     instantProcess: $instantProcess
+    integrationId: $integrationId
     organizationId: $organizationId
     teamId: $teamId
     teamName: $teamName
@@ -11284,8 +11578,10 @@ mutation updateIssueLabel(
 mutation createIssueRelation(
   # The issue relation to create.
   $input: IssueRelationCreateInput!
+  # Used by client undo operations. Should not be set directly.
+  $overrideCreatedAt: DateTime
 ) {
-  issueRelationCreate(input: $input) {
+  issueRelationCreate(input: $input, overrideCreatedAt: $overrideCreatedAt) {
     ...IssueRelationPayload
   }
 }
@@ -11587,10 +11883,10 @@ mutation updateOrganizationInvite(
     ...OrganizationInvitePayload
   }
 }
-# Starts a plus trial for the organization. Administrator privileges required.
-mutation organizationStartPlusTrial {
-  organizationStartPlusTrial {
-    ...OrganizationStartPlusTrialPayload
+# Starts a trial for the organization. Administrator privileges required.
+mutation organizationStartTrial {
+  organizationStartTrial {
+    ...OrganizationStartTrialPayload
   }
 }
 # Updates the user's organization.
