@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.14.0
+
+### Minor Changes
+
+- 80cb7a2: fix: strip leading single quotes from Linear CSVs before importing
+
 ## 1.13.1
 
 ### Patch Changes
