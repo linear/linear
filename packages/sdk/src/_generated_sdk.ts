@@ -923,6 +923,24 @@ export class AuthOrganization extends Request {
   public releaseChannel: L.ReleaseChannel;
 }
 /**
+ * AuthOrganizationBucketNamePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AuthOrganizationBucketNamePayloadFragment response data
+ */
+export class AuthOrganizationBucketNamePayload extends Request {
+  public constructor(request: LinearRequest, data: L.AuthOrganizationBucketNamePayloadFragment) {
+    super(request);
+    this.importsBucketName = data.importsBucketName;
+    this.uploadsBucketName = data.uploadsBucketName;
+  }
+
+  /** The imports bucket name for the organization. */
+  public importsBucketName: string;
+  /** The uploads bucket name for the organization. */
+  public uploadsBucketName: string;
+}
+/**
  * AuthOrganizationDomain model
  *
  * @param request - function to call the graphql client
@@ -1283,6 +1301,7 @@ export class Comment extends Request {
     this.url = data.url;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this.documentContent = data.documentContent ? new DocumentContent(request, data.documentContent) : undefined;
+    this.reactions = data.reactions.map(node => new Reaction(request, node));
     this._externalUser = data.externalUser ?? undefined;
     this._issue = data.issue ?? undefined;
     this._parent = data.parent ?? undefined;
@@ -1316,6 +1335,8 @@ export class Comment extends Request {
   public updatedAt: Date;
   /** Comment's URL. */
   public url: string;
+  /** Reactions associated with the comment. */
+  public reactions: Reaction[];
   /** The bot that created the comment. */
   public botActor?: ActorBot;
   /** The document content that the comment is associated with. */
@@ -2211,6 +2232,7 @@ export class Document extends Request {
     this.slugId = data.slugId;
     this.sortOrder = data.sortOrder;
     this.title = data.title;
+    this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._creator = data.creator;
@@ -2239,6 +2261,8 @@ export class Document extends Request {
   public sortOrder: number;
   /** The document title. */
   public title: string;
+  /** A flag that indicates whether the document is in the trash bin. */
+  public trashed?: boolean;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -2270,13 +2294,42 @@ export class Document extends Request {
   public create(input: L.DocumentCreateInput) {
     return new CreateDocumentMutation(this._request).fetch(input);
   }
-  /** Deletes a document. */
+  /** Deletes (trashes) a document. */
   public delete() {
     return new DeleteDocumentMutation(this._request).fetch(this.id);
+  }
+  /** Restores a document. */
+  public unarchive() {
+    return new UnarchiveDocumentMutation(this._request).fetch(this.id);
   }
   /** Updates a document. */
   public update(input: L.DocumentUpdateInput) {
     return new UpdateDocumentMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * A generic payload return from entity archive mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.DocumentArchivePayloadFragment response data
+ */
+export class DocumentArchivePayload extends Request {
+  private _entity?: L.DocumentArchivePayloadFragment["entity"];
+
+  public constructor(request: LinearRequest, data: L.DocumentArchivePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._entity = data.entity ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The archived/unarchived entity. Null if entity was deleted. */
+  public get entity(): LinearFetch<Document> | undefined {
+    return this._entity?.id ? new DocumentQuery(this._request).fetch(this._entity?.id) : undefined;
   }
 }
 /**
@@ -2411,13 +2464,13 @@ export class DocumentContentHistoryPayload extends Request {
   public constructor(request: LinearRequest, data: L.DocumentContentHistoryPayloadFragment) {
     super(request);
     this.success = data.success;
-    this.history = data.history ? data.history.map(node => new DocumentContentHistoryType(request, node)) : undefined;
+    this.history = data.history.map(node => new DocumentContentHistoryType(request, node));
   }
 
   /** Whether the operation was successful. */
   public success: boolean;
   /** The document content history entries. */
-  public history?: DocumentContentHistoryType[];
+  public history: DocumentContentHistoryType[];
 }
 /**
  * DocumentContentHistoryType model
@@ -2585,6 +2638,7 @@ export class DocumentSearchResult extends Request {
     this.slugId = data.slugId;
     this.sortOrder = data.sortOrder;
     this.title = data.title;
+    this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._creator = data.creator;
@@ -2615,6 +2669,8 @@ export class DocumentSearchResult extends Request {
   public sortOrder: number;
   /** The document title. */
   public title: string;
+  /** A flag that indicates whether the document is in the trash bin. */
+  public trashed?: boolean;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -3096,6 +3152,10 @@ export class ExternalUserConnection extends Connection<ExternalUser> {
  * @param data - L.FacetFragment response data
  */
 export class Facet extends Request {
+  private _sourceProject?: L.FacetFragment["sourceProject"];
+  private _sourceTeam?: L.FacetFragment["sourceTeam"];
+  private _targetCustomView?: L.FacetFragment["targetCustomView"];
+
   public constructor(request: LinearRequest, data: L.FacetFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
@@ -3103,6 +3163,10 @@ export class Facet extends Request {
     this.id = data.id;
     this.sortOrder = data.sortOrder;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.sourcePage = data.sourcePage ?? undefined;
+    this._sourceProject = data.sourceProject ?? undefined;
+    this._sourceTeam = data.sourceTeam ?? undefined;
+    this._targetCustomView = data.targetCustomView ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -3119,6 +3183,26 @@ export class Facet extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The owning page. */
+  public sourcePage?: L.FacetPageSource;
+  /** The owning organization. */
+  public get sourceOrganization(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+  /** The owning project. */
+  public get sourceProject(): LinearFetch<Project> | undefined {
+    return this._sourceProject?.id ? new ProjectQuery(this._request).fetch(this._sourceProject?.id) : undefined;
+  }
+  /** The owning team. */
+  public get sourceTeam(): LinearFetch<Team> | undefined {
+    return this._sourceTeam?.id ? new TeamQuery(this._request).fetch(this._sourceTeam?.id) : undefined;
+  }
+  /** The targeted custom view. */
+  public get targetCustomView(): LinearFetch<CustomView> | undefined {
+    return this._targetCustomView?.id
+      ? new CustomViewQuery(this._request).fetch(this._targetCustomView?.id)
+      : undefined;
+  }
 }
 /**
  * FacetConnection model
@@ -3317,6 +3401,187 @@ export class FavoritePayload extends Request {
   /** The object that was added as a favorite. */
   public get favorite(): LinearFetch<Favorite> | undefined {
     return new FavoriteQuery(this._request).fetch(this._favorite.id);
+  }
+}
+/**
+ * A feature flag for a project.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.FeatureFlagFragment response data
+ */
+export class FeatureFlag extends Request {
+  private _creator?: L.FeatureFlagFragment["creator"];
+  private _integration: L.FeatureFlagFragment["integration"];
+  private _lastStageUpdatedBy?: L.FeatureFlagFragment["lastStageUpdatedBy"];
+  private _project?: L.FeatureFlagFragment["project"];
+
+  public constructor(request: LinearRequest, data: L.FeatureFlagFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description ?? undefined;
+    this.externalUrl = data.externalUrl;
+    this.id = data.id;
+    this.isEnabled = data.isEnabled;
+    this.key = data.key;
+    this.lastStageUpdatedAt = parseDate(data.lastStageUpdatedAt) ?? undefined;
+    this.status = data.status;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.pendingRolloutStage = data.pendingRolloutStage
+      ? new FeatureFlagRolloutStage(request, data.pendingRolloutStage)
+      : undefined;
+    this.rolloutStage = new FeatureFlagRolloutStage(request, data.rolloutStage);
+    this._creator = data.creator ?? undefined;
+    this._integration = data.integration;
+    this._lastStageUpdatedBy = data.lastStageUpdatedBy ?? undefined;
+    this._project = data.project ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The description of the feature flag. */
+  public description?: string;
+  /** Url to the feature flag provider's page about the feature flag. */
+  public externalUrl: string;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Whether the feature flag is enabled. */
+  public isEnabled: boolean;
+  /** The unique key as defined by the feature flag provider. */
+  public key: string;
+  /** The description of the feature flag. */
+  public lastStageUpdatedAt?: Date;
+  /** The status of the feature flag. */
+  public status: string;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The pending rollout stage for the feature flag. */
+  public pendingRolloutStage?: FeatureFlagRolloutStage;
+  /** The rollout stage of the feature flag, should be defined for all feature flags in use. */
+  public rolloutStage: FeatureFlagRolloutStage;
+  /** The user who created the feature flag. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The integration providing the feature flag. */
+  public get integration(): LinearFetch<Integration> | undefined {
+    return new IntegrationQuery(this._request).fetch(this._integration.id);
+  }
+  /** The user who last changed the stage of the feature flag. */
+  public get lastStageUpdatedBy(): LinearFetch<User> | undefined {
+    return this._lastStageUpdatedBy?.id ? new UserQuery(this._request).fetch(this._lastStageUpdatedBy?.id) : undefined;
+  }
+  /** The organization of the feature flag. */
+  public get organization(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+  /** The project the feature flag is associated with. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+}
+/**
+ * FeatureFlagConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this FeatureFlagConnection model
+ * @param data - FeatureFlagConnection response data
+ */
+export class FeatureFlagConnection extends Connection<FeatureFlag> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<FeatureFlag> | undefined>,
+    data: L.FeatureFlagConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new FeatureFlag(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * A rollout stage for a feature flag.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.FeatureFlagRolloutStageFragment response data
+ */
+export class FeatureFlagRolloutStage extends Request {
+  private _integration: L.FeatureFlagRolloutStageFragment["integration"];
+
+  public constructor(request: LinearRequest, data: L.FeatureFlagRolloutStageFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description ?? undefined;
+    this.id = data.id;
+    this.name = data.name;
+    this.segmentKeys = data.segmentKeys;
+    this.sortOrder = data.sortOrder;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.type = data.type;
+    this._integration = data.integration;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The description of the rollout stage. */
+  public description?: string;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The name of the rollout stage. */
+  public name: string;
+  /** Which feature flag provider segments this rollout stage is associated with. */
+  public segmentKeys: string[];
+  /** The order of the rollout stages within an organization. */
+  public sortOrder: number;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The type of the feature flag rollout stage. */
+  public type: L.FeatureFlagRolloutStageType;
+  /** The integration providing the feature flag. */
+  public get integration(): LinearFetch<Integration> | undefined {
+    return new IntegrationQuery(this._request).fetch(this._integration.id);
+  }
+  /** The organization of the feature flag rollout stage. */
+  public get organization(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+}
+/**
+ * FeatureFlagRolloutStageConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this FeatureFlagRolloutStageConnection model
+ * @param data - FeatureFlagRolloutStageConnection response data
+ */
+export class FeatureFlagRolloutStageConnection extends Connection<FeatureFlagRolloutStage> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (
+      connection?: LinearConnectionVariables
+    ) => LinearFetch<LinearConnection<FeatureFlagRolloutStage> | undefined>,
+    data: L.FeatureFlagRolloutStageConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new FeatureFlagRolloutStage(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
   }
 }
 /**
@@ -3691,13 +3956,13 @@ export class GoogleSheetsSettings extends Request {
     this.sheetId = data.sheetId;
     this.spreadsheetId = data.spreadsheetId;
     this.spreadsheetUrl = data.spreadsheetUrl;
-    this.updatedIssuesAt = parseDate(data.updatedIssuesAt) ?? new Date();
+    this.updatedIssuesAt = parseDate(data.updatedIssuesAt) ?? undefined;
   }
 
   public sheetId: number;
   public spreadsheetId: string;
   public spreadsheetUrl: string;
-  public updatedIssuesAt: Date;
+  public updatedIssuesAt?: Date;
 }
 /**
  * ImageUploadFromUrlPayload model
@@ -3962,6 +4227,7 @@ export class IntegrationSettings extends Request {
     this.intercom = data.intercom ? new IntercomSettings(request, data.intercom) : undefined;
     this.jira = data.jira ? new JiraSettings(request, data.jira) : undefined;
     this.jiraPersonal = data.jiraPersonal ? new JiraPersonalSettings(request, data.jiraPersonal) : undefined;
+    this.launchDarkly = data.launchDarkly ? new LaunchDarklySettings(request, data.launchDarkly) : undefined;
     this.notion = data.notion ? new NotionSettings(request, data.notion) : undefined;
     this.opsgenie = data.opsgenie ? new OpsgenieSettings(request, data.opsgenie) : undefined;
     this.pagerDuty = data.pagerDuty ? new PagerDutySettings(request, data.pagerDuty) : undefined;
@@ -3988,6 +4254,7 @@ export class IntegrationSettings extends Request {
   public intercom?: IntercomSettings;
   public jira?: JiraSettings;
   public jiraPersonal?: JiraPersonalSettings;
+  public launchDarkly?: LaunchDarklySettings;
   public notion?: NotionSettings;
   public opsgenie?: OpsgenieSettings;
   public pagerDuty?: PagerDutySettings;
@@ -4115,6 +4382,7 @@ export class IntegrationsSettings extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.slackIssueAddedToTriage = data.slackIssueAddedToTriage ?? undefined;
+    this.slackIssueAddedToView = data.slackIssueAddedToView ?? undefined;
     this.slackIssueCreated = data.slackIssueCreated ?? undefined;
     this.slackIssueNewComment = data.slackIssueNewComment ?? undefined;
     this.slackIssueSlaBreached = data.slackIssueSlaBreached ?? undefined;
@@ -4137,6 +4405,8 @@ export class IntegrationsSettings extends Request {
   public id: string;
   /** Whether to send a Slack message when a new issue is added to triage. */
   public slackIssueAddedToTriage?: boolean;
+  /** Whether to send a Slack message when an issue is added to the custom view. */
+  public slackIssueAddedToView?: boolean;
   /** Whether to send a Slack message when a new issue is created for the project or the team. */
   public slackIssueCreated?: boolean;
   /** Whether to send a Slack message when a comment is created on any of the project or team's issues. */
@@ -4294,6 +4564,7 @@ export class Issue extends Request {
     this.previousIdentifiers = data.previousIdentifiers;
     this.priority = data.priority;
     this.priorityLabel = data.priorityLabel;
+    this.reactionData = data.reactionData;
     this.slaBreachesAt = parseDate(data.slaBreachesAt) ?? undefined;
     this.slaStartedAt = parseDate(data.slaStartedAt) ?? undefined;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
@@ -4307,6 +4578,7 @@ export class Issue extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.reactions = data.reactions.map(node => new Reaction(request, node));
     this.integrationSourceType = data.integrationSourceType ?? undefined;
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
@@ -4361,6 +4633,8 @@ export class Issue extends Request {
   public priority: number;
   /** Label for the priority. */
   public priorityLabel: string;
+  /** Emoji reaction summary, grouped by emoji type. */
+  public reactionData: L.Scalars["JSONObject"];
   /** The time at which the issue's SLA will breach. */
   public slaBreachesAt?: Date;
   /** The time at which the issue's SLA began. */
@@ -4389,6 +4663,8 @@ export class Issue extends Request {
   public updatedAt: Date;
   /** Issue URL. */
   public url: string;
+  /** Reactions associated with the issue. */
+  public reactions: Reaction[];
   /** The bot that created the issue, if applicable. */
   public botActor?: ActorBot;
   /** Integration type that created this issue, if applicable. */
@@ -4761,7 +5037,7 @@ export class IssueHistory extends Request {
   public botActor?: ActorBot;
   /** The import record. */
   public issueImport?: IssueImport;
-  /** The user who made these changes. If null, possibly means that the change made by an integration. */
+  /** The actor that performed the actions. This field may be empty in the case of integrations or automations. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
@@ -4769,27 +5045,27 @@ export class IssueHistory extends Request {
   public get attachment(): LinearFetch<Attachment> | undefined {
     return this._attachment?.id ? new AttachmentQuery(this._request).fetch(this._attachment?.id) : undefined;
   }
-  /** The user from whom the issue was re-assigned from. */
+  /** The user that was unassigned from the issue. */
   public get fromAssignee(): LinearFetch<User> | undefined {
     return this._fromAssignee?.id ? new UserQuery(this._request).fetch(this._fromAssignee?.id) : undefined;
   }
-  /** The previous cycle of the issue. */
+  /** The cycle that the issue was moved from. */
   public get fromCycle(): LinearFetch<Cycle> | undefined {
     return this._fromCycle?.id ? new CycleQuery(this._request).fetch(this._fromCycle?.id) : undefined;
   }
-  /** The previous parent of the issue. */
+  /** The parent issue that the issue was moved from. */
   public get fromParent(): LinearFetch<Issue> | undefined {
     return this._fromParent?.id ? new IssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
   }
-  /** The previous project of the issue. */
+  /** The project that the issue was moved from. */
   public get fromProject(): LinearFetch<Project> | undefined {
     return this._fromProject?.id ? new ProjectQuery(this._request).fetch(this._fromProject?.id) : undefined;
   }
-  /** The previous workflow state of the issue. */
+  /** The state that the issue was moved from. */
   public get fromState(): LinearFetch<WorkflowState> | undefined {
     return this._fromState?.id ? new WorkflowStateQuery(this._request).fetch(this._fromState?.id) : undefined;
   }
-  /** The team from which the issue was moved from. */
+  /** The team that the issue was moved from. */
   public get fromTeam(): LinearFetch<Team> | undefined {
     return this._fromTeam?.id ? new TeamQuery(this._request).fetch(this._fromTeam?.id) : undefined;
   }
@@ -4797,7 +5073,7 @@ export class IssueHistory extends Request {
   public get issue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
   }
-  /** The user to whom the issue was assigned to. */
+  /** The user that was assigned to the issue. */
   public get toAssignee(): LinearFetch<User> | undefined {
     return this._toAssignee?.id ? new UserQuery(this._request).fetch(this._toAssignee?.id) : undefined;
   }
@@ -4807,23 +5083,23 @@ export class IssueHistory extends Request {
       ? new ProjectQuery(this._request).fetch(this._toConvertedProject?.id)
       : undefined;
   }
-  /** The new cycle of the issue. */
+  /** The cycle that the issue was moved to. */
   public get toCycle(): LinearFetch<Cycle> | undefined {
     return this._toCycle?.id ? new CycleQuery(this._request).fetch(this._toCycle?.id) : undefined;
   }
-  /** The new parent of the issue. */
+  /** The parent issue that the issue was moved to. */
   public get toParent(): LinearFetch<Issue> | undefined {
     return this._toParent?.id ? new IssueQuery(this._request).fetch(this._toParent?.id) : undefined;
   }
-  /** The new project of the issue. */
+  /** The project that the issue was moved to. */
   public get toProject(): LinearFetch<Project> | undefined {
     return this._toProject?.id ? new ProjectQuery(this._request).fetch(this._toProject?.id) : undefined;
   }
-  /** The new workflow state of the issue. */
+  /** The state that the issue was moved to. */
   public get toState(): LinearFetch<WorkflowState> | undefined {
     return this._toState?.id ? new WorkflowStateQuery(this._request).fetch(this._toState?.id) : undefined;
   }
-  /** The team to which the issue was moved to. */
+  /** The team that the issue was moved to. */
   public get toTeam(): LinearFetch<Team> | undefined {
     return this._toTeam?.id ? new TeamQuery(this._request).fetch(this._toTeam?.id) : undefined;
   }
@@ -5444,6 +5720,7 @@ export class IssueSearchResult extends Request {
     this.previousIdentifiers = data.previousIdentifiers;
     this.priority = data.priority;
     this.priorityLabel = data.priorityLabel;
+    this.reactionData = data.reactionData;
     this.slaBreachesAt = parseDate(data.slaBreachesAt) ?? undefined;
     this.slaStartedAt = parseDate(data.slaStartedAt) ?? undefined;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
@@ -5457,6 +5734,7 @@ export class IssueSearchResult extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.reactions = data.reactions.map(node => new Reaction(request, node));
     this.integrationSourceType = data.integrationSourceType ?? undefined;
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
@@ -5513,6 +5791,8 @@ export class IssueSearchResult extends Request {
   public priority: number;
   /** Label for the priority. */
   public priorityLabel: string;
+  /** Emoji reaction summary, grouped by emoji type. */
+  public reactionData: L.Scalars["JSONObject"];
   /** The time at which the issue's SLA will breach. */
   public slaBreachesAt?: Date;
   /** The time at which the issue's SLA began. */
@@ -5541,6 +5821,8 @@ export class IssueSearchResult extends Request {
   public updatedAt: Date;
   /** Issue URL. */
   public url: string;
+  /** Reactions associated with the issue. */
+  public reactions: Reaction[];
   /** The bot that created the issue, if applicable. */
   public botActor?: ActorBot;
   /** Integration type that created this issue, if applicable. */
@@ -5798,6 +6080,24 @@ export class LabelNotificationSubscription extends Request {
   }
 }
 /**
+ * LaunchDarkly specific settings.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.LaunchDarklySettingsFragment response data
+ */
+export class LaunchDarklySettings extends Request {
+  public constructor(request: LinearRequest, data: L.LaunchDarklySettingsFragment) {
+    super(request);
+    this.environment = data.environment;
+    this.projectKey = data.projectKey;
+  }
+
+  /** The environment of the LaunchDarkly integration. */
+  public environment: string;
+  /** The project key of the LaunchDarkly integration. */
+  public projectKey: string;
+}
+/**
  * LogoutResponse model
  *
  * @param request - function to call the graphql client
@@ -6030,13 +6330,13 @@ export class NotificationDeliveryPreferencesChannel extends Request {
   public constructor(request: LinearRequest, data: L.NotificationDeliveryPreferencesChannelFragment) {
     super(request);
     this.notificationsDisabled = data.notificationsDisabled ?? undefined;
-    this.schedule = new NotificationDeliveryPreferencesSchedule(request, data.schedule);
+    this.schedule = data.schedule ? new NotificationDeliveryPreferencesSchedule(request, data.schedule) : undefined;
   }
 
   /** Whether notifications are enabled for this channel. */
   public notificationsDisabled?: boolean;
   /** The schedule for notifications on this channel. */
-  public schedule: NotificationDeliveryPreferencesSchedule;
+  public schedule?: NotificationDeliveryPreferencesSchedule;
 }
 /**
  * A user's notification delivery schedule for a particular day.
@@ -6561,11 +6861,11 @@ export class OauthToken extends Request {
 export class OpsgenieSettings extends Request {
   public constructor(request: LinearRequest, data: L.OpsgenieSettingsFragment) {
     super(request);
-    this.apiFailedWithUnauthorizedErrorAt = parseDate(data.apiFailedWithUnauthorizedErrorAt) ?? new Date();
+    this.apiFailedWithUnauthorizedErrorAt = parseDate(data.apiFailedWithUnauthorizedErrorAt) ?? undefined;
   }
 
   /** The date when the Opsgenie API failed with an unauthorized error. */
-  public apiFailedWithUnauthorizedErrorAt: Date;
+  public apiFailedWithUnauthorizedErrorAt?: Date;
 }
 /**
  * An organization. Organizations are root-level objects that contain user accounts and teams.
@@ -6600,6 +6900,9 @@ export class Organization extends Request {
     this.urlKey = data.urlKey;
     this.userCount = data.userCount;
     this.subscription = data.subscription ? new PaidSubscription(request, data.subscription) : undefined;
+    this.ipRestrictions = data.ipRestrictions
+      ? data.ipRestrictions.map(node => new OrganizationIpRestriction(request, node))
+      : undefined;
     this.projectStatuses = data.projectStatuses.map(node => new ProjectStatus(request, node));
     this.projectUpdateRemindersDay = data.projectUpdateRemindersDay;
     this.projectUpdatesReminderFrequency = data.projectUpdatesReminderFrequency;
@@ -6657,6 +6960,8 @@ export class Organization extends Request {
   public urlKey: string;
   /** Number of active users in the organization. */
   public userCount: number;
+  /** IP restriction configurations. */
+  public ipRestrictions?: OrganizationIpRestriction[];
   /** The organization's project statuses. */
   public projectStatuses: ProjectStatus[];
   /** The organization's subscription to a paid plan. */
@@ -6839,7 +7144,7 @@ export class OrganizationInvite extends Request {
     this.expiresAt = parseDate(data.expiresAt) ?? undefined;
     this.external = data.external;
     this.id = data.id;
-    this.metadata = data.metadata;
+    this.metadata = data.metadata ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.role = data.role;
     this._invitee = data.invitee ?? undefined;
@@ -6861,7 +7166,7 @@ export class OrganizationInvite extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** Extra metadata associated with the organization invite. */
-  public metadata: L.Scalars["JSONObject"];
+  public metadata?: L.Scalars["JSONObject"];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -7018,6 +7323,30 @@ export class OrganizationInvitePayload extends Request {
   }
 }
 /**
+ * OrganizationIpRestriction model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OrganizationIpRestrictionFragment response data
+ */
+export class OrganizationIpRestriction extends Request {
+  public constructor(request: LinearRequest, data: L.OrganizationIpRestrictionFragment) {
+    super(request);
+    this.description = data.description ?? undefined;
+    this.enabled = data.enabled;
+    this.range = data.range;
+    this.type = data.type;
+  }
+
+  /** Optional restriction description. */
+  public description?: string;
+  /** Whether the restriction is enabled. */
+  public enabled: boolean;
+  /** IP range in CIDR format. */
+  public range: string;
+  /** Restriction type. */
+  public type: string;
+}
+/**
  * OrganizationMeta model
  *
  * @param request - function to call the graphql client
@@ -7123,11 +7452,11 @@ export class PageInfo extends Request {
 export class PagerDutySettings extends Request {
   public constructor(request: LinearRequest, data: L.PagerDutySettingsFragment) {
     super(request);
-    this.apiFailedWithUnauthorizedErrorAt = parseDate(data.apiFailedWithUnauthorizedErrorAt) ?? new Date();
+    this.apiFailedWithUnauthorizedErrorAt = parseDate(data.apiFailedWithUnauthorizedErrorAt) ?? undefined;
   }
 
   /** The date when the PagerDuty API failed with an unauthorized error. */
-  public apiFailedWithUnauthorizedErrorAt: Date;
+  public apiFailedWithUnauthorizedErrorAt?: Date;
 }
 /**
  * The paid subscription of an organization.
@@ -7142,7 +7471,7 @@ export class PaidSubscription extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.canceledAt = parseDate(data.canceledAt) ?? undefined;
-    this.collectionMethod = data.collectionMethod ?? undefined;
+    this.collectionMethod = data.collectionMethod;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.nextBillingAt = parseDate(data.nextBillingAt) ?? undefined;
@@ -7160,7 +7489,7 @@ export class PaidSubscription extends Request {
   /** The date the subscription was canceled, if any. */
   public canceledAt?: Date;
   /** The collection method for this subscription, either automatically charged or invoiced. */
-  public collectionMethod?: string;
+  public collectionMethod: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -7507,24 +7836,6 @@ export class ProjectConnection extends Connection<Project> {
       new PageInfo(request, data.pageInfo)
     );
   }
-}
-/**
- * ProjectDetailSuggestionPayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.ProjectDetailSuggestionPayloadFragment response data
- */
-export class ProjectDetailSuggestionPayload extends Request {
-  public constructor(request: LinearRequest, data: L.ProjectDetailSuggestionPayloadFragment) {
-    super(request);
-    this.color = data.color ?? undefined;
-    this.icon = data.icon ?? undefined;
-  }
-
-  /** The suggested project color. */
-  public color?: string;
-  /** The suggested view icon. */
-  public icon?: string;
 }
 /**
  * ProjectFilterSuggestionPayload model
@@ -8350,6 +8661,7 @@ export class ProjectUpdate extends Request {
     this.reactionData = data.reactionData;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
+    this.reactions = data.reactions.map(node => new Reaction(request, node));
     this.health = data.health;
     this._project = data.project;
     this._user = data.user;
@@ -8381,6 +8693,8 @@ export class ProjectUpdate extends Request {
   public updatedAt: Date;
   /** The URL to the project update. */
   public url: string;
+  /** Reactions associated with the project update. */
+  public reactions: Reaction[];
   /** The health of the project at the time of the update. */
   public health: L.ProjectUpdateHealthType;
   /** The project that the update is associated with. */
@@ -9834,7 +10148,7 @@ export class TeamMembership extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
-    this.owner = data.owner ?? undefined;
+    this.owner = data.owner;
     this.sortOrder = data.sortOrder;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._team = data.team;
@@ -9848,7 +10162,7 @@ export class TeamMembership extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** Whether the user is the owner of the team. */
-  public owner?: boolean;
+  public owner: boolean;
   /** The order of the item in the users team list. */
   public sortOrder: number;
   /**
@@ -10267,7 +10581,7 @@ export class TimeSchedule extends Request {
     this.id = data.id;
     this.name = data.name;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this.entries = data.entries.map(node => new TimeScheduleEntry(request, node));
+    this.entries = data.entries ? data.entries.map(node => new TimeScheduleEntry(request, node)) : undefined;
     this._integration = data.integration ?? undefined;
   }
 
@@ -10290,7 +10604,7 @@ export class TimeSchedule extends Request {
    */
   public updatedAt: Date;
   /** The schedule entries. */
-  public entries: TimeScheduleEntry[];
+  public entries?: TimeScheduleEntry[];
   /** The identifier of the Linear integration populating the schedule. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -11004,20 +11318,20 @@ export class UserSettings extends Request {
 export class UserSettingsFlagPayload extends Request {
   public constructor(request: LinearRequest, data: L.UserSettingsFlagPayloadFragment) {
     super(request);
-    this.flag = data.flag;
+    this.flag = data.flag ?? undefined;
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
-    this.value = data.value;
+    this.value = data.value ?? undefined;
   }
 
   /** The flag key which was updated. */
-  public flag: string;
+  public flag?: string;
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
   /** The flag value after update. */
-  public value: number;
+  public value?: number;
 }
 /**
  * UserSettingsFlagsResetPayload model
@@ -11369,7 +11683,7 @@ export class WorkflowDefinition extends Request {
     super(request);
     this.activities = data.activities;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.conditions = data.conditions;
+    this.conditions = data.conditions ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
     this.enabled = data.enabled;
@@ -11397,7 +11711,7 @@ export class WorkflowDefinition extends Request {
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The conditions that need to be match for the workflow to be triggered. */
-  public conditions: L.Scalars["JSONObject"];
+  public conditions?: L.Scalars["JSONObject"];
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The description of the workflow. */
@@ -15943,12 +16257,12 @@ export class DeleteDocumentMutation extends Request {
   }
 
   /**
-   * Call the DeleteDocument mutation and return a DeletePayload
+   * Call the DeleteDocument mutation and return a DocumentArchivePayload
    *
    * @param id - required id to pass to deleteDocument
    * @returns parsed response from DeleteDocumentMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(id: string): LinearFetch<DocumentArchivePayload> {
     const response = await this._request<L.DeleteDocumentMutation, L.DeleteDocumentMutationVariables>(
       L.DeleteDocumentDocument,
       {
@@ -15957,7 +16271,36 @@ export class DeleteDocumentMutation extends Request {
     );
     const data = response.documentDelete;
 
-    return new DeletePayload(this._request, data);
+    return new DocumentArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UnarchiveDocument Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UnarchiveDocumentMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UnarchiveDocument mutation and return a DocumentArchivePayload
+   *
+   * @param id - required id to pass to unarchiveDocument
+   * @returns parsed response from UnarchiveDocumentMutation
+   */
+  public async fetch(id: string): LinearFetch<DocumentArchivePayload> {
+    const response = await this._request<L.UnarchiveDocumentMutation, L.UnarchiveDocumentMutationVariables>(
+      L.UnarchiveDocumentDocument,
+      {
+        id,
+      }
+    );
+    const data = response.documentUnarchive;
+
+    return new DocumentArchivePayload(this._request, data);
   }
 }
 
@@ -21037,35 +21380,6 @@ export class UserPromoteMemberMutation extends Request {
     const data = response.userPromoteMember;
 
     return new UserAdminPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable UserSettingsFlagIncrement Mutation
- *
- * @param request - function to call the graphql client
- */
-export class UserSettingsFlagIncrementMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the UserSettingsFlagIncrement mutation and return a UserSettingsFlagPayload
-   *
-   * @param flag - required flag to pass to userSettingsFlagIncrement
-   * @returns parsed response from UserSettingsFlagIncrementMutation
-   */
-  public async fetch(flag: string): LinearFetch<UserSettingsFlagPayload> {
-    const response = await this._request<
-      L.UserSettingsFlagIncrementMutation,
-      L.UserSettingsFlagIncrementMutationVariables
-    >(L.UserSettingsFlagIncrementDocument, {
-      flag,
-    });
-    const data = response.userSettingsFlagIncrement;
-
-    return new UserSettingsFlagPayload(this._request, data);
   }
 }
 
@@ -26948,13 +27262,22 @@ export class LinearSdk extends Request {
     return new CreateDocumentMutation(this._request).fetch(input);
   }
   /**
-   * Deletes a document.
+   * Deletes (trashes) a document.
    *
    * @param id - required id to pass to deleteDocument
-   * @returns DeletePayload
+   * @returns DocumentArchivePayload
    */
-  public deleteDocument(id: string): LinearFetch<DeletePayload> {
+  public deleteDocument(id: string): LinearFetch<DocumentArchivePayload> {
     return new DeleteDocumentMutation(this._request).fetch(id);
+  }
+  /**
+   * Restores a document.
+   *
+   * @param id - required id to pass to unarchiveDocument
+   * @returns DocumentArchivePayload
+   */
+  public unarchiveDocument(id: string): LinearFetch<DocumentArchivePayload> {
+    return new UnarchiveDocumentMutation(this._request).fetch(id);
   }
   /**
    * Updates a document.
@@ -28706,15 +29029,6 @@ export class LinearSdk extends Request {
    */
   public userPromoteMember(id: string): LinearFetch<UserAdminPayload> {
     return new UserPromoteMemberMutation(this._request).fetch(id);
-  }
-  /**
-   * [Deprecated] Updates a user's settings flag.
-   *
-   * @param flag - required flag to pass to userSettingsFlagIncrement
-   * @returns UserSettingsFlagPayload
-   */
-  public userSettingsFlagIncrement(flag: string): LinearFetch<UserSettingsFlagPayload> {
-    return new UserSettingsFlagIncrementMutation(this._request).fetch(flag);
   }
   /**
    * Resets user's setting flags.

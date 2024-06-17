@@ -902,6 +902,17 @@ type AuthOrganization {
   userCount: Float!
 }
 
+type AuthOrganizationBucketNamePayload {
+  """
+  The imports bucket name for the organization.
+  """
+  importsBucketName: String!
+  """
+  The uploads bucket name for the organization.
+  """
+  uploadsBucketName: String!
+}
+
 type AuthOrganizationDomain {
   authType: OrganizationDomainAuthType!
   claimed: Boolean
@@ -1285,7 +1296,7 @@ type Comment implements Node {
   """
   [Internal] The comment content as a Prosemirror document.
   """
-  bodyData: String!
+  bodyData: String
   """
   The bot that created the comment.
   """
@@ -1363,6 +1374,10 @@ type Comment implements Node {
   Emoji reaction summary, grouped by emoji type.
   """
   reactionData: JSONObject!
+  """
+  Reactions associated with the comment.
+  """
+  reactions: [Reaction!]!
   """
   The time the resolvingUser resolved the thread.
   """
@@ -1444,6 +1459,10 @@ input CommentCollectionFilter {
   """
   projectUpdate: ProjectUpdateFilter
   """
+  Filters that the comments reactions must satisfy.
+  """
+  reactions: ReactionCollectionFilter
+  """
   Filters that needs to be matched by some comments.
   """
   some: CommentFilter
@@ -1516,6 +1535,10 @@ input CommentCreateInput {
   The text that this comment references. Only defined for inline comments.
   """
   quotedText: String
+  """
+  [INTERNAL] The identifiers of the users subscribing to this comment thread.
+  """
+  subscriberIds: [String!]
 }
 
 type CommentEdge {
@@ -1567,6 +1590,10 @@ input CommentFilter {
   """
   projectUpdate: ProjectUpdateFilter
   """
+  Filters that the comments reactions must satisfy.
+  """
+  reactions: ReactionCollectionFilter
+  """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
@@ -1601,6 +1628,10 @@ input CommentUpdateInput {
   """
   bodyData: JSON
   """
+  [INTERNAL] Flag to prevent auto subscription to the issue the comment is updated on.
+  """
+  doNotSubscribeToIssue: Boolean
+  """
   The text that this comment references. Only defined for inline comments.
   """
   quotedText: String
@@ -1612,6 +1643,10 @@ input CommentUpdateInput {
   [INTERNAL] The user who resolved this thread.
   """
   resolvingUserId: String
+  """
+  [INTERNAL] The identifiers of the users subscribing to this comment.
+  """
+  subscriberIds: [String!]
 }
 
 """
@@ -2736,7 +2771,7 @@ type DiaryEntry implements Node {
   """
   [Internal] The entry content as a Prosemirror document.
   """
-  bodyData: String!
+  bodyData: String
   """
   The time at which the entity was created.
   """
@@ -2779,7 +2814,7 @@ input DiaryEntryCreateInput {
   """
   The date for which the entry is created.
   """
-  date: TimelessDate
+  date: TimelessDate!
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -2889,6 +2924,10 @@ type Document implements Node {
   """
   title: String!
   """
+  A flag that indicates whether the document is in the trash bin.
+  """
+  trashed: Boolean
+  """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -2902,6 +2941,24 @@ type Document implements Node {
   The canonical url for the document.
   """
   url: String!
+}
+
+"""
+A generic payload return from entity archive mutations.
+"""
+type DocumentArchivePayload implements ArchivePayload {
+  """
+  The archived/unarchived entity. Null if entity was deleted.
+  """
+  entity: Document
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 """
@@ -3094,7 +3151,7 @@ type DocumentContentHistoryPayload {
   """
   The document content history entries.
   """
-  history: [DocumentContentHistoryType!]
+  history: [DocumentContentHistoryType!]!
   """
   Whether the operation was successful.
   """
@@ -3109,7 +3166,7 @@ type DocumentContentHistoryType {
   """
   [Internal] The document content as Prosemirror document.
   """
-  contentData: JSON!
+  contentData: JSON
   """
   The date when the document content history snapshot was taken. This can be different than createdAt since the content is captured from its state at the previously known updatedAt timestamp in the case of an update. On document create, these timestamps can be the same.
   """
@@ -3376,6 +3433,10 @@ type DocumentSearchResult implements Node {
   The document title.
   """
   title: String!
+  """
+  A flag that indicates whether the document is in the trash bin.
+  """
+  trashed: Boolean
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -3982,6 +4043,30 @@ type Facet implements Node {
   """
   sortOrder: Float!
   """
+  The owning initiative.
+  """
+  sourceInitiative: Initiative
+  """
+  The owning organization.
+  """
+  sourceOrganization: Organization
+  """
+  The owning page.
+  """
+  sourcePage: FacetPageSource
+  """
+  The owning project.
+  """
+  sourceProject: Project
+  """
+  The owning team.
+  """
+  sourceTeam: Team
+  """
+  The targeted custom view.
+  """
+  targetCustomView: CustomView
+  """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -4001,6 +4086,10 @@ type FacetEdge {
   """
   cursor: String!
   node: Facet!
+}
+
+enum FacetPageSource {
+  projects
 }
 
 """
@@ -4056,6 +4145,10 @@ type Favorite implements Node {
   The favorited document.
   """
   document: Document
+  """
+  [INTERNAL] The favorited facet.
+  """
+  facet: Facet
   """
   The name of the folder. Only applies to favorites of type folder.
   """
@@ -4144,7 +4237,7 @@ input FavoriteCreateInput {
   """
   documentId: String
   """
-  [INTERNAL] The identifier of the facet to favorite.
+  The identifier of the facet to favorite.
   """
   facetId: String
   """
@@ -4241,6 +4334,172 @@ input FavoriteUpdateInput {
   The position of the item in the favorites list.
   """
   sortOrder: Float
+}
+
+"""
+A feature flag for a project.
+"""
+type FeatureFlag implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the feature flag.
+  """
+  creator: User
+  """
+  The description of the feature flag.
+  """
+  description: String
+  """
+  Url to the feature flag provider's page about the feature flag.
+  """
+  externalUrl: String!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The integration providing the feature flag.
+  """
+  integration: Integration!
+  """
+  Whether the feature flag is enabled.
+  """
+  isEnabled: Boolean!
+  """
+  The unique key as defined by the feature flag provider.
+  """
+  key: String!
+  """
+  The description of the feature flag.
+  """
+  lastStageUpdatedAt: DateTime
+  """
+  The user who last changed the stage of the feature flag.
+  """
+  lastStageUpdatedBy: User
+  """
+  The organization of the feature flag.
+  """
+  organization: Organization!
+  """
+  The pending rollout stage for the feature flag.
+  """
+  pendingRolloutStage: FeatureFlagRolloutStage
+  """
+  The project the feature flag is associated with.
+  """
+  project: Project
+  """
+  The rollout stage of the feature flag, should be defined for all feature flags in use.
+  """
+  rolloutStage: FeatureFlagRolloutStage!
+  """
+  The status of the feature flag.
+  """
+  status: String!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type FeatureFlagConnection {
+  edges: [FeatureFlagEdge!]!
+  nodes: [FeatureFlag!]!
+  pageInfo: PageInfo!
+}
+
+type FeatureFlagEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: FeatureFlag!
+}
+
+"""
+A rollout stage for a feature flag.
+"""
+type FeatureFlagRolloutStage implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The description of the rollout stage.
+  """
+  description: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The integration providing the feature flag.
+  """
+  integration: Integration!
+  """
+  The name of the rollout stage.
+  """
+  name: String!
+  """
+  The organization of the feature flag rollout stage.
+  """
+  organization: Organization!
+  """
+  Which feature flag provider segments this rollout stage is associated with.
+  """
+  segmentKeys: [String!]!
+  """
+  The order of the rollout stages within an organization.
+  """
+  sortOrder: Float!
+  """
+  The type of the feature flag rollout stage.
+  """
+  type: FeatureFlagRolloutStageType!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type FeatureFlagRolloutStageConnection {
+  edges: [FeatureFlagRolloutStageEdge!]!
+  nodes: [FeatureFlagRolloutStage!]!
+  pageInfo: PageInfo!
+}
+
+type FeatureFlagRolloutStageEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: FeatureFlagRolloutStage!
+}
+
+"""
+The type of a feature flag rollout stage.
+"""
+enum FeatureFlagRolloutStageType {
+  dev
+  full
+  internal
+  partial
 }
 
 type FrontAttachmentPayload {
@@ -4739,14 +4998,14 @@ type GoogleSheetsSettings {
   sheetId: Float!
   spreadsheetId: String!
   spreadsheetUrl: String!
-  updatedIssuesAt: DateTime!
+  updatedIssuesAt: DateTime
 }
 
 input GoogleSheetsSettingsInput {
   sheetId: Float!
   spreadsheetId: String!
   spreadsheetUrl: String!
-  updatedIssuesAt: DateTime!
+  updatedIssuesAt: DateTime
 }
 
 input GoogleUserAccountAuthInput {
@@ -4944,6 +5203,10 @@ type Initiative implements Node {
   """
   targetDateResolution: DateResolutionType
   """
+  A flag that indicates whether the initiative is in the trash bin.
+  """
+  trashed: Boolean
+  """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -5061,6 +5324,14 @@ input InitiativeCreateInput {
   The initiative's status.
   """
   status: InitiativeStatus
+  """
+  The estimated completion date of the initiative.
+  """
+  targetDate: TimelessDate
+  """
+  The resolution of the initiative's estimated completion date.
+  """
+  targetDateResolution: DateResolutionType
 }
 
 type InitiativeEdge {
@@ -5330,6 +5601,10 @@ input InitiativeUpdateInput {
   The estimated completion date of the initiative.
   """
   targetDate: TimelessDate
+  """
+  The resolution of the initiative's estimated completion date.
+  """
+  targetDateResolution: DateResolutionType
 }
 
 """
@@ -5450,6 +5725,7 @@ enum IntegrationService {
   intercom
   jira
   jiraPersonal
+  launchDarkly
   loom
   notion
   opsgenie
@@ -5479,6 +5755,7 @@ type IntegrationSettings {
   intercom: IntercomSettings
   jira: JiraSettings
   jiraPersonal: JiraPersonalSettings
+  launchDarkly: LaunchDarklySettings
   notion: NotionSettings
   opsgenie: OpsgenieSettings
   pagerDuty: PagerDutySettings
@@ -5502,6 +5779,7 @@ input IntegrationSettingsInput {
   intercom: IntercomSettingsInput
   jira: JiraSettingsInput
   jiraPersonal: JiraPersonalSettingsInput
+  launchDarkly: LaunchDarklySettingsInput
   notion: NotionSettingsInput
   opsgenie: OpsgenieInput
   pagerDuty: PagerDutyInput
@@ -5624,6 +5902,10 @@ type IntegrationsSettings implements Node {
   """
   slackIssueAddedToTriage: Boolean
   """
+  Whether to send a Slack message when an issue is added to the custom view.
+  """
+  slackIssueAddedToView: Boolean
+  """
   Whether to send a Slack message when a new issue is created for the project or the team.
   """
   slackIssueCreated: Boolean
@@ -5690,6 +5972,10 @@ input IntegrationsSettingsCreateInput {
   Whether to send a Slack message when a new issue is added to triage.
   """
   slackIssueAddedToTriage: Boolean
+  """
+  Whether to send a Slack message when an issue is added to a view.
+  """
+  slackIssueAddedToView: Boolean
   """
   Whether to send a Slack message when a new issue is created for the project or the team.
   """
@@ -5760,6 +6046,10 @@ input IntegrationsSettingsUpdateInput {
   Whether to send a Slack message when a new issue is added to triage.
   """
   slackIssueAddedToTriage: Boolean
+  """
+  Whether to send a Slack message when an issue is added to a view.
+  """
+  slackIssueAddedToView: Boolean
   """
   Whether to send a Slack message when a new issue is created for the project or the team.
   """
@@ -6170,6 +6460,14 @@ type Issue implements Node {
   """
   projectMilestone: ProjectMilestone
   """
+  Emoji reaction summary, grouped by emoji type.
+  """
+  reactionData: JSONObject!
+  """
+  Reactions associated with the issue.
+  """
+  reactions: [Reaction!]!
+  """
   Relations associated with this issue.
   """
   relations(
@@ -6461,6 +6759,10 @@ input IssueCollectionFilter {
   """
   projectMilestone: NullableProjectMilestoneFilter
   """
+  Filters that the issues reactions must satisfy.
+  """
+  reactions: ReactionCollectionFilter
+  """
   [Internal] Comparator for the issues content.
   """
   searchableContent: ContentComparator
@@ -6650,7 +6952,7 @@ type IssueDraft implements Node {
   """
   Serialized array of JSONs representing attachments.
   """
-  attachments: JSONObject!
+  attachments: JSONObject
   """
   The time at which the entity was created.
   """
@@ -6856,6 +7158,10 @@ input IssueFilter {
   """
   projectMilestone: NullableProjectMilestoneFilter
   """
+  Filters that the issues reactions must satisfy.
+  """
+  reactions: ReactionCollectionFilter
+  """
   [Internal] Comparator for the issues content.
   """
   searchableContent: ContentComparator
@@ -6917,9 +7223,9 @@ A record of changes to an issue.
 """
 type IssueHistory implements Node {
   """
-  The user who made these changes. If null, possibly means that the change made by an integration.
+  The actor that performed the actions. This field may be empty in the case of integrations or automations.
   """
-  actor: User
+  actor: User @deprecated(reason: "Use actors instead.")
   """
   The id of user who made these changes. If null, possibly means that the change made by an integration.
   """
@@ -6973,7 +7279,7 @@ type IssueHistory implements Node {
   """
   createdAt: DateTime!
   """
-  The user from whom the issue was re-assigned from.
+  The user that was unassigned from the issue.
   """
   fromAssignee: User
   """
@@ -6981,7 +7287,7 @@ type IssueHistory implements Node {
   """
   fromAssigneeId: String
   """
-  The previous cycle of the issue.
+  The cycle that the issue was moved from.
   """
   fromCycle: Cycle
   """
@@ -6997,7 +7303,7 @@ type IssueHistory implements Node {
   """
   fromEstimate: Float
   """
-  The previous parent of the issue.
+  The parent issue that the issue was moved from.
   """
   fromParent: Issue
   """
@@ -7009,7 +7315,7 @@ type IssueHistory implements Node {
   """
   fromPriority: Float
   """
-  The previous project of the issue.
+  The project that the issue was moved from.
   """
   fromProject: Project
   """
@@ -7017,7 +7323,7 @@ type IssueHistory implements Node {
   """
   fromProjectId: String
   """
-  The previous workflow state of the issue.
+  The state that the issue was moved from.
   """
   fromState: WorkflowState
   """
@@ -7025,7 +7331,7 @@ type IssueHistory implements Node {
   """
   fromStateId: String
   """
-  The team from which the issue was moved from.
+  The team that the issue was moved from.
   """
   fromTeam: Team
   """
@@ -7061,7 +7367,7 @@ type IssueHistory implements Node {
   """
   removedLabels: [IssueLabel!]
   """
-  The user to whom the issue was assigned to.
+  The user that was assigned to the issue.
   """
   toAssignee: User
   """
@@ -7077,7 +7383,7 @@ type IssueHistory implements Node {
   """
   toConvertedProjectId: String
   """
-  The new cycle of the issue.
+  The cycle that the issue was moved to.
   """
   toCycle: Cycle
   """
@@ -7093,7 +7399,7 @@ type IssueHistory implements Node {
   """
   toEstimate: Float
   """
-  The new parent of the issue.
+  The parent issue that the issue was moved to.
   """
   toParent: Issue
   """
@@ -7105,7 +7411,7 @@ type IssueHistory implements Node {
   """
   toPriority: Float
   """
-  The new project of the issue.
+  The project that the issue was moved to.
   """
   toProject: Project
   """
@@ -7113,7 +7419,7 @@ type IssueHistory implements Node {
   """
   toProjectId: String
   """
-  The new workflow state of the issue.
+  The state that the issue was moved to.
   """
   toState: WorkflowState
   """
@@ -7121,7 +7427,7 @@ type IssueHistory implements Node {
   """
   toStateId: String
   """
-  The team to which the issue was moved to.
+  The team that the issue was moved to.
   """
   toTeam: Team
   """
@@ -8163,6 +8469,14 @@ type IssueSearchResult implements Node {
   """
   projectMilestone: ProjectMilestone
   """
+  Emoji reaction summary, grouped by emoji type.
+  """
+  reactionData: JSONObject!
+  """
+  Reactions associated with the issue.
+  """
+  reactions: [Reaction!]!
+  """
   Relations associated with this issue.
   """
   relations(
@@ -8766,6 +9080,31 @@ input LabelSort {
   The order for the individual sort
   """
   order: PaginationSortOrder
+}
+
+"""
+LaunchDarkly specific settings.
+"""
+type LaunchDarklySettings {
+  """
+  The environment of the LaunchDarkly integration.
+  """
+  environment: String!
+  """
+  The project key of the LaunchDarkly integration.
+  """
+  projectKey: String!
+}
+
+input LaunchDarklySettingsInput {
+  """
+  The environment of the LaunchDarkly integration.
+  """
+  environment: String!
+  """
+  The project key of the LaunchDarkly integration.
+  """
+  projectKey: String!
 }
 
 type LogoutResponse {
@@ -9408,14 +9747,23 @@ type Mutation {
     input: DocumentCreateInput!
   ): DocumentPayload!
   """
-  Deletes a document.
+  Deletes (trashes) a document.
   """
   documentDelete(
     """
     The identifier of the document to delete.
     """
     id: String!
-  ): DeletePayload!
+  ): DocumentArchivePayload!
+  """
+  Restores a document.
+  """
+  documentUnarchive(
+    """
+    The identifier of the document to restore.
+    """
+    id: String!
+  ): DocumentArchivePayload!
   """
   Updates a document.
   """
@@ -9721,7 +10069,7 @@ type Mutation {
     input: InitiativeCreateInput!
   ): InitiativePayload!
   """
-  [Internal] Deletes a initiative.
+  [Internal] Deletes (trashes) an initiative.
   """
   initiativeDelete(
     """
@@ -9966,6 +10314,23 @@ type Mutation {
     Jira integration update input.
     """
     input: JiraUpdateInput!
+  ): IntegrationPayload!
+  """
+  [INTERNAL] Integrates the organization with LaunchDarkly.
+  """
+  integrationLaunchDarklyConnect(
+    """
+    The LaunchDarkly API key.
+    """
+    apiKey: String!
+    """
+    The LaunchDarkly environment.
+    """
+    environment: String!
+    """
+    The LaunchDarkly project key.
+    """
+    projectKey: String!
   ): IntegrationPayload!
   """
   Enables Loom integration for the organization.
@@ -11373,7 +11738,7 @@ type Mutation {
   """
   teamCreate(
     """
-    The team id to copy settings from.
+    The team id to copy settings from, if any.
     """
     copySettingsFromTeamId: String
     """
@@ -11647,15 +12012,6 @@ type Mutation {
     """
     id: String!
   ): UserAdminPayload!
-  """
-  [Deprecated] Updates a user's settings flag.
-  """
-  userSettingsFlagIncrement(
-    """
-    Flag to increment.
-    """
-    flag: String!
-  ): UserSettingsFlagPayload!
   """
   Resets user's setting flags.
   """
@@ -11932,7 +12288,7 @@ type NotificationDeliveryPreferencesChannel {
   """
   The schedule for notifications on this channel.
   """
-  schedule: NotificationDeliveryPreferencesSchedule!
+  schedule: NotificationDeliveryPreferencesSchedule
 }
 
 input NotificationDeliveryPreferencesChannelInput {
@@ -11943,7 +12299,7 @@ input NotificationDeliveryPreferencesChannelInput {
   """
   The schedule for notifications on this channel.
   """
-  schedule: NotificationDeliveryPreferencesScheduleInput!
+  schedule: NotificationDeliveryPreferencesScheduleInput
 }
 
 """
@@ -12336,6 +12692,10 @@ input NullableCommentFilter {
   """
   projectUpdate: ProjectUpdateFilter
   """
+  Filters that the comments reactions must satisfy.
+  """
+  reactions: ReactionCollectionFilter
+  """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
@@ -12662,6 +13022,10 @@ input NullableIssueFilter {
   """
   projectMilestone: NullableProjectMilestoneFilter
   """
+  Filters that the issues reactions must satisfy.
+  """
+  reactions: ReactionCollectionFilter
+  """
   [Internal] Comparator for the issues content.
   """
   searchableContent: ContentComparator
@@ -12782,6 +13146,26 @@ input NullableProjectFilter {
   """
   creator: UserFilter
   """
+  Comparator for filtering projects which are blocked.
+  """
+  hasBlockedByRelations: RelationExistsComparator
+  """
+  Comparator for filtering projects which are blocking.
+  """
+  hasBlockingRelations: RelationExistsComparator
+  """
+  Comparator for filtering projects which this is depended on by.
+  """
+  hasDependedOnByRelations: RelationExistsComparator
+  """
+  Comparator for filtering projects which this depends on.
+  """
+  hasDependsOnRelations: RelationExistsComparator
+  """
+  Comparator for filtering projects with relations.
+  """
+  hasRelatedRelations: RelationExistsComparator
+  """
   Comparator for the project health.
   """
   health: StringComparator
@@ -12829,6 +13213,10 @@ input NullableProjectFilter {
   Filters that the project's milestones must satisfy.
   """
   projectMilestones: ProjectMilestoneCollectionFilter
+  """
+  Comparator for the project updates.
+  """
+  projectUpdates: ProjectUpdatesCollectionFilter
   """
   Filters that the projects roadmaps must satisfy.
   """
@@ -12895,6 +13283,74 @@ input NullableProjectMilestoneFilter {
   Comparator for the project milestone target date.
   """
   targetDate: NullableDateComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+"""
+Options for filtering projects by project updates.
+"""
+input NullableProjectUpdatesFilter {
+  """
+  Compound filters, all of which need to be matched by the project updates.
+  """
+  and: [NullableProjectUpdatesFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the project updates.
+  """
+  or: [NullableProjectUpdatesFilter!]
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+"""
+Reaction filtering options.
+"""
+input NullableReactionFilter {
+  """
+  Compound filters, all of which need to be matched by the reaction.
+  """
+  and: [NullableReactionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the reactions custom emoji.
+  """
+  customEmojiId: IDComparator
+  """
+  Comparator for the reactions emoji.
+  """
+  emoji: StringComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the reaction.
+  """
+  or: [NullableReactionFilter!]
   """
   Comparator for the updated at date.
   """
@@ -13441,7 +13897,7 @@ input OpsgenieInput {
   """
   The date when the Opsgenie API failed with an unauthorized error.
   """
-  apiFailedWithUnauthorizedErrorAt: DateTime!
+  apiFailedWithUnauthorizedErrorAt: DateTime
 }
 
 """
@@ -13451,7 +13907,7 @@ type OpsgenieSettings {
   """
   The date when the Opsgenie API failed with an unauthorized error.
   """
-  apiFailedWithUnauthorizedErrorAt: DateTime!
+  apiFailedWithUnauthorizedErrorAt: DateTime
 }
 
 """
@@ -13531,6 +13987,10 @@ type Organization implements Node {
     """
     orderBy: PaginationOrderBy
   ): IntegrationConnection!
+  """
+  IP restriction configurations.
+  """
+  ipRestrictions: [OrganizationIpRestriction!]
   """
   Labels associated with the organization.
   """
@@ -13957,7 +14417,7 @@ type OrganizationInvite implements Node {
   """
   Extra metadata associated with the organization invite.
   """
-  metadata: JSONObject!
+  metadata: JSONObject
   """
   The organization that the invite is associated with.
   """
@@ -14124,6 +14584,47 @@ input OrganizationInviteUpdateInput {
   teamIds: [String!]!
 }
 
+type OrganizationIpRestriction {
+  """
+  Optional restriction description.
+  """
+  description: String
+  """
+  Whether the restriction is enabled.
+  """
+  enabled: Boolean!
+  """
+  IP range in CIDR format.
+  """
+  range: String!
+  """
+  Restriction type.
+  """
+  type: String!
+}
+
+"""
+[INTERNAL] Organization IP restriction configuration.
+"""
+input OrganizationIpRestrictionInput {
+  """
+  Optional restriction description.
+  """
+  description: String
+  """
+  Whether the restriction is enabled.
+  """
+  enabled: Boolean!
+  """
+  IP range in CIDR format.
+  """
+  range: String!
+  """
+  Restriction type.
+  """
+  type: String!
+}
+
 type OrganizationMeta {
   """
   Allowed authentication providers, empty array means all are allowed.
@@ -14194,9 +14695,9 @@ input OrganizationUpdateInput {
   """
   gitPublicLinkbackMessagesEnabled: Boolean
   """
-  Linear Preview feature flags.
+  IP restriction configurations controlling allowed access the workspace.
   """
-  linearPreviewFlags: JSONObject
+  ipRestrictions: [OrganizationIpRestrictionInput!]
   """
   The logo of the organization.
   """
@@ -14222,7 +14723,7 @@ input OrganizationUpdateInput {
   """
   projectUpdateRemindersHour: Float
   """
-  The frequency at which project updates are sent.
+  [DEPRECATED] The frequency at which project updates are sent.
   """
   projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency
   """
@@ -14274,7 +14775,7 @@ input PagerDutyInput {
   """
   The date when the PagerDuty API failed with an unauthorized error.
   """
-  apiFailedWithUnauthorizedErrorAt: DateTime!
+  apiFailedWithUnauthorizedErrorAt: DateTime
 }
 
 """
@@ -14284,7 +14785,7 @@ type PagerDutySettings {
   """
   The date when the PagerDuty API failed with an unauthorized error.
   """
-  apiFailedWithUnauthorizedErrorAt: DateTime!
+  apiFailedWithUnauthorizedErrorAt: DateTime
 }
 
 """
@@ -14326,7 +14827,7 @@ type PaidSubscription implements Node {
   """
   The collection method for this subscription, either automatically charged or invoiced.
   """
-  collectionMethod: String
+  collectionMethod: String!
   """
   The time at which the entity was created.
   """
@@ -14902,6 +15403,26 @@ input ProjectCollectionFilter {
   """
   every: ProjectFilter
   """
+  Comparator for filtering projects which are blocked.
+  """
+  hasBlockedByRelations: RelationExistsComparator
+  """
+  Comparator for filtering projects which are blocking.
+  """
+  hasBlockingRelations: RelationExistsComparator
+  """
+  Comparator for filtering projects which this is depended on by.
+  """
+  hasDependedOnByRelations: RelationExistsComparator
+  """
+  Comparator for filtering projects which this depends on.
+  """
+  hasDependsOnRelations: RelationExistsComparator
+  """
+  Comparator for filtering projects with relations.
+  """
+  hasRelatedRelations: RelationExistsComparator
+  """
   Comparator for the project health.
   """
   health: StringComparator
@@ -14949,6 +15470,10 @@ input ProjectCollectionFilter {
   Filters that the project's milestones must satisfy.
   """
   projectMilestones: ProjectMilestoneCollectionFilter
+  """
+  Comparator for the project updates.
+  """
+  projectUpdates: ProjectUpdatesCollectionFilter
   """
   Filters that the projects roadmaps must satisfy.
   """
@@ -15064,32 +15589,6 @@ input ProjectCreateInput {
   teamIds: [String!]!
 }
 
-input ProjectDetailSuggestionInput {
-  """
-  The description for the project.
-  """
-  description: String
-  """
-  The content of the project as markdown.
-  """
-  documentContent: String
-  """
-  The name of the project.
-  """
-  name: String!
-}
-
-type ProjectDetailSuggestionPayload {
-  """
-  The suggested project color.
-  """
-  color: String
-  """
-  The suggested view icon.
-  """
-  icon: String
-}
-
 type ProjectEdge {
   """
   Used in `before` and `after` args
@@ -15126,6 +15625,26 @@ input ProjectFilter {
   Filters that the projects creator must satisfy.
   """
   creator: UserFilter
+  """
+  Comparator for filtering projects which are blocked.
+  """
+  hasBlockedByRelations: RelationExistsComparator
+  """
+  Comparator for filtering projects which are blocking.
+  """
+  hasBlockingRelations: RelationExistsComparator
+  """
+  Comparator for filtering projects which this is depended on by.
+  """
+  hasDependedOnByRelations: RelationExistsComparator
+  """
+  Comparator for filtering projects which this depends on.
+  """
+  hasDependsOnRelations: RelationExistsComparator
+  """
+  Comparator for filtering projects with relations.
+  """
+  hasRelatedRelations: RelationExistsComparator
   """
   Comparator for the project health.
   """
@@ -15170,6 +15689,10 @@ input ProjectFilter {
   Filters that the project's milestones must satisfy.
   """
   projectMilestones: ProjectMilestoneCollectionFilter
+  """
+  Comparator for the project updates.
+  """
+  projectUpdates: ProjectUpdatesCollectionFilter
   """
   Filters that the projects roadmaps must satisfy.
   """
@@ -16435,7 +16958,6 @@ enum ProjectStatusType {
 Different tabs available inside a project.
 """
 enum ProjectTab {
-  activity
   documents
   issues
 }
@@ -16530,6 +17052,10 @@ type ProjectUpdate implements Node {
   """
   reactionData: JSONObject!
   """
+  Reactions associated with the project update.
+  """
+  reactions: [Reaction!]!
+  """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -16587,7 +17113,7 @@ type ProjectUpdateEdge {
 }
 
 """
-ProjectUpdate filtering options.
+Options for filtering project updates.
 """
 input ProjectUpdateFilter {
   """
@@ -16610,6 +17136,10 @@ input ProjectUpdateFilter {
   Filters that the project update project must satisfy.
   """
   project: ProjectFilter
+  """
+  Filters that the project updates reactions must satisfy.
+  """
+  reactions: ReactionCollectionFilter
   """
   Comparator for the updated at date.
   """
@@ -16872,6 +17402,70 @@ type ProjectUpdateWithInteractionPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+Collection filtering options for filtering projects by project updates.
+"""
+input ProjectUpdatesCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the project update.
+  """
+  and: [ProjectUpdatesCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that needs to be matched by all updates.
+  """
+  every: ProjectUpdatesFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Compound filters, one of which need to be matched by the update.
+  """
+  or: [ProjectUpdatesCollectionFilter!]
+  """
+  Filters that needs to be matched by some updates.
+  """
+  some: ProjectUpdatesFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+"""
+Options for filtering projects by project updates.
+"""
+input ProjectUpdatesFilter {
+  """
+  Compound filters, all of which need to be matched by the project updates.
+  """
+  and: [ProjectUpdatesFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the project updates.
+  """
+  or: [ProjectUpdatesFilter!]
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 """
@@ -18016,10 +18610,6 @@ type Query {
   """
   project(id: String!): Project!
   """
-  [INTERNAL] Suggests icon, color for a project based on its info while composing.
-  """
-  projectDetailsSuggestion(project: ProjectDetailSuggestionInput!): ProjectDetailSuggestionPayload!
-  """
   Suggests filters for a project view based on a text prompt.
   """
   projectFilterSuggestion(prompt: String!): ProjectFilterSuggestionPayload!
@@ -18872,6 +19462,52 @@ type Reaction implements Node {
   user: User
 }
 
+"""
+Reaction filtering options.
+"""
+input ReactionCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the reaction.
+  """
+  and: [ReactionCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the reactions custom emoji.
+  """
+  customEmojiId: IDComparator
+  """
+  Comparator for the reactions emoji.
+  """
+  emoji: StringComparator
+  """
+  Filters that needs to be matched by all reactions.
+  """
+  every: ReactionFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Compound filters, one of which need to be matched by the reaction.
+  """
+  or: [ReactionCollectionFilter!]
+  """
+  Filters that needs to be matched by some reactions.
+  """
+  some: ReactionFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 type ReactionConnection {
   edges: [ReactionEdge!]!
   nodes: [Reaction!]!
@@ -18886,7 +19522,7 @@ input ReactionCreateInput {
   """
   The emoji the user reacted with.
   """
-  emoji: String
+  emoji: String!
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -18907,6 +19543,40 @@ type ReactionEdge {
   """
   cursor: String!
   node: Reaction!
+}
+
+"""
+Reaction filtering options.
+"""
+input ReactionFilter {
+  """
+  Compound filters, all of which need to be matched by the reaction.
+  """
+  and: [ReactionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the reactions custom emoji.
+  """
+  customEmojiId: IDComparator
+  """
+  Comparator for the reactions emoji.
+  """
+  emoji: StringComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the reaction.
+  """
+  or: [ReactionFilter!]
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 type ReactionPayload {
@@ -19451,7 +20121,6 @@ enum SlaStatus {
   HighRisk
   LowRisk
   MediumRisk
-  Paused
 }
 
 """
@@ -20838,7 +21507,7 @@ type TeamMembership implements Node {
   """
   Whether the user is the owner of the team.
   """
-  owner: Boolean
+  owner: Boolean!
   """
   The order of the item in the users team list.
   """
@@ -21449,7 +22118,7 @@ type TimeSchedule implements Node {
   """
   The schedule entries.
   """
-  entries: [TimeScheduleEntry!]!
+  entries: [TimeScheduleEntry!]
   """
   The identifier of the external schedule.
   """
@@ -22622,7 +23291,7 @@ type UserSettingsFlagPayload {
   """
   The flag key which was updated.
   """
-  flag: String!
+  flag: String
   """
   The identifier of the last sync operation.
   """
@@ -22634,7 +23303,7 @@ type UserSettingsFlagPayload {
   """
   The flag value after update.
   """
-  value: Int!
+  value: Int
 }
 
 type UserSettingsFlagsResetPayload {
@@ -22906,12 +23575,11 @@ enum ViewType {
   customRoadmap
   customView
   customViews
-  customViewsPersonal
   cycle
   inbox
   initiative
+  initiativeOverview
   initiatives
-  initiativesAll
   initiativesCompleted
   initiativesPlanned
   issueIdentifiers
@@ -23173,7 +23841,7 @@ type WorkflowDefinition implements Node {
   """
   The conditions that need to be match for the workflow to be triggered.
   """
-  conditions: JSONObject!
+  conditions: JSONObject
   """
   The type of view to which this workflow's context is associated with.
   """

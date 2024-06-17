@@ -59,6 +59,10 @@ fragment Comment on Comment {
   url
   # Emoji reaction summary, grouped by emoji type.
   reactionData
+  # Reactions associated with the comment.
+  reactions {
+    ...Reaction
+  }
   # The bot that created the comment.
   botActor {
     ...ActorBot
@@ -460,6 +464,8 @@ fragment DocumentNotification on DocumentNotification {
 # A document that can be attached to different entities.
 fragment Document on Document {
   __typename
+  # A flag that indicates whether the document is in the trash bin.
+  trashed
   # The canonical url for the document.
   url
   # The color of the icon.
@@ -512,14 +518,79 @@ fragment Facet on Facet {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The owning page.
+  sourcePage
+  # The owning project.
+  sourceProject {
+    id
+  }
+  # The owning team.
+  sourceTeam {
+    id
+  }
   # The sort order of the facet.
   sortOrder
+  # The targeted custom view.
+  targetCustomView {
+    id
+  }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
   createdAt
   # The unique identifier of the entity.
   id
+}
+
+# A feature flag for a project.
+fragment FeatureFlag on FeatureFlag {
+  __typename
+  # The description of the feature flag.
+  description
+  # The description of the feature flag.
+  lastStageUpdatedAt
+  # The integration providing the feature flag.
+  integration {
+    id
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The pending rollout stage for the feature flag.
+  pendingRolloutStage {
+    ...FeatureFlagRolloutStage
+  }
+  # The project the feature flag is associated with.
+  project {
+    id
+  }
+  # The rollout stage of the feature flag, should be defined for all feature flags in use.
+  rolloutStage {
+    ...FeatureFlagRolloutStage
+  }
+  # The status of the feature flag.
+  status
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The unique key as defined by the feature flag provider.
+  key
+  # The user who created the feature flag.
+  creator {
+    id
+  }
+  # The user who last changed the stage of the feature flag.
+  lastStageUpdatedBy {
+    id
+  }
+  # Url to the feature flag provider's page about the feature flag.
+  externalUrl
+  # Whether the feature flag is enabled.
+  isEnabled
 }
 
 # A generic payload return from entity archive mutations.
@@ -537,6 +608,19 @@ fragment AttachmentArchivePayload on AttachmentArchivePayload {
 
 # A generic payload return from entity archive mutations.
 fragment CycleArchivePayload on CycleArchivePayload {
+  __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
+fragment DocumentArchivePayload on DocumentArchivePayload {
   __typename
   # The archived/unarchived entity. Null if entity was deleted.
   entity {
@@ -653,6 +737,10 @@ fragment ArchivePayload on ArchivePayload {
 
   ... on DeletePayload {
     ...DeletePayload
+  }
+
+  ... on DocumentArchivePayload {
+    ...DocumentArchivePayload
   }
 
   ... on InitiativeArchivePayload {
@@ -1104,6 +1192,10 @@ fragment IssueHistory on IssueHistory {
   addedLabelIds
   # ID's of labels that were removed.
   removedLabelIds
+  # The actor that performed the actions. This field may be empty in the case of integrations or automations.
+  actor {
+    id
+  }
   # The actors that performed the actions. This field may be empty in the case of integrations or automations.
   actors {
     ...User
@@ -1111,6 +1203,14 @@ fragment IssueHistory on IssueHistory {
   # The bot that performed the action.
   botActor {
     ...ActorBot
+  }
+  # The cycle that the issue was moved from.
+  fromCycle {
+    id
+  }
+  # The cycle that the issue was moved to.
+  toCycle {
+    id
   }
   # The id of linked attachment.
   attachmentId
@@ -1166,47 +1266,39 @@ fragment IssueHistory on IssueHistory {
   attachment {
     id
   }
-  # The new cycle of the issue.
-  toCycle {
-    id
-  }
-  # The new parent of the issue.
-  toParent {
-    id
-  }
   # The new project created from the issue.
   toConvertedProject {
     id
   }
-  # The new project of the issue.
-  toProject {
-    id
-  }
-  # The new workflow state of the issue.
-  toState {
-    id
-  }
-  # The previous cycle of the issue.
-  fromCycle {
-    id
-  }
-  # The previous parent of the issue.
+  # The parent issue that the issue was moved from.
   fromParent {
     id
   }
-  # The previous project of the issue.
+  # The parent issue that the issue was moved to.
+  toParent {
+    id
+  }
+  # The project that the issue was moved from.
   fromProject {
     id
   }
-  # The previous workflow state of the issue.
+  # The project that the issue was moved to.
+  toProject {
+    id
+  }
+  # The state that the issue was moved from.
   fromState {
     id
   }
-  # The team from which the issue was moved from.
+  # The state that the issue was moved to.
+  toState {
+    id
+  }
+  # The team that the issue was moved from.
   fromTeam {
     id
   }
-  # The team to which the issue was moved to.
+  # The team that the issue was moved to.
   toTeam {
     id
   }
@@ -1216,16 +1308,12 @@ fragment IssueHistory on IssueHistory {
   createdAt
   # The unique identifier of the entity.
   id
-  # The user from whom the issue was re-assigned from.
-  fromAssignee {
-    id
-  }
-  # The user to whom the issue was assigned to.
+  # The user that was assigned to the issue.
   toAssignee {
     id
   }
-  # The user who made these changes. If null, possibly means that the change made by an integration.
-  actor {
+  # The user that was unassigned from the issue.
+  fromAssignee {
     id
   }
   # The users that were notified of the issue.
@@ -1392,6 +1480,35 @@ fragment Roadmap on Roadmap {
   owner {
     id
   }
+}
+
+# A rollout stage for a feature flag.
+fragment FeatureFlagRolloutStage on FeatureFlagRolloutStage {
+  __typename
+  # The description of the rollout stage.
+  description
+  # The integration providing the feature flag.
+  integration {
+    id
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The name of the rollout stage.
+  name
+  # The order of the rollout stages within an organization.
+  sortOrder
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of the feature flag rollout stage.
+  type
+  # The unique identifier of the entity.
+  id
+  # Which feature flag provider segments this rollout stage is associated with.
+  segmentKeys
 }
 
 # A set of issues to be resolved in a specified amount of time.
@@ -1693,6 +1810,10 @@ fragment ProjectUpdate on ProjectUpdate {
   __typename
   # Emoji reaction summary, grouped by emoji type.
   reactionData
+  # Reactions associated with the project update.
+  reactions {
+    ...Reaction
+  }
   # The URL to the project update.
   url
   # The diff between the current update and the previous one, formatted as markdown.
@@ -2348,6 +2469,8 @@ fragment Issue on Issue {
   __typename
   # A flag that indicates whether the issue is in the trash bin.
   trashed
+  # Emoji reaction summary, grouped by emoji type.
+  reactionData
   # Id of the labels associated with this issue.
   labelIds
   # Integration type that created this issue, if applicable.
@@ -2360,6 +2483,10 @@ fragment Issue on Issue {
   priorityLabel
   # Previous identifiers of the issue if it has been moved between teams.
   previousIdentifiers
+  # Reactions associated with the issue.
+  reactions {
+    ...Reaction
+  }
   # Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk).
   customerTicketCount
   # Suggested branch name for the issue.
@@ -2523,6 +2650,10 @@ fragment Organization on Organization {
   allowedAuthServices
   # How git branches are formatted. If null, default formatting will be used.
   gitBranchFormat
+  # IP restriction configurations.
+  ipRestrictions {
+    ...OrganizationIpRestriction
+  }
   # Number of active users in the organization.
   userCount
   # Number of issues in the organization.
@@ -3143,6 +3274,15 @@ fragment IssueLabel on IssueLabel {
   isGroup
 }
 
+# LaunchDarkly specific settings.
+fragment LaunchDarklySettings on LaunchDarklySettings {
+  __typename
+  # The environment of the LaunchDarkly integration.
+  environment
+  # The project key of the LaunchDarkly integration.
+  projectKey
+}
+
 # Mapping of Linear teams to GitHub repos.
 fragment TeamRepoMapping on TeamRepoMapping {
   __typename
@@ -3591,6 +3731,8 @@ fragment IntegrationsSettings on IntegrationsSettings {
   slackIssueSlaHighRisk
   # Whether to send a Slack message when an SLA is breached.
   slackIssueSlaBreached
+  # Whether to send a Slack message when an issue is added to the custom view.
+  slackIssueAddedToView
   # Whether to send a Slack message when any of the project or team's issues change to completed or cancelled.
   slackIssueStatusChangedDone
   # Whether to send a Slack message when any of the project or team's issues has a change in status.
@@ -3630,6 +3772,9 @@ fragment IntegrationSettings on IntegrationSettings {
   }
   jiraPersonal {
     ...JiraPersonalSettings
+  }
+  launchDarkly {
+    ...LaunchDarklySettings
   }
   notion {
     ...NotionSettings
@@ -4113,6 +4258,14 @@ fragment AuthOauthClientWithTokens on AuthOauthClientWithTokens {
   }
 }
 
+fragment AuthOrganizationBucketNamePayload on AuthOrganizationBucketNamePayload {
+  __typename
+  # The imports bucket name for the organization.
+  importsBucketName
+  # The uploads bucket name for the organization.
+  uploadsBucketName
+}
+
 fragment AuthOrganizationDomain on AuthOrganizationDomain {
   __typename
   # Prevent users with this domain to create new workspaces.
@@ -4392,6 +4545,8 @@ fragment DocumentSearchPayload on DocumentSearchPayload {
 
 fragment DocumentSearchResult on DocumentSearchResult {
   __typename
+  # A flag that indicates whether the document is in the trash bin.
+  trashed
   # Metadata related to search result.
   metadata
   # The canonical url for the document.
@@ -4558,6 +4713,26 @@ fragment FavoritePayload on FavoritePayload {
   }
   # Whether the operation was successful.
   success
+}
+
+fragment FeatureFlagConnection on FeatureFlagConnection {
+  __typename
+  nodes {
+    ...FeatureFlag
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment FeatureFlagRolloutStageConnection on FeatureFlagRolloutStageConnection {
+  __typename
+  nodes {
+    ...FeatureFlagRolloutStage
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment FrontAttachmentPayload on FrontAttachmentPayload {
@@ -4858,6 +5033,8 @@ fragment IssueSearchResult on IssueSearchResult {
   __typename
   # A flag that indicates whether the issue is in the trash bin.
   trashed
+  # Emoji reaction summary, grouped by emoji type.
+  reactionData
   # Id of the labels associated with this issue.
   labelIds
   # Integration type that created this issue, if applicable.
@@ -4872,6 +5049,10 @@ fragment IssueSearchResult on IssueSearchResult {
   metadata
   # Previous identifiers of the issue if it has been moved between teams.
   previousIdentifiers
+  # Reactions associated with the issue.
+  reactions {
+    ...Reaction
+  }
   # Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk).
   customerTicketCount
   # Suggested branch name for the issue.
@@ -5180,6 +5361,18 @@ fragment OrganizationInvitePayload on OrganizationInvitePayload {
   success
 }
 
+fragment OrganizationIpRestriction on OrganizationIpRestriction {
+  __typename
+  # IP range in CIDR format.
+  range
+  # Optional restriction description.
+  description
+  # Restriction type.
+  type
+  # Whether the restriction is enabled.
+  enabled
+}
+
 fragment OrganizationMeta on OrganizationMeta {
   __typename
   # Allowed authentication providers, empty array means all are allowed.
@@ -5236,14 +5429,6 @@ fragment ProjectConnection on ProjectConnection {
   pageInfo {
     ...PageInfo
   }
-}
-
-fragment ProjectDetailSuggestionPayload on ProjectDetailSuggestionPayload {
-  __typename
-  # The suggested project color.
-  color
-  # The suggested view icon.
-  icon
 }
 
 fragment ProjectFilterSuggestionPayload on ProjectFilterSuggestionPayload {
@@ -10662,13 +10847,22 @@ mutation createDocument(
     ...DocumentPayload
   }
 }
-# Deletes a document.
+# Deletes (trashes) a document.
 mutation deleteDocument(
   # The identifier of the document to delete.
   $id: String!
 ) {
   documentDelete(id: $id) {
-    ...DeletePayload
+    ...DocumentArchivePayload
+  }
+}
+# Restores a document.
+mutation unarchiveDocument(
+  # The identifier of the document to restore.
+  $id: String!
+) {
+  documentUnarchive(id: $id) {
+    ...DocumentArchivePayload
   }
 }
 # Updates a document.
@@ -12196,7 +12390,7 @@ mutation samlTokenUserAccountAuth(
 # Creates a new team. The user who creates the team will automatically be added as a member to the
 # newly created team.
 mutation createTeam(
-  # The team id to copy settings from.
+  # The team id to copy settings from, if any.
   $copySettingsFromTeamId: String
   # The team object to create.
   $input: TeamCreateInput!
@@ -12453,15 +12647,6 @@ mutation userPromoteMember(
 ) {
   userPromoteMember(id: $id) {
     ...UserAdminPayload
-  }
-}
-# [Deprecated] Updates a user's settings flag.
-mutation userSettingsFlagIncrement(
-  # Flag to increment.
-  $flag: String!
-) {
-  userSettingsFlagIncrement(flag: $flag) {
-    ...UserSettingsFlagPayload
   }
 }
 # Resets user's setting flags.
