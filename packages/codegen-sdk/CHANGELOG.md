@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.4
+
+### Patch Changes
+
+- a3625a1: chore(deps): update dependency patch versions
+
 ## 2.2.3
 
 ### Patch Changes

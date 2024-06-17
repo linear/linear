@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.14.1
+
+### Patch Changes
+
+- a3625a1: chore(deps): update dependency patch versions
+- Updated dependencies [a3625a1]
+- Updated dependencies [f6db6a9]
+  - @linear/sdk@23.0.0
+
 ## 1.14.0
 
 ### Minor Changes
