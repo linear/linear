@@ -321,7 +321,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
     const formattedDueDate = issue.dueDate ? format(issue.dueDate, "yyyy-MM-dd") : undefined;
 
-    const createdIssue = await client.createIssue({
+    const createdIssue = await createIssueWithRetries(client, {
       teamId,
       projectId: projectId as unknown as string,
       title: issue.title,
@@ -363,4 +363,23 @@ const buildComments = async (
     newComments.push(`**${user.name}**${" " + date}\n\n${body}\n`);
   }
   return `${description}\n\n---\n\n${newComments.join("\n\n")}`;
+};
+
+const createIssueWithRetries = async (
+  client: LinearClient,
+  input: Parameters<LinearClient["createIssue"]>[0],
+  retries = 3
+): ReturnType<LinearClient["createIssue"]> => {
+  try {
+    return await client.createIssue(input);
+  } catch (error) {
+    if (error.type === "Ratelimited" && retries > 0) {
+      // Hard-coded to 1 minute for now; when we do LIN-17685, we can use the X-RateLimit-Endpoint-Requests-Remaining
+      // header to find out how long to wait.
+      await new Promise(resolve => setTimeout(resolve, 60000));
+      return createIssueWithRetries(client, input, retries - 1);
+    } else {
+      throw error;
+    }
+  }
 };
