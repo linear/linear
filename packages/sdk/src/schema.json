@@ -3472,6 +3472,22 @@
         "description": null,
         "fields": [
           {
+            "name": "region",
+            "description": "The region for the organization.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "importsBucketName",
             "description": "The imports bucket name for the organization.",
             "args": [],
@@ -6028,6 +6044,41 @@
       },
       {
         "kind": "OBJECT",
+        "name": "CommentNotification",
+        "description": "A comment related notification.",
+        "fields": [
+          {
+            "name": "commentId",
+            "description": "Related comment ID. Null if the notification is not related to a comment.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parentCommentId",
+            "description": "Related parent comment ID. Null if the notification is not related to a comment.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "CommentPayload",
         "description": null,
         "fields": [
@@ -7677,7 +7728,19 @@
           },
           {
             "name": "projectId",
-            "description": "[Internal] The id of the project associated with the custom view.",
+            "description": "The id of the project associated with the custom view.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeId",
+            "description": "The id of the initiative associated with the custom view.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -8240,6 +8303,18 @@
           {
             "name": "projectId",
             "description": "[Internal] The id of the project associated with the custom view.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeId",
+            "description": "[Internal] The id of the initiative associated with the custom view.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -12014,6 +12089,30 @@
         "description": "A document related notification.",
         "fields": [
           {
+            "name": "commentId",
+            "description": "Related comment ID. Null if the notification is not related to a comment.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parentCommentId",
+            "description": "Related parent comment ID. Null if the notification is not related to a comment.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "id",
             "description": "The unique identifier of the entity.",
             "args": [],
@@ -12173,6 +12272,142 @@
               "kind": "SCALAR",
               "name": "DateTime",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "url",
+            "description": "[Internal] URL to the target of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "title",
+            "description": "[Internal] Notification title.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subtitle",
+            "description": "[Internal] Notification subtitle.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isLinearActor",
+            "description": "[Internal] If notification actor was Linear.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarUrl",
+            "description": "[Internal] Notification avatar URL.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorInitials",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarColor",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueStatusType",
+            "description": "[Internal] Issue's status type for issue notifications.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectUpdateHealth",
+            "description": "[Internal] Project update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "groupingKey",
+            "description": "[ALPHA] Notifications with the same grouping key will be grouped together in the UI.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -12929,9 +13164,206 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "trashed",
+            "description": "Whether the document has been trashed.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Draft",
+        "description": "A general purpose draft. Used for comments, project updates, etc.",
+        "fields": [
+          {
+            "name": "id",
+            "description": "The unique identifier of the entity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those\n    for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't\n    been updated after creation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "archivedAt",
+            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "bodyData",
+            "description": "The text content as a Prosemirror document.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSON",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "data",
+            "description": "Additional properties for the draft.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isAutogenerated",
+            "description": "Whether the draft was autogenerated for the user.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": "The user who created the draft.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issue",
+            "description": "The issue for which this is a draft comment.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Issue",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "project",
+            "description": "The project for which this is a draft project update.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Project",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectUpdate",
+            "description": "The project update for which this is a draft comment.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ProjectUpdate",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parentComment",
+            "description": "The comment for which this is a draft comment reply.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Comment",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Node",
+            "ofType": null
+          }
+        ],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -15397,6 +15829,18 @@
             "deprecationReason": null
           },
           {
+            "name": "initiativeTab",
+            "description": "The targeted tab of the initiative.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "InitiativeTab",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "owner",
             "description": "The owner of the favorite.",
             "args": [],
@@ -15555,7 +15999,7 @@
           },
           {
             "name": "projectTeam",
-            "description": "The favorited team of the project.",
+            "description": "[DEPRECATED] The favorited team of the project.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -15644,6 +16088,18 @@
             "type": {
               "kind": "OBJECT",
               "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "url",
+            "description": "URL of the favorited entity. Folders return 'null' value.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -15827,18 +16283,6 @@
             "deprecationReason": null
           },
           {
-            "name": "projectTeamId",
-            "description": "The identifier of the project team to favorite.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "predefinedViewType",
             "description": "The type of the predefined view to favorite.",
             "type": {
@@ -15916,6 +16360,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeTab",
+            "description": "The tab of the initiative to favorite.",
+            "type": {
+              "kind": "ENUM",
+              "name": "InitiativeTab",
               "ofType": null
             },
             "defaultValue": null,
@@ -17983,6 +18439,93 @@
       },
       {
         "kind": "OBJECT",
+        "name": "GitHubEnterpriseServerPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "lastSyncId",
+            "description": "The identifier of the last sync operation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integration",
+            "description": "The integration that was created or updated.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Integration",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "setupUrl",
+            "description": "The setup address.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "webhookSecret",
+            "description": "The webhook secret to provide to GitHub.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "GitHubImportSettings",
         "description": "Metadata and settings for a GitHub import integration.",
         "fields": [
@@ -18297,13 +18840,9 @@
             "description": "The avatar URL for the GitHub organization.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -18392,13 +18931,9 @@
             "name": "orgAvatarUrl",
             "description": "The avatar URL for the GitHub organization.",
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -18980,7 +19515,7 @@
       {
         "kind": "OBJECT",
         "name": "Initiative",
-        "description": "[INTERNAL] An initiative to group projects.",
+        "description": "An initiative to group projects.",
         "fields": [
           {
             "name": "id",
@@ -19060,7 +19595,7 @@
           },
           {
             "name": "description",
-            "description": "[Internal] The description of the initiative.",
+            "description": "The description of the initiative.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -19200,7 +19735,7 @@
           },
           {
             "name": "targetDateResolution",
-            "description": "[INTERNAL] The resolution of the initiative's estimated completion date.",
+            "description": "The resolution of the initiative's estimated completion date.",
             "args": [],
             "type": {
               "kind": "ENUM",
@@ -19232,7 +19767,7 @@
             "args": [
               {
                 "name": "filter",
-                "description": "[Internal] Filter returned projects.",
+                "description": "Filter returned projects.",
                 "type": {
                   "kind": "INPUT_OBJECT",
                   "name": "ProjectFilter",
@@ -19726,7 +20261,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "InitiativeCreateInput",
-        "description": "[Internal] The properties of the initiative to create.",
+        "description": "The properties of the initiative to create.",
         "fields": null,
         "inputFields": [
           {
@@ -19759,7 +20294,7 @@
           },
           {
             "name": "description",
-            "description": "[Internal] The description of the initiative.",
+            "description": "The description of the initiative.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -20030,6 +20565,30 @@
         "description": "An initiative related notification.",
         "fields": [
           {
+            "name": "commentId",
+            "description": "Related comment ID. Null if the notification is not related to a comment.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parentCommentId",
+            "description": "Related parent comment ID. Null if the notification is not related to a comment.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "id",
             "description": "The unique identifier of the entity.",
             "args": [],
@@ -20194,6 +20753,142 @@
             "deprecationReason": null
           },
           {
+            "name": "url",
+            "description": "[Internal] URL to the target of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "title",
+            "description": "[Internal] Notification title.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subtitle",
+            "description": "[Internal] Notification subtitle.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isLinearActor",
+            "description": "[Internal] If notification actor was Linear.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarUrl",
+            "description": "[Internal] Notification avatar URL.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorInitials",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarColor",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueStatusType",
+            "description": "[Internal] Issue's status type for issue notifications.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectUpdateHealth",
+            "description": "[Internal] Project update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "groupingKey",
+            "description": "[ALPHA] Notifications with the same grouping key will be grouped together in the UI.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "botActor",
             "description": "The bot that caused the notification.",
             "args": [],
@@ -20230,7 +20925,7 @@
       {
         "kind": "OBJECT",
         "name": "InitiativePayload",
-        "description": "[Internal] The payload returned by the initiative mutations.",
+        "description": "The payload returned by the initiative mutations.",
         "fields": [
           {
             "name": "lastSyncId",
@@ -20316,9 +21011,32 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "InitiativeTab",
+        "description": "Different tabs available inside an initiative.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "overview",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projects",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "InitiativeToProject",
-        "description": "[INTERNAL] Join table between projects and initiatives.",
+        "description": "Join table between projects and initiatives.",
         "fields": [
           {
             "name": "id",
@@ -20518,7 +21236,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "InitiativeToProjectCreateInput",
-        "description": "[INTERNAL] The properties of the initiativeToProject to create.",
+        "description": "The properties of the initiativeToProject to create.",
         "fields": null,
         "inputFields": [
           {
@@ -20628,7 +21346,7 @@
       {
         "kind": "OBJECT",
         "name": "InitiativeToProjectPayload",
-        "description": "[INTERNAL] The result of a initiativeToProject mutation.",
+        "description": "The result of a initiativeToProject mutation.",
         "fields": [
           {
             "name": "lastSyncId",
@@ -20687,7 +21405,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "InitiativeToProjectUpdateInput",
-        "description": "[INTERNAL] The properties of the initiativeToProject to update.",
+        "description": "The properties of the initiativeToProject to update.",
         "fields": null,
         "inputFields": [
           {
@@ -20710,7 +21428,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "InitiativeUpdateInput",
-        "description": "[Internal] The properties of the initiative to update.",
+        "description": "The properties of the initiative to update.",
         "fields": null,
         "inputFields": [
           {
@@ -20727,7 +21445,7 @@
           },
           {
             "name": "description",
-            "description": "[Internal] The description of the initiative.",
+            "description": "The description of the initiative.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -20815,6 +21533,18 @@
             "type": {
               "kind": "ENUM",
               "name": "DateResolutionType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "trashed",
+            "description": "Whether the initiative has been trashed.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -21289,6 +22019,12 @@
           },
           {
             "name": "github",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "githubEnterpriseServer",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -27842,6 +28578,22 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "displayName",
+            "description": "The display name of the import service.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -29131,6 +29883,30 @@
         "description": "An issue related notification.",
         "fields": [
           {
+            "name": "commentId",
+            "description": "Related comment ID. Null if the notification is not related to a comment.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parentCommentId",
+            "description": "Related parent comment ID. Null if the notification is not related to a comment.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "id",
             "description": "The unique identifier of the entity.",
             "args": [],
@@ -29295,6 +30071,142 @@
             "deprecationReason": null
           },
           {
+            "name": "url",
+            "description": "[Internal] URL to the target of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "title",
+            "description": "[Internal] Notification title.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subtitle",
+            "description": "[Internal] Notification subtitle.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isLinearActor",
+            "description": "[Internal] If notification actor was Linear.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarUrl",
+            "description": "[Internal] Notification avatar URL.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorInitials",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarColor",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueStatusType",
+            "description": "[Internal] Issue's status type for issue notifications.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectUpdateHealth",
+            "description": "[Internal] Project update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "groupingKey",
+            "description": "[ALPHA] Notifications with the same grouping key will be grouped together in the UI.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "botActor",
             "description": "The bot that caused the notification.",
             "args": [],
@@ -29337,6 +30249,18 @@
           {
             "name": "comment",
             "description": "The comment related to the notification.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Comment",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parentComment",
+            "description": "The parent comment related to the notification, if a notification is a reply comment notification.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -36297,7 +37221,7 @@
           },
           {
             "name": "initiativeToProjectCreate",
-            "description": "[INTERNAL] Creates a new initiativeToProject join.",
+            "description": "Creates a new initiativeToProject join.",
             "args": [
               {
                 "name": "input",
@@ -36330,7 +37254,7 @@
           },
           {
             "name": "initiativeToProjectUpdate",
-            "description": "[INTERNAL] Updates a initiativeToProject.",
+            "description": "Updates a initiativeToProject.",
             "args": [
               {
                 "name": "input",
@@ -36379,7 +37303,7 @@
           },
           {
             "name": "initiativeToProjectDelete",
-            "description": "[INTERNAL] Deletes a initiativeToProject.",
+            "description": "Deletes a initiativeToProject.",
             "args": [
               {
                 "name": "id",
@@ -36412,7 +37336,7 @@
           },
           {
             "name": "initiativeCreate",
-            "description": "[Internal] Creates a new initiative.",
+            "description": "Creates a new initiative.",
             "args": [
               {
                 "name": "input",
@@ -36445,7 +37369,7 @@
           },
           {
             "name": "initiativeUpdate",
-            "description": "[Internal] Updates a initiative.",
+            "description": "Updates a initiative.",
             "args": [
               {
                 "name": "input",
@@ -36494,7 +37418,7 @@
           },
           {
             "name": "initiativeArchive",
-            "description": "[Internal] Archives a initiative.",
+            "description": "Archives a initiative.",
             "args": [
               {
                 "name": "id",
@@ -36527,7 +37451,7 @@
           },
           {
             "name": "initiativeUnarchive",
-            "description": "[Internal] Unarchives a initiative.",
+            "description": "Unarchives a initiative.",
             "args": [
               {
                 "name": "id",
@@ -36560,7 +37484,7 @@
           },
           {
             "name": "initiativeDelete",
-            "description": "[Internal] Deletes (trashes) an initiative.",
+            "description": "Deletes (trashes) an initiative.",
             "args": [
               {
                 "name": "id",
@@ -37293,6 +38217,51 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "integrationGitHubEnterpriseServerConnect",
+            "description": "Connects the organization with a GitHub Enterprise Server.",
+            "args": [
+              {
+                "name": "organizationName",
+                "description": "The name of GitHub organization.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "githubUrl",
+                "description": "The base URL of the GitHub Enterprise Server installation.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "GitHubEnterpriseServerPayload",
                 "ofType": null
               }
             },
@@ -39120,15 +40089,11 @@
               },
               {
                 "name": "integrationId",
-                "description": "ID of the Github import integration to use to access issues.",
+                "description": "[DEPRECATED] ID of the Github import integration to use to access issues.",
                 "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -40346,6 +41311,18 @@
             "name": "issueDelete",
             "description": "Deletes (trashes) an issue.",
             "args": [
+              {
+                "name": "permanentlyDelete",
+                "description": "Whether to permanently delete the issue and skip the grace period of 30 days. Available only to admins!",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "id",
                 "description": "The identifier of the issue to delete.",
@@ -44535,6 +45512,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "Draft",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "EmailIntakeAddress",
             "ofType": null
           },
@@ -45010,6 +45992,142 @@
               "kind": "SCALAR",
               "name": "DateTime",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "url",
+            "description": "[Internal] URL to the target of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "title",
+            "description": "[Internal] Notification title.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subtitle",
+            "description": "[Internal] Notification subtitle.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isLinearActor",
+            "description": "[Internal] If notification actor was Linear.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarUrl",
+            "description": "[Internal] Notification avatar URL.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorInitials",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarColor",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueStatusType",
+            "description": "[Internal] Issue's status type for issue notifications.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectUpdateHealth",
+            "description": "[Internal] Project update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "groupingKey",
+            "description": "[ALPHA] Notifications with the same grouping key will be grouped together in the UI.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -50457,6 +51575,142 @@
               "kind": "SCALAR",
               "name": "DateTime",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "url",
+            "description": "[Internal] URL to the target of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "title",
+            "description": "[Internal] Notification title.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subtitle",
+            "description": "[Internal] Notification subtitle.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isLinearActor",
+            "description": "[Internal] If notification actor was Linear.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarUrl",
+            "description": "[Internal] Notification avatar URL.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorInitials",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarColor",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueStatusType",
+            "description": "[Internal] Issue's status type for issue notifications.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectUpdateHealth",
+            "description": "[Internal] Project update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "groupingKey",
+            "description": "[ALPHA] Notifications with the same grouping key will be grouped together in the UI.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -58518,6 +59772,30 @@
         "description": "A project related notification.",
         "fields": [
           {
+            "name": "commentId",
+            "description": "Related comment ID. Null if the notification is not related to a comment.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parentCommentId",
+            "description": "Related parent comment ID. Null if the notification is not related to a comment.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "id",
             "description": "The unique identifier of the entity.",
             "args": [],
@@ -58682,6 +59960,142 @@
             "deprecationReason": null
           },
           {
+            "name": "url",
+            "description": "[Internal] URL to the target of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "title",
+            "description": "[Internal] Notification title.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subtitle",
+            "description": "[Internal] Notification subtitle.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isLinearActor",
+            "description": "[Internal] If notification actor was Linear.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarUrl",
+            "description": "[Internal] Notification avatar URL.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorInitials",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actorAvatarColor",
+            "description": "[Internal] Notification actor initials if avatar is not available.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueStatusType",
+            "description": "[Internal] Issue's status type for issue notifications.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projectUpdateHealth",
+            "description": "[Internal] Project update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "groupingKey",
+            "description": "[ALPHA] Notifications with the same grouping key will be grouped together in the UI.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "botActor",
             "description": "The bot that caused the notification.",
             "args": [],
@@ -58716,6 +60130,30 @@
             "type": {
               "kind": "OBJECT",
               "name": "ProjectUpdate",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "comment",
+            "description": "The comment related to the notification.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Comment",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parentComment",
+            "description": "The parent comment related to the notification, if a notification is a reply comment notification.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Comment",
               "ofType": null
             },
             "isDeprecated": false,
@@ -62749,6 +64187,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "trashed",
+            "description": "Whether the project has been trashed.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -63596,7 +65046,7 @@
       {
         "kind": "OBJECT",
         "name": "PushSubscription",
-        "description": "A user's web browser push notification subscription.",
+        "description": "A user's web or mobile push notification subscription.",
         "fields": [
           {
             "name": "id",
@@ -65804,7 +67254,7 @@
           },
           {
             "name": "initiativeToProjects",
-            "description": "[INTERNAL] returns a list of initiative to project entities.",
+            "description": "returns a list of initiative to project entities.",
             "args": [
               {
                 "name": "before",
@@ -65893,7 +67343,7 @@
           },
           {
             "name": "initiativeToProject",
-            "description": "[INTERNAL] One specific initiativeToProject.",
+            "description": "One specific initiativeToProject.",
             "args": [
               {
                 "name": "id",
@@ -65926,7 +67376,7 @@
           },
           {
             "name": "initiatives",
-            "description": "[Internal] All initiatives in the workspace.",
+            "description": "All initiatives in the workspace.",
             "args": [
               {
                 "name": "before",
@@ -66015,7 +67465,7 @@
           },
           {
             "name": "initiative",
-            "description": "[Internal] One specific initiative.",
+            "description": "One specific initiative.",
             "args": [
               {
                 "name": "id",
@@ -79901,7 +81351,7 @@
       {
         "kind": "OBJECT",
         "name": "TextDraft",
-        "description": "A text draft, used for comments and project updates.",
+        "description": "[DEPRECATED] A text draft, used for comments and project updates.",
         "fields": [
           {
             "name": "id",
@@ -79975,6 +81425,18 @@
                 "name": "JSON",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "data",
+            "description": "Additional properties for the draft.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -82059,6 +83521,38 @@
             "deprecationReason": null
           },
           {
+            "name": "initials",
+            "description": "The initials of the user.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "avatarBackgroundColor",
+            "description": "The background color of the avatar for users without set avatar.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "guest",
             "description": "Whether the user is a guest in the workspace and limited to accessing a subset of teams.",
             "args": [],
@@ -83823,6 +85317,12 @@
           },
           {
             "name": "figmaPluginBannerDismissed",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativesBannerDismissed",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

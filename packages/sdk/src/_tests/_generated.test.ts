@@ -1248,6 +1248,131 @@ describe("generated", () => {
     });
   });
 
+  /** Test all InitiativeToProject queries */
+  describe("InitiativeToProjects", () => {
+    let _initiativeToProject: L.InitiativeToProject | undefined;
+    let _initiativeToProject_id: string | undefined;
+
+    /** Test the root connection query for the InitiativeToProject */
+    it("initiativeToProjects", async () => {
+      const initiativeToProjects: L.InitiativeToProjectConnection | undefined = await client.initiativeToProjects();
+      const initiativeToProject = initiativeToProjects?.nodes?.[0];
+      _initiativeToProject_id = initiativeToProject?.id;
+      expect(initiativeToProjects instanceof L.InitiativeToProjectConnection);
+    });
+
+    /** Test the root query for a single InitiativeToProject */
+    it("initiativeToProject", async () => {
+      if (_initiativeToProject_id) {
+        const initiativeToProject: L.InitiativeToProject | undefined =
+          await client.initiativeToProject(_initiativeToProject_id);
+        _initiativeToProject = initiativeToProject;
+        expect(initiativeToProject instanceof L.InitiativeToProject);
+      } else {
+        console.warn(
+          "codegen-doc:print: No first InitiativeToProject found in connection - cannot test initiativeToProject query"
+        );
+      }
+    });
+
+    /** Test the initiativeToProject.initiative query for L.Initiative */
+    it("initiativeToProject.initiative", async () => {
+      if (_initiativeToProject) {
+        const initiativeToProject_initiative: L.Initiative | undefined = await _initiativeToProject.initiative;
+        expect(initiativeToProject_initiative instanceof L.Initiative);
+      } else {
+        console.warn(
+          "codegen-doc:print: No InitiativeToProject found - cannot test initiativeToProject.initiative query"
+        );
+      }
+    });
+
+    /** Test the initiativeToProject.project query for L.Project */
+    it("initiativeToProject.project", async () => {
+      if (_initiativeToProject) {
+        const initiativeToProject_project: L.Project | undefined = await _initiativeToProject.project;
+        expect(initiativeToProject_project instanceof L.Project);
+      } else {
+        console.warn("codegen-doc:print: No InitiativeToProject found - cannot test initiativeToProject.project query");
+      }
+    });
+  });
+
+  /** Test all Initiative queries */
+  describe("Initiatives", () => {
+    let _initiative: L.Initiative | undefined;
+    let _initiative_id: string | undefined;
+
+    /** Test the root connection query for the Initiative */
+    it("initiatives", async () => {
+      const initiatives: L.InitiativeConnection | undefined = await client.initiatives();
+      const initiative = initiatives?.nodes?.[0];
+      _initiative_id = initiative?.id;
+      expect(initiatives instanceof L.InitiativeConnection);
+    });
+
+    /** Test the root query for a single Initiative */
+    it("initiative", async () => {
+      if (_initiative_id) {
+        const initiative: L.Initiative | undefined = await client.initiative(_initiative_id);
+        _initiative = initiative;
+        expect(initiative instanceof L.Initiative);
+      } else {
+        console.warn("codegen-doc:print: No first Initiative found in connection - cannot test initiative query");
+      }
+    });
+
+    /** Test the initiative connection query for the EntityExternalLink */
+    it("initiative.links", async () => {
+      if (_initiative) {
+        const links: L.EntityExternalLinkConnection | undefined = await _initiative.links();
+        expect(links instanceof L.EntityExternalLinkConnection);
+      } else {
+        console.warn("codegen-doc:print: No initiative found - cannot test _initiative.links query");
+      }
+    });
+
+    /** Test the initiative connection query for the Project */
+    it("initiative.projects", async () => {
+      if (_initiative) {
+        const projects: L.ProjectConnection | undefined = await _initiative.projects();
+        expect(projects instanceof L.ProjectConnection);
+      } else {
+        console.warn("codegen-doc:print: No initiative found - cannot test _initiative.projects query");
+      }
+    });
+
+    /** Test the initiative.creator query for L.User */
+    it("initiative.creator", async () => {
+      if (_initiative) {
+        const initiative_creator: L.User | undefined = await _initiative.creator;
+        expect(initiative_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Initiative found - cannot test initiative.creator query");
+      }
+    });
+
+    /** Test the initiative.organization query for L.Organization */
+    it("initiative.organization", async () => {
+      if (_initiative) {
+        const initiative_organization: L.Organization | undefined = await _initiative.organization;
+        expect(initiative_organization instanceof L.Organization);
+      } else {
+        console.warn("codegen-doc:print: No Initiative found - cannot test initiative.organization query");
+      }
+    });
+
+    /** Test the initiative.owner query for L.User */
+    it("initiative.owner", async () => {
+      if (_initiative) {
+        const initiative_owner: L.User | undefined = await _initiative.owner;
+        expect(initiative_owner instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Initiative found - cannot test initiative.owner query");
+      }
+    });
+  });
+
   /** Test IntegrationHasScopes query */
   describe("IntegrationHasScopes", () => {
     /** Test the root model query for IntegrationHasScopes */
