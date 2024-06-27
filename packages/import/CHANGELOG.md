@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.14.2
+
+### Patch Changes
+
+- bbbe1e7: chore(deps): update dependency patch versions
+- ad5aca4: feat(import): handle `issueCreate` rate limit
+- Updated dependencies [bbbe1e7]
+- Updated dependencies [8838400]
+  - @linear/sdk@24.0.0
+
 ## 1.14.1
 
 ### Patch Changes
