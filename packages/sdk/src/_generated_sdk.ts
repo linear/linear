@@ -932,11 +932,14 @@ export class AuthOrganizationBucketNamePayload extends Request {
   public constructor(request: LinearRequest, data: L.AuthOrganizationBucketNamePayloadFragment) {
     super(request);
     this.importsBucketName = data.importsBucketName;
+    this.region = data.region;
     this.uploadsBucketName = data.uploadsBucketName;
   }
 
   /** The imports bucket name for the organization. */
   public importsBucketName: string;
+  /** The region for the organization. */
+  public region: string;
   /** The uploads bucket name for the organization. */
   public uploadsBucketName: string;
 }
@@ -1408,6 +1411,24 @@ export class CommentConnection extends Connection<Comment> {
       new PageInfo(request, data.pageInfo)
     );
   }
+}
+/**
+ * A comment related notification.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CommentNotificationFragment response data
+ */
+export class CommentNotification extends Request {
+  public constructor(request: LinearRequest, data: L.CommentNotificationFragment) {
+    super(request);
+    this.commentId = data.commentId ?? undefined;
+    this.parentCommentId = data.parentCommentId ?? undefined;
+  }
+
+  /** Related comment ID. Null if the notification is not related to a comment. */
+  public commentId?: string;
+  /** Related parent comment ID. Null if the notification is not related to a comment. */
+  public parentCommentId?: string;
 }
 /**
  * CommentPayload model
@@ -2361,6 +2382,7 @@ export class DocumentConnection extends Connection<Document> {
  */
 export class DocumentContent extends Request {
   private _document?: L.DocumentContentFragment["document"];
+  private _initiative?: L.DocumentContentFragment["initiative"];
   private _issue?: L.DocumentContentFragment["issue"];
   private _project?: L.DocumentContentFragment["project"];
   private _projectMilestone?: L.DocumentContentFragment["projectMilestone"];
@@ -2375,6 +2397,7 @@ export class DocumentContent extends Request {
     this.restoredAt = parseDate(data.restoredAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._document = data.document ?? undefined;
+    this._initiative = data.initiative ?? undefined;
     this._issue = data.issue ?? undefined;
     this._project = data.project ?? undefined;
     this._projectMilestone = data.projectMilestone ?? undefined;
@@ -2401,6 +2424,10 @@ export class DocumentContent extends Request {
   /** The document that the content is associated with. */
   public get document(): LinearFetch<Document> | undefined {
     return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
+  }
+  /** The initiative that the content is associated with. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
   /** The issue that the content is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
@@ -2510,9 +2537,11 @@ export class DocumentNotification extends Request {
   public constructor(request: LinearRequest, data: L.DocumentNotificationFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.commentId = data.commentId ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.emailedAt = parseDate(data.emailedAt) ?? undefined;
     this.id = data.id;
+    this.parentCommentId = data.parentCommentId ?? undefined;
     this.readAt = parseDate(data.readAt) ?? undefined;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
     this.type = data.type;
@@ -2526,6 +2555,8 @@ export class DocumentNotification extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
+  /** Related comment ID. Null if the notification is not related to a comment. */
+  public commentId?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /**
@@ -2535,6 +2566,8 @@ export class DocumentNotification extends Request {
   public emailedAt?: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Related parent comment ID. Null if the notification is not related to a comment. */
+  public parentCommentId?: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   public readAt?: Date;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
@@ -2717,6 +2750,74 @@ export class DocumentSearchResultConnection extends Connection<DocumentSearchRes
       data.nodes.map(node => new DocumentSearchResult(request, node)),
       new PageInfo(request, data.pageInfo)
     );
+  }
+}
+/**
+ * A general purpose draft. Used for comments, project updates, etc.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.DraftFragment response data
+ */
+export class Draft extends Request {
+  private _issue?: L.DraftFragment["issue"];
+  private _parentComment?: L.DraftFragment["parentComment"];
+  private _project?: L.DraftFragment["project"];
+  private _projectUpdate?: L.DraftFragment["projectUpdate"];
+  private _user: L.DraftFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.DraftFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.bodyData = parseJson(data.bodyData) ?? {};
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.data = data.data ?? undefined;
+    this.id = data.id;
+    this.isAutogenerated = data.isAutogenerated;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._issue = data.issue ?? undefined;
+    this._parentComment = data.parentComment ?? undefined;
+    this._project = data.project ?? undefined;
+    this._projectUpdate = data.projectUpdate ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The text content as a Prosemirror document. */
+  public bodyData: Record<string, unknown>;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** Additional properties for the draft. */
+  public data?: L.Scalars["JSONObject"];
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Whether the draft was autogenerated for the user. */
+  public isAutogenerated: boolean;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The issue for which this is a draft comment. */
+  public get issue(): LinearFetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** The comment for which this is a draft comment reply. */
+  public get parentComment(): LinearFetch<Comment> | undefined {
+    return this._parentComment?.id ? new CommentQuery(this._request).fetch({ id: this._parentComment?.id }) : undefined;
+  }
+  /** The project for which this is a draft project update. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The project update for which this is a draft comment. */
+  public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
+    return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
+  }
+  /** The user who created the draft. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
   }
 }
 /**
@@ -2982,6 +3083,7 @@ export class Entity extends Request {
  */
 export class EntityExternalLink extends Request {
   private _creator: L.EntityExternalLinkFragment["creator"];
+  private _initiative: L.EntityExternalLinkFragment["initiative"];
 
   public constructor(request: LinearRequest, data: L.EntityExternalLinkFragment) {
     super(request);
@@ -2993,6 +3095,7 @@ export class EntityExternalLink extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._creator = data.creator;
+    this._initiative = data.initiative;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -3016,6 +3119,10 @@ export class EntityExternalLink extends Request {
   /** The user who created the link. */
   public get creator(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
+  }
+  /** The initiative that the link is associated with. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return new InitiativeQuery(this._request).fetch(this._initiative.id);
   }
 
   /** Creates a new entity link. */
@@ -3152,6 +3259,7 @@ export class ExternalUserConnection extends Connection<ExternalUser> {
  * @param data - L.FacetFragment response data
  */
 export class Facet extends Request {
+  private _sourceInitiative?: L.FacetFragment["sourceInitiative"];
   private _sourceProject?: L.FacetFragment["sourceProject"];
   private _sourceTeam?: L.FacetFragment["sourceTeam"];
   private _targetCustomView?: L.FacetFragment["targetCustomView"];
@@ -3164,6 +3272,7 @@ export class Facet extends Request {
     this.sortOrder = data.sortOrder;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.sourcePage = data.sourcePage ?? undefined;
+    this._sourceInitiative = data.sourceInitiative ?? undefined;
     this._sourceProject = data.sourceProject ?? undefined;
     this._sourceTeam = data.sourceTeam ?? undefined;
     this._targetCustomView = data.targetCustomView ?? undefined;
@@ -3185,6 +3294,12 @@ export class Facet extends Request {
   public updatedAt: Date;
   /** The owning page. */
   public sourcePage?: L.FacetPageSource;
+  /** The owning initiative. */
+  public get sourceInitiative(): LinearFetch<Initiative> | undefined {
+    return this._sourceInitiative?.id
+      ? new InitiativeQuery(this._request).fetch(this._sourceInitiative?.id)
+      : undefined;
+  }
   /** The owning organization. */
   public get sourceOrganization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
@@ -3255,6 +3370,8 @@ export class Favorite extends Request {
     this.sortOrder = data.sortOrder;
     this.type = data.type;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url ?? undefined;
+    this.initiativeTab = data.initiativeTab ?? undefined;
     this.projectTab = data.projectTab ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
@@ -3290,6 +3407,10 @@ export class Favorite extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** URL of the favorited entity. Folders return 'null' value. */
+  public url?: string;
+  /** The targeted tab of the initiative. */
+  public initiativeTab?: L.InitiativeTab;
   /** The targeted tab of the project. */
   public projectTab?: L.ProjectTab;
   /** The favorited custom view. */
@@ -3328,7 +3449,7 @@ export class Favorite extends Request {
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
-  /** The favorited team of the project. */
+  /** [DEPRECATED] The favorited team of the project. */
   public get projectTeam(): LinearFetch<Team> | undefined {
     return this._projectTeam?.id ? new TeamQuery(this._request).fetch(this._projectTeam?.id) : undefined;
   }
@@ -3838,6 +3959,37 @@ export class GitHubCommitIntegrationPayload extends Request {
   }
 }
 /**
+ * GitHubEnterpriseServerPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.GitHubEnterpriseServerPayloadFragment response data
+ */
+export class GitHubEnterpriseServerPayload extends Request {
+  private _integration?: L.GitHubEnterpriseServerPayloadFragment["integration"];
+
+  public constructor(request: LinearRequest, data: L.GitHubEnterpriseServerPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.setupUrl = data.setupUrl;
+    this.success = data.success;
+    this.webhookSecret = data.webhookSecret;
+    this._integration = data.integration ?? undefined;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** The setup address. */
+  public setupUrl: string;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The webhook secret to provide to GitHub. */
+  public webhookSecret: string;
+  /** The integration that was created or updated. */
+  public get integration(): LinearFetch<Integration> | undefined {
+    return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
+  }
+}
+/**
  * Metadata and settings for a GitHub import integration.
  *
  * @param request - function to call the graphql client
@@ -3903,7 +4055,7 @@ export class GitHubRepo extends Request {
 export class GitHubSettings extends Request {
   public constructor(request: LinearRequest, data: L.GitHubSettingsFragment) {
     super(request);
-    this.orgAvatarUrl = data.orgAvatarUrl;
+    this.orgAvatarUrl = data.orgAvatarUrl ?? undefined;
     this.orgLogin = data.orgLogin;
     this.repositories = data.repositories ? data.repositories.map(node => new GitHubRepo(request, node)) : undefined;
     this.repositoriesMapping = data.repositoriesMapping
@@ -3913,7 +4065,7 @@ export class GitHubSettings extends Request {
   }
 
   /** The avatar URL for the GitHub organization. */
-  public orgAvatarUrl: string;
+  public orgAvatarUrl?: string;
   /** The GitHub organization's name. */
   public orgLogin: string;
   /** The names of the repositories connected for the GitHub integration. */
@@ -3986,22 +4138,153 @@ export class ImageUploadFromUrlPayload extends Request {
   public url?: string;
 }
 /**
+ * An initiative to group projects.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InitiativeFragment response data
+ */
+export class Initiative extends Request {
+  private _creator: L.InitiativeFragment["creator"];
+  private _owner: L.InitiativeFragment["owner"];
+
+  public constructor(request: LinearRequest, data: L.InitiativeFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.color = data.color ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.description = data.description ?? undefined;
+    this.icon = data.icon ?? undefined;
+    this.id = data.id;
+    this.name = data.name;
+    this.slugId = data.slugId;
+    this.sortOrder = data.sortOrder;
+    this.targetDate = data.targetDate ?? undefined;
+    this.trashed = data.trashed ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.status = data.status;
+    this.targetDateResolution = data.targetDateResolution ?? undefined;
+    this._creator = data.creator;
+    this._owner = data.owner;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The initiative's color. */
+  public color?: string;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The description of the initiative. */
+  public description?: string;
+  /** The icon of the initiative. */
+  public icon?: string;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The name of the initiative. */
+  public name: string;
+  /** The initiative's unique URL slug. */
+  public slugId: string;
+  /** The sort order of the initiative within the organization. */
+  public sortOrder: number;
+  /** The estimated completion date of the initiative. */
+  public targetDate?: L.Scalars["TimelessDate"];
+  /** A flag that indicates whether the initiative is in the trash bin. */
+  public trashed?: boolean;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The status of the initiative. One of Planned, Active, Completed */
+  public status: L.InitiativeStatus;
+  /** The resolution of the initiative's estimated completion date. */
+  public targetDateResolution?: L.DateResolutionType;
+  /** The user who created the initiative. */
+  public get creator(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._creator.id);
+  }
+  /** The organization of the initiative. */
+  public get organization(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+  /** The user who owns the initiative. */
+  public get owner(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._owner.id);
+  }
+  /** Links associated with the initiative. */
+  public links(variables?: Omit<L.Initiative_LinksQueryVariables, "id">) {
+    return new Initiative_LinksQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Projects associated with the initiative. */
+  public projects(variables?: Omit<L.Initiative_ProjectsQueryVariables, "id">) {
+    return new Initiative_ProjectsQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Archives a initiative. */
+  public archive() {
+    return new ArchiveInitiativeMutation(this._request).fetch(this.id);
+  }
+  /** Creates a new initiative. */
+  public create(input: L.InitiativeCreateInput) {
+    return new CreateInitiativeMutation(this._request).fetch(input);
+  }
+  /** Deletes (trashes) an initiative. */
+  public delete() {
+    return new DeleteInitiativeMutation(this._request).fetch(this.id);
+  }
+  /** Unarchives a initiative. */
+  public unarchive() {
+    return new UnarchiveInitiativeMutation(this._request).fetch(this.id);
+  }
+  /** Updates a initiative. */
+  public update(input: L.InitiativeUpdateInput) {
+    return new UpdateInitiativeMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
  * A generic payload return from entity archive mutations.
  *
  * @param request - function to call the graphql client
  * @param data - L.InitiativeArchivePayloadFragment response data
  */
 export class InitiativeArchivePayload extends Request {
+  private _entity?: L.InitiativeArchivePayloadFragment["entity"];
+
   public constructor(request: LinearRequest, data: L.InitiativeArchivePayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
+    this._entity = data.entity ?? undefined;
   }
 
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** The archived/unarchived entity. Null if entity was deleted. */
+  public get entity(): LinearFetch<Initiative> | undefined {
+    return this._entity?.id ? new InitiativeQuery(this._request).fetch(this._entity?.id) : undefined;
+  }
+}
+/**
+ * InitiativeConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this InitiativeConnection model
+ * @param data - InitiativeConnection response data
+ */
+export class InitiativeConnection extends Connection<Initiative> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Initiative> | undefined>,
+    data: L.InitiativeConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new Initiative(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
 }
 /**
  * An initiative related notification.
@@ -4017,9 +4300,11 @@ export class InitiativeNotification extends Request {
   public constructor(request: LinearRequest, data: L.InitiativeNotificationFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.commentId = data.commentId ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.emailedAt = parseDate(data.emailedAt) ?? undefined;
     this.id = data.id;
+    this.parentCommentId = data.parentCommentId ?? undefined;
     this.readAt = parseDate(data.readAt) ?? undefined;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
     this.type = data.type;
@@ -4033,6 +4318,8 @@ export class InitiativeNotification extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
+  /** Related comment ID. Null if the notification is not related to a comment. */
+  public commentId?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /**
@@ -4042,6 +4329,8 @@ export class InitiativeNotification extends Request {
   public emailedAt?: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Related parent comment ID. Null if the notification is not related to a comment. */
+  public parentCommentId?: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   public readAt?: Date;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
@@ -4071,6 +4360,134 @@ export class InitiativeNotification extends Request {
   /** The user that received the notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+}
+/**
+ * The payload returned by the initiative mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InitiativePayloadFragment response data
+ */
+export class InitiativePayload extends Request {
+  private _initiative: L.InitiativePayloadFragment["initiative"];
+
+  public constructor(request: LinearRequest, data: L.InitiativePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._initiative = data.initiative;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The initiative that was created or updated. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return new InitiativeQuery(this._request).fetch(this._initiative.id);
+  }
+}
+/**
+ * Join table between projects and initiatives.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InitiativeToProjectFragment response data
+ */
+export class InitiativeToProject extends Request {
+  private _initiative: L.InitiativeToProjectFragment["initiative"];
+  private _project: L.InitiativeToProjectFragment["project"];
+
+  public constructor(request: LinearRequest, data: L.InitiativeToProjectFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.sortOrder = data.sortOrder;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._initiative = data.initiative;
+    this._project = data.project;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The sort order of the project within the initiative. */
+  public sortOrder: string;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The initiative that the project is associated with. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return new InitiativeQuery(this._request).fetch(this._initiative.id);
+  }
+  /** The project that the initiative is associated with. */
+  public get project(): LinearFetch<Project> | undefined {
+    return new ProjectQuery(this._request).fetch(this._project.id);
+  }
+
+  /** Creates a new initiativeToProject join. */
+  public create(input: L.InitiativeToProjectCreateInput) {
+    return new CreateInitiativeToProjectMutation(this._request).fetch(input);
+  }
+  /** Deletes a initiativeToProject. */
+  public delete() {
+    return new DeleteInitiativeToProjectMutation(this._request).fetch(this.id);
+  }
+  /** Updates a initiativeToProject. */
+  public update(input: L.InitiativeToProjectUpdateInput) {
+    return new UpdateInitiativeToProjectMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * InitiativeToProjectConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this InitiativeToProjectConnection model
+ * @param data - InitiativeToProjectConnection response data
+ */
+export class InitiativeToProjectConnection extends Connection<InitiativeToProject> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<InitiativeToProject> | undefined>,
+    data: L.InitiativeToProjectConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new InitiativeToProject(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * The result of a initiativeToProject mutation.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InitiativeToProjectPayloadFragment response data
+ */
+export class InitiativeToProjectPayload extends Request {
+  private _initiativeToProject: L.InitiativeToProjectPayloadFragment["initiativeToProject"];
+
+  public constructor(request: LinearRequest, data: L.InitiativeToProjectPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._initiativeToProject = data.initiativeToProject;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The initiativeToProject that was created or updated. */
+  public get initiativeToProject(): LinearFetch<InitiativeToProject> | undefined {
+    return new InitiativeToProjectQuery(this._request).fetch(this._initiativeToProject.id);
   }
 }
 /**
@@ -4768,8 +5185,8 @@ export class Issue extends Request {
     return new CreateIssueMutation(this._request).fetch(input);
   }
   /** Deletes (trashes) an issue. */
-  public delete() {
-    return new DeleteIssueMutation(this._request).fetch(this.id);
+  public delete(variables?: Omit<L.DeleteIssueMutationVariables, "id">) {
+    return new DeleteIssueMutation(this._request).fetch(this.id, variables);
   }
   /** Unarchives an issue. */
   public unarchive() {
@@ -5138,6 +5555,7 @@ export class IssueImport extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.creatorId = data.creatorId;
     this.csvFileUrl = data.csvFileUrl ?? undefined;
+    this.displayName = data.displayName;
     this.error = data.error ?? undefined;
     this.errorMetadata = data.errorMetadata ?? undefined;
     this.id = data.id;
@@ -5158,6 +5576,8 @@ export class IssueImport extends Request {
   public creatorId: string;
   /** File URL for the uploaded CSV for the import, if there is one. */
   public csvFileUrl?: string;
+  /** The display name of the import service. */
+  public displayName: string;
   /** User readable error message, if one has occurred during the import. */
   public error?: string;
   /** Error code and metadata, if one has occurred during the import. */
@@ -5406,15 +5826,18 @@ export class IssueNotification extends Request {
   private _comment?: L.IssueNotificationFragment["comment"];
   private _externalUserActor?: L.IssueNotificationFragment["externalUserActor"];
   private _issue: L.IssueNotificationFragment["issue"];
+  private _parentComment?: L.IssueNotificationFragment["parentComment"];
   private _team: L.IssueNotificationFragment["team"];
   private _user: L.IssueNotificationFragment["user"];
 
   public constructor(request: LinearRequest, data: L.IssueNotificationFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.commentId = data.commentId ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.emailedAt = parseDate(data.emailedAt) ?? undefined;
     this.id = data.id;
+    this.parentCommentId = data.parentCommentId ?? undefined;
     this.reactionEmoji = data.reactionEmoji ?? undefined;
     this.readAt = parseDate(data.readAt) ?? undefined;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
@@ -5429,12 +5852,15 @@ export class IssueNotification extends Request {
     this._comment = data.comment ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
     this._issue = data.issue;
+    this._parentComment = data.parentComment ?? undefined;
     this._team = data.team;
     this._user = data.user;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
+  /** Related comment ID. Null if the notification is not related to a comment. */
+  public commentId?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /**
@@ -5444,6 +5870,8 @@ export class IssueNotification extends Request {
   public emailedAt?: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Related parent comment ID. Null if the notification is not related to a comment. */
+  public parentCommentId?: string;
   /** Name of the reaction emoji related to the notification. */
   public reactionEmoji?: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
@@ -5481,6 +5909,10 @@ export class IssueNotification extends Request {
   /** The issue related to the notification. */
   public get issue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
+  }
+  /** The parent comment related to the notification, if a notification is a reply comment notification. */
+  public get parentComment(): LinearFetch<Comment> | undefined {
+    return this._parentComment?.id ? new CommentQuery(this._request).fetch({ id: this._parentComment?.id }) : undefined;
   }
   /** The team related to the issue notification. */
   public get team(): LinearFetch<Team> | undefined {
@@ -8078,7 +8510,9 @@ export class ProjectMilestonePayload extends Request {
  */
 export class ProjectNotification extends Request {
   private _actor?: L.ProjectNotificationFragment["actor"];
+  private _comment?: L.ProjectNotificationFragment["comment"];
   private _externalUserActor?: L.ProjectNotificationFragment["externalUserActor"];
+  private _parentComment?: L.ProjectNotificationFragment["parentComment"];
   private _project: L.ProjectNotificationFragment["project"];
   private _projectUpdate?: L.ProjectNotificationFragment["projectUpdate"];
   private _user: L.ProjectNotificationFragment["user"];
@@ -8086,9 +8520,11 @@ export class ProjectNotification extends Request {
   public constructor(request: LinearRequest, data: L.ProjectNotificationFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.commentId = data.commentId ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.emailedAt = parseDate(data.emailedAt) ?? undefined;
     this.id = data.id;
+    this.parentCommentId = data.parentCommentId ?? undefined;
     this.readAt = parseDate(data.readAt) ?? undefined;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
     this.type = data.type;
@@ -8096,7 +8532,9 @@ export class ProjectNotification extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this._actor = data.actor ?? undefined;
+    this._comment = data.comment ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
+    this._parentComment = data.parentComment ?? undefined;
     this._project = data.project;
     this._projectUpdate = data.projectUpdate ?? undefined;
     this._user = data.user;
@@ -8104,6 +8542,8 @@ export class ProjectNotification extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
+  /** Related comment ID. Null if the notification is not related to a comment. */
+  public commentId?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /**
@@ -8113,6 +8553,8 @@ export class ProjectNotification extends Request {
   public emailedAt?: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Related parent comment ID. Null if the notification is not related to a comment. */
+  public parentCommentId?: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   public readAt?: Date;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
@@ -8133,11 +8575,19 @@ export class ProjectNotification extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
+  /** The comment related to the notification. */
+  public get comment(): LinearFetch<Comment> | undefined {
+    return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
+  }
   /** The external user that caused the notification. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
+  }
+  /** The parent comment related to the notification, if a notification is a reply comment notification. */
+  public get parentComment(): LinearFetch<Comment> | undefined {
+    return this._parentComment?.id ? new CommentQuery(this._request).fetch({ id: this._parentComment?.id }) : undefined;
   }
   /** The project related to the notification. */
   public get project(): LinearFetch<Project> | undefined {
@@ -8915,7 +9365,7 @@ export class ProjectUpdateWithInteractionPayload extends Request {
   }
 }
 /**
- * A user's web browser push notification subscription.
+ * A user's web or mobile push notification subscription.
  *
  * @param request - function to call the graphql client
  * @param data - L.PushSubscriptionFragment response data
@@ -10499,7 +10949,7 @@ export class TemplatePayload extends Request {
   }
 }
 /**
- * A text draft, used for comments and project updates.
+ * [DEPRECATED] A text draft, used for comments and project updates.
  *
  * @param request - function to call the graphql client
  * @param data - L.TextDraftFragment response data
@@ -10516,6 +10966,7 @@ export class TextDraft extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.bodyData = parseJson(data.bodyData) ?? {};
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.data = data.data ?? undefined;
     this.id = data.id;
     this.isAutogenerated = data.isAutogenerated;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -10532,6 +10983,8 @@ export class TextDraft extends Request {
   public bodyData: Record<string, unknown>;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** Additional properties for the draft. */
+  public data?: L.Scalars["JSONObject"];
   /** The unique identifier of the entity. */
   public id: string;
   /** Whether the draft was autogenerated for the user. */
@@ -10906,6 +11359,7 @@ export class User extends Request {
     this.active = data.active;
     this.admin = data.admin;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.avatarBackgroundColor = data.avatarBackgroundColor;
     this.avatarUrl = data.avatarUrl ?? undefined;
     this.calendarHash = data.calendarHash ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
@@ -10916,6 +11370,7 @@ export class User extends Request {
     this.email = data.email;
     this.guest = data.guest;
     this.id = data.id;
+    this.initials = data.initials;
     this.inviteHash = data.inviteHash;
     this.isMe = data.isMe;
     this.lastSeen = parseDate(data.lastSeen) ?? undefined;
@@ -10934,6 +11389,8 @@ export class User extends Request {
   public admin: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
+  /** The background color of the avatar for users without set avatar. */
+  public avatarBackgroundColor: string;
   /** An URL to the user's avatar image. */
   public avatarUrl?: string;
   /** [DEPRECATED] Hash for the user to be used in calendar URLs. */
@@ -10954,6 +11411,8 @@ export class User extends Request {
   public guest: boolean;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The initials of the user. */
+  public initials: string;
   /** Unique hash for the user to be used in invite URLs. */
   public inviteHash: string;
   /** Whether the user is the currently authenticated user. */
@@ -12881,6 +13340,135 @@ export class FavoritesQuery extends Request {
     const data = response.favorites;
 
     return new FavoriteConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Initiative Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class InitiativeQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Initiative query and return a Initiative
+   *
+   * @param id - required id to pass to initiative
+   * @returns parsed response from InitiativeQuery
+   */
+  public async fetch(id: string): LinearFetch<Initiative> {
+    const response = await this._request<L.InitiativeQuery, L.InitiativeQueryVariables>(L.InitiativeDocument, {
+      id,
+    });
+    const data = response.initiative;
+
+    return new Initiative(this._request, data);
+  }
+}
+
+/**
+ * A fetchable InitiativeToProject Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class InitiativeToProjectQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the InitiativeToProject query and return a InitiativeToProject
+   *
+   * @param id - required id to pass to initiativeToProject
+   * @returns parsed response from InitiativeToProjectQuery
+   */
+  public async fetch(id: string): LinearFetch<InitiativeToProject> {
+    const response = await this._request<L.InitiativeToProjectQuery, L.InitiativeToProjectQueryVariables>(
+      L.InitiativeToProjectDocument,
+      {
+        id,
+      }
+    );
+    const data = response.initiativeToProject;
+
+    return new InitiativeToProject(this._request, data);
+  }
+}
+
+/**
+ * A fetchable InitiativeToProjects Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class InitiativeToProjectsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the InitiativeToProjects query and return a InitiativeToProjectConnection
+   *
+   * @param variables - variables to pass into the InitiativeToProjectsQuery
+   * @returns parsed response from InitiativeToProjectsQuery
+   */
+  public async fetch(variables?: L.InitiativeToProjectsQueryVariables): LinearFetch<InitiativeToProjectConnection> {
+    const response = await this._request<L.InitiativeToProjectsQuery, L.InitiativeToProjectsQueryVariables>(
+      L.InitiativeToProjectsDocument,
+      variables
+    );
+    const data = response.initiativeToProjects;
+
+    return new InitiativeToProjectConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Initiatives Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class InitiativesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the Initiatives query and return a InitiativeConnection
+   *
+   * @param variables - variables to pass into the InitiativesQuery
+   * @returns parsed response from InitiativesQuery
+   */
+  public async fetch(variables?: L.InitiativesQueryVariables): LinearFetch<InitiativeConnection> {
+    const response = await this._request<L.InitiativesQuery, L.InitiativesQueryVariables>(
+      L.InitiativesDocument,
+      variables
+    );
+    const data = response.initiatives;
+
+    return new InitiativeConnection(
       this._request,
       connection =>
         this.fetch(
@@ -17087,6 +17675,242 @@ export class ImportFileUploadMutation extends Request {
 }
 
 /**
+ * A fetchable ArchiveInitiative Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ArchiveInitiativeMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ArchiveInitiative mutation and return a InitiativeArchivePayload
+   *
+   * @param id - required id to pass to archiveInitiative
+   * @returns parsed response from ArchiveInitiativeMutation
+   */
+  public async fetch(id: string): LinearFetch<InitiativeArchivePayload> {
+    const response = await this._request<L.ArchiveInitiativeMutation, L.ArchiveInitiativeMutationVariables>(
+      L.ArchiveInitiativeDocument,
+      {
+        id,
+      }
+    );
+    const data = response.initiativeArchive;
+
+    return new InitiativeArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateInitiative Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateInitiativeMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateInitiative mutation and return a InitiativePayload
+   *
+   * @param input - required input to pass to createInitiative
+   * @returns parsed response from CreateInitiativeMutation
+   */
+  public async fetch(input: L.InitiativeCreateInput): LinearFetch<InitiativePayload> {
+    const response = await this._request<L.CreateInitiativeMutation, L.CreateInitiativeMutationVariables>(
+      L.CreateInitiativeDocument,
+      {
+        input,
+      }
+    );
+    const data = response.initiativeCreate;
+
+    return new InitiativePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteInitiative Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteInitiativeMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteInitiative mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteInitiative
+   * @returns parsed response from DeleteInitiativeMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<L.DeleteInitiativeMutation, L.DeleteInitiativeMutationVariables>(
+      L.DeleteInitiativeDocument,
+      {
+        id,
+      }
+    );
+    const data = response.initiativeDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateInitiativeToProject Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateInitiativeToProjectMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateInitiativeToProject mutation and return a InitiativeToProjectPayload
+   *
+   * @param input - required input to pass to createInitiativeToProject
+   * @returns parsed response from CreateInitiativeToProjectMutation
+   */
+  public async fetch(input: L.InitiativeToProjectCreateInput): LinearFetch<InitiativeToProjectPayload> {
+    const response = await this._request<
+      L.CreateInitiativeToProjectMutation,
+      L.CreateInitiativeToProjectMutationVariables
+    >(L.CreateInitiativeToProjectDocument, {
+      input,
+    });
+    const data = response.initiativeToProjectCreate;
+
+    return new InitiativeToProjectPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteInitiativeToProject Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteInitiativeToProjectMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteInitiativeToProject mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteInitiativeToProject
+   * @returns parsed response from DeleteInitiativeToProjectMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<
+      L.DeleteInitiativeToProjectMutation,
+      L.DeleteInitiativeToProjectMutationVariables
+    >(L.DeleteInitiativeToProjectDocument, {
+      id,
+    });
+    const data = response.initiativeToProjectDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateInitiativeToProject Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateInitiativeToProjectMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateInitiativeToProject mutation and return a InitiativeToProjectPayload
+   *
+   * @param id - required id to pass to updateInitiativeToProject
+   * @param input - required input to pass to updateInitiativeToProject
+   * @returns parsed response from UpdateInitiativeToProjectMutation
+   */
+  public async fetch(id: string, input: L.InitiativeToProjectUpdateInput): LinearFetch<InitiativeToProjectPayload> {
+    const response = await this._request<
+      L.UpdateInitiativeToProjectMutation,
+      L.UpdateInitiativeToProjectMutationVariables
+    >(L.UpdateInitiativeToProjectDocument, {
+      id,
+      input,
+    });
+    const data = response.initiativeToProjectUpdate;
+
+    return new InitiativeToProjectPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UnarchiveInitiative Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UnarchiveInitiativeMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UnarchiveInitiative mutation and return a InitiativeArchivePayload
+   *
+   * @param id - required id to pass to unarchiveInitiative
+   * @returns parsed response from UnarchiveInitiativeMutation
+   */
+  public async fetch(id: string): LinearFetch<InitiativeArchivePayload> {
+    const response = await this._request<L.UnarchiveInitiativeMutation, L.UnarchiveInitiativeMutationVariables>(
+      L.UnarchiveInitiativeDocument,
+      {
+        id,
+      }
+    );
+    const data = response.initiativeUnarchive;
+
+    return new InitiativeArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateInitiative Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateInitiativeMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateInitiative mutation and return a InitiativePayload
+   *
+   * @param id - required id to pass to updateInitiative
+   * @param input - required input to pass to updateInitiative
+   * @returns parsed response from UpdateInitiativeMutation
+   */
+  public async fetch(id: string, input: L.InitiativeUpdateInput): LinearFetch<InitiativePayload> {
+    const response = await this._request<L.UpdateInitiativeMutation, L.UpdateInitiativeMutationVariables>(
+      L.UpdateInitiativeDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.initiativeUpdate;
+
+    return new InitiativePayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable ArchiveIntegration Mutation
  *
  * @param request - function to call the graphql client
@@ -17265,6 +18089,40 @@ export class IntegrationFrontMutation extends Request {
     const data = response.integrationFront;
 
     return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationGitHubEnterpriseServerConnect Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationGitHubEnterpriseServerConnectMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationGitHubEnterpriseServerConnect mutation and return a GitHubEnterpriseServerPayload
+   *
+   * @param githubUrl - required githubUrl to pass to integrationGitHubEnterpriseServerConnect
+   * @param variables - variables without 'githubUrl' to pass into the IntegrationGitHubEnterpriseServerConnectMutation
+   * @returns parsed response from IntegrationGitHubEnterpriseServerConnectMutation
+   */
+  public async fetch(
+    githubUrl: string,
+    variables?: Omit<L.IntegrationGitHubEnterpriseServerConnectMutationVariables, "githubUrl">
+  ): LinearFetch<GitHubEnterpriseServerPayload> {
+    const response = await this._request<
+      L.IntegrationGitHubEnterpriseServerConnectMutation,
+      L.IntegrationGitHubEnterpriseServerConnectMutationVariables
+    >(L.IntegrationGitHubEnterpriseServerConnectDocument, {
+      githubUrl,
+      ...variables,
+    });
+    const data = response.integrationGitHubEnterpriseServerConnect;
+
+    return new GitHubEnterpriseServerPayload(this._request, data);
   }
 }
 
@@ -18247,11 +19105,16 @@ export class DeleteIssueMutation extends Request {
    * Call the DeleteIssue mutation and return a IssueArchivePayload
    *
    * @param id - required id to pass to deleteIssue
+   * @param variables - variables without 'id' to pass into the DeleteIssueMutation
    * @returns parsed response from DeleteIssueMutation
    */
-  public async fetch(id: string): LinearFetch<IssueArchivePayload> {
+  public async fetch(
+    id: string,
+    variables?: Omit<L.DeleteIssueMutationVariables, "id">
+  ): LinearFetch<IssueArchivePayload> {
     const response = await this._request<L.DeleteIssueMutation, L.DeleteIssueMutationVariables>(L.DeleteIssueDocument, {
       id,
+      ...variables,
     });
     const data = response.issueDelete;
 
@@ -18380,20 +19243,13 @@ export class IssueImportCreateGithubMutation extends Request {
   /**
    * Call the IssueImportCreateGithub mutation and return a IssueImportPayload
    *
-   * @param integrationId - required integrationId to pass to issueImportCreateGithub
-   * @param variables - variables without 'integrationId' to pass into the IssueImportCreateGithubMutation
+   * @param variables - variables to pass into the IssueImportCreateGithubMutation
    * @returns parsed response from IssueImportCreateGithubMutation
    */
-  public async fetch(
-    integrationId: string,
-    variables?: Omit<L.IssueImportCreateGithubMutationVariables, "integrationId">
-  ): LinearFetch<IssueImportPayload> {
+  public async fetch(variables?: L.IssueImportCreateGithubMutationVariables): LinearFetch<IssueImportPayload> {
     const response = await this._request<L.IssueImportCreateGithubMutation, L.IssueImportCreateGithubMutationVariables>(
       L.IssueImportCreateGithubDocument,
-      {
-        integrationId,
-        ...variables,
-      }
+      variables
     );
     const data = response.issueImportCreateGithub;
 
@@ -22775,6 +23631,106 @@ export class Favorite_ChildrenQuery extends Request {
 }
 
 /**
+ * A fetchable Initiative_Links Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to initiative
+ * @param variables - variables without 'id' to pass into the Initiative_LinksQuery
+ */
+export class Initiative_LinksQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Initiative_LinksQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Initiative_LinksQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Initiative_Links query and return a EntityExternalLinkConnection
+   *
+   * @param variables - variables without 'id' to pass into the Initiative_LinksQuery
+   * @returns parsed response from Initiative_LinksQuery
+   */
+  public async fetch(
+    variables?: Omit<L.Initiative_LinksQueryVariables, "id">
+  ): LinearFetch<EntityExternalLinkConnection> {
+    const response = await this._request<L.Initiative_LinksQuery, L.Initiative_LinksQueryVariables>(
+      L.Initiative_LinksDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.initiative.links;
+
+    return new EntityExternalLinkConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Initiative_Projects Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to initiative
+ * @param variables - variables without 'id' to pass into the Initiative_ProjectsQuery
+ */
+export class Initiative_ProjectsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Initiative_ProjectsQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Initiative_ProjectsQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Initiative_Projects query and return a ProjectConnection
+   *
+   * @param variables - variables without 'id' to pass into the Initiative_ProjectsQuery
+   * @returns parsed response from Initiative_ProjectsQuery
+   */
+  public async fetch(variables?: Omit<L.Initiative_ProjectsQueryVariables, "id">): LinearFetch<ProjectConnection> {
+    const response = await this._request<L.Initiative_ProjectsQuery, L.Initiative_ProjectsQueryVariables>(
+      L.Initiative_ProjectsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.initiative.projects;
+
+    return new ProjectConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Issue_Attachments Query
  *
  * @param request - function to call the graphql client
@@ -26175,6 +27131,44 @@ export class LinearSdk extends Request {
     return new FavoritesQuery(this._request).fetch(variables);
   }
   /**
+   * One specific initiative.
+   *
+   * @param id - required id to pass to initiative
+   * @returns Initiative
+   */
+  public initiative(id: string): LinearFetch<Initiative> {
+    return new InitiativeQuery(this._request).fetch(id);
+  }
+  /**
+   * One specific initiativeToProject.
+   *
+   * @param id - required id to pass to initiativeToProject
+   * @returns InitiativeToProject
+   */
+  public initiativeToProject(id: string): LinearFetch<InitiativeToProject> {
+    return new InitiativeToProjectQuery(this._request).fetch(id);
+  }
+  /**
+   * returns a list of initiative to project entities.
+   *
+   * @param variables - variables to pass into the InitiativeToProjectsQuery
+   * @returns InitiativeToProjectConnection
+   */
+  public initiativeToProjects(
+    variables?: L.InitiativeToProjectsQueryVariables
+  ): LinearFetch<InitiativeToProjectConnection> {
+    return new InitiativeToProjectsQuery(this._request).fetch(variables);
+  }
+  /**
+   * All initiatives in the workspace.
+   *
+   * @param variables - variables to pass into the InitiativesQuery
+   * @returns InitiativeConnection
+   */
+  public initiatives(variables?: L.InitiativesQueryVariables): LinearFetch<InitiativeConnection> {
+    return new InitiativesQuery(this._request).fetch(variables);
+  }
+  /**
    * One specific integration.
    *
    * @param id - required id to pass to integration
@@ -27552,6 +28546,83 @@ export class LinearSdk extends Request {
     return new ImportFileUploadMutation(this._request).fetch(contentType, filename, size, variables);
   }
   /**
+   * Archives a initiative.
+   *
+   * @param id - required id to pass to archiveInitiative
+   * @returns InitiativeArchivePayload
+   */
+  public archiveInitiative(id: string): LinearFetch<InitiativeArchivePayload> {
+    return new ArchiveInitiativeMutation(this._request).fetch(id);
+  }
+  /**
+   * Creates a new initiative.
+   *
+   * @param input - required input to pass to createInitiative
+   * @returns InitiativePayload
+   */
+  public createInitiative(input: L.InitiativeCreateInput): LinearFetch<InitiativePayload> {
+    return new CreateInitiativeMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes (trashes) an initiative.
+   *
+   * @param id - required id to pass to deleteInitiative
+   * @returns DeletePayload
+   */
+  public deleteInitiative(id: string): LinearFetch<DeletePayload> {
+    return new DeleteInitiativeMutation(this._request).fetch(id);
+  }
+  /**
+   * Creates a new initiativeToProject join.
+   *
+   * @param input - required input to pass to createInitiativeToProject
+   * @returns InitiativeToProjectPayload
+   */
+  public createInitiativeToProject(input: L.InitiativeToProjectCreateInput): LinearFetch<InitiativeToProjectPayload> {
+    return new CreateInitiativeToProjectMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes a initiativeToProject.
+   *
+   * @param id - required id to pass to deleteInitiativeToProject
+   * @returns DeletePayload
+   */
+  public deleteInitiativeToProject(id: string): LinearFetch<DeletePayload> {
+    return new DeleteInitiativeToProjectMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates a initiativeToProject.
+   *
+   * @param id - required id to pass to updateInitiativeToProject
+   * @param input - required input to pass to updateInitiativeToProject
+   * @returns InitiativeToProjectPayload
+   */
+  public updateInitiativeToProject(
+    id: string,
+    input: L.InitiativeToProjectUpdateInput
+  ): LinearFetch<InitiativeToProjectPayload> {
+    return new UpdateInitiativeToProjectMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Unarchives a initiative.
+   *
+   * @param id - required id to pass to unarchiveInitiative
+   * @returns InitiativeArchivePayload
+   */
+  public unarchiveInitiative(id: string): LinearFetch<InitiativeArchivePayload> {
+    return new UnarchiveInitiativeMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates a initiative.
+   *
+   * @param id - required id to pass to updateInitiative
+   * @param input - required input to pass to updateInitiative
+   * @returns InitiativePayload
+   */
+  public updateInitiative(id: string, input: L.InitiativeUpdateInput): LinearFetch<InitiativePayload> {
+    return new UpdateInitiativeMutation(this._request).fetch(id, input);
+  }
+  /**
    * Archives an integration.
    *
    * @param id - required id to pass to archiveIntegration
@@ -27608,6 +28679,19 @@ export class LinearSdk extends Request {
    */
   public integrationFront(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
     return new IntegrationFrontMutation(this._request).fetch(code, redirectUri);
+  }
+  /**
+   * Connects the organization with a GitHub Enterprise Server.
+   *
+   * @param githubUrl - required githubUrl to pass to integrationGitHubEnterpriseServerConnect
+   * @param variables - variables without 'githubUrl' to pass into the IntegrationGitHubEnterpriseServerConnectMutation
+   * @returns GitHubEnterpriseServerPayload
+   */
+  public integrationGitHubEnterpriseServerConnect(
+    githubUrl: string,
+    variables?: Omit<L.IntegrationGitHubEnterpriseServerConnectMutationVariables, "githubUrl">
+  ): LinearFetch<GitHubEnterpriseServerPayload> {
+    return new IntegrationGitHubEnterpriseServerConnectMutation(this._request).fetch(githubUrl, variables);
   }
   /**
    * Connect your GitHub account to Linear.
@@ -27960,10 +29044,14 @@ export class LinearSdk extends Request {
    * Deletes (trashes) an issue.
    *
    * @param id - required id to pass to deleteIssue
+   * @param variables - variables without 'id' to pass into the DeleteIssueMutation
    * @returns IssueArchivePayload
    */
-  public deleteIssue(id: string): LinearFetch<IssueArchivePayload> {
-    return new DeleteIssueMutation(this._request).fetch(id);
+  public deleteIssue(
+    id: string,
+    variables?: Omit<L.DeleteIssueMutationVariables, "id">
+  ): LinearFetch<IssueArchivePayload> {
+    return new DeleteIssueMutation(this._request).fetch(id, variables);
   }
   /**
    * Kicks off an Asana import job.
@@ -28011,15 +29099,13 @@ export class LinearSdk extends Request {
   /**
    * Kicks off a GitHub import job.
    *
-   * @param integrationId - required integrationId to pass to issueImportCreateGithub
-   * @param variables - variables without 'integrationId' to pass into the IssueImportCreateGithubMutation
+   * @param variables - variables to pass into the IssueImportCreateGithubMutation
    * @returns IssueImportPayload
    */
   public issueImportCreateGithub(
-    integrationId: string,
-    variables?: Omit<L.IssueImportCreateGithubMutationVariables, "integrationId">
+    variables?: L.IssueImportCreateGithubMutationVariables
   ): LinearFetch<IssueImportPayload> {
-    return new IssueImportCreateGithubMutation(this._request).fetch(integrationId, variables);
+    return new IssueImportCreateGithubMutation(this._request).fetch(variables);
   }
   /**
    * Kicks off a Jira import job.
