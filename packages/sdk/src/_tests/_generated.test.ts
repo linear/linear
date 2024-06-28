@@ -3041,6 +3041,16 @@ describe("generated", () => {
         );
       }
     });
+
+    /** Test the projectRelation.user query for L.User */
+    it("projectRelation.user", async () => {
+      if (_projectRelation) {
+        const projectRelation_user: L.User | undefined = await _projectRelation.user;
+        expect(projectRelation_user instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No ProjectRelation found - cannot test projectRelation.user query");
+      }
+    });
   });
 
   /** Test all ProjectUpdateInteraction queries */

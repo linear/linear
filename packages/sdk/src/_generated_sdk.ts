@@ -8721,6 +8721,7 @@ export class ProjectRelation extends Request {
   private _projectMilestone?: L.ProjectRelationFragment["projectMilestone"];
   private _relatedProject: L.ProjectRelationFragment["relatedProject"];
   private _relatedProjectMilestone?: L.ProjectRelationFragment["relatedProjectMilestone"];
+  private _user?: L.ProjectRelationFragment["user"];
 
   public constructor(request: LinearRequest, data: L.ProjectRelationFragment) {
     super(request);
@@ -8735,6 +8736,7 @@ export class ProjectRelation extends Request {
     this._projectMilestone = data.projectMilestone ?? undefined;
     this._relatedProject = data.relatedProject;
     this._relatedProjectMilestone = data.relatedProjectMilestone ?? undefined;
+    this._user = data.user ?? undefined;
   }
 
   /** The type of anchor on the project end of the relation. */
@@ -8774,6 +8776,10 @@ export class ProjectRelation extends Request {
     return this._relatedProjectMilestone?.id
       ? new ProjectMilestoneQuery(this._request).fetch(this._relatedProjectMilestone?.id)
       : undefined;
+  }
+  /** The last user who created or modified the relation. */
+  public get user(): LinearFetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
 /**

@@ -49472,7 +49472,7 @@
             "description": "Filters that the projects members must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "UserFilter",
+              "name": "UserCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -57456,7 +57456,7 @@
             "description": "Filters that the projects members must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "UserFilter",
+              "name": "UserCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -58248,7 +58248,7 @@
             "description": "Filters that the projects members must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "UserFilter",
+              "name": "UserCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -60644,6 +60644,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": "The last user who created or modified the relation.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -63364,6 +63376,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slugId",
+            "description": "[INTERNAL] The project update's unique URL slug.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
