@@ -13531,7 +13531,7 @@ input NullableProjectFilter {
   """
   Filters that the projects members must satisfy.
   """
-  members: UserFilter
+  members: UserCollectionFilter
   """
   Comparator for the project name.
   """
@@ -15832,7 +15832,7 @@ input ProjectCollectionFilter {
   """
   Filters that the projects members must satisfy.
   """
-  members: UserFilter
+  members: UserCollectionFilter
   """
   Comparator for the project name.
   """
@@ -16051,7 +16051,7 @@ input ProjectFilter {
   """
   Filters that the projects members must satisfy.
   """
-  members: UserFilter
+  members: UserCollectionFilter
   """
   Comparator for the project name.
   """
@@ -16730,6 +16730,10 @@ type ProjectRelation implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  The last user who created or modified the relation.
+  """
+  user: User
 }
 
 type ProjectRelationConnection {
@@ -17490,6 +17494,10 @@ type ProjectUpdate implements Node {
   Reactions associated with the project update.
   """
   reactions: [Reaction!]!
+  """
+  [INTERNAL] The project update's unique URL slug.
+  """
+  slugId: String
   """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't

@@ -1458,6 +1458,10 @@ fragment ProjectRelation on ProjectRelation {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The last user who created or modified the relation.
+  user {
+    id
+  }
   # The milestone within the project whose relationship is being described.
   projectMilestone {
     id

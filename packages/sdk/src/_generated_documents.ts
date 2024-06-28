@@ -7825,7 +7825,7 @@ export type NullableProjectFilter = {
   /** Filters that the projects lead must satisfy. */
   lead?: Maybe<NullableUserFilter>;
   /** Filters that the projects members must satisfy. */
-  members?: Maybe<UserFilter>;
+  members?: Maybe<UserCollectionFilter>;
   /** Comparator for the project name. */
   name?: Maybe<StringComparator>;
   /** Filters that the project's next milestone must satisfy. */
@@ -9096,7 +9096,7 @@ export type ProjectCollectionFilter = {
   /** Comparator for the collection length. */
   length?: Maybe<NumberComparator>;
   /** Filters that the projects members must satisfy. */
-  members?: Maybe<UserFilter>;
+  members?: Maybe<UserCollectionFilter>;
   /** Comparator for the project name. */
   name?: Maybe<StringComparator>;
   /** Filters that the project's next milestone must satisfy. */
@@ -9215,7 +9215,7 @@ export type ProjectFilter = {
   /** Filters that the projects lead must satisfy. */
   lead?: Maybe<NullableUserFilter>;
   /** Filters that the projects members must satisfy. */
-  members?: Maybe<UserFilter>;
+  members?: Maybe<UserCollectionFilter>;
   /** Comparator for the project name. */
   name?: Maybe<StringComparator>;
   /** Filters that the project's next milestone must satisfy. */
@@ -9618,6 +9618,8 @@ export type ProjectRelation = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+  /** The last user who created or modified the relation. */
+  user?: Maybe<User>;
 };
 
 export type ProjectRelationConnection = {
@@ -10007,6 +10009,8 @@ export type ProjectUpdate = Node & {
   reactionData: Scalars["JSONObject"];
   /** Reactions associated with the project update. */
   reactions: Array<Reaction>;
+  /** [INTERNAL] The project update's unique URL slug. */
+  slugId?: Maybe<Scalars["String"]>;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -14849,6 +14853,7 @@ export type ProjectRelationFragment = { __typename: "ProjectRelation" } & Pick<
   ProjectRelation,
   "updatedAt" | "type" | "archivedAt" | "createdAt" | "anchorType" | "relatedAnchorType" | "id"
 > & {
+    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
     relatedProjectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
     project: { __typename?: "Project" } & Pick<Project, "id">;
@@ -30664,6 +30669,14 @@ export const ProjectRelationFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           {
             kind: "Field",
             name: { kind: "Name", value: "projectMilestone" },
