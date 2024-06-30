@@ -29,7 +29,7 @@
     "@graphql-codegen/plugin-helpers": "^1.18.1",
     "@graphql-codegen/visitor-plugin-common": "^1.17.17",
     "@rollup/plugin-typescript": "^8.1.1",
-    "auto-bind": "^4.0.0",
+    "auto-bind": "^5.0.1",
     "graphql": "^15.4.0",
     "rollup": "^2.38.3",
     "rollup-plugin-gzip": "^2.5.0",
