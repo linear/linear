@@ -29,7 +29,7 @@ export const replaceImagesInMarkdown = async (
     const title = args[0];
     const url = args[1];
     const uploadedUrl = await replaceImageUrl(client, url + effectiveURLSuffix);
-    return `![${title}](${uploadedUrl})`;
+    return `\n![${title}](${uploadedUrl})\n`;
   });
 
   // HTML tags
