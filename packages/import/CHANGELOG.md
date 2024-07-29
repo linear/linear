@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.14.3
+
+### Patch Changes
+
+- a293329: chore(deps): update dependency patch versions
+- 127c08f: fix(import): ensure that Markdown images are on their own line
+- Updated dependencies [a293329]
+- Updated dependencies [f519a84]
+  - @linear/sdk@25.0.0
+
 ## 1.14.2
 
 ### Patch Changes
