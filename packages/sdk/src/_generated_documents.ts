@@ -885,6 +885,8 @@ export type CommentCollectionFilter = {
   issue?: Maybe<NullableIssueFilter>;
   /** Comparator for the collection length. */
   length?: Maybe<NumberComparator>;
+  /** Filters that the comment's customer needs must satisfy. */
+  needs?: Maybe<CustomerNeedCollectionFilter>;
   /** Compound filters, one of which need to be matched by the comment. */
   or?: Maybe<Array<CommentCollectionFilter>>;
   /** Filters that the comment parent must satisfy. */
@@ -960,6 +962,8 @@ export type CommentFilter = {
   id?: Maybe<IdComparator>;
   /** Filters that the comments issue must satisfy. */
   issue?: Maybe<NullableIssueFilter>;
+  /** Filters that the comment's customer needs must satisfy. */
+  needs?: Maybe<CustomerNeedCollectionFilter>;
   /** Compound filters, one of which need to be matched by the comment. */
   or?: Maybe<Array<CommentFilter>>;
   /** Filters that the comment parent must satisfy. */
@@ -981,6 +985,8 @@ export type CommentNotification = {
   commentId?: Maybe<Scalars["String"]>;
   /** Related parent comment ID. Null if the notification is not related to a comment. */
   parentCommentId?: Maybe<Scalars["String"]>;
+  /** Name of the reaction emoji related to the notification. */
+  reactionEmoji?: Maybe<Scalars["String"]>;
 };
 
 export type CommentPayload = {
@@ -1008,51 +1014,6 @@ export type CommentUpdateInput = {
   resolvingUserId?: Maybe<Scalars["String"]>;
   /** [INTERNAL] The identifiers of the users subscribing to this comment. */
   subscriberIds?: Maybe<Array<Scalars["String"]>>;
-};
-
-/** A company related to issue's origin. */
-export type Company = Node & {
-  __typename?: "Company";
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** Custom company properties. */
-  companyProperties: Scalars["JSONObject"];
-  /** The time at which the entity was created. */
-  createdAt: Scalars["DateTime"];
-  /** The user who added the company. */
-  creator: User;
-  /** Company ID in an external system. */
-  externalId: Scalars["String"];
-  /** The unique identifier of the entity. */
-  id: Scalars["ID"];
-  /** Company logo URL. */
-  logoUrl?: Maybe<Scalars["String"]>;
-  /** Company name. */
-  name: Scalars["String"];
-  /** The organization of the customer. */
-  organization: Organization;
-  /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  updatedAt: Scalars["DateTime"];
-  /** Company website URL. */
-  websiteUrl?: Maybe<Scalars["String"]>;
-};
-
-export type CompanyConnection = {
-  __typename?: "CompanyConnection";
-  edges: Array<CompanyEdge>;
-  nodes: Array<Company>;
-  pageInfo: PageInfo;
-};
-
-export type CompanyEdge = {
-  __typename?: "CompanyEdge";
-  /** Used in `before` and `after` args */
-  cursor: Scalars["String"];
-  node: Company;
 };
 
 /** Issue completion date sorting options. */
@@ -1145,6 +1106,45 @@ export type CreatedAtSort = {
   nulls?: Maybe<PaginationNulls>;
   /** The order for the individual sort */
   order?: Maybe<PaginationSortOrder>;
+};
+
+/** [ALPHA] A custom attribute on a Customer entity. */
+export type CustomAttribute = Node & {
+  __typename?: "CustomAttribute";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The customer that this custom attribute is attached to. */
+  customer: Customer;
+  /** The field that is defining this custom attribute. */
+  field: CustomerSchemaField;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The type of the value stored by the attribute. */
+  type: SchemaFieldType;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+  /** The value of the custom attribute. */
+  value: Scalars["JSON"];
+};
+
+export type CustomAttributeConnection = {
+  __typename?: "CustomAttributeConnection";
+  edges: Array<CustomAttributeEdge>;
+  nodes: Array<CustomAttribute>;
+  pageInfo: PageInfo;
+};
+
+export type CustomAttributeEdge = {
+  __typename?: "CustomAttributeEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: CustomAttribute;
 };
 
 /** A custom view that has been saved by a user. */
@@ -1296,6 +1296,8 @@ export type CustomViewNotificationSubscription = Entity &
     cycle?: Maybe<Cycle>;
     /** The unique identifier of the entity. */
     id: Scalars["ID"];
+    /** The contextual initiative view associated with the notification subscription. */
+    initiative?: Maybe<Initiative>;
     /** The contextual label view associated with the notification subscription. */
     label?: Maybe<IssueLabel>;
     /** The type of subscription. */
@@ -1365,6 +1367,433 @@ export type CustomViewUpdateInput = {
   teamId?: Maybe<Scalars["String"]>;
 };
 
+/** [ALPHA] A customer whose needs will be tied to issues or projects. */
+export type Customer = Node & {
+  __typename?: "Customer";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The domains associated with this customer. */
+  domains: Array<Scalars["String"]>;
+  /** The ids of the customers in external systems. */
+  externalIds: Array<Scalars["String"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The customer's logo URL. */
+  logoUrl?: Maybe<Scalars["String"]>;
+  /** The customer's name. */
+  name: Scalars["String"];
+  /** The user who owns the customer. */
+  owner: User;
+  /** The ID of the Slack channel used to interact with the customer. */
+  slackChannelId?: Maybe<Scalars["String"]>;
+  /** The current status of the customer. */
+  status: CustomerStatus;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+/** Customer filtering options. */
+export type CustomerCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the customer. */
+  and?: Maybe<Array<CustomerCollectionFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the customer's domains. */
+  domains?: Maybe<StringArrayComparator>;
+  /** Filters that needs to be matched by all customers. */
+  every?: Maybe<CustomerFilter>;
+  /** Comparator for the customer's external IDs. */
+  externalIds?: Maybe<StringArrayComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the collection length. */
+  length?: Maybe<NumberComparator>;
+  /** Comparator for the customer name. */
+  name?: Maybe<StringComparator>;
+  /** Filters that the customer's needs must satisfy. */
+  needs?: Maybe<CustomerNeedCollectionFilter>;
+  /** Compound filters, one of which need to be matched by the customer. */
+  or?: Maybe<Array<CustomerCollectionFilter>>;
+  /** Filters that the customer owner must satisfy. */
+  owner?: Maybe<UserFilter>;
+  /** Comparator for the customer slack channel ID. */
+  slackChannelId?: Maybe<StringComparator>;
+  /** Filters that needs to be matched by some customers. */
+  some?: Maybe<CustomerFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
+export type CustomerConnection = {
+  __typename?: "CustomerConnection";
+  edges: Array<CustomerEdge>;
+  nodes: Array<Customer>;
+  pageInfo: PageInfo;
+};
+
+export type CustomerCreateInput = {
+  /** The domains associated with this customer. */
+  domains?: Maybe<Array<Scalars["String"]>>;
+  /** The ids of the customers in external systems. */
+  externalIds?: Maybe<Array<Scalars["String"]>>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: Maybe<Scalars["String"]>;
+  /** The name of the customer. */
+  name: Scalars["String"];
+  /** The user who owns the customer. */
+  ownerId?: Maybe<Scalars["String"]>;
+  /** The ID of the Slack channel used to interact with the customer. */
+  slackChannelId?: Maybe<Scalars["String"]>;
+  /** The status of the customer. */
+  statusId?: Maybe<Scalars["String"]>;
+};
+
+export type CustomerEdge = {
+  __typename?: "CustomerEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: Customer;
+};
+
+/** Customer filtering options. */
+export type CustomerFilter = {
+  /** Compound filters, all of which need to be matched by the customer. */
+  and?: Maybe<Array<CustomerFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the customer's domains. */
+  domains?: Maybe<StringArrayComparator>;
+  /** Comparator for the customer's external IDs. */
+  externalIds?: Maybe<StringArrayComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the customer name. */
+  name?: Maybe<StringComparator>;
+  /** Filters that the customer's needs must satisfy. */
+  needs?: Maybe<CustomerNeedCollectionFilter>;
+  /** Compound filters, one of which need to be matched by the customer. */
+  or?: Maybe<Array<CustomerFilter>>;
+  /** Filters that the customer owner must satisfy. */
+  owner?: Maybe<UserFilter>;
+  /** Comparator for the customer slack channel ID. */
+  slackChannelId?: Maybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
+/** [ALPHA] A customer need, expressed through a reference to an issue, project, or comment. */
+export type CustomerNeed = Node & {
+  __typename?: "CustomerNeed";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The comment this need is referencing. */
+  comment?: Maybe<Comment>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The customer that this need is attached to. */
+  customer: Customer;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The issue this need is referencing. */
+  issue?: Maybe<Issue>;
+  /** The priority of the customer need. 0 = No priority, 1 = Critical, 2 = Important, 3 = Nice to have. */
+  priority: Scalars["Float"];
+  /** The project this need is referencing. */
+  project?: Maybe<Project>;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+/** Customer needs filtering options. */
+export type CustomerNeedCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the customer needs. */
+  and?: Maybe<Array<CustomerNeedCollectionFilter>>;
+  /** Filters that the need's comment must satisfy. */
+  comment?: Maybe<NullableCommentFilter>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the need's customer must satisfy. */
+  customer?: Maybe<CustomerFilter>;
+  /** Filters that needs to be matched by all customer needs. */
+  every?: Maybe<CustomerNeedFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Filters that the need's issue must satisfy. */
+  issue?: Maybe<NullableIssueFilter>;
+  /** Comparator for the collection length. */
+  length?: Maybe<NumberComparator>;
+  /** Compound filters, one of which need to be matched by the customer needs. */
+  or?: Maybe<Array<CustomerNeedCollectionFilter>>;
+  /** Comparator for the customer need priority. */
+  priority?: Maybe<NumberComparator>;
+  /** Filters that the need's project must satisfy. */
+  project?: Maybe<NullableProjectFilter>;
+  /** Filters that needs to be matched by some customer needs. */
+  some?: Maybe<CustomerNeedFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
+export type CustomerNeedConnection = {
+  __typename?: "CustomerNeedConnection";
+  edges: Array<CustomerNeedEdge>;
+  nodes: Array<CustomerNeed>;
+  pageInfo: PageInfo;
+};
+
+export type CustomerNeedCreateInput = {
+  /** The comment this need is referencing. */
+  commentId?: Maybe<Scalars["String"]>;
+  /** The uuid of the customer the need belongs to. */
+  customerId: Scalars["String"];
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: Maybe<Scalars["String"]>;
+  /** The issue this need is referencing. */
+  issueId?: Maybe<Scalars["String"]>;
+  /** The priority of the customer need. 0 = No priority, 1 = Critical, 2 = Important, 3 = Nice to have. */
+  priority?: Maybe<Scalars["Float"]>;
+  /** The project this need is referencing. */
+  projectId?: Maybe<Scalars["String"]>;
+};
+
+export type CustomerNeedEdge = {
+  __typename?: "CustomerNeedEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: CustomerNeed;
+};
+
+/** Customer filtering options. */
+export type CustomerNeedFilter = {
+  /** Compound filters, all of which need to be matched by the customer need. */
+  and?: Maybe<Array<CustomerNeedFilter>>;
+  /** Filters that the need's comment must satisfy. */
+  comment?: Maybe<NullableCommentFilter>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the need's customer must satisfy. */
+  customer?: Maybe<CustomerFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Filters that the need's issue must satisfy. */
+  issue?: Maybe<NullableIssueFilter>;
+  /** Compound filters, one of which need to be matched by the customer need. */
+  or?: Maybe<Array<CustomerNeedFilter>>;
+  /** Comparator for the customer need priority. */
+  priority?: Maybe<NumberComparator>;
+  /** Filters that the need's project must satisfy. */
+  project?: Maybe<NullableProjectFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
+export type CustomerNeedPayload = {
+  __typename?: "CustomerNeedPayload";
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** The customer need that was created or updated. */
+  need: CustomerNeed;
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+export type CustomerNeedUpdateInput = {
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: Maybe<Scalars["String"]>;
+  /** The priority of the customer need. 0 = No priority, 1 = Critical, 2 = Important, 3 = Nice to have. */
+  priority?: Maybe<Scalars["Float"]>;
+};
+
+export type CustomerPayload = {
+  __typename?: "CustomerPayload";
+  /** The customer that was created or updated. */
+  customer: Customer;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+/** [ALPHA] A customer schema. */
+export type CustomerSchema = Node & {
+  __typename?: "CustomerSchema";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The schema display name. */
+  displayName: Scalars["String"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+export type CustomerSchemaConnection = {
+  __typename?: "CustomerSchemaConnection";
+  edges: Array<CustomerSchemaEdge>;
+  nodes: Array<CustomerSchema>;
+  pageInfo: PageInfo;
+};
+
+export type CustomerSchemaEdge = {
+  __typename?: "CustomerSchemaEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: CustomerSchema;
+};
+
+/** [ALPHA] A customer schema field. */
+export type CustomerSchemaField = Node & {
+  __typename?: "CustomerSchemaField";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** Whether this field is enabled to be used as a custom attribute. */
+  enabled: Scalars["Boolean"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The name of the field in the schema. */
+  name: Scalars["String"];
+  /** The type of the field in the schema. */
+  type: SchemaFieldType;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+export type CustomerSchemaFieldConnection = {
+  __typename?: "CustomerSchemaFieldConnection";
+  edges: Array<CustomerSchemaFieldEdge>;
+  nodes: Array<CustomerSchemaField>;
+  pageInfo: PageInfo;
+};
+
+export type CustomerSchemaFieldEdge = {
+  __typename?: "CustomerSchemaFieldEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: CustomerSchemaField;
+};
+
+/** [ALPHA] A customer status. */
+export type CustomerStatus = Node & {
+  __typename?: "CustomerStatus";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The UI color of the status as a HEX string. */
+  color: Scalars["String"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** Description of the status. */
+  description?: Maybe<Scalars["String"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The name of the status. */
+  name: Scalars["String"];
+  /** The position of the status in the workspace's customers flow. */
+  position: Scalars["Float"];
+  /** The type of the customer status. */
+  type: CustomerStatusType;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+export type CustomerStatusConnection = {
+  __typename?: "CustomerStatusConnection";
+  edges: Array<CustomerStatusEdge>;
+  nodes: Array<CustomerStatus>;
+  pageInfo: PageInfo;
+};
+
+export type CustomerStatusCreateInput = {
+  /** The UI color of the status as a HEX string. */
+  color: Scalars["String"];
+  /** Description of the status. */
+  description?: Maybe<Scalars["String"]>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: Maybe<Scalars["String"]>;
+  /** The name of the status. */
+  name: Scalars["String"];
+  /** The position of the status in the workspace's customer flow. */
+  position: Scalars["Float"];
+  /** The type of the customer status. */
+  type: CustomerStatusType;
+};
+
+export type CustomerStatusEdge = {
+  __typename?: "CustomerStatusEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: CustomerStatus;
+};
+
+export type CustomerStatusPayload = {
+  __typename?: "CustomerStatusPayload";
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** The customer status that was created or updated. */
+  status: CustomerStatus;
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+/** A type of customer status. */
+export enum CustomerStatusType {
+  Active = "active",
+  Inactive = "inactive",
+}
+
+export type CustomerStatusUpdateInput = {
+  /** The UI color of the status as a HEX string. */
+  color?: Maybe<Scalars["String"]>;
+  /** Description of the status. */
+  description?: Maybe<Scalars["String"]>;
+  /** The name of the status. */
+  name?: Maybe<Scalars["String"]>;
+  /** The position of the status in the workspace's customer flow. */
+  position?: Maybe<Scalars["Float"]>;
+  /** The type of the customer status. */
+  type?: Maybe<CustomerStatusType>;
+};
+
+export type CustomerUpdateInput = {
+  /** The domains associated with this customer. */
+  domains?: Maybe<Array<Scalars["String"]>>;
+  /** The ids of the customers in external systems. */
+  externalIds?: Maybe<Array<Scalars["String"]>>;
+  /** The name of the customer. */
+  name?: Maybe<Scalars["String"]>;
+  /** The user who owns the customer. */
+  ownerId?: Maybe<Scalars["String"]>;
+  /** The ID of the Slack channel used to interact with the customer. */
+  slackChannelId?: Maybe<Scalars["String"]>;
+  /** The status of the customer. */
+  statusId?: Maybe<Scalars["String"]>;
+};
+
 /** A set of issues to be resolved in a specified amount of time. */
 export type Cycle = Node & {
   __typename?: "Cycle";
@@ -1398,6 +1827,8 @@ export type Cycle = Node & {
   number: Scalars["Float"];
   /** The overall progress of the cycle. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   progress: Scalars["Float"];
+  /** [Internal] The progress history of the cycle. */
+  progressHistory: Scalars["JSONObject"];
   /** The total number of estimation points after each day. */
   scopeHistory: Array<Scalars["Float"]>;
   /** The start time of the cycle. */
@@ -1537,6 +1968,8 @@ export type CycleNotificationSubscription = Entity &
     cycle: Cycle;
     /** The unique identifier of the entity. */
     id: Scalars["ID"];
+    /** The contextual initiative view associated with the notification subscription. */
+    initiative?: Maybe<Initiative>;
     /** The contextual label view associated with the notification subscription. */
     label?: Maybe<IssueLabel>;
     /** The type of subscription. */
@@ -1569,11 +2002,11 @@ export type CyclePayload = {
   success: Scalars["Boolean"];
 };
 
-/** [DEPRECATED] Input for shifting all cycles by a certain number of days. Mutation is now deprecated. */
+/** Input for shifting all cycles from a certain cycle onwards by a certain number of days */
 export type CycleShiftAllInput = {
-  /** [DEPRECATED] The number of days to shift the cycles by. */
+  /** The number of days to shift the cycles by. */
   daysToShift: Scalars["Float"];
-  /** [DEPRECATED] The cycle id at which to start the shift. */
+  /** The cycle ID at which to start the shift. */
   id: Scalars["String"];
 };
 
@@ -1727,6 +2160,8 @@ export type Document = Node & {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The color of the icon. */
   color?: Maybe<Scalars["String"]>;
+  /** Comments associated with the document. */
+  comments: CommentConnection;
   /** The documents content in markdown format. */
   content?: Maybe<Scalars["String"]>;
   /**
@@ -1772,6 +2207,17 @@ export type Document = Node & {
   url: Scalars["String"];
 };
 
+/** A document that can be attached to different entities. */
+export type DocumentCommentsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CommentFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
 /** A generic payload return from entity archive mutations. */
 export type DocumentArchivePayload = ArchivePayload & {
   __typename?: "DocumentArchivePayload";
@@ -1795,6 +2241,8 @@ export type DocumentCollectionFilter = {
   every?: Maybe<DocumentFilter>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Filters that the document's initiative must satisfy. */
+  initiative?: Maybe<InitiativeFilter>;
   /** Comparator for the collection length. */
   length?: Maybe<NumberComparator>;
   /** Compound filters, one of which need to be matched by the document. */
@@ -1936,6 +2384,8 @@ export type DocumentCreateInput = {
   projectId?: Maybe<Scalars["String"]>;
   /** The order of the item in the resources list. */
   sortOrder?: Maybe<Scalars["Float"]>;
+  /** [INTERNAL] The identifiers of the users subscribing to this document. */
+  subscriberIds?: Maybe<Array<Scalars["String"]>>;
   /** The title of the document. */
   title: Scalars["String"];
 };
@@ -1957,6 +2407,8 @@ export type DocumentFilter = {
   creator?: Maybe<UserFilter>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Filters that the document's initiative must satisfy. */
+  initiative?: Maybe<InitiativeFilter>;
   /** Compound filters, one of which need to be matched by the document. */
   or?: Maybe<Array<DocumentFilter>>;
   /** Filters that the document's project must satisfy. */
@@ -1990,6 +2442,8 @@ export type DocumentNotification = Entity &
     commentId?: Maybe<Scalars["String"]>;
     /** The time at which the entity was created. */
     createdAt: Scalars["DateTime"];
+    /** Related document ID. */
+    documentId: Scalars["String"];
     /**
      * The time at when an email reminder for this notification was sent to the user. Null, if no email
      *     reminder has been sent.
@@ -1997,18 +2451,24 @@ export type DocumentNotification = Entity &
     emailedAt?: Maybe<Scalars["DateTime"]>;
     /** The external user that caused the notification. */
     externalUserActor?: Maybe<ExternalUser>;
-    /** [ALPHA] Notifications with the same grouping key will be grouped together in the UI. */
+    /** [Internal] Notifications with the same grouping key will be grouped together in the UI. */
     groupingKey: Scalars["String"];
+    /** [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`. */
+    groupingPriority: Scalars["Float"];
     /** The unique identifier of the entity. */
     id: Scalars["ID"];
+    /** [Internal] Inbox URL for the notification. */
+    inboxUrl: Scalars["String"];
     /** [Internal] If notification actor was Linear. */
-    isLinearActor?: Maybe<Scalars["Boolean"]>;
+    isLinearActor: Scalars["Boolean"];
     /** [Internal] Issue's status type for issue notifications. */
     issueStatusType?: Maybe<Scalars["String"]>;
     /** Related parent comment ID. Null if the notification is not related to a comment. */
     parentCommentId?: Maybe<Scalars["String"]>;
     /** [Internal] Project update health for new updates. */
     projectUpdateHealth?: Maybe<Scalars["String"]>;
+    /** Name of the reaction emoji related to the notification. */
+    reactionEmoji?: Maybe<Scalars["String"]>;
     /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
     readAt?: Maybe<Scalars["DateTime"]>;
     /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
@@ -2060,6 +2520,8 @@ export type DocumentSearchResult = Node & {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The color of the icon. */
   color?: Maybe<Scalars["String"]>;
+  /** Comments associated with the document. */
+  comments: CommentConnection;
   /** The documents content in markdown format. */
   content?: Maybe<Scalars["String"]>;
   /**
@@ -2107,6 +2569,16 @@ export type DocumentSearchResult = Node & {
   url: Scalars["String"];
 };
 
+export type DocumentSearchResultCommentsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CommentFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
 export type DocumentSearchResultConnection = {
   __typename?: "DocumentSearchResultConnection";
   edges: Array<DocumentSearchResultEdge>;
@@ -2140,6 +2612,8 @@ export type DocumentUpdateInput = {
   projectId?: Maybe<Scalars["String"]>;
   /** The order of the item in the resources list. */
   sortOrder?: Maybe<Scalars["Float"]>;
+  /** [INTERNAL] The identifiers of the users subscribing to this document. */
+  subscriberIds?: Maybe<Array<Scalars["String"]>>;
   /** The title of the document. */
   title?: Maybe<Scalars["String"]>;
   /** Whether the document has been trashed. */
@@ -2177,6 +2651,8 @@ export type Draft = Node & {
   updatedAt: Scalars["DateTime"];
   /** The user who created the draft. */
   user: User;
+  /** [INTERNAL] Whether the draft was ported from a local draft. */
+  wasLocalDraft: Scalars["Boolean"];
 };
 
 /** Issue due date sorting options. */
@@ -2576,6 +3052,8 @@ export type Favorite = Node & {
   folderName?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** The favorited initiative. */
+  initiative?: Maybe<Initiative>;
   /** The targeted tab of the initiative. */
   initiativeTab?: Maybe<InitiativeTab>;
   /** The favorited issue. */
@@ -3006,8 +3484,16 @@ export type GitHubCommitIntegrationPayload = {
   webhookSecret: Scalars["String"];
 };
 
+export type GitHubEnterpriseServerInstallVerificationPayload = {
+  __typename?: "GitHubEnterpriseServerInstallVerificationPayload";
+  /** Has the install been successful. */
+  success: Scalars["Boolean"];
+};
+
 export type GitHubEnterpriseServerPayload = {
   __typename?: "GitHubEnterpriseServerPayload";
+  /** The app install address. */
+  installUrl: Scalars["String"];
   /** The integration that was created or updated. */
   integration?: Maybe<Integration>;
   /** The identifier of the last sync operation. */
@@ -3023,6 +3509,8 @@ export type GitHubEnterpriseServerPayload = {
 /** Metadata and settings for a GitHub import integration. */
 export type GitHubImportSettings = {
   __typename?: "GitHubImportSettings";
+  /** A map storing all available issue labels per repository */
+  labels?: Maybe<Scalars["JSONObject"]>;
   /** The avatar URL for the GitHub organization. */
   orgAvatarUrl: Scalars["String"];
   /** The GitHub organization's name. */
@@ -3034,6 +3522,8 @@ export type GitHubImportSettings = {
 };
 
 export type GitHubImportSettingsInput = {
+  /** A map storing all available issue labels per repository */
+  labels?: Maybe<Scalars["JSONObject"]>;
   /** The avatar URL for the GitHub organization. */
   orgAvatarUrl: Scalars["String"];
   /** The GitHub organization's name. */
@@ -3281,6 +3771,8 @@ export type InitiativeCollectionFilter = {
   slugId?: Maybe<StringComparator>;
   /** Filters that needs to be matched by some initiatives. */
   some?: Maybe<InitiativeFilter>;
+  /** Comparator for the initiative status. */
+  status?: Maybe<StringComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -3339,6 +3831,8 @@ export type InitiativeFilter = {
   or?: Maybe<Array<InitiativeFilter>>;
   /** Comparator for the initiative slug ID. */
   slugId?: Maybe<StringComparator>;
+  /** Comparator for the initiative status. */
+  status?: Maybe<StringComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -3371,18 +3865,26 @@ export type InitiativeNotification = Entity &
     emailedAt?: Maybe<Scalars["DateTime"]>;
     /** The external user that caused the notification. */
     externalUserActor?: Maybe<ExternalUser>;
-    /** [ALPHA] Notifications with the same grouping key will be grouped together in the UI. */
+    /** [Internal] Notifications with the same grouping key will be grouped together in the UI. */
     groupingKey: Scalars["String"];
+    /** [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`. */
+    groupingPriority: Scalars["Float"];
     /** The unique identifier of the entity. */
     id: Scalars["ID"];
+    /** [Internal] Inbox URL for the notification. */
+    inboxUrl: Scalars["String"];
+    /** Related initiative ID. */
+    initiativeId: Scalars["String"];
     /** [Internal] If notification actor was Linear. */
-    isLinearActor?: Maybe<Scalars["Boolean"]>;
+    isLinearActor: Scalars["Boolean"];
     /** [Internal] Issue's status type for issue notifications. */
     issueStatusType?: Maybe<Scalars["String"]>;
     /** Related parent comment ID. Null if the notification is not related to a comment. */
     parentCommentId?: Maybe<Scalars["String"]>;
     /** [Internal] Project update health for new updates. */
     projectUpdateHealth?: Maybe<Scalars["String"]>;
+    /** Name of the reaction emoji related to the notification. */
+    reactionEmoji?: Maybe<Scalars["String"]>;
     /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
     readAt?: Maybe<Scalars["DateTime"]>;
     /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
@@ -3405,6 +3907,49 @@ export type InitiativeNotification = Entity &
     url: Scalars["String"];
     /** The user that received the notification. */
     user: User;
+  };
+
+/** An initiative notification subscription. */
+export type InitiativeNotificationSubscription = Entity &
+  Node &
+  NotificationSubscription & {
+    __typename?: "InitiativeNotificationSubscription";
+    /** Whether the subscription is active or not. */
+    active: Scalars["Boolean"];
+    /** The time at which the entity was archived. Null if the entity has not been archived. */
+    archivedAt?: Maybe<Scalars["DateTime"]>;
+    /** The type of view to which the notification subscription context is associated with. */
+    contextViewType?: Maybe<ContextViewType>;
+    /** The time at which the entity was created. */
+    createdAt: Scalars["DateTime"];
+    /** The contextual custom view associated with the notification subscription. */
+    customView?: Maybe<CustomView>;
+    /** The contextual cycle view associated with the notification subscription. */
+    cycle?: Maybe<Cycle>;
+    /** The unique identifier of the entity. */
+    id: Scalars["ID"];
+    /** The initiative subscribed to. */
+    initiative: Initiative;
+    /** The contextual label view associated with the notification subscription. */
+    label?: Maybe<IssueLabel>;
+    /** The type of subscription. */
+    notificationSubscriptionTypes: Array<Scalars["String"]>;
+    /** The contextual project view associated with the notification subscription. */
+    project?: Maybe<Project>;
+    /** The user that subscribed to receive notifications. */
+    subscriber: User;
+    /** The team associated with the notification subscription. */
+    team?: Maybe<Team>;
+    /**
+     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     *     been updated after creation.
+     */
+    updatedAt: Scalars["DateTime"];
+    /** The user view associated with the notification subscription. */
+    user?: Maybe<User>;
+    /** The type of user view to which the notification subscription context is associated with. */
+    userContextViewType?: Maybe<UserContextViewType>;
   };
 
 /** The payload returned by the initiative mutations. */
@@ -3966,6 +4511,8 @@ export type Issue = Node & {
   priority: Scalars["Float"];
   /** Label for the priority. */
   priorityLabel: Scalars["String"];
+  /** [ALPHA] The order of the item in relation to other items in the organization, when ordered by priority. */
+  prioritySortOrder: Scalars["Float"];
   /** The project that the issue is associated with. */
   project?: Maybe<Project>;
   /** The projectMilestone that the issue is associated with. */
@@ -4173,6 +4720,8 @@ export type IssueCollectionFilter = {
   lastAppliedTemplate?: Maybe<NullableTemplateFilter>;
   /** Comparator for the collection length. */
   length?: Maybe<NumberComparator>;
+  /** Filters that the issue's customer needs must satisfy. */
+  needs?: Maybe<CustomerNeedFilter>;
   /** Comparator for the issues number. */
   number?: Maybe<NumberComparator>;
   /** Compound filters, one of which need to be matched by the issue. */
@@ -4255,6 +4804,8 @@ export type IssueCreateInput = {
   preserveSortOrderOnCreate?: Maybe<Scalars["Boolean"]>;
   /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
   priority?: Maybe<Scalars["Int"]>;
+  /** [ALPHA] The position of the issue related to other issues, when ordered by priority. */
+  prioritySortOrder?: Maybe<Scalars["Float"]>;
   /** The project associated with the issue. */
   projectId?: Maybe<Scalars["String"]>;
   /** The project milestone associated with the issue. */
@@ -4273,7 +4824,7 @@ export type IssueCreateInput = {
   subIssueSortOrder?: Maybe<Scalars["Float"]>;
   /** The identifiers of the users subscribing to this ticket. */
   subscriberIds?: Maybe<Array<Scalars["String"]>>;
-  /** The identifier or key of the team associated with the issue. */
+  /** The identifier of the team associated with the issue. */
   teamId: Scalars["String"];
   /** The identifier of a template the issue should be created from. If other values are provided in the input, they will override template values. */
   templateId?: Maybe<Scalars["String"]>;
@@ -4387,6 +4938,8 @@ export type IssueFilter = {
   labels?: Maybe<IssueLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
   lastAppliedTemplate?: Maybe<NullableTemplateFilter>;
+  /** Filters that the issue's customer needs must satisfy. */
+  needs?: Maybe<CustomerNeedFilter>;
   /** Comparator for the issues number. */
   number?: Maybe<NumberComparator>;
   /** Compound filters, one of which need to be matched by the issue. */
@@ -4444,7 +4997,7 @@ export type IssueHistory = Node & {
   /** The id of user who made these changes. If null, possibly means that the change made by an integration. */
   actorId?: Maybe<Scalars["String"]>;
   /** The actors that performed the actions. This field may be empty in the case of integrations or automations. */
-  actors: Array<User>;
+  actors?: Maybe<Array<User>>;
   /** ID's of labels that were added. */
   addedLabelIds?: Maybe<Array<Scalars["String"]>>;
   /** The labels that were added to the issue. */
@@ -4853,14 +5406,20 @@ export type IssueNotification = Entity &
     emailedAt?: Maybe<Scalars["DateTime"]>;
     /** The external user that caused the notification. */
     externalUserActor?: Maybe<ExternalUser>;
-    /** [ALPHA] Notifications with the same grouping key will be grouped together in the UI. */
+    /** [Internal] Notifications with the same grouping key will be grouped together in the UI. */
     groupingKey: Scalars["String"];
+    /** [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`. */
+    groupingPriority: Scalars["Float"];
     /** The unique identifier of the entity. */
     id: Scalars["ID"];
+    /** [Internal] Inbox URL for the notification. */
+    inboxUrl: Scalars["String"];
     /** [Internal] If notification actor was Linear. */
-    isLinearActor?: Maybe<Scalars["Boolean"]>;
+    isLinearActor: Scalars["Boolean"];
     /** The issue related to the notification. */
     issue: Issue;
+    /** Related issue ID. */
+    issueId: Scalars["String"];
     /** [Internal] Issue's status type for issue notifications. */
     issueStatusType?: Maybe<Scalars["String"]>;
     /** The parent comment related to the notification, if a notification is a reply comment notification. */
@@ -5093,6 +5652,8 @@ export type IssueSearchResult = Node & {
   priority: Scalars["Float"];
   /** Label for the priority. */
   priorityLabel: Scalars["String"];
+  /** [ALPHA] The order of the item in relation to other items in the organization, when ordered by priority. */
+  prioritySortOrder: Scalars["Float"];
   /** The project that the issue is associated with. */
   project?: Maybe<Project>;
   /** The projectMilestone that the issue is associated with. */
@@ -5276,8 +5837,6 @@ export type IssueUpdateInput = {
   assigneeId?: Maybe<Scalars["String"]>;
   /** The position of the issue in its column on the board view. */
   boardOrder?: Maybe<Scalars["Float"]>;
-  /** The identifiers of the companies associated with this ticket. */
-  companyIds?: Maybe<Array<Scalars["String"]>>;
   /** The cycle associated with the issue. */
   cycleId?: Maybe<Scalars["String"]>;
   /** The issue description in markdown format. */
@@ -5296,6 +5855,8 @@ export type IssueUpdateInput = {
   parentId?: Maybe<Scalars["String"]>;
   /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
   priority?: Maybe<Scalars["Int"]>;
+  /** [ALPHA] The position of the issue related to other issues, when ordered by priority. */
+  prioritySortOrder?: Maybe<Scalars["Float"]>;
   /** The project associated with the issue. */
   projectId?: Maybe<Scalars["String"]>;
   /** The project milestone associated with the issue. */
@@ -5314,7 +5875,7 @@ export type IssueUpdateInput = {
   subIssueSortOrder?: Maybe<Scalars["Float"]>;
   /** The identifiers of the users subscribing to this ticket. */
   subscriberIds?: Maybe<Array<Scalars["String"]>>;
-  /** The identifier or key of the team associated with the issue. */
+  /** The identifier of the team associated with the issue. */
   teamId?: Maybe<Scalars["String"]>;
   /** The issue title. */
   title?: Maybe<Scalars["String"]>;
@@ -5458,6 +6019,8 @@ export type LabelNotificationSubscription = Entity &
     cycle?: Maybe<Cycle>;
     /** The unique identifier of the entity. */
     id: Scalars["ID"];
+    /** The contextual initiative view associated with the notification subscription. */
+    initiative?: Maybe<Initiative>;
     /** The label subscribed to. */
     label: IssueLabel;
     /** The type of subscription. */
@@ -5593,11 +6156,29 @@ export type Mutation = {
   customViewDelete: DeletePayload;
   /** Updates a custom view. */
   customViewUpdate: CustomViewPayload;
+  /** [ALPHA] Creates a new customer. */
+  customerCreate: CustomerPayload;
+  /** [ALPHA] Deletes a customer. */
+  customerDelete: DeletePayload;
+  /** [ALPHA] Creates a new customer need. */
+  customerNeedCreate: CustomerNeedPayload;
+  /** [ALPHA] Deletes a customer need. */
+  customerNeedDelete: DeletePayload;
+  /** [ALPHA] Updates a customer need */
+  customerNeedUpdate: CustomerNeedPayload;
+  /** [ALPHA] Creates a new customer status. */
+  customerStatusCreate: CustomerStatusPayload;
+  /** [ALPHA] Deletes a customer status. */
+  customerStatusDelete: DeletePayload;
+  /** [ALPHA] Updates a customer status. */
+  customerStatusUpdate: CustomerStatusPayload;
+  /** [ALPHA] Updates a customer */
+  customerUpdate: CustomerPayload;
   /** Archives a cycle. */
   cycleArchive: CycleArchivePayload;
   /** Creates a new cycle. */
   cycleCreate: CyclePayload;
-  /** [DEPRECATED] Shifts all cycles starts by a certain number of weeks. */
+  /** Shifts all cycles starts and ends by a certain number of days, starting from the provided cycle onwards. */
   cycleShiftAll: CyclePayload;
   /** Updates a cycle. */
   cycleUpdate: CyclePayload;
@@ -5841,13 +6422,13 @@ export type Mutation = {
   logoutSession: LogoutResponse;
   /** Archives a notification. */
   notificationArchive: NotificationArchivePayload;
-  /** Archives all of the user's past notifications for the associated entity. */
+  /** Archives a notification and all related notifications. */
   notificationArchiveAll: NotificationBatchActionPayload;
-  /** Marks all past notifications for the associated entity as read. */
+  /** Marks notification and all related notifications as read. */
   notificationMarkReadAll: NotificationBatchActionPayload;
-  /** Marks all past notifications for the associated entity as unread. */
+  /** Marks notification and all related notifications as unread. */
   notificationMarkUnreadAll: NotificationBatchActionPayload;
-  /** Snoozes a notification and all past notifications for the associated entity. */
+  /** Snoozes a notification and all related notifications. */
   notificationSnoozeAll: NotificationBatchActionPayload;
   /** Creates a new notification subscription for a cycle, custom view, label, project or team. */
   notificationSubscriptionCreate: NotificationSubscriptionPayload;
@@ -5860,7 +6441,7 @@ export type Mutation = {
   notificationSubscriptionUpdate: NotificationSubscriptionPayload;
   /** Unarchives a notification. */
   notificationUnarchive: NotificationArchivePayload;
-  /** Unsnoozes a notification and all past notifications for the associated entity. */
+  /** Unsnoozes a notification and all related notifications. */
   notificationUnsnoozeAll: NotificationBatchActionPayload;
   /** Updates a notification. */
   notificationUpdate: NotificationPayload;
@@ -6236,6 +6817,45 @@ export type MutationCustomViewDeleteArgs = {
 export type MutationCustomViewUpdateArgs = {
   id: Scalars["String"];
   input: CustomViewUpdateInput;
+};
+
+export type MutationCustomerCreateArgs = {
+  input: CustomerCreateInput;
+};
+
+export type MutationCustomerDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationCustomerNeedCreateArgs = {
+  input: CustomerNeedCreateInput;
+};
+
+export type MutationCustomerNeedDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationCustomerNeedUpdateArgs = {
+  id: Scalars["String"];
+  input: CustomerNeedUpdateInput;
+};
+
+export type MutationCustomerStatusCreateArgs = {
+  input: CustomerStatusCreateInput;
+};
+
+export type MutationCustomerStatusDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationCustomerStatusUpdateArgs = {
+  id: Scalars["String"];
+  input: CustomerStatusUpdateInput;
+};
+
+export type MutationCustomerUpdateArgs = {
+  id: Scalars["String"];
+  input: CustomerUpdateInput;
 };
 
 export type MutationCycleArchiveArgs = {
@@ -6675,12 +7295,9 @@ export type MutationIssueImportCreateClubhouseArgs = {
 };
 
 export type MutationIssueImportCreateGithubArgs = {
-  githubRepoId?: Maybe<Scalars["String"]>;
+  githubLabels?: Maybe<Array<Scalars["String"]>>;
   githubRepoIds?: Maybe<Array<Scalars["Int"]>>;
-  githubRepoName?: Maybe<Scalars["String"]>;
-  githubRepoOwner?: Maybe<Scalars["String"]>;
   githubShouldImportOrgProjects?: Maybe<Scalars["Boolean"]>;
-  githubToken?: Maybe<Scalars["String"]>;
   includeClosedIssues?: Maybe<Scalars["Boolean"]>;
   instantProcess?: Maybe<Scalars["Boolean"]>;
   integrationId?: Maybe<Scalars["String"]>;
@@ -7252,12 +7869,16 @@ export type Notification = {
   emailedAt?: Maybe<Scalars["DateTime"]>;
   /** The external user that caused the notification. */
   externalUserActor?: Maybe<ExternalUser>;
-  /** [ALPHA] Notifications with the same grouping key will be grouped together in the UI. */
+  /** [Internal] Notifications with the same grouping key will be grouped together in the UI. */
   groupingKey: Scalars["String"];
+  /** [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`. */
+  groupingPriority: Scalars["Float"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** [Internal] Inbox URL for the notification. */
+  inboxUrl: Scalars["String"];
   /** [Internal] If notification actor was Linear. */
-  isLinearActor?: Maybe<Scalars["Boolean"]>;
+  isLinearActor: Scalars["Boolean"];
   /** [Internal] Issue's status type for issue notifications. */
   issueStatusType?: Maybe<Scalars["String"]>;
   /** [Internal] Project update health for new updates. */
@@ -7407,16 +8028,36 @@ export type NotificationEdge = {
 
 /** Describes the type and id of the entity to target for notifications. */
 export type NotificationEntityInput = {
+  /** The id of the notification. */
+  id?: Maybe<Scalars["String"]>;
   /** The id of the initiative related to the notification. */
   initiativeId?: Maybe<Scalars["String"]>;
   /** The id of the issue related to the notification. */
   issueId?: Maybe<Scalars["String"]>;
   /** The id of the OAuth client approval related to the notification. */
   oauthClientApprovalId?: Maybe<Scalars["String"]>;
-  /** The id of the project related to the notification. */
+  /** [DEPRECATED] The id of the project related to the notification. */
   projectId?: Maybe<Scalars["String"]>;
   /** The id of the project update related to the notification. */
   projectUpdateId?: Maybe<Scalars["String"]>;
+};
+
+/** Notification filtering options. */
+export type NotificationFilter = {
+  /** Compound filters, all of which need to be matched by the notification. */
+  and?: Maybe<Array<NotificationFilter>>;
+  /** Comparator for the archived at date. */
+  archivedAt?: Maybe<DateComparator>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Compound filters, one of which need to be matched by the notification. */
+  or?: Maybe<Array<NotificationFilter>>;
+  /** Comparator for the notification type. */
+  type?: Maybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 export type NotificationPayload = {
@@ -7445,6 +8086,8 @@ export type NotificationSubscription = {
   cycle?: Maybe<Cycle>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** The contextual initiative view associated with the notification subscription. */
+  initiative?: Maybe<Initiative>;
   /** The contextual label view associated with the notification subscription. */
   label?: Maybe<IssueLabel>;
   /** The contextual project view associated with the notification subscription. */
@@ -7483,6 +8126,8 @@ export type NotificationSubscriptionCreateInput = {
   cycleId?: Maybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
+  /** The identifier of the initiative to subscribe to. */
+  initiativeId?: Maybe<Scalars["String"]>;
   /** The identifier of the label to subscribe to. */
   labelId?: Maybe<Scalars["String"]>;
   /** The types of notifications of the subscription. */
@@ -7560,6 +8205,8 @@ export type NullableCommentFilter = {
   id?: Maybe<IdComparator>;
   /** Filters that the comments issue must satisfy. */
   issue?: Maybe<NullableIssueFilter>;
+  /** Filters that the comment's customer needs must satisfy. */
+  needs?: Maybe<CustomerNeedCollectionFilter>;
   /** Filter based on the existence of the relation. */
   null?: Maybe<Scalars["Boolean"]>;
   /** Compound filters, one of which need to be matched by the comment. */
@@ -7664,6 +8311,8 @@ export type NullableDocumentFilter = {
   creator?: Maybe<UserFilter>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Filters that the document's initiative must satisfy. */
+  initiative?: Maybe<InitiativeFilter>;
   /** Filter based on the existence of the relation. */
   null?: Maybe<Scalars["Boolean"]>;
   /** Compound filters, one of which need to be matched by the document. */
@@ -7724,6 +8373,8 @@ export type NullableIssueFilter = {
   labels?: Maybe<IssueLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
   lastAppliedTemplate?: Maybe<NullableTemplateFilter>;
+  /** Filters that the issue's customer needs must satisfy. */
+  needs?: Maybe<CustomerNeedFilter>;
   /** Filter based on the existence of the relation. */
   null?: Maybe<Scalars["Boolean"]>;
   /** Comparator for the issues number. */
@@ -7825,15 +8476,19 @@ export type NullableProjectFilter = {
   /** Filters that the projects lead must satisfy. */
   lead?: Maybe<NullableUserFilter>;
   /** Filters that the projects members must satisfy. */
-  members?: Maybe<UserFilter>;
+  members?: Maybe<UserCollectionFilter>;
   /** Comparator for the project name. */
   name?: Maybe<StringComparator>;
+  /** Filters that the project's customer needs must satisfy. */
+  needs?: Maybe<CustomerNeedCollectionFilter>;
   /** Filters that the project's next milestone must satisfy. */
   nextProjectMilestone?: Maybe<ProjectMilestoneFilter>;
   /** Filter based on the existence of the relation. */
   null?: Maybe<Scalars["Boolean"]>;
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<NullableProjectFilter>>;
+  /** [ALPHA] Comparator for the projects priority. */
+  priority?: Maybe<NullableNumberComparator>;
   /** Filters that the project's milestones must satisfy. */
   projectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Comparator for the project updates. */
@@ -7882,6 +8537,8 @@ export type NullableProjectUpdatesFilter = {
   and?: Maybe<Array<NullableProjectUpdatesFilter>>;
   /** Comparator for the created at date. */
   createdAt?: Maybe<DateComparator>;
+  /** Comparator for the project update health. */
+  health?: Maybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
   /** Filter based on the existence of the relation. */
@@ -8171,16 +8828,22 @@ export type OauthClientApprovalNotification = Entity &
     emailedAt?: Maybe<Scalars["DateTime"]>;
     /** The external user that caused the notification. */
     externalUserActor?: Maybe<ExternalUser>;
-    /** [ALPHA] Notifications with the same grouping key will be grouped together in the UI. */
+    /** [Internal] Notifications with the same grouping key will be grouped together in the UI. */
     groupingKey: Scalars["String"];
+    /** [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`. */
+    groupingPriority: Scalars["Float"];
     /** The unique identifier of the entity. */
     id: Scalars["ID"];
+    /** [Internal] Inbox URL for the notification. */
+    inboxUrl: Scalars["String"];
     /** [Internal] If notification actor was Linear. */
-    isLinearActor?: Maybe<Scalars["Boolean"]>;
+    isLinearActor: Scalars["Boolean"];
     /** [Internal] Issue's status type for issue notifications. */
     issueStatusType?: Maybe<Scalars["String"]>;
     /** The OAuth client approval request related to the notification. */
     oauthClientApproval: OauthClientApproval;
+    /** Related OAuth client approval request ID. */
+    oauthClientApprovalId: Scalars["String"];
     /** [Internal] Project update health for new updates. */
     projectUpdateHealth?: Maybe<Scalars["String"]>;
     /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
@@ -8295,13 +8958,16 @@ export type Organization = Node & {
   previousUrlKeys: Array<Scalars["String"]>;
   /** The organization's project statuses. */
   projectStatuses: Array<ProjectStatus>;
-  /** [ALPHA] The n-weekly frequency at which to prompt for project updates. When not set, reminders are off. */
+  /** The n-weekly frequency at which to prompt for project updates. When not set, reminders are off. */
   projectUpdateReminderFrequencyInWeeks?: Maybe<Scalars["Float"]>;
   /** The day at which to prompt for project updates. */
   projectUpdateRemindersDay: Day;
   /** The hour at which to prompt for project updates. */
   projectUpdateRemindersHour: Scalars["Float"];
-  /** The frequency at which to prompt for project updates. */
+  /**
+   * [DEPRECATED] The frequency at which to prompt for project updates.
+   * @deprecated Use organization.projectUpdatesReminderFrequencyInWeeks instead
+   */
   projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency;
   /** The feature release channel the organization belongs to. */
   releaseChannel: ReleaseChannel;
@@ -8712,14 +9378,12 @@ export type OrganizationUpdateInput = {
   name?: Maybe<Scalars["String"]>;
   /** Whether the organization has opted for having to approve all OAuth applications for install. */
   oauthAppReview?: Maybe<Scalars["Boolean"]>;
-  /** [ALPHA] The n-weekly frequency at which to prompt for project updates. */
+  /** The n-weekly frequency at which to prompt for project updates. */
   projectUpdateReminderFrequencyInWeeks?: Maybe<Scalars["Float"]>;
   /** The day at which project updates are sent. */
   projectUpdateRemindersDay?: Maybe<Day>;
   /** The hour at which project updates are sent. */
   projectUpdateRemindersHour?: Maybe<Scalars["Float"]>;
-  /** [DEPRECATED] The frequency at which project updates are sent. */
-  projectUpdatesReminderFrequency?: Maybe<ProjectUpdateReminderFrequency>;
   /** Whether the organization has opted for reduced customer support attachment information. */
   reducedPersonalInformation?: Maybe<Scalars["Boolean"]>;
   /** Whether the organization is using roadmap. */
@@ -8891,8 +9555,12 @@ export type Project = Node & {
   description: Scalars["String"];
   /** Documents associated with the project. */
   documents: DocumentConnection;
+  /** External links associated with the project. */
+  externalLinks: EntityExternalLinkConnection;
   /** The user's favorite associated with this project. */
   favorite?: Maybe<Favorite>;
+  /** The health of the project based on the last project update. */
+  health?: Maybe<ProjectUpdateHealthType>;
   /** The icon of the project. */
   icon?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
@@ -8909,14 +9577,23 @@ export type Project = Node & {
   lastAppliedTemplate?: Maybe<Template>;
   /** The project lead. */
   lead?: Maybe<User>;
-  /** Links associated with the project. */
+  /**
+   * [DEPRECATED] Links associated with the project.
+   * @deprecated Use externalLinks instead
+   */
   links: ProjectLinkConnection;
   /** Users that are members of the project. */
   members: UserConnection;
   /** The project's name. */
   name: Scalars["String"];
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  priority: Scalars["Int"];
+  /** [ALPHA] The sort order for the project within the organization, when ordered by priority. */
+  prioritySortOrder: Scalars["Float"];
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   progress: Scalars["Float"];
+  /** [Internal] The progress history of the project. */
+  progressHistory: Scalars["JSONObject"];
   /** Milestones associated with the project. */
   projectMilestones: ProjectMilestoneConnection;
   /** The time until which project update reminders are paused. */
@@ -8973,6 +9650,16 @@ export type ProjectDocumentsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
   filter?: Maybe<DocumentFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** A project. */
+export type ProjectExternalLinksArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -9096,13 +9783,17 @@ export type ProjectCollectionFilter = {
   /** Comparator for the collection length. */
   length?: Maybe<NumberComparator>;
   /** Filters that the projects members must satisfy. */
-  members?: Maybe<UserFilter>;
+  members?: Maybe<UserCollectionFilter>;
   /** Comparator for the project name. */
   name?: Maybe<StringComparator>;
+  /** Filters that the project's customer needs must satisfy. */
+  needs?: Maybe<CustomerNeedCollectionFilter>;
   /** Filters that the project's next milestone must satisfy. */
   nextProjectMilestone?: Maybe<ProjectMilestoneFilter>;
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<ProjectCollectionFilter>>;
+  /** [ALPHA] Comparator for the projects priority. */
+  priority?: Maybe<NullableNumberComparator>;
   /** Filters that the project's milestones must satisfy. */
   projectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Comparator for the project updates. */
@@ -9153,6 +9844,10 @@ export type ProjectCreateInput = {
   memberIds?: Maybe<Array<Scalars["String"]>>;
   /** The name of the project. */
   name: Scalars["String"];
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  priority?: Maybe<Scalars["Int"]>;
+  /** [ALPHA] The sort order for the project within shared views, when ordered by priority. */
+  prioritySortOrder?: Maybe<Scalars["Float"]>;
   /** The sort order for the project within shared views. */
   sortOrder?: Maybe<Scalars["Float"]>;
   /** The planned start date of the project. */
@@ -9215,13 +9910,17 @@ export type ProjectFilter = {
   /** Filters that the projects lead must satisfy. */
   lead?: Maybe<NullableUserFilter>;
   /** Filters that the projects members must satisfy. */
-  members?: Maybe<UserFilter>;
+  members?: Maybe<UserCollectionFilter>;
   /** Comparator for the project name. */
   name?: Maybe<StringComparator>;
+  /** Filters that the project's customer needs must satisfy. */
+  needs?: Maybe<CustomerNeedCollectionFilter>;
   /** Filters that the project's next milestone must satisfy. */
   nextProjectMilestone?: Maybe<ProjectMilestoneFilter>;
   /** Compound filters, one of which need to be matched by the project. */
   or?: Maybe<Array<ProjectFilter>>;
+  /** [ALPHA] Comparator for the projects priority. */
+  priority?: Maybe<NullableNumberComparator>;
   /** Filters that the project's milestones must satisfy. */
   projectMilestones?: Maybe<ProjectMilestoneCollectionFilter>;
   /** Comparator for the project updates. */
@@ -9496,12 +10195,16 @@ export type ProjectNotification = Entity &
     emailedAt?: Maybe<Scalars["DateTime"]>;
     /** The external user that caused the notification. */
     externalUserActor?: Maybe<ExternalUser>;
-    /** [ALPHA] Notifications with the same grouping key will be grouped together in the UI. */
+    /** [Internal] Notifications with the same grouping key will be grouped together in the UI. */
     groupingKey: Scalars["String"];
+    /** [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`. */
+    groupingPriority: Scalars["Float"];
     /** The unique identifier of the entity. */
     id: Scalars["ID"];
+    /** [Internal] Inbox URL for the notification. */
+    inboxUrl: Scalars["String"];
     /** [Internal] If notification actor was Linear. */
-    isLinearActor?: Maybe<Scalars["Boolean"]>;
+    isLinearActor: Scalars["Boolean"];
     /** [Internal] Issue's status type for issue notifications. */
     issueStatusType?: Maybe<Scalars["String"]>;
     /** The parent comment related to the notification, if a notification is a reply comment notification. */
@@ -9510,10 +10213,18 @@ export type ProjectNotification = Entity &
     parentCommentId?: Maybe<Scalars["String"]>;
     /** The project related to the notification. */
     project: Project;
+    /** Related project ID. */
+    projectId: Scalars["String"];
+    /** Related project milestone ID. */
+    projectMilestoneId?: Maybe<Scalars["String"]>;
     /** The project update related to the notification. */
     projectUpdate?: Maybe<ProjectUpdate>;
     /** [Internal] Project update health for new updates. */
     projectUpdateHealth?: Maybe<Scalars["String"]>;
+    /** Related project update ID. */
+    projectUpdateId?: Maybe<Scalars["String"]>;
+    /** Name of the reaction emoji related to the notification. */
+    reactionEmoji?: Maybe<Scalars["String"]>;
     /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
     readAt?: Maybe<Scalars["DateTime"]>;
     /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
@@ -9557,6 +10268,8 @@ export type ProjectNotificationSubscription = Entity &
     cycle?: Maybe<Cycle>;
     /** The unique identifier of the entity. */
     id: Scalars["ID"];
+    /** The contextual initiative view associated with the notification subscription. */
+    initiative?: Maybe<Initiative>;
     /** The contextual label view associated with the notification subscription. */
     label?: Maybe<IssueLabel>;
     /** The type of subscription. */
@@ -9618,6 +10331,8 @@ export type ProjectRelation = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+  /** The last user who created or modified the relation. */
+  user?: Maybe<User>;
 };
 
 export type ProjectRelationConnection = {
@@ -9721,8 +10436,12 @@ export type ProjectSearchResult = Node & {
   description: Scalars["String"];
   /** Documents associated with the project. */
   documents: DocumentConnection;
+  /** External links associated with the project. */
+  externalLinks: EntityExternalLinkConnection;
   /** The user's favorite associated with this project. */
   favorite?: Maybe<Favorite>;
+  /** The health of the project based on the last project update. */
+  health?: Maybe<ProjectUpdateHealthType>;
   /** The icon of the project. */
   icon?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
@@ -9739,7 +10458,10 @@ export type ProjectSearchResult = Node & {
   lastAppliedTemplate?: Maybe<Template>;
   /** The project lead. */
   lead?: Maybe<User>;
-  /** Links associated with the project. */
+  /**
+   * [DEPRECATED] Links associated with the project.
+   * @deprecated Use externalLinks instead
+   */
   links: ProjectLinkConnection;
   /** Users that are members of the project. */
   members: UserConnection;
@@ -9747,8 +10469,14 @@ export type ProjectSearchResult = Node & {
   metadata: Scalars["JSONObject"];
   /** The project's name. */
   name: Scalars["String"];
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  priority: Scalars["Int"];
+  /** [ALPHA] The sort order for the project within the organization, when ordered by priority. */
+  prioritySortOrder: Scalars["Float"];
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   progress: Scalars["Float"];
+  /** [Internal] The progress history of the project. */
+  progressHistory: Scalars["JSONObject"];
   /** Milestones associated with the project. */
   projectMilestones: ProjectMilestoneConnection;
   /** The time until which project update reminders are paused. */
@@ -9804,6 +10532,15 @@ export type ProjectSearchResultDocumentsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
   filter?: Maybe<DocumentFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type ProjectSearchResultExternalLinksArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -10007,6 +10744,8 @@ export type ProjectUpdate = Node & {
   reactionData: Scalars["JSONObject"];
   /** Reactions associated with the project update. */
   reactions: Array<Reaction>;
+  /** The project update's unique URL slug. */
+  slugId: Scalars["String"];
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -10107,6 +10846,10 @@ export type ProjectUpdateInput = {
   memberIds?: Maybe<Array<Scalars["String"]>>;
   /** The name of the project. */
   name?: Maybe<Scalars["String"]>;
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  priority?: Maybe<Scalars["Int"]>;
+  /** [ALPHA] The sort order for the project within shared views, when ordered by priority. */
+  prioritySortOrder?: Maybe<Scalars["Float"]>;
   /** The time until which project update reminders are paused. */
   projectUpdateRemindersPausedUntilAt?: Maybe<Scalars["DateTime"]>;
   /** Whether to send new issue comment notifications to Slack. */
@@ -10248,6 +10991,8 @@ export type ProjectUpdatesCollectionFilter = {
   createdAt?: Maybe<DateComparator>;
   /** Filters that needs to be matched by all updates. */
   every?: Maybe<ProjectUpdatesFilter>;
+  /** Comparator for the project update health. */
+  health?: Maybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
   /** Comparator for the collection length. */
@@ -10266,6 +11011,8 @@ export type ProjectUpdatesFilter = {
   and?: Maybe<Array<ProjectUpdatesFilter>>;
   /** Comparator for the created at date. */
   createdAt?: Maybe<DateComparator>;
+  /** Comparator for the project update health. */
+  health?: Maybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
   /** Compound filters, one of which need to be matched by the project updates. */
@@ -10398,6 +11145,18 @@ export type Query = {
   customViewHasSubscribers: CustomViewHasSubscribersPayload;
   /** Custom views for the user. */
   customViews: CustomViewConnection;
+  /** One specific customer. */
+  customer: Customer;
+  /** One specific customer need */
+  customerNeed: CustomerNeed;
+  /** All customer needs. */
+  customerNeeds: CustomerNeedConnection;
+  /** One specific customer status. */
+  customerStatus: CustomerStatus;
+  /** All customer statuses. */
+  customerStatuses: CustomerStatusConnection;
+  /** All customers. */
+  customers: CustomerConnection;
   /** One specific cycle. */
   cycle: Cycle;
   /** All cycles. */
@@ -10478,6 +11237,8 @@ export type Query = {
   notificationSubscriptions: NotificationSubscriptionConnection;
   /** All notifications. */
   notifications: NotificationConnection;
+  /** [Internal] A number of unread notifications. */
+  notificationsUnreadCount: Scalars["Int"];
   /** The user's organization. */
   organization: Organization;
   /** [INTERNAL] Checks whether the domain can be claimed. */
@@ -10568,6 +11329,8 @@ export type Query = {
   userSettings: UserSettings;
   /** All users for the organization. */
   users: UserConnection;
+  /** Verify that we received the correct response from the GitHub Enterprise Server. */
+  verifyGitHubEnterpriseServerInstallation: GitHubEnterpriseServerInstallVerificationPayload;
   /** The currently authenticated user. */
   viewer: User;
   /** A specific webhook. */
@@ -10694,6 +11457,47 @@ export type QueryCustomViewHasSubscribersArgs = {
 export type QueryCustomViewsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type QueryCustomerArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryCustomerNeedArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryCustomerNeedsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CustomerNeedFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type QueryCustomerStatusArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryCustomerStatusesArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type QueryCustomersArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CustomerFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -10941,6 +11745,7 @@ export type QueryNotificationSubscriptionsArgs = {
 export type QueryNotificationsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<NotificationFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -11647,6 +12452,13 @@ export enum SLADayCountType {
   OnlyBusinessDays = "onlyBusinessDays",
 }
 
+export enum SchemaFieldType {
+  BooleanType = "booleanType",
+  DateType = "dateType",
+  NumberType = "numberType",
+  StringType = "stringType",
+}
+
 export enum SendStrategy {
   Desktop = "desktop",
   DesktopAndPush = "desktopAndPush",
@@ -11959,7 +12771,51 @@ export type SsoUrlFromEmailResponse = {
 };
 
 /** Comparator for strings. */
+export type StringArrayComparator = {
+  /** Compound filters, all of which need to be matched. */
+  every?: Maybe<Array<StringItemComparator>>;
+  /** Length of the array. Matches any values that have the given length. */
+  length?: Maybe<NumberComparator>;
+  /** Compound filters, one of which needs to be matched. */
+  some?: Maybe<Array<StringItemComparator>>;
+};
+
+/** Comparator for strings. */
 export type StringComparator = {
+  /** Contains constraint. Matches any values that contain the given string. */
+  contains?: Maybe<Scalars["String"]>;
+  /** Contains case insensitive constraint. Matches any values that contain the given string case insensitive. */
+  containsIgnoreCase?: Maybe<Scalars["String"]>;
+  /** Ends with constraint. Matches any values that end with the given string. */
+  endsWith?: Maybe<Scalars["String"]>;
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["String"]>;
+  /** Equals case insensitive. Matches any values that matches the given string case insensitive. */
+  eqIgnoreCase?: Maybe<Scalars["String"]>;
+  /** In-array constraint. */
+  in?: Maybe<Array<Scalars["String"]>>;
+  /** Not-equals constraint. */
+  neq?: Maybe<Scalars["String"]>;
+  /** Not-equals case insensitive. Matches any values that don't match the given string case insensitive. */
+  neqIgnoreCase?: Maybe<Scalars["String"]>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<Scalars["String"]>>;
+  /** Doesn't contain constraint. Matches any values that don't contain the given string. */
+  notContains?: Maybe<Scalars["String"]>;
+  /** Doesn't contain case insensitive constraint. Matches any values that don't contain the given string case insensitive. */
+  notContainsIgnoreCase?: Maybe<Scalars["String"]>;
+  /** Doesn't end with constraint. Matches any values that don't end with the given string. */
+  notEndsWith?: Maybe<Scalars["String"]>;
+  /** Doesn't start with constraint. Matches any values that don't start with the given string. */
+  notStartsWith?: Maybe<Scalars["String"]>;
+  /** Starts with constraint. Matches any values that start with the given string. */
+  startsWith?: Maybe<Scalars["String"]>;
+  /** Starts with case insensitive constraint. Matches any values that start with the given string. */
+  startsWithIgnoreCase?: Maybe<Scalars["String"]>;
+};
+
+/** Comparator for strings in arrays. */
+export type StringItemComparator = {
   /** Contains constraint. Matches any values that contain the given string. */
   contains?: Maybe<Scalars["String"]>;
   /** Contains case insensitive constraint. Matches any values that contain the given string case insensitive. */
@@ -12127,6 +12983,8 @@ export type Team = Node & {
   markedAsDuplicateWorkflowState?: Maybe<WorkflowState>;
   /** Users who are members of this team. */
   members: UserConnection;
+  /** The membership of the given user in the team. */
+  membership?: Maybe<TeamMembership>;
   /** Memberships associated with the team. For easier access of the same data, use `members` query. */
   memberships: TeamMembershipConnection;
   /**
@@ -12145,6 +13003,8 @@ export type Team = Node & {
   organization: Organization;
   /** Whether the team is private or not. */
   private: Scalars["Boolean"];
+  /** [Internal] The progress history of the team. */
+  progressHistory: Scalars["JSONObject"];
   /** Projects associated with the team. */
   projects: ProjectConnection;
   /** Whether an issue needs to have a priority set before leaving triage. */
@@ -12154,6 +13014,8 @@ export type Team = Node & {
    * @deprecated Use team.gitAutomationStates instead.
    */
   reviewWorkflowState?: Maybe<WorkflowState>;
+  /** The SCIM group name for the team. */
+  scimGroupName?: Maybe<Scalars["String"]>;
   /** Whether the team is managed by SCIM integration. */
   scimManaged: Scalars["Boolean"];
   /** Where to move issues when changing state. */
@@ -12251,6 +13113,11 @@ export type TeamMembersArgs = {
   includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** An organizational unit that contains issues. */
+export type TeamMembershipArgs = {
+  userId?: Maybe<Scalars["String"]>;
 };
 
 /** An organizational unit that contains issues. */
@@ -12529,6 +13396,8 @@ export type TeamNotificationSubscription = Entity &
     cycle?: Maybe<Cycle>;
     /** The unique identifier of the entity. */
     id: Scalars["ID"];
+    /** The contextual initiative view associated with the notification subscription. */
+    initiative?: Maybe<Initiative>;
     /** The contextual label view associated with the notification subscription. */
     label?: Maybe<IssueLabel>;
     /** The type of subscription. */
@@ -13429,6 +14298,8 @@ export type UserNotificationSubscription = Entity &
     cycle?: Maybe<Cycle>;
     /** The unique identifier of the entity. */
     id: Scalars["ID"];
+    /** The contextual initiative view associated with the notification subscription. */
+    initiative?: Maybe<Initiative>;
     /** The contextual label view associated with the notification subscription. */
     label?: Maybe<IssueLabel>;
     /** The type of subscription. */
@@ -13684,6 +14555,7 @@ export enum ViewType {
   CustomRoadmap = "customRoadmap",
   CustomView = "customView",
   CustomViews = "customViews",
+  Customers = "customers",
   Cycle = "cycle",
   Inbox = "inbox",
   Initiative = "initiative",
@@ -13781,6 +14653,25 @@ export type WebhookEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: Webhook;
+};
+
+/** Entity representing a webhook execution failure. */
+export type WebhookFailureEvent = {
+  __typename?: "WebhookFailureEvent";
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The unique execution ID of the webhook push. This is retained between retries of the same push. */
+  executionId: Scalars["String"];
+  /** The HTTP status code returned by the recipient. */
+  httpStatus?: Maybe<Scalars["Float"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The HTTP response body returned by the recipient or error occured. */
+  responseOrError?: Maybe<Scalars["String"]>;
+  /** The URL that the webhook was trying to push to. */
+  url: Scalars["String"];
+  /** The webhook that this failure event is associated with. */
+  webhook: Webhook;
 };
 
 export type WebhookPayload = {
@@ -14170,6 +15061,11 @@ type Entity_InitiativeNotification_Fragment = { __typename: "InitiativeNotificat
   "updatedAt" | "archivedAt" | "createdAt" | "id"
 >;
 
+type Entity_InitiativeNotificationSubscription_Fragment = { __typename: "InitiativeNotificationSubscription" } & Pick<
+  InitiativeNotificationSubscription,
+  "updatedAt" | "archivedAt" | "createdAt" | "id"
+>;
+
 type Entity_IssueNotification_Fragment = { __typename: "IssueNotification" } & Pick<
   IssueNotification,
   "updatedAt" | "archivedAt" | "createdAt" | "id"
@@ -14210,6 +15106,7 @@ export type EntityFragment =
   | Entity_CycleNotificationSubscription_Fragment
   | Entity_DocumentNotification_Fragment
   | Entity_InitiativeNotification_Fragment
+  | Entity_InitiativeNotificationSubscription_Fragment
   | Entity_IssueNotification_Fragment
   | Entity_LabelNotificationSubscription_Fragment
   | Entity_OauthClientApprovalNotification_Fragment
@@ -14250,21 +15147,8 @@ export type CommentFragment = { __typename: "Comment" } & Pick<
 
 export type CommentNotificationFragment = { __typename: "CommentNotification" } & Pick<
   CommentNotification,
-  "commentId" | "parentCommentId"
+  "reactionEmoji" | "commentId" | "parentCommentId"
 >;
-
-export type CompanyFragment = { __typename: "Company" } & Pick<
-  Company,
-  | "externalId"
-  | "logoUrl"
-  | "name"
-  | "websiteUrl"
-  | "companyProperties"
-  | "updatedAt"
-  | "archivedAt"
-  | "createdAt"
-  | "id"
-> & { creator: { __typename?: "User" } & Pick<User, "id"> };
 
 export type EmojiFragment = { __typename: "Emoji" } & Pick<
   Emoji,
@@ -14283,6 +15167,7 @@ export type CustomViewNotificationSubscriptionFragment = { __typename: "CustomVi
   | "active"
 > & {
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
@@ -14328,6 +15213,7 @@ export type CycleNotificationSubscriptionFragment = { __typename: "CycleNotifica
   | "active"
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
@@ -14359,8 +15245,10 @@ export type DocumentContentHistoryFragment = { __typename: "DocumentContentHisto
 
 export type DocumentNotificationFragment = { __typename: "DocumentNotification" } & Pick<
   DocumentNotification,
+  | "reactionEmoji"
   | "type"
   | "commentId"
+  | "documentId"
   | "parentCommentId"
   | "updatedAt"
   | "emailedAt"
@@ -14596,6 +15484,7 @@ export type LabelNotificationSubscriptionFragment = { __typename: "LabelNotifica
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -14678,6 +15567,7 @@ export type ProjectNotificationSubscriptionFragment = { __typename: "ProjectNoti
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project: { __typename?: "Project" } & Pick<Project, "id">;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -14687,9 +15577,13 @@ export type ProjectNotificationSubscriptionFragment = { __typename: "ProjectNoti
 
 export type ProjectNotificationFragment = { __typename: "ProjectNotification" } & Pick<
   ProjectNotification,
+  | "reactionEmoji"
   | "type"
   | "commentId"
   | "parentCommentId"
+  | "projectId"
+  | "projectMilestoneId"
+  | "projectUpdateId"
   | "updatedAt"
   | "emailedAt"
   | "readAt"
@@ -14729,6 +15623,7 @@ export type ProjectFragment = { __typename: "Project" } & Pick<
   | "url"
   | "targetDate"
   | "startDate"
+  | "health"
   | "icon"
   | "updatedAt"
   | "completedScopeHistory"
@@ -14736,6 +15631,7 @@ export type ProjectFragment = { __typename: "Project" } & Pick<
   | "inProgressScopeHistory"
   | "progress"
   | "scope"
+  | "priority"
   | "color"
   | "content"
   | "description"
@@ -14817,7 +15713,7 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
       Array<{ __typename?: "IssueRelationHistoryPayload" } & IssueRelationHistoryPayloadFragment>
     >;
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
-    actors: Array<{ __typename?: "User" } & UserFragment>;
+    actors?: Maybe<Array<{ __typename?: "User" } & UserFragment>>;
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     fromCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     toCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -14849,6 +15745,7 @@ export type ProjectRelationFragment = { __typename: "ProjectRelation" } & Pick<
   ProjectRelation,
   "updatedAt" | "type" | "archivedAt" | "createdAt" | "anchorType" | "relatedAnchorType" | "id"
 > & {
+    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     projectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
     relatedProjectMilestone?: Maybe<{ __typename?: "ProjectMilestone" } & Pick<ProjectMilestone, "id">>;
     project: { __typename?: "Project" } & Pick<Project, "id">;
@@ -14914,6 +15811,7 @@ export type TeamNotificationSubscriptionFragment = { __typename: "TeamNotificati
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team: { __typename?: "Team" } & Pick<Team, "id">;
@@ -14967,6 +15865,7 @@ export type ProjectUpdateFragment = { __typename: "ProjectUpdate" } & Pick<
   | "diff"
   | "health"
   | "updatedAt"
+  | "slugId"
   | "archivedAt"
   | "createdAt"
   | "editedAt"
@@ -14997,6 +15896,7 @@ export type UserNotificationSubscriptionFragment = { __typename: "UserNotificati
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -15150,10 +16050,33 @@ export type IssueImportFragment = { __typename: "IssueImport" } & Pick<
   | "error"
 >;
 
+export type InitiativeNotificationSubscriptionFragment = { __typename: "InitiativeNotificationSubscription" } & Pick<
+  InitiativeNotificationSubscription,
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "notificationSubscriptionTypes"
+  | "userContextViewType"
+  | "contextViewType"
+  | "id"
+  | "active"
+> & {
+    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+    subscriber: { __typename?: "User" } & Pick<User, "id">;
+    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
 export type InitiativeNotificationFragment = { __typename: "InitiativeNotification" } & Pick<
   InitiativeNotification,
+  | "reactionEmoji"
   | "type"
   | "commentId"
+  | "initiativeId"
   | "parentCommentId"
   | "updatedAt"
   | "emailedAt"
@@ -15220,6 +16143,7 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
   | "reactionEmoji"
   | "type"
   | "commentId"
+  | "issueId"
   | "parentCommentId"
   | "updatedAt"
   | "emailedAt"
@@ -15243,6 +16167,9 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
         | ({
             __typename?: "CycleNotificationSubscription";
           } & NotificationSubscription_CycleNotificationSubscription_Fragment)
+        | ({
+            __typename?: "InitiativeNotificationSubscription";
+          } & NotificationSubscription_InitiativeNotificationSubscription_Fragment)
         | ({
             __typename?: "LabelNotificationSubscription";
           } & NotificationSubscription_LabelNotificationSubscription_Fragment)
@@ -15317,7 +16244,16 @@ export type IssueFragment = { __typename: "Issue" } & Pick<
 
 export type OauthClientApprovalNotificationFragment = { __typename: "OauthClientApprovalNotification" } & Pick<
   OauthClientApprovalNotification,
-  "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
+  | "type"
+  | "oauthClientApprovalId"
+  | "updatedAt"
+  | "emailedAt"
+  | "readAt"
+  | "unsnoozedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "snoozedUntilAt"
+  | "id"
 > & {
     oauthClientApproval: { __typename?: "OauthClientApproval" } & OauthClientApprovalFragment;
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
@@ -15336,10 +16272,10 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "periodUploadVolume"
   | "projectUpdateRemindersDay"
   | "releaseChannel"
-  | "projectUpdatesReminderFrequency"
   | "projectUpdateRemindersHour"
   | "updatedAt"
   | "fiscalYearStartMonth"
+  | "projectUpdateReminderFrequencyInWeeks"
   | "logoUrl"
   | "name"
   | "urlKey"
@@ -15355,6 +16291,7 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "gitPublicLinkbackMessagesEnabled"
   | "roadmapEnabled"
   | "slaDayCount"
+  | "projectUpdatesReminderFrequency"
 > & {
     ipRestrictions?: Maybe<Array<{ __typename?: "OrganizationIpRestriction" } & OrganizationIpRestrictionFragment>>;
     projectStatuses: Array<{ __typename?: "ProjectStatus" } & ProjectStatusFragment>;
@@ -15389,6 +16326,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "issueCount"
   | "autoArchivePeriod"
   | "autoClosePeriod"
+  | "scimGroupName"
   | "autoCloseStateId"
   | "cycleCooldownTime"
   | "cycleStartDay"
@@ -15430,6 +16368,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
     defaultTemplateForNonMembers?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     defaultProjectTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     defaultIssueState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+    membership?: Maybe<{ __typename?: "TeamMembership" } & Pick<TeamMembership, "id">>;
     mergeWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     draftWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     startWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
@@ -15494,6 +16433,11 @@ export type OrganizationDomainFragment = { __typename: "OrganizationDomain" } & 
   | "authType"
   | "claimed"
 > & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
+
+export type WebhookFailureEventFragment = { __typename: "WebhookFailureEvent" } & Pick<
+  WebhookFailureEvent,
+  "responseOrError" | "httpStatus" | "url" | "createdAt" | "executionId" | "id"
+> & { webhook: { __typename?: "Webhook" } & Pick<Webhook, "id"> };
 
 export type FrontSettingsFragment = { __typename: "FrontSettings" } & Pick<
   FrontSettings,
@@ -15617,7 +16561,7 @@ export type GitHubPersonalSettingsFragment = { __typename: "GitHubPersonalSettin
 
 export type GitHubImportSettingsFragment = { __typename: "GitHubImportSettings" } & Pick<
   GitHubImportSettings,
-  "orgLogin" | "orgAvatarUrl" | "orgType"
+  "labels" | "orgLogin" | "orgAvatarUrl" | "orgType"
 > & { repositories: Array<{ __typename?: "GitHubRepo" } & GitHubRepoFragment> };
 
 export type GitHubSettingsFragment = { __typename: "GitHubSettings" } & Pick<
@@ -15641,6 +16585,7 @@ type NotificationSubscription_CustomViewNotificationSubscription_Fragment = {
 > & {
     customView: { __typename?: "CustomView" } & Pick<CustomView, "id">;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -15656,6 +16601,23 @@ type NotificationSubscription_CycleNotificationSubscription_Fragment = {
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle: { __typename?: "Cycle" } & Pick<Cycle, "id">;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+    label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
+    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+    subscriber: { __typename?: "User" } & Pick<User, "id">;
+    user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
+
+type NotificationSubscription_InitiativeNotificationSubscription_Fragment = {
+  __typename: "InitiativeNotificationSubscription";
+} & Pick<
+  InitiativeNotificationSubscription,
+  "updatedAt" | "archivedAt" | "createdAt" | "userContextViewType" | "contextViewType" | "id" | "active"
+> & {
+    customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+    cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -15671,6 +16633,7 @@ type NotificationSubscription_LabelNotificationSubscription_Fragment = {
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label: { __typename?: "IssueLabel" } & Pick<IssueLabel, "id">;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -15686,6 +16649,7 @@ type NotificationSubscription_ProjectNotificationSubscription_Fragment = {
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project: { __typename?: "Project" } & Pick<Project, "id">;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -15701,6 +16665,7 @@ type NotificationSubscription_TeamNotificationSubscription_Fragment = {
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team: { __typename?: "Team" } & Pick<Team, "id">;
@@ -15716,6 +16681,7 @@ type NotificationSubscription_UserNotificationSubscription_Fragment = {
 > & {
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -15726,6 +16692,7 @@ type NotificationSubscription_UserNotificationSubscription_Fragment = {
 export type NotificationSubscriptionFragment =
   | NotificationSubscription_CustomViewNotificationSubscription_Fragment
   | NotificationSubscription_CycleNotificationSubscription_Fragment
+  | NotificationSubscription_InitiativeNotificationSubscription_Fragment
   | NotificationSubscription_LabelNotificationSubscription_Fragment
   | NotificationSubscription_ProjectNotificationSubscription_Fragment
   | NotificationSubscription_TeamNotificationSubscription_Fragment
@@ -16005,6 +16972,7 @@ export type FavoriteFragment = { __typename: "Favorite" } & Pick<
     customView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     label?: Maybe<{ __typename?: "IssueLabel" } & Pick<IssueLabel, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -16182,11 +17150,6 @@ export type CommentPayloadFragment = { __typename: "CommentPayload" } & Pick<
   "lastSyncId" | "success"
 > & { comment: { __typename?: "Comment" } & Pick<Comment, "id"> };
 
-export type CompanyConnectionFragment = { __typename: "CompanyConnection" } & {
-  nodes: Array<{ __typename?: "Company" } & CompanyFragment>;
-  pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
-};
-
 export type ContactPayloadFragment = { __typename: "ContactPayload" } & Pick<ContactPayload, "success">;
 
 export type CreateCsvExportReportPayloadFragment = { __typename: "CreateCsvExportReportPayload" } & Pick<
@@ -16217,6 +17180,21 @@ export type CustomViewPayloadFragment = { __typename: "CustomViewPayload" } & Pi
 export type CustomViewSuggestionPayloadFragment = { __typename: "CustomViewSuggestionPayload" } & Pick<
   CustomViewSuggestionPayload,
   "description" | "icon" | "name"
+>;
+
+export type CustomerNeedPayloadFragment = { __typename: "CustomerNeedPayload" } & Pick<
+  CustomerNeedPayload,
+  "lastSyncId" | "success"
+>;
+
+export type CustomerPayloadFragment = { __typename: "CustomerPayload" } & Pick<
+  CustomerPayload,
+  "lastSyncId" | "success"
+>;
+
+export type CustomerStatusPayloadFragment = { __typename: "CustomerStatusPayload" } & Pick<
+  CustomerStatusPayload,
+  "lastSyncId" | "success"
 >;
 
 export type CycleConnectionFragment = { __typename: "CycleConnection" } & {
@@ -16383,9 +17361,13 @@ export type GitHubCommitIntegrationPayloadFragment = { __typename: "GitHubCommit
   "lastSyncId" | "webhookSecret" | "success"
 > & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
 
+export type GitHubEnterpriseServerInstallVerificationPayloadFragment = {
+  __typename: "GitHubEnterpriseServerInstallVerificationPayload";
+} & Pick<GitHubEnterpriseServerInstallVerificationPayload, "success">;
+
 export type GitHubEnterpriseServerPayloadFragment = { __typename: "GitHubEnterpriseServerPayload" } & Pick<
   GitHubEnterpriseServerPayload,
-  "lastSyncId" | "setupUrl" | "webhookSecret" | "success"
+  "installUrl" | "lastSyncId" | "setupUrl" | "webhookSecret" | "success"
 > & { integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">> };
 
 export type ImageUploadFromUrlPayloadFragment = { __typename: "ImageUploadFromUrlPayload" } & Pick<
@@ -16585,7 +17567,7 @@ type Node_AuditEntry_Fragment = { __typename: "AuditEntry" } & Pick<AuditEntry, 
 
 type Node_Comment_Fragment = { __typename: "Comment" } & Pick<Comment, "id">;
 
-type Node_Company_Fragment = { __typename: "Company" } & Pick<Company, "id">;
+type Node_CustomAttribute_Fragment = { __typename: "CustomAttribute" } & Pick<CustomAttribute, "id">;
 
 type Node_CustomView_Fragment = { __typename: "CustomView" } & Pick<CustomView, "id">;
 
@@ -16593,6 +17575,16 @@ type Node_CustomViewNotificationSubscription_Fragment = { __typename: "CustomVie
   CustomViewNotificationSubscription,
   "id"
 >;
+
+type Node_Customer_Fragment = { __typename: "Customer" } & Pick<Customer, "id">;
+
+type Node_CustomerNeed_Fragment = { __typename: "CustomerNeed" } & Pick<CustomerNeed, "id">;
+
+type Node_CustomerSchema_Fragment = { __typename: "CustomerSchema" } & Pick<CustomerSchema, "id">;
+
+type Node_CustomerSchemaField_Fragment = { __typename: "CustomerSchemaField" } & Pick<CustomerSchemaField, "id">;
+
+type Node_CustomerStatus_Fragment = { __typename: "CustomerStatus" } & Pick<CustomerStatus, "id">;
 
 type Node_Cycle_Fragment = { __typename: "Cycle" } & Pick<Cycle, "id">;
 
@@ -16648,6 +17640,11 @@ type Node_Initiative_Fragment = { __typename: "Initiative" } & Pick<Initiative, 
 
 type Node_InitiativeNotification_Fragment = { __typename: "InitiativeNotification" } & Pick<
   InitiativeNotification,
+  "id"
+>;
+
+type Node_InitiativeNotificationSubscription_Fragment = { __typename: "InitiativeNotificationSubscription" } & Pick<
+  InitiativeNotificationSubscription,
   "id"
 >;
 
@@ -16777,9 +17774,14 @@ export type NodeFragment =
   | Node_Attachment_Fragment
   | Node_AuditEntry_Fragment
   | Node_Comment_Fragment
-  | Node_Company_Fragment
+  | Node_CustomAttribute_Fragment
   | Node_CustomView_Fragment
   | Node_CustomViewNotificationSubscription_Fragment
+  | Node_Customer_Fragment
+  | Node_CustomerNeed_Fragment
+  | Node_CustomerSchema_Fragment
+  | Node_CustomerSchemaField_Fragment
+  | Node_CustomerStatus_Fragment
   | Node_Cycle_Fragment
   | Node_CycleNotificationSubscription_Fragment
   | Node_DiaryEntry_Fragment
@@ -16801,6 +17803,7 @@ export type NodeFragment =
   | Node_GitAutomationTargetBranch_Fragment
   | Node_Initiative_Fragment
   | Node_InitiativeNotification_Fragment
+  | Node_InitiativeNotificationSubscription_Fragment
   | Node_InitiativeToProject_Fragment
   | Node_Integration_Fragment
   | Node_IntegrationTemplate_Fragment
@@ -16897,6 +17900,9 @@ export type NotificationSubscriptionConnectionFragment = { __typename: "Notifica
         __typename?: "CycleNotificationSubscription";
       } & NotificationSubscription_CycleNotificationSubscription_Fragment)
     | ({
+        __typename?: "InitiativeNotificationSubscription";
+      } & NotificationSubscription_InitiativeNotificationSubscription_Fragment)
+    | ({
         __typename?: "LabelNotificationSubscription";
       } & NotificationSubscription_LabelNotificationSubscription_Fragment)
     | ({
@@ -16919,6 +17925,9 @@ export type NotificationSubscriptionPayloadFragment = { __typename: "Notificatio
       | ({
           __typename?: "CycleNotificationSubscription";
         } & NotificationSubscription_CycleNotificationSubscription_Fragment)
+      | ({
+          __typename?: "InitiativeNotificationSubscription";
+        } & NotificationSubscription_InitiativeNotificationSubscription_Fragment)
       | ({
           __typename?: "LabelNotificationSubscription";
         } & NotificationSubscription_LabelNotificationSubscription_Fragment)
@@ -17100,6 +18109,7 @@ export type ProjectSearchResultFragment = { __typename: "ProjectSearchResult" } 
   | "url"
   | "targetDate"
   | "startDate"
+  | "health"
   | "icon"
   | "updatedAt"
   | "completedScopeHistory"
@@ -17107,6 +18117,7 @@ export type ProjectSearchResultFragment = { __typename: "ProjectSearchResult" } 
   | "inProgressScopeHistory"
   | "progress"
   | "scope"
+  | "priority"
   | "color"
   | "content"
   | "description"
@@ -17942,6 +18953,23 @@ export type DocumentQueryVariables = Exact<{
 
 export type DocumentQuery = { __typename?: "Query" } & { document: { __typename?: "Document" } & DocumentFragment };
 
+export type Document_CommentsQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CommentFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type Document_CommentsQuery = { __typename?: "Query" } & {
+  document: { __typename?: "Document" } & {
+    comments: { __typename?: "CommentConnection" } & CommentConnectionFragment;
+  };
+};
+
 export type DocumentContentHistoryQueryVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -18654,6 +19682,9 @@ export type NotificationSubscriptionQuery = { __typename?: "Query" } & {
         __typename?: "CycleNotificationSubscription";
       } & NotificationSubscription_CycleNotificationSubscription_Fragment)
     | ({
+        __typename?: "InitiativeNotificationSubscription";
+      } & NotificationSubscription_InitiativeNotificationSubscription_Fragment)
+    | ({
         __typename?: "LabelNotificationSubscription";
       } & NotificationSubscription_LabelNotificationSubscription_Fragment)
     | ({
@@ -18683,6 +19714,7 @@ export type NotificationSubscriptionsQuery = { __typename?: "Query" } & {
 export type NotificationsQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<NotificationFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -18830,6 +19862,22 @@ export type Project_DocumentsQueryVariables = Exact<{
 export type Project_DocumentsQuery = { __typename?: "Query" } & {
   project: { __typename?: "Project" } & {
     documents: { __typename?: "DocumentConnection" } & DocumentConnectionFragment;
+  };
+};
+
+export type Project_ExternalLinksQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type Project_ExternalLinksQuery = { __typename?: "Query" } & {
+  project: { __typename?: "Project" } & {
+    externalLinks: { __typename?: "EntityExternalLinkConnection" } & EntityExternalLinkConnectionFragment;
   };
 };
 
@@ -19838,6 +20886,14 @@ export type UsersQueryVariables = Exact<{
 
 export type UsersQuery = { __typename?: "Query" } & {
   users: { __typename?: "UserConnection" } & UserConnectionFragment;
+};
+
+export type VerifyGitHubEnterpriseServerInstallationQueryVariables = Exact<{ [key: string]: never }>;
+
+export type VerifyGitHubEnterpriseServerInstallationQuery = { __typename?: "Query" } & {
+  verifyGitHubEnterpriseServerInstallation: {
+    __typename?: "GitHubEnterpriseServerInstallVerificationPayload";
+  } & GitHubEnterpriseServerInstallVerificationPayloadFragment;
 };
 
 export type ViewerQueryVariables = Exact<{ [key: string]: never }>;
@@ -21016,12 +22072,9 @@ export type IssueImportCreateClubhouseMutation = { __typename?: "Mutation" } & {
 };
 
 export type IssueImportCreateGithubMutationVariables = Exact<{
-  githubRepoId?: Maybe<Scalars["String"]>;
+  githubLabels?: Maybe<Array<Scalars["String"]> | Scalars["String"]>;
   githubRepoIds?: Maybe<Array<Scalars["Int"]> | Scalars["Int"]>;
-  githubRepoName?: Maybe<Scalars["String"]>;
-  githubRepoOwner?: Maybe<Scalars["String"]>;
   githubShouldImportOrgProjects?: Maybe<Scalars["Boolean"]>;
-  githubToken?: Maybe<Scalars["String"]>;
   includeClosedIssues?: Maybe<Scalars["Boolean"]>;
   instantProcess?: Maybe<Scalars["Boolean"]>;
   integrationId?: Maybe<Scalars["String"]>;
@@ -22026,6 +23079,7 @@ export const CommentNotificationFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "reactionEmoji" } },
           { kind: "Field", name: { kind: "Name", value: "commentId" } },
           { kind: "Field", name: { kind: "Name", value: "parentCommentId" } },
         ],
@@ -22047,6 +23101,14 @@ export const CustomViewNotificationSubscriptionFragmentDoc = {
           {
             kind: "Field",
             name: { kind: "Name", value: "cycle" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "initiative" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
@@ -22127,6 +23189,14 @@ export const CycleNotificationSubscriptionFragmentDoc = {
           {
             kind: "Field",
             name: { kind: "Name", value: "customView" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "initiative" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
@@ -22531,8 +23601,10 @@ export const DocumentNotificationFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "reactionEmoji" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "commentId" } },
+          { kind: "Field", name: { kind: "Name", value: "documentId" } },
           { kind: "Field", name: { kind: "Name", value: "parentCommentId" } },
           {
             kind: "Field",
@@ -22590,8 +23662,10 @@ export const InitiativeNotificationFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "reactionEmoji" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "commentId" } },
+          { kind: "Field", name: { kind: "Name", value: "initiativeId" } },
           { kind: "Field", name: { kind: "Name", value: "parentCommentId" } },
           {
             kind: "Field",
@@ -22667,6 +23741,14 @@ export const NotificationSubscriptionFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "initiative" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "label" },
             selectionSet: {
               kind: "SelectionSet",
@@ -22731,6 +23813,7 @@ export const IssueNotificationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "reactionEmoji" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "commentId" } },
+          { kind: "Field", name: { kind: "Name", value: "issueId" } },
           { kind: "Field", name: { kind: "Name", value: "parentCommentId" } },
           {
             kind: "Field",
@@ -22856,6 +23939,7 @@ export const OauthClientApprovalNotificationFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "oauthClientApprovalId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "oauthClientApproval" },
@@ -22920,9 +24004,13 @@ export const ProjectNotificationFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "reactionEmoji" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "commentId" } },
           { kind: "Field", name: { kind: "Name", value: "parentCommentId" } },
+          { kind: "Field", name: { kind: "Name", value: "projectId" } },
+          { kind: "Field", name: { kind: "Name", value: "projectMilestoneId" } },
+          { kind: "Field", name: { kind: "Name", value: "projectUpdateId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "botActor" },
@@ -23364,6 +24452,14 @@ export const LabelNotificationSubscriptionFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "initiative" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "project" },
             selectionSet: {
               kind: "SelectionSet",
@@ -23437,6 +24533,14 @@ export const ProjectNotificationSubscriptionFragmentDoc = {
           {
             kind: "Field",
             name: { kind: "Name", value: "cycle" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "initiative" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
@@ -23579,6 +24683,14 @@ export const TeamNotificationSubscriptionFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "initiative" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "label" },
             selectionSet: {
               kind: "SelectionSet",
@@ -23676,6 +24788,14 @@ export const UserNotificationSubscriptionFragmentDoc = {
           {
             kind: "Field",
             name: { kind: "Name", value: "cycle" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "initiative" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
@@ -23831,6 +24951,94 @@ export const AuthEmailIntakeAddressFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AuthEmailIntakeAddressFragment, unknown>;
+export const InitiativeNotificationSubscriptionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "InitiativeNotificationSubscription" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "InitiativeNotificationSubscription" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "customView" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "cycle" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "label" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "initiative" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "notificationSubscriptionTypes" } },
+          { kind: "Field", name: { kind: "Name", value: "userContextViewType" } },
+          { kind: "Field", name: { kind: "Name", value: "contextViewType" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "subscriber" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "active" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<InitiativeNotificationSubscriptionFragment, unknown>;
 export const AuthOrganizationInviteFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -23958,10 +25166,10 @@ export const OrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "periodUploadVolume" } },
           { kind: "Field", name: { kind: "Name", value: "projectUpdateRemindersDay" } },
           { kind: "Field", name: { kind: "Name", value: "releaseChannel" } },
-          { kind: "Field", name: { kind: "Name", value: "projectUpdatesReminderFrequency" } },
           { kind: "Field", name: { kind: "Name", value: "projectUpdateRemindersHour" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "fiscalYearStartMonth" } },
+          { kind: "Field", name: { kind: "Name", value: "projectUpdateReminderFrequencyInWeeks" } },
           { kind: "Field", name: { kind: "Name", value: "logoUrl" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           {
@@ -23993,6 +25201,7 @@ export const OrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "gitPublicLinkbackMessagesEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "roadmapEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "slaDayCount" } },
+          { kind: "Field", name: { kind: "Name", value: "projectUpdatesReminderFrequency" } },
         ],
       },
     },
@@ -24111,6 +25320,36 @@ export const OrganizationDomainFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<OrganizationDomainFragment, unknown>;
+export const WebhookFailureEventFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "WebhookFailureEvent" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "WebhookFailureEvent" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "responseOrError" } },
+          { kind: "Field", name: { kind: "Name", value: "httpStatus" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "executionId" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "webhook" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<WebhookFailureEventFragment, unknown>;
 export const UserAuthorizedApplicationFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -24318,6 +25557,7 @@ export const GitHubImportSettingsFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "labels" } },
           { kind: "Field", name: { kind: "Name", value: "orgLogin" } },
           { kind: "Field", name: { kind: "Name", value: "orgAvatarUrl" } },
           {
@@ -26190,71 +27430,6 @@ export const CommentPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<CommentPayloadFragment, unknown>;
-export const CompanyFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Company" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Company" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "externalId" } },
-          { kind: "Field", name: { kind: "Name", value: "logoUrl" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          { kind: "Field", name: { kind: "Name", value: "websiteUrl" } },
-          { kind: "Field", name: { kind: "Name", value: "companyProperties" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<CompanyFragment, unknown>;
-export const CompanyConnectionFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "CompanyConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CompanyConnection" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Company" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<CompanyConnectionFragment, unknown>;
 export const ContactPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -26549,6 +27724,60 @@ export const CustomViewSuggestionPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<CustomViewSuggestionPayloadFragment, unknown>;
+export const CustomerNeedPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "CustomerNeedPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CustomerNeedPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CustomerNeedPayloadFragment, unknown>;
+export const CustomerPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "CustomerPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CustomerPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CustomerPayloadFragment, unknown>;
+export const CustomerStatusPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "CustomerStatusPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CustomerStatusPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CustomerStatusPayloadFragment, unknown>;
 export const CycleFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -27528,6 +28757,14 @@ export const FavoriteFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "initiative" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "issue" },
             selectionSet: {
               kind: "SelectionSet",
@@ -28048,6 +29285,26 @@ export const GitHubCommitIntegrationPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<GitHubCommitIntegrationPayloadFragment, unknown>;
+export const GitHubEnterpriseServerInstallVerificationPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "GitHubEnterpriseServerInstallVerificationPayload" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "GitHubEnterpriseServerInstallVerificationPayload" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GitHubEnterpriseServerInstallVerificationPayloadFragment, unknown>;
 export const GitHubEnterpriseServerPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -28059,6 +29316,7 @@ export const GitHubEnterpriseServerPayloadFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "installUrl" } },
           { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
           {
             kind: "Field",
@@ -30310,6 +31568,7 @@ export const ProjectFragmentDoc = {
           },
           { kind: "Field", name: { kind: "Name", value: "targetDate" } },
           { kind: "Field", name: { kind: "Name", value: "startDate" } },
+          { kind: "Field", name: { kind: "Name", value: "health" } },
           { kind: "Field", name: { kind: "Name", value: "icon" } },
           {
             kind: "Field",
@@ -30325,6 +31584,7 @@ export const ProjectFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "inProgressScopeHistory" } },
           { kind: "Field", name: { kind: "Name", value: "progress" } },
           { kind: "Field", name: { kind: "Name", value: "scope" } },
+          { kind: "Field", name: { kind: "Name", value: "priority" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "lead" },
@@ -30666,6 +31926,14 @@ export const ProjectRelationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           {
             kind: "Field",
+            name: { kind: "Name", value: "user" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "projectMilestone" },
             selectionSet: {
               kind: "SelectionSet",
@@ -30789,6 +32057,7 @@ export const ProjectSearchResultFragmentDoc = {
           },
           { kind: "Field", name: { kind: "Name", value: "targetDate" } },
           { kind: "Field", name: { kind: "Name", value: "startDate" } },
+          { kind: "Field", name: { kind: "Name", value: "health" } },
           { kind: "Field", name: { kind: "Name", value: "icon" } },
           {
             kind: "Field",
@@ -30804,6 +32073,7 @@ export const ProjectSearchResultFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "inProgressScopeHistory" } },
           { kind: "Field", name: { kind: "Name", value: "progress" } },
           { kind: "Field", name: { kind: "Name", value: "scope" } },
+          { kind: "Field", name: { kind: "Name", value: "priority" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "lead" },
@@ -31007,6 +32277,7 @@ export const ProjectUpdateFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "slugId" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "editedAt" } },
@@ -31769,6 +33040,7 @@ export const TeamFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "scimGroupName" } },
           { kind: "Field", name: { kind: "Name", value: "autoCloseStateId" } },
           { kind: "Field", name: { kind: "Name", value: "cycleCooldownTime" } },
           { kind: "Field", name: { kind: "Name", value: "cycleStartDay" } },
@@ -31810,6 +33082,14 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "defaultTemplateForNonMembersId" } },
           { kind: "Field", name: { kind: "Name", value: "issueEstimationType" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "membership" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "color" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
@@ -36378,6 +37658,130 @@ export const DocumentDocument = {
     ...DocumentFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DocumentQuery, DocumentQueryVariables>;
+export const Document_CommentsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "document_comments" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "CommentFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "document" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "comments" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...CommentConnectionFragmentDoc.definitions,
+    ...CommentFragmentDoc.definitions,
+    ...ReactionFragmentDoc.definitions,
+    ...ActorBotFragmentDoc.definitions,
+    ...DocumentContentFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<Document_CommentsQuery, Document_CommentsQueryVariables>;
 export const DocumentContentHistoryDocument = {
   kind: "Document",
   definitions: [
@@ -41175,6 +42579,11 @@ export const NotificationsDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "NotificationFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -41210,6 +42619,11 @@ export const NotificationsDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",
@@ -42164,6 +43578,119 @@ export const Project_DocumentsDocument = {
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_DocumentsQuery, Project_DocumentsQueryVariables>;
+export const Project_ExternalLinksDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "project_externalLinks" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "externalLinks" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "EntityExternalLinkConnection" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...EntityExternalLinkConnectionFragmentDoc.definitions,
+    ...EntityExternalLinkFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<Project_ExternalLinksQuery, Project_ExternalLinksQueryVariables>;
 export const Project_IssuesDocument = {
   kind: "Document",
   definitions: [
@@ -48455,6 +49982,38 @@ export const UsersDocument = {
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UsersQuery, UsersQueryVariables>;
+export const VerifyGitHubEnterpriseServerInstallationDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "verifyGitHubEnterpriseServerInstallation" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "verifyGitHubEnterpriseServerInstallation" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "GitHubEnterpriseServerInstallVerificationPayload" },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...GitHubEnterpriseServerInstallVerificationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<
+  VerifyGitHubEnterpriseServerInstallationQuery,
+  VerifyGitHubEnterpriseServerInstallationQueryVariables
+>;
 export const ViewerDocument = {
   kind: "Document",
   definitions: [
@@ -55108,8 +56667,11 @@ export const IssueImportCreateGithubDocument = {
       variableDefinitions: [
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "githubRepoId" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          variable: { kind: "Variable", name: { kind: "Name", value: "githubLabels" } },
+          type: {
+            kind: "ListType",
+            type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          },
         },
         {
           kind: "VariableDefinition",
@@ -55121,23 +56683,8 @@ export const IssueImportCreateGithubDocument = {
         },
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "githubRepoName" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "githubRepoOwner" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "githubShouldImportOrgProjects" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "githubToken" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
         {
           kind: "VariableDefinition",
@@ -55179,8 +56726,8 @@ export const IssueImportCreateGithubDocument = {
             arguments: [
               {
                 kind: "Argument",
-                name: { kind: "Name", value: "githubRepoId" },
-                value: { kind: "Variable", name: { kind: "Name", value: "githubRepoId" } },
+                name: { kind: "Name", value: "githubLabels" },
+                value: { kind: "Variable", name: { kind: "Name", value: "githubLabels" } },
               },
               {
                 kind: "Argument",
@@ -55189,23 +56736,8 @@ export const IssueImportCreateGithubDocument = {
               },
               {
                 kind: "Argument",
-                name: { kind: "Name", value: "githubRepoName" },
-                value: { kind: "Variable", name: { kind: "Name", value: "githubRepoName" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "githubRepoOwner" },
-                value: { kind: "Variable", name: { kind: "Name", value: "githubRepoOwner" } },
-              },
-              {
-                kind: "Argument",
                 name: { kind: "Name", value: "githubShouldImportOrgProjects" },
                 value: { kind: "Variable", name: { kind: "Name", value: "githubShouldImportOrgProjects" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "githubToken" },
-                value: { kind: "Variable", name: { kind: "Name", value: "githubToken" } },
               },
               {
                 kind: "Argument",

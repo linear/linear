@@ -122,39 +122,12 @@ fragment Comment on Comment {
 # A comment related notification.
 fragment CommentNotification on CommentNotification {
   __typename
+  # Name of the reaction emoji related to the notification.
+  reactionEmoji
   # Related comment ID. Null if the notification is not related to a comment.
   commentId
   # Related parent comment ID. Null if the notification is not related to a comment.
   parentCommentId
-}
-
-# A company related to issue's origin.
-fragment Company on Company {
-  __typename
-  # Company ID in an external system.
-  externalId
-  # Company logo URL.
-  logoUrl
-  # Company name.
-  name
-  # Company website URL.
-  websiteUrl
-  # Custom company properties.
-  companyProperties
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The unique identifier of the entity.
-  id
-  # The user who added the company.
-  creator {
-    id
-  }
 }
 
 # A custom emoji.
@@ -187,6 +160,10 @@ fragment CustomViewNotificationSubscription on CustomViewNotificationSubscriptio
   __typename
   # The contextual cycle view associated with the notification subscription.
   cycle {
+    id
+  }
+  # The contextual initiative view associated with the notification subscription.
+  initiative {
     id
   }
   # The contextual label view associated with the notification subscription.
@@ -299,6 +276,10 @@ fragment CycleNotificationSubscription on CycleNotificationSubscription {
   __typename
   # The contextual custom view associated with the notification subscription.
   customView {
+    id
+  }
+  # The contextual initiative view associated with the notification subscription.
+  initiative {
     id
   }
   # The contextual label view associated with the notification subscription.
@@ -435,10 +416,14 @@ fragment DocumentContentHistory on DocumentContentHistory {
 # A document related notification.
 fragment DocumentNotification on DocumentNotification {
   __typename
+  # Name of the reaction emoji related to the notification.
+  reactionEmoji
   # Notification type.
   type
   # Related comment ID. Null if the notification is not related to a comment.
   commentId
+  # Related document ID.
+  documentId
   # Related parent comment ID. Null if the notification is not related to a comment.
   parentCommentId
   # The bot that caused the notification.
@@ -860,6 +845,10 @@ fragment LabelNotificationSubscription on LabelNotificationSubscription {
   cycle {
     id
   }
+  # The contextual initiative view associated with the notification subscription.
+  initiative {
+    id
+  }
   # The contextual project view associated with the notification subscription.
   project {
     id
@@ -1000,6 +989,10 @@ fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
   cycle {
     id
   }
+  # The contextual initiative view associated with the notification subscription.
+  initiative {
+    id
+  }
   # The contextual label view associated with the notification subscription.
   label {
     id
@@ -1043,12 +1036,20 @@ fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
 # A project related notification.
 fragment ProjectNotification on ProjectNotification {
   __typename
+  # Name of the reaction emoji related to the notification.
+  reactionEmoji
   # Notification type.
   type
   # Related comment ID. Null if the notification is not related to a comment.
   commentId
   # Related parent comment ID. Null if the notification is not related to a comment.
   parentCommentId
+  # Related project ID.
+  projectId
+  # Related project milestone ID.
+  projectMilestoneId
+  # Related project update ID.
+  projectUpdateId
   # The bot that caused the notification.
   botActor {
     ...ActorBot
@@ -1144,6 +1145,8 @@ fragment Project on Project {
   targetDate
   # The estimated start date of the project.
   startDate
+  # The health of the project based on the last project update.
+  health
   # The icon of the project.
   icon
   # The last template that was applied to this project.
@@ -1164,6 +1167,8 @@ fragment Project on Project {
   progress
   # The overall scope (total estimate points) of the project.
   scope
+  # The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  priority
   # The project lead.
   lead {
     id
@@ -1458,6 +1463,10 @@ fragment ProjectRelation on ProjectRelation {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The last user who created or modified the relation.
+  user {
+    id
+  }
   # The milestone within the project whose relationship is being described.
   projectMilestone {
     id
@@ -1674,6 +1683,10 @@ fragment TeamNotificationSubscription on TeamNotificationSubscription {
   cycle {
     id
   }
+  # The contextual initiative view associated with the notification subscription.
+  initiative {
+    id
+  }
   # The contextual label view associated with the notification subscription.
   label {
     id
@@ -1869,6 +1882,8 @@ fragment ProjectUpdate on ProjectUpdate {
   project {
     id
   }
+  # The project update's unique URL slug.
+  slugId
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -1917,6 +1932,10 @@ fragment UserNotificationSubscription on UserNotificationSubscription {
   }
   # The contextual cycle view associated with the notification subscription.
   cycle {
+    id
+  }
+  # The contextual initiative view associated with the notification subscription.
+  initiative {
     id
   }
   # The contextual label view associated with the notification subscription.
@@ -2342,13 +2361,72 @@ fragment IssueImport on IssueImport {
   error
 }
 
+# An initiative notification subscription.
+fragment InitiativeNotificationSubscription on InitiativeNotificationSubscription {
+  __typename
+  # The contextual custom view associated with the notification subscription.
+  customView {
+    id
+  }
+  # The contextual cycle view associated with the notification subscription.
+  cycle {
+    id
+  }
+  # The contextual label view associated with the notification subscription.
+  label {
+    id
+  }
+  # The contextual project view associated with the notification subscription.
+  project {
+    id
+  }
+  # The initiative subscribed to.
+  initiative {
+    id
+  }
+  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The team associated with the notification subscription.
+  team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of subscription.
+  notificationSubscriptionTypes
+  # The type of user view to which the notification subscription context is associated with.
+  userContextViewType
+  # The type of view to which the notification subscription context is associated with.
+  contextViewType
+  # The unique identifier of the entity.
+  id
+  # The user that subscribed to receive notifications.
+  subscriber {
+    id
+  }
+  # The user view associated with the notification subscription.
+  user {
+    id
+  }
+  # Whether the subscription is active or not.
+  active
+}
+
 # An initiative related notification.
 fragment InitiativeNotification on InitiativeNotification {
   __typename
+  # Name of the reaction emoji related to the notification.
+  reactionEmoji
   # Notification type.
   type
   # Related comment ID. Null if the notification is not related to a comment.
   commentId
+  # Related initiative ID.
+  initiativeId
   # Related parent comment ID. Null if the notification is not related to a comment.
   parentCommentId
   # The bot that caused the notification.
@@ -2509,6 +2587,8 @@ fragment IssueNotification on IssueNotification {
   type
   # Related comment ID. Null if the notification is not related to a comment.
   commentId
+  # Related issue ID.
+  issueId
   # Related parent comment ID. Null if the notification is not related to a comment.
   parentCommentId
   # The bot that caused the notification.
@@ -2706,6 +2786,8 @@ fragment OauthClientApprovalNotification on OauthClientApprovalNotification {
   __typename
   # Notification type.
   type
+  # Related OAuth client approval request ID.
+  oauthClientApprovalId
   # The OAuth client approval request related to the notification.
   oauthClientApproval {
     ...OauthClientApproval
@@ -2770,8 +2852,6 @@ fragment Organization on Organization {
   projectUpdateRemindersDay
   # The feature release channel the organization belongs to.
   releaseChannel
-  # The frequency at which to prompt for project updates.
-  projectUpdatesReminderFrequency
   # The hour at which to prompt for project updates.
   projectUpdateRemindersHour
   # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
@@ -2780,6 +2860,8 @@ fragment Organization on Organization {
   updatedAt
   # The month at which the fiscal year starts. Defaults to January (0).
   fiscalYearStartMonth
+  # The n-weekly frequency at which to prompt for project updates. When not set, reminders are off.
+  projectUpdateReminderFrequencyInWeeks
   # The organization's logo URL.
   logoUrl
   # The organization's name.
@@ -2818,6 +2900,8 @@ fragment Organization on Organization {
   roadmapEnabled
   # Which day count to use for SLA calculations.
   slaDayCount
+  # [DEPRECATED] The frequency at which to prompt for project updates.
+  projectUpdatesReminderFrequency
 }
 
 # An organization. Organizations are root-level objects that contain users and teams.
@@ -2883,6 +2967,8 @@ fragment Team on Team {
   triageResponsibility {
     id
   }
+  # The SCIM group name for the team.
+  scimGroupName
   # The canceled workflow state which auto closed issues will be set to. Defaults to the first canceled state.
   autoCloseStateId
   # The cooldown time after each cycle in weeks.
@@ -2919,6 +3005,10 @@ fragment Team on Team {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The membership of the given user in the team.
+  membership {
+    id
+  }
   # The team's color.
   color
   # The team's description.
@@ -3142,6 +3232,27 @@ fragment OrganizationDomain on OrganizationDomain {
   authType
   # Whether the domains was claimed by the organization through DNS verification.
   claimed
+}
+
+# Entity representing a webhook execution failure.
+fragment WebhookFailureEvent on WebhookFailureEvent {
+  __typename
+  # The HTTP response body returned by the recipient or error occured.
+  responseOrError
+  # The HTTP status code returned by the recipient.
+  httpStatus
+  # The URL that the webhook was trying to push to.
+  url
+  # The time at which the entity was created.
+  createdAt
+  # The unique execution ID of the webhook push. This is retained between retries of the same push.
+  executionId
+  # The unique identifier of the entity.
+  id
+  # The webhook that this failure event is associated with.
+  webhook {
+    id
+  }
 }
 
 # Front specific settings.
@@ -3446,6 +3557,8 @@ fragment GitHubPersonalSettings on GitHubPersonalSettings {
 # Metadata and settings for a GitHub import integration.
 fragment GitHubImportSettings on GitHubImportSettings {
   __typename
+  # A map storing all available issue labels per repository
+  labels
   # The GitHub organization's name.
   orgLogin
   # The avatar URL for the GitHub organization.
@@ -3497,6 +3610,10 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   # The contextual cycle view associated with the notification subscription.
   cycle {
+    id
+  }
+  # The contextual initiative view associated with the notification subscription.
+  initiative {
     id
   }
   # The contextual label view associated with the notification subscription.
@@ -4117,6 +4234,10 @@ fragment Favorite on Favorite {
   document {
     id
   }
+  # The favorited initiative.
+  initiative {
+    id
+  }
   # The favorited issue.
   issue {
     id
@@ -4571,16 +4692,6 @@ fragment CommentPayload on CommentPayload {
   success
 }
 
-fragment CompanyConnection on CompanyConnection {
-  __typename
-  nodes {
-    ...Company
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
 fragment ContactPayload on ContactPayload {
   __typename
   # Whether the operation was successful.
@@ -4639,6 +4750,30 @@ fragment CustomViewSuggestionPayload on CustomViewSuggestionPayload {
   icon
   # The suggested view name.
   name
+}
+
+fragment CustomerNeedPayload on CustomerNeedPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment CustomerPayload on CustomerPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment CustomerStatusPayload on CustomerStatusPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
 }
 
 fragment CycleConnection on CycleConnection {
@@ -4993,8 +5128,16 @@ fragment GitHubCommitIntegrationPayload on GitHubCommitIntegrationPayload {
   success
 }
 
+fragment GitHubEnterpriseServerInstallVerificationPayload on GitHubEnterpriseServerInstallVerificationPayload {
+  __typename
+  # Has the install been successful.
+  success
+}
+
 fragment GitHubEnterpriseServerPayload on GitHubEnterpriseServerPayload {
   __typename
+  # The app install address.
+  installUrl
   # The identifier of the last sync operation.
   lastSyncId
   # The integration that was created or updated.
@@ -5785,6 +5928,8 @@ fragment ProjectSearchResult on ProjectSearchResult {
   targetDate
   # The estimated start date of the project.
   startDate
+  # The health of the project based on the last project update.
+  health
   # The icon of the project.
   icon
   # The last template that was applied to this project.
@@ -5805,6 +5950,8 @@ fragment ProjectSearchResult on ProjectSearchResult {
   progress
   # The overall scope (total estimate points) of the project.
   scope
+  # The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  priority
   # The project lead.
   lead {
     id
@@ -7351,6 +7498,38 @@ query document($id: String!) {
     ...Document
   }
 }
+# Comments associated with the document.
+query document_comments(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned comments.
+  $filter: CommentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  document(id: $id) {
+    comments(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CommentConnection
+    }
+  }
+}
 # A collection of document content history entries.
 query documentContentHistory($id: String!) {
   documentContentHistory(id: $id) {
@@ -8576,6 +8755,8 @@ query notifications(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # Filters returned notifications.
+  $filter: NotificationFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -8588,6 +8769,7 @@ query notifications(
   notifications(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -8835,6 +9017,35 @@ query project_documents(
     }
   }
 }
+# External links associated with the project.
+query project_externalLinks(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  project(id: $id) {
+    externalLinks(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...EntityExternalLinkConnection
+    }
+  }
+}
 # Issues associated with the project.
 query project_issues(
   $id: String!
@@ -8867,7 +9078,7 @@ query project_issues(
     }
   }
 }
-# Links associated with the project.
+# [DEPRECATED] Links associated with the project.
 query project_links(
   $id: String!
   # A cursor to be used with first for forward pagination
@@ -10456,6 +10667,12 @@ query users(
     ...UserConnection
   }
 }
+# Verify that we received the correct response from the GitHub Enterprise Server.
+query verifyGitHubEnterpriseServerInstallation {
+  verifyGitHubEnterpriseServerInstallation {
+    ...GitHubEnterpriseServerInstallVerificationPayload
+  }
+}
 # The currently authenticated user.
 query viewer {
   viewer {
@@ -11152,7 +11369,8 @@ mutation createCycle(
     ...CyclePayload
   }
 }
-# [DEPRECATED] Shifts all cycles starts by a certain number of weeks.
+# Shifts all cycles starts and ends by a certain number of days, starting from the provided cycle
+# onwards.
 mutation cycleShiftAll(
   # A partial cycle object to update the cycle with.
   $input: CycleShiftAllInput!
@@ -12076,18 +12294,12 @@ mutation issueImportCreateClubhouse(
 }
 # Kicks off a GitHub import job.
 mutation issueImportCreateGithub(
-  # [DEPRECATED] ID of the Github repository from which we will import data.
-  $githubRepoId: String
+  # Labels to use to filter the import data. Only issues matching any of these filters will be imported.
+  $githubLabels: [String!]
   # IDs of the Github repositories from which we will import data.
   $githubRepoIds: [Int!]
-  # [DEPRECATED] GitHub repository name from which we will import data.
-  $githubRepoName: String
-  # [DEPRECATED] GitHub owner (user or org) for the repository from which we will import data.
-  $githubRepoOwner: String
   # Whether or not we should import GitHub organization level projects.
   $githubShouldImportOrgProjects: Boolean
-  # [DEPRECATED] GitHub token to fetch information from the GitHub API.
-  $githubToken: String
   # Whether or not we should collect the data for closed issues.
   $includeClosedIssues: Boolean
   # Whether to instantly process the import with the default configuration mapping.
@@ -12102,12 +12314,9 @@ mutation issueImportCreateGithub(
   $teamName: String
 ) {
   issueImportCreateGithub(
-    githubRepoId: $githubRepoId
+    githubLabels: $githubLabels
     githubRepoIds: $githubRepoIds
-    githubRepoName: $githubRepoName
-    githubRepoOwner: $githubRepoOwner
     githubShouldImportOrgProjects: $githubShouldImportOrgProjects
-    githubToken: $githubToken
     includeClosedIssues: $includeClosedIssues
     instantProcess: $instantProcess
     integrationId: $integrationId
@@ -12370,7 +12579,7 @@ mutation archiveNotification(
     ...NotificationArchivePayload
   }
 }
-# Archives all of the user's past notifications for the associated entity.
+# Archives a notification and all related notifications.
 mutation notificationArchiveAll(
   # The type and id of the entity to archive notifications for.
   $input: NotificationEntityInput!
@@ -12379,7 +12588,7 @@ mutation notificationArchiveAll(
     ...NotificationBatchActionPayload
   }
 }
-# Marks all past notifications for the associated entity as read.
+# Marks notification and all related notifications as read.
 mutation notificationMarkReadAll(
   # The type and id of the entity to archive notifications for.
   $input: NotificationEntityInput!
@@ -12390,7 +12599,7 @@ mutation notificationMarkReadAll(
     ...NotificationBatchActionPayload
   }
 }
-# Marks all past notifications for the associated entity as unread.
+# Marks notification and all related notifications as unread.
 mutation notificationMarkUnreadAll(
   # The type and id of the entity to archive notifications for.
   $input: NotificationEntityInput!
@@ -12399,7 +12608,7 @@ mutation notificationMarkUnreadAll(
     ...NotificationBatchActionPayload
   }
 }
-# Snoozes a notification and all past notifications for the associated entity.
+# Snoozes a notification and all related notifications.
 mutation notificationSnoozeAll(
   # The type and id of the entity to archive notifications for.
   $input: NotificationEntityInput!
@@ -12448,7 +12657,7 @@ mutation unarchiveNotification(
     ...NotificationArchivePayload
   }
 }
-# Unsnoozes a notification and all past notifications for the associated entity.
+# Unsnoozes a notification and all related notifications.
 mutation notificationUnsnoozeAll(
   # The type and id of the entity to archive notifications for.
   $input: NotificationEntityInput!
