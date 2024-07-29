@@ -1423,12 +1423,15 @@ export class CommentNotification extends Request {
     super(request);
     this.commentId = data.commentId ?? undefined;
     this.parentCommentId = data.parentCommentId ?? undefined;
+    this.reactionEmoji = data.reactionEmoji ?? undefined;
   }
 
   /** Related comment ID. Null if the notification is not related to a comment. */
   public commentId?: string;
   /** Related parent comment ID. Null if the notification is not related to a comment. */
   public parentCommentId?: string;
+  /** Name of the reaction emoji related to the notification. */
+  public reactionEmoji?: string;
 }
 /**
  * CommentPayload model
@@ -1453,81 +1456,6 @@ export class CommentPayload extends Request {
   /** The comment that was created or updated. */
   public get comment(): LinearFetch<Comment> | undefined {
     return new CommentQuery(this._request).fetch({ id: this._comment.id });
-  }
-}
-/**
- * A company related to issue's origin.
- *
- * @param request - function to call the graphql client
- * @param data - L.CompanyFragment response data
- */
-export class Company extends Request {
-  private _creator: L.CompanyFragment["creator"];
-
-  public constructor(request: LinearRequest, data: L.CompanyFragment) {
-    super(request);
-    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.companyProperties = data.companyProperties;
-    this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.externalId = data.externalId;
-    this.id = data.id;
-    this.logoUrl = data.logoUrl ?? undefined;
-    this.name = data.name;
-    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this.websiteUrl = data.websiteUrl ?? undefined;
-    this._creator = data.creator;
-  }
-
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
-  /** Custom company properties. */
-  public companyProperties: L.Scalars["JSONObject"];
-  /** The time at which the entity was created. */
-  public createdAt: Date;
-  /** Company ID in an external system. */
-  public externalId: string;
-  /** The unique identifier of the entity. */
-  public id: string;
-  /** Company logo URL. */
-  public logoUrl?: string;
-  /** Company name. */
-  public name: string;
-  /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  public updatedAt: Date;
-  /** Company website URL. */
-  public websiteUrl?: string;
-  /** The user who added the company. */
-  public get creator(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._creator.id);
-  }
-  /** The organization of the customer. */
-  public get organization(): LinearFetch<Organization> {
-    return new OrganizationQuery(this._request).fetch();
-  }
-}
-/**
- * CompanyConnection model
- *
- * @param request - function to call the graphql client
- * @param fetch - function to trigger a refetch of this CompanyConnection model
- * @param data - CompanyConnection response data
- */
-export class CompanyConnection extends Connection<Company> {
-  public constructor(
-    request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Company> | undefined>,
-    data: L.CompanyConnectionFragment
-  ) {
-    super(
-      request,
-      fetch,
-      data.nodes.map(node => new Company(request, node)),
-      new PageInfo(request, data.pageInfo)
-    );
   }
 }
 /**
@@ -1740,6 +1668,7 @@ export class CustomViewHasSubscribersPayload extends Request {
 export class CustomViewNotificationSubscription extends Request {
   private _customView: L.CustomViewNotificationSubscriptionFragment["customView"];
   private _cycle?: L.CustomViewNotificationSubscriptionFragment["cycle"];
+  private _initiative?: L.CustomViewNotificationSubscriptionFragment["initiative"];
   private _label?: L.CustomViewNotificationSubscriptionFragment["label"];
   private _project?: L.CustomViewNotificationSubscriptionFragment["project"];
   private _subscriber: L.CustomViewNotificationSubscriptionFragment["subscriber"];
@@ -1758,6 +1687,7 @@ export class CustomViewNotificationSubscription extends Request {
     this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView;
     this._cycle = data.cycle ?? undefined;
+    this._initiative = data.initiative ?? undefined;
     this._label = data.label ?? undefined;
     this._project = data.project ?? undefined;
     this._subscriber = data.subscriber;
@@ -1792,6 +1722,10 @@ export class CustomViewNotificationSubscription extends Request {
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The contextual initiative view associated with the notification subscription. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
@@ -1859,6 +1793,60 @@ export class CustomViewSuggestionPayload extends Request {
   public icon?: string;
   /** The suggested view name. */
   public name?: string;
+}
+/**
+ * CustomerNeedPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CustomerNeedPayloadFragment response data
+ */
+export class CustomerNeedPayload extends Request {
+  public constructor(request: LinearRequest, data: L.CustomerNeedPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
+ * CustomerPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CustomerPayloadFragment response data
+ */
+export class CustomerPayload extends Request {
+  public constructor(request: LinearRequest, data: L.CustomerPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
+ * CustomerStatusPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CustomerStatusPayloadFragment response data
+ */
+export class CustomerStatusPayload extends Request {
+  public constructor(request: LinearRequest, data: L.CustomerStatusPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
 }
 /**
  * A set of issues to be resolved in a specified amount of time.
@@ -2009,6 +1997,7 @@ export class CycleConnection extends Connection<Cycle> {
 export class CycleNotificationSubscription extends Request {
   private _customView?: L.CycleNotificationSubscriptionFragment["customView"];
   private _cycle: L.CycleNotificationSubscriptionFragment["cycle"];
+  private _initiative?: L.CycleNotificationSubscriptionFragment["initiative"];
   private _label?: L.CycleNotificationSubscriptionFragment["label"];
   private _project?: L.CycleNotificationSubscriptionFragment["project"];
   private _subscriber: L.CycleNotificationSubscriptionFragment["subscriber"];
@@ -2027,6 +2016,7 @@ export class CycleNotificationSubscription extends Request {
     this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle;
+    this._initiative = data.initiative ?? undefined;
     this._label = data.label ?? undefined;
     this._project = data.project ?? undefined;
     this._subscriber = data.subscriber;
@@ -2061,6 +2051,10 @@ export class CycleNotificationSubscription extends Request {
   /** The cycle subscribed to. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return new CycleQuery(this._request).fetch(this._cycle.id);
+  }
+  /** The contextual initiative view associated with the notification subscription. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
@@ -2310,7 +2304,10 @@ export class Document extends Request {
   public get updatedBy(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._updatedBy.id);
   }
-
+  /** Comments associated with the document. */
+  public comments(variables?: Omit<L.Document_CommentsQueryVariables, "id">) {
+    return new Document_CommentsQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Creates a new document. */
   public create(input: L.DocumentCreateInput) {
     return new CreateDocumentMutation(this._request).fetch(input);
@@ -2539,9 +2536,11 @@ export class DocumentNotification extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.commentId = data.commentId ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.documentId = data.documentId;
     this.emailedAt = parseDate(data.emailedAt) ?? undefined;
     this.id = data.id;
     this.parentCommentId = data.parentCommentId ?? undefined;
+    this.reactionEmoji = data.reactionEmoji ?? undefined;
     this.readAt = parseDate(data.readAt) ?? undefined;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
     this.type = data.type;
@@ -2559,6 +2558,8 @@ export class DocumentNotification extends Request {
   public commentId?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** Related document ID. */
+  public documentId: string;
   /**
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
@@ -2568,6 +2569,8 @@ export class DocumentNotification extends Request {
   public id: string;
   /** Related parent comment ID. Null if the notification is not related to a comment. */
   public parentCommentId?: string;
+  /** Name of the reaction emoji related to the notification. */
+  public reactionEmoji?: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   public readAt?: Date;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
@@ -3350,6 +3353,7 @@ export class Favorite extends Request {
   private _customView?: L.FavoriteFragment["customView"];
   private _cycle?: L.FavoriteFragment["cycle"];
   private _document?: L.FavoriteFragment["document"];
+  private _initiative?: L.FavoriteFragment["initiative"];
   private _issue?: L.FavoriteFragment["issue"];
   private _label?: L.FavoriteFragment["label"];
   private _owner: L.FavoriteFragment["owner"];
@@ -3376,6 +3380,7 @@ export class Favorite extends Request {
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
     this._document = data.document ?? undefined;
+    this._initiative = data.initiative ?? undefined;
     this._issue = data.issue ?? undefined;
     this._label = data.label ?? undefined;
     this._owner = data.owner;
@@ -3424,6 +3429,10 @@ export class Favorite extends Request {
   /** The favorited document. */
   public get document(): LinearFetch<Document> | undefined {
     return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
+  }
+  /** The favorited initiative. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
   /** The favorited issue. */
   public get issue(): LinearFetch<Issue> | undefined {
@@ -3959,6 +3968,21 @@ export class GitHubCommitIntegrationPayload extends Request {
   }
 }
 /**
+ * GitHubEnterpriseServerInstallVerificationPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.GitHubEnterpriseServerInstallVerificationPayloadFragment response data
+ */
+export class GitHubEnterpriseServerInstallVerificationPayload extends Request {
+  public constructor(request: LinearRequest, data: L.GitHubEnterpriseServerInstallVerificationPayloadFragment) {
+    super(request);
+    this.success = data.success;
+  }
+
+  /** Has the install been successful. */
+  public success: boolean;
+}
+/**
  * GitHubEnterpriseServerPayload model
  *
  * @param request - function to call the graphql client
@@ -3969,6 +3993,7 @@ export class GitHubEnterpriseServerPayload extends Request {
 
   public constructor(request: LinearRequest, data: L.GitHubEnterpriseServerPayloadFragment) {
     super(request);
+    this.installUrl = data.installUrl;
     this.lastSyncId = data.lastSyncId;
     this.setupUrl = data.setupUrl;
     this.success = data.success;
@@ -3976,6 +4001,8 @@ export class GitHubEnterpriseServerPayload extends Request {
     this._integration = data.integration ?? undefined;
   }
 
+  /** The app install address. */
+  public installUrl: string;
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** The setup address. */
@@ -3998,12 +4025,15 @@ export class GitHubEnterpriseServerPayload extends Request {
 export class GitHubImportSettings extends Request {
   public constructor(request: LinearRequest, data: L.GitHubImportSettingsFragment) {
     super(request);
+    this.labels = data.labels ?? undefined;
     this.orgAvatarUrl = data.orgAvatarUrl;
     this.orgLogin = data.orgLogin;
     this.repositories = data.repositories.map(node => new GitHubRepo(request, node));
     this.orgType = data.orgType;
   }
 
+  /** A map storing all available issue labels per repository */
+  public labels?: L.Scalars["JSONObject"];
   /** The avatar URL for the GitHub organization. */
   public orgAvatarUrl: string;
   /** The GitHub organization's name. */
@@ -4304,7 +4334,9 @@ export class InitiativeNotification extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.emailedAt = parseDate(data.emailedAt) ?? undefined;
     this.id = data.id;
+    this.initiativeId = data.initiativeId;
     this.parentCommentId = data.parentCommentId ?? undefined;
+    this.reactionEmoji = data.reactionEmoji ?? undefined;
     this.readAt = parseDate(data.readAt) ?? undefined;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
     this.type = data.type;
@@ -4329,8 +4361,12 @@ export class InitiativeNotification extends Request {
   public emailedAt?: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Related initiative ID. */
+  public initiativeId: string;
   /** Related parent comment ID. Null if the notification is not related to a comment. */
   public parentCommentId?: string;
+  /** Name of the reaction emoji related to the notification. */
+  public reactionEmoji?: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   public readAt?: Date;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
@@ -4360,6 +4396,95 @@ export class InitiativeNotification extends Request {
   /** The user that received the notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+}
+/**
+ * An initiative notification subscription.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InitiativeNotificationSubscriptionFragment response data
+ */
+export class InitiativeNotificationSubscription extends Request {
+  private _customView?: L.InitiativeNotificationSubscriptionFragment["customView"];
+  private _cycle?: L.InitiativeNotificationSubscriptionFragment["cycle"];
+  private _initiative: L.InitiativeNotificationSubscriptionFragment["initiative"];
+  private _label?: L.InitiativeNotificationSubscriptionFragment["label"];
+  private _project?: L.InitiativeNotificationSubscriptionFragment["project"];
+  private _subscriber: L.InitiativeNotificationSubscriptionFragment["subscriber"];
+  private _team?: L.InitiativeNotificationSubscriptionFragment["team"];
+  private _user?: L.InitiativeNotificationSubscriptionFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.InitiativeNotificationSubscriptionFragment) {
+    super(request);
+    this.active = data.active;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.notificationSubscriptionTypes = data.notificationSubscriptionTypes;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.contextViewType = data.contextViewType ?? undefined;
+    this.userContextViewType = data.userContextViewType ?? undefined;
+    this._customView = data.customView ?? undefined;
+    this._cycle = data.cycle ?? undefined;
+    this._initiative = data.initiative;
+    this._label = data.label ?? undefined;
+    this._project = data.project ?? undefined;
+    this._subscriber = data.subscriber;
+    this._team = data.team ?? undefined;
+    this._user = data.user ?? undefined;
+  }
+
+  /** Whether the subscription is active or not. */
+  public active: boolean;
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The type of subscription. */
+  public notificationSubscriptionTypes: string[];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The type of view to which the notification subscription context is associated with. */
+  public contextViewType?: L.ContextViewType;
+  /** The type of user view to which the notification subscription context is associated with. */
+  public userContextViewType?: L.UserContextViewType;
+  /** The contextual custom view associated with the notification subscription. */
+  public get customView(): LinearFetch<CustomView> | undefined {
+    return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
+  }
+  /** The contextual cycle view associated with the notification subscription. */
+  public get cycle(): LinearFetch<Cycle> | undefined {
+    return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The initiative subscribed to. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return new InitiativeQuery(this._request).fetch(this._initiative.id);
+  }
+  /** The contextual label view associated with the notification subscription. */
+  public get label(): LinearFetch<IssueLabel> | undefined {
+    return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
+  }
+  /** The contextual project view associated with the notification subscription. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The user that subscribed to receive notifications. */
+  public get subscriber(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._subscriber.id);
+  }
+  /** The team associated with the notification subscription. */
+  public get team(): LinearFetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The user view associated with the notification subscription. */
+  public get user(): LinearFetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
 /**
@@ -5341,7 +5466,7 @@ export class IssueHistory extends Request {
     this.updatedDescription = data.updatedDescription ?? undefined;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this.issueImport = data.issueImport ? new IssueImport(request, data.issueImport) : undefined;
-    this.actors = data.actors.map(node => new User(request, node));
+    this.actors = data.actors ? data.actors.map(node => new User(request, node)) : undefined;
     this.addedLabels = data.addedLabels ? data.addedLabels.map(node => new IssueLabel(request, node)) : undefined;
     this.relationChanges = data.relationChanges
       ? data.relationChanges.map(node => new IssueRelationHistoryPayload(request, node))
@@ -5441,7 +5566,7 @@ export class IssueHistory extends Request {
   /** Whether the issue's description was updated. */
   public updatedDescription?: boolean;
   /** The actors that performed the actions. This field may be empty in the case of integrations or automations. */
-  public actors: User[];
+  public actors?: User[];
   /** The labels that were added to the issue. */
   public addedLabels?: IssueLabel[];
   /** Changed issue relationships. */
@@ -5837,6 +5962,7 @@ export class IssueNotification extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.emailedAt = parseDate(data.emailedAt) ?? undefined;
     this.id = data.id;
+    this.issueId = data.issueId;
     this.parentCommentId = data.parentCommentId ?? undefined;
     this.reactionEmoji = data.reactionEmoji ?? undefined;
     this.readAt = parseDate(data.readAt) ?? undefined;
@@ -5870,6 +5996,8 @@ export class IssueNotification extends Request {
   public emailedAt?: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Related issue ID. */
+  public issueId: string;
   /** Related parent comment ID. Null if the notification is not related to a comment. */
   public parentCommentId?: string;
   /** Name of the reaction emoji related to the notification. */
@@ -6437,6 +6565,7 @@ export class JiraSettings extends Request {
 export class LabelNotificationSubscription extends Request {
   private _customView?: L.LabelNotificationSubscriptionFragment["customView"];
   private _cycle?: L.LabelNotificationSubscriptionFragment["cycle"];
+  private _initiative?: L.LabelNotificationSubscriptionFragment["initiative"];
   private _label: L.LabelNotificationSubscriptionFragment["label"];
   private _project?: L.LabelNotificationSubscriptionFragment["project"];
   private _subscriber: L.LabelNotificationSubscriptionFragment["subscriber"];
@@ -6455,6 +6584,7 @@ export class LabelNotificationSubscription extends Request {
     this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
+    this._initiative = data.initiative ?? undefined;
     this._label = data.label;
     this._project = data.project ?? undefined;
     this._subscriber = data.subscriber;
@@ -6489,6 +6619,10 @@ export class LabelNotificationSubscription extends Request {
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The contextual initiative view associated with the notification subscription. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
   /** The label subscribed to. */
   public get label(): LinearFetch<IssueLabel> | undefined {
@@ -6851,6 +6985,7 @@ export class NotificationPayload extends Request {
 export class NotificationSubscription extends Request {
   private _customView?: L.NotificationSubscriptionFragment["customView"];
   private _cycle?: L.NotificationSubscriptionFragment["cycle"];
+  private _initiative?: L.NotificationSubscriptionFragment["initiative"];
   private _label?: L.NotificationSubscriptionFragment["label"];
   private _project?: L.NotificationSubscriptionFragment["project"];
   private _subscriber: L.NotificationSubscriptionFragment["subscriber"];
@@ -6868,6 +7003,7 @@ export class NotificationSubscription extends Request {
     this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
+    this._initiative = data.initiative ?? undefined;
     this._label = data.label ?? undefined;
     this._project = data.project ?? undefined;
     this._subscriber = data.subscriber;
@@ -6900,6 +7036,10 @@ export class NotificationSubscription extends Request {
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The contextual initiative view associated with the notification subscription. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
@@ -6945,6 +7085,7 @@ export class NotificationSubscription extends Request {
 export class NotificationSubscriptionConnection extends Connection<
   | CustomViewNotificationSubscription
   | CycleNotificationSubscription
+  | InitiativeNotificationSubscription
   | LabelNotificationSubscription
   | ProjectNotificationSubscription
   | TeamNotificationSubscription
@@ -6959,6 +7100,7 @@ export class NotificationSubscriptionConnection extends Connection<
       | LinearConnection<
           | CustomViewNotificationSubscription
           | CycleNotificationSubscription
+          | InitiativeNotificationSubscription
           | LabelNotificationSubscription
           | ProjectNotificationSubscription
           | TeamNotificationSubscription
@@ -6981,6 +7123,11 @@ export class NotificationSubscriptionConnection extends Connection<
             );
           case "CycleNotificationSubscription":
             return new CycleNotificationSubscription(request, node as L.CycleNotificationSubscriptionFragment);
+          case "InitiativeNotificationSubscription":
+            return new InitiativeNotificationSubscription(
+              request,
+              node as L.InitiativeNotificationSubscriptionFragment
+            );
           case "LabelNotificationSubscription":
             return new LabelNotificationSubscription(request, node as L.LabelNotificationSubscriptionFragment);
           case "ProjectNotificationSubscription":
@@ -7175,6 +7322,7 @@ export class OauthClientApprovalNotification extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.emailedAt = parseDate(data.emailedAt) ?? undefined;
     this.id = data.id;
+    this.oauthClientApprovalId = data.oauthClientApprovalId;
     this.readAt = parseDate(data.readAt) ?? undefined;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
     this.type = data.type;
@@ -7198,6 +7346,8 @@ export class OauthClientApprovalNotification extends Request {
   public emailedAt?: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Related OAuth client approval request ID. */
+  public oauthClientApprovalId: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   public readAt?: Date;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
@@ -7323,6 +7473,7 @@ export class Organization extends Request {
     this.name = data.name;
     this.periodUploadVolume = data.periodUploadVolume;
     this.previousUrlKeys = data.previousUrlKeys;
+    this.projectUpdateReminderFrequencyInWeeks = data.projectUpdateReminderFrequencyInWeeks ?? undefined;
     this.projectUpdateRemindersHour = data.projectUpdateRemindersHour;
     this.roadmapEnabled = data.roadmapEnabled;
     this.samlEnabled = data.samlEnabled;
@@ -7372,6 +7523,8 @@ export class Organization extends Request {
   public periodUploadVolume: number;
   /** Previously used URL keys for the organization (last 3 are kept and redirected). */
   public previousUrlKeys: string[];
+  /** The n-weekly frequency at which to prompt for project updates. When not set, reminders are off. */
+  public projectUpdateReminderFrequencyInWeeks?: number;
   /** The hour at which to prompt for project updates. */
   public projectUpdateRemindersHour: number;
   /** Whether the organization is using a roadmap. */
@@ -7400,7 +7553,7 @@ export class Organization extends Request {
   public subscription?: PaidSubscription;
   /** The day at which to prompt for project updates. */
   public projectUpdateRemindersDay: L.Day;
-  /** The frequency at which to prompt for project updates. */
+  /** [DEPRECATED] The frequency at which to prompt for project updates. */
   public projectUpdatesReminderFrequency: L.ProjectUpdateReminderFrequency;
   /** The feature release channel the organization belongs to. */
   public releaseChannel: L.ReleaseChannel;
@@ -8053,6 +8206,7 @@ export class Project extends Request {
     this.inProgressScopeHistory = data.inProgressScopeHistory;
     this.issueCountHistory = data.issueCountHistory;
     this.name = data.name;
+    this.priority = data.priority;
     this.progress = data.progress;
     this.projectUpdateRemindersPausedUntilAt = parseDate(data.projectUpdateRemindersPausedUntilAt) ?? undefined;
     this.scope = data.scope;
@@ -8070,6 +8224,7 @@ export class Project extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.status = new ProjectStatus(request, data.status);
+    this.health = data.health ?? undefined;
     this._convertedFromIssue = data.convertedFromIssue ?? undefined;
     this._creator = data.creator ?? undefined;
     this._favorite = data.favorite ?? undefined;
@@ -8108,6 +8263,8 @@ export class Project extends Request {
   public issueCountHistory: number[];
   /** The project's name. */
   public name: string;
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  public priority: number;
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   public progress: number;
   /** The time until which project update reminders are paused. */
@@ -8146,6 +8303,8 @@ export class Project extends Request {
   public url: string;
   /** The status that the project is associated with. */
   public status: ProjectStatus;
+  /** The health of the project based on the last project update. */
+  public health?: L.ProjectUpdateHealthType;
   /** The project was created based on this issue. */
   public get convertedFromIssue(): LinearFetch<Issue> | undefined {
     return this._convertedFromIssue?.id ? new IssueQuery(this._request).fetch(this._convertedFromIssue?.id) : undefined;
@@ -8178,11 +8337,15 @@ export class Project extends Request {
   public documents(variables?: Omit<L.Project_DocumentsQueryVariables, "id">) {
     return new Project_DocumentsQuery(this._request, this.id, variables).fetch(variables);
   }
+  /** External links associated with the project. */
+  public externalLinks(variables?: Omit<L.Project_ExternalLinksQueryVariables, "id">) {
+    return new Project_ExternalLinksQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Issues associated with the project. */
   public issues(variables?: Omit<L.Project_IssuesQueryVariables, "id">) {
     return new Project_IssuesQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Links associated with the project. */
+  /** [DEPRECATED] Links associated with the project. */
   public links(variables?: Omit<L.Project_LinksQueryVariables, "id">) {
     return new Project_LinksQuery(this._request, this.id, variables).fetch(variables);
   }
@@ -8525,6 +8688,10 @@ export class ProjectNotification extends Request {
     this.emailedAt = parseDate(data.emailedAt) ?? undefined;
     this.id = data.id;
     this.parentCommentId = data.parentCommentId ?? undefined;
+    this.projectId = data.projectId;
+    this.projectMilestoneId = data.projectMilestoneId ?? undefined;
+    this.projectUpdateId = data.projectUpdateId ?? undefined;
+    this.reactionEmoji = data.reactionEmoji ?? undefined;
     this.readAt = parseDate(data.readAt) ?? undefined;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
     this.type = data.type;
@@ -8555,6 +8722,14 @@ export class ProjectNotification extends Request {
   public id: string;
   /** Related parent comment ID. Null if the notification is not related to a comment. */
   public parentCommentId?: string;
+  /** Related project ID. */
+  public projectId: string;
+  /** Related project milestone ID. */
+  public projectMilestoneId?: string;
+  /** Related project update ID. */
+  public projectUpdateId?: string;
+  /** Name of the reaction emoji related to the notification. */
+  public reactionEmoji?: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   public readAt?: Date;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
@@ -8611,6 +8786,7 @@ export class ProjectNotification extends Request {
 export class ProjectNotificationSubscription extends Request {
   private _customView?: L.ProjectNotificationSubscriptionFragment["customView"];
   private _cycle?: L.ProjectNotificationSubscriptionFragment["cycle"];
+  private _initiative?: L.ProjectNotificationSubscriptionFragment["initiative"];
   private _label?: L.ProjectNotificationSubscriptionFragment["label"];
   private _project: L.ProjectNotificationSubscriptionFragment["project"];
   private _subscriber: L.ProjectNotificationSubscriptionFragment["subscriber"];
@@ -8629,6 +8805,7 @@ export class ProjectNotificationSubscription extends Request {
     this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
+    this._initiative = data.initiative ?? undefined;
     this._label = data.label ?? undefined;
     this._project = data.project;
     this._subscriber = data.subscriber;
@@ -8663,6 +8840,10 @@ export class ProjectNotificationSubscription extends Request {
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The contextual initiative view associated with the notification subscription. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
@@ -8721,6 +8902,7 @@ export class ProjectRelation extends Request {
   private _projectMilestone?: L.ProjectRelationFragment["projectMilestone"];
   private _relatedProject: L.ProjectRelationFragment["relatedProject"];
   private _relatedProjectMilestone?: L.ProjectRelationFragment["relatedProjectMilestone"];
+  private _user?: L.ProjectRelationFragment["user"];
 
   public constructor(request: LinearRequest, data: L.ProjectRelationFragment) {
     super(request);
@@ -8735,6 +8917,7 @@ export class ProjectRelation extends Request {
     this._projectMilestone = data.projectMilestone ?? undefined;
     this._relatedProject = data.relatedProject;
     this._relatedProjectMilestone = data.relatedProjectMilestone ?? undefined;
+    this._user = data.user ?? undefined;
   }
 
   /** The type of anchor on the project end of the relation. */
@@ -8774,6 +8957,10 @@ export class ProjectRelation extends Request {
     return this._relatedProjectMilestone?.id
       ? new ProjectMilestoneQuery(this._request).fetch(this._relatedProjectMilestone?.id)
       : undefined;
+  }
+  /** The last user who created or modified the relation. */
+  public get user(): LinearFetch<User> | undefined {
+    return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
   }
 }
 /**
@@ -8876,6 +9063,7 @@ export class ProjectSearchResult extends Request {
     this.issueCountHistory = data.issueCountHistory;
     this.metadata = data.metadata;
     this.name = data.name;
+    this.priority = data.priority;
     this.progress = data.progress;
     this.projectUpdateRemindersPausedUntilAt = parseDate(data.projectUpdateRemindersPausedUntilAt) ?? undefined;
     this.scope = data.scope;
@@ -8893,6 +9081,7 @@ export class ProjectSearchResult extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.status = new ProjectStatus(request, data.status);
+    this.health = data.health ?? undefined;
     this._convertedFromIssue = data.convertedFromIssue ?? undefined;
     this._creator = data.creator ?? undefined;
     this._favorite = data.favorite ?? undefined;
@@ -8933,6 +9122,8 @@ export class ProjectSearchResult extends Request {
   public metadata: L.Scalars["JSONObject"];
   /** The project's name. */
   public name: string;
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  public priority: number;
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   public progress: number;
   /** The time until which project update reminders are paused. */
@@ -8971,6 +9162,8 @@ export class ProjectSearchResult extends Request {
   public url: string;
   /** The status that the project is associated with. */
   public status: ProjectStatus;
+  /** The health of the project based on the last project update. */
+  public health?: L.ProjectUpdateHealthType;
   /** The project was created based on this issue. */
   public get convertedFromIssue(): LinearFetch<Issue> | undefined {
     return this._convertedFromIssue?.id ? new IssueQuery(this._request).fetch(this._convertedFromIssue?.id) : undefined;
@@ -9109,6 +9302,7 @@ export class ProjectUpdate extends Request {
     this.id = data.id;
     this.isDiffHidden = data.isDiffHidden;
     this.reactionData = data.reactionData;
+    this.slugId = data.slugId;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this.reactions = data.reactions.map(node => new Reaction(request, node));
@@ -9135,6 +9329,8 @@ export class ProjectUpdate extends Request {
   public isDiffHidden: boolean;
   /** Emoji reaction summary, grouped by emoji type. */
   public reactionData: L.Scalars["JSONObject"];
+  /** The project update's unique URL slug. */
+  public slugId: string;
   /**
    * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
    *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
@@ -10242,6 +10438,7 @@ export class Team extends Request {
   private _draftWorkflowState?: L.TeamFragment["draftWorkflowState"];
   private _integrationsSettings?: L.TeamFragment["integrationsSettings"];
   private _markedAsDuplicateWorkflowState?: L.TeamFragment["markedAsDuplicateWorkflowState"];
+  private _membership?: L.TeamFragment["membership"];
   private _mergeWorkflowState?: L.TeamFragment["mergeWorkflowState"];
   private _mergeableWorkflowState?: L.TeamFragment["mergeableWorkflowState"];
   private _reviewWorkflowState?: L.TeamFragment["reviewWorkflowState"];
@@ -10283,6 +10480,7 @@ export class Team extends Request {
     this.name = data.name;
     this.private = data.private;
     this.requirePriorityToLeaveTriage = data.requirePriorityToLeaveTriage;
+    this.scimGroupName = data.scimGroupName ?? undefined;
     this.scimManaged = data.scimManaged;
     this.setIssueSortOrderOnStateChange = data.setIssueSortOrderOnStateChange;
     this.slackIssueComments = data.slackIssueComments;
@@ -10300,6 +10498,7 @@ export class Team extends Request {
     this._draftWorkflowState = data.draftWorkflowState ?? undefined;
     this._integrationsSettings = data.integrationsSettings ?? undefined;
     this._markedAsDuplicateWorkflowState = data.markedAsDuplicateWorkflowState ?? undefined;
+    this._membership = data.membership ?? undefined;
     this._mergeWorkflowState = data.mergeWorkflowState ?? undefined;
     this._mergeableWorkflowState = data.mergeableWorkflowState ?? undefined;
     this._reviewWorkflowState = data.reviewWorkflowState ?? undefined;
@@ -10372,6 +10571,8 @@ export class Team extends Request {
   public private: boolean;
   /** Whether an issue needs to have a priority set before leaving triage. */
   public requirePriorityToLeaveTriage: boolean;
+  /** The SCIM group name for the team. */
+  public scimGroupName?: string;
   /** Whether the team is managed by SCIM integration. */
   public scimManaged: boolean;
   /** Where to move issues when changing state. */
@@ -10439,6 +10640,10 @@ export class Team extends Request {
     return this._markedAsDuplicateWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._markedAsDuplicateWorkflowState?.id)
       : undefined;
+  }
+  /** The membership of the given user in the team. */
+  public get membership(): LinearFetch<TeamMembership> | undefined {
+    return this._membership?.id ? new TeamMembershipQuery(this._request).fetch(this._membership?.id) : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been merged. */
   public get mergeWorkflowState(): LinearFetch<WorkflowState> | undefined {
@@ -10700,6 +10905,7 @@ export class TeamMembershipPayload extends Request {
 export class TeamNotificationSubscription extends Request {
   private _customView?: L.TeamNotificationSubscriptionFragment["customView"];
   private _cycle?: L.TeamNotificationSubscriptionFragment["cycle"];
+  private _initiative?: L.TeamNotificationSubscriptionFragment["initiative"];
   private _label?: L.TeamNotificationSubscriptionFragment["label"];
   private _project?: L.TeamNotificationSubscriptionFragment["project"];
   private _subscriber: L.TeamNotificationSubscriptionFragment["subscriber"];
@@ -10718,6 +10924,7 @@ export class TeamNotificationSubscription extends Request {
     this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
+    this._initiative = data.initiative ?? undefined;
     this._label = data.label ?? undefined;
     this._project = data.project ?? undefined;
     this._subscriber = data.subscriber;
@@ -10752,6 +10959,10 @@ export class TeamNotificationSubscription extends Request {
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The contextual initiative view associated with the notification subscription. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
@@ -11596,6 +11807,7 @@ export class UserConnection extends Connection<User> {
 export class UserNotificationSubscription extends Request {
   private _customView?: L.UserNotificationSubscriptionFragment["customView"];
   private _cycle?: L.UserNotificationSubscriptionFragment["cycle"];
+  private _initiative?: L.UserNotificationSubscriptionFragment["initiative"];
   private _label?: L.UserNotificationSubscriptionFragment["label"];
   private _project?: L.UserNotificationSubscriptionFragment["project"];
   private _subscriber: L.UserNotificationSubscriptionFragment["subscriber"];
@@ -11614,6 +11826,7 @@ export class UserNotificationSubscription extends Request {
     this.userContextViewType = data.userContextViewType ?? undefined;
     this._customView = data.customView ?? undefined;
     this._cycle = data.cycle ?? undefined;
+    this._initiative = data.initiative ?? undefined;
     this._label = data.label ?? undefined;
     this._project = data.project ?? undefined;
     this._subscriber = data.subscriber;
@@ -11648,6 +11861,10 @@ export class UserNotificationSubscription extends Request {
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The contextual initiative view associated with the notification subscription. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
@@ -12015,6 +12232,43 @@ export class WebhookConnection extends Connection<Webhook> {
       data.nodes.map(node => new Webhook(request, node)),
       new PageInfo(request, data.pageInfo)
     );
+  }
+}
+/**
+ * Entity representing a webhook execution failure.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.WebhookFailureEventFragment response data
+ */
+export class WebhookFailureEvent extends Request {
+  private _webhook: L.WebhookFailureEventFragment["webhook"];
+
+  public constructor(request: LinearRequest, data: L.WebhookFailureEventFragment) {
+    super(request);
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.executionId = data.executionId;
+    this.httpStatus = data.httpStatus ?? undefined;
+    this.id = data.id;
+    this.responseOrError = data.responseOrError ?? undefined;
+    this.url = data.url;
+    this._webhook = data.webhook;
+  }
+
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique execution ID of the webhook push. This is retained between retries of the same push. */
+  public executionId: string;
+  /** The HTTP status code returned by the recipient. */
+  public httpStatus?: number;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The HTTP response body returned by the recipient or error occured. */
+  public responseOrError?: string;
+  /** The URL that the webhook was trying to push to. */
+  public url: string;
+  /** The webhook that this failure event is associated with. */
+  public get webhook(): LinearFetch<Webhook> | undefined {
+    return new WebhookQuery(this._request).fetch(this._webhook.id);
   }
 }
 /**
@@ -14160,6 +14414,7 @@ export class NotificationSubscriptionQuery extends Request {
   ): LinearFetch<
     | CustomViewNotificationSubscription
     | CycleNotificationSubscription
+    | InitiativeNotificationSubscription
     | LabelNotificationSubscription
     | ProjectNotificationSubscription
     | TeamNotificationSubscription
@@ -14182,6 +14437,11 @@ export class NotificationSubscriptionQuery extends Request {
         );
       case "CycleNotificationSubscription":
         return new CycleNotificationSubscription(this._request, data as L.CycleNotificationSubscriptionFragment);
+      case "InitiativeNotificationSubscription":
+        return new InitiativeNotificationSubscription(
+          this._request,
+          data as L.InitiativeNotificationSubscriptionFragment
+        );
       case "LabelNotificationSubscription":
         return new LabelNotificationSubscription(this._request, data as L.LabelNotificationSubscriptionFragment);
       case "ProjectNotificationSubscription":
@@ -15535,6 +15795,32 @@ export class UsersQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable VerifyGitHubEnterpriseServerInstallation Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class VerifyGitHubEnterpriseServerInstallationQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the VerifyGitHubEnterpriseServerInstallation query and return a GitHubEnterpriseServerInstallVerificationPayload
+   *
+   * @returns parsed response from VerifyGitHubEnterpriseServerInstallationQuery
+   */
+  public async fetch(): LinearFetch<GitHubEnterpriseServerInstallVerificationPayload> {
+    const response = await this._request<
+      L.VerifyGitHubEnterpriseServerInstallationQuery,
+      L.VerifyGitHubEnterpriseServerInstallationQueryVariables
+    >(L.VerifyGitHubEnterpriseServerInstallationDocument, {});
+    const data = response.verifyGitHubEnterpriseServerInstallation;
+
+    return new GitHubEnterpriseServerInstallVerificationPayload(this._request, data);
   }
 }
 
@@ -23582,6 +23868,55 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
 }
 
 /**
+ * A fetchable Document_Comments Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to document
+ * @param variables - variables without 'id' to pass into the Document_CommentsQuery
+ */
+export class Document_CommentsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Document_CommentsQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Document_CommentsQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Document_Comments query and return a CommentConnection
+   *
+   * @param variables - variables without 'id' to pass into the Document_CommentsQuery
+   * @returns parsed response from Document_CommentsQuery
+   */
+  public async fetch(variables?: Omit<L.Document_CommentsQueryVariables, "id">): LinearFetch<CommentConnection> {
+    const response = await this._request<L.Document_CommentsQuery, L.Document_CommentsQueryVariables>(
+      L.Document_CommentsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.document.comments;
+
+    return new CommentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Favorite_Children Query
  *
  * @param request - function to call the graphql client
@@ -25024,6 +25359,61 @@ export class Project_DocumentsQuery extends Request {
     const data = response.project.documents;
 
     return new DocumentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Project_ExternalLinks Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to project
+ * @param variables - variables without 'id' to pass into the Project_ExternalLinksQuery
+ */
+export class Project_ExternalLinksQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Project_ExternalLinksQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.Project_ExternalLinksQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Project_ExternalLinks query and return a EntityExternalLinkConnection
+   *
+   * @param variables - variables without 'id' to pass into the Project_ExternalLinksQuery
+   * @returns parsed response from Project_ExternalLinksQuery
+   */
+  public async fetch(
+    variables?: Omit<L.Project_ExternalLinksQueryVariables, "id">
+  ): LinearFetch<EntityExternalLinkConnection> {
+    const response = await this._request<L.Project_ExternalLinksQuery, L.Project_ExternalLinksQueryVariables>(
+      L.Project_ExternalLinksDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.project.externalLinks;
+
+    return new EntityExternalLinkConnection(
       this._request,
       connection =>
         this.fetch(
@@ -27379,6 +27769,7 @@ export class LinearSdk extends Request {
   ): LinearFetch<
     | CustomViewNotificationSubscription
     | CycleNotificationSubscription
+    | InitiativeNotificationSubscription
     | LabelNotificationSubscription
     | ProjectNotificationSubscription
     | TeamNotificationSubscription
@@ -27797,6 +28188,14 @@ export class LinearSdk extends Request {
     return new UsersQuery(this._request).fetch(variables);
   }
   /**
+   * Verify that we received the correct response from the GitHub Enterprise Server.
+   *
+   * @returns GitHubEnterpriseServerInstallVerificationPayload
+   */
+  public get verifyGitHubEnterpriseServerInstallation(): LinearFetch<GitHubEnterpriseServerInstallVerificationPayload> {
+    return new VerifyGitHubEnterpriseServerInstallationQuery(this._request).fetch();
+  }
+  /**
    * The currently authenticated user.
    *
    * @returns User
@@ -28200,7 +28599,7 @@ export class LinearSdk extends Request {
     return new CreateCycleMutation(this._request).fetch(input);
   }
   /**
-   * [DEPRECATED] Shifts all cycles starts by a certain number of weeks.
+   * Shifts all cycles starts and ends by a certain number of days, starting from the provided cycle onwards.
    *
    * @param input - required input to pass to cycleShiftAll
    * @returns CyclePayload
@@ -29359,7 +29758,7 @@ export class LinearSdk extends Request {
     return new ArchiveNotificationMutation(this._request).fetch(id);
   }
   /**
-   * Archives all of the user's past notifications for the associated entity.
+   * Archives a notification and all related notifications.
    *
    * @param input - required input to pass to notificationArchiveAll
    * @returns NotificationBatchActionPayload
@@ -29368,7 +29767,7 @@ export class LinearSdk extends Request {
     return new NotificationArchiveAllMutation(this._request).fetch(input);
   }
   /**
-   * Marks all past notifications for the associated entity as read.
+   * Marks notification and all related notifications as read.
    *
    * @param input - required input to pass to notificationMarkReadAll
    * @param readAt - required readAt to pass to notificationMarkReadAll
@@ -29381,7 +29780,7 @@ export class LinearSdk extends Request {
     return new NotificationMarkReadAllMutation(this._request).fetch(input, readAt);
   }
   /**
-   * Marks all past notifications for the associated entity as unread.
+   * Marks notification and all related notifications as unread.
    *
    * @param input - required input to pass to notificationMarkUnreadAll
    * @returns NotificationBatchActionPayload
@@ -29390,7 +29789,7 @@ export class LinearSdk extends Request {
     return new NotificationMarkUnreadAllMutation(this._request).fetch(input);
   }
   /**
-   * Snoozes a notification and all past notifications for the associated entity.
+   * Snoozes a notification and all related notifications.
    *
    * @param input - required input to pass to notificationSnoozeAll
    * @param snoozedUntilAt - required snoozedUntilAt to pass to notificationSnoozeAll
@@ -29445,7 +29844,7 @@ export class LinearSdk extends Request {
     return new UnarchiveNotificationMutation(this._request).fetch(id);
   }
   /**
-   * Unsnoozes a notification and all past notifications for the associated entity.
+   * Unsnoozes a notification and all related notifications.
    *
    * @param input - required input to pass to notificationUnsnoozeAll
    * @param unsnoozedAt - required unsnoozedAt to pass to notificationUnsnoozeAll

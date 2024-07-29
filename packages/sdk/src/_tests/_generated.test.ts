@@ -224,6 +224,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the team.membership query for L.TeamMembership */
+    it("team.membership", async () => {
+      if (_team) {
+        const team_membership: L.TeamMembership | undefined = await _team.membership;
+        expect(team_membership instanceof L.TeamMembership);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.membership query");
+      }
+    });
+
     /** Test the team.mergeWorkflowState query for L.WorkflowState */
     it("team.mergeWorkflowState", async () => {
       if (_team) {
@@ -963,6 +973,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the document connection query for the Comment */
+    it("document.comments", async () => {
+      if (_document) {
+        const comments: L.CommentConnection | undefined = await _document.comments();
+        expect(comments instanceof L.CommentConnection);
+      } else {
+        console.warn("codegen-doc:print: No document found - cannot test _document.comments query");
+      }
+    });
+
     /** Test the document.creator query for L.User */
     it("document.creator", async () => {
       if (_document) {
@@ -1154,6 +1174,16 @@ describe("generated", () => {
         expect(favorite_document instanceof L.Document);
       } else {
         console.warn("codegen-doc:print: No Favorite found - cannot test favorite.document query");
+      }
+    });
+
+    /** Test the favorite.initiative query for L.Initiative */
+    it("favorite.initiative", async () => {
+      if (_favorite) {
+        const favorite_initiative: L.Initiative | undefined = await _favorite.initiative;
+        expect(favorite_initiative instanceof L.Initiative);
+      } else {
+        console.warn("codegen-doc:print: No Favorite found - cannot test favorite.initiative query");
       }
     });
 
@@ -2534,6 +2564,7 @@ describe("generated", () => {
       | L.NotificationSubscription
       | L.CustomViewNotificationSubscription
       | L.CycleNotificationSubscription
+      | L.InitiativeNotificationSubscription
       | L.LabelNotificationSubscription
       | L.ProjectNotificationSubscription
       | L.TeamNotificationSubscription
@@ -2557,6 +2588,7 @@ describe("generated", () => {
           | L.NotificationSubscription
           | L.CustomViewNotificationSubscription
           | L.CycleNotificationSubscription
+          | L.InitiativeNotificationSubscription
           | L.LabelNotificationSubscription
           | L.ProjectNotificationSubscription
           | L.TeamNotificationSubscription
@@ -2592,6 +2624,19 @@ describe("generated", () => {
       } else {
         console.warn(
           "codegen-doc:print: No NotificationSubscription found - cannot test notificationSubscription.cycle query"
+        );
+      }
+    });
+
+    /** Test the notificationSubscription.initiative query for L.Initiative */
+    it("notificationSubscription.initiative", async () => {
+      if (_notificationSubscription) {
+        const notificationSubscription_initiative: L.Initiative | undefined =
+          await _notificationSubscription.initiative;
+        expect(notificationSubscription_initiative instanceof L.Initiative);
+      } else {
+        console.warn(
+          "codegen-doc:print: No NotificationSubscription found - cannot test notificationSubscription.initiative query"
         );
       }
     });
@@ -3041,6 +3086,16 @@ describe("generated", () => {
         );
       }
     });
+
+    /** Test the projectRelation.user query for L.User */
+    it("projectRelation.user", async () => {
+      if (_projectRelation) {
+        const projectRelation_user: L.User | undefined = await _projectRelation.user;
+        expect(projectRelation_user instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No ProjectRelation found - cannot test projectRelation.user query");
+      }
+    });
   });
 
   /** Test all ProjectUpdateInteraction queries */
@@ -3183,6 +3238,16 @@ describe("generated", () => {
         expect(documents instanceof L.DocumentConnection);
       } else {
         console.warn("codegen-doc:print: No project found - cannot test _project.documents query");
+      }
+    });
+
+    /** Test the project connection query for the EntityExternalLink */
+    it("project.externalLinks", async () => {
+      if (_project) {
+        const externalLinks: L.EntityExternalLinkConnection | undefined = await _project.externalLinks();
+        expect(externalLinks instanceof L.EntityExternalLinkConnection);
+      } else {
+        console.warn("codegen-doc:print: No project found - cannot test _project.externalLinks query");
       }
     });
 
@@ -3735,6 +3800,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the team.membership query for L.TeamMembership */
+    it("team.membership", async () => {
+      if (_team) {
+        const team_membership: L.TeamMembership | undefined = await _team.membership;
+        expect(team_membership instanceof L.TeamMembership);
+      } else {
+        console.warn("codegen-doc:print: No Team found - cannot test team.membership query");
+      }
+    });
+
     /** Test the team.mergeWorkflowState query for L.WorkflowState */
     it("team.mergeWorkflowState", async () => {
       if (_team) {
@@ -4070,6 +4145,16 @@ describe("generated", () => {
       } else {
         console.warn("codegen-doc:print: No User found - cannot test user.organization query");
       }
+    });
+  });
+
+  /** Test VerifyGitHubEnterpriseServerInstallation query */
+  describe("VerifyGitHubEnterpriseServerInstallation", () => {
+    /** Test the root model query for VerifyGitHubEnterpriseServerInstallation */
+    it("verifyGitHubEnterpriseServerInstallation", async () => {
+      const verifyGitHubEnterpriseServerInstallation: L.GitHubEnterpriseServerInstallVerificationPayload | undefined =
+        await client.verifyGitHubEnterpriseServerInstallation;
+      expect(verifyGitHubEnterpriseServerInstallation instanceof L.GitHubEnterpriseServerInstallVerificationPayload);
     });
   });
 

@@ -1451,6 +1451,10 @@ input CommentCollectionFilter {
   """
   length: NumberComparator
   """
+  Filters that the comment's customer needs must satisfy.
+  """
+  needs: CustomerNeedCollectionFilter
+  """
   Compound filters, one of which need to be matched by the comment.
   """
   or: [CommentCollectionFilter!]
@@ -1582,6 +1586,10 @@ input CommentFilter {
   """
   issue: NullableIssueFilter
   """
+  Filters that the comment's customer needs must satisfy.
+  """
+  needs: CustomerNeedCollectionFilter
+  """
   Compound filters, one of which need to be matched by the comment.
   """
   or: [CommentFilter!]
@@ -1619,6 +1627,10 @@ type CommentNotification {
   Related parent comment ID. Null if the notification is not related to a comment.
   """
   parentCommentId: String
+  """
+  Name of the reaction emoji related to the notification.
+  """
+  reactionEmoji: String
 }
 
 type CommentPayload {
@@ -1665,72 +1677,6 @@ input CommentUpdateInput {
   [INTERNAL] The identifiers of the users subscribing to this comment.
   """
   subscriberIds: [String!]
-}
-
-"""
-A company related to issue's origin.
-"""
-type Company implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  Custom company properties.
-  """
-  companyProperties: JSONObject!
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The user who added the company.
-  """
-  creator: User!
-  """
-  Company ID in an external system.
-  """
-  externalId: String!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  Company logo URL.
-  """
-  logoUrl: String
-  """
-  Company name.
-  """
-  name: String!
-  """
-  The organization of the customer.
-  """
-  organization: Organization!
-  """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  Company website URL.
-  """
-  websiteUrl: String
-}
-
-type CompanyConnection {
-  edges: [CompanyEdge!]!
-  nodes: [Company!]!
-  pageInfo: PageInfo!
-}
-
-type CompanyEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: Company!
 }
 
 """
@@ -1876,6 +1822,60 @@ input CreatedAtSort {
   The order for the individual sort
   """
   order: PaginationSortOrder
+}
+
+"""
+[ALPHA] A custom attribute on a Customer entity.
+"""
+type CustomAttribute implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The customer that this custom attribute is attached to.
+  """
+  customer: Customer!
+  """
+  The field that is defining this custom attribute.
+  """
+  field: CustomerSchemaField!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The type of the value stored by the attribute.
+  """
+  type: SchemaFieldType!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The value of the custom attribute.
+  """
+  value: JSON!
+}
+
+type CustomAttributeConnection {
+  edges: [CustomAttributeEdge!]!
+  nodes: [CustomAttribute!]!
+  pageInfo: PageInfo!
+}
+
+type CustomAttributeEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: CustomAttribute!
 }
 
 """
@@ -2149,6 +2149,10 @@ type CustomViewNotificationSubscription implements Entity & Node & NotificationS
   """
   id: ID!
   """
+  The contextual initiative view associated with the notification subscription.
+  """
+  initiative: Initiative
+  """
   The contextual label view associated with the notification subscription.
   """
   label: IssueLabel
@@ -2266,6 +2270,695 @@ input CustomViewUpdateInput {
 }
 
 """
+[ALPHA] A customer whose needs will be tied to issues or projects.
+"""
+type Customer implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The domains associated with this customer.
+  """
+  domains: [String!]!
+  """
+  The ids of the customers in external systems.
+  """
+  externalIds: [String!]!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The customer's logo URL.
+  """
+  logoUrl: String
+  """
+  The customer's name.
+  """
+  name: String!
+  """
+  The user who owns the customer.
+  """
+  owner: User!
+  """
+  The ID of the Slack channel used to interact with the customer.
+  """
+  slackChannelId: String
+  """
+  The current status of the customer.
+  """
+  status: CustomerStatus!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Customer filtering options.
+"""
+input CustomerCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the customer.
+  """
+  and: [CustomerCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the customer's domains.
+  """
+  domains: StringArrayComparator
+  """
+  Filters that needs to be matched by all customers.
+  """
+  every: CustomerFilter
+  """
+  Comparator for the customer's external IDs.
+  """
+  externalIds: StringArrayComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Comparator for the customer name.
+  """
+  name: StringComparator
+  """
+  Filters that the customer's needs must satisfy.
+  """
+  needs: CustomerNeedCollectionFilter
+  """
+  Compound filters, one of which need to be matched by the customer.
+  """
+  or: [CustomerCollectionFilter!]
+  """
+  Filters that the customer owner must satisfy.
+  """
+  owner: UserFilter
+  """
+  Comparator for the customer slack channel ID.
+  """
+  slackChannelId: StringComparator
+  """
+  Filters that needs to be matched by some customers.
+  """
+  some: CustomerFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+type CustomerConnection {
+  edges: [CustomerEdge!]!
+  nodes: [Customer!]!
+  pageInfo: PageInfo!
+}
+
+input CustomerCreateInput {
+  """
+  The domains associated with this customer.
+  """
+  domains: [String!] = []
+  """
+  The ids of the customers in external systems.
+  """
+  externalIds: [String!] = []
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The name of the customer.
+  """
+  name: String!
+  """
+  The user who owns the customer.
+  """
+  ownerId: String
+  """
+  The ID of the Slack channel used to interact with the customer.
+  """
+  slackChannelId: String
+  """
+  The status of the customer.
+  """
+  statusId: String
+}
+
+type CustomerEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: Customer!
+}
+
+"""
+Customer filtering options.
+"""
+input CustomerFilter {
+  """
+  Compound filters, all of which need to be matched by the customer.
+  """
+  and: [CustomerFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the customer's domains.
+  """
+  domains: StringArrayComparator
+  """
+  Comparator for the customer's external IDs.
+  """
+  externalIds: StringArrayComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the customer name.
+  """
+  name: StringComparator
+  """
+  Filters that the customer's needs must satisfy.
+  """
+  needs: CustomerNeedCollectionFilter
+  """
+  Compound filters, one of which need to be matched by the customer.
+  """
+  or: [CustomerFilter!]
+  """
+  Filters that the customer owner must satisfy.
+  """
+  owner: UserFilter
+  """
+  Comparator for the customer slack channel ID.
+  """
+  slackChannelId: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+"""
+[ALPHA] A customer need, expressed through a reference to an issue, project, or comment.
+"""
+type CustomerNeed implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The comment this need is referencing.
+  """
+  comment: Comment
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The customer that this need is attached to.
+  """
+  customer: Customer!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The issue this need is referencing.
+  """
+  issue: Issue
+  """
+  The priority of the customer need. 0 = No priority, 1 = Critical, 2 = Important, 3 = Nice to have.
+  """
+  priority: Float!
+  """
+  The project this need is referencing.
+  """
+  project: Project
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Customer needs filtering options.
+"""
+input CustomerNeedCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the customer needs.
+  """
+  and: [CustomerNeedCollectionFilter!]
+  """
+  Filters that the need's comment must satisfy.
+  """
+  comment: NullableCommentFilter
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the need's customer must satisfy.
+  """
+  customer: CustomerFilter
+  """
+  Filters that needs to be matched by all customer needs.
+  """
+  every: CustomerNeedFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filters that the need's issue must satisfy.
+  """
+  issue: NullableIssueFilter
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Compound filters, one of which need to be matched by the customer needs.
+  """
+  or: [CustomerNeedCollectionFilter!]
+  """
+  Comparator for the customer need priority.
+  """
+  priority: NumberComparator
+  """
+  Filters that the need's project must satisfy.
+  """
+  project: NullableProjectFilter
+  """
+  Filters that needs to be matched by some customer needs.
+  """
+  some: CustomerNeedFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+type CustomerNeedConnection {
+  edges: [CustomerNeedEdge!]!
+  nodes: [CustomerNeed!]!
+  pageInfo: PageInfo!
+}
+
+input CustomerNeedCreateInput {
+  """
+  The comment this need is referencing.
+  """
+  commentId: String
+  """
+  The uuid of the customer the need belongs to.
+  """
+  customerId: String!
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The issue this need is referencing.
+  """
+  issueId: String
+  """
+  The priority of the customer need. 0 = No priority, 1 = Critical, 2 = Important, 3 = Nice to have.
+  """
+  priority: Float
+  """
+  The project this need is referencing.
+  """
+  projectId: String
+}
+
+type CustomerNeedEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: CustomerNeed!
+}
+
+"""
+Customer filtering options.
+"""
+input CustomerNeedFilter {
+  """
+  Compound filters, all of which need to be matched by the customer need.
+  """
+  and: [CustomerNeedFilter!]
+  """
+  Filters that the need's comment must satisfy.
+  """
+  comment: NullableCommentFilter
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the need's customer must satisfy.
+  """
+  customer: CustomerFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filters that the need's issue must satisfy.
+  """
+  issue: NullableIssueFilter
+  """
+  Compound filters, one of which need to be matched by the customer need.
+  """
+  or: [CustomerNeedFilter!]
+  """
+  Comparator for the customer need priority.
+  """
+  priority: NumberComparator
+  """
+  Filters that the need's project must satisfy.
+  """
+  project: NullableProjectFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+type CustomerNeedPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The customer need that was created or updated.
+  """
+  need: CustomerNeed!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+input CustomerNeedUpdateInput {
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The priority of the customer need. 0 = No priority, 1 = Critical, 2 = Important, 3 = Nice to have.
+  """
+  priority: Float
+}
+
+type CustomerPayload {
+  """
+  The customer that was created or updated.
+  """
+  customer: Customer!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+[ALPHA] A customer schema.
+"""
+type CustomerSchema implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The schema display name.
+  """
+  displayName: String!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type CustomerSchemaConnection {
+  edges: [CustomerSchemaEdge!]!
+  nodes: [CustomerSchema!]!
+  pageInfo: PageInfo!
+}
+
+type CustomerSchemaEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: CustomerSchema!
+}
+
+"""
+[ALPHA] A customer schema field.
+"""
+type CustomerSchemaField implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  Whether this field is enabled to be used as a custom attribute.
+  """
+  enabled: Boolean!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The name of the field in the schema.
+  """
+  name: String!
+  """
+  The type of the field in the schema.
+  """
+  type: SchemaFieldType!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type CustomerSchemaFieldConnection {
+  edges: [CustomerSchemaFieldEdge!]!
+  nodes: [CustomerSchemaField!]!
+  pageInfo: PageInfo!
+}
+
+type CustomerSchemaFieldEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: CustomerSchemaField!
+}
+
+"""
+[ALPHA] A customer status.
+"""
+type CustomerStatus implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The UI color of the status as a HEX string.
+  """
+  color: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  Description of the status.
+  """
+  description: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The name of the status.
+  """
+  name: String!
+  """
+  The position of the status in the workspace's customers flow.
+  """
+  position: Float!
+  """
+  The type of the customer status.
+  """
+  type: CustomerStatusType!
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type CustomerStatusConnection {
+  edges: [CustomerStatusEdge!]!
+  nodes: [CustomerStatus!]!
+  pageInfo: PageInfo!
+}
+
+input CustomerStatusCreateInput {
+  """
+  The UI color of the status as a HEX string.
+  """
+  color: String!
+  """
+  Description of the status.
+  """
+  description: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The name of the status.
+  """
+  name: String!
+  """
+  The position of the status in the workspace's customer flow.
+  """
+  position: Float!
+  """
+  The type of the customer status.
+  """
+  type: CustomerStatusType!
+}
+
+type CustomerStatusEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: CustomerStatus!
+}
+
+type CustomerStatusPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The customer status that was created or updated.
+  """
+  status: CustomerStatus!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+A type of customer status.
+"""
+enum CustomerStatusType {
+  active
+  inactive
+}
+
+input CustomerStatusUpdateInput {
+  """
+  The UI color of the status as a HEX string.
+  """
+  color: String
+  """
+  Description of the status.
+  """
+  description: String
+  """
+  The name of the status.
+  """
+  name: String
+  """
+  The position of the status in the workspace's customer flow.
+  """
+  position: Float
+  """
+  The type of the customer status.
+  """
+  type: CustomerStatusType
+}
+
+input CustomerUpdateInput {
+  """
+  The domains associated with this customer.
+  """
+  domains: [String!]
+  """
+  The ids of the customers in external systems.
+  """
+  externalIds: [String!]
+  """
+  The name of the customer.
+  """
+  name: String
+  """
+  The user who owns the customer.
+  """
+  ownerId: String
+  """
+  The ID of the Slack channel used to interact with the customer.
+  """
+  slackChannelId: String
+  """
+  The status of the customer.
+  """
+  statusId: String
+}
+
+"""
 A set of issues to be resolved in a specified amount of time.
 """
 type Cycle implements Node {
@@ -2358,6 +3051,10 @@ type Cycle implements Node {
   The overall progress of the cycle. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
   """
   progress: Float!
+  """
+  [Internal] The progress history of the cycle.
+  """
+  progressHistory: JSONObject!
   """
   The total number of estimation points after each day.
   """
@@ -2585,6 +3282,10 @@ type CycleNotificationSubscription implements Entity & Node & NotificationSubscr
   """
   id: ID!
   """
+  The contextual initiative view associated with the notification subscription.
+  """
+  initiative: Initiative
+  """
   The contextual label view associated with the notification subscription.
   """
   label: IssueLabel
@@ -2636,15 +3337,15 @@ type CyclePayload {
 }
 
 """
-[DEPRECATED] Input for shifting all cycles by a certain number of days. Mutation is now deprecated.
+Input for shifting all cycles from a certain cycle onwards by a certain number of days
 """
 input CycleShiftAllInput {
   """
-  [DEPRECATED] The number of days to shift the cycles by.
+  The number of days to shift the cycles by.
   """
   daysToShift: Float!
   """
-  [DEPRECATED] The cycle id at which to start the shift.
+  The cycle ID at which to start the shift.
   """
   id: String!
 }
@@ -2894,6 +3595,39 @@ type Document implements Node {
   """
   color: String
   """
+  Comments associated with the document.
+  """
+  comments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned comments.
+    """
+    filter: CommentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CommentConnection!
+  """
   The documents content in markdown format.
   """
   content: String
@@ -3011,6 +3745,10 @@ input DocumentCollectionFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Filters that the document's initiative must satisfy.
+  """
+  initiative: InitiativeFilter
   """
   Comparator for the collection length.
   """
@@ -3245,6 +3983,10 @@ input DocumentCreateInput {
   """
   sortOrder: Float
   """
+  [INTERNAL] The identifiers of the users subscribing to this document.
+  """
+  subscriberIds: [String!]
+  """
   The title of the document.
   """
   title: String!
@@ -3278,6 +4020,10 @@ input DocumentFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Filters that the document's initiative must satisfy.
+  """
+  initiative: InitiativeFilter
   """
   Compound filters, one of which need to be matched by the document.
   """
@@ -3337,6 +4083,10 @@ type DocumentNotification implements Entity & Node & Notification {
   """
   createdAt: DateTime!
   """
+  Related document ID.
+  """
+  documentId: String!
+  """
   The time at when an email reminder for this notification was sent to the user. Null, if no email
       reminder has been sent.
   """
@@ -3346,17 +4096,25 @@ type DocumentNotification implements Entity & Node & Notification {
   """
   externalUserActor: ExternalUser
   """
-  [ALPHA] Notifications with the same grouping key will be grouped together in the UI.
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
   """
   groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
   """
   The unique identifier of the entity.
   """
   id: ID!
   """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
   [Internal] If notification actor was Linear.
   """
-  isLinearActor: Boolean
+  isLinearActor: Boolean!
   """
   [Internal] Issue's status type for issue notifications.
   """
@@ -3369,6 +4127,10 @@ type DocumentNotification implements Entity & Node & Notification {
   [Internal] Project update health for new updates.
   """
   projectUpdateHealth: String
+  """
+  Name of the reaction emoji related to the notification.
+  """
+  reactionEmoji: String
   """
   The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
   """
@@ -3447,6 +4209,39 @@ type DocumentSearchResult implements Node {
   The color of the icon.
   """
   color: String
+  """
+  Comments associated with the document.
+  """
+  comments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned comments.
+    """
+    filter: CommentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CommentConnection!
   """
   The documents content in markdown format.
   """
@@ -3579,6 +4374,10 @@ input DocumentUpdateInput {
   """
   sortOrder: Float
   """
+  [INTERNAL] The identifiers of the users subscribing to this document.
+  """
+  subscriberIds: [String!]
+  """
   The title of the document.
   """
   title: String
@@ -3642,6 +4441,10 @@ type Draft implements Node {
   The user who created the draft.
   """
   user: User!
+  """
+  [INTERNAL] Whether the draft was ported from a local draft.
+  """
+  wasLocalDraft: Boolean!
 }
 
 """
@@ -4291,6 +5094,10 @@ type Favorite implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  The favorited initiative.
+  """
+  initiative: Initiative
   """
   The targeted tab of the initiative.
   """
@@ -4963,7 +5770,18 @@ type GitHubCommitIntegrationPayload {
   webhookSecret: String!
 }
 
+type GitHubEnterpriseServerInstallVerificationPayload {
+  """
+  Has the install been successful.
+  """
+  success: Boolean!
+}
+
 type GitHubEnterpriseServerPayload {
+  """
+  The app install address.
+  """
+  installUrl: String!
   """
   The integration that was created or updated.
   """
@@ -4991,6 +5809,10 @@ Metadata and settings for a GitHub import integration.
 """
 type GitHubImportSettings {
   """
+  A map storing all available issue labels per repository
+  """
+  labels: JSONObject
+  """
   The avatar URL for the GitHub organization.
   """
   orgAvatarUrl: String!
@@ -5009,6 +5831,10 @@ type GitHubImportSettings {
 }
 
 input GitHubImportSettingsInput {
+  """
+  A map storing all available issue labels per repository
+  """
+  labels: JSONObject
   """
   The avatar URL for the GitHub organization.
   """
@@ -5442,6 +6268,10 @@ input InitiativeCollectionFilter {
   """
   some: InitiativeFilter
   """
+  Comparator for the initiative status.
+  """
+  status: StringComparator
+  """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
@@ -5540,6 +6370,10 @@ input InitiativeFilter {
   """
   slugId: StringComparator
   """
+  Comparator for the initiative status.
+  """
+  status: StringComparator
+  """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
@@ -5591,17 +6425,29 @@ type InitiativeNotification implements Entity & Node & Notification {
   """
   externalUserActor: ExternalUser
   """
-  [ALPHA] Notifications with the same grouping key will be grouped together in the UI.
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
   """
   groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
   """
   The unique identifier of the entity.
   """
   id: ID!
   """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
+  Related initiative ID.
+  """
+  initiativeId: String!
+  """
   [Internal] If notification actor was Linear.
   """
-  isLinearActor: Boolean
+  isLinearActor: Boolean!
   """
   [Internal] Issue's status type for issue notifications.
   """
@@ -5614,6 +6460,10 @@ type InitiativeNotification implements Entity & Node & Notification {
   [Internal] Project update health for new updates.
   """
   projectUpdateHealth: String
+  """
+  Name of the reaction emoji related to the notification.
+  """
+  reactionEmoji: String
   """
   The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
   """
@@ -5652,6 +6502,78 @@ type InitiativeNotification implements Entity & Node & Notification {
   The user that received the notification.
   """
   user: User!
+}
+
+"""
+An initiative notification subscription.
+"""
+type InitiativeNotificationSubscription implements Entity & Node & NotificationSubscription {
+  """
+  Whether the subscription is active or not.
+  """
+  active: Boolean!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The type of view to which the notification subscription context is associated with.
+  """
+  contextViewType: ContextViewType
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The contextual custom view associated with the notification subscription.
+  """
+  customView: CustomView
+  """
+  The contextual cycle view associated with the notification subscription.
+  """
+  cycle: Cycle
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The initiative subscribed to.
+  """
+  initiative: Initiative!
+  """
+  The contextual label view associated with the notification subscription.
+  """
+  label: IssueLabel
+  """
+  The type of subscription.
+  """
+  notificationSubscriptionTypes: [String!]!
+  """
+  The contextual project view associated with the notification subscription.
+  """
+  project: Project
+  """
+  The user that subscribed to receive notifications.
+  """
+  subscriber: User!
+  """
+  The team associated with the notification subscription.
+  """
+  team: Team
+  """
+  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user view associated with the notification subscription.
+  """
+  user: User
+  """
+  The type of user view to which the notification subscription context is associated with.
+  """
+  userContextViewType: UserContextViewType
 }
 
 """
@@ -6678,6 +7600,10 @@ type Issue implements Node {
   """
   priorityLabel: String!
   """
+  [ALPHA] The order of the item in relation to other items in the organization, when ordered by priority.
+  """
+  prioritySortOrder: Float!
+  """
   The project that the issue is associated with.
   """
   project: Project
@@ -6961,6 +7887,10 @@ input IssueCollectionFilter {
   """
   length: NumberComparator
   """
+  Filters that the issue's customer needs must satisfy.
+  """
+  needs: CustomerNeedFilter
+  """
   Comparator for the issues number.
   """
   number: NumberComparator
@@ -7114,6 +8044,10 @@ input IssueCreateInput {
   """
   priority: Int
   """
+  [ALPHA] The position of the issue related to other issues, when ordered by priority.
+  """
+  prioritySortOrder: Float
+  """
   The project associated with the issue.
   """
   projectId: String
@@ -7150,7 +8084,7 @@ input IssueCreateInput {
   """
   subscriberIds: [String!]
   """
-  The identifier or key of the team associated with the issue.
+  The identifier of the team associated with the issue.
   """
   teamId: String!
   """
@@ -7360,6 +8294,10 @@ input IssueFilter {
   """
   lastAppliedTemplate: NullableTemplateFilter
   """
+  Filters that the issue's customer needs must satisfy.
+  """
+  needs: CustomerNeedFilter
+  """
   Comparator for the issues number.
   """
   number: NumberComparator
@@ -7459,7 +8397,7 @@ type IssueHistory implements Node {
   """
   The actors that performed the actions. This field may be empty in the case of integrations or automations.
   """
-  actors: [User!]!
+  actors: [User!]
   """
   ID's of labels that were added.
   """
@@ -8182,21 +9120,33 @@ type IssueNotification implements Entity & Node & Notification {
   """
   externalUserActor: ExternalUser
   """
-  [ALPHA] Notifications with the same grouping key will be grouped together in the UI.
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
   """
   groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
   """
   The unique identifier of the entity.
   """
   id: ID!
   """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
   [Internal] If notification actor was Linear.
   """
-  isLinearActor: Boolean
+  isLinearActor: Boolean!
   """
   The issue related to the notification.
   """
   issue: Issue!
+  """
+  Related issue ID.
+  """
+  issueId: String!
   """
   [Internal] Issue's status type for issue notifications.
   """
@@ -8743,6 +9693,10 @@ type IssueSearchResult implements Node {
   """
   priorityLabel: String!
   """
+  [ALPHA] The order of the item in relation to other items in the organization, when ordered by priority.
+  """
+  prioritySortOrder: Float!
+  """
   The project that the issue is associated with.
   """
   project: Project
@@ -8986,10 +9940,6 @@ input IssueUpdateInput {
   """
   boardOrder: Float
   """
-  The identifiers of the companies associated with this ticket.
-  """
-  companyIds: [String!]
-  """
   The cycle associated with the issue.
   """
   cycleId: String
@@ -9025,6 +9975,10 @@ input IssueUpdateInput {
   The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
   """
   priority: Int
+  """
+  [ALPHA] The position of the issue related to other issues, when ordered by priority.
+  """
+  prioritySortOrder: Float
   """
   The project associated with the issue.
   """
@@ -9062,7 +10016,7 @@ input IssueUpdateInput {
   """
   subscriberIds: [String!]
   """
-  The identifier or key of the team associated with the issue.
+  The identifier of the team associated with the issue.
   """
   teamId: String
   """
@@ -9314,6 +10268,10 @@ type LabelNotificationSubscription implements Entity & Node & NotificationSubscr
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  The contextual initiative view associated with the notification subscription.
+  """
+  initiative: Initiative
   """
   The label subscribed to.
   """
@@ -9949,6 +10907,99 @@ type Mutation {
     input: CustomViewUpdateInput!
   ): CustomViewPayload!
   """
+  [ALPHA] Creates a new customer.
+  """
+  customerCreate(
+    """
+    The customer to create.
+    """
+    input: CustomerCreateInput!
+  ): CustomerPayload!
+  """
+  [ALPHA] Deletes a customer.
+  """
+  customerDelete(
+    """
+    The identifier of the customer to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  [ALPHA] Creates a new customer need.
+  """
+  customerNeedCreate(
+    """
+    The customer need to create.
+    """
+    input: CustomerNeedCreateInput!
+  ): CustomerNeedPayload!
+  """
+  [ALPHA] Deletes a customer need.
+  """
+  customerNeedDelete(
+    """
+    The identifier of the customer need to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  [ALPHA] Updates a customer need
+  """
+  customerNeedUpdate(
+    """
+    The identifier of the customer need to update.
+    """
+    id: String!
+    """
+    The properties of the customer need to update.
+    """
+    input: CustomerNeedUpdateInput!
+  ): CustomerNeedPayload!
+  """
+  [ALPHA] Creates a new customer status.
+  """
+  customerStatusCreate(
+    """
+    The CustomerStatus object to create.
+    """
+    input: CustomerStatusCreateInput!
+  ): CustomerStatusPayload!
+  """
+  [ALPHA] Deletes a customer status.
+  """
+  customerStatusDelete(
+    """
+    The identifier of the customer status to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  [ALPHA] Updates a customer status.
+  """
+  customerStatusUpdate(
+    """
+    The identifier of the customer status to update.
+    """
+    id: String!
+    """
+    A partial CustomerStatus object to update the CustomerStatus with.
+    """
+    input: CustomerStatusUpdateInput!
+  ): CustomerStatusPayload!
+  """
+  [ALPHA] Updates a customer
+  """
+  customerUpdate(
+    """
+    The identifier of the customer to update.
+    """
+    id: String!
+    """
+    The properties of the customer to update.
+    """
+    input: CustomerUpdateInput!
+  ): CustomerPayload!
+  """
   Archives a cycle.
   """
   cycleArchive(
@@ -9967,7 +11018,7 @@ type Mutation {
     input: CycleCreateInput!
   ): CyclePayload!
   """
-  [DEPRECATED] Shifts all cycles starts by a certain number of weeks.
+  Shifts all cycles starts and ends by a certain number of days, starting from the provided cycle onwards.
   """
   cycleShiftAll(
     """
@@ -11088,29 +12139,17 @@ type Mutation {
   """
   issueImportCreateGithub(
     """
-    [DEPRECATED] ID of the Github repository from which we will import data.
+    Labels to use to filter the import data. Only issues matching any of these filters will be imported.
     """
-    githubRepoId: String
+    githubLabels: [String!]
     """
     IDs of the Github repositories from which we will import data.
     """
     githubRepoIds: [Int!]
     """
-    [DEPRECATED] GitHub repository name from which we will import data.
-    """
-    githubRepoName: String
-    """
-    [DEPRECATED] GitHub owner (user or org) for the repository from which we will import data.
-    """
-    githubRepoOwner: String
-    """
     Whether or not we should import GitHub organization level projects.
     """
     githubShouldImportOrgProjects: Boolean
-    """
-    [DEPRECATED] GitHub token to fetch information from the GitHub API.
-    """
-    githubToken: String
     """
     Whether or not we should collect the data for closed issues.
     """
@@ -11435,7 +12474,7 @@ type Mutation {
     id: String!
   ): NotificationArchivePayload!
   """
-  Archives all of the user's past notifications for the associated entity.
+  Archives a notification and all related notifications.
   """
   notificationArchiveAll(
     """
@@ -11444,7 +12483,7 @@ type Mutation {
     input: NotificationEntityInput!
   ): NotificationBatchActionPayload!
   """
-  Marks all past notifications for the associated entity as read.
+  Marks notification and all related notifications as read.
   """
   notificationMarkReadAll(
     """
@@ -11457,7 +12496,7 @@ type Mutation {
     readAt: DateTime!
   ): NotificationBatchActionPayload!
   """
-  Marks all past notifications for the associated entity as unread.
+  Marks notification and all related notifications as unread.
   """
   notificationMarkUnreadAll(
     """
@@ -11466,7 +12505,7 @@ type Mutation {
     input: NotificationEntityInput!
   ): NotificationBatchActionPayload!
   """
-  Snoozes a notification and all past notifications for the associated entity.
+  Snoozes a notification and all related notifications.
   """
   notificationSnoozeAll(
     """
@@ -11519,7 +12558,7 @@ type Mutation {
     id: String!
   ): NotificationArchivePayload!
   """
-  Unsnoozes a notification and all past notifications for the associated entity.
+  Unsnoozes a notification and all related notifications.
   """
   notificationUnsnoozeAll(
     """
@@ -12508,17 +13547,25 @@ interface Notification implements Entity & Node {
   """
   externalUserActor: ExternalUser
   """
-  [ALPHA] Notifications with the same grouping key will be grouped together in the UI.
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
   """
   groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
   """
   The unique identifier of the entity.
   """
   id: ID!
   """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
   [Internal] If notification actor was Linear.
   """
-  isLinearActor: Boolean
+  isLinearActor: Boolean!
   """
   [Internal] Issue's status type for issue notifications.
   """
@@ -12759,6 +13806,10 @@ Describes the type and id of the entity to target for notifications.
 """
 input NotificationEntityInput {
   """
+  The id of the notification.
+  """
+  id: String
+  """
   The id of the initiative related to the notification.
   """
   initiativeId: String
@@ -12771,13 +13822,47 @@ input NotificationEntityInput {
   """
   oauthClientApprovalId: String
   """
-  The id of the project related to the notification.
+  [DEPRECATED] The id of the project related to the notification.
   """
   projectId: String
   """
   The id of the project update related to the notification.
   """
   projectUpdateId: String
+}
+
+"""
+Notification filtering options.
+"""
+input NotificationFilter {
+  """
+  Compound filters, all of which need to be matched by the notification.
+  """
+  and: [NotificationFilter!]
+  """
+  Comparator for the archived at date.
+  """
+  archivedAt: DateComparator
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the notification.
+  """
+  or: [NotificationFilter!]
+  """
+  Comparator for the notification type.
+  """
+  type: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 type NotificationPayload {
@@ -12827,6 +13912,10 @@ interface NotificationSubscription implements Entity & Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  The contextual initiative view associated with the notification subscription.
+  """
+  initiative: Initiative
   """
   The contextual label view associated with the notification subscription.
   """
@@ -12886,6 +13975,10 @@ input NotificationSubscriptionCreateInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  The identifier of the initiative to subscribe to.
+  """
+  initiativeId: String
   """
   The identifier of the label to subscribe to.
   """
@@ -13014,6 +14107,10 @@ input NullableCommentFilter {
   Filters that the comments issue must satisfy.
   """
   issue: NullableIssueFilter
+  """
+  Filters that the comment's customer needs must satisfy.
+  """
+  needs: CustomerNeedCollectionFilter
   """
   Filter based on the existence of the relation.
   """
@@ -13215,6 +14312,10 @@ input NullableDocumentFilter {
   """
   id: IDComparator
   """
+  Filters that the document's initiative must satisfy.
+  """
+  initiative: InitiativeFilter
+  """
   Filter based on the existence of the relation.
   """
   null: Boolean
@@ -13332,6 +14433,10 @@ input NullableIssueFilter {
   Filters that the last applied template must satisfy.
   """
   lastAppliedTemplate: NullableTemplateFilter
+  """
+  Filters that the issue's customer needs must satisfy.
+  """
+  needs: CustomerNeedFilter
   """
   Filter based on the existence of the relation.
   """
@@ -13531,11 +14636,15 @@ input NullableProjectFilter {
   """
   Filters that the projects members must satisfy.
   """
-  members: UserFilter
+  members: UserCollectionFilter
   """
   Comparator for the project name.
   """
   name: StringComparator
+  """
+  Filters that the project's customer needs must satisfy.
+  """
+  needs: CustomerNeedCollectionFilter
   """
   Filters that the project's next milestone must satisfy.
   """
@@ -13548,6 +14657,10 @@ input NullableProjectFilter {
   Compound filters, one of which need to be matched by the project.
   """
   or: [NullableProjectFilter!]
+  """
+  [ALPHA] Comparator for the projects priority.
+  """
+  priority: NullableNumberComparator
   """
   Filters that the project's milestones must satisfy.
   """
@@ -13640,6 +14753,10 @@ input NullableProjectUpdatesFilter {
   Comparator for the created at date.
   """
   createdAt: DateComparator
+  """
+  Comparator for the project update health.
+  """
+  health: StringComparator
   """
   Comparator for the identifier.
   """
@@ -14167,17 +15284,25 @@ type OauthClientApprovalNotification implements Entity & Node & Notification {
   """
   externalUserActor: ExternalUser
   """
-  [ALPHA] Notifications with the same grouping key will be grouped together in the UI.
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
   """
   groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
   """
   The unique identifier of the entity.
   """
   id: ID!
   """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
   [Internal] If notification actor was Linear.
   """
-  isLinearActor: Boolean
+  isLinearActor: Boolean!
   """
   [Internal] Issue's status type for issue notifications.
   """
@@ -14186,6 +15311,10 @@ type OauthClientApprovalNotification implements Entity & Node & Notification {
   The OAuth client approval request related to the notification.
   """
   oauthClientApproval: OauthClientApproval!
+  """
+  Related OAuth client approval request ID.
+  """
+  oauthClientApprovalId: String!
   """
   [Internal] Project update health for new updates.
   """
@@ -14424,7 +15553,7 @@ type Organization implements Node {
   """
   projectStatuses: [ProjectStatus!]!
   """
-  [ALPHA] The n-weekly frequency at which to prompt for project updates. When not set, reminders are off.
+  The n-weekly frequency at which to prompt for project updates. When not set, reminders are off.
   """
   projectUpdateReminderFrequencyInWeeks: Float
   """
@@ -14436,9 +15565,10 @@ type Organization implements Node {
   """
   projectUpdateRemindersHour: Float!
   """
-  The frequency at which to prompt for project updates.
+  [DEPRECATED] The frequency at which to prompt for project updates.
   """
   projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency!
+    @deprecated(reason: "Use organization.projectUpdatesReminderFrequencyInWeeks instead")
   """
   The feature release channel the organization belongs to.
   """
@@ -15090,7 +16220,7 @@ input OrganizationUpdateInput {
   """
   oauthAppReview: Boolean
   """
-  [ALPHA] The n-weekly frequency at which to prompt for project updates.
+  The n-weekly frequency at which to prompt for project updates.
   """
   projectUpdateReminderFrequencyInWeeks: Float
   """
@@ -15101,10 +16231,6 @@ input OrganizationUpdateInput {
   The hour at which project updates are sent.
   """
   projectUpdateRemindersHour: Float
-  """
-  [DEPRECATED] The frequency at which project updates are sent.
-  """
-  projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency
   """
   Whether the organization has opted for reduced customer support attachment information.
   """
@@ -15422,9 +16548,42 @@ type Project implements Node {
     orderBy: PaginationOrderBy
   ): DocumentConnection!
   """
+  External links associated with the project.
+  """
+  externalLinks(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): EntityExternalLinkConnection!
+  """
   The user's favorite associated with this project.
   """
   favorite: Favorite
+  """
+  The health of the project based on the last project update.
+  """
+  health: ProjectUpdateHealthType
   """
   The icon of the project.
   """
@@ -15487,7 +16646,7 @@ type Project implements Node {
   """
   lead: User
   """
-  Links associated with the project.
+  [DEPRECATED] Links associated with the project.
   """
   links(
     """
@@ -15514,7 +16673,7 @@ type Project implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
-  ): ProjectLinkConnection!
+  ): ProjectLinkConnection! @deprecated(reason: "Use externalLinks instead")
   """
   Users that are members of the project.
   """
@@ -15557,9 +16716,21 @@ type Project implements Node {
   """
   name: String!
   """
+  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  """
+  priority: Int!
+  """
+  [ALPHA] The sort order for the project within the organization, when ordered by priority.
+  """
+  prioritySortOrder: Float!
+  """
   The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
   """
   progress: Float!
+  """
+  [Internal] The progress history of the project.
+  """
+  progressHistory: JSONObject!
   """
   Milestones associated with the project.
   """
@@ -15832,11 +17003,15 @@ input ProjectCollectionFilter {
   """
   Filters that the projects members must satisfy.
   """
-  members: UserFilter
+  members: UserCollectionFilter
   """
   Comparator for the project name.
   """
   name: StringComparator
+  """
+  Filters that the project's customer needs must satisfy.
+  """
+  needs: CustomerNeedCollectionFilter
   """
   Filters that the project's next milestone must satisfy.
   """
@@ -15845,6 +17020,10 @@ input ProjectCollectionFilter {
   Compound filters, one of which need to be matched by the project.
   """
   or: [ProjectCollectionFilter!]
+  """
+  [ALPHA] Comparator for the projects priority.
+  """
+  priority: NullableNumberComparator
   """
   Filters that the project's milestones must satisfy.
   """
@@ -15934,6 +17113,14 @@ input ProjectCreateInput {
   The name of the project.
   """
   name: String!
+  """
+  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  """
+  priority: Int
+  """
+  [ALPHA] The sort order for the project within shared views, when ordered by priority.
+  """
+  prioritySortOrder: Float
   """
   The sort order for the project within shared views.
   """
@@ -16051,11 +17238,15 @@ input ProjectFilter {
   """
   Filters that the projects members must satisfy.
   """
-  members: UserFilter
+  members: UserCollectionFilter
   """
   Comparator for the project name.
   """
   name: StringComparator
+  """
+  Filters that the project's customer needs must satisfy.
+  """
+  needs: CustomerNeedCollectionFilter
   """
   Filters that the project's next milestone must satisfy.
   """
@@ -16064,6 +17255,10 @@ input ProjectFilter {
   Compound filters, one of which need to be matched by the project.
   """
   or: [ProjectFilter!]
+  """
+  [ALPHA] Comparator for the projects priority.
+  """
+  priority: NullableNumberComparator
   """
   Filters that the project's milestones must satisfy.
   """
@@ -16522,17 +17717,25 @@ type ProjectNotification implements Entity & Node & Notification {
   """
   externalUserActor: ExternalUser
   """
-  [ALPHA] Notifications with the same grouping key will be grouped together in the UI.
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
   """
   groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
   """
   The unique identifier of the entity.
   """
   id: ID!
   """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
   [Internal] If notification actor was Linear.
   """
-  isLinearActor: Boolean
+  isLinearActor: Boolean!
   """
   [Internal] Issue's status type for issue notifications.
   """
@@ -16550,6 +17753,14 @@ type ProjectNotification implements Entity & Node & Notification {
   """
   project: Project!
   """
+  Related project ID.
+  """
+  projectId: String!
+  """
+  Related project milestone ID.
+  """
+  projectMilestoneId: String
+  """
   The project update related to the notification.
   """
   projectUpdate: ProjectUpdate
@@ -16557,6 +17768,14 @@ type ProjectNotification implements Entity & Node & Notification {
   [Internal] Project update health for new updates.
   """
   projectUpdateHealth: String
+  """
+  Related project update ID.
+  """
+  projectUpdateId: String
+  """
+  Name of the reaction emoji related to the notification.
+  """
+  reactionEmoji: String
   """
   The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
   """
@@ -16629,6 +17848,10 @@ type ProjectNotificationSubscription implements Entity & Node & NotificationSubs
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  The contextual initiative view associated with the notification subscription.
+  """
+  initiative: Initiative
   """
   The contextual label view associated with the notification subscription.
   """
@@ -16730,6 +17953,10 @@ type ProjectRelation implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  The last user who created or modified the relation.
+  """
+  user: User
 }
 
 type ProjectRelationConnection {
@@ -16928,9 +18155,42 @@ type ProjectSearchResult implements Node {
     orderBy: PaginationOrderBy
   ): DocumentConnection!
   """
+  External links associated with the project.
+  """
+  externalLinks(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): EntityExternalLinkConnection!
+  """
   The user's favorite associated with this project.
   """
   favorite: Favorite
+  """
+  The health of the project based on the last project update.
+  """
+  health: ProjectUpdateHealthType
   """
   The icon of the project.
   """
@@ -16993,7 +18253,7 @@ type ProjectSearchResult implements Node {
   """
   lead: User
   """
-  Links associated with the project.
+  [DEPRECATED] Links associated with the project.
   """
   links(
     """
@@ -17020,7 +18280,7 @@ type ProjectSearchResult implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
-  ): ProjectLinkConnection!
+  ): ProjectLinkConnection! @deprecated(reason: "Use externalLinks instead")
   """
   Users that are members of the project.
   """
@@ -17067,9 +18327,21 @@ type ProjectSearchResult implements Node {
   """
   name: String!
   """
+  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  """
+  priority: Int!
+  """
+  [ALPHA] The sort order for the project within the organization, when ordered by priority.
+  """
+  prioritySortOrder: Float!
+  """
   The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points.
   """
   progress: Float!
+  """
+  [Internal] The progress history of the project.
+  """
+  progressHistory: JSONObject!
   """
   Milestones associated with the project.
   """
@@ -17491,6 +18763,10 @@ type ProjectUpdate implements Node {
   """
   reactions: [Reaction!]!
   """
+  The project update's unique URL slug.
+  """
+  slugId: String!
+  """
   The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
       for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -17635,6 +18911,14 @@ input ProjectUpdateInput {
   The name of the project.
   """
   name: String
+  """
+  The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  """
+  priority: Int
+  """
+  [ALPHA] The sort order for the project within shared views, when ordered by priority.
+  """
+  prioritySortOrder: Float
   """
   The time until which project update reminders are paused.
   """
@@ -17860,6 +19144,10 @@ input ProjectUpdatesCollectionFilter {
   """
   every: ProjectUpdatesFilter
   """
+  Comparator for the project update health.
+  """
+  health: StringComparator
+  """
   Comparator for the identifier.
   """
   id: IDComparator
@@ -17893,6 +19181,10 @@ input ProjectUpdatesFilter {
   Comparator for the created at date.
   """
   createdAt: DateComparator
+  """
+  Comparator for the project update health.
+  """
+  health: StringComparator
   """
   Comparator for the identifier.
   """
@@ -18350,6 +19642,113 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): CustomViewConnection!
+  """
+  One specific customer.
+  """
+  customer(id: String!): Customer!
+  """
+  One specific customer need
+  """
+  customerNeed(id: String!): CustomerNeed!
+  """
+  All customer needs.
+  """
+  customerNeeds(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned customers needs.
+    """
+    filter: CustomerNeedFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CustomerNeedConnection!
+  """
+  One specific customer status.
+  """
+  customerStatus(id: String!): CustomerStatus!
+  """
+  All customer statuses.
+  """
+  customerStatuses(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CustomerStatusConnection!
+  """
+  All customers.
+  """
+  customers(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned customers.
+    """
+    filter: CustomerFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CustomerConnection!
   """
   One specific cycle.
   """
@@ -18970,6 +20369,10 @@ type Query {
     """
     before: String
     """
+    Filters returned notifications.
+    """
+    filter: NotificationFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -18986,6 +20389,10 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): NotificationConnection!
+  """
+  [Internal] A number of unread notifications.
+  """
+  notificationsUnreadCount: Int!
   """
   The user's organization.
   """
@@ -19730,6 +21137,10 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): UserConnection!
+  """
+  Verify that we received the correct response from the GitHub Enterprise Server.
+  """
+  verifyGitHubEnterpriseServerInstallation: GitHubEnterpriseServerInstallVerificationPayload!
   """
   The currently authenticated user.
   """
@@ -20480,6 +21891,13 @@ enum SLADayCountType {
   onlyBusinessDays
 }
 
+enum SchemaFieldType {
+  booleanType
+  dateType
+  numberType
+  stringType
+}
+
 enum SendStrategy {
   desktop
   desktopAndPush
@@ -21007,7 +22425,91 @@ type SsoUrlFromEmailResponse {
 """
 Comparator for strings.
 """
+input StringArrayComparator {
+  """
+  Compound filters, all of which need to be matched.
+  """
+  every: [StringItemComparator!]
+  """
+  Length of the array. Matches any values that have the given length.
+  """
+  length: NumberComparator
+  """
+  Compound filters, one of which needs to be matched.
+  """
+  some: [StringItemComparator!]
+}
+
+"""
+Comparator for strings.
+"""
 input StringComparator {
+  """
+  Contains constraint. Matches any values that contain the given string.
+  """
+  contains: String
+  """
+  Contains case insensitive constraint. Matches any values that contain the given string case insensitive.
+  """
+  containsIgnoreCase: String
+  """
+  Ends with constraint. Matches any values that end with the given string.
+  """
+  endsWith: String
+  """
+  Equals constraint.
+  """
+  eq: String
+  """
+  Equals case insensitive. Matches any values that matches the given string case insensitive.
+  """
+  eqIgnoreCase: String
+  """
+  In-array constraint.
+  """
+  in: [String!]
+  """
+  Not-equals constraint.
+  """
+  neq: String
+  """
+  Not-equals case insensitive. Matches any values that don't match the given string case insensitive.
+  """
+  neqIgnoreCase: String
+  """
+  Not-in-array constraint.
+  """
+  nin: [String!]
+  """
+  Doesn't contain constraint. Matches any values that don't contain the given string.
+  """
+  notContains: String
+  """
+  Doesn't contain case insensitive constraint. Matches any values that don't contain the given string case insensitive.
+  """
+  notContainsIgnoreCase: String
+  """
+  Doesn't end with constraint. Matches any values that don't end with the given string.
+  """
+  notEndsWith: String
+  """
+  Doesn't start with constraint. Matches any values that don't start with the given string.
+  """
+  notStartsWith: String
+  """
+  Starts with constraint. Matches any values that start with the given string.
+  """
+  startsWith: String
+  """
+  Starts with case insensitive constraint. Matches any values that start with the given string.
+  """
+  startsWithIgnoreCase: String
+}
+
+"""
+Comparator for strings in arrays.
+"""
+input StringItemComparator {
   """
   Contains constraint. Matches any values that contain the given string.
   """
@@ -21448,6 +22950,15 @@ type Team implements Node {
     orderBy: PaginationOrderBy
   ): UserConnection!
   """
+  The membership of the given user in the team.
+  """
+  membership(
+    """
+    The user ID.
+    """
+    userId: String
+  ): TeamMembership
+  """
   Memberships associated with the team. For easier access of the same data, use `members` query.
   """
   memberships(
@@ -21497,6 +23008,10 @@ type Team implements Node {
   """
   private: Boolean!
   """
+  [Internal] The progress history of the team.
+  """
+  progressHistory: JSONObject!
+  """
   Projects associated with the team.
   """
   projects(
@@ -21537,6 +23052,10 @@ type Team implements Node {
   The workflow state into which issues are moved when a review has been requested for the PR.
   """
   reviewWorkflowState: WorkflowState @deprecated(reason: "Use team.gitAutomationStates instead.")
+  """
+  The SCIM group name for the team.
+  """
+  scimGroupName: String
   """
   Whether the team is managed by SCIM integration.
   """
@@ -22062,6 +23581,10 @@ type TeamNotificationSubscription implements Entity & Node & NotificationSubscri
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  The contextual initiative view associated with the notification subscription.
+  """
+  initiative: Initiative
   """
   The contextual label view associated with the notification subscription.
   """
@@ -23611,6 +25134,10 @@ type UserNotificationSubscription implements Entity & Node & NotificationSubscri
   """
   id: ID!
   """
+  The contextual initiative view associated with the notification subscription.
+  """
+  initiative: Initiative
+  """
   The contextual label view associated with the notification subscription.
   """
   label: IssueLabel
@@ -24027,6 +25554,7 @@ enum ViewType {
   customRoadmap
   customView
   customViews
+  customers
   cycle
   inbox
   initiative
@@ -24163,6 +25691,40 @@ type WebhookEdge {
   """
   cursor: String!
   node: Webhook!
+}
+
+"""
+Entity representing a webhook execution failure.
+"""
+type WebhookFailureEvent {
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique execution ID of the webhook push. This is retained between retries of the same push.
+  """
+  executionId: String!
+  """
+  The HTTP status code returned by the recipient.
+  """
+  httpStatus: Float
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The HTTP response body returned by the recipient or error occured.
+  """
+  responseOrError: String
+  """
+  The URL that the webhook was trying to push to.
+  """
+  url: String!
+  """
+  The webhook that this failure event is associated with.
+  """
+  webhook: Webhook!
 }
 
 type WebhookPayload {
