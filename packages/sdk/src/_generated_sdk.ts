@@ -10438,7 +10438,6 @@ export class Team extends Request {
   private _draftWorkflowState?: L.TeamFragment["draftWorkflowState"];
   private _integrationsSettings?: L.TeamFragment["integrationsSettings"];
   private _markedAsDuplicateWorkflowState?: L.TeamFragment["markedAsDuplicateWorkflowState"];
-  private _membership?: L.TeamFragment["membership"];
   private _mergeWorkflowState?: L.TeamFragment["mergeWorkflowState"];
   private _mergeableWorkflowState?: L.TeamFragment["mergeableWorkflowState"];
   private _reviewWorkflowState?: L.TeamFragment["reviewWorkflowState"];
@@ -10498,7 +10497,6 @@ export class Team extends Request {
     this._draftWorkflowState = data.draftWorkflowState ?? undefined;
     this._integrationsSettings = data.integrationsSettings ?? undefined;
     this._markedAsDuplicateWorkflowState = data.markedAsDuplicateWorkflowState ?? undefined;
-    this._membership = data.membership ?? undefined;
     this._mergeWorkflowState = data.mergeWorkflowState ?? undefined;
     this._mergeableWorkflowState = data.mergeableWorkflowState ?? undefined;
     this._reviewWorkflowState = data.reviewWorkflowState ?? undefined;
@@ -10640,10 +10638,6 @@ export class Team extends Request {
     return this._markedAsDuplicateWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._markedAsDuplicateWorkflowState?.id)
       : undefined;
-  }
-  /** The membership of the given user in the team. */
-  public get membership(): LinearFetch<TeamMembership> | undefined {
-    return this._membership?.id ? new TeamMembershipQuery(this._request).fetch(this._membership?.id) : undefined;
   }
   /** The workflow state into which issues are moved when a PR has been merged. */
   public get mergeWorkflowState(): LinearFetch<WorkflowState> | undefined {
