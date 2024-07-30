@@ -11404,6 +11404,22 @@
             "deprecationReason": null
           },
           {
+            "name": "currentProgress",
+            "description": "[Internal] The current progress of the cycle.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "issues",
             "description": "Issues associated with the cycle.",
             "args": [
@@ -29573,7 +29589,7 @@
             "description": "Filters that the issue's customer needs must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "CustomerNeedFilter",
+              "name": "CustomerNeedCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -30954,7 +30970,7 @@
             "description": "Filters that the issue's customer needs must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "CustomerNeedFilter",
+              "name": "CustomerNeedCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -53215,7 +53231,7 @@
             "description": "Filters that the issue's customer needs must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "CustomerNeedFilter",
+              "name": "CustomerNeedCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -60595,6 +60611,22 @@
             "deprecationReason": null
           },
           {
+            "name": "currentProgress",
+            "description": "[Internal] The current progress of the project.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slackNewIssue",
             "description": "Whether to send new issue notifications to Slack.",
             "args": [],
@@ -66264,6 +66296,22 @@
           {
             "name": "progressHistory",
             "description": "[Internal] The progress history of the project.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "currentProgress",
+            "description": "[Internal] The current progress of the project.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -82822,6 +82870,22 @@
             "deprecationReason": null
           },
           {
+            "name": "currentProgress",
+            "description": "[Internal] The current progress of the team.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "draftWorkflowState",
             "description": "The workflow state into which issues are moved when a PR has been opened as draft.",
             "args": [],
@@ -83395,15 +83459,19 @@
           },
           {
             "name": "membership",
-            "description": "The membership of the given user in the team.",
+            "description": "[ALPHA] The membership of the given user in the team.",
             "args": [
               {
                 "name": "userId",
                 "description": "The user ID.",
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null,
                 "isDeprecated": false,

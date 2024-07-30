@@ -224,16 +224,6 @@ describe("generated", () => {
       }
     });
 
-    /** Test the team.membership query for L.TeamMembership */
-    it("team.membership", async () => {
-      if (_team) {
-        const team_membership: L.TeamMembership | undefined = await _team.membership;
-        expect(team_membership instanceof L.TeamMembership);
-      } else {
-        console.warn("codegen-doc:print: No Team found - cannot test team.membership query");
-      }
-    });
-
     /** Test the team.mergeWorkflowState query for L.WorkflowState */
     it("team.mergeWorkflowState", async () => {
       if (_team) {
@@ -3797,16 +3787,6 @@ describe("generated", () => {
         expect(team_markedAsDuplicateWorkflowState instanceof L.WorkflowState);
       } else {
         console.warn("codegen-doc:print: No Team found - cannot test team.markedAsDuplicateWorkflowState query");
-      }
-    });
-
-    /** Test the team.membership query for L.TeamMembership */
-    it("team.membership", async () => {
-      if (_team) {
-        const team_membership: L.TeamMembership | undefined = await _team.membership;
-        expect(team_membership instanceof L.TeamMembership);
-      } else {
-        console.warn("codegen-doc:print: No Team found - cannot test team.membership query");
       }
     });
 

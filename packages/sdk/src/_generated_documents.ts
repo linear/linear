@@ -1809,6 +1809,8 @@ export type Cycle = Node & {
   completedScopeHistory: Array<Scalars["Float"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** [Internal] The current progress of the cycle. */
+  currentProgress: Scalars["JSONObject"];
   /** The cycle's description. */
   description?: Maybe<Scalars["String"]>;
   /** The end time of the cycle. */
@@ -4721,7 +4723,7 @@ export type IssueCollectionFilter = {
   /** Comparator for the collection length. */
   length?: Maybe<NumberComparator>;
   /** Filters that the issue's customer needs must satisfy. */
-  needs?: Maybe<CustomerNeedFilter>;
+  needs?: Maybe<CustomerNeedCollectionFilter>;
   /** Comparator for the issues number. */
   number?: Maybe<NumberComparator>;
   /** Compound filters, one of which need to be matched by the issue. */
@@ -4939,7 +4941,7 @@ export type IssueFilter = {
   /** Filters that the last applied template must satisfy. */
   lastAppliedTemplate?: Maybe<NullableTemplateFilter>;
   /** Filters that the issue's customer needs must satisfy. */
-  needs?: Maybe<CustomerNeedFilter>;
+  needs?: Maybe<CustomerNeedCollectionFilter>;
   /** Comparator for the issues number. */
   number?: Maybe<NumberComparator>;
   /** Compound filters, one of which need to be matched by the issue. */
@@ -8374,7 +8376,7 @@ export type NullableIssueFilter = {
   /** Filters that the last applied template must satisfy. */
   lastAppliedTemplate?: Maybe<NullableTemplateFilter>;
   /** Filters that the issue's customer needs must satisfy. */
-  needs?: Maybe<CustomerNeedFilter>;
+  needs?: Maybe<CustomerNeedCollectionFilter>;
   /** Filter based on the existence of the relation. */
   null?: Maybe<Scalars["Boolean"]>;
   /** Comparator for the issues number. */
@@ -9551,6 +9553,8 @@ export type Project = Node & {
   createdAt: Scalars["DateTime"];
   /** The user who created the project. */
   creator?: Maybe<User>;
+  /** [Internal] The current progress of the project. */
+  currentProgress: Scalars["JSONObject"];
   /** The project's description. */
   description: Scalars["String"];
   /** Documents associated with the project. */
@@ -10432,6 +10436,8 @@ export type ProjectSearchResult = Node & {
   createdAt: Scalars["DateTime"];
   /** The user who created the project. */
   creator?: Maybe<User>;
+  /** [Internal] The current progress of the project. */
+  currentProgress: Scalars["JSONObject"];
   /** The project's description. */
   description: Scalars["String"];
   /** Documents associated with the project. */
@@ -12899,6 +12905,8 @@ export type Team = Node & {
   color?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** [Internal] The current progress of the team. */
+  currentProgress: Scalars["JSONObject"];
   /** Calendar feed URL (iCal) for cycles. */
   cycleCalenderUrl: Scalars["String"];
   /** The cooldown time after each cycle in weeks. */
@@ -12983,7 +12991,7 @@ export type Team = Node & {
   markedAsDuplicateWorkflowState?: Maybe<WorkflowState>;
   /** Users who are members of this team. */
   members: UserConnection;
-  /** The membership of the given user in the team. */
+  /** [ALPHA] The membership of the given user in the team. */
   membership?: Maybe<TeamMembership>;
   /** Memberships associated with the team. For easier access of the same data, use `members` query. */
   memberships: TeamMembershipConnection;
@@ -13117,7 +13125,7 @@ export type TeamMembersArgs = {
 
 /** An organizational unit that contains issues. */
 export type TeamMembershipArgs = {
-  userId?: Maybe<Scalars["String"]>;
+  userId: Scalars["String"];
 };
 
 /** An organizational unit that contains issues. */
@@ -16368,7 +16376,6 @@ export type TeamFragment = { __typename: "Team" } & Pick<
     defaultTemplateForNonMembers?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     defaultProjectTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     defaultIssueState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
-    membership?: Maybe<{ __typename?: "TeamMembership" } & Pick<TeamMembership, "id">>;
     mergeWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     draftWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
     startWorkflowState?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
@@ -33082,14 +33089,6 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "defaultTemplateForNonMembersId" } },
           { kind: "Field", name: { kind: "Name", value: "issueEstimationType" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "membership" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
           { kind: "Field", name: { kind: "Name", value: "color" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },

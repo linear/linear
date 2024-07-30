@@ -2987,6 +2987,10 @@ type Cycle implements Node {
   """
   createdAt: DateTime!
   """
+  [Internal] The current progress of the cycle.
+  """
+  currentProgress: JSONObject!
+  """
   The cycle's description.
   """
   description: String
@@ -7889,7 +7893,7 @@ input IssueCollectionFilter {
   """
   Filters that the issue's customer needs must satisfy.
   """
-  needs: CustomerNeedFilter
+  needs: CustomerNeedCollectionFilter
   """
   Comparator for the issues number.
   """
@@ -8296,7 +8300,7 @@ input IssueFilter {
   """
   Filters that the issue's customer needs must satisfy.
   """
-  needs: CustomerNeedFilter
+  needs: CustomerNeedCollectionFilter
   """
   Comparator for the issues number.
   """
@@ -14436,7 +14440,7 @@ input NullableIssueFilter {
   """
   Filters that the issue's customer needs must satisfy.
   """
-  needs: CustomerNeedFilter
+  needs: CustomerNeedCollectionFilter
   """
   Filter based on the existence of the relation.
   """
@@ -16511,6 +16515,10 @@ type Project implements Node {
   """
   creator: User
   """
+  [Internal] The current progress of the project.
+  """
+  currentProgress: JSONObject!
+  """
   The project's description.
   """
   description: String!
@@ -18117,6 +18125,10 @@ type ProjectSearchResult implements Node {
   The user who created the project.
   """
   creator: User
+  """
+  [Internal] The current progress of the project.
+  """
+  currentProgress: JSONObject!
   """
   The project's description.
   """
@@ -22656,6 +22668,10 @@ type Team implements Node {
   """
   createdAt: DateTime!
   """
+  [Internal] The current progress of the team.
+  """
+  currentProgress: JSONObject!
+  """
   Calendar feed URL (iCal) for cycles.
   """
   cycleCalenderUrl: String!
@@ -22950,13 +22966,13 @@ type Team implements Node {
     orderBy: PaginationOrderBy
   ): UserConnection!
   """
-  The membership of the given user in the team.
+  [ALPHA] The membership of the given user in the team.
   """
   membership(
     """
     The user ID.
     """
-    userId: String
+    userId: String!
   ): TeamMembership
   """
   Memberships associated with the team. For easier access of the same data, use `members` query.

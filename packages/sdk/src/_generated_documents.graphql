@@ -3005,10 +3005,6 @@ fragment Team on Team {
   #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The membership of the given user in the team.
-  membership {
-    id
-  }
   # The team's color.
   color
   # The team's description.
