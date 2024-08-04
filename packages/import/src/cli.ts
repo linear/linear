@@ -7,6 +7,7 @@ import { asanaCsvImport } from "./importers/asanaCsv";
 import { githubImport } from "./importers/github";
 import { jiraCsvImport } from "./importers/jiraCsv";
 import { linearCsvImporter } from "./importers/linearCsv";
+import { dequeCsvImporter } from "./importers/dequeCsv";
 import { pivotalCsvImport } from "./importers/pivotalCsv";
 import { shortcutCsvImport } from "./importers/shortcutCsv";
 import { trelloJsonImport } from "./importers/trelloJson";
@@ -34,6 +35,10 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
           {
             name: "Jira (CSV export)",
             value: "jiraCsv",
+          },
+          {
+            name: "Deque (CSV export)",
+            value: "dequeCsv",
           },
           {
             name: "Asana (CSV export)",
@@ -70,6 +75,9 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
         break;
       case "asanaCsv":
         importer = await asanaCsvImport();
+        break;
+      case "dequeCsv":
+        importer = await dequeCsvImporter();
         break;
       case "pivotalCsv":
         importer = await pivotalCsvImport();
