@@ -232,8 +232,7 @@ export class ApiKey extends Request {
   /** The label of the API key. */
   public label: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -434,8 +433,7 @@ export class Attachment extends Request {
   /** Content for the title line in the Linear attachment widget. */
   public title: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -601,8 +599,7 @@ export class AuditEntry extends Request {
   public requestInformation?: L.Scalars["JSONObject"];
   public type: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -1331,8 +1328,7 @@ export class Comment extends Request {
   /** The time the resolvingUser resolved the thread. */
   public resolvedAt?: Date;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -1571,8 +1567,7 @@ export class CustomView extends Request {
   /** Whether the custom view is shared with everyone in the organization. */
   public shared: boolean;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -1706,8 +1701,7 @@ export class CustomViewNotificationSubscription extends Request {
   /** The type of subscription. */
   public notificationSubscriptionTypes: string[];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -1912,8 +1906,7 @@ export class Cycle extends Request {
   /** The start time of the cycle. */
   public startsAt: Date;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -2035,8 +2028,7 @@ export class CycleNotificationSubscription extends Request {
   /** The type of subscription. */
   public notificationSubscriptionTypes: string[];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -2152,8 +2144,7 @@ export class DiaryEntry extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -2241,6 +2232,7 @@ export class Document extends Request {
     this.color = data.color ?? undefined;
     this.content = data.content ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.documentContentId = data.documentContentId ?? undefined;
     this.hiddenAt = parseDate(data.hiddenAt) ?? undefined;
     this.icon = data.icon ?? undefined;
     this.id = data.id;
@@ -2264,6 +2256,8 @@ export class Document extends Request {
   public content?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** The ID of the document content associated with the document. */
+  public documentContentId?: string;
   /** The time at which the document was hidden. Null if the entity has not been hidden. */
   public hiddenAt?: Date;
   /** The icon of the document. */
@@ -2279,8 +2273,7 @@ export class Document extends Request {
   /** A flag that indicates whether the document is in the trash bin. */
   public trashed?: boolean;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -2413,8 +2406,7 @@ export class DocumentContent extends Request {
   /** The time at which the document content was restored from a previous version. */
   public restoredAt?: Date;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -2470,8 +2462,7 @@ export class DocumentContentHistory extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -2580,8 +2571,7 @@ export class DocumentNotification extends Request {
   /** The time at which a notification was unsnoozed.. */
   public unsnoozedAt?: Date;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -2667,6 +2657,7 @@ export class DocumentSearchResult extends Request {
     this.color = data.color ?? undefined;
     this.content = data.content ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.documentContentId = data.documentContentId ?? undefined;
     this.hiddenAt = parseDate(data.hiddenAt) ?? undefined;
     this.icon = data.icon ?? undefined;
     this.id = data.id;
@@ -2691,6 +2682,8 @@ export class DocumentSearchResult extends Request {
   public content?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** The ID of the document content associated with the document. */
+  public documentContentId?: string;
   /** The time at which the document was hidden. Null if the entity has not been hidden. */
   public hiddenAt?: Date;
   /** The icon of the document. */
@@ -2708,8 +2701,7 @@ export class DocumentSearchResult extends Request {
   /** A flag that indicates whether the document is in the trash bin. */
   public trashed?: boolean;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -2797,8 +2789,7 @@ export class Draft extends Request {
   /** Whether the draft was autogenerated for the user. */
   public isAutogenerated: boolean;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -2858,8 +2849,7 @@ export class EmailIntakeAddress extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -2979,8 +2969,7 @@ export class Emoji extends Request {
   /** The source of the emoji. */
   public source: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -3072,8 +3061,7 @@ export class Entity extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -3086,7 +3074,7 @@ export class Entity extends Request {
  */
 export class EntityExternalLink extends Request {
   private _creator: L.EntityExternalLinkFragment["creator"];
-  private _initiative: L.EntityExternalLinkFragment["initiative"];
+  private _initiative?: L.EntityExternalLinkFragment["initiative"];
 
   public constructor(request: LinearRequest, data: L.EntityExternalLinkFragment) {
     super(request);
@@ -3098,7 +3086,7 @@ export class EntityExternalLink extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._creator = data.creator;
-    this._initiative = data.initiative;
+    this._initiative = data.initiative ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -3112,8 +3100,7 @@ export class EntityExternalLink extends Request {
   /** The order of the item in the resources list. */
   public sortOrder: number;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -3125,7 +3112,7 @@ export class EntityExternalLink extends Request {
   }
   /** The initiative that the link is associated with. */
   public get initiative(): LinearFetch<Initiative> | undefined {
-    return new InitiativeQuery(this._request).fetch(this._initiative.id);
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
 
   /** Creates a new entity link. */
@@ -3224,8 +3211,7 @@ export class ExternalUser extends Request {
   /** The external user's full name. */
   public name: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -3290,8 +3276,7 @@ export class Facet extends Request {
   /** The sort order of the facet. */
   public sortOrder: number;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -3407,8 +3392,7 @@ export class Favorite extends Request {
   /** The type of the favorite. */
   public type: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -3586,8 +3570,7 @@ export class FeatureFlag extends Request {
   /** The status of the feature flag. */
   public status: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -3675,8 +3658,7 @@ export class FeatureFlagRolloutStage extends Request {
   /** The order of the rollout stages within an organization. */
   public sortOrder: number;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -3791,8 +3773,7 @@ export class GitAutomationState extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -3895,8 +3876,7 @@ export class GitAutomationTargetBranch extends Request {
   /** Whether the branch pattern is a regular expression. */
   public isRegex: boolean;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -4077,6 +4057,33 @@ export class GitHubRepo extends Request {
   public id: number;
 }
 /**
+ * Mapping of Linear teams to GitHub repos.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.GitHubRepoMappingFragment response data
+ */
+export class GitHubRepoMapping extends Request {
+  public constructor(request: LinearRequest, data: L.GitHubRepoMappingFragment) {
+    super(request);
+    this.bidirectional = data.bidirectional ?? undefined;
+    this.default = data.default ?? undefined;
+    this.gitHubLabels = data.gitHubLabels ?? undefined;
+    this.gitHubRepoId = data.gitHubRepoId;
+    this.linearTeamId = data.linearTeamId;
+  }
+
+  /** Whether the sync for this mapping is bidirectional. */
+  public bidirectional?: boolean;
+  /** Whether this mapping is the default one for issue creation. */
+  public default?: boolean;
+  /** Labels to filter incoming GitHub issue creation by. */
+  public gitHubLabels?: string[];
+  /** The GitHub repo id. */
+  public gitHubRepoId: number;
+  /** The Linear team id to map to the given project. */
+  public linearTeamId: string;
+}
+/**
  * Metadata and settings for a GitHub integration.
  *
  * @param request - function to call the graphql client
@@ -4089,7 +4096,7 @@ export class GitHubSettings extends Request {
     this.orgLogin = data.orgLogin;
     this.repositories = data.repositories ? data.repositories.map(node => new GitHubRepo(request, node)) : undefined;
     this.repositoriesMapping = data.repositoriesMapping
-      ? data.repositoriesMapping.map(node => new TeamRepoMapping(request, node))
+      ? data.repositoriesMapping.map(node => new GitHubRepoMapping(request, node))
       : undefined;
     this.orgType = data.orgType ?? undefined;
   }
@@ -4101,7 +4108,7 @@ export class GitHubSettings extends Request {
   /** The names of the repositories connected for the GitHub integration. */
   public repositories?: GitHubRepo[];
   /** Mapping of team to repository for syncing. */
-  public repositoriesMapping?: TeamRepoMapping[];
+  public repositoriesMapping?: GitHubRepoMapping[];
   /** The type of Github org */
   public orgType?: L.GithubOrgType;
 }
@@ -4220,8 +4227,7 @@ export class Initiative extends Request {
   /** A flag that indicates whether the initiative is in the trash bin. */
   public trashed?: boolean;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -4376,8 +4382,7 @@ export class InitiativeNotification extends Request {
   /** The time at which a notification was unsnoozed.. */
   public unsnoozedAt?: Date;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -4445,8 +4450,7 @@ export class InitiativeNotificationSubscription extends Request {
   /** The type of subscription. */
   public notificationSubscriptionTypes: string[];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -4542,8 +4546,7 @@ export class InitiativeToProject extends Request {
   /** The sort order of the project within the initiative. */
   public sortOrder: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -4645,8 +4648,7 @@ export class Integration extends Request {
   /** The integration's type. */
   public service: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -4839,8 +4841,7 @@ export class IntegrationTemplate extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -4968,8 +4969,7 @@ export class IntegrationsSettings extends Request {
   /** Whether to send a new project update to workspace Slack channel. */
   public slackProjectUpdateCreatedToWorkspace?: boolean;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -5198,8 +5198,7 @@ export class Issue extends Request {
   /** The time at which the issue left triage. */
   public triagedAt?: Date;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -5558,8 +5557,7 @@ export class IssueHistory extends Request {
   /** Whether the issue was trashed or un-trashed. */
   public trashed?: boolean;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -5722,8 +5720,7 @@ export class IssueImport extends Request {
   /** New team's name in cases when teamId not set. */
   public teamName?: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -5853,8 +5850,7 @@ export class IssueLabel extends Request {
   /** The label's name. */
   public name: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -6011,8 +6007,7 @@ export class IssueNotification extends Request {
   /** The time at which a notification was unsnoozed.. */
   public unsnoozedAt?: Date;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -6124,8 +6119,7 @@ export class IssueRelation extends Request {
   /** The relationship of the issue with the related issue. */
   public type: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -6374,8 +6368,7 @@ export class IssueSearchResult extends Request {
   /** The time at which the issue left triage. */
   public triagedAt?: Date;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -6603,8 +6596,7 @@ export class LabelNotificationSubscription extends Request {
   /** The type of subscription. */
   public notificationSubscriptionTypes: string[];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -6741,8 +6733,7 @@ export class Notification extends Request {
   /** The time at which a notification was unsnoozed.. */
   public unsnoozedAt?: Date;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -7020,8 +7011,7 @@ export class NotificationSubscription extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -7236,8 +7226,7 @@ export class OauthClient extends Request {
   /** List of allowed redirect URIs for the application. */
   public redirectUris: string[];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -7297,8 +7286,7 @@ export class OauthClientApproval extends Request {
   /** The scopes the app has requested. */
   public scopes: string[];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -7357,8 +7345,7 @@ export class OauthClientApprovalNotification extends Request {
   /** The time at which a notification was unsnoozed.. */
   public unsnoozedAt?: Date;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -7536,8 +7523,7 @@ export class Organization extends Request {
   /** The time at which the trial will end. */
   public trialEndsAt?: Date;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -7671,8 +7657,7 @@ export class OrganizationDomain extends Request {
   /** Domain name. */
   public name: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -7753,8 +7738,7 @@ export class OrganizationInvite extends Request {
   /** Extra metadata associated with the organization invite. */
   public metadata?: L.Scalars["JSONObject"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -8092,8 +8076,7 @@ export class PaidSubscription extends Request {
   /** The subscription type. */
   public type: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -8223,6 +8206,7 @@ export class Project extends Request {
     this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
+    this.documentContent = data.documentContent ? new DocumentContent(request, data.documentContent) : undefined;
     this.status = new ProjectStatus(request, data.status);
     this.health = data.health ?? undefined;
     this._convertedFromIssue = data.convertedFromIssue ?? undefined;
@@ -8294,13 +8278,14 @@ export class Project extends Request {
   /** A flag that indicates whether the project is in the trash bin. */
   public trashed?: boolean;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** Project URL. */
   public url: string;
+  /** The content of the project description. */
+  public documentContent?: DocumentContent;
   /** The status that the project is associated with. */
   public status: ProjectStatus;
   /** The health of the project based on the last project update. */
@@ -8481,8 +8466,7 @@ export class ProjectLink extends Request {
   /** The order of the item in the project resources list. */
   public sortOrder: number;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -8575,6 +8559,7 @@ export class ProjectMilestone extends Request {
     this.sortOrder = data.sortOrder;
     this.targetDate = data.targetDate ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.documentContent = data.documentContent ? new DocumentContent(request, data.documentContent) : undefined;
     this._project = data.project;
   }
 
@@ -8593,11 +8578,12 @@ export class ProjectMilestone extends Request {
   /** The planned completion date of the milestone. */
   public targetDate?: L.Scalars["TimelessDate"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The content of the project milestone description. */
+  public documentContent?: DocumentContent;
   /** The project of the milestone. */
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
@@ -8739,8 +8725,7 @@ export class ProjectNotification extends Request {
   /** The time at which a notification was unsnoozed.. */
   public unsnoozedAt?: Date;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -8824,8 +8809,7 @@ export class ProjectNotificationSubscription extends Request {
   /** The type of subscription. */
   public notificationSubscriptionTypes: string[];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -8933,8 +8917,7 @@ export class ProjectRelation extends Request {
   /** The relationship of the project with the related project. */
   public type: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -9080,6 +9063,7 @@ export class ProjectSearchResult extends Request {
     this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
+    this.documentContent = data.documentContent ? new DocumentContent(request, data.documentContent) : undefined;
     this.status = new ProjectStatus(request, data.status);
     this.health = data.health ?? undefined;
     this._convertedFromIssue = data.convertedFromIssue ?? undefined;
@@ -9153,13 +9137,14 @@ export class ProjectSearchResult extends Request {
   /** A flag that indicates whether the project is in the trash bin. */
   public trashed?: boolean;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** Project URL. */
   public url: string;
+  /** The content of the project description. */
+  public documentContent?: DocumentContent;
   /** The status that the project is associated with. */
   public status: ProjectStatus;
   /** The health of the project based on the last project update. */
@@ -9252,8 +9237,7 @@ export class ProjectStatus extends Request {
   /** The position of the status in the workspace's project flow. */
   public position: number;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -9332,8 +9316,7 @@ export class ProjectUpdate extends Request {
   /** The project update's unique URL slug. */
   public slugId: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -9419,8 +9402,7 @@ export class ProjectUpdateInteraction extends Request {
   /** The time at which the user read the project update. */
   public readAt: Date;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -9582,8 +9564,7 @@ export class PushSubscription extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -9713,6 +9694,7 @@ export class RateLimitResultPayload extends Request {
  */
 export class Reaction extends Request {
   private _comment?: L.ReactionFragment["comment"];
+  private _externalUser?: L.ReactionFragment["externalUser"];
   private _issue?: L.ReactionFragment["issue"];
   private _projectUpdate?: L.ReactionFragment["projectUpdate"];
   private _user?: L.ReactionFragment["user"];
@@ -9725,6 +9707,7 @@ export class Reaction extends Request {
     this.id = data.id;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._comment = data.comment ?? undefined;
+    this._externalUser = data.externalUser ?? undefined;
     this._issue = data.issue ?? undefined;
     this._projectUpdate = data.projectUpdate ?? undefined;
     this._user = data.user ?? undefined;
@@ -9739,14 +9722,17 @@ export class Reaction extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The comment that the reaction is associated with. */
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
+  }
+  /** The external user that created the reaction. */
+  public get externalUser(): LinearFetch<ExternalUser> | undefined {
+    return this._externalUser?.id ? new ExternalUserQuery(this._request).fetch(this._externalUser?.id) : undefined;
   }
   /** The issue that the reaction is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
@@ -9850,8 +9836,7 @@ export class Reminder extends Request {
   /** Scheduling settings for recurring reminders. */
   public schedule?: L.Scalars["JSONObject"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -9915,8 +9900,7 @@ export class Roadmap extends Request {
   /** The sort order of the roadmap within the organization. */
   public sortOrder: number;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -10060,8 +10044,7 @@ export class RoadmapToProject extends Request {
   /** The sort order of the project within the roadmap. */
   public sortOrder: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -10280,7 +10263,9 @@ export class SlackChannelNameMapping extends Request {
     this.isPrivate = data.isPrivate ?? undefined;
     this.isShared = data.isShared ?? undefined;
     this.name = data.name;
+    this.postAcceptedFromTriageUpdates = data.postAcceptedFromTriageUpdates ?? undefined;
     this.postCancellationUpdates = data.postCancellationUpdates ?? undefined;
+    this.postCompletionUpdates = data.postCompletionUpdates ?? undefined;
     this.teams = data.teams.map(node => new SlackAsksTeamSettings(request, node));
   }
 
@@ -10302,8 +10287,12 @@ export class SlackChannelNameMapping extends Request {
   public isShared?: boolean;
   /** The Slack channel name. */
   public name: string;
+  /** Whether or not synced Slack threads should be updated with a message when their Ask is accepted from triage. */
+  public postAcceptedFromTriageUpdates?: boolean;
   /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled. */
   public postCancellationUpdates?: boolean;
+  /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed. */
+  public postCompletionUpdates?: boolean;
   /** Which teams are connected to the channel and settings for those teams. */
   public teams: SlackAsksTeamSettings[];
 }
@@ -10588,8 +10577,7 @@ export class Team extends Request {
   /** How many upcoming cycles to create. */
   public upcomingCycleCount: number;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -10815,8 +10803,7 @@ export class TeamMembership extends Request {
   /** The order of the item in the users team list. */
   public sortOrder: number;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -10937,8 +10924,7 @@ export class TeamNotificationSubscription extends Request {
   /** The type of subscription. */
   public notificationSubscriptionTypes: string[];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -11005,30 +10991,6 @@ export class TeamPayload extends Request {
   }
 }
 /**
- * Mapping of Linear teams to GitHub repos.
- *
- * @param request - function to call the graphql client
- * @param data - L.TeamRepoMappingFragment response data
- */
-export class TeamRepoMapping extends Request {
-  public constructor(request: LinearRequest, data: L.TeamRepoMappingFragment) {
-    super(request);
-    this.bidirectional = data.bidirectional ?? undefined;
-    this.default = data.default ?? undefined;
-    this.gitHubRepoId = data.gitHubRepoId;
-    this.linearTeamId = data.linearTeamId;
-  }
-
-  /** Whether the sync for this mapping is bidirectional. */
-  public bidirectional?: boolean;
-  /** Whether this mapping is the default one for issue creation. */
-  public default?: boolean;
-  /** The GitHub repo id. */
-  public gitHubRepoId: number;
-  /** The Linear team id to map to the given project. */
-  public linearTeamId: string;
-}
-/**
  * A template object used for creating entities faster.
  *
  * @param request - function to call the graphql client
@@ -11072,8 +11034,7 @@ export class Template extends Request {
   /** The entity type this template is for. */
   public type: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -11195,8 +11156,7 @@ export class TextDraft extends Request {
   /** Whether the draft was autogenerated for the user. */
   public isAutogenerated: boolean;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -11256,8 +11216,7 @@ export class TimeSchedule extends Request {
   /** The name of the schedule. */
   public name: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -11387,8 +11346,7 @@ export class TriageResponsibility extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -11635,8 +11593,7 @@ export class User extends Request {
   /** The local timezone of the user. */
   public timezone?: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -11839,8 +11796,7 @@ export class UserNotificationSubscription extends Request {
   /** The type of subscription. */
   public notificationSubscriptionTypes: string[];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -11962,8 +11918,7 @@ export class UserSettings extends Request {
   /** The email types the user has unsubscribed from. */
   public unsubscribedFrom: string[];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -12070,8 +12025,7 @@ export class ViewPreferences extends Request {
   /** The view preference type. */
   public type: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -12178,8 +12132,7 @@ export class Webhook extends Request {
   /** Secret token for verifying the origin on the recipient side. */
   public secret?: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -12334,8 +12287,7 @@ export class WorkflowCronJobDefinition extends Request {
   /** The sort order of the workflow cron job definition within its siblings. */
   public sortOrder: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -12433,8 +12385,7 @@ export class WorkflowDefinition extends Request {
   /** The sort order of the workflow definition within its siblings. */
   public sortOrder: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -12538,8 +12489,7 @@ export class WorkflowState extends Request {
   /** The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled". */
   public type: string;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
@@ -16332,14 +16282,20 @@ export class AttachmentLinkJiraIssueMutation extends Request {
    *
    * @param issueId - required issueId to pass to attachmentLinkJiraIssue
    * @param jiraIssueId - required jiraIssueId to pass to attachmentLinkJiraIssue
+   * @param variables - variables without 'issueId', 'jiraIssueId' to pass into the AttachmentLinkJiraIssueMutation
    * @returns parsed response from AttachmentLinkJiraIssueMutation
    */
-  public async fetch(issueId: string, jiraIssueId: string): LinearFetch<AttachmentPayload> {
+  public async fetch(
+    issueId: string,
+    jiraIssueId: string,
+    variables?: Omit<L.AttachmentLinkJiraIssueMutationVariables, "issueId" | "jiraIssueId">
+  ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkJiraIssueMutation, L.AttachmentLinkJiraIssueMutationVariables>(
       L.AttachmentLinkJiraIssueDocument,
       {
         issueId,
         jiraIssueId,
+        ...variables,
       }
     );
     const data = response.attachmentLinkJiraIssue;
@@ -19115,37 +19071,6 @@ export class DeleteIntegrationTemplateMutation extends Request {
     const data = response.integrationTemplateDelete;
 
     return new DeletePayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable IntegrationUpdateSlack Mutation
- *
- * @param request - function to call the graphql client
- */
-export class IntegrationUpdateSlackMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IntegrationUpdateSlack mutation and return a IntegrationPayload
-   *
-   * @param code - required code to pass to integrationUpdateSlack
-   * @param redirectUri - required redirectUri to pass to integrationUpdateSlack
-   * @returns parsed response from IntegrationUpdateSlackMutation
-   */
-  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
-    const response = await this._request<L.IntegrationUpdateSlackMutation, L.IntegrationUpdateSlackMutationVariables>(
-      L.IntegrationUpdateSlackDocument,
-      {
-        code,
-        redirectUri,
-      }
-    );
-    const data = response.integrationUpdateSlack;
-
-    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -25319,6 +25244,38 @@ export class Organization_UsersQuery extends Request {
 }
 
 /**
+ * A fetchable Project_DocumentContent Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to project
+ */
+export class Project_DocumentContentQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the Project_DocumentContent query and return a DocumentContent
+   *
+   * @returns parsed response from Project_DocumentContentQuery
+   */
+  public async fetch(): LinearFetch<DocumentContent | undefined> {
+    const response = await this._request<L.Project_DocumentContentQuery, L.Project_DocumentContentQueryVariables>(
+      L.Project_DocumentContentDocument,
+      {
+        id: this._id,
+      }
+    );
+    const data = response.project.documentContent;
+
+    return data ? new DocumentContent(this._request, data) : undefined;
+  }
+}
+
+/**
  * A fetchable Project_Documents Query
  *
  * @param request - function to call the graphql client
@@ -25751,6 +25708,38 @@ export class Project_TeamsQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable ProjectMilestone_DocumentContent Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to projectMilestone
+ */
+export class ProjectMilestone_DocumentContentQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the ProjectMilestone_DocumentContent query and return a DocumentContent
+   *
+   * @returns parsed response from ProjectMilestone_DocumentContentQuery
+   */
+  public async fetch(): LinearFetch<DocumentContent | undefined> {
+    const response = await this._request<
+      L.ProjectMilestone_DocumentContentQuery,
+      L.ProjectMilestone_DocumentContentQueryVariables
+    >(L.ProjectMilestone_DocumentContentDocument, {
+      id: this._id,
+    });
+    const data = response.projectMilestone.documentContent;
+
+    return data ? new DocumentContent(this._request, data) : undefined;
   }
 }
 
@@ -28381,10 +28370,15 @@ export class LinearSdk extends Request {
    *
    * @param issueId - required issueId to pass to attachmentLinkJiraIssue
    * @param jiraIssueId - required jiraIssueId to pass to attachmentLinkJiraIssue
+   * @param variables - variables without 'issueId', 'jiraIssueId' to pass into the AttachmentLinkJiraIssueMutation
    * @returns AttachmentPayload
    */
-  public attachmentLinkJiraIssue(issueId: string, jiraIssueId: string): LinearFetch<AttachmentPayload> {
-    return new AttachmentLinkJiraIssueMutation(this._request).fetch(issueId, jiraIssueId);
+  public attachmentLinkJiraIssue(
+    issueId: string,
+    jiraIssueId: string,
+    variables?: Omit<L.AttachmentLinkJiraIssueMutationVariables, "issueId" | "jiraIssueId">
+  ): LinearFetch<AttachmentPayload> {
+    return new AttachmentLinkJiraIssueMutation(this._request).fetch(issueId, jiraIssueId, variables);
   }
   /**
    * Link an existing Slack message to an issue.
@@ -29339,16 +29333,6 @@ export class LinearSdk extends Request {
    */
   public deleteIntegrationTemplate(id: string): LinearFetch<DeletePayload> {
     return new DeleteIntegrationTemplateMutation(this._request).fetch(id);
-  }
-  /**
-   * Updates the organization's Slack integration.
-   *
-   * @param code - required code to pass to integrationUpdateSlack
-   * @param redirectUri - required redirectUri to pass to integrationUpdateSlack
-   * @returns IntegrationPayload
-   */
-  public integrationUpdateSlack(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
-    return new IntegrationUpdateSlackMutation(this._request).fetch(code, redirectUri);
   }
   /**
    * Integrates the organization with Zendesk.

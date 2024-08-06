@@ -59,8 +59,7 @@ export type ApiKey = Node & {
   /** The label of the API key. */
   label: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -189,8 +188,7 @@ export type Attachment = Node & {
   /** Content for the title line in the Linear attachment widget. */
   title: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -354,8 +352,7 @@ export type AuditEntry = Node & {
   requestInformation?: Maybe<Scalars["JSONObject"]>;
   type: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -845,8 +842,7 @@ export type Comment = Node & {
   /** [Internal] Summary for comment thread. */
   summaryText?: Maybe<Scalars["String"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -1124,8 +1120,7 @@ export type CustomAttribute = Node & {
   /** The type of the value stored by the attribute. */
   type: SchemaFieldType;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -1192,8 +1187,7 @@ export type CustomView = Node & {
   /** The team associated with the custom view. */
   team?: Maybe<Team>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -1309,8 +1303,7 @@ export type CustomViewNotificationSubscription = Entity &
     /** The team associated with the notification subscription. */
     team?: Maybe<Team>;
     /**
-     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
      *     been updated after creation.
      */
     updatedAt: Scalars["DateTime"];
@@ -1391,8 +1384,7 @@ export type Customer = Node & {
   /** The current status of the customer. */
   status: CustomerStatus;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -1507,8 +1499,7 @@ export type CustomerNeed = Node & {
   /** The project this need is referencing. */
   project?: Maybe<Project>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -1636,8 +1627,7 @@ export type CustomerSchema = Node & {
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -1673,8 +1663,7 @@ export type CustomerSchemaField = Node & {
   /** The type of the field in the schema. */
   type: SchemaFieldType;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -1714,8 +1703,7 @@ export type CustomerStatus = Node & {
   /** The type of the customer status. */
   type: CustomerStatusType;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -1840,8 +1828,7 @@ export type Cycle = Node & {
   /** Issues that weren't completed when the cycle was closed. */
   uncompletedIssuesUponClose: IssueConnection;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -1983,8 +1970,7 @@ export type CycleNotificationSubscription = Entity &
     /** The team associated with the notification subscription. */
     team?: Maybe<Team>;
     /**
-     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
      *     been updated after creation.
      */
     updatedAt: Scalars["DateTime"];
@@ -2104,8 +2090,7 @@ export type DiaryEntry = Node & {
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -2177,6 +2162,8 @@ export type Document = Node & {
   createdAt: Scalars["DateTime"];
   /** The user who created the document. */
   creator: User;
+  /** The ID of the document content associated with the document. */
+  documentContentId?: Maybe<Scalars["String"]>;
   /** The time at which the document was hidden. Null if the entity has not been hidden. */
   hiddenAt?: Maybe<Scalars["DateTime"]>;
   /** The icon of the document. */
@@ -2198,8 +2185,7 @@ export type Document = Node & {
   /** A flag that indicates whether the document is in the trash bin. */
   trashed?: Maybe<Scalars["Boolean"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -2299,8 +2285,7 @@ export type DocumentContent = Node & {
   /** The time at which the document content was restored from a previous version. */
   restoredAt?: Maybe<Scalars["DateTime"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -2338,8 +2323,7 @@ export type DocumentContentHistory = Node & {
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -2484,8 +2468,7 @@ export type DocumentNotification = Entity &
     /** The time at which a notification was unsnoozed.. */
     unsnoozedAt?: Maybe<Scalars["DateTime"]>;
     /**
-     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
      *     been updated after creation.
      */
     updatedAt: Scalars["DateTime"];
@@ -2537,6 +2520,8 @@ export type DocumentSearchResult = Node & {
   createdAt: Scalars["DateTime"];
   /** The user who created the document. */
   creator: User;
+  /** The ID of the document content associated with the document. */
+  documentContentId?: Maybe<Scalars["String"]>;
   /** The time at which the document was hidden. Null if the entity has not been hidden. */
   hiddenAt?: Maybe<Scalars["DateTime"]>;
   /** The icon of the document. */
@@ -2560,8 +2545,7 @@ export type DocumentSearchResult = Node & {
   /** A flag that indicates whether the document is in the trash bin. */
   trashed?: Maybe<Scalars["Boolean"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -2646,8 +2630,7 @@ export type Draft = Node & {
   /** The project update for which this is a draft comment. */
   projectUpdate?: Maybe<ProjectUpdate>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -2687,8 +2670,7 @@ export type EmailIntakeAddress = Node & {
   /** The template that the email address is associated with. */
   template?: Maybe<Template>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -2774,8 +2756,7 @@ export type Emoji = Node & {
   /** The source of the emoji. */
   source: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -2825,8 +2806,7 @@ export type Entity = {
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -2844,14 +2824,13 @@ export type EntityExternalLink = Node & {
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The initiative that the link is associated with. */
-  initiative: Initiative;
+  initiative?: Maybe<Initiative>;
   /** The link's label. */
   label: Scalars["String"];
   /** The order of the item in the resources list. */
   sortOrder: Scalars["Float"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -2963,8 +2942,7 @@ export type ExternalUser = Node & {
   /** Organization the external user belongs to. */
   organization: Organization;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -3008,8 +2986,7 @@ export type Facet = Node & {
   /** The targeted custom view. */
   targetCustomView?: Maybe<CustomView>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -3083,8 +3060,7 @@ export type Favorite = Node & {
   /** The type of the favorite. */
   type: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -3212,8 +3188,7 @@ export type FeatureFlag = Node & {
   /** The status of the feature flag. */
   status: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -3257,8 +3232,7 @@ export type FeatureFlagRolloutStage = Node & {
   /** The type of the feature flag rollout stage. */
   type: FeatureFlagRolloutStageType;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -3345,8 +3319,7 @@ export type GitAutomationState = Node & {
   /** The team to which this automation state belongs. */
   team: Team;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -3429,8 +3402,7 @@ export type GitAutomationTargetBranch = Node & {
   /** The team to which this Git target branch automation belongs. */
   team: Team;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -3564,6 +3536,34 @@ export type GitHubRepoInput = {
   id: Scalars["Float"];
 };
 
+/** Mapping of Linear teams to GitHub repos. */
+export type GitHubRepoMapping = {
+  __typename?: "GitHubRepoMapping";
+  /** Whether the sync for this mapping is bidirectional. */
+  bidirectional?: Maybe<Scalars["Boolean"]>;
+  /** Whether this mapping is the default one for issue creation. */
+  default?: Maybe<Scalars["Boolean"]>;
+  /** Labels to filter incoming GitHub issue creation by. */
+  gitHubLabels?: Maybe<Array<Scalars["String"]>>;
+  /** The GitHub repo id. */
+  gitHubRepoId: Scalars["Float"];
+  /** The Linear team id to map to the given project. */
+  linearTeamId: Scalars["String"];
+};
+
+export type GitHubRepoMappingInput = {
+  /** Whether the sync for this mapping is bidirectional. */
+  bidirectional?: Maybe<Scalars["Boolean"]>;
+  /** Whether this mapping is the default one for issue creation. */
+  default?: Maybe<Scalars["Boolean"]>;
+  /** Labels to filter incoming GitHub issue creation by. */
+  gitHubLabels?: Maybe<Array<Scalars["String"]>>;
+  /** The GitHub repo id. */
+  gitHubRepoId: Scalars["Float"];
+  /** The Linear team id to map to the given project. */
+  linearTeamId: Scalars["String"];
+};
+
 /** Metadata and settings for a GitHub integration. */
 export type GitHubSettings = {
   __typename?: "GitHubSettings";
@@ -3576,7 +3576,7 @@ export type GitHubSettings = {
   /** The names of the repositories connected for the GitHub integration. */
   repositories?: Maybe<Array<GitHubRepo>>;
   /** Mapping of team to repository for syncing. */
-  repositoriesMapping?: Maybe<Array<TeamRepoMapping>>;
+  repositoriesMapping?: Maybe<Array<GitHubRepoMapping>>;
 };
 
 export type GitHubSettingsInput = {
@@ -3589,7 +3589,7 @@ export type GitHubSettingsInput = {
   /** The names of the repositories connected for the GitHub integration. */
   repositories?: Maybe<Array<GitHubRepoInput>>;
   /** Mapping of team to repository for syncing. */
-  repositoriesMapping?: Maybe<Array<TeamRepoMappingInput>>;
+  repositoriesMapping?: Maybe<Array<GitHubRepoMappingInput>>;
 };
 
 /** Metadata and settings for a GitLab integration. */
@@ -3712,8 +3712,7 @@ export type Initiative = Node & {
   /** A flag that indicates whether the initiative is in the trash bin. */
   trashed?: Maybe<Scalars["Boolean"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -3900,8 +3899,7 @@ export type InitiativeNotification = Entity &
     /** The time at which a notification was unsnoozed.. */
     unsnoozedAt?: Maybe<Scalars["DateTime"]>;
     /**
-     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
      *     been updated after creation.
      */
     updatedAt: Scalars["DateTime"];
@@ -3943,8 +3941,7 @@ export type InitiativeNotificationSubscription = Entity &
     /** The team associated with the notification subscription. */
     team?: Maybe<Team>;
     /**
-     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
      *     been updated after creation.
      */
     updatedAt: Scalars["DateTime"];
@@ -3993,8 +3990,7 @@ export type InitiativeToProject = Node & {
   /** The sort order of the project within the initiative. */
   sortOrder: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -4085,8 +4081,7 @@ export type Integration = Node & {
   /** The team that the integration is associated with. */
   team?: Maybe<Team>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -4239,8 +4234,7 @@ export type IntegrationTemplate = Node & {
   /** The template that the integration is associated with. */
   template: Template;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -4317,8 +4311,7 @@ export type IntegrationsSettings = Node & {
   /** Team which those settings apply to. */
   team?: Maybe<Team>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -4556,8 +4549,7 @@ export type Issue = Node & {
   /** The time at which the issue left triage. */
   triagedAt?: Maybe<Scalars["DateTime"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -4778,6 +4770,8 @@ export type IssueCreateInput = {
   assigneeId?: Maybe<Scalars["String"]>;
   /** The position of the issue in its column on the board view. */
   boardOrder?: Maybe<Scalars["Float"]>;
+  /** The date when the issue was completed (e.g. if importing from another system). Must be a date in the past and after createdAt date. Cannot be provided with an incompatible workflow state. */
+  completedAt?: Maybe<Scalars["DateTime"]>;
   /** Create issue as a user with the provided name. This option is only available to OAuth applications creating issues in `actor=application` mode. */
   createAsUser?: Maybe<Scalars["String"]>;
   /** The date when the issue was created (e.g. if importing from another system). Must be a date in the past. If none is provided, the backend will generate the time as now. */
@@ -4880,8 +4874,7 @@ export type IssueDraft = Node & {
   /** The draft's title. */
   title: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -5107,8 +5100,7 @@ export type IssueHistory = Node & {
   /** The users that were notified of the issue. */
   triageResponsibilityNotifiedUsers?: Maybe<Array<User>>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -5162,8 +5154,7 @@ export type IssueImport = Node & {
   /** New team's name in cases when teamId not set. */
   teamName?: Maybe<Scalars["String"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -5249,8 +5240,7 @@ export type IssueLabel = Node & {
   /** The team that the label is associated with. If null, the label is associated with the global workspace. */
   team?: Maybe<Team>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -5449,8 +5439,7 @@ export type IssueNotification = Entity &
     /** The time at which a notification was unsnoozed.. */
     unsnoozedAt?: Maybe<Scalars["DateTime"]>;
     /**
-     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
      *     been updated after creation.
      */
     updatedAt: Scalars["DateTime"];
@@ -5494,8 +5483,7 @@ export type IssueRelation = Node & {
   /** The relationship of the issue with the related issue. */
   type: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -5697,8 +5685,7 @@ export type IssueSearchResult = Node & {
   /** The time at which the issue left triage. */
   triagedAt?: Maybe<Scalars["DateTime"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -6034,8 +6021,7 @@ export type LabelNotificationSubscription = Entity &
     /** The team associated with the notification subscription. */
     team?: Maybe<Team>;
     /**
-     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
      *     been updated after creation.
      */
     updatedAt: Scalars["DateTime"];
@@ -6346,8 +6332,6 @@ export type Mutation = {
   integrationTemplateCreate: IntegrationTemplatePayload;
   /** Deletes a integrationTemplate. */
   integrationTemplateDelete: DeletePayload;
-  /** Updates the organization's Slack integration. */
-  integrationUpdateSlack: IntegrationPayload;
   /** Integrates the organization with Zendesk. */
   integrationZendesk: IntegrationPayload;
   /** Creates new settings for one or more integrations. */
@@ -6720,8 +6704,12 @@ export type MutationAttachmentLinkIntercomArgs = {
 };
 
 export type MutationAttachmentLinkJiraIssueArgs = {
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
+  id?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
   jiraIssueId: Scalars["String"];
+  title?: Maybe<Scalars["String"]>;
 };
 
 export type MutationAttachmentLinkSlackArgs = {
@@ -7212,11 +7200,6 @@ export type MutationIntegrationTemplateCreateArgs = {
 
 export type MutationIntegrationTemplateDeleteArgs = {
   id: Scalars["String"];
-};
-
-export type MutationIntegrationUpdateSlackArgs = {
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
 };
 
 export type MutationIntegrationZendeskArgs = {
@@ -7898,8 +7881,7 @@ export type Notification = {
   /** The time at which a notification was unsnoozed.. */
   unsnoozedAt?: Maybe<Scalars["DateTime"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -8099,8 +8081,7 @@ export type NotificationSubscription = {
   /** The team associated with the notification subscription. */
   team?: Maybe<Team>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -8760,8 +8741,7 @@ export type OauthClient = Node & {
   /** List of allowed redirect URIs for the application. */
   redirectUris: Array<Scalars["String"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -8797,8 +8777,7 @@ export type OauthClientApproval = Node & {
   /** The status for the OAuth client approval request. */
   status: OAuthClientApprovalStatus;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -8861,8 +8840,7 @@ export type OauthClientApprovalNotification = Entity &
     /** The time at which a notification was unsnoozed.. */
     unsnoozedAt?: Maybe<Scalars["DateTime"]>;
     /**
-     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
      *     been updated after creation.
      */
     updatedAt: Scalars["DateTime"];
@@ -8994,8 +8972,7 @@ export type Organization = Node & {
   /** The time at which the trial will end. */
   trialEndsAt?: Maybe<Scalars["DateTime"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -9098,8 +9075,7 @@ export type OrganizationDomain = Node & {
   /** Domain name. */
   name: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -9199,8 +9175,7 @@ export type OrganizationInvite = Node & {
   /** The user role that the invitee will receive upon accepting the invite. */
   role: UserRoleType;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -9472,8 +9447,7 @@ export type PaidSubscription = Node & {
   /** The subscription type. */
   type: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -9557,6 +9531,8 @@ export type Project = Node & {
   currentProgress: Scalars["JSONObject"];
   /** The project's description. */
   description: Scalars["String"];
+  /** The content of the project description. */
+  documentContent?: Maybe<DocumentContent>;
   /** Documents associated with the project. */
   documents: DocumentConnection;
   /** External links associated with the project. */
@@ -9640,8 +9616,7 @@ export type Project = Node & {
   /** A flag that indicates whether the project is in the trash bin. */
   trashed?: Maybe<Scalars["Boolean"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -9971,8 +9946,7 @@ export type ProjectLink = Node & {
   /** The order of the item in the project resources list. */
   sortOrder: Scalars["Float"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -10042,6 +10016,8 @@ export type ProjectMilestone = Node & {
   descriptionData?: Maybe<Scalars["JSON"]>;
   /** [Internal] The project milestone's description as YJS state. */
   descriptionState?: Maybe<Scalars["String"]>;
+  /** The content of the project milestone description. */
+  documentContent?: Maybe<DocumentContent>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** Issues associated with the project milestone. */
@@ -10055,8 +10031,7 @@ export type ProjectMilestone = Node & {
   /** The planned completion date of the milestone. */
   targetDate?: Maybe<Scalars["TimelessDate"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -10242,8 +10217,7 @@ export type ProjectNotification = Entity &
     /** The time at which a notification was unsnoozed.. */
     unsnoozedAt?: Maybe<Scalars["DateTime"]>;
     /**
-     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
      *     been updated after creation.
      */
     updatedAt: Scalars["DateTime"];
@@ -10285,8 +10259,7 @@ export type ProjectNotificationSubscription = Entity &
     /** The team associated with the notification subscription. */
     team?: Maybe<Team>;
     /**
-     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
      *     been updated after creation.
      */
     updatedAt: Scalars["DateTime"];
@@ -10330,8 +10303,7 @@ export type ProjectRelation = Node & {
   /** The relationship of the project with the related project. */
   type: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -10440,6 +10412,8 @@ export type ProjectSearchResult = Node & {
   currentProgress: Scalars["JSONObject"];
   /** The project's description. */
   description: Scalars["String"];
+  /** The content of the project description. */
+  documentContent?: Maybe<DocumentContent>;
   /** Documents associated with the project. */
   documents: DocumentConnection;
   /** External links associated with the project. */
@@ -10525,8 +10499,7 @@ export type ProjectSearchResult = Node & {
   /** A flag that indicates whether the project is in the trash bin. */
   trashed?: Maybe<Scalars["Boolean"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -10656,8 +10629,7 @@ export type ProjectStatus = Node & {
   /** The type of the project status. */
   type: ProjectStatusType;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -10753,8 +10725,7 @@ export type ProjectUpdate = Node & {
   /** The project update's unique URL slug. */
   slugId: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -10898,8 +10869,7 @@ export type ProjectUpdateInteraction = Node & {
   /** The time at which the user read the project update. */
   readAt: Scalars["DateTime"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -11037,8 +11007,7 @@ export type PushSubscription = Node & {
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -12092,6 +12061,8 @@ export type Reaction = Node & {
   createdAt: Scalars["DateTime"];
   /** Name of the reaction's emoji. */
   emoji: Scalars["String"];
+  /** The external user that created the reaction. */
+  externalUser?: Maybe<ExternalUser>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The issue that the reaction is associated with. */
@@ -12099,8 +12070,7 @@ export type Reaction = Node & {
   /** The project update that the reaction is associated with. */
   projectUpdate?: Maybe<ProjectUpdate>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -12223,8 +12193,7 @@ export type Reminder = Node & {
   /** Scheduling settings for recurring reminders. */
   schedule?: Maybe<Scalars["JSONObject"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -12260,8 +12229,7 @@ export type Roadmap = Node & {
   /** The sort order of the roadmap within the organization. */
   sortOrder: Scalars["Float"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -12392,8 +12360,7 @@ export type RoadmapToProject = Node & {
   /** The sort order of the project within the roadmap. */
   sortOrder: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -12632,8 +12599,12 @@ export type SlackChannelNameMapping = {
   isShared?: Maybe<Scalars["Boolean"]>;
   /** The Slack channel name. */
   name: Scalars["String"];
+  /** Whether or not synced Slack threads should be updated with a message when their Ask is accepted from triage. */
+  postAcceptedFromTriageUpdates?: Maybe<Scalars["Boolean"]>;
   /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled. */
   postCancellationUpdates?: Maybe<Scalars["Boolean"]>;
+  /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed. */
+  postCompletionUpdates?: Maybe<Scalars["Boolean"]>;
   /** Which teams are connected to the channel and settings for those teams. */
   teams: Array<SlackAsksTeamSettings>;
 };
@@ -12657,8 +12628,12 @@ export type SlackChannelNameMappingInput = {
   isShared?: Maybe<Scalars["Boolean"]>;
   /** The Slack channel name. */
   name: Scalars["String"];
+  /** Whether or not synced Slack threads should be updated with a message when their Ask is accepted from triage. */
+  postAcceptedFromTriageUpdates?: Maybe<Scalars["Boolean"]>;
   /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled. */
   postCancellationUpdates?: Maybe<Scalars["Boolean"]>;
+  /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed. */
+  postCompletionUpdates?: Maybe<Scalars["Boolean"]>;
   /** Which teams are connected to the channel and settings for those teams. */
   teams: Array<SlackAsksTeamSettingsInput>;
 };
@@ -13054,8 +13029,7 @@ export type Team = Node & {
   /** How many upcoming cycles to create. */
   upcomingCycleCount: Scalars["Float"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -13332,8 +13306,7 @@ export type TeamMembership = Node & {
   /** The team that the membership is associated with. */
   team: Team;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -13417,8 +13390,7 @@ export type TeamNotificationSubscription = Entity &
     /** The team subscribed to. */
     team: Team;
     /**
-     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
      *     been updated after creation.
      */
     updatedAt: Scalars["DateTime"];
@@ -13436,30 +13408,6 @@ export type TeamPayload = {
   success: Scalars["Boolean"];
   /** The team that was created or updated. */
   team?: Maybe<Team>;
-};
-
-/** Mapping of Linear teams to GitHub repos. */
-export type TeamRepoMapping = {
-  __typename?: "TeamRepoMapping";
-  /** Whether the sync for this mapping is bidirectional. */
-  bidirectional?: Maybe<Scalars["Boolean"]>;
-  /** Whether this mapping is the default one for issue creation. */
-  default?: Maybe<Scalars["Boolean"]>;
-  /** The GitHub repo id. */
-  gitHubRepoId: Scalars["Float"];
-  /** The Linear team id to map to the given project. */
-  linearTeamId: Scalars["String"];
-};
-
-export type TeamRepoMappingInput = {
-  /** Whether the sync for this mapping is bidirectional. */
-  bidirectional?: Maybe<Scalars["Boolean"]>;
-  /** Whether this mapping is the default one for issue creation. */
-  default?: Maybe<Scalars["Boolean"]>;
-  /** The GitHub repo id. */
-  gitHubRepoId: Scalars["Float"];
-  /** The Linear team id to map to the given project. */
-  linearTeamId: Scalars["String"];
 };
 
 /** Issue team sorting options. */
@@ -13589,8 +13537,7 @@ export type Template = Node & {
   /** The entity type this template is for. */
   type: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -13674,8 +13621,7 @@ export type TextDraft = Node & {
   /** The project update for which this is a draft comment. */
   projectUpdate?: Maybe<ProjectUpdate>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -13705,8 +13651,7 @@ export type TimeSchedule = Node & {
   /** The organization of the schedule. */
   organization: Organization;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -13843,8 +13788,7 @@ export type TriageResponsibility = Node & {
   /** The time schedule used for scheduling. */
   timeSchedule?: Maybe<TimeSchedule>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -14022,8 +13966,7 @@ export type User = Node & {
   /** The local timezone of the user. */
   timezone?: Maybe<Scalars["String"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -14319,8 +14262,7 @@ export type UserNotificationSubscription = Entity &
     /** The team associated with the notification subscription. */
     team?: Maybe<Team>;
     /**
-     * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-     *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+     * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
      *     been updated after creation.
      */
     updatedAt: Scalars["DateTime"];
@@ -14380,8 +14322,7 @@ export type UserSettings = Node & {
    */
   unsubscribedFrom: Array<Scalars["String"]>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -14481,8 +14422,7 @@ export type ViewPreferences = Node & {
   /** The view preference type. */
   type: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -14621,8 +14561,7 @@ export type Webhook = Node & {
   /** The team that the webhook is associated with. If null, the webhook is associated with all public teams of the organization. */
   team?: Maybe<Team>;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -14737,8 +14676,7 @@ export type WorkflowCronJobDefinition = Node & {
   /** The team associated with the workflow cron job. */
   team: Team;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -14800,8 +14738,7 @@ export type WorkflowDefinition = Node & {
   /** The type of the workflow. */
   type: WorkflowType;
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -14849,8 +14786,7 @@ export type WorkflowState = Node & {
   /** The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled". */
   type: Scalars["String"];
   /**
-   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
@@ -15276,6 +15212,7 @@ export type DocumentNotificationFragment = { __typename: "DocumentNotification" 
 export type DocumentFragment = { __typename: "Document" } & Pick<
   Document,
   | "trashed"
+  | "documentContentId"
   | "url"
   | "color"
   | "title"
@@ -15503,7 +15440,10 @@ export type LabelNotificationSubscriptionFragment = { __typename: "LabelNotifica
 export type ProjectMilestoneFragment = { __typename: "ProjectMilestone" } & Pick<
   ProjectMilestone,
   "updatedAt" | "name" | "sortOrder" | "targetDate" | "description" | "archivedAt" | "createdAt" | "id"
-> & { project: { __typename?: "Project" } & Pick<Project, "id"> };
+> & {
+    documentContent?: Maybe<{ __typename?: "DocumentContent" } & DocumentContentFragment>;
+    project: { __typename?: "Project" } & Pick<Project, "id">;
+  };
 
 type Notification_DocumentNotification_Fragment = { __typename: "DocumentNotification" } & Pick<
   DocumentNotification,
@@ -15662,6 +15602,7 @@ export type ProjectFragment = { __typename: "Project" } & Pick<
   | "state"
 > & {
     integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
+    documentContent?: Maybe<{ __typename?: "DocumentContent" } & DocumentContentFragment>;
     lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     lead?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     convertedFromIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
@@ -15675,6 +15616,7 @@ export type ReactionFragment = { __typename: "Reaction" } & Pick<
   "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & {
     comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+    externalUser?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
     user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -16035,7 +15977,7 @@ export type EntityExternalLinkFragment = { __typename: "EntityExternalLink" } & 
   EntityExternalLink,
   "updatedAt" | "url" | "label" | "sortOrder" | "archivedAt" | "createdAt" | "id"
 > & {
-    initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     creator: { __typename?: "User" } & Pick<User, "id">;
   };
 
@@ -16554,9 +16496,9 @@ export type LaunchDarklySettingsFragment = { __typename: "LaunchDarklySettings" 
   "environment" | "projectKey"
 >;
 
-export type TeamRepoMappingFragment = { __typename: "TeamRepoMapping" } & Pick<
-  TeamRepoMapping,
-  "gitHubRepoId" | "linearTeamId" | "bidirectional" | "default"
+export type GitHubRepoMappingFragment = { __typename: "GitHubRepoMapping" } & Pick<
+  GitHubRepoMapping,
+  "gitHubLabels" | "gitHubRepoId" | "linearTeamId" | "bidirectional" | "default"
 >;
 
 export type JiraProjectDataFragment = { __typename: "JiraProjectData" } & Pick<JiraProjectData, "id" | "key" | "name">;
@@ -16575,7 +16517,7 @@ export type GitHubSettingsFragment = { __typename: "GitHubSettings" } & Pick<
   GitHubSettings,
   "orgLogin" | "orgAvatarUrl" | "orgType"
 > & {
-    repositoriesMapping?: Maybe<Array<{ __typename?: "TeamRepoMapping" } & TeamRepoMappingFragment>>;
+    repositoriesMapping?: Maybe<Array<{ __typename?: "GitHubRepoMapping" } & GitHubRepoMappingFragment>>;
     repositories?: Maybe<Array<{ __typename?: "GitHubRepo" } & GitHubRepoFragment>>;
   };
 
@@ -16737,6 +16679,8 @@ export type SlackChannelNameMappingFragment = { __typename: "SlackChannelNameMap
   | "autoCreateTemplateId"
   | "autoCreateOnBotMention"
   | "postCancellationUpdates"
+  | "postCompletionUpdates"
+  | "postAcceptedFromTriageUpdates"
   | "botAdded"
   | "isPrivate"
   | "isShared"
@@ -17256,6 +17200,7 @@ export type DocumentSearchResultFragment = { __typename: "DocumentSearchResult" 
   DocumentSearchResult,
   | "trashed"
   | "metadata"
+  | "documentContentId"
   | "url"
   | "color"
   | "title"
@@ -18147,6 +18092,7 @@ export type ProjectSearchResultFragment = { __typename: "ProjectSearchResult" } 
   | "state"
 > & {
     integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
+    documentContent?: Maybe<{ __typename?: "DocumentContent" } & DocumentContentFragment>;
     lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     lead?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     convertedFromIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
@@ -19855,6 +19801,16 @@ export type ProjectQueryVariables = Exact<{
 
 export type ProjectQuery = { __typename?: "Query" } & { project: { __typename?: "Project" } & ProjectFragment };
 
+export type Project_DocumentContentQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type Project_DocumentContentQuery = { __typename?: "Query" } & {
+  project: { __typename?: "Project" } & {
+    documentContent?: Maybe<{ __typename?: "DocumentContent" } & DocumentContentFragment>;
+  };
+};
+
 export type Project_DocumentsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
@@ -20026,6 +19982,16 @@ export type ProjectMilestoneQueryVariables = Exact<{
 
 export type ProjectMilestoneQuery = { __typename?: "Query" } & {
   projectMilestone: { __typename?: "ProjectMilestone" } & ProjectMilestoneFragment;
+};
+
+export type ProjectMilestone_DocumentContentQueryVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type ProjectMilestone_DocumentContentQuery = { __typename?: "Query" } & {
+  projectMilestone: { __typename?: "ProjectMilestone" } & {
+    documentContent?: Maybe<{ __typename?: "DocumentContent" } & DocumentContentFragment>;
+  };
 };
 
 export type ProjectMilestone_IssuesQueryVariables = Exact<{
@@ -21140,8 +21106,12 @@ export type AttachmentLinkIntercomMutation = { __typename?: "Mutation" } & {
 };
 
 export type AttachmentLinkJiraIssueMutationVariables = Exact<{
+  createAsUser?: Maybe<Scalars["String"]>;
+  displayIconUrl?: Maybe<Scalars["String"]>;
+  id?: Maybe<Scalars["String"]>;
   issueId: Scalars["String"];
   jiraIssueId: Scalars["String"];
+  title?: Maybe<Scalars["String"]>;
 }>;
 
 export type AttachmentLinkJiraIssueMutation = { __typename?: "Mutation" } & {
@@ -21951,15 +21921,6 @@ export type DeleteIntegrationTemplateMutationVariables = Exact<{
 
 export type DeleteIntegrationTemplateMutation = { __typename?: "Mutation" } & {
   integrationTemplateDelete: { __typename?: "DeletePayload" } & DeletePayloadFragment;
-};
-
-export type IntegrationUpdateSlackMutationVariables = Exact<{
-  code: Scalars["String"];
-  redirectUri: Scalars["String"];
-}>;
-
-export type IntegrationUpdateSlackMutation = { __typename?: "Mutation" } & {
-  integrationUpdateSlack: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
 };
 
 export type IntegrationZendeskMutationVariables = Exact<{
@@ -25480,17 +25441,18 @@ export const FrontSettingsFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<FrontSettingsFragment, unknown>;
-export const TeamRepoMappingFragmentDoc = {
+export const GitHubRepoMappingFragmentDoc = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "TeamRepoMapping" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "TeamRepoMapping" } },
+      name: { kind: "Name", value: "GitHubRepoMapping" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "GitHubRepoMapping" } },
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "gitHubLabels" } },
           { kind: "Field", name: { kind: "Name", value: "gitHubRepoId" } },
           { kind: "Field", name: { kind: "Name", value: "linearTeamId" } },
           { kind: "Field", name: { kind: "Name", value: "bidirectional" } },
@@ -25499,7 +25461,7 @@ export const TeamRepoMappingFragmentDoc = {
       },
     },
   ],
-} as unknown as DocumentNode<TeamRepoMappingFragment, unknown>;
+} as unknown as DocumentNode<GitHubRepoMappingFragment, unknown>;
 export const GitHubRepoFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -25534,7 +25496,7 @@ export const GitHubSettingsFragmentDoc = {
             name: { kind: "Name", value: "repositoriesMapping" },
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamRepoMapping" } }],
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "GitHubRepoMapping" } }],
             },
           },
           { kind: "Field", name: { kind: "Name", value: "orgLogin" } },
@@ -25892,6 +25854,8 @@ export const SlackChannelNameMappingFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "autoCreateTemplateId" } },
           { kind: "Field", name: { kind: "Name", value: "autoCreateOnBotMention" } },
           { kind: "Field", name: { kind: "Name", value: "postCancellationUpdates" } },
+          { kind: "Field", name: { kind: "Name", value: "postCompletionUpdates" } },
+          { kind: "Field", name: { kind: "Name", value: "postAcceptedFromTriageUpdates" } },
           { kind: "Field", name: { kind: "Name", value: "botAdded" } },
           { kind: "Field", name: { kind: "Name", value: "isPrivate" } },
           { kind: "Field", name: { kind: "Name", value: "isShared" } },
@@ -27242,6 +27206,14 @@ export const ReactionFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "externalUser" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "issue" },
             selectionSet: {
               kind: "SelectionSet",
@@ -27984,6 +27956,7 @@ export const DocumentFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "trashed" } },
+          { kind: "Field", name: { kind: "Name", value: "documentContentId" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "color" } },
           { kind: "Field", name: { kind: "Name", value: "title" } },
@@ -28169,6 +28142,7 @@ export const DocumentSearchResultFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "trashed" } },
           { kind: "Field", name: { kind: "Name", value: "metadata" } },
+          { kind: "Field", name: { kind: "Name", value: "documentContentId" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "color" } },
           { kind: "Field", name: { kind: "Name", value: "title" } },
@@ -31573,6 +31547,14 @@ export const ProjectFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "documentContent" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DocumentContent" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "targetDate" } },
           { kind: "Field", name: { kind: "Name", value: "startDate" } },
           { kind: "Field", name: { kind: "Name", value: "health" } },
@@ -31814,6 +31796,14 @@ export const ProjectMilestoneFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "documentContent" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DocumentContent" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
@@ -32060,6 +32050,14 @@ export const ProjectSearchResultFragmentDoc = {
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "documentContent" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DocumentContent" } }],
             },
           },
           { kind: "Field", name: { kind: "Name", value: "targetDate" } },
@@ -36905,6 +36903,7 @@ export const CustomView_ProjectsDocument = {
     },
     ...ProjectConnectionFragmentDoc.definitions,
     ...ProjectFragmentDoc.definitions,
+    ...DocumentContentFragmentDoc.definitions,
     ...ProjectStatusFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -38722,6 +38721,7 @@ export const Initiative_ProjectsDocument = {
     },
     ...ProjectConnectionFragmentDoc.definitions,
     ...ProjectFragmentDoc.definitions,
+    ...DocumentContentFragmentDoc.definitions,
     ...ProjectStatusFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -43453,9 +43453,57 @@ export const ProjectDocument = {
       },
     },
     ...ProjectFragmentDoc.definitions,
+    ...DocumentContentFragmentDoc.definitions,
     ...ProjectStatusFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectQuery, ProjectQueryVariables>;
+export const Project_DocumentContentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "project_documentContent" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "documentContent" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DocumentContent" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...DocumentContentFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<Project_DocumentContentQuery, Project_DocumentContentQueryVariables>;
 export const Project_DocumentsDocument = {
   kind: "Document",
   definitions: [
@@ -44175,6 +44223,7 @@ export const Project_ProjectMilestonesDocument = {
     },
     ...ProjectMilestoneConnectionFragmentDoc.definitions,
     ...ProjectMilestoneFragmentDoc.definitions,
+    ...DocumentContentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_ProjectMilestonesQuery, Project_ProjectMilestonesQueryVariables>;
@@ -44660,8 +44709,56 @@ export const ProjectMilestoneDocument = {
       },
     },
     ...ProjectMilestoneFragmentDoc.definitions,
+    ...DocumentContentFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectMilestoneQuery, ProjectMilestoneQueryVariables>;
+export const ProjectMilestone_DocumentContentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "projectMilestone_documentContent" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectMilestone" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "documentContent" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DocumentContent" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...DocumentContentFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ProjectMilestone_DocumentContentQuery, ProjectMilestone_DocumentContentQueryVariables>;
 export const ProjectMilestone_IssuesDocument = {
   kind: "Document",
   definitions: [
@@ -44882,6 +44979,7 @@ export const ProjectMilestonesDocument = {
     },
     ...ProjectMilestoneConnectionFragmentDoc.definitions,
     ...ProjectMilestoneFragmentDoc.definitions,
+    ...DocumentContentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectMilestonesQuery, ProjectMilestonesQueryVariables>;
@@ -45504,6 +45602,7 @@ export const ProjectsDocument = {
     },
     ...ProjectConnectionFragmentDoc.definitions,
     ...ProjectFragmentDoc.definitions,
+    ...DocumentContentFragmentDoc.definitions,
     ...ProjectStatusFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -45737,6 +45836,7 @@ export const Roadmap_ProjectsDocument = {
     },
     ...ProjectConnectionFragmentDoc.definitions,
     ...ProjectFragmentDoc.definitions,
+    ...DocumentContentFragmentDoc.definitions,
     ...ProjectStatusFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -46645,6 +46745,7 @@ export const SearchProjectsDocument = {
     ...ProjectSearchPayloadFragmentDoc.definitions,
     ...ArchiveResponseFragmentDoc.definitions,
     ...ProjectSearchResultFragmentDoc.definitions,
+    ...DocumentContentFragmentDoc.definitions,
     ...ProjectStatusFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -47711,6 +47812,7 @@ export const Team_ProjectsDocument = {
     },
     ...ProjectConnectionFragmentDoc.definitions,
     ...ProjectFragmentDoc.definitions,
+    ...DocumentContentFragmentDoc.definitions,
     ...ProjectStatusFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -51622,6 +51724,21 @@ export const AttachmentLinkJiraIssueDocument = {
       variableDefinitions: [
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -51629,6 +51746,11 @@ export const AttachmentLinkJiraIssueDocument = {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "jiraIssueId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "title" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
       ],
       selectionSet: {
@@ -51640,6 +51762,21 @@ export const AttachmentLinkJiraIssueDocument = {
             arguments: [
               {
                 kind: "Argument",
+                name: { kind: "Name", value: "createAsUser" },
+                value: { kind: "Variable", name: { kind: "Name", value: "createAsUser" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "displayIconUrl" },
+                value: { kind: "Variable", name: { kind: "Name", value: "displayIconUrl" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
                 name: { kind: "Name", value: "issueId" },
                 value: { kind: "Variable", name: { kind: "Name", value: "issueId" } },
               },
@@ -51647,6 +51784,11 @@ export const AttachmentLinkJiraIssueDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "jiraIssueId" },
                 value: { kind: "Variable", name: { kind: "Name", value: "jiraIssueId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "title" },
+                value: { kind: "Variable", name: { kind: "Name", value: "title" } },
               },
             ],
             selectionSet: {
@@ -55892,54 +56034,6 @@ export const DeleteIntegrationTemplateDocument = {
     ...DeletePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DeleteIntegrationTemplateMutation, DeleteIntegrationTemplateMutationVariables>;
-export const IntegrationUpdateSlackDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "integrationUpdateSlack" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "integrationUpdateSlack" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "code" },
-                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "redirectUri" },
-                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IntegrationPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IntegrationUpdateSlackMutation, IntegrationUpdateSlackMutationVariables>;
 export const IntegrationZendeskDocument = {
   kind: "Document",
   definitions: [

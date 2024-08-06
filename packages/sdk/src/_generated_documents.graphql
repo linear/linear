@@ -1,8 +1,7 @@
 # A Git target branch for which there are automations (GitAutomationState).
 fragment GitAutomationTargetBranch on GitAutomationTargetBranch {
   __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The target branch pattern.
@@ -24,8 +23,7 @@ fragment GitAutomationTargetBranch on GitAutomationTargetBranch {
 # A basic entity.
 fragment Entity on Entity {
   __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -85,8 +83,7 @@ fragment Comment on Comment {
   issue {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The parent comment under which the current comment is nested.
@@ -137,8 +134,7 @@ fragment Emoji on Emoji {
   url
   # The emoji's name.
   name
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The source of the emoji.
@@ -178,8 +174,7 @@ fragment CustomViewNotificationSubscription on CustomViewNotificationSubscriptio
   customView {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The team associated with the notification subscription.
@@ -233,8 +228,7 @@ fragment CustomView on CustomView {
   filters
   # The icon of the custom view.
   icon
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The model name of the custom view.
@@ -294,8 +288,7 @@ fragment CycleNotificationSubscription on CycleNotificationSubscription {
   cycle {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The team associated with the notification subscription.
@@ -333,8 +326,7 @@ fragment DiaryEntry on DiaryEntry {
   url
   # The date for which the entry is created
   date
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -368,8 +360,7 @@ fragment DocumentContent on DocumentContent {
   issue {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The project milestone that the content is associated with.
@@ -399,8 +390,7 @@ fragment DocumentContentHistory on DocumentContentHistory {
   documentContent {
     ...DocumentContent
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -434,8 +424,7 @@ fragment DocumentNotification on DocumentNotification {
   externalUserActor {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at when an email reminder for this notification was sent to the user. Null, if no email
@@ -468,6 +457,8 @@ fragment Document on Document {
   __typename
   # A flag that indicates whether the document is in the trash bin.
   trashed
+  # The ID of the document content associated with the document.
+  documentContentId
   # The canonical url for the document.
   url
   # The color of the icon.
@@ -484,8 +475,7 @@ fragment Document on Document {
   lastAppliedTemplate {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The order of the item in the resources list.
@@ -516,8 +506,7 @@ fragment Document on Document {
 # project to a roadmap for example.
 fragment Facet on Facet {
   __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The owning initiative.
@@ -559,8 +548,7 @@ fragment FeatureFlag on FeatureFlag {
   integration {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The pending rollout stage for the feature flag.
@@ -612,8 +600,7 @@ fragment Draft on Draft {
   issue {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The project for which this is a draft project update.
@@ -857,8 +844,7 @@ fragment LabelNotificationSubscription on LabelNotificationSubscription {
   label {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The team associated with the notification subscription.
@@ -892,8 +878,11 @@ fragment LabelNotificationSubscription on LabelNotificationSubscription {
 # A milestone for a project.
 fragment ProjectMilestone on ProjectMilestone {
   __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The content of the project milestone description.
+  documentContent {
+    ...DocumentContent
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The name of the project milestone.
@@ -929,8 +918,7 @@ fragment Notification on Notification {
   externalUserActor {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at when an email reminder for this notification was sent to the user. Null, if no email
@@ -997,8 +985,7 @@ fragment ProjectNotificationSubscription on ProjectNotificationSubscription {
   label {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The project subscribed to.
@@ -1062,8 +1049,7 @@ fragment ProjectNotification on ProjectNotification {
   externalUserActor {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The parent comment related to the notification, if a notification is a reply comment notification.
@@ -1110,8 +1096,7 @@ fragment ProjectStatus on ProjectStatus {
   description
   # The UI color of the status as a HEX string.
   color
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The name of the status.
@@ -1141,6 +1126,10 @@ fragment Project on Project {
   integrationsSettings {
     id
   }
+  # The content of the project description.
+  documentContent {
+    ...DocumentContent
+  }
   # The estimated completion date of the project.
   targetDate
   # The estimated start date of the project.
@@ -1153,8 +1142,7 @@ fragment Project on Project {
   lastAppliedTemplate {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The number of completed estimation points after each week.
@@ -1240,12 +1228,15 @@ fragment Reaction on Reaction {
   comment {
     id
   }
+  # The external user that created the reaction.
+  externalUser {
+    id
+  }
   # The issue that the reaction is associated with.
   issue {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The project update that the reaction is associated with.
@@ -1341,8 +1332,7 @@ fragment IssueHistory on IssueHistory {
   removedLabels {
     ...IssueLabel
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The linked attachment.
@@ -1438,8 +1428,7 @@ fragment IssueRelation on IssueRelation {
   issue {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The related issue.
@@ -1459,8 +1448,7 @@ fragment IssueRelation on IssueRelation {
 # A relation between two projects.
 fragment ProjectRelation on ProjectRelation {
   __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The last user who created or modified the relation.
@@ -1510,8 +1498,7 @@ fragment Reminder on Reminder {
   issueId {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The project that the reminder is associated with.
@@ -1541,8 +1528,7 @@ fragment Roadmap on Roadmap {
   url
   # The description of the roadmap.
   description
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The name of the roadmap.
@@ -1578,8 +1564,7 @@ fragment FeatureFlagRolloutStage on FeatureFlagRolloutStage {
   integration {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The name of the rollout stage.
@@ -1609,8 +1594,7 @@ fragment Cycle on Cycle {
   description
   # The end time of the cycle.
   endsAt
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The number of completed estimation points after each day.
@@ -1648,8 +1632,7 @@ fragment WorkflowState on WorkflowState {
   __typename
   # Description of the state.
   description
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The position of the state in the team flow.
@@ -1695,8 +1678,7 @@ fragment TeamNotificationSubscription on TeamNotificationSubscription {
   project {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The team subscribed to.
@@ -1736,8 +1718,7 @@ fragment TriageResponsibility on TriageResponsibility {
   }
   # The action to take when an issue is added to triage.
   action
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The team to which the triage responsibility belongs to.
@@ -1769,8 +1750,7 @@ fragment Template on Template {
   description
   # The entity type this template is for.
   type
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The name of the template.
@@ -1808,8 +1788,7 @@ fragment TimeSchedule on TimeSchedule {
   }
   # The identifier of the external schedule.
   externalId
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The name of the schedule.
@@ -1835,8 +1814,7 @@ fragment GitAutomationState on GitAutomationState {
   }
   # The event that triggers the automation.
   event
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The target branch associated to this automation state.
@@ -1874,8 +1852,7 @@ fragment ProjectUpdate on ProjectUpdate {
   diff
   # The health of the project at the time of the update.
   health
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The project that the update is associated with.
@@ -1946,8 +1923,7 @@ fragment UserNotificationSubscription on UserNotificationSubscription {
   project {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The team associated with the notification subscription.
@@ -2023,8 +1999,7 @@ fragment User on User {
   initials
   # The label of the user current status.
   statusLabel
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The last time the user was seen online. If null, the user is currently online.
@@ -2126,8 +2101,7 @@ fragment NotificationDeliveryPreferencesSchedule on NotificationDeliveryPreferen
 # A user's web or mobile push notification subscription.
 fragment PushSubscription on PushSubscription {
   __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -2143,8 +2117,7 @@ fragment Webhook on Webhook {
   __typename
   # Secret token for verifying the origin on the recipient side.
   secret
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The resource types this webhook is subscribed to.
@@ -2178,8 +2151,7 @@ fragment ApiKey on ApiKey {
   __typename
   # The label of the API key.
   label
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -2212,8 +2184,7 @@ fragment AuthEmailIntakeAddress on AuthEmailIntakeAddress {
 # An email address that can be used for submitting issues.
 fragment EmailIntakeAddress on EmailIntakeAddress {
   __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The team that the email address is associated with.
@@ -2252,8 +2223,7 @@ fragment ExternalUser on ExternalUser {
   email
   # The external user's full name.
   name
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The last time the external user was seen interacting with Linear.
@@ -2269,8 +2239,7 @@ fragment ExternalUser on ExternalUser {
 # An external link for a project.
 fragment ProjectLink on ProjectLink {
   __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The link's URL.
@@ -2302,8 +2271,7 @@ fragment EntityExternalLink on EntityExternalLink {
   initiative {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The link's URL.
@@ -2343,8 +2311,7 @@ fragment IssueImport on IssueImport {
   displayName
   # The id for the user that started the job.
   creatorId
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The service from which data will be imported.
@@ -2384,8 +2351,7 @@ fragment InitiativeNotificationSubscription on InitiativeNotificationSubscriptio
   initiative {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The team associated with the notification subscription.
@@ -2437,8 +2403,7 @@ fragment InitiativeNotification on InitiativeNotification {
   externalUserActor {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at when an email reminder for this notification was sent to the user. Null, if no email
@@ -2481,8 +2446,7 @@ fragment Initiative on Initiative {
   color
   # The initiative's unique URL slug.
   slugId
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The name of the initiative.
@@ -2514,8 +2478,7 @@ fragment Integration on Integration {
   __typename
   # The integration's type.
   service
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The team that the integration is associated with.
@@ -2552,8 +2515,7 @@ fragment OrganizationInvite on OrganizationInvite {
   external
   # The invitees email address.
   email
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -2607,8 +2569,7 @@ fragment IssueNotification on IssueNotification {
   issue {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The parent comment related to the notification, if a notification is a reply comment notification.
@@ -2705,8 +2666,7 @@ fragment Issue on Issue {
   lastAppliedTemplate {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The order of the item in its column on the board.
@@ -2800,8 +2760,7 @@ fragment OauthClientApprovalNotification on OauthClientApprovalNotification {
   externalUserActor {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at when an email reminder for this notification was sent to the user. Null, if no email
@@ -2854,8 +2813,7 @@ fragment Organization on Organization {
   releaseChannel
   # The hour at which to prompt for project updates.
   projectUpdateRemindersHour
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The month at which the fiscal year starts. Defaults to January (0).
@@ -3001,8 +2959,7 @@ fragment Team on Team {
   defaultTemplateForNonMembersId
   # The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt".
   issueEstimationType
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The team's color.
@@ -3175,8 +3132,7 @@ fragment ArchiveResponse on ArchiveResponse {
 # Defines the membership of a user to a team.
 fragment TeamMembership on TeamMembership {
   __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The order of the item in the users team list.
@@ -3210,8 +3166,7 @@ fragment OrganizationDomain on OrganizationDomain {
   verified
   # Prevent users with this domain to create new workspaces.
   disableOrganizationCreation
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -3287,8 +3242,7 @@ fragment GoogleSheetsSettings on GoogleSheetsSettings {
 # Holds information about when a user has interacted with a project update.
 fragment ProjectUpdateInteraction on ProjectUpdateInteraction {
   __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The project update that has been interacted with.
@@ -3349,8 +3303,7 @@ fragment Attachment on Attachment {
   issue {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The non-Linear user who created the attachment.
@@ -3407,8 +3360,7 @@ fragment InitiativeToProject on InitiativeToProject {
   initiative {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The project that the initiative is associated with.
@@ -3428,8 +3380,7 @@ fragment InitiativeToProject on InitiativeToProject {
 # Join table between projects and roadmaps.
 fragment RoadmapToProject on RoadmapToProject {
   __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The project that the roadmap is associated with.
@@ -3459,8 +3410,7 @@ fragment IntegrationTemplate on IntegrationTemplate {
   integration {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The template that the integration is associated with.
@@ -3484,8 +3434,7 @@ fragment IssueLabel on IssueLabel {
   description
   # The label's name.
   name
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The parent label.
@@ -3520,8 +3469,10 @@ fragment LaunchDarklySettings on LaunchDarklySettings {
 }
 
 # Mapping of Linear teams to GitHub repos.
-fragment TeamRepoMapping on TeamRepoMapping {
+fragment GitHubRepoMapping on GitHubRepoMapping {
   __typename
+  # Labels to filter incoming GitHub issue creation by.
+  gitHubLabels
   # The GitHub repo id.
   gitHubRepoId
   # The Linear team id to map to the given project.
@@ -3572,7 +3523,7 @@ fragment GitHubSettings on GitHubSettings {
   __typename
   # Mapping of team to repository for syncing.
   repositoriesMapping {
-    ...TeamRepoMapping
+    ...GitHubRepoMapping
   }
   # The GitHub organization's name.
   orgLogin
@@ -3620,8 +3571,7 @@ fragment NotificationSubscription on NotificationSubscription {
   project {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The team associated with the notification subscription.
@@ -3676,8 +3626,7 @@ fragment OauthClient on OauthClient {
   name
   # OAuth application's client secret.
   clientSecret
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The resource types to request when creating new webhooks.
@@ -3715,6 +3664,10 @@ fragment SlackChannelNameMapping on SlackChannelNameMapping {
   autoCreateOnBotMention
   # Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled.
   postCancellationUpdates
+  # Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed.
+  postCompletionUpdates
+  # Whether or not synced Slack threads should be updated with a message when their Ask is accepted from triage.
+  postAcceptedFromTriageUpdates
   # Whether or not the Linear Asks bot has been added to this Slack channel.
   botAdded
   # Whether or not the Slack channel is private.
@@ -3845,8 +3798,7 @@ fragment Passkey on Passkey {
 # Request to install OAuth clients on organizations and the response to the request.
 fragment OauthClientApproval on OauthClientApproval {
   __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The person who requested installing the OAuth client.
@@ -3951,8 +3903,7 @@ fragment IntegrationsSettings on IntegrationsSettings {
   team {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -4066,8 +4017,7 @@ fragment PaidSubscription on PaidSubscription {
   canceledAt
   # The date the subscription will be billed next.
   nextBillingAt
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The maximum number of seats that will be billed in the subscription.
@@ -4121,8 +4071,7 @@ fragment UserSettings on UserSettings {
   calendarHash
   # The email types the user has unsubscribed from.
   unsubscribedFrom
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The notification channel settings the user has selected.
@@ -4254,8 +4203,7 @@ fragment Favorite on Favorite {
   user {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The name of the folder. Only applies to favorites of type folder.
@@ -4299,8 +4247,7 @@ fragment Favorite on Favorite {
 # View preferences.
 fragment ViewPreferences on ViewPreferences {
   __typename
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -4341,8 +4288,7 @@ fragment AuditEntry on AuditEntry {
   ip
   # The ID of the user that caused the audit entry to be created.
   actorId
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -4392,8 +4338,7 @@ fragment TextDraft on TextDraft {
   issue {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The project for which this is a draft project update.
@@ -4882,6 +4827,8 @@ fragment DocumentSearchResult on DocumentSearchResult {
   trashed
   # Metadata related to search result.
   metadata
+  # The ID of the document content associated with the document.
+  documentContentId
   # The canonical url for the document.
   url
   # The color of the icon.
@@ -4898,8 +4845,7 @@ fragment DocumentSearchResult on DocumentSearchResult {
   lastAppliedTemplate {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The order of the item in the resources list.
@@ -5464,8 +5410,7 @@ fragment IssueSearchResult on IssueSearchResult {
   lastAppliedTemplate {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The order of the item in its column on the board.
@@ -5920,6 +5865,10 @@ fragment ProjectSearchResult on ProjectSearchResult {
   integrationsSettings {
     id
   }
+  # The content of the project description.
+  documentContent {
+    ...DocumentContent
+  }
   # The estimated completion date of the project.
   targetDate
   # The estimated start date of the project.
@@ -5932,8 +5881,7 @@ fragment ProjectSearchResult on ProjectSearchResult {
   lastAppliedTemplate {
     id
   }
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The number of completed estimation points after each week.
@@ -6518,8 +6466,7 @@ fragment WorkflowCronJobDefinition on WorkflowCronJobDefinition {
   schedule
   # The description of the workflow cron job.
   description
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The name of the workflow cron job.
@@ -6581,8 +6528,7 @@ fragment WorkflowDefinition on WorkflowDefinition {
   }
   # The description of the workflow.
   description
-  # The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-  #     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
   # The name of the group that the workflow belongs to.
@@ -8981,6 +8927,14 @@ query project($id: String!) {
     ...Project
   }
 }
+# The content of the project description.
+query project_documentContent($id: String!) {
+  project(id: $id) {
+    documentContent {
+      ...DocumentContent
+    }
+  }
+}
 # Documents associated with the project.
 query project_documents(
   $id: String!
@@ -9281,6 +9235,14 @@ query projectLinks(
 query projectMilestone($id: String!) {
   projectMilestone(id: $id) {
     ...ProjectMilestone
+  }
+}
+# The content of the project milestone description.
+query projectMilestone_documentContent($id: String!) {
+  projectMilestone(id: $id) {
+    documentContent {
+      ...DocumentContent
+    }
   }
 }
 # Issues associated with the project milestone.
@@ -11113,12 +11075,27 @@ mutation attachmentLinkIntercom(
 }
 # Link an existing Jira issue to an issue.
 mutation attachmentLinkJiraIssue(
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  $createAsUser: String
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  $displayIconUrl: String
+  # Optional attachment ID that may be provided through the API.
+  $id: String
   # The issue for which to link the Jira issue.
   $issueId: String!
   # The Jira issue key or ID to link.
   $jiraIssueId: String!
+  # The title to use for the attachment.
+  $title: String
 ) {
-  attachmentLinkJiraIssue(issueId: $issueId, jiraIssueId: $jiraIssueId) {
+  attachmentLinkJiraIssue(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    jiraIssueId: $jiraIssueId
+    title: $title
+  ) {
     ...AttachmentPayload
   }
 }
@@ -12094,17 +12071,6 @@ mutation deleteIntegrationTemplate(
 ) {
   integrationTemplateDelete(id: $id) {
     ...DeletePayload
-  }
-}
-# Updates the organization's Slack integration.
-mutation integrationUpdateSlack(
-  # The Slack OAuth code.
-  $code: String!
-  # The Slack OAuth redirect URI.
-  $redirectUri: String!
-) {
-  integrationUpdateSlack(code: $code, redirectUri: $redirectUri) {
-    ...IntegrationPayload
   }
 }
 # Integrates the organization with Zendesk.
