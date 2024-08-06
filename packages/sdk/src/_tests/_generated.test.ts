@@ -2984,6 +2984,18 @@ describe("generated", () => {
       }
     });
 
+    /** Test the projectMilestone model query for ProjectMilestone_DocumentContent */
+    it("projectMilestone.documentContent", async () => {
+      if (_projectMilestone) {
+        const documentContent: L.DocumentContent | undefined = _projectMilestone.documentContent;
+        expect(documentContent instanceof L.DocumentContent);
+      } else {
+        console.warn(
+          "codegen-doc:print: No projectMilestone found - cannot test _projectMilestone.documentContent query"
+        );
+      }
+    });
+
     /** Test the projectMilestone connection query for the Issue */
     it("projectMilestone.issues", async () => {
       if (_projectMilestone) {
@@ -3218,6 +3230,16 @@ describe("generated", () => {
         expect(project instanceof L.Project);
       } else {
         console.warn("codegen-doc:print: No first Project found in connection - cannot test project query");
+      }
+    });
+
+    /** Test the project model query for Project_DocumentContent */
+    it("project.documentContent", async () => {
+      if (_project) {
+        const documentContent: L.DocumentContent | undefined = _project.documentContent;
+        expect(documentContent instanceof L.DocumentContent);
+      } else {
+        console.warn("codegen-doc:print: No project found - cannot test _project.documentContent query");
       }
     });
 

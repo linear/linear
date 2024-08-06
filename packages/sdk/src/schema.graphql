@@ -58,8 +58,7 @@ type ApiKey implements Node {
   """
   label: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -269,8 +268,7 @@ type Attachment implements Node {
   """
   title: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -550,8 +548,7 @@ type AuditEntry implements Node {
   requestInformation: JSONObject
   type: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -1399,8 +1396,7 @@ type Comment implements Node {
   """
   summaryText: String
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -1853,8 +1849,7 @@ type CustomAttribute implements Node {
   """
   type: SchemaFieldType!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -2021,8 +2016,7 @@ type CustomView implements Node {
   """
   team: Team
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -2173,8 +2167,7 @@ type CustomViewNotificationSubscription implements Entity & Node & NotificationS
   """
   team: Team
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -2314,8 +2307,7 @@ type Customer implements Node {
   """
   status: CustomerStatus!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -2515,8 +2507,7 @@ type CustomerNeed implements Node {
   """
   project: Project
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -2729,8 +2720,7 @@ type CustomerSchema implements Node {
   """
   id: ID!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -2779,8 +2769,7 @@ type CustomerSchemaField implements Node {
   """
   type: SchemaFieldType!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -2837,8 +2826,7 @@ type CustomerStatus implements Node {
   """
   type: CustomerStatusType!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -3105,8 +3093,7 @@ type Cycle implements Node {
     orderBy: PaginationOrderBy
   ): IssueConnection!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -3310,8 +3297,7 @@ type CycleNotificationSubscription implements Entity & Node & NotificationSubscr
   """
   team: Team
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -3516,8 +3502,7 @@ type DiaryEntry implements Node {
   """
   id: ID!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -3652,6 +3637,10 @@ type Document implements Node {
   """
   creator: User!
   """
+  The ID of the document content associated with the document.
+  """
+  documentContentId: String
+  """
   The time at which the document was hidden. Null if the entity has not been hidden.
   """
   hiddenAt: DateTime
@@ -3692,8 +3681,7 @@ type Document implements Node {
   """
   trashed: Boolean
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -3842,8 +3830,7 @@ type DocumentContent implements Node {
   """
   restoredAt: DateTime
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -3908,8 +3895,7 @@ type DocumentContentHistory implements Node {
   """
   id: ID!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -4160,8 +4146,7 @@ type DocumentNotification implements Entity & Node & Notification {
   """
   unsnoozedAt: DateTime
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -4267,6 +4252,10 @@ type DocumentSearchResult implements Node {
   """
   creator: User!
   """
+  The ID of the document content associated with the document.
+  """
+  documentContentId: String
+  """
   The time at which the document was hidden. Null if the entity has not been hidden.
   """
   hiddenAt: DateTime
@@ -4311,8 +4300,7 @@ type DocumentSearchResult implements Node {
   """
   trashed: Boolean
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -4436,8 +4424,7 @@ type Draft implements Node {
   """
   projectUpdate: ProjectUpdate
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -4506,8 +4493,7 @@ type EmailIntakeAddress implements Node {
   """
   template: Template
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -4643,8 +4629,7 @@ type Emoji implements Node {
   """
   source: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -4715,8 +4700,7 @@ interface Entity implements Node {
   """
   id: ID!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -4745,7 +4729,7 @@ type EntityExternalLink implements Node {
   """
   The initiative that the link is associated with.
   """
-  initiative: Initiative!
+  initiative: Initiative
   """
   The link's label.
   """
@@ -4755,8 +4739,7 @@ type EntityExternalLink implements Node {
   """
   sortOrder: Float!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -4942,8 +4925,7 @@ type ExternalUser implements Node {
   """
   organization: Organization!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -5008,8 +4990,7 @@ type Facet implements Node {
   """
   targetCustomView: CustomView
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -5155,8 +5136,7 @@ type Favorite implements Node {
   """
   type: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -5358,8 +5338,7 @@ type FeatureFlag implements Node {
   """
   status: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -5424,8 +5403,7 @@ type FeatureFlagRolloutStage implements Node {
   """
   type: FeatureFlagRolloutStageType!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -5552,8 +5530,7 @@ type GitAutomationState implements Node {
   """
   team: Team!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -5703,8 +5680,7 @@ type GitAutomationTargetBranch implements Node {
   """
   team: Team!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -5900,6 +5876,55 @@ input GitHubRepoInput {
 }
 
 """
+Mapping of Linear teams to GitHub repos.
+"""
+type GitHubRepoMapping {
+  """
+  Whether the sync for this mapping is bidirectional.
+  """
+  bidirectional: Boolean
+  """
+  Whether this mapping is the default one for issue creation.
+  """
+  default: Boolean
+  """
+  Labels to filter incoming GitHub issue creation by.
+  """
+  gitHubLabels: [String!]
+  """
+  The GitHub repo id.
+  """
+  gitHubRepoId: Float!
+  """
+  The Linear team id to map to the given project.
+  """
+  linearTeamId: String!
+}
+
+input GitHubRepoMappingInput {
+  """
+  Whether the sync for this mapping is bidirectional.
+  """
+  bidirectional: Boolean
+  """
+  Whether this mapping is the default one for issue creation.
+  """
+  default: Boolean
+  """
+  Labels to filter incoming GitHub issue creation by.
+  """
+  gitHubLabels: [String!]
+  """
+  The GitHub repo id.
+  """
+  gitHubRepoId: Float!
+  """
+  The Linear team id to map to the given project.
+  """
+  linearTeamId: String!
+}
+
+"""
 Metadata and settings for a GitHub integration.
 """
 type GitHubSettings {
@@ -5922,7 +5947,7 @@ type GitHubSettings {
   """
   Mapping of team to repository for syncing.
   """
-  repositoriesMapping: [TeamRepoMapping!]
+  repositoriesMapping: [GitHubRepoMapping!]
 }
 
 input GitHubSettingsInput {
@@ -5945,7 +5970,7 @@ input GitHubSettingsInput {
   """
   Mapping of team to repository for syncing.
   """
-  repositoriesMapping: [TeamRepoMappingInput!]
+  repositoriesMapping: [GitHubRepoMappingInput!]
 }
 
 """
@@ -6202,8 +6227,7 @@ type Initiative implements Node {
   """
   trashed: Boolean
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -6493,8 +6517,7 @@ type InitiativeNotification implements Entity & Node & Notification {
   """
   unsnoozedAt: DateTime
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -6565,8 +6588,7 @@ type InitiativeNotificationSubscription implements Entity & Node & NotificationS
   """
   team: Team
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -6641,8 +6663,7 @@ type InitiativeToProject implements Node {
   """
   sortOrder: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -6791,8 +6812,7 @@ type Integration implements Node {
   """
   team: Team
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -6974,8 +6994,7 @@ type IntegrationTemplate implements Node {
   """
   template: Template!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -7098,8 +7117,7 @@ type IntegrationsSettings implements Node {
   """
   team: Team
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -7746,8 +7764,7 @@ type Issue implements Node {
   """
   triagedAt: DateTime
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -7992,6 +8009,10 @@ input IssueCreateInput {
   """
   boardOrder: Float
   """
+  The date when the issue was completed (e.g. if importing from another system). Must be a date in the past and after createdAt date. Cannot be provided with an incompatible workflow state.
+  """
+  completedAt: DateTime
+  """
   Create issue as a user with the provided name. This option is only available to OAuth applications creating issues in `actor=application` mode.
   """
   createAsUser: String
@@ -8190,8 +8211,7 @@ type IssueDraft implements Node {
   """
   title: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -8615,8 +8635,7 @@ type IssueHistory implements Node {
   """
   triageResponsibilityNotifiedUsers: [User!]
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -8701,8 +8720,7 @@ type IssueImport implements Node {
   """
   teamName: String
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -8896,8 +8914,7 @@ type IssueLabel implements Node {
   """
   team: Team
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -9204,8 +9221,7 @@ type IssueNotification implements Entity & Node & Notification {
   """
   unsnoozedAt: DateTime
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -9274,8 +9290,7 @@ type IssueRelation implements Node {
   """
   type: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -9839,8 +9854,7 @@ type IssueSearchResult implements Node {
   """
   triagedAt: DateTime
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -10297,8 +10311,7 @@ type LabelNotificationSubscription implements Entity & Node & NotificationSubscr
   """
   team: Team
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -10648,6 +10661,18 @@ type Mutation {
   """
   attachmentLinkJiraIssue(
     """
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    """
+    createAsUser: String
+    """
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    """
+    displayIconUrl: String
+    """
+    Optional attachment ID that may be provided through the API.
+    """
+    id: String
+    """
     The issue for which to link the Jira issue.
     """
     issueId: String!
@@ -10655,6 +10680,10 @@ type Mutation {
     The Jira issue key or ID to link.
     """
     jiraIssueId: String!
+    """
+    The title to use for the attachment.
+    """
+    title: String
   ): AttachmentPayload!
   """
   Link an existing Slack message to an issue.
@@ -11901,19 +11930,6 @@ type Mutation {
     """
     id: String!
   ): DeletePayload!
-  """
-  Updates the organization's Slack integration.
-  """
-  integrationUpdateSlack(
-    """
-    The Slack OAuth code.
-    """
-    code: String!
-    """
-    The Slack OAuth redirect URI.
-    """
-    redirectUri: String!
-  ): IntegrationPayload!
   """
   Integrates the organization with Zendesk.
   """
@@ -13603,8 +13619,7 @@ interface Notification implements Entity & Node {
   """
   unsnoozedAt: DateTime
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -13937,8 +13952,7 @@ interface NotificationSubscription implements Entity & Node {
   """
   team: Team
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -15175,8 +15189,7 @@ type OauthClient implements Node {
   """
   redirectUris: [String!]!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -15239,8 +15252,7 @@ type OauthClientApproval implements Node {
   """
   status: OAuthClientApprovalStatus!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -15348,8 +15360,7 @@ type OauthClientApprovalNotification implements Entity & Node & Notification {
   """
   unsnoozedAt: DateTime
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -15672,8 +15683,7 @@ type Organization implements Node {
   """
   trialEndsAt: DateTime
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -15778,8 +15788,7 @@ type OrganizationDomain implements Node {
   """
   name: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -15940,8 +15949,7 @@ type OrganizationInvite implements Node {
   """
   role: UserRoleType!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -16378,8 +16386,7 @@ type PaidSubscription implements Node {
   """
   type: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -16522,6 +16529,10 @@ type Project implements Node {
   The project's description.
   """
   description: String!
+  """
+  The content of the project description.
+  """
+  documentContent: DocumentContent
   """
   Documents associated with the project.
   """
@@ -16899,8 +16910,7 @@ type Project implements Node {
   """
   trashed: Boolean
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -17349,8 +17359,7 @@ type ProjectLink implements Node {
   """
   sortOrder: Float!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -17452,6 +17461,10 @@ type ProjectMilestone implements Node {
   """
   descriptionState: String
   """
+  The content of the project milestone description.
+  """
+  documentContent: DocumentContent
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -17505,8 +17518,7 @@ type ProjectMilestone implements Node {
   """
   targetDate: TimelessDate
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -17809,8 +17821,7 @@ type ProjectNotification implements Entity & Node & Notification {
   """
   unsnoozedAt: DateTime
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -17881,8 +17892,7 @@ type ProjectNotificationSubscription implements Entity & Node & NotificationSubs
   """
   team: Team
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -17956,8 +17966,7 @@ type ProjectRelation implements Node {
   """
   type: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -18133,6 +18142,10 @@ type ProjectSearchResult implements Node {
   The project's description.
   """
   description: String!
+  """
+  The content of the project description.
+  """
+  documentContent: DocumentContent
   """
   Documents associated with the project.
   """
@@ -18514,8 +18527,7 @@ type ProjectSearchResult implements Node {
   """
   trashed: Boolean
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -18594,8 +18606,7 @@ type ProjectStatus implements Node {
   """
   type: ProjectStatusType!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -18779,8 +18790,7 @@ type ProjectUpdate implements Node {
   """
   slugId: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -19010,8 +19020,7 @@ type ProjectUpdateInteraction implements Node {
   """
   readAt: DateTime!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -19228,8 +19237,7 @@ type PushSubscription implements Node {
   """
   id: ID!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -21301,6 +21309,10 @@ type Reaction implements Node {
   """
   emoji: String!
   """
+  The external user that created the reaction.
+  """
+  externalUser: ExternalUser
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -21313,8 +21325,7 @@ type Reaction implements Node {
   """
   projectUpdate: ProjectUpdate
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -21515,8 +21526,7 @@ type Reminder implements Node {
   """
   schedule: JSONObject
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -21608,8 +21618,7 @@ type Roadmap implements Node {
   """
   sortOrder: Float!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -21810,8 +21819,7 @@ type RoadmapToProject implements Node {
   """
   sortOrder: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -22190,9 +22198,17 @@ type SlackChannelNameMapping {
   """
   name: String!
   """
+  Whether or not synced Slack threads should be updated with a message when their Ask is accepted from triage.
+  """
+  postAcceptedFromTriageUpdates: Boolean
+  """
   Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled.
   """
   postCancellationUpdates: Boolean
+  """
+  Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed.
+  """
+  postCompletionUpdates: Boolean
   """
   Which teams are connected to the channel and settings for those teams.
   """
@@ -22237,9 +22253,17 @@ input SlackChannelNameMappingInput {
   """
   name: String!
   """
+  Whether or not synced Slack threads should be updated with a message when their Ask is accepted from triage.
+  """
+  postAcceptedFromTriageUpdates: Boolean
+  """
   Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled.
   """
   postCancellationUpdates: Boolean
+  """
+  Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed.
+  """
+  postCompletionUpdates: Boolean
   """
   Which teams are connected to the channel and settings for those teams.
   """
@@ -23179,8 +23203,7 @@ type Team implements Node {
   """
   upcomingCycleCount: Float!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -23491,8 +23514,7 @@ type TeamMembership implements Node {
   """
   team: Team!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -23622,8 +23644,7 @@ type TeamNotificationSubscription implements Entity & Node & NotificationSubscri
   """
   team: Team!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -23650,47 +23671,6 @@ type TeamPayload {
   The team that was created or updated.
   """
   team: Team
-}
-
-"""
-Mapping of Linear teams to GitHub repos.
-"""
-type TeamRepoMapping {
-  """
-  Whether the sync for this mapping is bidirectional.
-  """
-  bidirectional: Boolean
-  """
-  Whether this mapping is the default one for issue creation.
-  """
-  default: Boolean
-  """
-  The GitHub repo id.
-  """
-  gitHubRepoId: Float!
-  """
-  The Linear team id to map to the given project.
-  """
-  linearTeamId: String!
-}
-
-input TeamRepoMappingInput {
-  """
-  Whether the sync for this mapping is bidirectional.
-  """
-  bidirectional: Boolean
-  """
-  Whether this mapping is the default one for issue creation.
-  """
-  default: Boolean
-  """
-  The GitHub repo id.
-  """
-  gitHubRepoId: Float!
-  """
-  The Linear team id to map to the given project.
-  """
-  linearTeamId: String!
 }
 
 """
@@ -23939,8 +23919,7 @@ type Template implements Node {
   """
   type: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -24074,8 +24053,7 @@ type TextDraft implements Node {
   """
   projectUpdate: ProjectUpdate
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -24126,8 +24104,7 @@ type TimeSchedule implements Node {
   """
   organization: Organization!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -24361,8 +24338,7 @@ type TriageResponsibility implements Node {
   """
   timeSchedule: TimeSchedule
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -24771,8 +24747,7 @@ type User implements Node {
   """
   timezone: String
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -25174,8 +25149,7 @@ type UserNotificationSubscription implements Entity & Node & NotificationSubscri
   """
   team: Team
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -25271,8 +25245,7 @@ type UserSettings implements Node {
   unsubscribedFrom: [String!]!
     @deprecated(reason: "Use individual subscription fields instead. This field's value is now outdated.")
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -25442,8 +25415,7 @@ type ViewPreferences implements Node {
   """
   type: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -25649,8 +25621,7 @@ type Webhook implements Node {
   """
   team: Team
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -25838,8 +25809,7 @@ type WorkflowCronJobDefinition implements Node {
   """
   team: Team!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -25938,8 +25908,7 @@ type WorkflowDefinition implements Node {
   """
   type: WorkflowType!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
@@ -26041,8 +26010,7 @@ type WorkflowState implements Node {
   """
   type: String!
   """
-  The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
-      for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
   updatedAt: DateTime!
