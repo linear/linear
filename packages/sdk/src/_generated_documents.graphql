@@ -3014,8 +3014,6 @@ fragment Team on Team {
   setIssueSortOrderOnStateChange
   # Whether an issue needs to have a priority set before leaving triage.
   requirePriorityToLeaveTriage
-  # Whether issues without priority should be sorted first.
-  issueOrderingNoPriorityFirst
   # Whether the team is managed by SCIM integration.
   scimManaged
   # Whether the team is private or not.
@@ -3036,6 +3034,8 @@ fragment Team on Team {
   slackIssueStatuses
   # Whether triage mode is enabled for the team or not.
   triageEnabled
+  # [DEPRECATED] Whether issues without priority should be sorted first.
+  issueOrderingNoPriorityFirst
   # [DEPRECATED] Whether to move issues to bottom of the column when changing state.
   issueSortOrderDefaultToBottom
 }

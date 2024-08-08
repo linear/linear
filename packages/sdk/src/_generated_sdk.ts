@@ -10546,7 +10546,7 @@ export class Team extends Request {
   public issueEstimationExtended: boolean;
   /** The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt". */
   public issueEstimationType: string;
-  /** Whether issues without priority should be sorted first. */
+  /** [DEPRECATED] Whether issues without priority should be sorted first. */
   public issueOrderingNoPriorityFirst: boolean;
   /** [DEPRECATED] Whether to move issues to bottom of the column when changing state. */
   public issueSortOrderDefaultToBottom: boolean;

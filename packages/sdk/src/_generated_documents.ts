@@ -12947,7 +12947,10 @@ export type Team = Node & {
   issueEstimationExtended: Scalars["Boolean"];
   /** The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt". */
   issueEstimationType: Scalars["String"];
-  /** Whether issues without priority should be sorted first. */
+  /**
+   * [DEPRECATED] Whether issues without priority should be sorted first.
+   * @deprecated This setting is no longer in use.
+   */
   issueOrderingNoPriorityFirst: Scalars["Boolean"];
   /**
    * [DEPRECATED] Whether to move issues to bottom of the column when changing state.
@@ -13237,7 +13240,7 @@ export type TeamCreateInput = {
   issueEstimationExtended?: Maybe<Scalars["Boolean"]>;
   /** The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt". */
   issueEstimationType?: Maybe<Scalars["String"]>;
-  /** Whether issues without priority should be sorted first. */
+  /** [DEPRECATED] Whether issues without priority should be sorted first. */
   issueOrderingNoPriorityFirst?: Maybe<Scalars["Boolean"]>;
   /** The key of the team. If not given, the key will be generated based on the name of the team. */
   key?: Maybe<Scalars["String"]>;
@@ -13469,7 +13472,7 @@ export type TeamUpdateInput = {
   issueEstimationExtended?: Maybe<Scalars["Boolean"]>;
   /** The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt". */
   issueEstimationType?: Maybe<Scalars["String"]>;
-  /** Whether issues without priority should be sorted first. */
+  /** [DEPRECATED] Whether issues without priority should be sorted first. */
   issueOrderingNoPriorityFirst?: Maybe<Scalars["Boolean"]>;
   /** Whether new users should join this team by default. Mutation restricted to workspace admins! */
   joinByDefault?: Maybe<Scalars["Boolean"]>;
@@ -16298,7 +16301,6 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "defaultIssueEstimate"
   | "setIssueSortOrderOnStateChange"
   | "requirePriorityToLeaveTriage"
-  | "issueOrderingNoPriorityFirst"
   | "scimManaged"
   | "private"
   | "cyclesEnabled"
@@ -16309,6 +16311,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "slackNewIssue"
   | "slackIssueStatuses"
   | "triageEnabled"
+  | "issueOrderingNoPriorityFirst"
   | "issueSortOrderDefaultToBottom"
 > & {
     integrationsSettings?: Maybe<{ __typename?: "IntegrationsSettings" } & Pick<IntegrationsSettings, "id">>;
@@ -33155,7 +33158,6 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "defaultIssueEstimate" } },
           { kind: "Field", name: { kind: "Name", value: "setIssueSortOrderOnStateChange" } },
           { kind: "Field", name: { kind: "Name", value: "requirePriorityToLeaveTriage" } },
-          { kind: "Field", name: { kind: "Name", value: "issueOrderingNoPriorityFirst" } },
           { kind: "Field", name: { kind: "Name", value: "scimManaged" } },
           { kind: "Field", name: { kind: "Name", value: "private" } },
           { kind: "Field", name: { kind: "Name", value: "cyclesEnabled" } },
@@ -33166,6 +33168,7 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "slackNewIssue" } },
           { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" } },
           { kind: "Field", name: { kind: "Name", value: "triageEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "issueOrderingNoPriorityFirst" } },
           { kind: "Field", name: { kind: "Name", value: "issueSortOrderDefaultToBottom" } },
         ],
       },

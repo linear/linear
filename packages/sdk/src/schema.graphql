@@ -22867,9 +22867,9 @@ type Team implements Node {
   """
   issueEstimationType: String!
   """
-  Whether issues without priority should be sorted first.
+  [DEPRECATED] Whether issues without priority should be sorted first.
   """
-  issueOrderingNoPriorityFirst: Boolean!
+  issueOrderingNoPriorityFirst: Boolean! @deprecated(reason: "This setting is no longer in use.")
   """
   [DEPRECATED] Whether to move issues to bottom of the column when changing state.
   """
@@ -23390,7 +23390,7 @@ input TeamCreateInput {
   """
   issueEstimationType: String
   """
-  Whether issues without priority should be sorted first.
+  [DEPRECATED] Whether issues without priority should be sorted first.
   """
   issueOrderingNoPriorityFirst: Boolean
   """
@@ -23789,7 +23789,7 @@ input TeamUpdateInput {
   """
   issueEstimationType: String
   """
-  Whether issues without priority should be sorted first.
+  [DEPRECATED] Whether issues without priority should be sorted first.
   """
   issueOrderingNoPriorityFirst: Boolean
   """
