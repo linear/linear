@@ -82916,7 +82916,7 @@
           },
           {
             "name": "issueOrderingNoPriorityFirst",
-            "description": "Whether issues without priority should be sorted first.",
+            "description": "[DEPRECATED] Whether issues without priority should be sorted first.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -82927,8 +82927,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "This setting is no longer in use."
           },
           {
             "name": "issueEstimationAllowZero",
@@ -84973,7 +84973,7 @@
           },
           {
             "name": "issueOrderingNoPriorityFirst",
-            "description": "Whether issues without priority should be sorted first.",
+            "description": "[DEPRECATED] Whether issues without priority should be sorted first.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -86307,7 +86307,7 @@
           },
           {
             "name": "issueOrderingNoPriorityFirst",
-            "description": "Whether issues without priority should be sorted first.",
+            "description": "[DEPRECATED] Whether issues without priority should be sorted first.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
