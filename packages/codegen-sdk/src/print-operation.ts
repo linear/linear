@@ -74,8 +74,9 @@ function printOperationCall(context: SdkPluginContext, operation: SdkOperation):
   const returnsInterface = context.interfaces?.some(i => i.name.value === operation.print.model);
 
   const implementations: string[] = returnsInterface
-    ? context.interfaceImplementations[operation.print.model]?.map((imp: ObjectTypeDefinitionNode) => imp.name.value) ??
-      []
+    ? (context.interfaceImplementations[operation.print.model]?.map(
+        (imp: ObjectTypeDefinitionNode) => imp.name.value
+      ) ?? [])
     : [];
 
   const operationCall = operation.print.list
@@ -87,31 +88,31 @@ function printOperationCall(context: SdkPluginContext, operation: SdkOperation):
           }
         })`
     : isConnectionModel(operation.model)
-    ? `return new ${operation.print.model}(${printList([
-        `this._${Sdk.REQUEST_NAME}`,
-        `${Sdk.CONNECTION_NAME} => this.${Sdk.FETCH_NAME}(${printList([
-          ...operation.requiredArgs.args.filter(arg => !parentArgNames.includes(arg.name)).map(arg => arg.name),
-          `${Sdk.CONNECTION_DEFAULT}({
+      ? `return new ${operation.print.model}(${printList([
+          `this._${Sdk.REQUEST_NAME}`,
+          `${Sdk.CONNECTION_NAME} => this.${Sdk.FETCH_NAME}(${printList([
+            ...operation.requiredArgs.args.filter(arg => !parentArgNames.includes(arg.name)).map(arg => arg.name),
+            `${Sdk.CONNECTION_DEFAULT}({
             ${printList([
               ...optionalArgs.map(arg => `...this._${arg.name}`),
               `...${Sdk.VARIABLE_NAME}`,
               `...${Sdk.CONNECTION_NAME}`,
             ])}
           })`,
-        ])})`,
-        Sdk.DATA_NAME,
-      ])})`
-    : returnsInterface
-    ? printObjectInstantiationSwitch(implementations, operation)
-    : printObjectInstantiation(operation);
+          ])})`,
+          Sdk.DATA_NAME,
+        ])})`
+      : returnsInterface
+        ? printObjectInstantiationSwitch(implementations, operation)
+        : printObjectInstantiation(operation);
 
   const isNullableConnectionOperation = isConnectionModel(operation.model) && !operation.nonNull;
 
   return printLines([
     `public async ${Sdk.FETCH_NAME}(${operation.fetchArgs.printInput}): ${operation.print.promise} {
       const ${Sdk.RESPONSE_NAME} = await this._${Sdk.REQUEST_NAME}<${responseType}, ${
-      operation.print.variables
-    }>(${printList([operation.print.document, printOperationArgs(operation)])})
+        operation.print.variables
+      }>(${printList([operation.print.document, printOperationArgs(operation)])})
         ${printSet(`const ${Sdk.DATA_NAME}`, `${operation.print.responsePath}`)}
         ${isNullableConnectionOperation ? `if(${Sdk.DATA_NAME}){` : ""}
         ${operationCall}

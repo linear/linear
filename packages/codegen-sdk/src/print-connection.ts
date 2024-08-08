@@ -234,7 +234,7 @@ export function printConnectionModel(context: SdkPluginContext, model: SdkModel)
 
   const implementations: string[] =
     returnsInterface && modelType
-      ? context.interfaceImplementations[modelType]?.map((imp: ObjectTypeDefinitionNode) => imp.name.value) ?? []
+      ? (context.interfaceImplementations[modelType]?.map((imp: ObjectTypeDefinitionNode) => imp.name.value) ?? [])
       : [];
 
   const returnValue = returnsInterface ? [...implementations, modelType].join(" | ") : modelType;

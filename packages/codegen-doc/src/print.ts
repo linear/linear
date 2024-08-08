@@ -137,7 +137,7 @@ export function printPascal(str?: string): string {
  * Print a ternary expression if the _if arg is defined, otherwise print the _then
  */
 export function printTernary(_if?: string, _then?: string, _else = "undefined"): string {
-  return _if ? `${_if} ? ${_then} : ${_else}` : _then ?? "";
+  return _if ? `${_if} ? ${_then} : ${_else}` : (_then ?? "");
 }
 
 /**

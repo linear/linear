@@ -28,7 +28,8 @@ import {
 import { Sdk } from "./constants";
 import { printNamespaced } from "./print";
 import {
-  SdkConnectionField, SdkEnumField,
+  SdkConnectionField,
+  SdkEnumField,
   SdkInterfaceField,
   SdkListField,
   SdkModel,
@@ -194,7 +195,7 @@ export class ModelVisitor {
 
         /** Identify enum fields */
         const enumField = findEnum(this._context, node);
-        if(enumField) {
+        if (enumField) {
           return {
             __typename: SdkModelFieldType.enum,
             node,
