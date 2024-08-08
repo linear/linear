@@ -5,7 +5,7 @@ import {
   GraphQLSchema,
   InterfaceTypeDefinitionNode,
   ObjectTypeDefinitionNode,
-  EnumTypeDefinitionNode
+  EnumTypeDefinitionNode,
 } from "graphql";
 
 /**

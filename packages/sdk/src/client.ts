@@ -31,7 +31,7 @@ function parseClientOptions({
         ? accessToken.startsWith("Bearer ")
           ? accessToken
           : `Bearer ${accessToken}`
-        : apiKey ?? "",
+        : (apiKey ?? ""),
       /** Use configured headers */
       ...headers,
       /** Override any user agent with the sdk name and version */

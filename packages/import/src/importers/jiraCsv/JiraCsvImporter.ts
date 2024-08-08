@@ -76,8 +76,8 @@ export class JiraCsvImporter implements Importer {
         mdDesc && url
           ? `${mdDesc}\n\n[View original issue in Jira](${url})`
           : url
-          ? `[View original issue in Jira](${url})`
-          : undefined;
+            ? `[View original issue in Jira](${url})`
+            : undefined;
       const priority = mapPriority(row.Priority);
       const type = `Type: ${row["Issue Type"]}`;
       const release = row.Release && row.Release.length > 0 ? `Release: ${row.Release}` : undefined;

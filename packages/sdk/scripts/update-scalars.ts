@@ -5,9 +5,12 @@ function updateScalars() {
   try {
     const results = replaceInFileSync({
       files: "src/_generated_documents.ts",
-      from: [...Doc.SCALAR_STRING_NAMES, ...Doc.SCALAR_DATE_NAMES, ...Doc.SCALAR_JSON_NAMES, ...Doc.SCALAR_DATE_OR_STRING_NAMES].map(
-        name => `${name}: any`
-      ),
+      from: [
+        ...Doc.SCALAR_STRING_NAMES,
+        ...Doc.SCALAR_DATE_NAMES,
+        ...Doc.SCALAR_JSON_NAMES,
+        ...Doc.SCALAR_DATE_OR_STRING_NAMES,
+      ].map(name => `${name}: any`),
       to: match => {
         const name = match?.split(":")?.[0];
 

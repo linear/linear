@@ -163,7 +163,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
 
   const itemField = itemOperation?.print.field;
   const itemSdkKey = itemOperation?.path.join("_");
-  const itemOperations = itemSdkKey ? context.sdkDefinitions[itemSdkKey]?.operations ?? [] : [];
+  const itemOperations = itemSdkKey ? (context.sdkDefinitions[itemSdkKey]?.operations ?? []) : [];
   const itemType = printList([Sdk.NAMESPACE, itemOperation?.print.model], ".");
   const itemArgs = itemOperation?.requiredArgs.args ?? [];
   const itemQueries = itemOperation?.model?.fields.query ?? [];
@@ -173,7 +173,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
   const returnsInterface = modelName ? context.interfaces?.some(i => i.name.value === modelName) : false;
   const implementations: string[] =
     returnsInterface && modelName
-      ? context.interfaceImplementations[modelName]?.map((imp: ObjectTypeDefinitionNode) => imp.name.value) ?? []
+      ? (context.interfaceImplementations[modelName]?.map((imp: ObjectTypeDefinitionNode) => imp.name.value) ?? [])
       : [];
   const itemTypes = printList([itemType, ...implementations.map(imp => printList([Sdk.NAMESPACE, imp], "."))], " | ");
 

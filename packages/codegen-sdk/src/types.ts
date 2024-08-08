@@ -129,7 +129,7 @@ export enum SdkModelFieldType {
   list = "SdkListField ",
   scalarList = "SdkScalarListField",
   connection = "SdkConnectionField",
-  enum = "SdkEnumField"
+  enum = "SdkEnumField",
 }
 
 /**
@@ -209,7 +209,6 @@ export interface SdkListField extends Omit<SdkScalarField, "__typename"> {
 export interface SdkEnumField extends Omit<SdkScalarField, "__typename"> {
   __typename: SdkModelFieldType.enum;
 }
-
 
 /**
  * One of the model field types

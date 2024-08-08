@@ -130,11 +130,11 @@ export function parseOperations(
     /** Identify whether the response is an interface type and collect all interface implementations. */
     const returnsInterface = context.interfaces?.some(i => i.name.value === modelName);
     const implementations: string[] = returnsInterface
-      ? context.interfaceImplementations[modelName]?.map((imp: ObjectTypeDefinitionNode) => imp.name.value) ?? []
+      ? (context.interfaceImplementations[modelName]?.map((imp: ObjectTypeDefinitionNode) => imp.name.value) ?? [])
       : [];
 
     /** If the return is an interface, we can return any implementation. */
-    const returnValue = returnsInterface ? [...implementations, modelName].join(" | ") : listType ?? modelName;
+    const returnValue = returnsInterface ? [...implementations, modelName].join(" | ") : (listType ?? modelName);
 
     /** Store printable type names */
     const print: SdkOperationPrint = {

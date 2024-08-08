@@ -79,7 +79,11 @@ const colParser = {
  * @param apiToken  A Shortcut API token (https://app.shortcut.com/settings/account/api-tokens)
  */
 export class ShortcutCsvImporter implements Importer {
-  public constructor(private filePath: string, workspaceSlug: string, private apiToken: string) {
+  public constructor(
+    private filePath: string,
+    workspaceSlug: string,
+    private apiToken: string
+  ) {
     this.shortcutBaseURL = "https://app.shortcut.com/" + workspaceSlug;
   }
 
@@ -137,6 +141,8 @@ export class ShortcutCsvImporter implements Importer {
 
       const createdAt = row.created_at;
 
+      const completedAt = row.completed_at;
+
       importData.issues.push({
         title,
         description,
@@ -145,6 +151,7 @@ export class ShortcutCsvImporter implements Importer {
         assigneeId,
         labels,
         createdAt,
+        completedAt,
       });
 
       for (const lab of labels) {

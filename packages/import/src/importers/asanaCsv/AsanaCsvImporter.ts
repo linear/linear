@@ -82,6 +82,10 @@ export class AsanaCsvImporter implements Importer {
 
       const labels = tags.filter(tag => !!tag);
 
+      const createdAt = row["Created At"] ? new Date(row["Created At"]) : undefined;
+
+      const completedAt = row["Completed At"] ? new Date(row["Completed At"]) : undefined;
+
       importData.issues.push({
         title,
         description,
@@ -91,6 +95,8 @@ export class AsanaCsvImporter implements Importer {
         assigneeId,
         labels,
         dueDate,
+        createdAt,
+        completedAt,
       });
 
       for (const lab of labels) {

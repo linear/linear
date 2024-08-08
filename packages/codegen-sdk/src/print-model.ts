@@ -127,7 +127,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                   )
                 : undefined
             )
-          )
+          ),
         ])}
       }
 
