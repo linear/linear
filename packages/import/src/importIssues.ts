@@ -307,7 +307,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
     const issueAssigneeId = issue.assigneeId?.toLowerCase();
     const existingAssigneeId: string | undefined = !!issueAssigneeId
-      ? existingUserMapByEmail[issueAssigneeId] ?? existingUserMapByName[issueAssigneeId]
+      ? (existingUserMapByEmail[issueAssigneeId] ?? existingUserMapByName[issueAssigneeId])
       : undefined;
 
     let assigneeId: string | undefined;
@@ -331,6 +331,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       stateId,
       assigneeId,
       createdAt: issue.createdAt,
+      completedAt: issue.completedAt,
       dueDate: formattedDueDate,
     });
 
