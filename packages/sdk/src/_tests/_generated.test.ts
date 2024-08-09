@@ -3263,6 +3263,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the project connection query for the Initiative */
+    it("project.initiatives", async () => {
+      if (_project) {
+        const initiatives: L.InitiativeConnection | undefined = await _project.initiatives();
+        expect(initiatives instanceof L.InitiativeConnection);
+      } else {
+        console.warn("codegen-doc:print: No project found - cannot test _project.initiatives query");
+      }
+    });
+
     /** Test the project connection query for the Issue */
     it("project.issues", async () => {
       if (_project) {

@@ -8326,6 +8326,10 @@ export class Project extends Request {
   public externalLinks(variables?: Omit<L.Project_ExternalLinksQueryVariables, "id">) {
     return new Project_ExternalLinksQuery(this._request, this.id, variables).fetch(variables);
   }
+  /** Initiatives that this project belongs to. */
+  public initiatives(variables?: Omit<L.Project_InitiativesQueryVariables, "id">) {
+    return new Project_InitiativesQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Issues associated with the project. */
   public issues(variables?: Omit<L.Project_IssuesQueryVariables, "id">) {
     return new Project_IssuesQuery(this._request, this.id, variables).fetch(variables);
@@ -25365,6 +25369,55 @@ export class Project_ExternalLinksQuery extends Request {
     const data = response.project.externalLinks;
 
     return new EntityExternalLinkConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Project_Initiatives Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to project
+ * @param variables - variables without 'id' to pass into the Project_InitiativesQuery
+ */
+export class Project_InitiativesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Project_InitiativesQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Project_InitiativesQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Project_Initiatives query and return a InitiativeConnection
+   *
+   * @param variables - variables without 'id' to pass into the Project_InitiativesQuery
+   * @returns parsed response from Project_InitiativesQuery
+   */
+  public async fetch(variables?: Omit<L.Project_InitiativesQueryVariables, "id">): LinearFetch<InitiativeConnection> {
+    const response = await this._request<L.Project_InitiativesQuery, L.Project_InitiativesQueryVariables>(
+      L.Project_InitiativesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.project.initiatives;
+
+    return new InitiativeConnection(
       this._request,
       connection =>
         this.fetch(
