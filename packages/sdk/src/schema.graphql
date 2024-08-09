@@ -16616,6 +16616,35 @@ type Project implements Node {
   """
   inProgressScopeHistory: [Float!]!
   """
+  Initiatives that this project belongs to.
+  """
+  initiatives(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): InitiativeConnection!
+  """
   Settings for all integrations associated with that project.
   """
   integrationsSettings: IntegrationsSettings
@@ -18228,6 +18257,35 @@ type ProjectSearchResult implements Node {
   The number of in progress estimation points after each week.
   """
   inProgressScopeHistory: [Float!]!
+  """
+  Initiatives that this project belongs to.
+  """
+  initiatives(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): InitiativeConnection!
   """
   Settings for all integrations associated with that project.
   """
