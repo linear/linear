@@ -1,5 +1,24 @@
 # Change Log
 
+## 27.0.1
+
+### Patch Changes
+
+- 02e0e45: chore(deps): update dependency patch versions
+- 5ad9b3d: feat(schema): [non_breaking] Field 'initiatives' was added to object type 'Project' (Project.initiatives)
+
+  feat(schema): [non_breaking] Field 'initiatives' was added to object type 'ProjectSearchResult' (ProjectSearchResult.initiatives)
+
+- 1298845: feat(schema): [non_breaking] Field 'Team.issueOrderingNoPriorityFirst' description changed from 'Whether issues without priority should be sorted first.' to '[DEPRECATED] Whether issues without priority should be sorted first.' (Team.issueOrderingNoPriorityFirst)
+
+  feat(schema): [non_breaking] Field 'Team.issueOrderingNoPriorityFirst' is deprecated (Team.issueOrderingNoPriorityFirst)
+
+  feat(schema): [non_breaking] Field 'Team.issueOrderingNoPriorityFirst' has deprecation reason 'This setting is no longer in use.' (Team.issueOrderingNoPriorityFirst)
+
+  feat(schema): [non_breaking] Input field 'TeamCreateInput.issueOrderingNoPriorityFirst' description changed from 'Whether issues without priority should be sorted first.' to '[DEPRECATED] Whether issues without priority should be sorted first.' (TeamCreateInput.issueOrderingNoPriorityFirst)
+
+  feat(schema): [non_breaking] Input field 'TeamUpdateInput.issueOrderingNoPriorityFirst' description changed from 'Whether issues without priority should be sorted first.' to '[DEPRECATED] Whether issues without priority should be sorted first.' (TeamUpdateInput.issueOrderingNoPriorityFirst)
+
 ## 27.0.0
 
 ### Major Changes
