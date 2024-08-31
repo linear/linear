@@ -323,6 +323,30 @@ describe("generated", () => {
     });
   });
 
+  /** Test ArchivedModelSync query */
+  describe("ArchivedModelSync", () => {
+    /** Test the root model query for ArchivedModelSync */
+    it("archivedModelSync", async () => {
+      const archivedModelSync: L.ArchiveResponse | undefined = await client.archivedModelSync(
+        "mock-identifier",
+        "mock-modelClass"
+      );
+      expect(archivedModelSync instanceof L.ArchiveResponse);
+    });
+  });
+
+  /** Test ArchivedModelsSync query */
+  describe("ArchivedModelsSync", () => {
+    /** Test the root model query for ArchivedModelsSync */
+    it("archivedModelsSync", async () => {
+      const archivedModelsSync: L.ArchiveResponse | undefined = await client.archivedModelsSync(
+        "mock-modelClass",
+        "mock-teamId"
+      );
+      expect(archivedModelsSync instanceof L.ArchiveResponse);
+    });
+  });
+
   /** Test AttachmentIssue query */
   describe("AttachmentIssue", () => {
     let _attachmentIssue: L.Issue | undefined;
@@ -3263,6 +3287,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the project connection query for the ProjectHistory */
+    it("project.history", async () => {
+      if (_project) {
+        const history: L.ProjectHistoryConnection | undefined = await _project.history();
+        expect(history instanceof L.ProjectHistoryConnection);
+      } else {
+        console.warn("codegen-doc:print: No project found - cannot test _project.history query");
+      }
+    });
+
     /** Test the project connection query for the Initiative */
     it("project.initiatives", async () => {
       if (_project) {
@@ -3567,6 +3601,15 @@ describe("generated", () => {
     it("ssoUrlFromEmail", async () => {
       const ssoUrlFromEmail: L.SsoUrlFromEmailResponse | undefined = await client.ssoUrlFromEmail("mock-email");
       expect(ssoUrlFromEmail instanceof L.SsoUrlFromEmailResponse);
+    });
+  });
+
+  /** Test SyncEntityCount query */
+  describe("SyncEntityCount", () => {
+    /** Test the root model query for SyncEntityCount */
+    it("syncEntityCount", async () => {
+      const syncEntityCount: L.EntityCountResponse | undefined = await client.syncEntityCount;
+      expect(syncEntityCount instanceof L.EntityCountResponse);
     });
   });
 
