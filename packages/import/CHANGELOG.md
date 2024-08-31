@@ -1,5 +1,20 @@
 # Change Log
 
+## 2.0.0
+
+### Major Changes
+
+- c75006a: feat: add support for `completedAt` date in CLI importer
+
+### Patch Changes
+
+- 02e0e45: chore(deps): update dependency patch versions
+- Updated dependencies [02e0e45]
+- Updated dependencies [5ad9b3d]
+- Updated dependencies [1298845]
+- Updated dependencies [deab8df]
+  - @linear/sdk@28.0.0
+
 ## 1.14.5
 
 ### Patch Changes
