@@ -1,5 +1,11 @@
 # Change Log
 
+## 28.0.1
+
+### Patch Changes
+
+- 47c0d7a: chore(deps): update dependency patch versions
+
 ## 28.0.0
 
 ### Major Changes
