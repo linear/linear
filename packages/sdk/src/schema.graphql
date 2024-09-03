@@ -2027,7 +2027,7 @@ type CustomView implements Node {
   """
   The user who last updated the custom view.
   """
-  updatedBy: User!
+  updatedBy: User
   """
   The current users view preferences for this custom view.
   """
@@ -4007,7 +4007,7 @@ type Document implements Node {
   """
   The user who created the document.
   """
-  creator: User!
+  creator: User
   """
   The ID of the document content associated with the document.
   """
@@ -4060,7 +4060,7 @@ type Document implements Node {
   """
   The user who last updated the document.
   """
-  updatedBy: User!
+  updatedBy: User
   """
   The canonical url for the document.
   """
@@ -4419,7 +4419,7 @@ type DocumentNotification implements Entity & Node & Notification {
   """
   [Internal] Notification actor initials if avatar is not available.
   """
-  actorAvatarColor: String
+  actorAvatarColor: String!
   """
   [Internal] Notification avatar URL.
   """
@@ -4622,7 +4622,7 @@ type DocumentSearchResult implements Node {
   """
   The user who created the document.
   """
-  creator: User!
+  creator: User
   """
   The ID of the document content associated with the document.
   """
@@ -4679,7 +4679,7 @@ type DocumentSearchResult implements Node {
   """
   The user who last updated the document.
   """
-  updatedBy: User!
+  updatedBy: User
   """
   The canonical url for the document.
   """
@@ -4859,7 +4859,7 @@ type EmailIntakeAddress implements Node {
   """
   The team that the email address is associated with.
   """
-  team: Team!
+  team: Team
   """
   The template that the email address is associated with.
   """
@@ -4983,7 +4983,7 @@ type Emoji implements Node {
   """
   The user who created the emoji.
   """
-  creator: User!
+  creator: User
   """
   The unique identifier of the entity.
   """
@@ -5726,7 +5726,7 @@ type FeatureFlag implements Node {
   """
   The project the feature flag is associated with.
   """
-  project: Project
+  project: Project!
   """
   The rollout stage of the feature flag.
   """
@@ -6835,7 +6835,7 @@ type InitiativeNotification implements Entity & Node & Notification {
   """
   [Internal] Notification actor initials if avatar is not available.
   """
-  actorAvatarColor: String
+  actorAvatarColor: String!
   """
   [Internal] Notification avatar URL.
   """
@@ -9732,7 +9732,7 @@ type IssueNotification implements Entity & Node & Notification {
   """
   [Internal] Notification actor initials if avatar is not available.
   """
-  actorAvatarColor: String
+  actorAvatarColor: String!
   """
   [Internal] Notification avatar URL.
   """
@@ -14281,7 +14281,7 @@ interface Notification implements Entity & Node {
   """
   [Internal] Notification actor initials if avatar is not available.
   """
-  actorAvatarColor: String
+  actorAvatarColor: String!
   """
   [Internal] Notification avatar URL.
   """
@@ -16026,7 +16026,7 @@ type OauthClientApprovalNotification implements Entity & Node & Notification {
   """
   [Internal] Notification actor initials if avatar is not available.
   """
-  actorAvatarColor: String
+  actorAvatarColor: String!
   """
   [Internal] Notification avatar URL.
   """
@@ -18700,7 +18700,7 @@ type ProjectNotification implements Entity & Node & Notification {
   """
   [Internal] Notification actor initials if avatar is not available.
   """
-  actorAvatarColor: String
+  actorAvatarColor: String!
   """
   [Internal] Notification avatar URL.
   """
@@ -22741,7 +22741,7 @@ type Roadmap implements Node {
   """
   The user who owns the roadmap.
   """
-  owner: User!
+  owner: User
   """
   Projects associated with the roadmap.
   """
@@ -25105,7 +25105,7 @@ type Template implements Node {
   """
   The organization that the template is associated with. If null, the template is associated with a particular team.
   """
-  organization: Organization
+  organization: Organization!
   """
   The sort order of the template.
   """

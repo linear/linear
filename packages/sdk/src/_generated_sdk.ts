@@ -1510,7 +1510,7 @@ export class CustomView extends Request {
   private _creator: L.CustomViewFragment["creator"];
   private _owner: L.CustomViewFragment["owner"];
   private _team?: L.CustomViewFragment["team"];
-  private _updatedBy: L.CustomViewFragment["updatedBy"];
+  private _updatedBy?: L.CustomViewFragment["updatedBy"];
 
   public constructor(request: LinearRequest, data: L.CustomViewFragment) {
     super(request);
@@ -1540,7 +1540,7 @@ export class CustomView extends Request {
     this._creator = data.creator;
     this._owner = data.owner;
     this._team = data.team ?? undefined;
-    this._updatedBy = data.updatedBy;
+    this._updatedBy = data.updatedBy ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -1598,7 +1598,7 @@ export class CustomView extends Request {
   }
   /** The user who last updated the custom view. */
   public get updatedBy(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._updatedBy.id);
+    return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
   }
   /** Issues associated with the custom view. */
   public issues(variables?: Omit<L.CustomView_IssuesQueryVariables, "id">) {
@@ -2242,10 +2242,10 @@ export class DiaryEntryPayload extends Request {
  * @param data - L.DocumentFragment response data
  */
 export class Document extends Request {
-  private _creator: L.DocumentFragment["creator"];
+  private _creator?: L.DocumentFragment["creator"];
   private _lastAppliedTemplate?: L.DocumentFragment["lastAppliedTemplate"];
   private _project?: L.DocumentFragment["project"];
-  private _updatedBy: L.DocumentFragment["updatedBy"];
+  private _updatedBy?: L.DocumentFragment["updatedBy"];
 
   public constructor(request: LinearRequest, data: L.DocumentFragment) {
     super(request);
@@ -2263,10 +2263,10 @@ export class Document extends Request {
     this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
-    this._creator = data.creator;
+    this._creator = data.creator ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
     this._project = data.project ?? undefined;
-    this._updatedBy = data.updatedBy;
+    this._updatedBy = data.updatedBy ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -2302,7 +2302,7 @@ export class Document extends Request {
   public url: string;
   /** The user who created the document. */
   public get creator(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._creator.id);
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The last template that was applied to this document. */
   public get lastAppliedTemplate(): LinearFetch<Template> | undefined {
@@ -2316,7 +2316,7 @@ export class Document extends Request {
   }
   /** The user who last updated the document. */
   public get updatedBy(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._updatedBy.id);
+    return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
   }
   /** Comments associated with the document. */
   public comments(variables?: Omit<L.Document_CommentsQueryVariables, "id">) {
@@ -2667,10 +2667,10 @@ export class DocumentSearchPayload extends Request {
  * @param data - L.DocumentSearchResultFragment response data
  */
 export class DocumentSearchResult extends Request {
-  private _creator: L.DocumentSearchResultFragment["creator"];
+  private _creator?: L.DocumentSearchResultFragment["creator"];
   private _lastAppliedTemplate?: L.DocumentSearchResultFragment["lastAppliedTemplate"];
   private _project?: L.DocumentSearchResultFragment["project"];
-  private _updatedBy: L.DocumentSearchResultFragment["updatedBy"];
+  private _updatedBy?: L.DocumentSearchResultFragment["updatedBy"];
 
   public constructor(request: LinearRequest, data: L.DocumentSearchResultFragment) {
     super(request);
@@ -2689,10 +2689,10 @@ export class DocumentSearchResult extends Request {
     this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
-    this._creator = data.creator;
+    this._creator = data.creator ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
     this._project = data.project ?? undefined;
-    this._updatedBy = data.updatedBy;
+    this._updatedBy = data.updatedBy ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -2730,7 +2730,7 @@ export class DocumentSearchResult extends Request {
   public url: string;
   /** The user who created the document. */
   public get creator(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._creator.id);
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The last template that was applied to this document. */
   public get lastAppliedTemplate(): LinearFetch<Template> | undefined {
@@ -2744,7 +2744,7 @@ export class DocumentSearchResult extends Request {
   }
   /** The user who last updated the document. */
   public get updatedBy(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._updatedBy.id);
+    return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
   }
 }
 /**
@@ -2843,7 +2843,7 @@ export class Draft extends Request {
  */
 export class EmailIntakeAddress extends Request {
   private _creator?: L.EmailIntakeAddressFragment["creator"];
-  private _team: L.EmailIntakeAddressFragment["team"];
+  private _team?: L.EmailIntakeAddressFragment["team"];
   private _template?: L.EmailIntakeAddressFragment["template"];
 
   public constructor(request: LinearRequest, data: L.EmailIntakeAddressFragment) {
@@ -2855,7 +2855,7 @@ export class EmailIntakeAddress extends Request {
     this.id = data.id;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator ?? undefined;
-    this._team = data.team;
+    this._team = data.team ?? undefined;
     this._template = data.template ?? undefined;
   }
 
@@ -2884,7 +2884,7 @@ export class EmailIntakeAddress extends Request {
   }
   /** The team that the email address is associated with. */
   public get team(): LinearFetch<Team> | undefined {
-    return new TeamQuery(this._request).fetch(this._team.id);
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
   /** The template that the email address is associated with. */
   public get template(): LinearFetch<Template> | undefined {
@@ -2965,7 +2965,7 @@ export class EmailUserAccountAuthChallengeResponse extends Request {
  * @param data - L.EmojiFragment response data
  */
 export class Emoji extends Request {
-  private _creator: L.EmojiFragment["creator"];
+  private _creator?: L.EmojiFragment["creator"];
 
   public constructor(request: LinearRequest, data: L.EmojiFragment) {
     super(request);
@@ -2976,7 +2976,7 @@ export class Emoji extends Request {
     this.source = data.source;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
-    this._creator = data.creator;
+    this._creator = data.creator ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -2998,7 +2998,7 @@ export class Emoji extends Request {
   public url: string;
   /** The user who created the emoji. */
   public get creator(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._creator.id);
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
   /** The organization that the emoji belongs to. */
   public get organization(): LinearFetch<Organization> {
@@ -3563,7 +3563,7 @@ export class FeatureFlag extends Request {
   private _creator?: L.FeatureFlagFragment["creator"];
   private _integration: L.FeatureFlagFragment["integration"];
   private _lastStageUpdatedBy?: L.FeatureFlagFragment["lastStageUpdatedBy"];
-  private _project?: L.FeatureFlagFragment["project"];
+  private _project: L.FeatureFlagFragment["project"];
 
   public constructor(request: LinearRequest, data: L.FeatureFlagFragment) {
     super(request);
@@ -3584,7 +3584,7 @@ export class FeatureFlag extends Request {
     this._creator = data.creator ?? undefined;
     this._integration = data.integration;
     this._lastStageUpdatedBy = data.lastStageUpdatedBy ?? undefined;
-    this._project = data.project ?? undefined;
+    this._project = data.project;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -3632,7 +3632,7 @@ export class FeatureFlag extends Request {
   }
   /** The project the feature flag is associated with. */
   public get project(): LinearFetch<Project> | undefined {
-    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+    return new ProjectQuery(this._request).fetch(this._project.id);
   }
 }
 /**
@@ -10123,7 +10123,7 @@ export class Reminder extends Request {
  */
 export class Roadmap extends Request {
   private _creator: L.RoadmapFragment["creator"];
-  private _owner: L.RoadmapFragment["owner"];
+  private _owner?: L.RoadmapFragment["owner"];
 
   public constructor(request: LinearRequest, data: L.RoadmapFragment) {
     super(request);
@@ -10138,7 +10138,7 @@ export class Roadmap extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
     this._creator = data.creator;
-    this._owner = data.owner;
+    this._owner = data.owner ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -10174,7 +10174,7 @@ export class Roadmap extends Request {
   }
   /** The user who owns the roadmap. */
   public get owner(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._owner.id);
+    return this._owner?.id ? new UserQuery(this._request).fetch(this._owner?.id) : undefined;
   }
   /** Projects associated with the roadmap. */
   public projects(variables?: Omit<L.Roadmap_ProjectsQueryVariables, "id">) {
