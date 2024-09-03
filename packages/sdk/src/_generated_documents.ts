@@ -1194,7 +1194,7 @@ export type CustomView = Node & {
    */
   updatedAt: Scalars["DateTime"];
   /** The user who last updated the custom view. */
-  updatedBy: User;
+  updatedBy?: Maybe<User>;
   /** The current users view preferences for this custom view. */
   userViewPreferences?: Maybe<ViewPreferences>;
   /** The calculated view preferences values for this custom view. */
@@ -2369,7 +2369,7 @@ export type Document = Node & {
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The user who created the document. */
-  creator: User;
+  creator?: Maybe<User>;
   /** The ID of the document content associated with the document. */
   documentContentId?: Maybe<Scalars["String"]>;
   /** The time at which the document was hidden. Null if the entity has not been hidden. */
@@ -2398,7 +2398,7 @@ export type Document = Node & {
    */
   updatedAt: Scalars["DateTime"];
   /** The user who last updated the document. */
-  updatedBy: User;
+  updatedBy?: Maybe<User>;
   /** The canonical url for the document. */
   url: Scalars["String"];
 };
@@ -2623,7 +2623,7 @@ export type DocumentNotification = Entity &
     /** The user that caused the notification. */
     actor?: Maybe<User>;
     /** [Internal] Notification actor initials if avatar is not available. */
-    actorAvatarColor?: Maybe<Scalars["String"]>;
+    actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
     /** [Internal] Notification actor initials if avatar is not available. */
@@ -2727,7 +2727,7 @@ export type DocumentSearchResult = Node & {
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The user who created the document. */
-  creator: User;
+  creator?: Maybe<User>;
   /** The ID of the document content associated with the document. */
   documentContentId?: Maybe<Scalars["String"]>;
   /** The time at which the document was hidden. Null if the entity has not been hidden. */
@@ -2758,7 +2758,7 @@ export type DocumentSearchResult = Node & {
    */
   updatedAt: Scalars["DateTime"];
   /** The user who last updated the document. */
-  updatedBy: User;
+  updatedBy?: Maybe<User>;
   /** The canonical url for the document. */
   url: Scalars["String"];
 };
@@ -2874,7 +2874,7 @@ export type EmailIntakeAddress = Node & {
   /** The organization that the email address is associated with. */
   organization: Organization;
   /** The team that the email address is associated with. */
-  team: Team;
+  team?: Maybe<Team>;
   /** The template that the email address is associated with. */
   template?: Maybe<Template>;
   /**
@@ -2954,7 +2954,7 @@ export type Emoji = Node & {
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The user who created the emoji. */
-  creator: User;
+  creator?: Maybe<User>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The emoji's name. */
@@ -3405,7 +3405,7 @@ export type FeatureFlag = Node & {
   /** The pending rollout stage for the feature flag. */
   pendingRolloutStage?: Maybe<FeatureFlagRolloutStage>;
   /** The project the feature flag is associated with. */
-  project?: Maybe<Project>;
+  project: Project;
   /** The rollout stage of the feature flag. */
   rolloutStage: FeatureFlagRolloutStage;
   /** The status of the feature flag. */
@@ -4081,7 +4081,7 @@ export type InitiativeNotification = Entity &
     /** The user that caused the notification. */
     actor?: Maybe<User>;
     /** [Internal] Notification actor initials if avatar is not available. */
-    actorAvatarColor?: Maybe<Scalars["String"]>;
+    actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
     /** [Internal] Notification actor initials if avatar is not available. */
@@ -5735,7 +5735,7 @@ export type IssueNotification = Entity &
     /** The user that caused the notification. */
     actor?: Maybe<User>;
     /** [Internal] Notification actor initials if avatar is not available. */
-    actorAvatarColor?: Maybe<Scalars["String"]>;
+    actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
     /** [Internal] Notification actor initials if avatar is not available. */
@@ -8267,7 +8267,7 @@ export type Notification = {
   /** The user that caused the notification. */
   actor?: Maybe<User>;
   /** [Internal] Notification actor initials if avatar is not available. */
-  actorAvatarColor?: Maybe<Scalars["String"]>;
+  actorAvatarColor: Scalars["String"];
   /** [Internal] Notification avatar URL. */
   actorAvatarUrl?: Maybe<Scalars["String"]>;
   /** [Internal] Notification actor initials if avatar is not available. */
@@ -9228,7 +9228,7 @@ export type OauthClientApprovalNotification = Entity &
     /** The user that caused the notification. */
     actor?: Maybe<User>;
     /** [Internal] Notification actor initials if avatar is not available. */
-    actorAvatarColor?: Maybe<Scalars["String"]>;
+    actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
     /** [Internal] Notification actor initials if avatar is not available. */
@@ -10739,7 +10739,7 @@ export type ProjectNotification = Entity &
     /** The user that caused the notification. */
     actor?: Maybe<User>;
     /** [Internal] Notification actor initials if avatar is not available. */
-    actorAvatarColor?: Maybe<Scalars["String"]>;
+    actorAvatarColor: Scalars["String"];
     /** [Internal] Notification avatar URL. */
     actorAvatarUrl?: Maybe<Scalars["String"]>;
     /** [Internal] Notification actor initials if avatar is not available. */
@@ -12900,7 +12900,7 @@ export type Roadmap = Node & {
   /** The organization of the roadmap. */
   organization: Organization;
   /** The user who owns the roadmap. */
-  owner: User;
+  owner?: Maybe<User>;
   /** Projects associated with the roadmap. */
   projects: ProjectConnection;
   /** The roadmap's unique URL slug. */
@@ -14238,7 +14238,7 @@ export type Template = Node & {
   /** The name of the template. */
   name: Scalars["String"];
   /** The organization that the template is associated with. If null, the template is associated with a particular team. */
-  organization?: Maybe<Organization>;
+  organization: Organization;
   /** The sort order of the template. */
   sortOrder: Scalars["Float"];
   /** The team that the template is associated with. If null, the template is global to the workspace. */
@@ -15801,7 +15801,7 @@ export type CommentNotificationFragment = { __typename: "CommentNotification" } 
 export type EmojiFragment = { __typename: "Emoji" } & Pick<
   Emoji,
   "url" | "name" | "updatedAt" | "source" | "archivedAt" | "createdAt" | "id"
-> & { creator: { __typename?: "User" } & Pick<User, "id"> };
+> & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
 export type CustomViewNotificationSubscriptionFragment = { __typename: "CustomViewNotificationSubscription" } & Pick<
   CustomViewNotificationSubscription,
@@ -15846,7 +15846,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
     organizationViewPreferences?: Maybe<{ __typename?: "ViewPreferences" } & ViewPreferencesFragment>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     creator: { __typename?: "User" } & Pick<User, "id">;
-    updatedBy: { __typename?: "User" } & Pick<User, "id">;
+    updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     owner: { __typename?: "User" } & Pick<User, "id">;
   };
 
@@ -15933,8 +15933,8 @@ export type DocumentFragment = { __typename: "Document" } & Pick<
 > & {
     lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-    creator: { __typename?: "User" } & Pick<User, "id">;
-    updatedBy: { __typename?: "User" } & Pick<User, "id">;
+    creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
 export type FacetFragment = { __typename: "Facet" } & Pick<
@@ -15962,7 +15962,7 @@ export type FeatureFlagFragment = { __typename: "FeatureFlag" } & Pick<
 > & {
     integration: { __typename?: "Integration" } & Pick<Integration, "id">;
     pendingRolloutStage?: Maybe<{ __typename?: "FeatureFlagRolloutStage" } & FeatureFlagRolloutStageFragment>;
-    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    project: { __typename?: "Project" } & Pick<Project, "id">;
     rolloutStage: { __typename?: "FeatureFlagRolloutStage" } & FeatureFlagRolloutStageFragment;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     lastStageUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -16433,7 +16433,7 @@ export type ReminderFragment = { __typename: "Reminder" } & Pick<
 export type RoadmapFragment = { __typename: "Roadmap" } & Pick<
   Roadmap,
   "url" | "description" | "updatedAt" | "name" | "color" | "slugId" | "sortOrder" | "archivedAt" | "createdAt" | "id"
-> & { creator: { __typename?: "User" } & Pick<User, "id">; owner: { __typename?: "User" } & Pick<User, "id"> };
+> & { creator: { __typename?: "User" } & Pick<User, "id">; owner?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
 
 export type FeatureFlagRolloutStageFragment = { __typename: "FeatureFlagRolloutStage" } & Pick<
   FeatureFlagRolloutStage,
@@ -16655,7 +16655,7 @@ export type EmailIntakeAddressFragment = { __typename: "EmailIntakeAddress" } & 
   EmailIntakeAddress,
   "updatedAt" | "archivedAt" | "createdAt" | "id" | "address" | "enabled"
 > & {
-    team: { __typename?: "Team" } & Pick<Team, "id">;
+    team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     template?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
@@ -17943,8 +17943,8 @@ export type DocumentSearchResultFragment = { __typename: "DocumentSearchResult" 
 > & {
     lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
-    creator: { __typename?: "User" } & Pick<User, "id">;
-    updatedBy: { __typename?: "User" } & Pick<User, "id">;
+    creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
 export type DocumentSearchResultConnectionFragment = { __typename: "DocumentSearchResultConnection" } & {
