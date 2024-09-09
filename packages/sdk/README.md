@@ -61,9 +61,6 @@ Open source packages:
 # install dependencies
 yarn
 
-# link package dependencies
-yarn bootstrap
-
 # build all packages
 yarn build
 
