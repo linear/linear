@@ -324,8 +324,6 @@ fragment CycleNotificationSubscription on CycleNotificationSubscription {
 # A diary entry
 fragment DiaryEntry on DiaryEntry {
   __typename
-  # The canonical url for the DiaryEntry.
-  url
   # The date for which the entry is created
   date
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -730,6 +728,19 @@ fragment ProjectArchivePayload on ProjectArchivePayload {
 }
 
 # A generic payload return from entity archive mutations.
+fragment ProjectStatusArchivePayload on ProjectStatusArchivePayload {
+  __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
 fragment RoadmapArchivePayload on RoadmapArchivePayload {
   __typename
   # The archived/unarchived entity. Null if entity was deleted.
@@ -810,6 +821,10 @@ fragment ArchivePayload on ArchivePayload {
 
   ... on ProjectArchivePayload {
     ...ProjectArchivePayload
+  }
+
+  ... on ProjectStatusArchivePayload {
+    ...ProjectStatusArchivePayload
   }
 
   ... on RoadmapArchivePayload {
@@ -1149,7 +1164,7 @@ fragment Project on Project {
   targetDate
   # The estimated start date of the project.
   startDate
-  # The health of the project based on the last project update.
+  # The health of the project.
   health
   # The icon of the project.
   icon
@@ -1194,7 +1209,7 @@ fragment Project on Project {
   sortOrder
   # The status that the project is associated with.
   status {
-    ...ProjectStatus
+    id
   }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
@@ -3161,14 +3176,6 @@ fragment AuthenticationSessionResponse on AuthenticationSessionResponse {
   id
 }
 
-# Contains either the full serialized state of the application or delta packets that the requester can
-# apply to the local data set in order to be up-to-date.
-fragment EntityCountResponse on EntityCountResponse {
-  __typename
-  # Entity counts keyed by the entity name.
-  counts
-}
-
 # Contains requested archived model objects.
 fragment ArchiveResponse on ArchiveResponse {
   __typename
@@ -3727,6 +3734,8 @@ fragment SlackChannelNameMapping on SlackChannelNameMapping {
   isPrivate
   # Whether or not the Slack channel is shared with an external org.
   isShared
+  # Whether or not to use AI to generate titles for Asks created in this channel.
+  aiTitles
   # Whether or not top-level messages in this channel should automatically create Asks.
   autoCreateOnMessage
   # Whether or not using the :ticket: emoji in this channel should automatically create Asks.
@@ -4321,6 +4330,17 @@ fragment ViewPreferences on ViewPreferences {
   viewType
 }
 
+# Whether a custom JQL query is valid or not
+fragment IssueImportJqlCheckPayload on IssueImportJqlCheckPayload {
+  __typename
+  # An error message returned by Jira when validating the JQL query.
+  error
+  # Returns an approximate number of issues matching the JQL query, if available
+  count
+  # Returns true if the JQL query has been validated successfully, false otherwise
+  success
+}
+
 # Whether an issue import can be synced at the end of an import or not
 fragment IssueImportSyncCheckPayload on IssueImportSyncCheckPayload {
   __typename
@@ -4770,18 +4790,6 @@ fragment DiaryEntryConnection on DiaryEntryConnection {
   pageInfo {
     ...PageInfo
   }
-}
-
-fragment DiaryEntryPayload on DiaryEntryPayload {
-  __typename
-  # The diary entry that was created or updated.
-  diaryEntry {
-    id
-  }
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
 }
 
 fragment DocumentConnection on DocumentConnection {
@@ -5968,7 +5976,7 @@ fragment ProjectSearchResult on ProjectSearchResult {
   targetDate
   # The estimated start date of the project.
   startDate
-  # The health of the project based on the last project update.
+  # The health of the project.
   health
   # The icon of the project.
   icon
@@ -6013,7 +6021,7 @@ fragment ProjectSearchResult on ProjectSearchResult {
   sortOrder
   # The status that the project is associated with.
   status {
-    ...ProjectStatus
+    id
   }
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
@@ -6073,6 +6081,24 @@ fragment ProjectStatusConnection on ProjectStatusConnection {
   pageInfo {
     ...PageInfo
   }
+}
+
+fragment ProjectStatusCountPayload on ProjectStatusCountPayload {
+  __typename
+  # Number of projects using this project status.
+  count
+}
+
+fragment ProjectStatusPayload on ProjectStatusPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The project status that was created or updated.
+  status {
+    id
+  }
+  # Whether the operation was successful.
+  success
 }
 
 fragment ProjectUpdateConnection on ProjectUpdateConnection {
@@ -6611,6 +6637,10 @@ fragment WorkflowDefinition on WorkflowDefinition {
   cycle {
     id
   }
+  # The contextual initiative view associated with the workflow.
+  initiative {
+    id
+  }
   # The contextual label view associated with the workflow.
   label {
     id
@@ -6771,46 +6801,6 @@ query applicationWithAuthorization(
 ) {
   applicationWithAuthorization(actor: $actor, clientId: $clientId, redirectUri: $redirectUri, scope: $scope) {
     ...UserAuthorizedApplication
-  }
-}
-# Fetches an archived model.
-query archivedModelSync(
-  # The identifier of the model to load. What an identifier is specific to the model class.
-  $identifier: String!
-  # The class name of the model to load.
-  $modelClass: String!
-) {
-  archivedModelSync(identifier: $identifier, modelClass: $modelClass) {
-    ...ArchiveResponse
-  }
-}
-# Fetches archived models.
-query archivedModelsSync(
-  # Retrieve issues that have been archived before this date.
-  $before: DateTime
-  # To proper page through entities with same "archivedAt" date we also need last id
-  $beforeId: String
-  # The filter to apply to archived models.
-  $issueFilter: IssueFilter
-  # The number of issues to load.
-  $last: Int
-  # The class name of the models to load.
-  $modelClass: String!
-  # The teamId for which to load archived models.
-  $teamId: String!
-  # How trashed issues should be loaded. Defaults to TrashOptionType.excludeTrash
-  $trashOption: TrashOptionType
-) {
-  archivedModelsSync(
-    before: $before
-    beforeId: $beforeId
-    issueFilter: $issueFilter
-    last: $last
-    modelClass: $modelClass
-    teamId: $teamId
-    trashOption: $trashOption
-  ) {
-    ...ArchiveResponse
   }
 }
 # One specific issue attachment.
@@ -7565,12 +7555,6 @@ query cycles(
     ...CycleConnection
   }
 }
-# One specific diary entry.
-query diaryEntry($id: String!) {
-  diaryEntry(id: $id) {
-    ...DiaryEntry
-  }
-}
 # One specific document.
 query document($id: String!) {
   document(id: $id) {
@@ -8308,6 +8292,29 @@ query issueImportCheckSync(
 ) {
   issueImportCheckSync(issueImportId: $issueImportId) {
     ...IssueImportSyncCheckPayload
+  }
+}
+# Checks whether a custom JQL query is valid and can be used to filter issues of a Jira import
+query issueImportJqlCheck(
+  # Jira user account email.
+  $jiraEmail: String!
+  # Jira installation or cloud hostname.
+  $jiraHostname: String!
+  # Jira project key to use as the base filter of the query.
+  $jiraProject: String!
+  # Jira personal access token to access Jira REST API.
+  $jiraToken: String!
+  # The JQL query to validate.
+  $jql: String!
+) {
+  issueImportJqlCheck(
+    jiraEmail: $jiraEmail
+    jiraHostname: $jiraHostname
+    jiraProject: $jiraProject
+    jiraToken: $jiraToken
+    jql: $jql
+  ) {
+    ...IssueImportJqlCheckPayload
   }
 }
 # One specific label.
@@ -9064,6 +9071,38 @@ query project($id: String!) {
     ...Project
   }
 }
+# Comments associated with the project overview.
+query project_comments(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned comments.
+  $filter: CommentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  project(id: $id) {
+    comments(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CommentConnection
+    }
+  }
+}
 # The content of the project description.
 query project_documentContent($id: String!) {
   project(id: $id) {
@@ -9348,14 +9387,6 @@ query project_projectUpdates(
     }
   }
 }
-# The status that the project is associated with.
-query project_status($id: String!) {
-  project(id: $id) {
-    status {
-      ...ProjectStatus
-    }
-  }
-}
 # Teams associated with this project.
 query project_teams(
   $id: String!
@@ -9531,6 +9562,38 @@ query projectRelations(
     orderBy: $orderBy
   ) {
     ...ProjectRelationConnection
+  }
+}
+# One specific project status.
+query projectStatus($id: String!) {
+  projectStatus(id: $id) {
+    ...ProjectStatus
+  }
+}
+# All project statuses.
+query projectStatuses(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  projectStatuses(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...ProjectStatusConnection
   }
 }
 # A specific project update.
@@ -10030,12 +10093,6 @@ query ssoUrlFromEmail(
 ) {
   ssoUrlFromEmail(email: $email, isDesktop: $isDesktop) {
     ...SsoUrlFromEmailResponse
-  }
-}
-# Retrieves how many entities the user has access to.
-query syncEntityCount {
-  syncEntityCount {
-    ...EntityCountResponse
   }
 }
 # One specific team.
@@ -11574,35 +11631,6 @@ mutation updateCycle(
     ...CyclePayload
   }
 }
-# Creates a new diary entry.
-mutation createDiaryEntry(
-  # The diary entry to create.
-  $input: DiaryEntryCreateInput!
-) {
-  diaryEntryCreate(input: $input) {
-    ...DiaryEntryPayload
-  }
-}
-# Deletes a diaryEntry.
-mutation deleteDiaryEntry(
-  # The identifier of the diaryEntry to delete.
-  $id: String!
-) {
-  diaryEntryDelete(id: $id) {
-    ...DeletePayload
-  }
-}
-# Updates a diaryEntry.
-mutation updateDiaryEntry(
-  # The identifier of the diary entry to update.
-  $id: String!
-  # A partial diary entry object to update the diary entry with.
-  $input: DiaryEntryUpdateInput!
-) {
-  diaryEntryUpdate(id: $id, input: $input) {
-    ...DiaryEntryPayload
-  }
-}
 # Creates a new document.
 mutation createDocument(
   # The document to create.
@@ -12554,6 +12582,8 @@ mutation issueImportCreateJira(
   $jiraProject: String!
   # Jira personal access token to access Jira REST API.
   $jiraToken: String!
+  # A custom JQL query to filter issues being imported
+  $jql: String
   # ID of the organization into which to import data.
   $organizationId: String
   # ID of the team into which to import data. Empty to create new team.
@@ -12569,6 +12599,7 @@ mutation issueImportCreateJira(
     jiraHostname: $jiraHostname
     jiraProject: $jiraProject
     jiraToken: $jiraToken
+    jql: $jql
     organizationId: $organizationId
     teamId: $teamId
     teamName: $teamName
@@ -13051,6 +13082,44 @@ mutation updateProjectMilestone(
 ) {
   projectMilestoneUpdate(id: $id, input: $input) {
     ...ProjectMilestonePayload
+  }
+}
+# Archives a project status.
+mutation archiveProjectStatus(
+  # The identifier of the project status to archive.
+  $id: String!
+) {
+  projectStatusArchive(id: $id) {
+    ...ProjectStatusArchivePayload
+  }
+}
+# Creates a new project status.
+mutation createProjectStatus(
+  # The ProjectStatus object to create.
+  $input: ProjectStatusCreateInput!
+) {
+  projectStatusCreate(input: $input) {
+    ...ProjectStatusPayload
+  }
+}
+# Unarchives a project status.
+mutation unarchiveProjectStatus(
+  # The identifier of the project status to unarchive.
+  $id: String!
+) {
+  projectStatusUnarchive(id: $id) {
+    ...ProjectStatusArchivePayload
+  }
+}
+# Updates a project status.
+mutation updateProjectStatus(
+  # The identifier of the project status to update.
+  $id: String!
+  # A partial ProjectStatus object to update the ProjectStatus with.
+  $input: ProjectStatusUpdateInput!
+) {
+  projectStatusUpdate(id: $id, input: $input) {
+    ...ProjectStatusPayload
   }
 }
 # Unarchives a project.

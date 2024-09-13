@@ -1297,7 +1297,7 @@ type Comment implements Node {
   """
   [Internal] The comment content as a Prosemirror document.
   """
-  bodyData: String
+  bodyData: String!
   """
   The bot that created the comment.
   """
@@ -1650,7 +1650,7 @@ input CommentUpdateInput {
   """
   body: String
   """
-  The comment content as a Prosemirror document.
+  [Internal] The comment content as a Prosemirror document.
   """
   bodyData: JSON
   """
@@ -2376,7 +2376,7 @@ input CustomerCollectionFilter {
   """
   Filters that the customer owner must satisfy.
   """
-  owner: UserFilter
+  owner: NullableUserFilter
   """
   Comparator for the customer generated revenue.
   """
@@ -2517,7 +2517,7 @@ input CustomerFilter {
   """
   Filters that the customer owner must satisfy.
   """
-  owner: UserFilter
+  owner: NullableUserFilter
   """
   Comparator for the customer generated revenue.
   """
@@ -2589,7 +2589,7 @@ type CustomerNeed implements Node {
   """
   issue: Issue
   """
-  The priority of the customer need. 0 = No priority, 1 = Critical, 2 = Important, 3 = Nice to have.
+  The urgency of the customer need. 0 = No urgency, 1 = Critical, 2 = Important, 3 = Nice to have.
   """
   priority: Float!
   """
@@ -2697,7 +2697,7 @@ input CustomerNeedCreateInput {
   """
   issueId: String
   """
-  The priority of the customer need. 0 = No priority, 1 = Critical, 2 = Important, 3 = Nice to have.
+  The urgency of the customer need. 0 = No urgency, 1 = Critical, 2 = Important, 3 = Nice to have.
   """
   priority: Float
   """
@@ -2793,9 +2793,17 @@ input CustomerNeedUpdateInput {
   """
   id: String
   """
-  The priority of the customer need. 0 = No priority, 1 = Critical, 2 = Important, 3 = Nice to have.
+  The issue this need is referencing.
+  """
+  issueId: String
+  """
+  The urgency of the customer need. 0 = No urgency, 1 = Critical, 2 = Important, 3 = Nice to have.
   """
   priority: Float
+  """
+  The project this need is referencing.
+  """
+  projectId: String
 }
 
 type CustomerPayload {
@@ -3879,10 +3887,6 @@ type DiaryEntry implements Node {
   """
   updatedAt: DateTime!
   """
-  The canonical url for the DiaryEntry.
-  """
-  url: String!
-  """
   The user who the diary belongs to.
   """
   user: User!
@@ -3894,53 +3898,12 @@ type DiaryEntryConnection {
   pageInfo: PageInfo!
 }
 
-input DiaryEntryCreateInput {
-  """
-  [Internal] The comment content as a Prosemirror diaryEntry.
-  """
-  bodyData: JSON
-  """
-  The date for which the entry is created.
-  """
-  date: TimelessDate!
-  """
-  The identifier in UUID v4 format. If none is provided, the backend will generate one.
-  """
-  id: String
-}
-
 type DiaryEntryEdge {
   """
   Used in `before` and `after` args
   """
   cursor: String!
   node: DiaryEntry!
-}
-
-type DiaryEntryPayload {
-  """
-  The diary entry that was created or updated.
-  """
-  diaryEntry: DiaryEntry!
-  """
-  The identifier of the last sync operation.
-  """
-  lastSyncId: Float!
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-input DiaryEntryUpdateInput {
-  """
-  [Internal] The comment content as a Prosemirror diaryEntry.
-  """
-  bodyData: JSON
-  """
-  The date for which the entry is created.
-  """
-  date: TimelessDate
 }
 
 """
@@ -5079,16 +5042,6 @@ interface Entity implements Node {
 }
 
 """
-Contains either the full serialized state of the application or delta packets that the requester can apply to the local data set in order to be up-to-date.
-"""
-type EntityCountResponse {
-  """
-  Entity counts keyed by the entity name.
-  """
-  counts: JSONObject!
-}
-
-"""
 An external link for an entity like initiative, etc...
 """
 type EntityExternalLink implements Node {
@@ -5446,6 +5399,10 @@ type Favorite implements Node {
   """
   customView: CustomView
   """
+  The favorited customer.
+  """
+  customer: Customer
+  """
   The favorited cycle.
   """
   cycle: Cycle
@@ -5559,6 +5516,10 @@ input FavoriteCreateInput {
   The identifier of the custom view to favorite.
   """
   customViewId: String
+  """
+  The identifier of the customer to favorite.
+  """
+  customerId: String
   """
   The identifier of the cycle to favorite.
   """
@@ -5829,6 +5790,41 @@ enum FeatureFlagRolloutStageType {
   full
   internal
   partial
+}
+
+"""
+[Internal] An item in a users feed.
+"""
+type FeedItem implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The project update that is in the feed.
+  """
+  projectUpdate: ProjectUpdate
+  """
+  The time at which the user saw the feed item.
+  """
+  seenAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user that will see this feed item.
+  """
+  user: User!
 }
 
 type FrontAttachmentPayload {
@@ -7315,6 +7311,7 @@ enum IntegrationService {
   jira
   jiraPersonal
   launchDarkly
+  launchDarklyPersonal
   loom
   notion
   opsgenie
@@ -8607,6 +8604,32 @@ type IssueDraft implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  labels(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueLabelConnection!
   """
   The parent draft of the draft.
   """
@@ -9374,6 +9397,24 @@ type IssueImportDeletePayload {
   lastSyncId: Float!
   """
   Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+Whether a custom JQL query is valid or not
+"""
+type IssueImportJqlCheckPayload {
+  """
+  Returns an approximate number of issues matching the JQL query, if available
+  """
+  count: Float
+  """
+  An error message returned by Jira when validating the JQL query.
+  """
+  error: String
+  """
+  Returns true if the JQL query has been validated successfully, false otherwise
   """
   success: Boolean!
 }
@@ -11751,37 +11792,6 @@ type Mutation {
     input: CycleUpdateInput!
   ): CyclePayload!
   """
-  Creates a new diary entry.
-  """
-  diaryEntryCreate(
-    """
-    The diary entry to create.
-    """
-    input: DiaryEntryCreateInput!
-  ): DiaryEntryPayload!
-  """
-  Deletes a diaryEntry.
-  """
-  diaryEntryDelete(
-    """
-    The identifier of the diaryEntry to delete.
-    """
-    id: String!
-  ): DeletePayload!
-  """
-  Updates a diaryEntry.
-  """
-  diaryEntryUpdate(
-    """
-    The identifier of the diary entry to update.
-    """
-    id: String!
-    """
-    A partial diary entry object to update the diary entry with.
-    """
-    input: DiaryEntryUpdateInput!
-  ): DiaryEntryPayload!
-  """
   Creates a new document.
   """
   documentCreate(
@@ -12377,9 +12387,9 @@ type Mutation {
   """
   integrationLaunchDarklyConnect(
     """
-    The LaunchDarkly API key.
+    The LaunchDarkly OAuth code.
     """
-    apiKey: String!
+    code: String!
     """
     The LaunchDarkly environment.
     """
@@ -12388,6 +12398,15 @@ type Mutation {
     The LaunchDarkly project key.
     """
     projectKey: String!
+  ): IntegrationPayload!
+  """
+  [INTERNAL] Integrates your personal account with LaunchDarkly.
+  """
+  integrationLaunchDarklyPersonalConnect(
+    """
+    The LaunchDarkly OAuth code.
+    """
+    code: String!
   ): IntegrationPayload!
   """
   Enables Loom integration for the organization.
@@ -12945,6 +12964,10 @@ type Mutation {
     Jira personal access token to access Jira REST API.
     """
     jiraToken: String!
+    """
+    A custom JQL query to filter issues being imported
+    """
+    jql: String
     """
     ID of the organization into which to import data.
     """
@@ -13609,6 +13632,46 @@ type Mutation {
     input: ProjectRelationUpdateInput!
   ): ProjectRelationPayload!
   """
+  Archives a project status.
+  """
+  projectStatusArchive(
+    """
+    The identifier of the project status to archive.
+    """
+    id: String!
+  ): ProjectStatusArchivePayload!
+  """
+  Creates a new project status.
+  """
+  projectStatusCreate(
+    """
+    The ProjectStatus object to create.
+    """
+    input: ProjectStatusCreateInput!
+  ): ProjectStatusPayload!
+  """
+  Unarchives a project status.
+  """
+  projectStatusUnarchive(
+    """
+    The identifier of the project status to unarchive.
+    """
+    id: String!
+  ): ProjectStatusArchivePayload!
+  """
+  Updates a project status.
+  """
+  projectStatusUpdate(
+    """
+    The identifier of the project status to update.
+    """
+    id: String!
+    """
+    A partial ProjectStatus object to update the ProjectStatus with.
+    """
+    input: ProjectStatusUpdateInput!
+  ): ProjectStatusPayload!
+  """
   Unarchives a project.
   """
   projectUnarchive(
@@ -14030,6 +14093,23 @@ type Mutation {
     """
     input: TriageResponsibilityUpdateInput!
   ): TriageResponsibilityPayload!
+  """
+  [Internal] Updates existing Slack integration scopes.
+  """
+  updateIntegrationSlackScopes(
+    """
+    The Slack OAuth code.
+    """
+    code: String!
+    """
+    The ID of the existing Slack integration
+    """
+    integrationId: String!
+    """
+    The Slack OAuth redirect URI.
+    """
+    redirectUri: String!
+  ): IntegrationPayload!
   """
   Makes user a regular user. Can only be called by an admin.
   """
@@ -16215,6 +16295,10 @@ type Organization implements Node {
   """
   createdIssueCount: Int!
   """
+  [ALPHA] Number of customers in the organization.
+  """
+  customerCount: Int!
+  """
   The time at which deletion of the organization was requested.
   """
   deletionRequestedAt: DateTime
@@ -17261,6 +17345,39 @@ type Project implements Node {
   """
   color: String!
   """
+  Comments associated with the project overview.
+  """
+  comments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned comments.
+    """
+    filter: CommentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CommentConnection!
+  """
   The time at which the project was moved into completed state.
   """
   completedAt: DateTime
@@ -17371,7 +17488,7 @@ type Project implements Node {
   """
   favorite: Favorite
   """
-  The health of the project based on the last project update.
+  The health of the project.
   """
   health: ProjectUpdateHealthType
   """
@@ -17944,6 +18061,10 @@ input ProjectCreateInput {
   The color of the project.
   """
   color: String
+  """
+  The project content as markdown.
+  """
+  content: String
   """
   The ID of the issue from which that project is created.
   """
@@ -19105,6 +19226,39 @@ type ProjectSearchResult implements Node {
   """
   color: String!
   """
+  Comments associated with the project overview.
+  """
+  comments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned comments.
+    """
+    filter: CommentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CommentConnection!
+  """
   The time at which the project was moved into completed state.
   """
   completedAt: DateTime
@@ -19215,7 +19369,7 @@ type ProjectSearchResult implements Node {
   """
   favorite: Favorite
   """
-  The health of the project based on the last project update.
+  The health of the project.
   """
   health: ProjectUpdateHealthType
   """
@@ -19676,10 +19830,66 @@ type ProjectStatus implements Node {
   updatedAt: DateTime!
 }
 
+"""
+A generic payload return from entity archive mutations.
+"""
+type ProjectStatusArchivePayload implements ArchivePayload {
+  """
+  The archived/unarchived entity. Null if entity was deleted.
+  """
+  entity: ProjectStatus
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 type ProjectStatusConnection {
   edges: [ProjectStatusEdge!]!
   nodes: [ProjectStatus!]!
   pageInfo: PageInfo!
+}
+
+type ProjectStatusCountPayload {
+  """
+  Number of projects using this project status.
+  """
+  count: Float!
+}
+
+input ProjectStatusCreateInput {
+  """
+  The UI color of the status as a HEX string.
+  """
+  color: String!
+  """
+  Description of the status.
+  """
+  description: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  Whether or not a project can be in this status indefinitely.
+  """
+  indefinite: Boolean = false
+  """
+  The name of the status.
+  """
+  name: String!
+  """
+  The position of the status in the workspace's project flow.
+  """
+  position: Float!
+  """
+  The type of the project status.
+  """
+  type: ProjectStatusType!
 }
 
 type ProjectStatusEdge {
@@ -19736,6 +19946,21 @@ input ProjectStatusFilter {
   updatedAt: DateComparator
 }
 
+type ProjectStatusPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The project status that was created or updated.
+  """
+  status: ProjectStatus!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 """
 A type of project status.
 """
@@ -19746,6 +19971,33 @@ enum ProjectStatusType {
   paused
   planned
   started
+}
+
+input ProjectStatusUpdateInput {
+  """
+  The UI color of the status as a HEX string.
+  """
+  color: String
+  """
+  Description of the status.
+  """
+  description: String
+  """
+  Whether or not a project can be in this status indefinitely.
+  """
+  indefinite: Boolean
+  """
+  The name of the status.
+  """
+  name: String
+  """
+  The position of the status in the workspace's project flow.
+  """
+  position: Float
+  """
+  The type of the project status.
+  """
+  type: ProjectStatusType
 }
 
 """
@@ -19969,6 +20221,10 @@ input ProjectUpdateInput {
   The date when the project was completed.
   """
   completedAt: DateTime
+  """
+  The project content as markdown.
+  """
+  content: String
   """
   The ID of the issue from which that project is created.
   """
@@ -20285,6 +20541,181 @@ input ProjectUpdatesFilter {
 }
 
 """
+[ALPHA] A pull request in a version control system.
+"""
+type PullRequest implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The date when the pull request was closed.
+  """
+  closedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the pull request.
+  """
+  creator: User
+  """
+  The description of the pull request.
+  """
+  description: String
+  """
+  The external user who created the pull request.
+  """
+  externalCreator: ExternalUser
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Links between the pull request and issues.
+  """
+  issueLinks: [PullRequestIssueLink!]!
+  """
+  The date when the pull request was merged.
+  """
+  mergedAt: DateTime
+  """
+  The date when the pull request was opened.
+  """
+  openedAt: DateTime!
+  """
+  The organization of the pull request.
+  """
+  organization: Organization!
+  """
+  The reviewers of the pull request.
+  """
+  reviewers: [PullRequestReviewer!]!
+  """
+  The source branch of the pull request.
+  """
+  sourceBranch: String!
+  """
+  The status of the pull request.
+  """
+  status: PullRequestStatus!
+  """
+  The target branch of the pull request.
+  """
+  targetBranch: String!
+  """
+  The title of the pull request.
+  """
+  title: String!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The URL of the pull request.
+  """
+  url: String!
+}
+
+"""
+[ALPHA] A link between a pull request and an issue.
+"""
+type PullRequestIssueLink {
+  """
+  The ID Of the linked issue.
+  """
+  issueId: String!
+  """
+  The type of link between the pull request & issue.
+  """
+  type: PullRequestIssueLinkType!
+}
+
+input PullRequestIssueLinkInput {
+  """
+  The ID Of the linked issue.
+  """
+  issueId: String!
+  """
+  The type of link between the pull request & issue.
+  """
+  type: PullRequestIssueLinkType!
+}
+
+"""
+[ALPHA] The type of link between the pull request & issue.
+"""
+enum PullRequestIssueLinkType {
+  closes
+  contributes
+  links
+}
+
+"""
+[ALPHA] A pull request reviewer.
+"""
+type PullRequestReviewer {
+  """
+  The decision made by the reviewer.
+  """
+  decision: PullRequestReviewerDecision!
+  """
+  The ID of the external user who reviewed the pull request.
+  """
+  externalUserId: String
+  """
+  The date when the pull request was last reviewed.
+  """
+  lastReviewedAt: DateTime
+  """
+  The ID of the user who reviewed the pull request.
+  """
+  userId: String
+}
+
+"""
+[ALPHA] The decision made by a pull request reviewer.
+"""
+enum PullRequestReviewerDecision {
+  approved
+  changesRequested
+  pending
+}
+
+input PullRequestReviewerInput {
+  """
+  The decision made by the reviewer.
+  """
+  decision: PullRequestReviewerDecision!
+  """
+  The ID of the external user who reviewed the pull request.
+  """
+  externalUserId: String
+  """
+  The date when the pull request was last reviewed.
+  """
+  lastReviewedAt: DateTime
+  """
+  The ID of the user who reviewed the pull request.
+  """
+  userId: String
+}
+
+"""
+[ALPHA] The status of a pull request.
+"""
+enum PullRequestStatus {
+  approved
+  closed
+  draft
+  inReview
+  merged
+  open
+}
+
+"""
 A user's web or mobile push notification subscription.
 """
 type PushSubscription implements Node {
@@ -20483,52 +20914,6 @@ type Query {
     """
     scope: [String!]!
   ): UserAuthorizedApplication!
-  """
-  Fetches an archived model.
-  """
-  archivedModelSync(
-    """
-    The identifier of the model to load. What an identifier is specific to the model class.
-    """
-    identifier: String!
-    """
-    The class name of the model to load.
-    """
-    modelClass: String!
-  ): ArchiveResponse! @deprecated(reason: "Use streaming endpoint instead.")
-  """
-  Fetches archived models.
-  """
-  archivedModelsSync(
-    """
-    Retrieve issues that have been archived before this date.
-    """
-    before: DateTime
-    """
-    To proper page through entities with same "archivedAt" date we also need last id
-    """
-    beforeId: String
-    """
-    The filter to apply to archived models.
-    """
-    issueFilter: IssueFilter
-    """
-    The number of issues to load.
-    """
-    last: Int
-    """
-    The class name of the models to load.
-    """
-    modelClass: String!
-    """
-    The teamId for which to load archived models.
-    """
-    teamId: String!
-    """
-    How trashed issues should be loaded. Defaults to TrashOptionType.excludeTrash
-    """
-    trashOption: TrashOptionType
-  ): ArchiveResponse! @deprecated(reason: "Use streaming endpoint instead.")
   """
   [Internal] All archived teams of the organization.
   """
@@ -20954,10 +21339,6 @@ type Query {
     orderBy: PaginationOrderBy
   ): CycleConnection!
   """
-  One specific diary entry.
-  """
-  diaryEntry(id: String!): DiaryEntry!
-  """
   One specific document.
   """
   document(id: String!): Document!
@@ -21329,6 +21710,31 @@ type Query {
     """
     issueImportId: String!
   ): IssueImportSyncCheckPayload!
+  """
+  Checks whether a custom JQL query is valid and can be used to filter issues of a Jira import
+  """
+  issueImportJqlCheck(
+    """
+    Jira user account email.
+    """
+    jiraEmail: String!
+    """
+    Jira installation or cloud hostname.
+    """
+    jiraHostname: String!
+    """
+    Jira project key to use as the base filter of the query.
+    """
+    jiraProject: String!
+    """
+    Jira personal access token to access Jira REST API.
+    """
+    jiraToken: String!
+    """
+    The JQL query to validate.
+    """
+    jql: String!
+  ): IssueImportJqlCheckPayload!
   """
   One specific label.
   """
@@ -21730,6 +22136,48 @@ type Query {
     orderBy: PaginationOrderBy
   ): ProjectRelationConnection!
   """
+  One specific project status.
+  """
+  projectStatus(id: String!): ProjectStatus!
+  """
+  [INTERNAL] Count of projects using this project status across the organization.
+  """
+  projectStatusProjectCount(
+    """
+    The identifier of the project status to find the project count for.
+    """
+    id: String!
+  ): ProjectStatusCountPayload!
+  """
+  All project statuses.
+  """
+  projectStatuses(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectStatusConnection!
+  """
   A specific project update.
   """
   projectUpdate(
@@ -22087,10 +22535,6 @@ type Query {
     """
     ids: [String!]!
   ): SummaryPayload!
-  """
-  Retrieves how many entities the user has access to.
-  """
-  syncEntityCount: EntityCountResponse!
   """
   One specific team.
   """
@@ -23342,6 +23786,10 @@ Object for mapping Slack channel IDs to names and other settings.
 """
 type SlackChannelNameMapping {
   """
+  Whether or not to use AI to generate titles for Asks created in this channel.
+  """
+  aiTitles: Boolean
+  """
   Whether or not @-mentioning the bot should automatically create an Ask with the message.
   """
   autoCreateOnBotMention: Boolean
@@ -23396,6 +23844,10 @@ type SlackChannelNameMapping {
 }
 
 input SlackChannelNameMappingInput {
+  """
+  Whether or not to use AI to generate titles for Asks created in this channel.
+  """
+  aiTitles: Boolean
   """
   Whether or not @-mentioning the bot should automatically create an Ask with the message.
   """
@@ -25465,15 +25917,6 @@ input TokenUserAccountAuthInput {
 }
 
 """
-How trashed models should be loaded.
-"""
-enum TrashOptionType {
-  excludeTrash
-  includeTrash
-  trashOnly
-}
-
-"""
 A team's triage responsibility.
 """
 type TriageResponsibility implements Node {
@@ -26753,12 +27196,14 @@ enum ViewType {
   myIssuesActivity
   myIssuesCreatedByMe
   myIssuesSubscribedTo
+  myPullRequests
   project
   projectDocuments
   projects
   projectsAll
   projectsBacklog
   projectsClosed
+  pullRequests
   quickView
   roadmap
   roadmapAll
@@ -27072,6 +27517,10 @@ type WorkflowDefinition implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  The contextual initiative view associated with the workflow.
+  """
+  initiative: Initiative
   """
   The contextual label view associated with the workflow.
   """
