@@ -323,30 +323,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test ArchivedModelSync query */
-  describe("ArchivedModelSync", () => {
-    /** Test the root model query for ArchivedModelSync */
-    it("archivedModelSync", async () => {
-      const archivedModelSync: L.ArchiveResponse | undefined = await client.archivedModelSync(
-        "mock-identifier",
-        "mock-modelClass"
-      );
-      expect(archivedModelSync instanceof L.ArchiveResponse);
-    });
-  });
-
-  /** Test ArchivedModelsSync query */
-  describe("ArchivedModelsSync", () => {
-    /** Test the root model query for ArchivedModelsSync */
-    it("archivedModelsSync", async () => {
-      const archivedModelsSync: L.ArchiveResponse | undefined = await client.archivedModelsSync(
-        "mock-modelClass",
-        "mock-teamId"
-      );
-      expect(archivedModelsSync instanceof L.ArchiveResponse);
-    });
-  });
-
   /** Test AttachmentIssue query */
   describe("AttachmentIssue", () => {
     let _attachmentIssue: L.Issue | undefined;
@@ -941,15 +917,6 @@ describe("generated", () => {
       } else {
         console.warn("codegen-doc:print: No Cycle found - cannot test cycle.team query");
       }
-    });
-  });
-
-  /** Test DiaryEntry query */
-  describe("DiaryEntry", () => {
-    /** Test the root model query for DiaryEntry */
-    it("diaryEntry", async () => {
-      const diaryEntry: L.DiaryEntry | undefined = await client.diaryEntry("mock-id");
-      expect(diaryEntry instanceof L.DiaryEntry);
     });
   });
 
@@ -1820,6 +1787,21 @@ describe("generated", () => {
       const issueImportCheckSync: L.IssueImportSyncCheckPayload | undefined =
         await client.issueImportCheckSync("mock-issueImportId");
       expect(issueImportCheckSync instanceof L.IssueImportSyncCheckPayload);
+    });
+  });
+
+  /** Test IssueImportJqlCheck query */
+  describe("IssueImportJqlCheck", () => {
+    /** Test the root model query for IssueImportJqlCheck */
+    it("issueImportJqlCheck", async () => {
+      const issueImportJqlCheck: L.IssueImportJqlCheckPayload | undefined = await client.issueImportJqlCheck(
+        "mock-jiraEmail",
+        "mock-jiraHostname",
+        "mock-jiraProject",
+        "mock-jiraToken",
+        "mock-jql"
+      );
+      expect(issueImportJqlCheck instanceof L.IssueImportJqlCheckPayload);
     });
   });
 
@@ -3124,6 +3106,30 @@ describe("generated", () => {
     });
   });
 
+  /** Test all ProjectStatus queries */
+  describe("ProjectStatuses", () => {
+    let _projectStatus: L.ProjectStatus | undefined;
+    let _projectStatus_id: string | undefined;
+
+    /** Test the root connection query for the ProjectStatus */
+    it("projectStatuses", async () => {
+      const projectStatuses: L.ProjectStatusConnection | undefined = await client.projectStatuses();
+      const projectStatus = projectStatuses?.nodes?.[0];
+      _projectStatus_id = projectStatus?.id;
+      expect(projectStatuses instanceof L.ProjectStatusConnection);
+    });
+
+    /** Test the root query for a single ProjectStatus */
+    it("projectStatus", async () => {
+      if (_projectStatus_id) {
+        const projectStatus: L.ProjectStatus | undefined = await client.projectStatus(_projectStatus_id);
+        expect(projectStatus instanceof L.ProjectStatus);
+      } else {
+        console.warn("codegen-doc:print: No first ProjectStatus found in connection - cannot test projectStatus query");
+      }
+    });
+  });
+
   /** Test all ProjectUpdateInteraction queries */
   describe("ProjectUpdateInteractions", () => {
     let _projectUpdateInteraction: L.ProjectUpdateInteraction | undefined;
@@ -3257,6 +3263,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the project connection query for the Comment */
+    it("project.comments", async () => {
+      if (_project) {
+        const comments: L.CommentConnection | undefined = await _project.comments();
+        expect(comments instanceof L.CommentConnection);
+      } else {
+        console.warn("codegen-doc:print: No project found - cannot test _project.comments query");
+      }
+    });
+
     /** Test the project model query for Project_DocumentContent */
     it("project.documentContent", async () => {
       if (_project) {
@@ -3357,16 +3373,6 @@ describe("generated", () => {
       }
     });
 
-    /** Test the project model query for Project_Status */
-    it("project.status", async () => {
-      if (_project) {
-        const status: L.ProjectStatus | undefined = _project.status;
-        expect(status instanceof L.ProjectStatus);
-      } else {
-        console.warn("codegen-doc:print: No project found - cannot test _project.status query");
-      }
-    });
-
     /** Test the project connection query for the Team */
     it("project.teams", async () => {
       if (_project) {
@@ -3434,6 +3440,16 @@ describe("generated", () => {
         expect(project_lead instanceof L.User);
       } else {
         console.warn("codegen-doc:print: No Project found - cannot test project.lead query");
+      }
+    });
+
+    /** Test the project.status query for L.ProjectStatus */
+    it("project.status", async () => {
+      if (_project) {
+        const project_status: L.ProjectStatus | undefined = await _project.status;
+        expect(project_status instanceof L.ProjectStatus);
+      } else {
+        console.warn("codegen-doc:print: No Project found - cannot test project.status query");
       }
     });
   });
@@ -3601,15 +3617,6 @@ describe("generated", () => {
     it("ssoUrlFromEmail", async () => {
       const ssoUrlFromEmail: L.SsoUrlFromEmailResponse | undefined = await client.ssoUrlFromEmail("mock-email");
       expect(ssoUrlFromEmail instanceof L.SsoUrlFromEmailResponse);
-    });
-  });
-
-  /** Test SyncEntityCount query */
-  describe("SyncEntityCount", () => {
-    /** Test the root model query for SyncEntityCount */
-    it("syncEntityCount", async () => {
-      const syncEntityCount: L.EntityCountResponse | undefined = await client.syncEntityCount;
-      expect(syncEntityCount instanceof L.EntityCountResponse);
     });
   });
 
