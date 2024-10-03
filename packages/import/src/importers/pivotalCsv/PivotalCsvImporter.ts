@@ -79,7 +79,7 @@ export class PivotalCsvImporter implements Importer {
       const mdDesc = j2m.to_markdown(row.Description);
       const description = url ? `${mdDesc}\n\n[View original issue in Pivotal](${url})` : mdDesc;
 
-      // const priority = parseInt(row['Estimate']) || undefined;
+      const estimate = parseInt(row["Estimate"]);
 
       const tags = row.Labels.split(",");
 
@@ -99,6 +99,7 @@ export class PivotalCsvImporter implements Importer {
         assigneeId,
         labels,
         createdAt,
+        estimate,
       });
 
       for (const lab of labels) {

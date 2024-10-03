@@ -80,6 +80,7 @@ export class LinearCsvImporter implements Importer {
         createdAt: !!row.Created ? new Date(row.Created) : undefined,
         completedAt: !!row.Completed ? new Date(row.Completed) : undefined,
         startedAt: !!row.Started ? new Date(row.Started) : undefined,
+        estimate: !!row.Estimate ? parseInt(row.Estimate) : undefined,
         labels,
       });
 

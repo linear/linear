@@ -19,7 +19,6 @@ interface ShortcutIssueType {
   moved_at: Date;
   completed_at: Date;
   estimate: number;
-  external_ticket_count: number;
   external_tickets: string[];
   is_blocked: boolean;
   is_a_blocker: boolean;
@@ -39,13 +38,13 @@ interface ShortcutIssueType {
 
 const parseBooleanColumn = (item: string) => item == "TRUE";
 const parseStringArrayColumn = (item: string) => item.split(";").filter(s => s.length > 0);
-const parseInt = (item: string) => Number.parseInt(item) || 0;
+const parseInt = (item: string) => (item ? Number.parseInt(item) : undefined);
 const parseDate = (item: string, _: any, __: any, row: string[]) => {
   if (item.length <= 0) {
     return null;
   }
   // Inoptimal method for finding the timezone UTC offset, we parse it from the UTC offset column in this row each time
-  const utcOffset = row.find(c => /[+-]([01]\d|2[0-4])(:?[0-5]\d)?/g.test(c)) || "";
+  const utcOffset = row.find(c => /^[+-]([01]\d|2[0-4])(:?[0-5]\d)?$/g.test(c)) || "";
   return new Date(item + " " + utcOffset);
 };
 
@@ -58,7 +57,6 @@ const colParser = {
   moved_at: parseDate,
   completed_at: parseDate,
   estimate: parseInt,
-  external_ticket_count: parseInt,
   external_tickets: parseStringArrayColumn,
   is_blocked: parseBooleanColumn,
   is_a_blocker: parseBooleanColumn,
@@ -143,6 +141,8 @@ export class ShortcutCsvImporter implements Importer {
 
       const completedAt = row.completed_at;
 
+      const estimate = row.estimate;
+
       importData.issues.push({
         title,
         description,
@@ -152,6 +152,7 @@ export class ShortcutCsvImporter implements Importer {
         labels,
         createdAt,
         completedAt,
+        estimate,
       });
 
       for (const lab of labels) {
