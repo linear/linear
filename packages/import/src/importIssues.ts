@@ -333,6 +333,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       createdAt: issue.createdAt,
       completedAt: issue.completedAt,
       dueDate: formattedDueDate,
+      estimate: issue.estimate,
     });
 
     if (issue.archived) {

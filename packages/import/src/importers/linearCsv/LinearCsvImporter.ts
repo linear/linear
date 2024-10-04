@@ -1,5 +1,6 @@
 import csv from "csvtojson";
 import { Importer, ImportResult } from "../../types";
+import { safeParseInt } from "../../utils/parseInt";
 
 type LinearPriority = "No priority" | "Urgent" | "High" | "Medium" | "Low";
 
@@ -80,6 +81,7 @@ export class LinearCsvImporter implements Importer {
         createdAt: !!row.Created ? new Date(row.Created) : undefined,
         completedAt: !!row.Completed ? new Date(row.Completed) : undefined,
         startedAt: !!row.Started ? new Date(row.Started) : undefined,
+        estimate: safeParseInt(row.Estimate),
         labels,
       });
 

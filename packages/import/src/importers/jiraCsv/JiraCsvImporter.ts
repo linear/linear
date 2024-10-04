@@ -1,9 +1,13 @@
 import csv from "csvtojson";
 import { Importer, ImportResult } from "../../types";
+import { safeParseInt } from "../../utils/parseInt";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const j2m = require("jira2md");
 
 type JiraPriority = "Highest" | "High" | "Medium" | "Low" | "Lowest";
+
+// There are many estimates field in Jira. Use the one that comes as the default in new projects.
+const estimateCustomField = "Custom field (Story point estimate)";
 
 interface JiraIssueType {
   Description: string;
@@ -16,7 +20,7 @@ interface JiraIssueType {
   Assignee: string;
   Created: string;
   Release: string;
-  "Custom field (Story Points)"?: string;
+  [estimateCustomField]?: string;
 }
 
 /**
@@ -83,6 +87,7 @@ export class JiraCsvImporter implements Importer {
       const release = row.Release && row.Release.length > 0 ? `Release: ${row.Release}` : undefined;
       const assigneeId = row.Assignee && row.Assignee.length > 0 ? row.Assignee : undefined;
       const status = row.Status;
+      const estimate = safeParseInt(row[estimateCustomField]);
 
       const labels = [type];
       if (release) {
@@ -97,6 +102,7 @@ export class JiraCsvImporter implements Importer {
         url,
         assigneeId,
         labels,
+        estimate,
       });
 
       for (const lab of labels) {
