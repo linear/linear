@@ -1,5 +1,6 @@
 import csv from "csvtojson";
 import { Importer, ImportResult } from "../../types";
+import { safeParseInt } from "../../utils/parseInt";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const j2m = require("jira2md");
 
@@ -86,7 +87,7 @@ export class JiraCsvImporter implements Importer {
       const release = row.Release && row.Release.length > 0 ? `Release: ${row.Release}` : undefined;
       const assigneeId = row.Assignee && row.Assignee.length > 0 ? row.Assignee : undefined;
       const status = row.Status;
-      const estimate = row[estimateCustomField] ? parseInt(row[estimateCustomField]) : undefined;
+      const estimate = safeParseInt(row[estimateCustomField]);
 
       const labels = [type];
       if (release) {

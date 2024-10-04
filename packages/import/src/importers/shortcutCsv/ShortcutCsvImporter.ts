@@ -2,6 +2,7 @@
 /* eslint-disable eqeqeq */
 import csv from "csvtojson";
 import { Importer, ImportResult } from "../../types";
+import { safeParseInt } from "../../utils/parseInt";
 
 type ShortcutStoryType = "feature" | "bug" | "chore";
 
@@ -38,7 +39,6 @@ interface ShortcutIssueType {
 
 const parseBooleanColumn = (item: string) => item == "TRUE";
 const parseStringArrayColumn = (item: string) => item.split(";").filter(s => s.length > 0);
-const parseInt = (item: string) => (item ? Number.parseInt(item) : undefined);
 const parseDate = (item: string, _: any, __: any, row: string[]) => {
   if (item.length <= 0) {
     return null;
@@ -56,7 +56,7 @@ const colParser = {
   updated_at: parseDate,
   moved_at: parseDate,
   completed_at: parseDate,
-  estimate: parseInt,
+  estimate: safeParseInt,
   external_tickets: parseStringArrayColumn,
   is_blocked: parseBooleanColumn,
   is_a_blocker: parseBooleanColumn,

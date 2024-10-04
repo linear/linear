@@ -1,5 +1,6 @@
 import csv from "csvtojson";
 import { Importer, ImportResult } from "../../types";
+import { safeParseInt } from "../../utils/parseInt";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const j2m = require("jira2md");
 
@@ -79,7 +80,7 @@ export class PivotalCsvImporter implements Importer {
       const mdDesc = j2m.to_markdown(row.Description);
       const description = url ? `${mdDesc}\n\n[View original issue in Pivotal](${url})` : mdDesc;
 
-      const estimate = parseInt(row["Estimate"]);
+      const estimate = safeParseInt(row["Estimate"]);
 
       const tags = row.Labels.split(",");
 
