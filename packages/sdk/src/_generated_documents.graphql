@@ -75,6 +75,10 @@ fragment Comment on Comment {
   documentContent {
     ...DocumentContent
   }
+  # The external thread that the comment is synced with.
+  externalThread {
+    ...SyncedExternalThread
+  }
   # The external user who wrote the comment.
   externalUser {
     id
@@ -125,6 +129,26 @@ fragment CommentNotification on CommentNotification {
   commentId
   # Related parent comment ID. Null if the notification is not related to a comment.
   parentCommentId
+}
+
+# A comment thread that is synced with an external source.
+fragment SyncedExternalThread on SyncedExternalThread {
+  __typename
+  # The display name of the source.
+  name
+  # The display name of the thread.
+  displayName
+  # The external url of the thread.
+  url
+  # The sub type of the external source.
+  subType
+  # The type of the external source.
+  type
+  # Whether the current user has the corresponding personal integration connected for the external service.
+  isPersonalIntegrationConnected
+  # Whether this thread is syncing with the external service.
+  isConnected
+  id
 }
 
 # A custom emoji.
@@ -741,6 +765,19 @@ fragment ProjectStatusArchivePayload on ProjectStatusArchivePayload {
 }
 
 # A generic payload return from entity archive mutations.
+fragment ProjectUpdateArchivePayload on ProjectUpdateArchivePayload {
+  __typename
+  # The archived/unarchived entity. Null if entity was deleted.
+  entity {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
 fragment RoadmapArchivePayload on RoadmapArchivePayload {
   __typename
   # The archived/unarchived entity. Null if entity was deleted.
@@ -825,6 +862,10 @@ fragment ArchivePayload on ArchivePayload {
 
   ... on ProjectStatusArchivePayload {
     ...ProjectStatusArchivePayload
+  }
+
+  ... on ProjectUpdateArchivePayload {
+    ...ProjectUpdateArchivePayload
   }
 
   ... on RoadmapArchivePayload {
@@ -1301,6 +1342,10 @@ fragment IssueHistory on IssueHistory {
   # The actor that performed the actions. This field may be empty in the case of integrations or automations.
   actor {
     id
+  }
+  # The actors that edited the description of the issue, if any.
+  descriptionUpdatedBy {
+    ...User
   }
   # The actors that performed the actions. This field may be empty in the case of integrations or automations.
   actors {
@@ -2448,10 +2493,14 @@ fragment Initiative on Initiative {
   description
   # The estimated completion date of the initiative.
   targetDate
+  # The health of the initiative.
+  health
   # The icon of the initiative.
   icon
   # The initiative's color.
   color
+  # The initiative's content in markdown format.
+  content
   # The initiative's unique URL slug.
   slugId
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -2469,6 +2518,8 @@ fragment Initiative on Initiative {
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The time at which the initiative health was updated.
+  healthUpdatedAt
   # The unique identifier of the entity.
   id
   # The user who created the initiative.
@@ -2477,6 +2528,38 @@ fragment Initiative on Initiative {
   }
   # The user who owns the initiative.
   owner {
+    id
+  }
+}
+
+# An initiative update.
+fragment InitiativeUpdate on InitiativeUpdate {
+  __typename
+  # Emoji reaction summary, grouped by emoji type.
+  reactionData
+  # The health at the time of the update.
+  health
+  # The initiative that the update is associated with.
+  initiative {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time the update was edited.
+  editedAt
+  # The unique identifier of the entity.
+  id
+  # The update content in markdown format.
+  body
+  # The update's unique URL slug.
+  slugId
+  # The user who wrote the update.
+  user {
     id
   }
 }
@@ -2729,6 +2812,8 @@ fragment Issue on Issue {
   slaBreachesAt
   # The time until an issue will be snoozed in Triage view.
   snoozedUntilAt
+  # The type of SLA set on the issue. Calendar days or business days.
+  slaType
   # The unique identifier of the entity.
   id
   # The user to whom the issue is assigned to.
@@ -2868,10 +2953,10 @@ fragment Organization on Organization {
   gitPublicLinkbackMessagesEnabled
   # Whether the organization is using a roadmap.
   roadmapEnabled
-  # Which day count to use for SLA calculations.
-  slaDayCount
   # [DEPRECATED] The frequency at which to prompt for project updates.
   projectUpdatesReminderFrequency
+  # [DEPRECATED] Which day count to use for SLA calculations.
+  slaDayCount
 }
 
 # An organization. Organizations are root-level objects that contain users and teams.
@@ -3080,23 +3165,59 @@ fragment ProjectUpdate on ProjectUpdate {
   project {
     id
   }
-  # The project update's unique URL slug.
-  slugId
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
   createdAt
-  # The time the project update was edited.
+  # The time the update was edited.
   editedAt
   # The unique identifier of the entity.
   id
   # The update content in markdown format.
   body
+  # The update's unique URL slug.
+  slugId
   # The user who wrote the update.
   user {
     id
   }
   # Whether project update diff should be hidden.
+  isDiffHidden
+}
+
+# An update for project/initiative
+fragment Update on Update {
+  __typename
+  # The health at the time of the update.
+  health
+  # The initiative that the update is associated with.
+  initiative {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The project that the update is associated with.
+  project {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time the update was edited.
+  editedAt
+  # The unique identifier of the entity.
+  id
+  # The update content in markdown format.
+  body
+  # The update's unique URL slug.
+  slugId
+  # The user who wrote the update.
+  user {
+    id
+  }
+  # Whether update diff should be hidden.
   isDiffHidden
 }
 
@@ -3537,6 +3658,8 @@ fragment GitHubRepoMapping on GitHubRepoMapping {
   gitHubRepoId
   # The Linear team id to map to the given project.
   linearTeamId
+  # The unique identifier for this mapping.
+  id
   # Whether the sync for this mapping is bidirectional.
   bidirectional
   # Whether this mapping is the default one for issue creation.
@@ -5169,6 +5292,16 @@ fragment InitiativeToProjectConnection on InitiativeToProjectConnection {
   }
 }
 
+fragment InitiativeUpdateConnection on InitiativeUpdateConnection {
+  __typename
+  nodes {
+    ...InitiativeUpdate
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment IntegrationConnection on IntegrationConnection {
   __typename
   nodes {
@@ -5518,6 +5651,8 @@ fragment IssueSearchResult on IssueSearchResult {
   slaBreachesAt
   # The time until an issue will be snoozed in Triage view.
   snoozedUntilAt
+  # The type of SLA set on the issue. Calendar days or business days.
+  slaType
   # The unique identifier of the entity.
   id
   # The user to whom the issue is assigned to.
@@ -6461,6 +6596,16 @@ fragment TriageResponsibilityPayload on TriageResponsibilityPayload {
   }
 }
 
+fragment UpdateConnection on UpdateConnection {
+  __typename
+  nodes {
+    ...Update
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment UploadFileHeader on UploadFileHeader {
   __typename
   # Upload file header key.
@@ -6563,6 +6708,16 @@ fragment WebhookConnection on WebhookConnection {
   __typename
   nodes {
     ...Webhook
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment WebhookFailureEventConnection on WebhookFailureEventConnection {
+  __typename
+  nodes {
+    ...WebhookFailureEvent
   }
   pageInfo {
     ...PageInfo
@@ -7272,6 +7427,21 @@ query comment_documentContent(
   comment(hash: $hash, id: $id, issueId: $issueId) {
     documentContent {
       ...DocumentContent
+    }
+  }
+}
+# The external thread that the comment is synced with.
+query comment_externalThread(
+  # The hash of the comment to retrieve.
+  $hash: String
+  # The identifier of the comment to retrieve.
+  $id: String
+  # [Deprecated] The issue for which to find the comment.
+  $issueId: String
+) {
+  comment(hash: $hash, id: $id, issueId: $issueId) {
+    externalThread {
+      ...SyncedExternalThread
     }
   }
 }
@@ -13142,6 +13312,15 @@ mutation updateProject(
     ...ProjectPayload
   }
 }
+# Archives a project update.
+mutation archiveProjectUpdate(
+  # The identifier of the project update to archive.
+  $id: String!
+) {
+  projectUpdateArchive(id: $id) {
+    ...ProjectUpdateArchivePayload
+  }
+}
 # Creates a new project update.
 mutation createProjectUpdate(
   # Data for the project update to create.
@@ -13176,6 +13355,15 @@ mutation projectUpdateMarkAsRead(
 ) {
   projectUpdateMarkAsRead(id: $id) {
     ...ProjectUpdateWithInteractionPayload
+  }
+}
+# Unarchives a project update.
+mutation unarchiveProjectUpdate(
+  # The identifier of the project update to unarchive.
+  $id: String!
+) {
+  projectUpdateUnarchive(id: $id) {
+    ...ProjectUpdateArchivePayload
   }
 }
 # Updates a project update.
@@ -13378,10 +13566,12 @@ mutation createTeamMembership(
 }
 # Deletes a team membership.
 mutation deleteTeamMembership(
+  # Whether to leave the parent teams.
+  $alsoLeaveParentTeams: Boolean
   # The identifier of the team membership to delete.
   $id: String!
 ) {
-  teamMembershipDelete(id: $id) {
+  teamMembershipDelete(alsoLeaveParentTeams: $alsoLeaveParentTeams, id: $id) {
     ...DeletePayload
   }
 }

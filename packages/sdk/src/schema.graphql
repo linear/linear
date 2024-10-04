@@ -143,6 +143,20 @@ type Application {
 }
 
 """
+Customer approximate need count sorting options.
+"""
+input ApproximateNeedCountSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
 A generic payload return from entity archive or deletion mutations.
 """
 interface ArchivePayload {
@@ -1348,6 +1362,10 @@ type Comment implements Node {
   """
   editedAt: DateTime
   """
+  The external thread that the comment is synced with.
+  """
+  externalThread: SyncedExternalThread
+  """
   The external user who wrote the comment.
   """
   externalUser: ExternalUser
@@ -1363,6 +1381,10 @@ type Comment implements Node {
   The parent comment under which the current comment is nested.
   """
   parent: Comment
+  """
+  The post that the comment is associated with.
+  """
+  post: Post
   """
   The project update that the comment is associated with.
   """
@@ -1419,7 +1441,7 @@ input CommentCollectionFilter {
   """
   and: [CommentCollectionFilter!]
   """
-  Comparator for the comments body.
+  Comparator for the comment's body.
   """
   body: StringComparator
   """
@@ -1427,9 +1449,9 @@ input CommentCollectionFilter {
   """
   createdAt: DateComparator
   """
-  Filters that the comments document content must satisfy.
+  Filters that the comment's document content must satisfy.
   """
-  documentContent: DocumentContentFilter
+  documentContent: NullableDocumentContentFilter
   """
   Filters that needs to be matched by all comments.
   """
@@ -1439,7 +1461,7 @@ input CommentCollectionFilter {
   """
   id: IDComparator
   """
-  Filters that the comments issue must satisfy.
+  Filters that the comment's issue must satisfy.
   """
   issue: NullableIssueFilter
   """
@@ -1459,11 +1481,11 @@ input CommentCollectionFilter {
   """
   parent: NullableCommentFilter
   """
-  Filters that the comments project update must satisfy.
+  Filters that the comment's project update must satisfy.
   """
-  projectUpdate: ProjectUpdateFilter
+  projectUpdate: NullableProjectUpdateFilter
   """
-  Filters that the comments reactions must satisfy.
+  Filters that the comment's reactions must satisfy.
   """
   reactions: ReactionCollectionFilter
   """
@@ -1475,7 +1497,7 @@ input CommentCollectionFilter {
   """
   updatedAt: DateComparator
   """
-  Filters that the comments creator must satisfy.
+  Filters that the comment's creator must satisfy.
   """
   user: UserFilter
 }
@@ -1562,7 +1584,7 @@ input CommentFilter {
   """
   and: [CommentFilter!]
   """
-  Comparator for the comments body.
+  Comparator for the comment's body.
   """
   body: StringComparator
   """
@@ -1570,15 +1592,15 @@ input CommentFilter {
   """
   createdAt: DateComparator
   """
-  Filters that the comments document content must satisfy.
+  Filters that the comment's document content must satisfy.
   """
-  documentContent: DocumentContentFilter
+  documentContent: NullableDocumentContentFilter
   """
   Comparator for the identifier.
   """
   id: IDComparator
   """
-  Filters that the comments issue must satisfy.
+  Filters that the comment's issue must satisfy.
   """
   issue: NullableIssueFilter
   """
@@ -1594,11 +1616,11 @@ input CommentFilter {
   """
   parent: NullableCommentFilter
   """
-  Filters that the comments project update must satisfy.
+  Filters that the comment's project update must satisfy.
   """
-  projectUpdate: ProjectUpdateFilter
+  projectUpdate: NullableProjectUpdateFilter
   """
-  Filters that the comments reactions must satisfy.
+  Filters that the comment's reactions must satisfy.
   """
   reactions: ReactionCollectionFilter
   """
@@ -1606,7 +1628,7 @@ input CommentFilter {
   """
   updatedAt: DateComparator
   """
-  Filters that the comments creator must satisfy.
+  Filters that the comment's creator must satisfy.
   """
   user: UserFilter
 }
@@ -2271,6 +2293,10 @@ input CustomViewUpdateInput {
 """
 type Customer implements Node {
   """
+  The approximate number of needs of the customer.
+  """
+  approximateNeedCount: Float!
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -2579,7 +2605,7 @@ type CustomerNeed implements Node {
   """
   The customer that this need is attached to.
   """
-  customer: Customer!
+  customer: Customer
   """
   The unique identifier of the entity.
   """
@@ -2601,6 +2627,10 @@ type CustomerNeed implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  Optional URL to the source of the customer need. Used when manually creating a need.
+  """
+  url: String
 }
 
 """
@@ -2687,7 +2717,7 @@ input CustomerNeedCreateInput {
   """
   The uuid of the customer the need belongs to.
   """
-  customerId: String!
+  customerId: String
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -2704,6 +2734,10 @@ input CustomerNeedCreateInput {
   The project this need is referencing.
   """
   projectId: String
+  """
+  Optional URL to the source of the customer need.
+  """
+  url: String
 }
 
 type CustomerNeedEdge {
@@ -2804,6 +2838,10 @@ input CustomerNeedUpdateInput {
   The project this need is referencing.
   """
   projectId: String
+  """
+  Optional URL to the source of the customer need.
+  """
+  url: String
 }
 
 type CustomerPayload {
@@ -2915,6 +2953,10 @@ type CustomerSchemaFieldEdge {
 Customer sorting options.
 """
 input CustomerSortInput {
+  """
+  Sort by approximate customer need count
+  """
+  approximateNeedCount: ApproximateNeedCountSort
   """
   Sort by customer creation date
   """
@@ -4731,6 +4773,10 @@ type Draft implements Node {
   """
   createdAt: DateTime!
   """
+  [ALPHA] The customer need that this draft is referencing.
+  """
+  customerNeed: CustomerNeed
+  """
   Additional properties for the draft.
   """
   data: JSONObject
@@ -4750,6 +4796,10 @@ type Draft implements Node {
   The comment for which this is a draft comment reply.
   """
   parentComment: Comment
+  """
+  The post for which this is a draft comment.
+  """
+  post: Post
   """
   The project for which this is a draft project update.
   """
@@ -5347,6 +5397,7 @@ type FacetEdge {
 
 enum FacetPageSource {
   projects
+  teamIssues
 }
 
 """
@@ -5809,13 +5860,21 @@ type FeedItem implements Node {
   """
   id: ID!
   """
+  The organization that will see this feed item.
+  """
+  organization: Organization!
+  """
+  The post that is in the feed.
+  """
+  post: Post
+  """
   The project update that is in the feed.
   """
   projectUpdate: ProjectUpdate
   """
-  The time at which the user saw the feed item.
+  The team that will see this feed item.
   """
-  seenAt: DateTime
+  team: Team
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -5824,7 +5883,7 @@ type FeedItem implements Node {
   """
   The user that will see this feed item.
   """
-  user: User!
+  user: User
 }
 
 type FrontAttachmentPayload {
@@ -6290,6 +6349,10 @@ type GitHubRepoMapping {
   """
   gitHubRepoId: Float!
   """
+  The unique identifier for this mapping.
+  """
+  id: String
+  """
   The Linear team id to map to the given project.
   """
   linearTeamId: String!
@@ -6312,6 +6375,10 @@ input GitHubRepoMappingInput {
   The GitHub repo id.
   """
   gitHubRepoId: Float!
+  """
+  The unique identifier for this mapping.
+  """
+  id: String
   """
   The Linear team id to map to the given project.
   """
@@ -6522,6 +6589,10 @@ type Initiative implements Node {
   """
   color: String
   """
+  The initiative's content in markdown format.
+  """
+  content: String
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -6533,6 +6604,14 @@ type Initiative implements Node {
   The description of the initiative.
   """
   description: String
+  """
+  The health of the initiative.
+  """
+  health: InitiativeUpdateHealthType
+  """
+  The time at which the initiative health was updated.
+  """
+  healthUpdatedAt: DateTime
   """
   The icon of the initiative.
   """
@@ -6732,6 +6811,10 @@ input InitiativeCreateInput {
   The initiative's color.
   """
   color: String
+  """
+  The initiative's content in markdown format.
+  """
+  content: String
   """
   The description of the initiative.
   """
@@ -7147,6 +7230,84 @@ input InitiativeToProjectUpdateInput {
 }
 
 """
+An initiative update.
+"""
+type InitiativeUpdate implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The update content in markdown format.
+  """
+  body: String!
+  """
+  [Internal] The content of the update as a Prosemirror document.
+  """
+  bodyData: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time the update was edited.
+  """
+  editedAt: DateTime
+  """
+  The health at the time of the update.
+  """
+  health: InitiativeUpdateHealthType!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The initiative that the update is associated with.
+  """
+  initiative: Initiative!
+  """
+  Emoji reaction summary, grouped by emoji type.
+  """
+  reactionData: JSONObject!
+  """
+  The update's unique URL slug.
+  """
+  slugId: String!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user who wrote the update.
+  """
+  user: User!
+}
+
+type InitiativeUpdateConnection {
+  edges: [InitiativeUpdateEdge!]!
+  nodes: [InitiativeUpdate!]!
+  pageInfo: PageInfo!
+}
+
+type InitiativeUpdateEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: InitiativeUpdate!
+}
+
+"""
+The health type when the update is created.
+"""
+enum InitiativeUpdateHealthType {
+  atRisk
+  offTrack
+  onTrack
+}
+
+"""
 The properties of the initiative to update.
 """
 input InitiativeUpdateInput {
@@ -7154,6 +7315,10 @@ input InitiativeUpdateInput {
   The initiative's color.
   """
   color: String
+  """
+  The initiative's content in markdown format.
+  """
+  content: String
   """
   The description of the initiative.
   """
@@ -8113,6 +8278,10 @@ type Issue implements Node {
   """
   slaStartedAt: DateTime
   """
+  The type of SLA set on the issue. Calendar days or business days.
+  """
+  slaType: String
+  """
   The user who snoozed the issue.
   """
   snoozedBy: User
@@ -8655,6 +8824,10 @@ type IssueDraft implements Node {
   """
   projectMilestoneId: String
   """
+  The ID of the comment that the draft was created from.
+  """
+  sourceCommentId: String
+  """
   The workflow state associated with the draft.
   """
   stateId: String!
@@ -8758,6 +8931,10 @@ input IssueDraftCreateInput {
   The project milestone associated with the draft.
   """
   projectMilestoneId: String
+  """
+  The identifier of the source comment.
+  """
+  sourceCommentId: String
   """
   The team state of the draft.
   """
@@ -9066,7 +9243,7 @@ type IssueHistory implements Node {
   """
   The actor that performed the actions. This field may be empty in the case of integrations or automations.
   """
-  actor: User @deprecated(reason: "Use actors instead.")
+  actor: User
   """
   The id of user who made these changes. If null, possibly means that the change made by an integration.
   """
@@ -9074,7 +9251,7 @@ type IssueHistory implements Node {
   """
   The actors that performed the actions. This field may be empty in the case of integrations or automations.
   """
-  actors: [User!]
+  actors: [User!] @deprecated(reason: "Use `actor` and `descriptionUpdatedBy` instead.")
   """
   ID's of labels that were added.
   """
@@ -9119,6 +9296,10 @@ type IssueHistory implements Node {
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  """
+  The actors that edited the description of the issue, if any.
+  """
+  descriptionUpdatedBy: [User!]
   """
   The user that was unassigned from the issue.
   """
@@ -10447,6 +10628,10 @@ type IssueSearchResult implements Node {
   The time at which the issue's SLA began.
   """
   slaStartedAt: DateTime
+  """
+  The type of SLA set on the issue. Calendar days or business days.
+  """
+  slaType: String
   """
   The user who snoozed the issue.
   """
@@ -13694,6 +13879,15 @@ type Mutation {
     input: ProjectUpdateInput!
   ): ProjectPayload!
   """
+  Archives a project update.
+  """
+  projectUpdateArchive(
+    """
+    The identifier of the project update to archive.
+    """
+    id: String!
+  ): ProjectUpdateArchivePayload!
+  """
   Creates a new project update.
   """
   projectUpdateCreate(
@@ -13710,7 +13904,7 @@ type Mutation {
     The identifier of the project update to delete.
     """
     id: String!
-  ): DeletePayload!
+  ): DeletePayload! @deprecated(reason: "Use `projectUpdateArchive` instead.")
   """
   Creates a new interaction on a project update.
   """
@@ -13729,6 +13923,15 @@ type Mutation {
     """
     id: String!
   ): ProjectUpdateWithInteractionPayload!
+  """
+  Unarchives a project update.
+  """
+  projectUpdateUnarchive(
+    """
+    The identifier of the project update to unarchive.
+    """
+    id: String!
+  ): ProjectUpdateArchivePayload!
   """
   Updates a project update.
   """
@@ -13938,6 +14141,10 @@ type Mutation {
   Deletes a team membership.
   """
   teamMembershipDelete(
+    """
+    Whether to leave the parent teams.
+    """
+    alsoLeaveParentTeams: Boolean
     """
     The identifier of the team membership to delete.
     """
@@ -14931,7 +15138,7 @@ input NullableCommentFilter {
   """
   and: [NullableCommentFilter!]
   """
-  Comparator for the comments body.
+  Comparator for the comment's body.
   """
   body: StringComparator
   """
@@ -14939,15 +15146,15 @@ input NullableCommentFilter {
   """
   createdAt: DateComparator
   """
-  Filters that the comments document content must satisfy.
+  Filters that the comment's document content must satisfy.
   """
-  documentContent: DocumentContentFilter
+  documentContent: NullableDocumentContentFilter
   """
   Comparator for the identifier.
   """
   id: IDComparator
   """
-  Filters that the comments issue must satisfy.
+  Filters that the comment's issue must satisfy.
   """
   issue: NullableIssueFilter
   """
@@ -14967,11 +15174,11 @@ input NullableCommentFilter {
   """
   parent: NullableCommentFilter
   """
-  Filters that the comments project update must satisfy.
+  Filters that the comment's project update must satisfy.
   """
-  projectUpdate: ProjectUpdateFilter
+  projectUpdate: NullableProjectUpdateFilter
   """
-  Filters that the comments reactions must satisfy.
+  Filters that the comment's reactions must satisfy.
   """
   reactions: ReactionCollectionFilter
   """
@@ -14979,7 +15186,7 @@ input NullableCommentFilter {
   """
   updatedAt: DateComparator
   """
-  Filters that the comments creator must satisfy.
+  Filters that the comment's creator must satisfy.
   """
   user: UserFilter
 }
@@ -15113,6 +15320,10 @@ Document content filtering options.
 """
 input NullableDocumentContentFilter {
   """
+  Compound filters, all of which need to be matched by the user.
+  """
+  and: [NullableDocumentContentFilter!]
+  """
   Comparator for the created at date.
   """
   createdAt: DateComparator
@@ -15124,6 +15335,14 @@ input NullableDocumentContentFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the user.
+  """
+  or: [NullableDocumentContentFilter!]
   """
   Filters that the document content project must satisfy.
   """
@@ -15577,7 +15796,7 @@ input NullableProjectMilestoneFilter {
   """
   Comparator for the project milestone name.
   """
-  name: StringComparator
+  name: NullableStringComparator
   """
   Filter based on the existence of the relation.
   """
@@ -15594,6 +15813,48 @@ input NullableProjectMilestoneFilter {
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+}
+
+"""
+Nullable project update filtering options.
+"""
+input NullableProjectUpdateFilter {
+  """
+  Compound filters, all of which need to be matched by the project update.
+  """
+  and: [NullableProjectUpdateFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
+  Compound filters, one of which need to be matched by the project update.
+  """
+  or: [NullableProjectUpdateFilter!]
+  """
+  Filters that the project update project must satisfy.
+  """
+  project: ProjectFilter
+  """
+  Filters that the project updates reactions must satisfy.
+  """
+  reactions: ReactionCollectionFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+  """
+  Filters that the project update creator must satisfy.
+  """
+  user: UserFilter
 }
 
 """
@@ -16446,9 +16707,9 @@ type Organization implements Node {
   """
   scimEnabled: Boolean!
   """
-  Which day count to use for SLA calculations.
+  [DEPRECATED] Which day count to use for SLA calculations.
   """
-  slaDayCount: SLADayCountType!
+  slaDayCount: SLADayCountType! @deprecated(reason: "No longer in use")
   """
   The organization's subscription to a paid plan.
   """
@@ -17093,10 +17354,6 @@ input OrganizationUpdateInput {
   """
   roadmapEnabled: Boolean
   """
-  Which day count to use for SLA calculation.
-  """
-  slaDayCount: SLADayCountType
-  """
   Internal. Whether SLAs have been enabled for the organization.
   """
   slaEnabled: Boolean
@@ -17304,6 +17561,65 @@ type Passkey {
 type PasskeyLoginStartResponse {
   options: JSONObject!
   success: Boolean!
+}
+
+"""
+[Internal] A generic post.
+"""
+type Post implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The update content in markdown format.
+  """
+  body: String!
+  """
+  [Internal] The content of the post as a Prosemirror document.
+  """
+  bodyData: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who wrote the post.
+  """
+  creator: User
+  """
+  The time the post was edited.
+  """
+  editedAt: DateTime
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The project that the post is associated with.
+  """
+  project: Project
+  """
+  Emoji reaction summary, grouped by emoji type.
+  """
+  reactionData: JSONObject!
+  """
+  The team that the post is associated with.
+  """
+  team: Team
+  """
+  A URL of the TTL (text-to-language) for the body.
+  """
+  ttlUrl: String
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user that the post is associated with.
+  """
+  user: User
 }
 
 """
@@ -18574,7 +18890,7 @@ input ProjectMilestoneCollectionFilter {
   """
   Comparator for the project milestone name.
   """
-  name: StringComparator
+  name: NullableStringComparator
   """
   Compound filters, one of which need to be matched by the milestone.
   """
@@ -18657,7 +18973,7 @@ input ProjectMilestoneFilter {
   """
   Comparator for the project milestone name.
   """
-  name: StringComparator
+  name: NullableStringComparator
   """
   Compound filters, one of which need to be matched by the project milestone.
   """
@@ -20021,7 +20337,7 @@ type ProjectUpdate implements Node {
   """
   body: String!
   """
-  [Internal] The content of the project update as a Prosemirror document.
+  [Internal] The content of the update as a Prosemirror document.
   """
   bodyData: String!
   """
@@ -20070,7 +20386,7 @@ type ProjectUpdate implements Node {
   """
   diffMarkdown: String
   """
-  The time the project update was edited.
+  The time the update was edited.
   """
   editedAt: DateTime
   """
@@ -20102,7 +20418,7 @@ type ProjectUpdate implements Node {
   """
   reactions: [Reaction!]!
   """
-  The project update's unique URL slug.
+  The update's unique URL slug.
   """
   slugId: String!
   """
@@ -20118,6 +20434,24 @@ type ProjectUpdate implements Node {
   The user who wrote the update.
   """
   user: User!
+}
+
+"""
+A generic payload return from entity archive mutations.
+"""
+type ProjectUpdateArchivePayload implements ArchivePayload {
+  """
+  The archived/unarchived entity. Null if entity was deleted.
+  """
+  entity: ProjectUpdate
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 type ProjectUpdateConnection {
@@ -20200,7 +20534,7 @@ input ProjectUpdateFilter {
 }
 
 """
-The health type of a project when the update is created.
+The health type when the project update is created.
 """
 enum ProjectUpdateHealthType {
   atRisk
@@ -20541,119 +20875,6 @@ input ProjectUpdatesFilter {
 }
 
 """
-[ALPHA] A pull request in a version control system.
-"""
-type PullRequest implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The date when the pull request was closed.
-  """
-  closedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The user who created the pull request.
-  """
-  creator: User
-  """
-  The description of the pull request.
-  """
-  description: String
-  """
-  The external user who created the pull request.
-  """
-  externalCreator: ExternalUser
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  Links between the pull request and issues.
-  """
-  issueLinks: [PullRequestIssueLink!]!
-  """
-  The date when the pull request was merged.
-  """
-  mergedAt: DateTime
-  """
-  The date when the pull request was opened.
-  """
-  openedAt: DateTime!
-  """
-  The organization of the pull request.
-  """
-  organization: Organization!
-  """
-  The reviewers of the pull request.
-  """
-  reviewers: [PullRequestReviewer!]!
-  """
-  The source branch of the pull request.
-  """
-  sourceBranch: String!
-  """
-  The status of the pull request.
-  """
-  status: PullRequestStatus!
-  """
-  The target branch of the pull request.
-  """
-  targetBranch: String!
-  """
-  The title of the pull request.
-  """
-  title: String!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The URL of the pull request.
-  """
-  url: String!
-}
-
-"""
-[ALPHA] A link between a pull request and an issue.
-"""
-type PullRequestIssueLink {
-  """
-  The ID Of the linked issue.
-  """
-  issueId: String!
-  """
-  The type of link between the pull request & issue.
-  """
-  type: PullRequestIssueLinkType!
-}
-
-input PullRequestIssueLinkInput {
-  """
-  The ID Of the linked issue.
-  """
-  issueId: String!
-  """
-  The type of link between the pull request & issue.
-  """
-  type: PullRequestIssueLinkType!
-}
-
-"""
-[ALPHA] The type of link between the pull request & issue.
-"""
-enum PullRequestIssueLinkType {
-  closes
-  contributes
-  links
-}
-
-"""
 [ALPHA] A pull request reviewer.
 """
 type PullRequestReviewer {
@@ -20701,18 +20922,6 @@ input PullRequestReviewerInput {
   The ID of the user who reviewed the pull request.
   """
   userId: String
-}
-
-"""
-[ALPHA] The status of a pull request.
-"""
-enum PullRequestStatus {
-  approved
-  closed
-  draft
-  inReview
-  merged
-  open
 }
 
 """
@@ -22913,9 +23122,17 @@ type Reaction implements Node {
   """
   id: ID!
   """
+  [Internal] The initiative update that the reaction is associated with.
+  """
+  initiativeUpdate: InitiativeUpdate
+  """
   The issue that the reaction is associated with.
   """
   issue: Issue
+  """
+  The post that the reaction is associated with.
+  """
+  post: Post
   """
   The project update that the reaction is associated with.
   """
@@ -22996,6 +23213,10 @@ input ReactionCreateInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  [Internal] The update to associate the reaction with.
+  """
+  initiativeUpdateId: String
   """
   The issue to associate the reaction with.
   """
@@ -24282,6 +24503,41 @@ type SummaryPayload {
   Summary for project updates.
   """
   summary: String!
+}
+
+"""
+A comment thread that is synced with an external source.
+"""
+type SyncedExternalThread {
+  """
+  The display name of the thread.
+  """
+  displayName: String
+  id: ID
+  """
+  Whether this thread is syncing with the external service.
+  """
+  isConnected: Boolean!
+  """
+  Whether the current user has the corresponding personal integration connected for the external service.
+  """
+  isPersonalIntegrationConnected: Boolean!
+  """
+  The display name of the source.
+  """
+  name: String
+  """
+  The sub type of the external source.
+  """
+  subType: String
+  """
+  The type of the external source.
+  """
+  type: String!
+  """
+  The external url of the thread.
+  """
+  url: String
 }
 
 type SynchronizedPayload {
@@ -26062,6 +26318,92 @@ A universally unique identifier as specified by RFC 4122.
 scalar UUID
 
 """
+An update for project/initiative
+"""
+type Update implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The update content in markdown format.
+  """
+  body: String!
+  """
+  [Internal] The content of the update as a Prosemirror document.
+  """
+  bodyData: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time the update was edited.
+  """
+  editedAt: DateTime
+  """
+  The health at the time of the update.
+  """
+  health: UpdateHealthType!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  [Internal] Serialized JSON representing current state of the project/initiative properties when posting the update.
+  """
+  infoSnapshot: JSONObject
+  """
+  The initiative that the update is associated with.
+  """
+  initiative: Initiative
+  """
+  Whether update diff should be hidden.
+  """
+  isDiffHidden: Boolean!
+  """
+  The project that the update is associated with.
+  """
+  project: Project
+  """
+  The update's unique URL slug.
+  """
+  slugId: String!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user who wrote the update.
+  """
+  user: User!
+}
+
+type UpdateConnection {
+  edges: [UpdateEdge!]!
+  nodes: [Update!]!
+  pageInfo: PageInfo!
+}
+
+type UpdateEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: Update!
+}
+
+"""
+The health type when the update is created.
+"""
+enum UpdateHealthType {
+  atRisk
+  offTrack
+  onTrack
+}
+
+"""
 Issue update date sorting options.
 """
 input UpdatedAtSort {
@@ -27196,15 +27538,15 @@ enum ViewType {
   myIssuesActivity
   myIssuesCreatedByMe
   myIssuesSubscribedTo
-  myPullRequests
+  myReviews
   project
   projectDocuments
   projects
   projectsAll
   projectsBacklog
   projectsClosed
-  pullRequests
   quickView
+  reviews
   roadmap
   roadmapAll
   roadmapBacklog
@@ -27242,6 +27584,10 @@ type Webhook implements Node {
   Whether the Webhook is enabled.
   """
   enabled: Boolean!
+  """
+  [INTERNAL] Webhook failure events associated with the webhook (last 50).
+  """
+  failures: [WebhookFailureEvent!]!
   """
   The unique identifier of the entity.
   """
@@ -27354,6 +27700,20 @@ type WebhookFailureEvent {
   The webhook that this failure event is associated with.
   """
   webhook: Webhook!
+}
+
+type WebhookFailureEventConnection {
+  edges: [WebhookFailureEventEdge!]!
+  nodes: [WebhookFailureEvent!]!
+  pageInfo: PageInfo!
+}
+
+type WebhookFailureEventEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: WebhookFailureEvent!
 }
 
 type WebhookPayload {
