@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.1.0
+
+### Minor Changes
+
+- bb59062: feat: add support for issue estimates in CLI importer
+
+### Patch Changes
+
+- Updated dependencies [f597059]
+  - @linear/sdk@31.0.0
+
 ## 2.0.3
 
 ### Patch Changes
