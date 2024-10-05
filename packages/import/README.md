@@ -39,6 +39,22 @@ Supported fields:
 - Labels
 - (Optional) Comments
 
+### GitLab for Personal
+
+Open GitLab issues can be imported with your personal access token from GitLab's API.
+
+Supported fields:
+
+- `title` - Issue Title
+- `description` - Issue Description
+- `url` - Issue URL
+- `labels` - Issue Labels
+- `assignees` - Issue Assignees
+- `createdAt` - Issue Creation Date
+- `dueDate` - Issue Due Date
+- `priority` - Issue Priority
+- `status` - Issue Status
+
 ### Jira CSV
 
 This method is deprecated. We recommend importing Jira projects through the [in-product importer](https://linear.app/docs/import-issues#jira) instead of the CLI, which also offers a CSV import option but imports more fields. If you proceed, the following fields are supported:
