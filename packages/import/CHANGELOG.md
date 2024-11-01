@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.1.1
+
+### Patch Changes
+
+- Updated dependencies [58ec5c8]
+  - @linear/sdk@32.0.0
+
 ## 2.1.0
 
 ### Minor Changes
