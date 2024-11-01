@@ -637,6 +637,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the comment model query for Comment_InitiativeUpdate */
+    it("comment.initiativeUpdate", async () => {
+      if (_comment) {
+        const initiativeUpdate: L.InitiativeUpdate | undefined = _comment.initiativeUpdate;
+        expect(initiativeUpdate instanceof L.InitiativeUpdate);
+      } else {
+        console.warn("codegen-doc:print: No comment found - cannot test _comment.initiativeUpdate query");
+      }
+    });
+
     /** Test the comment.externalUser query for L.ExternalUser */
     it("comment.externalUser", async () => {
       if (_comment) {
@@ -1727,6 +1737,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue.recurringIssueTemplate query for L.Template */
+    it("issue.recurringIssueTemplate", async () => {
+      if (_issue) {
+        const issue_recurringIssueTemplate: L.Template | undefined = await _issue.recurringIssueTemplate;
+        expect(issue_recurringIssueTemplate instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.recurringIssueTemplate query");
+      }
+    });
+
     /** Test the issue.snoozedBy query for L.User */
     it("issue.snoozedBy", async () => {
       if (_issue) {
@@ -1866,6 +1886,16 @@ describe("generated", () => {
         expect(issueLabel_creator instanceof L.User);
       } else {
         console.warn("codegen-doc:print: No IssueLabel found - cannot test issueLabel.creator query");
+      }
+    });
+
+    /** Test the issueLabel.inheritedFrom query for L.IssueLabel */
+    it("issueLabel.inheritedFrom", async () => {
+      if (_issueLabel) {
+        const issueLabel_inheritedFrom: L.IssueLabel | undefined = await _issueLabel.inheritedFrom;
+        expect(issueLabel_inheritedFrom instanceof L.IssueLabel);
+      } else {
+        console.warn("codegen-doc:print: No IssueLabel found - cannot test issueLabel.inheritedFrom query");
       }
     });
 
@@ -2155,6 +2185,16 @@ describe("generated", () => {
         expect(issue_projectMilestone instanceof L.ProjectMilestone);
       } else {
         console.warn("codegen-doc:print: No Issue found - cannot test issue.projectMilestone query");
+      }
+    });
+
+    /** Test the issue.recurringIssueTemplate query for L.Template */
+    it("issue.recurringIssueTemplate", async () => {
+      if (_issue) {
+        const issue_recurringIssueTemplate: L.Template | undefined = await _issue.recurringIssueTemplate;
+        expect(issue_recurringIssueTemplate instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.recurringIssueTemplate query");
       }
     });
 
@@ -2520,6 +2560,16 @@ describe("generated", () => {
         expect(issue_projectMilestone instanceof L.ProjectMilestone);
       } else {
         console.warn("codegen-doc:print: No Issue found - cannot test issue.projectMilestone query");
+      }
+    });
+
+    /** Test the issue.recurringIssueTemplate query for L.Template */
+    it("issue.recurringIssueTemplate", async () => {
+      if (_issue) {
+        const issue_recurringIssueTemplate: L.Template | undefined = await _issue.recurringIssueTemplate;
+        expect(issue_recurringIssueTemplate instanceof L.Template);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.recurringIssueTemplate query");
       }
     });
 
@@ -4189,6 +4239,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the user connection query for the Draft */
+    it("user.drafts", async () => {
+      if (_user) {
+        const drafts: L.DraftConnection | undefined = await _user.drafts();
+        expect(drafts instanceof L.DraftConnection);
+      } else {
+        console.warn("codegen-doc:print: No user found - cannot test _user.drafts query");
+      }
+    });
+
     /** Test the user connection query for the TeamMembership */
     it("user.teamMemberships", async () => {
       if (_user) {
@@ -4258,6 +4318,16 @@ describe("generated", () => {
         expect(createdIssues instanceof L.IssueConnection);
       } else {
         console.warn("codegen-doc:print: No viewer found - cannot test _viewer.createdIssues query");
+      }
+    });
+
+    /** Test the viewer connection query for the Draft */
+    it("viewer.drafts", async () => {
+      if (_viewer) {
+        const drafts: L.DraftConnection | undefined = await _viewer.drafts();
+        expect(drafts instanceof L.DraftConnection);
+      } else {
+        console.warn("codegen-doc:print: No viewer found - cannot test _viewer.drafts query");
       }
     });
 

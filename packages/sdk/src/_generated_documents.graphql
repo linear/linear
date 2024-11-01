@@ -83,6 +83,10 @@ fragment Comment on Comment {
   externalUser {
     id
   }
+  # The initiative update that the comment is associated with.
+  initiativeUpdate {
+    ...InitiativeUpdate
+  }
   # The issue that the comment is associated with.
   issue {
     id
@@ -561,7 +565,7 @@ fragment Facet on Facet {
   id
 }
 
-# A feature flag for a project.
+# A feature flag for a project or an issue.
 fragment FeatureFlag on FeatureFlag {
   __typename
   # Date when the stage was last changed.
@@ -570,6 +574,10 @@ fragment FeatureFlag on FeatureFlag {
   description
   # The integration providing the feature flag.
   integration {
+    id
+  }
+  # The issue the feature flag is associated with.
+  issue {
     id
   }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -665,6 +673,15 @@ fragment AttachmentArchivePayload on AttachmentArchivePayload {
 }
 
 # A generic payload return from entity archive mutations.
+fragment CustomerNeedArchivePayload on CustomerNeedArchivePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
 fragment CycleArchivePayload on CycleArchivePayload {
   __typename
   # The archived/unarchived entity. Null if entity was deleted.
@@ -710,15 +727,6 @@ fragment IssueArchivePayload on IssueArchivePayload {
   entity {
     id
   }
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
-# A generic payload return from entity archive mutations.
-fragment IssueDraftArchivePayload on IssueDraftArchivePayload {
-  __typename
   # The identifier of the last sync operation.
   lastSyncId
   # Whether the operation was successful.
@@ -828,6 +836,10 @@ fragment ArchivePayload on ArchivePayload {
     ...AttachmentArchivePayload
   }
 
+  ... on CustomerNeedArchivePayload {
+    ...CustomerNeedArchivePayload
+  }
+
   ... on CycleArchivePayload {
     ...CycleArchivePayload
   }
@@ -846,10 +858,6 @@ fragment ArchivePayload on ArchivePayload {
 
   ... on IssueArchivePayload {
     ...IssueArchivePayload
-  }
-
-  ... on IssueDraftArchivePayload {
-    ...IssueDraftArchivePayload
   }
 
   ... on NotificationArchivePayload {
@@ -2067,6 +2075,68 @@ fragment User on User {
   calendarHash
 }
 
+# A user's notification category preferences for a channel.
+fragment NotificationCategoryPreferencesChannel on NotificationCategoryPreferencesChannel {
+  __typename
+  # Whether notifications are enabled for this category for Slack.
+  slack
+  # Whether notifications are enabled for this category for desktop.
+  desktop
+  # Whether notifications are enabled for this category for email.
+  email
+  # Whether notifications are enabled for this category for mobile.
+  mobile
+}
+
+# A user's notification category preferences.
+fragment NotificationCategoryPreferences on NotificationCategoryPreferences {
+  __typename
+  # The preferences for notifications about apps and integrations.
+  appsAndIntegrations {
+    ...NotificationCategoryPreferencesChannel
+  }
+  # The preferences for notifications about assignments.
+  assignments {
+    ...NotificationCategoryPreferencesChannel
+  }
+  # The preferences for notifications about comments and replies.
+  commentsAndReplies {
+    ...NotificationCategoryPreferencesChannel
+  }
+  # The preferences for notifications about document changes.
+  documentChanges {
+    ...NotificationCategoryPreferencesChannel
+  }
+  # The preferences for notifications about mentions.
+  mentions {
+    ...NotificationCategoryPreferencesChannel
+  }
+  # The preferences for notifications about posts and updates.
+  postsAndUpdates {
+    ...NotificationCategoryPreferencesChannel
+  }
+  # The preferences for notifications about reactions.
+  reactions {
+    ...NotificationCategoryPreferencesChannel
+  }
+  # The preferences for notifications about reminders.
+  reminders {
+    ...NotificationCategoryPreferencesChannel
+  }
+  # The preferences for notifications about reviews.
+  reviews {
+    ...NotificationCategoryPreferencesChannel
+  }
+  # The preferences for notifications about status changes.
+  statusChanges {
+    ...NotificationCategoryPreferencesChannel
+  }
+  # The preferences for notifications about subscriptions.
+  subscriptions {
+    ...NotificationCategoryPreferencesChannel
+  }
+}
+
 # A user's notification delivery preferences.
 fragment NotificationDeliveryPreferences on NotificationDeliveryPreferences {
   __typename
@@ -2780,6 +2850,10 @@ fragment Issue on Issue {
   projectMilestone {
     id
   }
+  # The recurring issue template that created this issue.
+  recurringIssueTemplate {
+    id
+  }
   # The team that the issue is associated with.
   team {
     id
@@ -2810,6 +2884,10 @@ fragment Issue on Issue {
   slaStartedAt
   # The time at which the issue's SLA will breach.
   slaBreachesAt
+  # The time at which the issue's SLA will enter high risk state.
+  slaHighRiskAt
+  # The time at which the issue's SLA will enter medium risk state.
+  slaMediumRiskAt
   # The time until an issue will be snoozed in Triage view.
   snoozedUntilAt
   # The type of SLA set on the issue. Calendar days or business days.
@@ -2890,6 +2968,8 @@ fragment Organization on Organization {
   __typename
   # Allowed authentication providers, empty array means all are allowed.
   allowedAuthServices
+  # Configuration settings for the Customers feature.
+  customersConfiguration
   # How git branches are formatted. If null, default formatting will be used.
   gitBranchFormat
   # IP restriction configurations.
@@ -2951,6 +3031,8 @@ fragment Organization on Organization {
   gitLinkbackMessagesEnabled
   # Whether the Git integration linkback messages should be sent to public repositories.
   gitPublicLinkbackMessagesEnabled
+  # Whether the organization is using Customers.
+  customersEnabled
   # Whether the organization is using a roadmap.
   roadmapEnabled
   # [DEPRECATED] The frequency at which to prompt for project updates.
@@ -3182,42 +3264,6 @@ fragment ProjectUpdate on ProjectUpdate {
     id
   }
   # Whether project update diff should be hidden.
-  isDiffHidden
-}
-
-# An update for project/initiative
-fragment Update on Update {
-  __typename
-  # The health at the time of the update.
-  health
-  # The initiative that the update is associated with.
-  initiative {
-    id
-  }
-  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The project that the update is associated with.
-  project {
-    id
-  }
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The time the update was edited.
-  editedAt
-  # The unique identifier of the entity.
-  id
-  # The update content in markdown format.
-  body
-  # The update's unique URL slug.
-  slugId
-  # The user who wrote the update.
-  user {
-    id
-  }
-  # Whether update diff should be hidden.
   isDiffHidden
 }
 
@@ -3618,6 +3664,10 @@ fragment IssueLabel on IssueLabel {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The original label inherited from.
+  inheritedFrom {
+    id
+  }
   # The parent label.
   parent {
     id
@@ -4261,6 +4311,8 @@ fragment UserSettings on UserSettings {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The notification category preferences for the user.
+  notificationCategoryPreferences
   # The notification channel settings the user has selected.
   notificationPreferences
   # The notification delivery preferences for the user.
@@ -4287,6 +4339,8 @@ fragment UserSettings on UserSettings {
   subscribedToPrivacyLegalUpdates
   # Whether this user is subscribed to unread notifications reminder emails or not.
   subscribedToUnreadNotificationsReminder
+  # Whether to auto-assign newly created issues to the current user by default.
+  autoAssignToSelf
   # Whether to show full user names instead of display names.
   showFullUserNames
 }
@@ -5036,6 +5090,16 @@ fragment DocumentSearchResultConnection on DocumentSearchResultConnection {
   }
 }
 
+fragment DraftConnection on DraftConnection {
+  __typename
+  nodes {
+    ...Draft
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment EmailIntakeAddressPayload on EmailIntakeAddressPayload {
   __typename
   # The email address that was created or updated.
@@ -5404,14 +5468,6 @@ fragment IssueConnection on IssueConnection {
   }
 }
 
-fragment IssueDraftPayload on IssueDraftPayload {
-  __typename
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
 fragment IssueFilterSuggestionPayload on IssueFilterSuggestionPayload {
   __typename
   # The json filter that is suggested.
@@ -5619,6 +5675,10 @@ fragment IssueSearchResult on IssueSearchResult {
   projectMilestone {
     id
   }
+  # The recurring issue template that created this issue.
+  recurringIssueTemplate {
+    id
+  }
   # The team that the issue is associated with.
   team {
     id
@@ -5649,6 +5709,10 @@ fragment IssueSearchResult on IssueSearchResult {
   slaStartedAt
   # The time at which the issue's SLA will breach.
   slaBreachesAt
+  # The time at which the issue's SLA will enter high risk state.
+  slaHighRiskAt
+  # The time at which the issue's SLA will enter medium risk state.
+  slaMediumRiskAt
   # The time until an issue will be snoozed in Triage view.
   snoozedUntilAt
   # The type of SLA set on the issue. Calendar days or business days.
@@ -5685,6 +5749,14 @@ fragment IssueSearchResultConnection on IssueSearchResultConnection {
   pageInfo {
     ...PageInfo
   }
+}
+
+fragment IssueTitleSuggestionFromCustomerRequestPayload on IssueTitleSuggestionFromCustomerRequestPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The suggested issue title.
+  title
 }
 
 fragment LogoutResponse on LogoutResponse {
@@ -6596,16 +6668,6 @@ fragment TriageResponsibilityPayload on TriageResponsibilityPayload {
   }
 }
 
-fragment UpdateConnection on UpdateConnection {
-  __typename
-  nodes {
-    ...Update
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
 fragment UploadFileHeader on UploadFileHeader {
   __typename
   # Upload file header key.
@@ -7442,6 +7504,21 @@ query comment_externalThread(
   comment(hash: $hash, id: $id, issueId: $issueId) {
     externalThread {
       ...SyncedExternalThread
+    }
+  }
+}
+# The initiative update that the comment is associated with.
+query comment_initiativeUpdate(
+  # The hash of the comment to retrieve.
+  $hash: String
+  # The identifier of the comment to retrieve.
+  $id: String
+  # [Deprecated] The issue for which to find the comment.
+  $issueId: String
+) {
+  comment(hash: $hash, id: $id, issueId: $issueId) {
+    initiativeUpdate {
+      ...InitiativeUpdate
     }
   }
 }
@@ -9144,6 +9221,8 @@ query organization_templates(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # Filter returned templates.
+  $filter: NullableTemplateFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -9157,6 +9236,7 @@ query organization_templates(
     templates(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -10531,6 +10611,8 @@ query team_templates(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # Filter returned templates.
+  $filter: NullableTemplateFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -10544,6 +10626,7 @@ query team_templates(
     templates(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last
@@ -10821,6 +10904,36 @@ query user_createdIssues(
       orderBy: $orderBy
     ) {
       ...IssueConnection
+    }
+  }
+}
+# The user's drafts
+query user_drafts(
+  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  user(id: $id) {
+    drafts(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...DraftConnection
     }
   }
 }
@@ -11124,6 +11237,34 @@ query viewer_createdIssues(
       orderBy: $orderBy
     ) {
       ...IssueConnection
+    }
+  }
+}
+# The user's drafts
+query viewer_drafts(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  viewer {
+    drafts(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...DraftConnection
     }
   }
 }
@@ -12261,19 +12402,23 @@ mutation createIntegrationGithubCommit {
 }
 # Connects the organization with the GitHub App.
 mutation integrationGithubConnect(
+  # The GitHub grant code that's exchanged for OAuth tokens.
+  $code: String!
   # The GitHub data to connect with.
   $installationId: String!
 ) {
-  integrationGithubConnect(installationId: $installationId) {
+  integrationGithubConnect(code: $code, installationId: $installationId) {
     ...IntegrationPayload
   }
 }
 # Connects the organization with the GitHub Import App.
 mutation integrationGithubImportConnect(
+  # The GitHub grant code that's exchanged for OAuth tokens.
+  $code: String!
   # The GitHub data to connect with.
   $installationId: String!
 ) {
-  integrationGithubImportConnect(installationId: $installationId) {
+  integrationGithubImportConnect(code: $code, installationId: $installationId) {
     ...IntegrationPayload
   }
 }
@@ -12539,6 +12684,15 @@ mutation archiveIssue(
     ...IssueArchivePayload
   }
 }
+# Creates a list of issues in one transaction.
+mutation createIssueBatch(
+  # A list of issue objects to create.
+  $input: IssueBatchCreateInput!
+) {
+  issueBatchCreate(input: $input) {
+    ...IssueBatchPayload
+  }
+}
 # Updates multiple issues at once.
 mutation updateIssueBatch(
   # The id's of the issues to update. Can't be more than 50 at a time.
@@ -12568,44 +12722,6 @@ mutation deleteIssue(
 ) {
   issueDelete(id: $id, permanentlyDelete: $permanentlyDelete) {
     ...IssueArchivePayload
-  }
-}
-# Archives a draft.
-mutation archiveIssueDraft(
-  # The identifier of the draft to archive.
-  $id: String!
-) {
-  issueDraftArchive(id: $id) {
-    ...IssueDraftArchivePayload
-  }
-}
-# Creates a new draft.
-mutation createIssueDraft(
-  # The issue draft to create.
-  $input: IssueDraftCreateInput!
-) {
-  issueDraftCreate(input: $input) {
-    ...IssueDraftPayload
-  }
-}
-# Deletes a draft.
-mutation deleteIssueDraft(
-  # The identifier of the draft to delete.
-  $id: String!
-) {
-  issueDraftDelete(id: $id) {
-    ...DeletePayload
-  }
-}
-# Updates a draft.
-mutation updateIssueDraft(
-  # The ID of the issue draft to update.
-  $id: String!
-  # The fields to update.
-  $input: IssueDraftUpdateInput!
-) {
-  issueDraftUpdate(id: $id, input: $input) {
-    ...IssueDraftPayload
   }
 }
 # Kicks off an Asana import job.
@@ -12956,20 +13072,29 @@ mutation leaveOrganization(
   }
 }
 # Logout the client.
-mutation logout {
-  logout {
+mutation logout(
+  # The reason for logging out.
+  $reason: String
+) {
+  logout(reason: $reason) {
     ...LogoutResponse
   }
 }
 # Logout all of user's sessions including the active one.
-mutation logoutAllSessions {
-  logoutAllSessions {
+mutation logoutAllSessions(
+  # The reason for logging out.
+  $reason: String
+) {
+  logoutAllSessions(reason: $reason) {
     ...LogoutResponse
   }
 }
 # Logout all of user's sessions excluding the current one.
-mutation logoutOtherSessions {
-  logoutOtherSessions {
+mutation logoutOtherSessions(
+  # The reason for logging out.
+  $reason: String
+) {
+  logoutOtherSessions(reason: $reason) {
     ...LogoutResponse
   }
 }
@@ -13252,6 +13377,35 @@ mutation updateProjectMilestone(
 ) {
   projectMilestoneUpdate(id: $id, input: $input) {
     ...ProjectMilestonePayload
+  }
+}
+# Creates a new project relation.
+mutation createProjectRelation(
+  # The project relation to create.
+  $input: ProjectRelationCreateInput!
+) {
+  projectRelationCreate(input: $input) {
+    ...ProjectRelationPayload
+  }
+}
+# Deletes a project relation.
+mutation deleteProjectRelation(
+  # The identifier of the project relation to delete.
+  $id: String!
+) {
+  projectRelationDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates a project relation.
+mutation updateProjectRelation(
+  # The identifier of the project relation to update.
+  $id: String!
+  # The properties of the project relation to update.
+  $input: ProjectRelationUpdateInput!
+) {
+  projectRelationUpdate(id: $id, input: $input) {
+    ...ProjectRelationPayload
   }
 }
 # Archives a project status.
