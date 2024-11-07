@@ -9,6 +9,8 @@ import { replaceImagesInMarkdown } from "./utils/replaceImages";
 import { Presets, SingleBar } from "cli-progress";
 import ora from "ora";
 
+type Id = string;
+
 interface ImportAnswers {
   newTeam: boolean;
   includeComments?: boolean;
@@ -150,7 +152,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
   ]);
 
   let teamKey: string | undefined;
-  let teamId: string | undefined;
+  let teamId: Id | undefined;
   if (importAnswers.newTeam) {
     // Create a new team
     const teamResponse = await client.createTeam({
@@ -189,8 +191,10 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
   const workflowStates = await teamInfo?.states();
 
-  const existingLabelMap = {} as { [name: string]: string };
-  const existingLabelGroupsMap = {} as { [name: string]: string };
+  const existingLabelMap = {} as { [name: string]: Id };
+  const existingLabelGroupsMap = {} as { [name: string]: Id };
+  // Map of groupId to its labelIds
+  const existingGroupIdLabelMap = {} as { [id: Id]: { [name: string]: Id } };
 
   for (const label of existingLabels) {
     const labelName = label.name?.toLowerCase();
@@ -207,40 +211,11 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
   const projectId = importAnswers.targetProjectId;
 
-  // Create labels and mapping to source data
-  const labelMapping = {} as { [id: string]: string };
-  for (const labelId of Object.keys(importData.labels)) {
-    const label = importData.labels[labelId];
-    let labelName = _.truncate(label.name.trim(), { length: 20 });
-
-    // Check if this label matches with an existing group label
-    let actualLabelId: string | undefined = existingLabelGroupsMap[labelName.toLowerCase()];
-
-    if (actualLabelId) {
-      // This label has matched with an existing group label. We cannot re-use the label as-is, it will be renamed.
-      actualLabelId = undefined;
-      labelName = `${labelName} (imported)`;
-    }
-
-    // Check if this label matches with an existing label
-    actualLabelId = existingLabelMap[labelName.toLowerCase()];
-
-    if (!actualLabelId) {
-      const labelResponse = await client.createIssueLabel({
-        name: labelName,
-        description: label.description,
-        color: label.color,
-        teamId,
-      });
-
-      const issueLabel = await labelResponse?.issueLabel;
-      if (issueLabel?.id) {
-        actualLabelId = issueLabel?.id;
-      }
-      existingLabelMap[labelName.toLowerCase()] = actualLabelId;
-    }
-    labelMapping[labelId] = actualLabelId;
-  }
+  const labelMapping = await handleLabels(client, importData, teamId, {
+    existingLabelMap,
+    existingLabelGroupsMap,
+    existingGroupIdLabelMap,
+  });
 
   const existingStateMap = {} as { [name: string]: string };
   for (const state of workflowStates?.nodes ?? []) {
@@ -306,11 +281,11 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
     }
 
     const issueAssigneeId = issue.assigneeId?.toLowerCase();
-    const existingAssigneeId: string | undefined = !!issueAssigneeId
-      ? (existingUserMapByEmail[issueAssigneeId] ?? existingUserMapByName[issueAssigneeId])
+    const existingAssigneeId: Id | undefined = !!issueAssigneeId
+      ? existingUserMapByEmail[issueAssigneeId] ?? existingUserMapByName[issueAssigneeId]
       : undefined;
 
-    let assigneeId: string | undefined;
+    let assigneeId: Id | undefined;
     if (importAnswers.selfAssign) {
       assigneeId = viewer;
     } else if (importAnswers.targetAssignee === "{{assignee}}") {
@@ -384,4 +359,117 @@ const createIssueWithRetries = async (
       throw error;
     }
   }
+};
+
+const handleLabels = async (
+  client: LinearClient,
+  data: ImportResult,
+  teamId: string,
+  state: {
+    existingLabelMap: { [name: string]: string };
+    existingLabelGroupsMap: { [name: string]: string };
+    existingGroupIdLabelMap: { [id: Id]: { [name: string]: Id } };
+  }
+) => {
+  const { existingLabelMap, existingLabelGroupsMap, existingGroupIdLabelMap } = state;
+  const { labels } = data;
+
+  const createLabel = async ({
+    name,
+    description,
+    color,
+    parentId,
+  }: {
+    name: string;
+    description?: string;
+    color?: string;
+    parentId?: string;
+  }) => {
+    const labelResponse = await client.createIssueLabel({
+      name,
+      description,
+      color,
+      teamId,
+      parentId,
+    });
+
+    const issueLabel = await labelResponse?.issueLabel;
+    return issueLabel?.id;
+  };
+
+  // Create labels and mapping to source data
+  const labelMapping = {} as { [id: string]: Id };
+
+  for (const labelId of Object.keys(labels)) {
+    const label = labels[labelId];
+    let labelName = _.truncate(label.name.trim(), { length: 80 });
+
+    let groupLabelId: string | undefined;
+    // Handle label groups
+    if (labelName.indexOf("/") !== -1) {
+      const parts = labelName.split("/");
+      const group = parts.slice(0, -1).join("/");
+      const subgroup = parts[parts.length - 1];
+
+      groupLabelId = existingLabelGroupsMap[group.toLowerCase()];
+
+      const rootLabelExists = existingLabelMap[group.toLowerCase()] !== undefined;
+
+      // Label group does not exist, create it
+      if (!groupLabelId) {
+        groupLabelId = await createLabel({
+          name: rootLabelExists ? `${group} (group)` : group,
+          color: label.color,
+          description: label.description,
+        });
+
+        if (groupLabelId) {
+          existingLabelGroupsMap[group.toLowerCase()] = groupLabelId;
+          existingGroupIdLabelMap[groupLabelId] = {};
+        }
+      }
+
+      labelName = subgroup; // Use the subgroup name for the actual label
+    }
+
+    let actualLabelId: string | undefined;
+    if (groupLabelId) {
+      // If we have a group label, check if we've already created the subgroup label
+      actualLabelId = existingGroupIdLabelMap[groupLabelId]?.[labelName.toLowerCase()];
+    } else {
+      // Check if this label matches with an existing group label
+      actualLabelId = existingLabelGroupsMap[labelName.toLowerCase()];
+
+      if (actualLabelId) {
+        // This label has matched with an existing group label. We cannot re-use the label as-is, it will be renamed.
+        actualLabelId = undefined;
+        labelName = `${labelName} (imported)`;
+      }
+
+      // Check if this label matches with an existing root label
+      actualLabelId = existingLabelMap[labelName.toLowerCase()];
+    }
+
+    if (!actualLabelId) {
+      // We haven't found an existing label, create it
+      actualLabelId = await createLabel({
+        name: labelName,
+        color: label.color,
+        description: label.description,
+        parentId: groupLabelId,
+      });
+
+      if (groupLabelId && actualLabelId) {
+        existingGroupIdLabelMap[groupLabelId][labelName.toLowerCase()] = actualLabelId;
+      } else if (actualLabelId) {
+        existingLabelMap[labelName.toLowerCase()] = actualLabelId;
+      }
+    }
+
+    if (actualLabelId) {
+      labelMapping[labelId] = actualLabelId;
+    }
+  }
+
+  return labelMapping;
 };
