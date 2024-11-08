@@ -1,3 +1,5 @@
+export type IssuePriority = 0 | 1 | 2 | 3 | 4;
+
 /** Issue. */
 export interface Issue {
   /** Issue title */
@@ -8,8 +10,8 @@ export interface Issue {
   status?: string;
   /** Assigned user */
   assigneeId?: string;
-  /** Issue's priority from 0-4, with 0 being the most important. Undefined for non-prioritized. */
-  priority?: number;
+  /** Issue's priority from 0 to 4 – 1 being the highest, and 0/undefined being no priority. */
+  priority?: IssuePriority;
   /** Issue's comments */
   comments?: Comment[];
   /** Issue's label IDs */

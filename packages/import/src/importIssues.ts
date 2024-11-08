@@ -3,11 +3,22 @@ import { LinearClient } from "@linear/sdk";
 import { format } from "date-fns";
 import chalk from "chalk";
 import * as inquirer from "inquirer";
-import _, { uniq } from "lodash";
+import { uniq } from "lodash";
 import { Comment, Importer, ImportResult } from "./types";
 import { replaceImagesInMarkdown } from "./utils/replaceImages";
 import { Presets, SingleBar } from "cli-progress";
 import ora from "ora";
+
+import { setGlobalDispatcher, Agent } from "undici";
+import { handleLabels } from "./helpers/labelManager";
+
+setGlobalDispatcher(
+  new Agent({
+    connect: {
+      rejectUnauthorized: false,
+    },
+  })
+);
 
 type Id = string;
 
@@ -22,17 +33,23 @@ interface ImportAnswers {
   teamName?: string;
 }
 
-const defaultStateColors = {
-  backlog: "#bec2c8",
-  started: "#f2c94c",
-  completed: "#5e6ad2",
+enum IssueStatus {
+  Backlog = "backlog",
+  Started = "started",
+  Completed = "completed",
+}
+
+const defaultStateColors: Record<IssueStatus, string> = {
+  [IssueStatus.Backlog]: "#bec2c8",
+  [IssueStatus.Started]: "#f2c94c",
+  [IssueStatus.Completed]: "#5e6ad2",
 };
 
 /**
  * Import issues into Linear via the API.
  */
 export const importIssues = async (apiKey: string, importer: Importer): Promise<void> => {
-  const client = new LinearClient({ apiKey });
+  const client = new LinearClient({ apiKey, apiUrl: "https://local.linear.dev:8090/graphql" });
   const importData = await importer.import();
 
   const viewerQuery = await client.viewer;
@@ -177,45 +194,19 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
   const teamInfo = await client.team(teamId);
   const organization = await client.organization;
 
-  const existingLabels = [];
-
   spinner = ora("Fetching labels").start();
 
   const allTeamLabels = await teamInfo.paginate(teamInfo.labels, {});
   const allWorkspaceLabels = await client.paginate(organization.labels, {});
-
-  existingLabels.push(...allTeamLabels, ...allWorkspaceLabels);
 
   spinner.stop();
   spinner = ora("Fetching workflow states").start();
 
   const workflowStates = await teamInfo?.states();
 
-  const existingLabelMap = {} as { [name: string]: Id };
-  const existingLabelGroupsMap = {} as { [name: string]: Id };
-  // Map of groupId to its labelIds
-  const existingGroupIdLabelMap = {} as { [id: Id]: { [name: string]: Id } };
-
-  for (const label of existingLabels) {
-    const labelName = label.name?.toLowerCase();
-    if (label.isGroup) {
-      if (labelName && label.id && !existingLabelGroupsMap[labelName]) {
-        existingLabelGroupsMap[labelName] = label.id;
-      }
-    } else {
-      if (labelName && label.id && !existingLabelMap[labelName]) {
-        existingLabelMap[labelName] = label.id;
-      }
-    }
-  }
-
   const projectId = importAnswers.targetProjectId;
 
-  const labelMapping = await handleLabels(client, importData, teamId, {
-    existingLabelMap,
-    existingLabelGroupsMap,
-    existingGroupIdLabelMap,
-  });
+  const labelMapping = await handleLabels(client, importData, teamId, [...allTeamLabels, ...allWorkspaceLabels]);
 
   const existingStateMap = {} as { [name: string]: string };
   for (const state of workflowStates?.nodes ?? []) {
@@ -259,11 +250,11 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
     let stateId = !!issue.status ? existingStateMap[issue.status.toLowerCase()] : undefined;
     // Create a new state since one doesn't already exist with this name
     if (!stateId && issue.status) {
-      let stateType = "backlog";
+      let stateType = IssueStatus.Backlog;
       if (issue.completedAt) {
-        stateType = "completed";
+        stateType = IssueStatus.Completed;
       } else if (issue.startedAt) {
-        stateType = "started";
+        stateType = IssueStatus.Started;
       }
       const newStateResult = await client.createWorkflowState({
         name: issue.status,
@@ -359,117 +350,4 @@ const createIssueWithRetries = async (
       throw error;
     }
   }
-};
-
-const handleLabels = async (
-  client: LinearClient,
-  data: ImportResult,
-  teamId: string,
-  state: {
-    existingLabelMap: { [name: string]: string };
-    existingLabelGroupsMap: { [name: string]: string };
-    existingGroupIdLabelMap: { [id: Id]: { [name: string]: Id } };
-  }
-) => {
-  const { existingLabelMap, existingLabelGroupsMap, existingGroupIdLabelMap } = state;
-  const { labels } = data;
-
-  const createLabel = async ({
-    name,
-    description,
-    color,
-    parentId,
-  }: {
-    name: string;
-    description?: string;
-    color?: string;
-    parentId?: string;
-  }) => {
-    const labelResponse = await client.createIssueLabel({
-      name,
-      description,
-      color,
-      teamId,
-      parentId,
-    });
-
-    const issueLabel = await labelResponse?.issueLabel;
-    return issueLabel?.id;
-  };
-
-  // Create labels and mapping to source data
-  const labelMapping = {} as { [id: string]: Id };
-
-  for (const labelId of Object.keys(labels)) {
-    const label = labels[labelId];
-    let labelName = _.truncate(label.name.trim(), { length: 80 });
-
-    let groupLabelId: string | undefined;
-    // Handle label groups
-    if (labelName.indexOf("/") !== -1) {
-      const parts = labelName.split("/");
-      const group = parts.slice(0, -1).join("/");
-      const subgroup = parts[parts.length - 1];
-
-      groupLabelId = existingLabelGroupsMap[group.toLowerCase()];
-
-      const rootLabelExists = existingLabelMap[group.toLowerCase()] !== undefined;
-
-      // Label group does not exist, create it
-      if (!groupLabelId) {
-        groupLabelId = await createLabel({
-          name: rootLabelExists ? `${group} (group)` : group,
-          color: label.color,
-          description: label.description,
-        });
-
-        if (groupLabelId) {
-          existingLabelGroupsMap[group.toLowerCase()] = groupLabelId;
-          existingGroupIdLabelMap[groupLabelId] = {};
-        }
-      }
-
-      labelName = subgroup; // Use the subgroup name for the actual label
-    }
-
-    let actualLabelId: string | undefined;
-    if (groupLabelId) {
-      // If we have a group label, check if we've already created the subgroup label
-      actualLabelId = existingGroupIdLabelMap[groupLabelId]?.[labelName.toLowerCase()];
-    } else {
-      // Check if this label matches with an existing group label
-      actualLabelId = existingLabelGroupsMap[labelName.toLowerCase()];
-
-      if (actualLabelId) {
-        // This label has matched with an existing group label. We cannot re-use the label as-is, it will be renamed.
-        actualLabelId = undefined;
-        labelName = `${labelName} (imported)`;
-      }
-
-      // Check if this label matches with an existing root label
-      actualLabelId = existingLabelMap[labelName.toLowerCase()];
-    }
-
-    if (!actualLabelId) {
-      // We haven't found an existing label, create it
-      actualLabelId = await createLabel({
-        name: labelName,
-        color: label.color,
-        description: label.description,
-        parentId: groupLabelId,
-      });
-
-      if (groupLabelId && actualLabelId) {
-        existingGroupIdLabelMap[groupLabelId][labelName.toLowerCase()] = actualLabelId;
-      } else if (actualLabelId) {
-        existingLabelMap[labelName.toLowerCase()] = actualLabelId;
-      }
-    }
-
-    if (actualLabelId) {
-      labelMapping[labelId] = actualLabelId;
-    }
-  }
-
-  return labelMapping;
 };

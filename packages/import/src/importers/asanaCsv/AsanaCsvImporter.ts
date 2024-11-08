@@ -1,5 +1,5 @@
 import csv from "csvtojson";
-import { Importer, ImportResult } from "../../types";
+import { Importer, ImportResult, IssuePriority } from "../../types";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const j2m = require("jira2md");
 
@@ -117,8 +117,8 @@ export class AsanaCsvImporter implements Importer {
   private organizationName?: string;
 }
 
-const mapPriority = (input: AsanaPriority): number => {
-  const priorityMap = {
+const mapPriority = (input: AsanaPriority) => {
+  const priorityMap: { [k: string]: IssuePriority } = {
     High: 2,
     Med: 3,
     Low: 4,

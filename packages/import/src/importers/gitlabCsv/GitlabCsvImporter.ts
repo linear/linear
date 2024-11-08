@@ -1,5 +1,5 @@
 import csv from "csvtojson";
-import { Importer, ImportResult } from "../../types";
+import { Importer, ImportResult, IssuePriority } from "../../types";
 import { safeParseInt } from "../../utils/parseInt";
 
 type GitLabStatus = "opened" | "closed";
@@ -28,7 +28,7 @@ export class GitLabCsvImporter implements Importer {
   }
 
   public get name(): string {
-    return "Linear (CSV)";
+    return "GitLab (CSV)";
   }
 
   public get defaultTeamName(): string {
@@ -82,9 +82,9 @@ export class GitLabCsvImporter implements Importer {
   private filePath: string;
 }
 
-// Map weights to a normalized range of 0-4, with 0 being the highest weight. Answer with a map of original to normalized.
+// Map weights to a normalized range of 0-4, with 0 being the highest weight.
 const normalizeWeights = (weights: Set<number>) => {
-  const res: Map<number, number> = new Map();
+  const res: Map<number, IssuePriority> = new Map();
 
   const sortedWeights = Array.from(weights).sort((a, b) => a - b);
   const max = sortedWeights[sortedWeights.length - 1];
@@ -92,9 +92,10 @@ const normalizeWeights = (weights: Set<number>) => {
 
   for (const weight of sortedWeights) {
     if (max === min) {
-      res.set(weight, 0);
+      // Handle division by zero
+      res.set(weight, 1);
     } else {
-      res.set(weight, Math.round(((max - weight) / (max - min)) * 4));
+      res.set(weight, Math.round(((max - weight) / (max - min)) * 4) as IssuePriority);
     }
   }
 
