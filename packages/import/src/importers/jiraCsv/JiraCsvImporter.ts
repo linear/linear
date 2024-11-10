@@ -124,7 +124,7 @@ export class JiraCsvImporter implements Importer {
   private jiraSiteName?: string;
 }
 
-const mapPriority = (input: JiraPriority): number => {
+const mapPriority = (input: JiraPriority): IssuePriority => {
   const priorityMap: { [k: string]: IssuePriority } = {
     Highest: 1,
     High: 2,

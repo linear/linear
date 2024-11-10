@@ -245,7 +245,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
         ? await buildComments(client, issueDescription || "", issue.comments, importData)
         : issueDescription;
 
-    const labelIds = issue.labels ? uniq(issue.labels.map(labelId => labelMapping[labelId])) : undefined;
+    const labelIds = issue.labels ? uniq(issue.labels.map(labelId => labelMapping[labelId].id)) : undefined;
 
     let stateId = !!issue.status ? existingStateMap[issue.status.toLowerCase()] : undefined;
     // Create a new state since one doesn't already exist with this name
