@@ -6,19 +6,9 @@ import * as inquirer from "inquirer";
 import { uniq } from "lodash";
 import { Comment, Importer, ImportResult } from "./types";
 import { replaceImagesInMarkdown } from "./utils/replaceImages";
+import { handleLabels } from "./helpers/labelManager";
 import { Presets, SingleBar } from "cli-progress";
 import ora from "ora";
-
-import { setGlobalDispatcher, Agent } from "undici";
-import { handleLabels } from "./helpers/labelManager";
-
-setGlobalDispatcher(
-  new Agent({
-    connect: {
-      rejectUnauthorized: false,
-    },
-  })
-);
 
 type Id = string;
 
@@ -49,7 +39,7 @@ const defaultStateColors: Record<IssueStatus, string> = {
  * Import issues into Linear via the API.
  */
 export const importIssues = async (apiKey: string, importer: Importer): Promise<void> => {
-  const client = new LinearClient({ apiKey, apiUrl: "https://local.linear.dev:8090/graphql" });
+  const client = new LinearClient({ apiKey });
   const importData = await importer.import();
 
   const viewerQuery = await client.viewer;
