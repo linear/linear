@@ -11,6 +11,7 @@ import { pivotalCsvImport } from "./importers/pivotalCsv";
 import { shortcutCsvImport } from "./importers/shortcutCsv";
 import { trelloJsonImport } from "./importers/trelloJson";
 import { ImportAnswers } from "./types";
+import { gitlabCsvImporter } from "./importers/gitlabCsv";
 
 inquirer.registerPrompt("filePath", require("inquirer-file-path"));
 
@@ -30,6 +31,10 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
           {
             name: "GitHub",
             value: "github",
+          },
+          {
+            name: "GitLab (CSV export)",
+            value: "gitlabCsv",
           },
           {
             name: "Jira (CSV export)",
@@ -64,6 +69,9 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
     switch (importAnswers.service) {
       case "github":
         importer = await githubImport();
+        break;
+      case "gitlabCsv":
+        importer = await gitlabCsvImporter();
         break;
       case "jiraCsv":
         importer = await jiraCsvImport();

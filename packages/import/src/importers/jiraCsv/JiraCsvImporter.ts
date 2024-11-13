@@ -1,5 +1,5 @@
 import csv from "csvtojson";
-import { Importer, ImportResult } from "../../types";
+import { Importer, ImportResult, IssuePriority } from "../../types";
 import { safeParseInt } from "../../utils/parseInt";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const j2m = require("jira2md");
@@ -124,8 +124,8 @@ export class JiraCsvImporter implements Importer {
   private jiraSiteName?: string;
 }
 
-const mapPriority = (input: JiraPriority): number => {
-  const priorityMap = {
+const mapPriority = (input: JiraPriority): IssuePriority => {
+  const priorityMap: { [k: string]: IssuePriority } = {
     Highest: 1,
     High: 2,
     Medium: 3,

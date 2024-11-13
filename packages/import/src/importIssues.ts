@@ -3,11 +3,14 @@ import { LinearClient } from "@linear/sdk";
 import { format } from "date-fns";
 import chalk from "chalk";
 import * as inquirer from "inquirer";
-import _, { uniq } from "lodash";
+import { uniq } from "lodash";
 import { Comment, Importer, ImportResult } from "./types";
 import { replaceImagesInMarkdown } from "./utils/replaceImages";
+import { handleLabels } from "./helpers/labelManager";
 import { Presets, SingleBar } from "cli-progress";
 import ora from "ora";
+
+type Id = string;
 
 interface ImportAnswers {
   newTeam: boolean;
@@ -20,10 +23,16 @@ interface ImportAnswers {
   teamName?: string;
 }
 
-const defaultStateColors = {
-  backlog: "#bec2c8",
-  started: "#f2c94c",
-  completed: "#5e6ad2",
+enum IssueStatus {
+  Backlog = "backlog",
+  Started = "started",
+  Completed = "completed",
+}
+
+const defaultStateColors: Record<IssueStatus, string> = {
+  [IssueStatus.Backlog]: "#bec2c8",
+  [IssueStatus.Started]: "#f2c94c",
+  [IssueStatus.Completed]: "#5e6ad2",
 };
 
 /**
@@ -150,7 +159,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
   ]);
 
   let teamKey: string | undefined;
-  let teamId: string | undefined;
+  let teamId: Id | undefined;
   if (importAnswers.newTeam) {
     // Create a new team
     const teamResponse = await client.createTeam({
@@ -175,72 +184,19 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
   const teamInfo = await client.team(teamId);
   const organization = await client.organization;
 
-  const existingLabels = [];
-
   spinner = ora("Fetching labels").start();
 
   const allTeamLabels = await teamInfo.paginate(teamInfo.labels, {});
   const allWorkspaceLabels = await client.paginate(organization.labels, {});
-
-  existingLabels.push(...allTeamLabels, ...allWorkspaceLabels);
 
   spinner.stop();
   spinner = ora("Fetching workflow states").start();
 
   const workflowStates = await teamInfo?.states();
 
-  const existingLabelMap = {} as { [name: string]: string };
-  const existingLabelGroupsMap = {} as { [name: string]: string };
-
-  for (const label of existingLabels) {
-    const labelName = label.name?.toLowerCase();
-    if (label.isGroup) {
-      if (labelName && label.id && !existingLabelGroupsMap[labelName]) {
-        existingLabelGroupsMap[labelName] = label.id;
-      }
-    } else {
-      if (labelName && label.id && !existingLabelMap[labelName]) {
-        existingLabelMap[labelName] = label.id;
-      }
-    }
-  }
-
   const projectId = importAnswers.targetProjectId;
 
-  // Create labels and mapping to source data
-  const labelMapping = {} as { [id: string]: string };
-  for (const labelId of Object.keys(importData.labels)) {
-    const label = importData.labels[labelId];
-    let labelName = _.truncate(label.name.trim(), { length: 20 });
-
-    // Check if this label matches with an existing group label
-    let actualLabelId: string | undefined = existingLabelGroupsMap[labelName.toLowerCase()];
-
-    if (actualLabelId) {
-      // This label has matched with an existing group label. We cannot re-use the label as-is, it will be renamed.
-      actualLabelId = undefined;
-      labelName = `${labelName} (imported)`;
-    }
-
-    // Check if this label matches with an existing label
-    actualLabelId = existingLabelMap[labelName.toLowerCase()];
-
-    if (!actualLabelId) {
-      const labelResponse = await client.createIssueLabel({
-        name: labelName,
-        description: label.description,
-        color: label.color,
-        teamId,
-      });
-
-      const issueLabel = await labelResponse?.issueLabel;
-      if (issueLabel?.id) {
-        actualLabelId = issueLabel?.id;
-      }
-      existingLabelMap[labelName.toLowerCase()] = actualLabelId;
-    }
-    labelMapping[labelId] = actualLabelId;
-  }
+  const labelMapping = await handleLabels(client, importData, teamId, [...allTeamLabels, ...allWorkspaceLabels]);
 
   const existingStateMap = {} as { [name: string]: string };
   for (const state of workflowStates?.nodes ?? []) {
@@ -279,16 +235,16 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
         ? await buildComments(client, issueDescription || "", issue.comments, importData)
         : issueDescription;
 
-    const labelIds = issue.labels ? uniq(issue.labels.map(labelId => labelMapping[labelId])) : undefined;
+    const labelIds = issue.labels ? uniq(issue.labels.map(labelId => labelMapping[labelId].id)) : undefined;
 
     let stateId = !!issue.status ? existingStateMap[issue.status.toLowerCase()] : undefined;
     // Create a new state since one doesn't already exist with this name
     if (!stateId && issue.status) {
-      let stateType = "backlog";
+      let stateType = IssueStatus.Backlog;
       if (issue.completedAt) {
-        stateType = "completed";
+        stateType = IssueStatus.Completed;
       } else if (issue.startedAt) {
-        stateType = "started";
+        stateType = IssueStatus.Started;
       }
       const newStateResult = await client.createWorkflowState({
         name: issue.status,
@@ -306,11 +262,11 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
     }
 
     const issueAssigneeId = issue.assigneeId?.toLowerCase();
-    const existingAssigneeId: string | undefined = !!issueAssigneeId
-      ? (existingUserMapByEmail[issueAssigneeId] ?? existingUserMapByName[issueAssigneeId])
+    const existingAssigneeId: Id | undefined = !!issueAssigneeId
+      ? existingUserMapByEmail[issueAssigneeId] ?? existingUserMapByName[issueAssigneeId]
       : undefined;
 
-    let assigneeId: string | undefined;
+    let assigneeId: Id | undefined;
     if (importAnswers.selfAssign) {
       assigneeId = viewer;
     } else if (importAnswers.targetAssignee === "{{assignee}}") {

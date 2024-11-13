@@ -1,5 +1,5 @@
 import csv from "csvtojson";
-import { Importer, ImportResult } from "../../types";
+import { Importer, ImportResult, IssuePriority } from "../../types";
 import { safeParseInt } from "../../utils/parseInt";
 
 type LinearPriority = "No priority" | "Urgent" | "High" | "Medium" | "Low";
@@ -108,8 +108,8 @@ function stripLeadingSingleQuote(input: string): string {
   return input.replace(/^'([+\-=@])/, "$1");
 }
 
-const mapPriority = (input: LinearPriority): number => {
-  const priorityMap = {
+const mapPriority = (input: LinearPriority) => {
+  const priorityMap: { [k: string]: IssuePriority } = {
     "No priority": 0,
     Urgent: 1,
     High: 2,
