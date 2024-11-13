@@ -22,7 +22,7 @@ export const handleLabels = async (
   existingLabels: IssueLabel[]
 ): Promise<Record<string, { type: LabelType; id: Id }>> => {
   const manager = new LabelManager(existingLabels, teamId);
-  const labelMapping: Record<string, { type: LabelType; id: Id }> = {};
+  const labelMapping: Record<string, { type: LabelType; id: Id; existedBeforeImport: boolean }> = {};
 
   // We process issues instead of labels to validate issue <> label constraints (e.g. only one label from a group)
   for (const issue of importData.issues) {
@@ -43,7 +43,7 @@ const handleIssueLabels = async (
   teamId: Id,
   importData: ImportResult,
   issueLabelIds: string[],
-  labelMapping: Record<string, { type: "root" | "parent" | "child"; id: Id }>
+  labelMapping: Record<string, { type: "root" | "parent" | "child"; id: Id; existedBeforeImport?: boolean }>
 ) => {
   let actualLabelId: Id | undefined;
   // Track which groups are used to prevent multiple labels from same group
@@ -59,20 +59,21 @@ const handleIssueLabels = async (
     // and its group is in use, create/use a root label with the full name.
     if (group && (usedGroups.has(group) || (labelMapping[labelId]?.type === "child" && usedGroups.has(group)))) {
       const fullName = labelData.name;
-      actualLabelId = manager.getLabelByName(fullName, teamId)?.id;
+      const label = manager.getLabelByName(fullName, teamId);
+      actualLabelId = label?.id;
 
       // If this was previously a child label, delete it before converting to root
-      if (labelMapping[labelId]?.type === "child") {
+      if (labelMapping[labelId]?.type === "child" && !labelMapping[labelId].existedBeforeImport) {
         await deleteLabel(client, labelMapping[labelId].id);
       }
 
       if (!actualLabelId) {
         actualLabelId = await createLabel(client, { name: fullName, teamId });
-        const rootLabel = new Label(actualLabelId, fullName);
-        manager.addLabel({ label: rootLabel, teamId });
+        const newRootLabel = new Label(actualLabelId, fullName);
+        manager.addLabel({ label: newRootLabel, teamId });
       }
 
-      labelMapping[labelId] = { type: "root", id: actualLabelId };
+      labelMapping[labelId] = { type: "root", id: actualLabelId, existedBeforeImport: label?.existedBeforeImport };
       continue;
     }
 
@@ -110,7 +111,8 @@ const handleIssueLabels = async (
 
     // Handle the child label if we have a valid group
     if (groupLabel) {
-      actualLabelId = groupLabel.labels[labelName];
+      const existingChildLabel = groupLabel.labels[labelName];
+      actualLabelId = existingChildLabel?.id;
 
       if (!actualLabelId) {
         // Check for naming conflicts
@@ -127,7 +129,11 @@ const handleIssueLabels = async (
         manager.addLabel({ label: subgroupLabel, parent: groupLabel, teamId });
       }
 
-      labelMapping[labelId] = { type: "child", id: actualLabelId };
+      labelMapping[labelId] = {
+        type: "child",
+        id: actualLabelId,
+        existedBeforeImport: existingChildLabel?.existedBeforeImport,
+      };
       continue;
     }
 
@@ -141,15 +147,16 @@ const handleIssueLabels = async (
     }
 
     // Check for existing root label
-    actualLabelId = manager.getLabelByName(rootLabelName, teamId)?.id;
+    const rootLabel = manager.getRootLabel({ name: rootLabelName });
+    actualLabelId = rootLabel?.id;
 
     if (!actualLabelId) {
       actualLabelId = await createLabel(client, { name: rootLabelName, teamId });
-      const rootLabel = new Label(actualLabelId, rootLabelName);
-      manager.addLabel({ label: rootLabel, teamId });
+      const newRootLabel = new Label(actualLabelId, rootLabelName);
+      manager.addLabel({ label: newRootLabel, teamId });
     }
 
-    labelMapping[labelId] = { type: "root", id: actualLabelId };
+    labelMapping[labelId] = { type: "root", id: actualLabelId, existedBeforeImport: rootLabel?.existedBeforeImport };
   }
 };
 
@@ -235,7 +242,7 @@ class LabelManager {
     this.idToLabel[label.id] = { [teamId]: label };
 
     if (parent) {
-      parent.addLabel(label.name, label.id);
+      parent.addLabel(label);
     }
   }
 
@@ -256,21 +263,22 @@ class LabelManager {
     // We want to process groups first.
     existingLabels.sort(a => (a.isGroup ? -1 : 1));
 
+    const isExisting = true;
+
     for (const existingLabel of existingLabels) {
       const labelName = existingLabel.name?.toLowerCase();
       const teamId = (await existingLabel.team)?.id ?? WORKSPACE_ID;
 
       if (existingLabel.isGroup && labelName && existingLabel.id) {
-        const group = new GroupLabel(existingLabel.id, labelName);
-        this.addLabel({ label: group, teamId });
+        this.addLabel({ label: new GroupLabel(existingLabel.id, labelName, isExisting), teamId });
       } else if (labelName && existingLabel.id) {
         const parent = await existingLabel.parent;
 
         if (parent) {
           const group = this.idToLabel[parent.id]?.[teamId] as GroupLabel;
-          this.addLabel({ label: new Label(existingLabel.id, labelName), parent: group, teamId });
+          this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), parent: group, teamId });
         } else {
-          this.addLabel({ label: new Label(existingLabel.id, labelName), teamId });
+          this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), teamId });
         }
       }
     }
@@ -304,22 +312,27 @@ const deleteLabel = async (client: LinearClient, labelId: Id) => {
 
 // A root label
 class Label {
+  public name: string;
+
   public constructor(
     public id: Id,
-    public name: string
-  ) {}
+    name: string,
+    public existedBeforeImport: boolean = false
+  ) {
+    this.name = name.toLowerCase();
+  }
 }
 
 // A label group (parent label)
 class GroupLabel extends Label {
-  public labels: Record<string, Id> = {};
+  public labels: Record<string, Label> = {};
 
-  public constructor(id: Id, name: string) {
-    super(id, name);
+  public constructor(id: Id, name: string, existedBeforeImport?: boolean) {
+    super(id, name, existedBeforeImport);
   }
 
-  public addLabel(name: string, id: Id) {
-    this.labels[name.toLowerCase()] = id;
+  public addLabel(label: Label) {
+    this.labels[label.name] = label;
   }
 }
 
