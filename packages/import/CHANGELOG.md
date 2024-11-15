@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.0
+
+### Minor Changes
+
+- df7cea6: feat: add gitlab csv importer, support label groups
+
 ## 2.1.1
 
 ### Patch Changes
