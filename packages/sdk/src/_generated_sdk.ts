@@ -4262,6 +4262,7 @@ export class Initiative extends Request {
     this.targetDate = data.targetDate ?? undefined;
     this.trashed = data.trashed ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
     this.health = data.health ?? undefined;
     this.status = data.status;
     this.targetDateResolution = data.targetDateResolution ?? undefined;
@@ -4300,6 +4301,8 @@ export class Initiative extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** Initiative URL. */
+  public url: string;
   /** The health of the initiative. */
   public health?: L.InitiativeUpdateHealthType;
   /** The status of the initiative. One of Planned, Active, Completed */
@@ -4928,6 +4931,12 @@ export class IntegrationSettings extends Request {
     this.slackCustomViewNotifications = data.slackCustomViewNotifications
       ? new SlackPostSettings(request, data.slackCustomViewNotifications)
       : undefined;
+    this.slackInitiativePost = data.slackInitiativePost
+      ? new SlackPostSettings(request, data.slackInitiativePost)
+      : undefined;
+    this.slackOrgInitiativeUpdatesPost = data.slackOrgInitiativeUpdatesPost
+      ? new SlackPostSettings(request, data.slackOrgInitiativeUpdatesPost)
+      : undefined;
     this.slackOrgProjectUpdatesPost = data.slackOrgProjectUpdatesPost
       ? new SlackPostSettings(request, data.slackOrgProjectUpdatesPost)
       : undefined;
@@ -4953,6 +4962,8 @@ export class IntegrationSettings extends Request {
   public slack?: SlackSettings;
   public slackAsks?: SlackAsksSettings;
   public slackCustomViewNotifications?: SlackPostSettings;
+  public slackInitiativePost?: SlackPostSettings;
+  public slackOrgInitiativeUpdatesPost?: SlackPostSettings;
   public slackOrgProjectUpdatesPost?: SlackPostSettings;
   public slackPost?: SlackPostSettings;
   public slackProjectPost?: SlackPostSettings;
@@ -5057,12 +5068,13 @@ export class IntegrationTemplatePayload extends Request {
   }
 }
 /**
- * The configuration of all integrations for a project or a team.
+ * The configuration of all integrations for different entities.
  *
  * @param request - function to call the graphql client
  * @param data - L.IntegrationsSettingsFragment response data
  */
 export class IntegrationsSettings extends Request {
+  private _initiative?: L.IntegrationsSettingsFragment["initiative"];
   private _project?: L.IntegrationsSettingsFragment["project"];
   private _team?: L.IntegrationsSettingsFragment["team"];
 
@@ -5071,6 +5083,7 @@ export class IntegrationsSettings extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.slackInitiativeUpdateCreated = data.slackInitiativeUpdateCreated ?? undefined;
     this.slackIssueAddedToTriage = data.slackIssueAddedToTriage ?? undefined;
     this.slackIssueAddedToView = data.slackIssueAddedToView ?? undefined;
     this.slackIssueCreated = data.slackIssueCreated ?? undefined;
@@ -5084,6 +5097,7 @@ export class IntegrationsSettings extends Request {
     this.slackProjectUpdateCreatedToWorkspace = data.slackProjectUpdateCreatedToWorkspace ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.contextViewType = data.contextViewType ?? undefined;
+    this._initiative = data.initiative ?? undefined;
     this._project = data.project ?? undefined;
     this._team = data.team ?? undefined;
   }
@@ -5094,6 +5108,8 @@ export class IntegrationsSettings extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Whether to send a Slack message when a initiate update is created. */
+  public slackInitiativeUpdateCreated?: boolean;
   /** Whether to send a Slack message when a new issue is added to triage. */
   public slackIssueAddedToTriage?: boolean;
   /** Whether to send a Slack message when an issue is added to the custom view. */
@@ -5123,6 +5139,10 @@ export class IntegrationsSettings extends Request {
   public updatedAt: Date;
   /** The type of view to which the integration settings context is associated with. */
   public contextViewType?: L.ContextViewType;
+  /** Initiative which those settings apply to. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
   /** Project which those settings apply to. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
@@ -7136,6 +7156,30 @@ export class NotificationCategoryPreferencesChannel extends Request {
   public slack: boolean;
 }
 /**
+ * A user's notification channel preferences, indicating if a channel is enabled or not
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.NotificationChannelPreferencesFragment response data
+ */
+export class NotificationChannelPreferences extends Request {
+  public constructor(request: LinearRequest, data: L.NotificationChannelPreferencesFragment) {
+    super(request);
+    this.desktop = data.desktop ?? undefined;
+    this.email = data.email ?? undefined;
+    this.mobile = data.mobile ?? undefined;
+    this.slack = data.slack ?? undefined;
+  }
+
+  /** Whether notifications are currently enabled for desktop. */
+  public desktop?: boolean;
+  /** Whether notifications are currently enabled for email. */
+  public email?: boolean;
+  /** Whether notifications are currently enabled for mobile. */
+  public mobile?: boolean;
+  /** Whether notifications are currently enabled for Slack. */
+  public slack?: boolean;
+}
+/**
  * NotificationConnection model
  *
  * @param request - function to call the graphql client
@@ -9142,7 +9186,9 @@ export class ProjectMilestonePayload extends Request {
 export class ProjectNotification extends Request {
   private _actor?: L.ProjectNotificationFragment["actor"];
   private _comment?: L.ProjectNotificationFragment["comment"];
+  private _document: L.ProjectNotificationFragment["document"];
   private _externalUserActor?: L.ProjectNotificationFragment["externalUserActor"];
+  private _initiative: L.ProjectNotificationFragment["initiative"];
   private _parentComment?: L.ProjectNotificationFragment["parentComment"];
   private _project: L.ProjectNotificationFragment["project"];
   private _projectUpdate?: L.ProjectNotificationFragment["projectUpdate"];
@@ -9168,7 +9214,9 @@ export class ProjectNotification extends Request {
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this._actor = data.actor ?? undefined;
     this._comment = data.comment ?? undefined;
+    this._document = data.document;
     this._externalUserActor = data.externalUserActor ?? undefined;
+    this._initiative = data.initiative;
     this._parentComment = data.parentComment ?? undefined;
     this._project = data.project;
     this._projectUpdate = data.projectUpdate ?? undefined;
@@ -9221,11 +9269,19 @@ export class ProjectNotification extends Request {
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
   }
+  /** The document related to the notification. */
+  public get document(): LinearFetch<Document> | undefined {
+    return new DocumentQuery(this._request).fetch(this._document.id);
+  }
   /** The external user that caused the notification. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
+  }
+  /** The initiative related to the notification. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return new InitiativeQuery(this._request).fetch(this._initiative.id);
   }
   /** The parent comment related to the notification, if a notification is a reply comment notification. */
   public get parentComment(): LinearFetch<Comment> | undefined {
@@ -10159,6 +10215,33 @@ export class ProjectUpdateWithInteractionPayload extends Request {
   }
 }
 /**
+ * A comment on a pull request.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.PullRequestCommentFragment response data
+ */
+export class PullRequestComment extends Request {
+  public constructor(request: LinearRequest, data: L.PullRequestCommentFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+}
+/**
  * A user's web or mobile push notification subscription.
  *
  * @param request - function to call the graphql client
@@ -10741,9 +10824,12 @@ export class RoadmapToProjectPayload extends Request {
 export class SentrySettings extends Request {
   public constructor(request: LinearRequest, data: L.SentrySettingsFragment) {
     super(request);
+    this.organizationId = data.organizationId;
     this.organizationSlug = data.organizationSlug;
   }
 
+  /** The ID of the Sentry organization being connected. */
+  public organizationId: number;
   /** The slug of the Sentry organization being connected. */
   public organizationSlug: string;
 }
@@ -11078,13 +11164,8 @@ export class Team extends Request {
   private _defaultProjectTemplate?: L.TeamFragment["defaultProjectTemplate"];
   private _defaultTemplateForMembers?: L.TeamFragment["defaultTemplateForMembers"];
   private _defaultTemplateForNonMembers?: L.TeamFragment["defaultTemplateForNonMembers"];
-  private _draftWorkflowState?: L.TeamFragment["draftWorkflowState"];
   private _integrationsSettings?: L.TeamFragment["integrationsSettings"];
   private _markedAsDuplicateWorkflowState?: L.TeamFragment["markedAsDuplicateWorkflowState"];
-  private _mergeWorkflowState?: L.TeamFragment["mergeWorkflowState"];
-  private _mergeableWorkflowState?: L.TeamFragment["mergeableWorkflowState"];
-  private _reviewWorkflowState?: L.TeamFragment["reviewWorkflowState"];
-  private _startWorkflowState?: L.TeamFragment["startWorkflowState"];
   private _triageIssueState?: L.TeamFragment["triageIssueState"];
   private _triageResponsibility?: L.TeamFragment["triageResponsibility"];
 
@@ -11139,13 +11220,8 @@ export class Team extends Request {
     this._defaultProjectTemplate = data.defaultProjectTemplate ?? undefined;
     this._defaultTemplateForMembers = data.defaultTemplateForMembers ?? undefined;
     this._defaultTemplateForNonMembers = data.defaultTemplateForNonMembers ?? undefined;
-    this._draftWorkflowState = data.draftWorkflowState ?? undefined;
     this._integrationsSettings = data.integrationsSettings ?? undefined;
     this._markedAsDuplicateWorkflowState = data.markedAsDuplicateWorkflowState ?? undefined;
-    this._mergeWorkflowState = data.mergeWorkflowState ?? undefined;
-    this._mergeableWorkflowState = data.mergeableWorkflowState ?? undefined;
-    this._reviewWorkflowState = data.reviewWorkflowState ?? undefined;
-    this._startWorkflowState = data.startWorkflowState ?? undefined;
     this._triageIssueState = data.triageIssueState ?? undefined;
     this._triageResponsibility = data.triageResponsibility ?? undefined;
   }
@@ -11269,12 +11345,6 @@ export class Team extends Request {
       ? new TemplateQuery(this._request).fetch(this._defaultTemplateForNonMembers?.id)
       : undefined;
   }
-  /** The workflow state into which issues are moved when a PR has been opened as draft. */
-  public get draftWorkflowState(): LinearFetch<WorkflowState> | undefined {
-    return this._draftWorkflowState?.id
-      ? new WorkflowStateQuery(this._request).fetch(this._draftWorkflowState?.id)
-      : undefined;
-  }
   /** Settings for all integrations associated with that team. */
   public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
     return this._integrationsSettings?.id
@@ -11287,33 +11357,9 @@ export class Team extends Request {
       ? new WorkflowStateQuery(this._request).fetch(this._markedAsDuplicateWorkflowState?.id)
       : undefined;
   }
-  /** The workflow state into which issues are moved when a PR has been merged. */
-  public get mergeWorkflowState(): LinearFetch<WorkflowState> | undefined {
-    return this._mergeWorkflowState?.id
-      ? new WorkflowStateQuery(this._request).fetch(this._mergeWorkflowState?.id)
-      : undefined;
-  }
-  /** The workflow state into which issues are moved when a PR is ready to be merged. */
-  public get mergeableWorkflowState(): LinearFetch<WorkflowState> | undefined {
-    return this._mergeableWorkflowState?.id
-      ? new WorkflowStateQuery(this._request).fetch(this._mergeableWorkflowState?.id)
-      : undefined;
-  }
   /** The organization that the team is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
-  }
-  /** The workflow state into which issues are moved when a review has been requested for the PR. */
-  public get reviewWorkflowState(): LinearFetch<WorkflowState> | undefined {
-    return this._reviewWorkflowState?.id
-      ? new WorkflowStateQuery(this._request).fetch(this._reviewWorkflowState?.id)
-      : undefined;
-  }
-  /** The workflow state into which issues are moved when a PR has been opened. */
-  public get startWorkflowState(): LinearFetch<WorkflowState> | undefined {
-    return this._startWorkflowState?.id
-      ? new WorkflowStateQuery(this._request).fetch(this._startWorkflowState?.id)
-      : undefined;
   }
   /** The workflow state into which issues are set when they are opened by non-team members or integrations if triage is enabled. */
   public get triageIssueState(): LinearFetch<WorkflowState> | undefined {
@@ -12475,7 +12521,6 @@ export class UserSettings extends Request {
     this.calendarHash = data.calendarHash ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
-    this.notificationCategoryPreferences = data.notificationCategoryPreferences;
     this.notificationPreferences = data.notificationPreferences;
     this.showFullUserNames = data.showFullUserNames;
     this.subscribedToChangelog = data.subscribedToChangelog;
@@ -12485,6 +12530,14 @@ export class UserSettings extends Request {
     this.subscribedToUnreadNotificationsReminder = data.subscribedToUnreadNotificationsReminder;
     this.unsubscribedFrom = data.unsubscribedFrom;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.notificationCategoryPreferences = new NotificationCategoryPreferences(
+      request,
+      data.notificationCategoryPreferences
+    );
+    this.notificationChannelPreferences = new NotificationChannelPreferences(
+      request,
+      data.notificationChannelPreferences
+    );
     this.notificationDeliveryPreferences = new NotificationDeliveryPreferences(
       request,
       data.notificationDeliveryPreferences
@@ -12502,8 +12555,6 @@ export class UserSettings extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The notification category preferences for the user. */
-  public notificationCategoryPreferences: L.Scalars["JSONObject"];
   /** The notification channel settings the user has selected. */
   public notificationPreferences: L.Scalars["JSONObject"];
   /** Whether to show full user names instead of display names. */
@@ -12525,6 +12576,10 @@ export class UserSettings extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The notification category preferences for the user. */
+  public notificationCategoryPreferences: NotificationCategoryPreferences;
+  /** Whether the user has specific notification channels enabled or disabled. */
+  public notificationChannelPreferences: NotificationChannelPreferences;
   /** The notification delivery preferences for the user. */
   public notificationDeliveryPreferences: NotificationDeliveryPreferences;
   /** The user associated with these settings. */
@@ -19130,6 +19185,35 @@ export class IntegrationGithubImportConnectMutation extends Request {
 }
 
 /**
+ * A fetchable IntegrationGithubImportRefresh Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationGithubImportRefreshMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationGithubImportRefresh mutation and return a IntegrationPayload
+   *
+   * @param id - required id to pass to integrationGithubImportRefresh
+   * @returns parsed response from IntegrationGithubImportRefreshMutation
+   */
+  public async fetch(id: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<
+      L.IntegrationGithubImportRefreshMutation,
+      L.IntegrationGithubImportRefreshMutationVariables
+    >(L.IntegrationGithubImportRefreshDocument, {
+      id,
+    });
+    const data = response.integrationGithubImportRefresh;
+
+    return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable IntegrationGitlabConnect Mutation
  *
  * @param request - function to call the graphql client
@@ -20880,6 +20964,43 @@ export class NotificationArchiveAllMutation extends Request {
     const data = response.notificationArchiveAll;
 
     return new NotificationBatchActionPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateNotificationCategoryChannelSubscription Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateNotificationCategoryChannelSubscriptionMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateNotificationCategoryChannelSubscription mutation and return a UserSettingsPayload
+   *
+   * @param category - required category to pass to updateNotificationCategoryChannelSubscription
+   * @param channel - required channel to pass to updateNotificationCategoryChannelSubscription
+   * @param subscribe - required subscribe to pass to updateNotificationCategoryChannelSubscription
+   * @returns parsed response from UpdateNotificationCategoryChannelSubscriptionMutation
+   */
+  public async fetch(
+    category: L.NotificationCategory,
+    channel: L.NotificationChannel,
+    subscribe: boolean
+  ): LinearFetch<UserSettingsPayload> {
+    const response = await this._request<
+      L.UpdateNotificationCategoryChannelSubscriptionMutation,
+      L.UpdateNotificationCategoryChannelSubscriptionMutationVariables
+    >(L.UpdateNotificationCategoryChannelSubscriptionDocument, {
+      category,
+      channel,
+      subscribe,
+    });
+    const data = response.notificationCategoryChannelSubscriptionUpdate;
+
+    return new UserSettingsPayload(this._request, data);
   }
 }
 
@@ -27916,6 +28037,58 @@ export class User_TeamsQuery extends Request {
 }
 
 /**
+ * A fetchable UserSettings_NotificationCategoryPreferences Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferencesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences query and return a NotificationCategoryPreferences
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferencesQuery
+   */
+  public async fetch(): LinearFetch<NotificationCategoryPreferences> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferencesQuery,
+      L.UserSettings_NotificationCategoryPreferencesQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferencesDocument, {});
+    const data = response.userSettings.notificationCategoryPreferences;
+
+    return new NotificationCategoryPreferences(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationChannelPreferences Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationChannelPreferencesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationChannelPreferences query and return a NotificationChannelPreferences
+   *
+   * @returns parsed response from UserSettings_NotificationChannelPreferencesQuery
+   */
+  public async fetch(): LinearFetch<NotificationChannelPreferences> {
+    const response = await this._request<
+      L.UserSettings_NotificationChannelPreferencesQuery,
+      L.UserSettings_NotificationChannelPreferencesQueryVariables
+    >(L.UserSettings_NotificationChannelPreferencesDocument, {});
+    const data = response.userSettings.notificationChannelPreferences;
+
+    return new NotificationChannelPreferences(this._request, data);
+  }
+}
+
+/**
  * A fetchable UserSettings_NotificationDeliveryPreferences Query
  *
  * @param request - function to call the graphql client
@@ -27938,6 +28111,292 @@ export class UserSettings_NotificationDeliveryPreferencesQuery extends Request {
     const data = response.userSettings.notificationDeliveryPreferences;
 
     return new NotificationDeliveryPreferences(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationCategoryPreferences_AppsAndIntegrations Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_AppsAndIntegrationsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_AppsAndIntegrations query and return a NotificationCategoryPreferencesChannel
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_AppsAndIntegrationsQuery
+   */
+  public async fetch(): LinearFetch<NotificationCategoryPreferencesChannel | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_AppsAndIntegrationsQuery,
+      L.UserSettings_NotificationCategoryPreferences_AppsAndIntegrationsQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_AppsAndIntegrationsDocument, {});
+    const data = response.userSettings.notificationCategoryPreferences.appsAndIntegrations;
+
+    return data ? new NotificationCategoryPreferencesChannel(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationCategoryPreferences_Assignments Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_AssignmentsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_Assignments query and return a NotificationCategoryPreferencesChannel
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_AssignmentsQuery
+   */
+  public async fetch(): LinearFetch<NotificationCategoryPreferencesChannel | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_AssignmentsQuery,
+      L.UserSettings_NotificationCategoryPreferences_AssignmentsQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_AssignmentsDocument, {});
+    const data = response.userSettings.notificationCategoryPreferences.assignments;
+
+    return data ? new NotificationCategoryPreferencesChannel(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationCategoryPreferences_CommentsAndReplies Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_CommentsAndRepliesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_CommentsAndReplies query and return a NotificationCategoryPreferencesChannel
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_CommentsAndRepliesQuery
+   */
+  public async fetch(): LinearFetch<NotificationCategoryPreferencesChannel | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_CommentsAndRepliesQuery,
+      L.UserSettings_NotificationCategoryPreferences_CommentsAndRepliesQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_CommentsAndRepliesDocument, {});
+    const data = response.userSettings.notificationCategoryPreferences.commentsAndReplies;
+
+    return data ? new NotificationCategoryPreferencesChannel(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationCategoryPreferences_DocumentChanges Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_DocumentChangesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_DocumentChanges query and return a NotificationCategoryPreferencesChannel
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_DocumentChangesQuery
+   */
+  public async fetch(): LinearFetch<NotificationCategoryPreferencesChannel | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_DocumentChangesQuery,
+      L.UserSettings_NotificationCategoryPreferences_DocumentChangesQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_DocumentChangesDocument, {});
+    const data = response.userSettings.notificationCategoryPreferences.documentChanges;
+
+    return data ? new NotificationCategoryPreferencesChannel(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationCategoryPreferences_Mentions Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_MentionsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_Mentions query and return a NotificationCategoryPreferencesChannel
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_MentionsQuery
+   */
+  public async fetch(): LinearFetch<NotificationCategoryPreferencesChannel | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_MentionsQuery,
+      L.UserSettings_NotificationCategoryPreferences_MentionsQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_MentionsDocument, {});
+    const data = response.userSettings.notificationCategoryPreferences.mentions;
+
+    return data ? new NotificationCategoryPreferencesChannel(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationCategoryPreferences_PostsAndUpdates Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_PostsAndUpdatesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_PostsAndUpdates query and return a NotificationCategoryPreferencesChannel
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_PostsAndUpdatesQuery
+   */
+  public async fetch(): LinearFetch<NotificationCategoryPreferencesChannel | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_PostsAndUpdatesQuery,
+      L.UserSettings_NotificationCategoryPreferences_PostsAndUpdatesQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_PostsAndUpdatesDocument, {});
+    const data = response.userSettings.notificationCategoryPreferences.postsAndUpdates;
+
+    return data ? new NotificationCategoryPreferencesChannel(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationCategoryPreferences_Reactions Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_ReactionsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_Reactions query and return a NotificationCategoryPreferencesChannel
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_ReactionsQuery
+   */
+  public async fetch(): LinearFetch<NotificationCategoryPreferencesChannel | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_ReactionsQuery,
+      L.UserSettings_NotificationCategoryPreferences_ReactionsQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_ReactionsDocument, {});
+    const data = response.userSettings.notificationCategoryPreferences.reactions;
+
+    return data ? new NotificationCategoryPreferencesChannel(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationCategoryPreferences_Reminders Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_RemindersQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_Reminders query and return a NotificationCategoryPreferencesChannel
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_RemindersQuery
+   */
+  public async fetch(): LinearFetch<NotificationCategoryPreferencesChannel | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_RemindersQuery,
+      L.UserSettings_NotificationCategoryPreferences_RemindersQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_RemindersDocument, {});
+    const data = response.userSettings.notificationCategoryPreferences.reminders;
+
+    return data ? new NotificationCategoryPreferencesChannel(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationCategoryPreferences_Reviews Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_ReviewsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_Reviews query and return a NotificationCategoryPreferencesChannel
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_ReviewsQuery
+   */
+  public async fetch(): LinearFetch<NotificationCategoryPreferencesChannel | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_ReviewsQuery,
+      L.UserSettings_NotificationCategoryPreferences_ReviewsQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_ReviewsDocument, {});
+    const data = response.userSettings.notificationCategoryPreferences.reviews;
+
+    return data ? new NotificationCategoryPreferencesChannel(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationCategoryPreferences_StatusChanges Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_StatusChangesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_StatusChanges query and return a NotificationCategoryPreferencesChannel
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_StatusChangesQuery
+   */
+  public async fetch(): LinearFetch<NotificationCategoryPreferencesChannel | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_StatusChangesQuery,
+      L.UserSettings_NotificationCategoryPreferences_StatusChangesQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_StatusChangesDocument, {});
+    const data = response.userSettings.notificationCategoryPreferences.statusChanges;
+
+    return data ? new NotificationCategoryPreferencesChannel(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationCategoryPreferences_Subscriptions Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_SubscriptionsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_Subscriptions query and return a NotificationCategoryPreferencesChannel
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_SubscriptionsQuery
+   */
+  public async fetch(): LinearFetch<NotificationCategoryPreferencesChannel | undefined> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_SubscriptionsQuery,
+      L.UserSettings_NotificationCategoryPreferences_SubscriptionsQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_SubscriptionsDocument, {});
+    const data = response.userSettings.notificationCategoryPreferences.subscriptions;
+
+    return data ? new NotificationCategoryPreferencesChannel(this._request, data) : undefined;
   }
 }
 
@@ -30353,6 +30812,15 @@ export class LinearSdk extends Request {
     return new IntegrationGithubImportConnectMutation(this._request).fetch(code, installationId);
   }
   /**
+   * Refreshes the data for a GitHub import integration.
+   *
+   * @param id - required id to pass to integrationGithubImportRefresh
+   * @returns IntegrationPayload
+   */
+  public integrationGithubImportRefresh(id: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationGithubImportRefreshMutation(this._request).fetch(id);
+  }
+  /**
    * Connects the organization with a GitLab Access Token.
    *
    * @param accessToken - required accessToken to pass to integrationGitlabConnect
@@ -30992,6 +31460,21 @@ export class LinearSdk extends Request {
    */
   public notificationArchiveAll(input: L.NotificationEntityInput): LinearFetch<NotificationBatchActionPayload> {
     return new NotificationArchiveAllMutation(this._request).fetch(input);
+  }
+  /**
+   * Subscribes to or unsubscribes from a notification category for a given notification channel for the user
+   *
+   * @param category - required category to pass to updateNotificationCategoryChannelSubscription
+   * @param channel - required channel to pass to updateNotificationCategoryChannelSubscription
+   * @param subscribe - required subscribe to pass to updateNotificationCategoryChannelSubscription
+   * @returns UserSettingsPayload
+   */
+  public updateNotificationCategoryChannelSubscription(
+    category: L.NotificationCategory,
+    channel: L.NotificationChannel,
+    subscribe: boolean
+  ): LinearFetch<UserSettingsPayload> {
+    return new UpdateNotificationCategoryChannelSubscriptionMutation(this._request).fetch(category, channel, subscribe);
   }
   /**
    * Marks notification and all related notifications as read.
