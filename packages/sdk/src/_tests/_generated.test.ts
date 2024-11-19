@@ -193,16 +193,6 @@ describe("generated", () => {
       }
     });
 
-    /** Test the team.draftWorkflowState query for L.WorkflowState */
-    it("team.draftWorkflowState", async () => {
-      if (_team) {
-        const team_draftWorkflowState: L.WorkflowState | undefined = await _team.draftWorkflowState;
-        expect(team_draftWorkflowState instanceof L.WorkflowState);
-      } else {
-        console.warn("codegen-doc:print: No Team found - cannot test team.draftWorkflowState query");
-      }
-    });
-
     /** Test the team.integrationsSettings query for L.IntegrationsSettings */
     it("team.integrationsSettings", async () => {
       if (_team) {
@@ -224,26 +214,6 @@ describe("generated", () => {
       }
     });
 
-    /** Test the team.mergeWorkflowState query for L.WorkflowState */
-    it("team.mergeWorkflowState", async () => {
-      if (_team) {
-        const team_mergeWorkflowState: L.WorkflowState | undefined = await _team.mergeWorkflowState;
-        expect(team_mergeWorkflowState instanceof L.WorkflowState);
-      } else {
-        console.warn("codegen-doc:print: No Team found - cannot test team.mergeWorkflowState query");
-      }
-    });
-
-    /** Test the team.mergeableWorkflowState query for L.WorkflowState */
-    it("team.mergeableWorkflowState", async () => {
-      if (_team) {
-        const team_mergeableWorkflowState: L.WorkflowState | undefined = await _team.mergeableWorkflowState;
-        expect(team_mergeableWorkflowState instanceof L.WorkflowState);
-      } else {
-        console.warn("codegen-doc:print: No Team found - cannot test team.mergeableWorkflowState query");
-      }
-    });
-
     /** Test the team.organization query for L.Organization */
     it("team.organization", async () => {
       if (_team) {
@@ -251,26 +221,6 @@ describe("generated", () => {
         expect(team_organization instanceof L.Organization);
       } else {
         console.warn("codegen-doc:print: No Team found - cannot test team.organization query");
-      }
-    });
-
-    /** Test the team.reviewWorkflowState query for L.WorkflowState */
-    it("team.reviewWorkflowState", async () => {
-      if (_team) {
-        const team_reviewWorkflowState: L.WorkflowState | undefined = await _team.reviewWorkflowState;
-        expect(team_reviewWorkflowState instanceof L.WorkflowState);
-      } else {
-        console.warn("codegen-doc:print: No Team found - cannot test team.reviewWorkflowState query");
-      }
-    });
-
-    /** Test the team.startWorkflowState query for L.WorkflowState */
-    it("team.startWorkflowState", async () => {
-      if (_team) {
-        const team_startWorkflowState: L.WorkflowState | undefined = await _team.startWorkflowState;
-        expect(team_startWorkflowState instanceof L.WorkflowState);
-      } else {
-        console.warn("codegen-doc:print: No Team found - cannot test team.startWorkflowState query");
       }
     });
 
@@ -3901,16 +3851,6 @@ describe("generated", () => {
       }
     });
 
-    /** Test the team.draftWorkflowState query for L.WorkflowState */
-    it("team.draftWorkflowState", async () => {
-      if (_team) {
-        const team_draftWorkflowState: L.WorkflowState | undefined = await _team.draftWorkflowState;
-        expect(team_draftWorkflowState instanceof L.WorkflowState);
-      } else {
-        console.warn("codegen-doc:print: No Team found - cannot test team.draftWorkflowState query");
-      }
-    });
-
     /** Test the team.integrationsSettings query for L.IntegrationsSettings */
     it("team.integrationsSettings", async () => {
       if (_team) {
@@ -3932,26 +3872,6 @@ describe("generated", () => {
       }
     });
 
-    /** Test the team.mergeWorkflowState query for L.WorkflowState */
-    it("team.mergeWorkflowState", async () => {
-      if (_team) {
-        const team_mergeWorkflowState: L.WorkflowState | undefined = await _team.mergeWorkflowState;
-        expect(team_mergeWorkflowState instanceof L.WorkflowState);
-      } else {
-        console.warn("codegen-doc:print: No Team found - cannot test team.mergeWorkflowState query");
-      }
-    });
-
-    /** Test the team.mergeableWorkflowState query for L.WorkflowState */
-    it("team.mergeableWorkflowState", async () => {
-      if (_team) {
-        const team_mergeableWorkflowState: L.WorkflowState | undefined = await _team.mergeableWorkflowState;
-        expect(team_mergeableWorkflowState instanceof L.WorkflowState);
-      } else {
-        console.warn("codegen-doc:print: No Team found - cannot test team.mergeableWorkflowState query");
-      }
-    });
-
     /** Test the team.organization query for L.Organization */
     it("team.organization", async () => {
       if (_team) {
@@ -3959,26 +3879,6 @@ describe("generated", () => {
         expect(team_organization instanceof L.Organization);
       } else {
         console.warn("codegen-doc:print: No Team found - cannot test team.organization query");
-      }
-    });
-
-    /** Test the team.reviewWorkflowState query for L.WorkflowState */
-    it("team.reviewWorkflowState", async () => {
-      if (_team) {
-        const team_reviewWorkflowState: L.WorkflowState | undefined = await _team.reviewWorkflowState;
-        expect(team_reviewWorkflowState instanceof L.WorkflowState);
-      } else {
-        console.warn("codegen-doc:print: No Team found - cannot test team.reviewWorkflowState query");
-      }
-    });
-
-    /** Test the team.startWorkflowState query for L.WorkflowState */
-    it("team.startWorkflowState", async () => {
-      if (_team) {
-        const team_startWorkflowState: L.WorkflowState | undefined = await _team.startWorkflowState;
-        expect(team_startWorkflowState instanceof L.WorkflowState);
-      } else {
-        console.warn("codegen-doc:print: No Team found - cannot test team.startWorkflowState query");
       }
     });
 
@@ -4161,6 +4061,177 @@ describe("generated", () => {
       const userSettings: L.UserSettings | undefined = await client.userSettings;
       _userSettings = userSettings;
       expect(userSettings instanceof L.UserSettings);
+    });
+
+    let _notificationCategoryPreferences: L.NotificationCategoryPreferences | undefined;
+
+    /** Test the userSettings model query for UserSettings_NotificationCategoryPreferences */
+    it("userSettings.notificationCategoryPreferences", async () => {
+      if (_userSettings) {
+        const notificationCategoryPreferences: L.NotificationCategoryPreferences | undefined =
+          _userSettings.notificationCategoryPreferences;
+        _notificationCategoryPreferences = notificationCategoryPreferences;
+        expect(notificationCategoryPreferences instanceof L.NotificationCategoryPreferences);
+      } else {
+        console.warn(
+          "codegen-doc:print: No userSettings found - cannot test _userSettings.notificationCategoryPreferences query"
+        );
+      }
+    });
+
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_AppsAndIntegrations */
+    it("userSettings_notificationCategoryPreferences.appsAndIntegrations", async () => {
+      if (_notificationCategoryPreferences) {
+        const appsAndIntegrations: L.NotificationCategoryPreferencesChannel | undefined =
+          _notificationCategoryPreferences.appsAndIntegrations;
+        expect(appsAndIntegrations instanceof L.NotificationCategoryPreferencesChannel);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.appsAndIntegrations query"
+        );
+      }
+    });
+
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_Assignments */
+    it("userSettings_notificationCategoryPreferences.assignments", async () => {
+      if (_notificationCategoryPreferences) {
+        const assignments: L.NotificationCategoryPreferencesChannel | undefined =
+          _notificationCategoryPreferences.assignments;
+        expect(assignments instanceof L.NotificationCategoryPreferencesChannel);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.assignments query"
+        );
+      }
+    });
+
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_CommentsAndReplies */
+    it("userSettings_notificationCategoryPreferences.commentsAndReplies", async () => {
+      if (_notificationCategoryPreferences) {
+        const commentsAndReplies: L.NotificationCategoryPreferencesChannel | undefined =
+          _notificationCategoryPreferences.commentsAndReplies;
+        expect(commentsAndReplies instanceof L.NotificationCategoryPreferencesChannel);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.commentsAndReplies query"
+        );
+      }
+    });
+
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_DocumentChanges */
+    it("userSettings_notificationCategoryPreferences.documentChanges", async () => {
+      if (_notificationCategoryPreferences) {
+        const documentChanges: L.NotificationCategoryPreferencesChannel | undefined =
+          _notificationCategoryPreferences.documentChanges;
+        expect(documentChanges instanceof L.NotificationCategoryPreferencesChannel);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.documentChanges query"
+        );
+      }
+    });
+
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_Mentions */
+    it("userSettings_notificationCategoryPreferences.mentions", async () => {
+      if (_notificationCategoryPreferences) {
+        const mentions: L.NotificationCategoryPreferencesChannel | undefined =
+          _notificationCategoryPreferences.mentions;
+        expect(mentions instanceof L.NotificationCategoryPreferencesChannel);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.mentions query"
+        );
+      }
+    });
+
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_PostsAndUpdates */
+    it("userSettings_notificationCategoryPreferences.postsAndUpdates", async () => {
+      if (_notificationCategoryPreferences) {
+        const postsAndUpdates: L.NotificationCategoryPreferencesChannel | undefined =
+          _notificationCategoryPreferences.postsAndUpdates;
+        expect(postsAndUpdates instanceof L.NotificationCategoryPreferencesChannel);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.postsAndUpdates query"
+        );
+      }
+    });
+
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_Reactions */
+    it("userSettings_notificationCategoryPreferences.reactions", async () => {
+      if (_notificationCategoryPreferences) {
+        const reactions: L.NotificationCategoryPreferencesChannel | undefined =
+          _notificationCategoryPreferences.reactions;
+        expect(reactions instanceof L.NotificationCategoryPreferencesChannel);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.reactions query"
+        );
+      }
+    });
+
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_Reminders */
+    it("userSettings_notificationCategoryPreferences.reminders", async () => {
+      if (_notificationCategoryPreferences) {
+        const reminders: L.NotificationCategoryPreferencesChannel | undefined =
+          _notificationCategoryPreferences.reminders;
+        expect(reminders instanceof L.NotificationCategoryPreferencesChannel);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.reminders query"
+        );
+      }
+    });
+
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_Reviews */
+    it("userSettings_notificationCategoryPreferences.reviews", async () => {
+      if (_notificationCategoryPreferences) {
+        const reviews: L.NotificationCategoryPreferencesChannel | undefined = _notificationCategoryPreferences.reviews;
+        expect(reviews instanceof L.NotificationCategoryPreferencesChannel);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.reviews query"
+        );
+      }
+    });
+
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_StatusChanges */
+    it("userSettings_notificationCategoryPreferences.statusChanges", async () => {
+      if (_notificationCategoryPreferences) {
+        const statusChanges: L.NotificationCategoryPreferencesChannel | undefined =
+          _notificationCategoryPreferences.statusChanges;
+        expect(statusChanges instanceof L.NotificationCategoryPreferencesChannel);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.statusChanges query"
+        );
+      }
+    });
+
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_Subscriptions */
+    it("userSettings_notificationCategoryPreferences.subscriptions", async () => {
+      if (_notificationCategoryPreferences) {
+        const subscriptions: L.NotificationCategoryPreferencesChannel | undefined =
+          _notificationCategoryPreferences.subscriptions;
+        expect(subscriptions instanceof L.NotificationCategoryPreferencesChannel);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.subscriptions query"
+        );
+      }
+    });
+
+    /** Test the userSettings model query for UserSettings_NotificationChannelPreferences */
+    it("userSettings.notificationChannelPreferences", async () => {
+      if (_userSettings) {
+        const notificationChannelPreferences: L.NotificationChannelPreferences | undefined =
+          _userSettings.notificationChannelPreferences;
+        expect(notificationChannelPreferences instanceof L.NotificationChannelPreferences);
+      } else {
+        console.warn(
+          "codegen-doc:print: No userSettings found - cannot test _userSettings.notificationChannelPreferences query"
+        );
+      }
     });
 
     let _notificationDeliveryPreferences: L.NotificationDeliveryPreferences | undefined;

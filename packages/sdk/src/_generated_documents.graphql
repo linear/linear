@@ -124,6 +124,20 @@ fragment Comment on Comment {
   }
 }
 
+# A comment on a pull request.
+fragment PullRequestComment on PullRequestComment {
+  __typename
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
 # A comment related notification.
 fragment CommentNotification on CommentNotification {
   __typename
@@ -1124,8 +1138,16 @@ fragment ProjectNotification on ProjectNotification {
   comment {
     id
   }
+  # The document related to the notification.
+  document {
+    id
+  }
   # The external user that caused the notification.
   externalUserActor {
+    id
+  }
+  # The initiative related to the notification.
+  initiative {
     id
   }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -2137,6 +2159,19 @@ fragment NotificationCategoryPreferences on NotificationCategoryPreferences {
   }
 }
 
+# A user's notification channel preferences, indicating if a channel is enabled or not
+fragment NotificationChannelPreferences on NotificationChannelPreferences {
+  __typename
+  # Whether notifications are currently enabled for Slack.
+  slack
+  # Whether notifications are currently enabled for desktop.
+  desktop
+  # Whether notifications are currently enabled for email.
+  email
+  # Whether notifications are currently enabled for mobile.
+  mobile
+}
+
 # A user's notification delivery preferences.
 fragment NotificationDeliveryPreferences on NotificationDeliveryPreferences {
   __typename
@@ -2559,6 +2594,8 @@ fragment Initiative on Initiative {
   __typename
   # A flag that indicates whether the initiative is in the trash bin.
   trashed
+  # Initiative URL.
+  url
   # The description of the initiative.
   description
   # The estimated completion date of the initiative.
@@ -3157,26 +3194,6 @@ fragment Team on Team {
   timezone
   # The unique identifier of the entity.
   id
-  # The workflow state into which issues are moved when a PR has been merged.
-  mergeWorkflowState {
-    id
-  }
-  # The workflow state into which issues are moved when a PR has been opened as draft.
-  draftWorkflowState {
-    id
-  }
-  # The workflow state into which issues are moved when a PR has been opened.
-  startWorkflowState {
-    id
-  }
-  # The workflow state into which issues are moved when a PR is ready to be merged.
-  mergeableWorkflowState {
-    id
-  }
-  # The workflow state into which issues are moved when a review has been requested for the PR.
-  reviewWorkflowState {
-    id
-  }
   # The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state.
   markedAsDuplicateWorkflowState {
     id
@@ -4061,6 +4078,8 @@ fragment OauthClientApproval on OauthClientApproval {
 # Sentry specific settings.
 fragment SentrySettings on SentrySettings {
   __typename
+  # The ID of the Sentry organization being connected.
+  organizationId
   # The slug of the Sentry organization being connected.
   organizationSlug
 }
@@ -4127,9 +4146,13 @@ fragment SlackPostSettings on SlackPostSettings {
   configurationUrl
 }
 
-# The configuration of all integrations for a project or a team.
+# The configuration of all integrations for different entities.
 fragment IntegrationsSettings on IntegrationsSettings {
   __typename
+  # Initiative which those settings apply to.
+  initiative {
+    id
+  }
   # Project which those settings apply to.
   project {
     id
@@ -4151,6 +4174,8 @@ fragment IntegrationsSettings on IntegrationsSettings {
   id
   # Whether to send a Slack message when a comment is created on any of the project or team's issues.
   slackIssueNewComment
+  # Whether to send a Slack message when a initiate update is created.
+  slackInitiativeUpdateCreated
   # Whether to send a Slack message when a new issue is added to triage.
   slackIssueAddedToTriage
   # Whether to send a Slack message when a new issue is created for the project or the team.
@@ -4225,6 +4250,12 @@ fragment IntegrationSettings on IntegrationSettings {
     ...SlackAsksSettings
   }
   slackCustomViewNotifications {
+    ...SlackPostSettings
+  }
+  slackInitiativePost {
+    ...SlackPostSettings
+  }
+  slackOrgInitiativeUpdatesPost {
     ...SlackPostSettings
   }
   slackOrgProjectUpdatesPost {
@@ -4312,7 +4343,9 @@ fragment UserSettings on UserSettings {
   #     been updated after creation.
   updatedAt
   # The notification category preferences for the user.
-  notificationCategoryPreferences
+  notificationCategoryPreferences {
+    ...NotificationCategoryPreferences
+  }
   # The notification channel settings the user has selected.
   notificationPreferences
   # The notification delivery preferences for the user.
@@ -4328,6 +4361,10 @@ fragment UserSettings on UserSettings {
   # The user associated with these settings.
   user {
     id
+  }
+  # Whether the user has specific notification channels enabled or disabled.
+  notificationChannelPreferences {
+    ...NotificationChannelPreferences
   }
   # Whether this user is subscribed to DPA emails or not.
   subscribedToDPA
@@ -11006,6 +11043,132 @@ query userSettings {
     ...UserSettings
   }
 }
+# The notification category preferences for the user.
+query userSettings_notificationCategoryPreferences {
+  userSettings {
+    notificationCategoryPreferences {
+      ...NotificationCategoryPreferences
+    }
+  }
+}
+# The preferences for notifications about apps and integrations.
+query userSettings_notificationCategoryPreferences_appsAndIntegrations {
+  userSettings {
+    notificationCategoryPreferences {
+      appsAndIntegrations {
+        ...NotificationCategoryPreferencesChannel
+      }
+    }
+  }
+}
+# The preferences for notifications about assignments.
+query userSettings_notificationCategoryPreferences_assignments {
+  userSettings {
+    notificationCategoryPreferences {
+      assignments {
+        ...NotificationCategoryPreferencesChannel
+      }
+    }
+  }
+}
+# The preferences for notifications about comments and replies.
+query userSettings_notificationCategoryPreferences_commentsAndReplies {
+  userSettings {
+    notificationCategoryPreferences {
+      commentsAndReplies {
+        ...NotificationCategoryPreferencesChannel
+      }
+    }
+  }
+}
+# The preferences for notifications about document changes.
+query userSettings_notificationCategoryPreferences_documentChanges {
+  userSettings {
+    notificationCategoryPreferences {
+      documentChanges {
+        ...NotificationCategoryPreferencesChannel
+      }
+    }
+  }
+}
+# The preferences for notifications about mentions.
+query userSettings_notificationCategoryPreferences_mentions {
+  userSettings {
+    notificationCategoryPreferences {
+      mentions {
+        ...NotificationCategoryPreferencesChannel
+      }
+    }
+  }
+}
+# The preferences for notifications about posts and updates.
+query userSettings_notificationCategoryPreferences_postsAndUpdates {
+  userSettings {
+    notificationCategoryPreferences {
+      postsAndUpdates {
+        ...NotificationCategoryPreferencesChannel
+      }
+    }
+  }
+}
+# The preferences for notifications about reactions.
+query userSettings_notificationCategoryPreferences_reactions {
+  userSettings {
+    notificationCategoryPreferences {
+      reactions {
+        ...NotificationCategoryPreferencesChannel
+      }
+    }
+  }
+}
+# The preferences for notifications about reminders.
+query userSettings_notificationCategoryPreferences_reminders {
+  userSettings {
+    notificationCategoryPreferences {
+      reminders {
+        ...NotificationCategoryPreferencesChannel
+      }
+    }
+  }
+}
+# The preferences for notifications about reviews.
+query userSettings_notificationCategoryPreferences_reviews {
+  userSettings {
+    notificationCategoryPreferences {
+      reviews {
+        ...NotificationCategoryPreferencesChannel
+      }
+    }
+  }
+}
+# The preferences for notifications about status changes.
+query userSettings_notificationCategoryPreferences_statusChanges {
+  userSettings {
+    notificationCategoryPreferences {
+      statusChanges {
+        ...NotificationCategoryPreferencesChannel
+      }
+    }
+  }
+}
+# The preferences for notifications about subscriptions.
+query userSettings_notificationCategoryPreferences_subscriptions {
+  userSettings {
+    notificationCategoryPreferences {
+      subscriptions {
+        ...NotificationCategoryPreferencesChannel
+      }
+    }
+  }
+}
+# Whether the user has specific notification channels enabled or disabled.
+query userSettings_notificationChannelPreferences {
+  userSettings {
+    notificationChannelPreferences {
+      ...NotificationChannelPreferences
+    }
+  }
+}
 # The notification delivery preferences for the user.
 query userSettings_notificationDeliveryPreferences {
   userSettings {
@@ -12422,6 +12585,15 @@ mutation integrationGithubImportConnect(
     ...IntegrationPayload
   }
 }
+# Refreshes the data for a GitHub import integration.
+mutation integrationGithubImportRefresh(
+  # The id of the integration to update.
+  $id: String!
+) {
+  integrationGithubImportRefresh(id: $id) {
+    ...IntegrationPayload
+  }
+}
 # Connects the organization with a GitLab Access Token.
 mutation integrationGitlabConnect(
   # The GitLab Access Token to connect with.
@@ -13123,6 +13295,20 @@ mutation notificationArchiveAll(
 ) {
   notificationArchiveAll(input: $input) {
     ...NotificationBatchActionPayload
+  }
+}
+# Subscribes to or unsubscribes from a notification category for a given notification channel for the
+# user
+mutation updateNotificationCategoryChannelSubscription(
+  # The notification category to subscribe to or unsubscribe from
+  $category: NotificationCategory!
+  # The notification channel in which to subscribe to or unsubscribe from the category
+  $channel: NotificationChannel!
+  # True if the user wants to subscribe, false if the user wants to unsubscribe
+  $subscribe: Boolean!
+) {
+  notificationCategoryChannelSubscriptionUpdate(category: $category, channel: $channel, subscribe: $subscribe) {
+    ...UserSettingsPayload
   }
 }
 # Marks notification and all related notifications as read.
