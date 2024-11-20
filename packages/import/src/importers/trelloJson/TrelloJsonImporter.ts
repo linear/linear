@@ -84,7 +84,7 @@ export class TrelloJsonImporter implements Importer {
 
     // Map card id => checklist so we can add them to the issues in the next step
     const checkLists: { [key: string]: TrelloChecklist } = {};
-    for (const checklist of data.checklists as TrelloChecklist[]) {
+    for (const checklist of (data?.checklists ?? []) as TrelloChecklist[]) {
       checkLists[checklist.idCard] = checklist;
     }
 
@@ -135,7 +135,7 @@ export class TrelloJsonImporter implements Importer {
       const description = `${mdDesc}${formattedChecklist && `\n${formattedChecklist}`}${
         formattedAttachments && `\n\nAttachments:\n${formattedAttachments}`
       }\n\n[View original card in Trello](${url})`;
-      const labels = card.labels.map(l => l.id);
+      const labels = card.labels?.map(l => l.id);
 
       if (this.discardArchivedCards && card.closed) {
         continue;
@@ -155,12 +155,12 @@ export class TrelloJsonImporter implements Importer {
         archived: card.closed || cardList?.closed,
       });
 
-      const allLabels = card.labels.map(label => ({
+      const allLabels = card.labels?.map(label => ({
         id: label.id,
         color: mapLabelColor(label.color),
         // Trello allows labels with no name and only a color value, but we must specify a name
         name: label.name || `Trello-${label.color}`,
-      }));
+      })) ?? [];
 
       for (const label of allLabels) {
         const { id, ...labelData } = label;
