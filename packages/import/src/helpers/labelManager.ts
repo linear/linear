@@ -196,7 +196,8 @@ class LabelManager {
    * @returns Label instance if found
    */
   public getLabelByName(name: string, teamId: Id | typeof WORKSPACE_ID): Label | undefined {
-    return this.nameToLabel[name.toLowerCase()]?.[teamId] ?? this.nameToLabel[name]?.[WORKSPACE_ID];
+    const normalized = Label.normalizeName(name);
+    return this.nameToLabel[normalized]?.[teamId] ?? this.nameToLabel[normalized]?.[WORKSPACE_ID];
   }
 
   /**
@@ -238,7 +239,7 @@ class LabelManager {
   public addLabel(props: { label: Label; parent?: GroupLabel; teamId?: Id | typeof WORKSPACE_ID }) {
     const { label, parent, teamId = this.teamId } = props;
 
-    this.nameToLabel[label.name.toLowerCase()] = { [teamId]: label };
+    this.nameToLabel[label.name] = { [teamId]: label };
     this.idToLabel[label.id] = { [teamId]: label };
 
     if (parent) {
@@ -310,7 +311,7 @@ const deleteLabel = async (client: LinearClient, labelId: Id) => {
   await client.deleteIssueLabel(labelId);
 };
 
-// A root label
+/** A root label */
 class Label {
   public name: string;
 
@@ -319,11 +320,16 @@ class Label {
     name: string,
     public existedBeforeImport: boolean = false
   ) {
-    this.name = name.toLowerCase();
+    this.name = Label.normalizeName(name);
+  }
+
+  public static normalizeName(name: string) {
+    // Trim and lowercase to prevent duplicates
+    return name.toLowerCase().trim();
   }
 }
 
-// A label group (parent label)
+/** A label group (parent label) */
 class GroupLabel extends Label {
   public labels: Record<string, Label> = {};
 
@@ -336,5 +342,5 @@ class GroupLabel extends Label {
   }
 }
 
-// A label in a group (child label)
+/** A label in a group (child label)  */
 class SubgroupLabel extends Label {}
