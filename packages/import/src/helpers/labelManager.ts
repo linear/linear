@@ -111,7 +111,7 @@ const handleIssueLabels = async (
 
     // Handle the child label if we have a valid group
     if (groupLabel) {
-      const existingChildLabel = groupLabel.labels[labelName];
+      const existingChildLabel = groupLabel.getSubgroupLabel(labelName);
       actualLabelId = existingChildLabel?.id;
 
       if (!actualLabelId) {
@@ -234,16 +234,27 @@ class LabelManager {
   /**
    * Adds a label to the manager
    *
-   * @param props Object label, its parent (if any), and team ID (defaults to the current teamId)
+   * @param props Object containing the team ID and label data
    */
-  public addLabel(props: { label: Label; parent?: GroupLabel; teamId?: Id | typeof WORKSPACE_ID }) {
-    const { label, parent, teamId = this.teamId } = props;
+  public addLabel(
+    props: { teamId: Id } & (
+      | {
+          label: Label;
+        }
+      | {
+          label: SubgroupLabel;
+          parent: GroupLabel;
+        }
+    )
+  ) {
+    const { label, teamId = this.teamId } = props;
 
-    this.nameToLabel[label.name] = { [teamId]: label };
+    this.nameToLabel[label.normalizedName] = { [teamId]: label };
     this.idToLabel[label.id] = { [teamId]: label };
 
-    if (parent) {
-      parent.addLabel(label);
+    if ("parent" in props) {
+      const { parent } = props;
+      parent.addSubgroupLabel(label);
     }
   }
 
@@ -313,14 +324,21 @@ const deleteLabel = async (client: LinearClient, labelId: Id) => {
 
 /** A root label */
 class Label {
-  public name: string;
-
+  /**
+   * Create a new label
+   *
+   * @param id Label ID returned from the API
+   * @param name Label name as it was imported
+   * @param existedBeforeImport Whether the label existed before the import
+   */
   public constructor(
     public id: Id,
-    name: string,
+    private name: string,
     public existedBeforeImport: boolean = false
-  ) {
-    this.name = Label.normalizeName(name);
+  ) {}
+
+  public get normalizedName() {
+    return Label.normalizeName(this.name);
   }
 
   public static normalizeName(name: string) {
@@ -331,14 +349,18 @@ class Label {
 
 /** A label group (parent label) */
 class GroupLabel extends Label {
-  public labels: Record<string, Label> = {};
+  private labels: Record<string, Label> = {};
 
   public constructor(id: Id, name: string, existedBeforeImport?: boolean) {
     super(id, name, existedBeforeImport);
   }
 
-  public addLabel(label: Label) {
-    this.labels[label.name] = label;
+  public addSubgroupLabel(label: SubgroupLabel) {
+    this.labels[label.normalizedName] = label;
+  }
+
+  public getSubgroupLabel(name: string) {
+    return this.labels[Label.normalizeName(name)];
   }
 }
 
