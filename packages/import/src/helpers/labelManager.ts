@@ -111,7 +111,7 @@ const handleIssueLabels = async (
 
     // Handle the child label if we have a valid group
     if (groupLabel) {
-      const existingChildLabel = groupLabel.labels[labelName];
+      const existingChildLabel = groupLabel.getSubgroupLabel(labelName);
       actualLabelId = existingChildLabel?.id;
 
       if (!actualLabelId) {
@@ -196,7 +196,8 @@ class LabelManager {
    * @returns Label instance if found
    */
   public getLabelByName(name: string, teamId: Id | typeof WORKSPACE_ID): Label | undefined {
-    return this.nameToLabel[name.toLowerCase()]?.[teamId] ?? this.nameToLabel[name]?.[WORKSPACE_ID];
+    const normalized = Label.normalizeName(name);
+    return this.nameToLabel[normalized]?.[teamId] ?? this.nameToLabel[normalized]?.[WORKSPACE_ID];
   }
 
   /**
@@ -233,16 +234,27 @@ class LabelManager {
   /**
    * Adds a label to the manager
    *
-   * @param props Object label, its parent (if any), and team ID (defaults to the current teamId)
+   * @param props Object containing the team ID and label data
    */
-  public addLabel(props: { label: Label; parent?: GroupLabel; teamId?: Id | typeof WORKSPACE_ID }) {
-    const { label, parent, teamId = this.teamId } = props;
+  public addLabel(
+    props: { teamId: Id } & (
+      | {
+          label: Label;
+        }
+      | {
+          label: SubgroupLabel;
+          parent: GroupLabel;
+        }
+    )
+  ) {
+    const { label, teamId = this.teamId } = props;
 
-    this.nameToLabel[label.name.toLowerCase()] = { [teamId]: label };
+    this.nameToLabel[label.normalizedName] = { [teamId]: label };
     this.idToLabel[label.id] = { [teamId]: label };
 
-    if (parent) {
-      parent.addLabel(label);
+    if ("parent" in props) {
+      const { parent } = props;
+      parent.addSubgroupLabel(label);
     }
   }
 
@@ -310,31 +322,47 @@ const deleteLabel = async (client: LinearClient, labelId: Id) => {
   await client.deleteIssueLabel(labelId);
 };
 
-// A root label
+/** A root label */
 class Label {
-  public name: string;
-
+  /**
+   * Create a new label
+   *
+   * @param id Label ID returned from the API
+   * @param name Label name as it was imported
+   * @param existedBeforeImport Whether the label existed before the import
+   */
   public constructor(
     public id: Id,
-    name: string,
+    private name: string,
     public existedBeforeImport: boolean = false
-  ) {
-    this.name = name.toLowerCase();
+  ) {}
+
+  public get normalizedName() {
+    return Label.normalizeName(this.name);
+  }
+
+  public static normalizeName(name: string) {
+    // Trim and lowercase to prevent duplicates
+    return name.toLowerCase().trim();
   }
 }
 
-// A label group (parent label)
+/** A label group (parent label) */
 class GroupLabel extends Label {
-  public labels: Record<string, Label> = {};
+  private labels: Record<string, Label> = {};
 
   public constructor(id: Id, name: string, existedBeforeImport?: boolean) {
     super(id, name, existedBeforeImport);
   }
 
-  public addLabel(label: Label) {
-    this.labels[label.name] = label;
+  public addSubgroupLabel(label: SubgroupLabel) {
+    this.labels[label.normalizedName] = label;
+  }
+
+  public getSubgroupLabel(name: string) {
+    return this.labels[Label.normalizeName(name)];
   }
 }
 
-// A label in a group (child label)
+/** A label in a group (child label)  */
 class SubgroupLabel extends Label {}
