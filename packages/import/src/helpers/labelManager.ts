@@ -186,7 +186,7 @@ class LabelManager {
   /**
    * Create a new label manager.
    *
-   * @param teamId  The team ID being imported to
+   * @param teamId The team ID being imported to
    * @param existingLabels Existing labels in the team and workspace
    * @returns LabelManager instance
    */
