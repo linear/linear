@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.2.2
+
+### Patch Changes
+
+- 7e8e279: fix: guard against missing empty arrays in trello json
+- 88f267e: fix: duplicate label error when importing to the same team
+- 1e91bc1: fix: normalize label names to prevent duplicates
+
 ## 2.2.1
 
 ### Patch Changes
