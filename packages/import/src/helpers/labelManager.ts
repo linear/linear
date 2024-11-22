@@ -21,7 +21,7 @@ export const handleLabels = async (
   teamId: string,
   existingLabels: IssueLabel[]
 ): Promise<Record<string, { type: LabelType; id: Id }>> => {
-  const manager = new LabelManager(existingLabels, teamId);
+  const manager = await LabelManager.create(teamId, existingLabels);
   const labelMapping: Record<string, { type: LabelType; id: Id; existedBeforeImport: boolean }> = {};
 
   // We process issues instead of labels to validate issue <> label constraints (e.g. only one label from a group)
@@ -178,14 +178,22 @@ function parseLabelName(fullName: string): [string | undefined, string] {
 }
 
 class LabelManager {
-  private nameToLabel: Record<string, { [teamId: Id | typeof WORKSPACE_ID]: Label }> = {};
-  private idToLabel: Record<Id, { [teamId: Id | typeof WORKSPACE_ID]: Label }> = {};
+  private nameToLabel: Record<string, Map<Id | typeof WORKSPACE_ID, Label>> = {};
+  private idToLabel: Record<Id, Map<Id | typeof WORKSPACE_ID, Label>> = {};
 
-  public constructor(
-    existingLabels: IssueLabel[],
-    private teamId: Id
-  ) {
-    this.initializeLabels(existingLabels);
+  public constructor(private teamId: Id) {}
+
+  /**
+   * Create a new label manager.
+   * 
+   * @param teamId  The team ID being imported to
+   * @param existingLabels Existing labels in the team and workspace
+   * @returns LabelManager instance
+   */
+  public static async create(teamId: Id, existingLabels: IssueLabel[]): Promise<LabelManager> {
+    const manager = new LabelManager(teamId);
+    await manager.initializeLabels(existingLabels);
+    return manager;
   }
 
   /**
@@ -197,7 +205,7 @@ class LabelManager {
    */
   public getLabelByName(name: string, teamId: Id | typeof WORKSPACE_ID): Label | undefined {
     const normalized = Label.normalizeName(name);
-    return this.nameToLabel[normalized]?.[teamId] ?? this.nameToLabel[normalized]?.[WORKSPACE_ID];
+    return this.nameToLabel[normalized]?.get(teamId) ?? this.nameToLabel[normalized]?.get(WORKSPACE_ID);
   }
 
   /**
@@ -208,7 +216,7 @@ class LabelManager {
    * @returns Label instance if found
    */
   public getLabelById(id: Id, teamId: Id | typeof WORKSPACE_ID): Label | undefined {
-    return this.idToLabel[id]?.[teamId] ?? this.idToLabel[id]?.[WORKSPACE_ID];
+    return this.idToLabel[id]?.get(teamId) ?? this.idToLabel[id]?.get(WORKSPACE_ID);
   }
 
   /**
@@ -249,8 +257,16 @@ class LabelManager {
   ) {
     const { label, teamId = this.teamId } = props;
 
-    this.nameToLabel[label.normalizedName] = { [teamId]: label };
-    this.idToLabel[label.id] = { [teamId]: label };
+    if (!this.nameToLabel[label.normalizedName]) {
+      this.nameToLabel[label.normalizedName] = new Map();
+    }
+
+    if (!this.idToLabel[label.id]) {
+      this.idToLabel[label.id] = new Map();
+    }
+
+    this.nameToLabel[label.normalizedName].set(teamId, label);
+    this.idToLabel[label.id].set(teamId, label);
 
     if ("parent" in props) {
       const { parent } = props;
@@ -278,7 +294,7 @@ class LabelManager {
     const isExisting = true;
 
     for (const existingLabel of existingLabels) {
-      const labelName = existingLabel.name?.toLowerCase();
+      const labelName = existingLabel.name;
       const teamId = (await existingLabel.team)?.id ?? WORKSPACE_ID;
 
       if (existingLabel.isGroup && labelName && existingLabel.id) {
@@ -287,7 +303,7 @@ class LabelManager {
         const parent = await existingLabel.parent;
 
         if (parent) {
-          const group = this.idToLabel[parent.id]?.[teamId] as GroupLabel;
+          const group = this.idToLabel[parent.id]?.get(teamId) as GroupLabel;
           this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), parent: group, teamId });
         } else {
           this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), teamId });
