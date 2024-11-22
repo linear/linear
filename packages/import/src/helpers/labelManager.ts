@@ -178,14 +178,14 @@ function parseLabelName(fullName: string): [string | undefined, string] {
 }
 
 class LabelManager {
-  private nameToLabel: Record<string, Map<Id | typeof WORKSPACE_ID, Label>> = {};
-  private idToLabel: Record<Id, Map<Id | typeof WORKSPACE_ID, Label>> = {};
+  private nameToLabel: Record<string, { [teamId: Id | typeof WORKSPACE_ID]: Label }> = {};
+  private idToLabel: Record<Id, { [teamId: Id | typeof WORKSPACE_ID]: Label }> = {};
 
   public constructor(private teamId: Id) {}
 
   /**
    * Create a new label manager.
-   * 
+   *
    * @param teamId  The team ID being imported to
    * @param existingLabels Existing labels in the team and workspace
    * @returns LabelManager instance
@@ -205,7 +205,7 @@ class LabelManager {
    */
   public getLabelByName(name: string, teamId: Id | typeof WORKSPACE_ID): Label | undefined {
     const normalized = Label.normalizeName(name);
-    return this.nameToLabel[normalized]?.get(teamId) ?? this.nameToLabel[normalized]?.get(WORKSPACE_ID);
+    return this.nameToLabel[normalized]?.[teamId] ?? this.nameToLabel[normalized]?.[WORKSPACE_ID];
   }
 
   /**
@@ -216,7 +216,7 @@ class LabelManager {
    * @returns Label instance if found
    */
   public getLabelById(id: Id, teamId: Id | typeof WORKSPACE_ID): Label | undefined {
-    return this.idToLabel[id]?.get(teamId) ?? this.idToLabel[id]?.get(WORKSPACE_ID);
+    return this.idToLabel[id]?.[teamId] ?? this.idToLabel[id]?.[WORKSPACE_ID];
   }
 
   /**
@@ -257,16 +257,8 @@ class LabelManager {
   ) {
     const { label, teamId = this.teamId } = props;
 
-    if (!this.nameToLabel[label.normalizedName]) {
-      this.nameToLabel[label.normalizedName] = new Map();
-    }
-
-    if (!this.idToLabel[label.id]) {
-      this.idToLabel[label.id] = new Map();
-    }
-
-    this.nameToLabel[label.normalizedName].set(teamId, label);
-    this.idToLabel[label.id].set(teamId, label);
+    this.nameToLabel[label.normalizedName] = { [teamId]: label };
+    this.idToLabel[label.id] = { [teamId]: label };
 
     if ("parent" in props) {
       const { parent } = props;
@@ -303,7 +295,7 @@ class LabelManager {
         const parent = await existingLabel.parent;
 
         if (parent) {
-          const group = this.idToLabel[parent.id]?.get(teamId) as GroupLabel;
+          const group = this.idToLabel[parent.id]?.[teamId] as GroupLabel;
           this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), parent: group, teamId });
         } else {
           this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), teamId });
