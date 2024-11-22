@@ -21,7 +21,7 @@ export const handleLabels = async (
   teamId: string,
   existingLabels: IssueLabel[]
 ): Promise<Record<string, { type: LabelType; id: Id }>> => {
-  const manager = new LabelManager(existingLabels, teamId);
+  const manager = await LabelManager.create(teamId, existingLabels);
   const labelMapping: Record<string, { type: LabelType; id: Id; existedBeforeImport: boolean }> = {};
 
   // We process issues instead of labels to validate issue <> label constraints (e.g. only one label from a group)
@@ -181,11 +181,19 @@ class LabelManager {
   private nameToLabel: Record<string, { [teamId: Id | typeof WORKSPACE_ID]: Label }> = {};
   private idToLabel: Record<Id, { [teamId: Id | typeof WORKSPACE_ID]: Label }> = {};
 
-  public constructor(
-    existingLabels: IssueLabel[],
-    private teamId: Id
-  ) {
-    this.initializeLabels(existingLabels);
+  public constructor(private teamId: Id) {}
+
+  /**
+   * Create a new label manager.
+   *
+   * @param teamId The team ID being imported to
+   * @param existingLabels Existing labels in the team and workspace
+   * @returns LabelManager instance
+   */
+  public static async create(teamId: Id, existingLabels: IssueLabel[]): Promise<LabelManager> {
+    const manager = new LabelManager(teamId);
+    await manager.initializeLabels(existingLabels);
+    return manager;
   }
 
   /**
@@ -278,7 +286,7 @@ class LabelManager {
     const isExisting = true;
 
     for (const existingLabel of existingLabels) {
-      const labelName = existingLabel.name?.toLowerCase();
+      const labelName = existingLabel.name;
       const teamId = (await existingLabel.team)?.id ?? WORKSPACE_ID;
 
       if (existingLabel.isGroup && labelName && existingLabel.id) {
