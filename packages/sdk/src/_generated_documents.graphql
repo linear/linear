@@ -83,10 +83,6 @@ fragment Comment on Comment {
   externalUser {
     id
   }
-  # The initiative update that the comment is associated with.
-  initiativeUpdate {
-    ...InitiativeUpdate
-  }
   # The issue that the comment is associated with.
   issue {
     id
@@ -162,6 +158,8 @@ fragment SyncedExternalThread on SyncedExternalThread {
   subType
   # The type of the external source.
   type
+  # Whether a connected personal integration is required to comment in this thread.
+  isPersonalIntegrationRequired
   # Whether the current user has the corresponding personal integration connected for the external service.
   isPersonalIntegrationConnected
   # Whether this thread is syncing with the external service.
@@ -984,12 +982,16 @@ fragment ProjectMilestone on ProjectMilestone {
   sortOrder
   # The planned completion date of the milestone.
   targetDate
+  # The progress % of the project milestone.
+  progress
   # The project milestone's description in markdown format.
   description
   # The project of the milestone.
   project {
     id
   }
+  # The status of the project milestone.
+  status
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
@@ -1395,6 +1397,8 @@ fragment IssueHistory on IssueHistory {
   }
   # The id of linked attachment.
   attachmentId
+  # The id of linked customer need.
+  customerNeedId
   # The id of new cycle of the issue.
   toCycleId
   # The id of new parent of the issue.
@@ -1744,6 +1748,10 @@ fragment WorkflowState on WorkflowState {
   updatedAt
   # The position of the state in the team flow.
   position
+  # The state inherited from
+  inheritedFrom {
+    id
+  }
   # The state's UI color as a HEX string.
   color
   # The state's name.
@@ -2098,64 +2106,133 @@ fragment User on User {
 }
 
 # A user's notification category preferences for a channel.
-fragment NotificationCategoryPreferencesChannel on NotificationCategoryPreferencesChannel {
+fragment PartialNotificationChannelPreferences on PartialNotificationChannelPreferences {
   __typename
-  # Whether notifications are enabled for this category for Slack.
+  # Whether notifications are currently enabled for Slack.
   slack
-  # Whether notifications are enabled for this category for desktop.
+  # Whether notifications are currently enabled for desktop.
   desktop
-  # Whether notifications are enabled for this category for email.
+  # Whether notifications are currently enabled for email.
   email
-  # Whether notifications are enabled for this category for mobile.
+  # Whether notifications are currently enabled for mobile.
   mobile
 }
 
 # A user's notification category preferences.
 fragment NotificationCategoryPreferences on NotificationCategoryPreferences {
   __typename
+  # The preferences for customer notifications.
+  customers {
+    ...NotificationChannelPreferences
+  }
   # The preferences for notifications about apps and integrations.
   appsAndIntegrations {
-    ...NotificationCategoryPreferencesChannel
+    ...NotificationChannelPreferences
   }
   # The preferences for notifications about assignments.
   assignments {
-    ...NotificationCategoryPreferencesChannel
+    ...NotificationChannelPreferences
   }
   # The preferences for notifications about comments and replies.
   commentsAndReplies {
-    ...NotificationCategoryPreferencesChannel
+    ...NotificationChannelPreferences
   }
   # The preferences for notifications about document changes.
   documentChanges {
-    ...NotificationCategoryPreferencesChannel
+    ...NotificationChannelPreferences
   }
   # The preferences for notifications about mentions.
   mentions {
-    ...NotificationCategoryPreferencesChannel
+    ...NotificationChannelPreferences
   }
   # The preferences for notifications about posts and updates.
   postsAndUpdates {
-    ...NotificationCategoryPreferencesChannel
+    ...NotificationChannelPreferences
   }
   # The preferences for notifications about reactions.
   reactions {
-    ...NotificationCategoryPreferencesChannel
+    ...NotificationChannelPreferences
   }
   # The preferences for notifications about reminders.
   reminders {
-    ...NotificationCategoryPreferencesChannel
+    ...NotificationChannelPreferences
   }
   # The preferences for notifications about reviews.
   reviews {
-    ...NotificationCategoryPreferencesChannel
+    ...NotificationChannelPreferences
   }
   # The preferences for notifications about status changes.
   statusChanges {
-    ...NotificationCategoryPreferencesChannel
+    ...NotificationChannelPreferences
   }
   # The preferences for notifications about subscriptions.
   subscriptions {
-    ...NotificationCategoryPreferencesChannel
+    ...NotificationChannelPreferences
+  }
+  # The preferences for system notifications.
+  system {
+    ...NotificationChannelPreferences
+  }
+  # The preferences for triage notifications.
+  triage {
+    ...NotificationChannelPreferences
+  }
+}
+
+# A user's notification category preferences.
+fragment PartialNotificationCategoryPreferences on PartialNotificationCategoryPreferences {
+  __typename
+  # The preferences for notifications about apps and integrations.
+  appsAndIntegrations {
+    ...PartialNotificationChannelPreferences
+  }
+  # The preferences for notifications about assignments.
+  assignments {
+    ...PartialNotificationChannelPreferences
+  }
+  # The preferences for notifications about comments and replies.
+  commentsAndReplies {
+    ...PartialNotificationChannelPreferences
+  }
+  # The preferences for notifications about customers.
+  customers {
+    ...PartialNotificationChannelPreferences
+  }
+  # The preferences for notifications about document changes.
+  documentChanges {
+    ...PartialNotificationChannelPreferences
+  }
+  # The preferences for notifications about mentions.
+  mentions {
+    ...PartialNotificationChannelPreferences
+  }
+  # The preferences for notifications about posts and updates.
+  postsAndUpdates {
+    ...PartialNotificationChannelPreferences
+  }
+  # The preferences for notifications about reactions.
+  reactions {
+    ...PartialNotificationChannelPreferences
+  }
+  # The preferences for notifications about reminders.
+  reminders {
+    ...PartialNotificationChannelPreferences
+  }
+  # The preferences for notifications about reviews.
+  reviews {
+    ...PartialNotificationChannelPreferences
+  }
+  # The preferences for notifications about status changes.
+  statusChanges {
+    ...PartialNotificationChannelPreferences
+  }
+  # The preferences for notifications about subscriptions.
+  subscriptions {
+    ...PartialNotificationChannelPreferences
+  }
+  # The preferences for notifications about triage.
+  triage {
+    ...PartialNotificationChannelPreferences
   }
 }
 
@@ -2639,38 +2716,6 @@ fragment Initiative on Initiative {
   }
 }
 
-# An initiative update.
-fragment InitiativeUpdate on InitiativeUpdate {
-  __typename
-  # Emoji reaction summary, grouped by emoji type.
-  reactionData
-  # The health at the time of the update.
-  health
-  # The initiative that the update is associated with.
-  initiative {
-    id
-  }
-  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The time the update was edited.
-  editedAt
-  # The unique identifier of the entity.
-  id
-  # The update content in markdown format.
-  body
-  # The update's unique URL slug.
-  slugId
-  # The user who wrote the update.
-  user {
-    id
-  }
-}
-
 # An integration with an external service.
 fragment Integration on Integration {
   __typename
@@ -3064,6 +3109,8 @@ fragment Organization on Organization {
   scimEnabled
   # Whether member users are allowed to send invites.
   allowMembersToInvite
+  # Whether team creation is restricted to admins.
+  restrictTeamCreationToAdmins
   # Whether the Git integration linkback messages should be sent to private repositories.
   gitLinkbackMessagesEnabled
   # Whether the Git integration linkback messages should be sent to public repositories.
@@ -3194,6 +3241,26 @@ fragment Team on Team {
   timezone
   # The unique identifier of the entity.
   id
+  # The workflow state into which issues are moved when a PR has been merged.
+  mergeWorkflowState {
+    id
+  }
+  # The workflow state into which issues are moved when a PR has been opened as draft.
+  draftWorkflowState {
+    id
+  }
+  # The workflow state into which issues are moved when a PR has been opened.
+  startWorkflowState {
+    id
+  }
+  # The workflow state into which issues are moved when a PR is ready to be merged.
+  mergeableWorkflowState {
+    id
+  }
+  # The workflow state into which issues are moved when a review has been requested for the PR.
+  reviewWorkflowState {
+    id
+  }
   # The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state.
   markedAsDuplicateWorkflowState {
     id
@@ -3742,6 +3809,78 @@ fragment JiraProjectData on JiraProjectData {
   key
   # The Jira name for this project, such as Engineering.
   name
+}
+
+# Metadata about a single notification category
+fragment NotificationCategoryMetadata on NotificationCategoryMetadata {
+  __typename
+  # The category's description
+  description
+  # The category's sort order among all categories
+  sortOrder
+  # The category's title
+  title
+}
+
+# Metadata about notification categories
+fragment NotificationCategoryPreferencesMetadata on NotificationCategoryPreferencesMetadata {
+  __typename
+  # The metadata for notifications about apps and integrations.
+  appsAndIntegrations {
+    ...NotificationCategoryMetadata
+  }
+  # The metadata for notifications about assignments.
+  assignments {
+    ...NotificationCategoryMetadata
+  }
+  # The metadata for notifications about comments and replies.
+  commentsAndReplies {
+    ...NotificationCategoryMetadata
+  }
+  # The metadata for notifications about document changes.
+  documentChanges {
+    ...NotificationCategoryMetadata
+  }
+  # The metadata for notifications about mentions.
+  mentions {
+    ...NotificationCategoryMetadata
+  }
+  # The metadata for notifications about posts and updates.
+  postsAndUpdates {
+    ...NotificationCategoryMetadata
+  }
+  # The metadata for notifications about reactions.
+  reactions {
+    ...NotificationCategoryMetadata
+  }
+  # The metadata for notifications about reminders.
+  reminders {
+    ...NotificationCategoryMetadata
+  }
+  # The metadata for notifications about reviews.
+  reviews {
+    ...NotificationCategoryMetadata
+  }
+  # The metadata for notifications about status changes.
+  statusChanges {
+    ...NotificationCategoryMetadata
+  }
+  # The metadata for notifications about subscriptions.
+  subscriptions {
+    ...NotificationCategoryMetadata
+  }
+  # The preferences for customer notifications.
+  customers {
+    ...NotificationCategoryMetadata
+  }
+  # The preferences for system notifications.
+  system {
+    ...NotificationCategoryMetadata
+  }
+  # The preferences for triage notifications.
+  triage {
+    ...NotificationCategoryMetadata
+  }
 }
 
 # Metadata and settings for a GitHub Personal integration.
@@ -4342,10 +4481,6 @@ fragment UserSettings on UserSettings {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The notification category preferences for the user.
-  notificationCategoryPreferences {
-    ...NotificationCategoryPreferences
-  }
   # The notification channel settings the user has selected.
   notificationPreferences
   # The notification delivery preferences for the user.
@@ -4362,7 +4497,11 @@ fragment UserSettings on UserSettings {
   user {
     id
   }
-  # Whether the user has specific notification channels enabled or disabled.
+  # The user's notification category preferences.
+  notificationCategoryPreferences {
+    ...NotificationCategoryPreferences
+  }
+  # The user's notification channel preferences.
   notificationChannelPreferences {
     ...NotificationChannelPreferences
   }
@@ -5387,16 +5526,6 @@ fragment InitiativeToProjectConnection on InitiativeToProjectConnection {
   __typename
   nodes {
     ...InitiativeToProject
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-fragment InitiativeUpdateConnection on InitiativeUpdateConnection {
-  __typename
-  nodes {
-    ...InitiativeUpdate
   }
   pageInfo {
     ...PageInfo
@@ -7541,21 +7670,6 @@ query comment_externalThread(
   comment(hash: $hash, id: $id, issueId: $issueId) {
     externalThread {
       ...SyncedExternalThread
-    }
-  }
-}
-# The initiative update that the comment is associated with.
-query comment_initiativeUpdate(
-  # The hash of the comment to retrieve.
-  $hash: String
-  # The identifier of the comment to retrieve.
-  $id: String
-  # [Deprecated] The issue for which to find the comment.
-  $issueId: String
-) {
-  comment(hash: $hash, id: $id, issueId: $issueId) {
-    initiativeUpdate {
-      ...InitiativeUpdate
     }
   }
 }
@@ -11043,7 +11157,7 @@ query userSettings {
     ...UserSettings
   }
 }
-# The notification category preferences for the user.
+# The user's notification category preferences.
 query userSettings_notificationCategoryPreferences {
   userSettings {
     notificationCategoryPreferences {
@@ -11056,7 +11170,7 @@ query userSettings_notificationCategoryPreferences_appsAndIntegrations {
   userSettings {
     notificationCategoryPreferences {
       appsAndIntegrations {
-        ...NotificationCategoryPreferencesChannel
+        ...NotificationChannelPreferences
       }
     }
   }
@@ -11066,7 +11180,7 @@ query userSettings_notificationCategoryPreferences_assignments {
   userSettings {
     notificationCategoryPreferences {
       assignments {
-        ...NotificationCategoryPreferencesChannel
+        ...NotificationChannelPreferences
       }
     }
   }
@@ -11076,7 +11190,17 @@ query userSettings_notificationCategoryPreferences_commentsAndReplies {
   userSettings {
     notificationCategoryPreferences {
       commentsAndReplies {
-        ...NotificationCategoryPreferencesChannel
+        ...NotificationChannelPreferences
+      }
+    }
+  }
+}
+# The preferences for customer notifications.
+query userSettings_notificationCategoryPreferences_customers {
+  userSettings {
+    notificationCategoryPreferences {
+      customers {
+        ...NotificationChannelPreferences
       }
     }
   }
@@ -11086,7 +11210,7 @@ query userSettings_notificationCategoryPreferences_documentChanges {
   userSettings {
     notificationCategoryPreferences {
       documentChanges {
-        ...NotificationCategoryPreferencesChannel
+        ...NotificationChannelPreferences
       }
     }
   }
@@ -11096,7 +11220,7 @@ query userSettings_notificationCategoryPreferences_mentions {
   userSettings {
     notificationCategoryPreferences {
       mentions {
-        ...NotificationCategoryPreferencesChannel
+        ...NotificationChannelPreferences
       }
     }
   }
@@ -11106,7 +11230,7 @@ query userSettings_notificationCategoryPreferences_postsAndUpdates {
   userSettings {
     notificationCategoryPreferences {
       postsAndUpdates {
-        ...NotificationCategoryPreferencesChannel
+        ...NotificationChannelPreferences
       }
     }
   }
@@ -11116,7 +11240,7 @@ query userSettings_notificationCategoryPreferences_reactions {
   userSettings {
     notificationCategoryPreferences {
       reactions {
-        ...NotificationCategoryPreferencesChannel
+        ...NotificationChannelPreferences
       }
     }
   }
@@ -11126,7 +11250,7 @@ query userSettings_notificationCategoryPreferences_reminders {
   userSettings {
     notificationCategoryPreferences {
       reminders {
-        ...NotificationCategoryPreferencesChannel
+        ...NotificationChannelPreferences
       }
     }
   }
@@ -11136,7 +11260,7 @@ query userSettings_notificationCategoryPreferences_reviews {
   userSettings {
     notificationCategoryPreferences {
       reviews {
-        ...NotificationCategoryPreferencesChannel
+        ...NotificationChannelPreferences
       }
     }
   }
@@ -11146,7 +11270,7 @@ query userSettings_notificationCategoryPreferences_statusChanges {
   userSettings {
     notificationCategoryPreferences {
       statusChanges {
-        ...NotificationCategoryPreferencesChannel
+        ...NotificationChannelPreferences
       }
     }
   }
@@ -11156,12 +11280,32 @@ query userSettings_notificationCategoryPreferences_subscriptions {
   userSettings {
     notificationCategoryPreferences {
       subscriptions {
-        ...NotificationCategoryPreferencesChannel
+        ...NotificationChannelPreferences
       }
     }
   }
 }
-# Whether the user has specific notification channels enabled or disabled.
+# The preferences for system notifications.
+query userSettings_notificationCategoryPreferences_system {
+  userSettings {
+    notificationCategoryPreferences {
+      system {
+        ...NotificationChannelPreferences
+      }
+    }
+  }
+}
+# The preferences for triage notifications.
+query userSettings_notificationCategoryPreferences_triage {
+  userSettings {
+    notificationCategoryPreferences {
+      triage {
+        ...NotificationChannelPreferences
+      }
+    }
+  }
+}
+# The user's notification channel preferences.
 query userSettings_notificationChannelPreferences {
   userSettings {
     notificationChannelPreferences {
@@ -12718,6 +12862,19 @@ mutation integrationSlackCustomViewNotifications(
     ...SlackChannelConnectPayload
   }
 }
+# Integrates a Slack Asks channel with a Customer.
+mutation integrationSlackCustomerChannelLink(
+  # The Slack OAuth code.
+  $code: String!
+  # The customer to link the Slack channel with
+  $customerId: String!
+  # The Slack OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationSlackCustomerChannelLink(code: $code, customerId: $customerId, redirectUri: $redirectUri) {
+    ...SuccessPayload
+  }
+}
 # Imports custom emojis from your Slack workspace.
 mutation integrationSlackImportEmojis(
   # The Slack OAuth code.
@@ -13941,8 +14098,10 @@ mutation updateTeam(
   $id: String!
   # A partial team object to update the team with.
   $input: TeamUpdateInput!
+  # [INTERNAL] Mapping of existing team entities to those inherited from the parent team
+  $mapping: InheritanceEntityMapping
 ) {
-  teamUpdate(id: $id, input: $input) {
+  teamUpdate(id: $id, input: $input, mapping: $mapping) {
     ...TeamPayload
   }
 }
