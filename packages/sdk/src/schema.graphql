@@ -3808,7 +3808,6 @@ type CyclePayload {
 enum CyclePeriod {
   after
   before
-  cooldown
   during
 }
 

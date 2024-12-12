@@ -14074,12 +14074,6 @@
             "deprecationReason": null
           },
           {
-            "name": "cooldown",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "after",
             "description": null,
             "isDeprecated": false,
