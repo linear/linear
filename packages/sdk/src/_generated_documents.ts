@@ -2259,7 +2259,6 @@ export type CyclePayload = {
 export enum CyclePeriod {
   After = "after",
   Before = "before",
-  Cooldown = "cooldown",
   During = "during",
 }
 
