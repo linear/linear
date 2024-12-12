@@ -20,7 +20,7 @@ function parseClientOptions({
 }: LinearClientOptions): LinearClientParsedOptions {
   if (!accessToken && !apiKey) {
     throw new Error(
-      "No accessToken or apiKey provided to the LinearClient - create one here: https://linear.app/settings/api"
+      "No accessToken or apiKey provided to the LinearClient - create one here: https://linear.app/settings/account/security"
     );
   }
 

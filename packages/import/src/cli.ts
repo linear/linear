@@ -21,7 +21,7 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
       {
         type: "input",
         name: "linearApiKey",
-        message: "Input your Linear API key (https://linear.app/settings/api)",
+        message: "Input your Linear API key (https://linear.app/settings/account/security)",
       },
       {
         type: "list",
