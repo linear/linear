@@ -26816,6 +26816,10 @@ type Template implements Node {
   """
   id: ID!
   """
+  The original template inherited from.
+  """
+  inheritedFrom: Template
+  """
   The user who last updated the template.
   """
   lastUpdatedBy: User
