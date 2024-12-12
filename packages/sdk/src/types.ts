@@ -2,9 +2,9 @@
  * Input options for creating a Linear Client
  */
 export interface LinearClientOptions extends RequestInit {
-  /** Personal api token generated from https://linear.app/settings/api */
+  /** Personal api token generated from https://linear.app/settings/account/security */
   apiKey?: string;
-  /** The access token returned from oauth endpoints configured in https://linear.app/settings/api */
+  /** The access token returned from oauth endpoints configured in https://linear.app/settings/account/security */
   accessToken?: string;
   /** The url to the Linear graphql api */
   apiUrl?: string;
