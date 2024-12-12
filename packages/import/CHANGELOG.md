@@ -1,5 +1,17 @@
 # Change Log
 
+## 2.2.4
+
+### Patch Changes
+
+- 29d4834: chore(deps): update dependency patch versions
+- 787fe41: fix: update Linear API key page URL
+- Updated dependencies [29d4834]
+- Updated dependencies [615cc5a]
+- Updated dependencies [9b0b6a2]
+- Updated dependencies [787fe41]
+  - @linear/sdk@35.0.0
+
 ## 2.2.3
 
 ### Patch Changes

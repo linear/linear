@@ -1,5 +1,17 @@
 # Change Log
 
+## 35.0.0
+
+### Major Changes
+
+- 9b0b6a2: feat(schema): [breaking] Enum value 'cooldown' was removed from enum 'CyclePeriod' (CyclePeriod.cooldown)
+
+### Patch Changes
+
+- 29d4834: chore(deps): update dependency patch versions
+- 615cc5a: feat(schema): [non_breaking] Field 'inheritedFrom' was added to object type 'Template' (Template.inheritedFrom)
+- 787fe41: fix: update Linear API key page URL
+
 ## 34.0.0
 
 ### Major Changes
