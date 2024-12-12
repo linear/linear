@@ -15209,6 +15209,8 @@ export type Template = Node & {
   description?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** The original template inherited from. */
+  inheritedFrom?: Maybe<Template>;
   /** The user who last updated the template. */
   lastUpdatedBy?: Maybe<User>;
   /** The name of the template. */
@@ -17632,6 +17634,7 @@ export type TemplateFragment = { __typename: "Template" } & Pick<
   Template,
   "templateData" | "description" | "type" | "updatedAt" | "name" | "sortOrder" | "archivedAt" | "createdAt" | "id"
 > & {
+    inheritedFrom?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     lastUpdatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
@@ -36703,6 +36706,14 @@ export const TemplateFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "inheritedFrom" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
           {
             kind: "Field",
