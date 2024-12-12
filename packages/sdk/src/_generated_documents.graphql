@@ -1870,6 +1870,10 @@ fragment Template on Template {
   updatedAt
   # The name of the template.
   name
+  # The original template inherited from.
+  inheritedFrom {
+    id
+  }
   # The sort order of the template.
   sortOrder
   # The team that the template is associated with. If null, the template is global to the workspace.

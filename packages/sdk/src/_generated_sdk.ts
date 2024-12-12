@@ -11815,6 +11815,7 @@ export class TeamPayload extends Request {
  */
 export class Template extends Request {
   private _creator?: L.TemplateFragment["creator"];
+  private _inheritedFrom?: L.TemplateFragment["inheritedFrom"];
   private _lastUpdatedBy?: L.TemplateFragment["lastUpdatedBy"];
   private _team?: L.TemplateFragment["team"];
 
@@ -11830,6 +11831,7 @@ export class Template extends Request {
     this.type = data.type;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._creator = data.creator ?? undefined;
+    this._inheritedFrom = data.inheritedFrom ?? undefined;
     this._lastUpdatedBy = data.lastUpdatedBy ?? undefined;
     this._team = data.team ?? undefined;
   }
@@ -11858,6 +11860,10 @@ export class Template extends Request {
   /** The user who created the template. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The original template inherited from. */
+  public get inheritedFrom(): LinearFetch<Template> | undefined {
+    return this._inheritedFrom?.id ? new TemplateQuery(this._request).fetch(this._inheritedFrom?.id) : undefined;
   }
   /** The user who last updated the template. */
   public get lastUpdatedBy(): LinearFetch<User> | undefined {

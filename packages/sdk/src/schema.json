@@ -14339,7 +14339,7 @@
       {
         "kind": "OBJECT",
         "name": "Dashboard",
-        "description": "A dashboard, usually a collection of widgets to display several insights at once.",
+        "description": "[Internal] A dashboard, usually a collection of widgets to display several insights at once.",
         "fields": [
           {
             "name": "id",
@@ -27944,7 +27944,7 @@
       {
         "kind": "OBJECT",
         "name": "InitiativeUpdate",
-        "description": "An initiative update.",
+        "description": "[ALPHA] An initiative update.",
         "fields": [
           {
             "name": "id",
@@ -97113,6 +97113,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "inheritedFrom",
+            "description": "The original template inherited from.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Template",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -104220,7 +104232,7 @@
       {
         "kind": "OBJECT",
         "name": "Widget",
-        "description": "A widget, contains a small configuration on how to display a specific piece of content, like an insight.",
+        "description": "[Internal] A widget, contains a small configuration on how to display a specific piece of content, like an insight.",
         "fields": [
           {
             "name": "id",
