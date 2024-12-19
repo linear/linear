@@ -2269,7 +2269,7 @@ fragment NotificationDeliveryPreferencesChannel on NotificationDeliveryPreferenc
   schedule {
     ...NotificationDeliveryPreferencesSchedule
   }
-  # Whether notifications are enabled for this channel.
+  # [DEPRECATED] Whether notifications are enabled for this channel. Use notificationChannelPreferences instead.
   notificationsDisabled
 }
 
@@ -3070,10 +3070,14 @@ fragment Organization on Organization {
   previousUrlKeys
   # Rolling 30-day total upload volume for the organization, in megabytes.
   periodUploadVolume
+  # The day at which to prompt for initiative updates.
+  initiativeUpdateRemindersDay
   # The day at which to prompt for project updates.
   projectUpdateRemindersDay
   # The feature release channel the organization belongs to.
   releaseChannel
+  # The hour at which to prompt for initiative updates.
+  initiativeUpdateRemindersHour
   # The hour at which to prompt for project updates.
   projectUpdateRemindersHour
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -3081,6 +3085,8 @@ fragment Organization on Organization {
   updatedAt
   # The month at which the fiscal year starts. Defaults to January (0).
   fiscalYearStartMonth
+  # The n-weekly frequency at which to prompt for initiative updates. When not set, reminders are off.
+  initiativeUpdateReminderFrequencyInWeeks
   # The n-weekly frequency at which to prompt for project updates. When not set, reminders are off.
   projectUpdateReminderFrequencyInWeeks
   # The organization's logo URL.
@@ -4487,7 +4493,7 @@ fragment UserSettings on UserSettings {
   updatedAt
   # The notification channel settings the user has selected.
   notificationPreferences
-  # The notification delivery preferences for the user.
+  # The notification delivery preferences for the user. Note: notificationDisabled field is deprecated in favor of notificationChannelPreferences.
   notificationDeliveryPreferences {
     ...NotificationDeliveryPreferences
   }
@@ -4517,12 +4523,12 @@ fragment UserSettings on UserSettings {
   subscribedToInviteAccepted
   # Whether this user is subscribed to privacy and legal update emails or not.
   subscribedToPrivacyLegalUpdates
-  # Whether this user is subscribed to unread notifications reminder emails or not.
-  subscribedToUnreadNotificationsReminder
   # Whether to auto-assign newly created issues to the current user by default.
   autoAssignToSelf
   # Whether to show full user names instead of display names.
   showFullUserNames
+  # [DEPRECATED] Whether this user is subscribed to unread notifications reminder emails or not.
+  subscribedToUnreadNotificationsReminder
 }
 
 # Tuple for mapping Jira projects to Linear teams.
@@ -11317,7 +11323,8 @@ query userSettings_notificationChannelPreferences {
     }
   }
 }
-# The notification delivery preferences for the user.
+# The notification delivery preferences for the user. Note: notificationDisabled field is deprecated
+# in favor of notificationChannelPreferences.
 query userSettings_notificationDeliveryPreferences {
   userSettings {
     notificationDeliveryPreferences {
@@ -11870,6 +11877,8 @@ mutation attachmentLinkGitHubPR(
   $id: String
   # The issue for which to link the GitHub pull request.
   $issueId: String!
+  # [Internal] The kind of link between the issue and the pull request.
+  $linkKind: GitLinkKind
   # The GitHub pull request number to link.
   $number: Float
   # The owner of the GitHub repository.
@@ -11886,6 +11895,7 @@ mutation attachmentLinkGitHubPR(
     displayIconUrl: $displayIconUrl
     id: $id
     issueId: $issueId
+    linkKind: $linkKind
     number: $number
     owner: $owner
     repo: $repo
@@ -13622,9 +13632,18 @@ mutation updateOrganizationInvite(
     ...OrganizationInvitePayload
   }
 }
-# Starts a trial for the organization. Administrator privileges required.
+# [DEPRECATED] Starts a trial for the organization. Administrator privileges required.
 mutation organizationStartTrial {
   organizationStartTrial {
+    ...OrganizationStartTrialPayload
+  }
+}
+# Starts a trial for the organization on the specified plan type. Administrator privileges required.
+mutation organizationStartTrialForPlan(
+  # Plan details for trial
+  $input: OrganizationStartTrialInput!
+) {
+  organizationStartTrialForPlan(input: $input) {
     ...OrganizationStartTrialPayload
   }
 }
