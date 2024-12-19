@@ -7233,7 +7233,7 @@ export class NotificationDeliveryPreferencesChannel extends Request {
     this.schedule = data.schedule ? new NotificationDeliveryPreferencesSchedule(request, data.schedule) : undefined;
   }
 
-  /** Whether notifications are enabled for this channel. */
+  /** [DEPRECATED] Whether notifications are enabled for this channel. Use notificationChannelPreferences instead. */
   public notificationsDisabled?: boolean;
   /** The schedule for notifications on this channel. */
   public schedule?: NotificationDeliveryPreferencesSchedule;
@@ -7801,6 +7801,8 @@ export class Organization extends Request {
     this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled;
     this.gitPublicLinkbackMessagesEnabled = data.gitPublicLinkbackMessagesEnabled;
     this.id = data.id;
+    this.initiativeUpdateReminderFrequencyInWeeks = data.initiativeUpdateReminderFrequencyInWeeks ?? undefined;
+    this.initiativeUpdateRemindersHour = data.initiativeUpdateRemindersHour;
     this.logoUrl = data.logoUrl ?? undefined;
     this.name = data.name;
     this.periodUploadVolume = data.periodUploadVolume;
@@ -7820,6 +7822,7 @@ export class Organization extends Request {
       ? data.ipRestrictions.map(node => new OrganizationIpRestriction(request, node))
       : undefined;
     this.projectStatuses = data.projectStatuses.map(node => new ProjectStatus(request, node));
+    this.initiativeUpdateRemindersDay = data.initiativeUpdateRemindersDay;
     this.projectUpdateRemindersDay = data.projectUpdateRemindersDay;
     this.projectUpdatesReminderFrequency = data.projectUpdatesReminderFrequency;
     this.releaseChannel = data.releaseChannel;
@@ -7852,6 +7855,10 @@ export class Organization extends Request {
   public gitPublicLinkbackMessagesEnabled: boolean;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The n-weekly frequency at which to prompt for initiative updates. When not set, reminders are off. */
+  public initiativeUpdateReminderFrequencyInWeeks?: number;
+  /** The hour at which to prompt for initiative updates. */
+  public initiativeUpdateRemindersHour: number;
   /** The organization's logo URL. */
   public logoUrl?: string;
   /** The organization's name. */
@@ -7889,6 +7896,8 @@ export class Organization extends Request {
   public projectStatuses: ProjectStatus[];
   /** The organization's subscription to a paid plan. */
   public subscription?: PaidSubscription;
+  /** The day at which to prompt for initiative updates. */
+  public initiativeUpdateRemindersDay: L.Day;
   /** The day at which to prompt for project updates. */
   public projectUpdateRemindersDay: L.Day;
   /** [DEPRECATED] The frequency at which to prompt for project updates. */
@@ -12684,7 +12693,7 @@ export class UserSettings extends Request {
   public subscribedToInviteAccepted: boolean;
   /** Whether this user is subscribed to privacy and legal update emails or not. */
   public subscribedToPrivacyLegalUpdates: boolean;
-  /** Whether this user is subscribed to unread notifications reminder emails or not. */
+  /** [DEPRECATED] Whether this user is subscribed to unread notifications reminder emails or not. */
   public subscribedToUnreadNotificationsReminder: boolean;
   /** The email types the user has unsubscribed from. */
   public unsubscribedFrom: string[];
@@ -12697,7 +12706,7 @@ export class UserSettings extends Request {
   public notificationCategoryPreferences: NotificationCategoryPreferences;
   /** The user's notification channel preferences. */
   public notificationChannelPreferences: NotificationChannelPreferences;
-  /** The notification delivery preferences for the user. */
+  /** The notification delivery preferences for the user. Note: notificationDisabled field is deprecated in favor of notificationChannelPreferences. */
   public notificationDeliveryPreferences: NotificationDeliveryPreferences;
   /** The user associated with these settings. */
   public get user(): LinearFetch<User> | undefined {
@@ -21657,6 +21666,35 @@ export class OrganizationStartTrialMutation extends Request {
       {}
     );
     const data = response.organizationStartTrial;
+
+    return new OrganizationStartTrialPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable OrganizationStartTrialForPlan Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class OrganizationStartTrialForPlanMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the OrganizationStartTrialForPlan mutation and return a OrganizationStartTrialPayload
+   *
+   * @param input - required input to pass to organizationStartTrialForPlan
+   * @returns parsed response from OrganizationStartTrialForPlanMutation
+   */
+  public async fetch(input: L.OrganizationStartTrialInput): LinearFetch<OrganizationStartTrialPayload> {
+    const response = await this._request<
+      L.OrganizationStartTrialForPlanMutation,
+      L.OrganizationStartTrialForPlanMutationVariables
+    >(L.OrganizationStartTrialForPlanDocument, {
+      input,
+    });
+    const data = response.organizationStartTrialForPlan;
 
     return new OrganizationStartTrialPayload(this._request, data);
   }
@@ -31865,12 +31903,23 @@ export class LinearSdk extends Request {
     return new UpdateOrganizationInviteMutation(this._request).fetch(id, input);
   }
   /**
-   * Starts a trial for the organization. Administrator privileges required.
+   * [DEPRECATED] Starts a trial for the organization. Administrator privileges required.
    *
    * @returns OrganizationStartTrialPayload
    */
   public get organizationStartTrial(): LinearFetch<OrganizationStartTrialPayload> {
     return new OrganizationStartTrialMutation(this._request).fetch();
+  }
+  /**
+   * Starts a trial for the organization on the specified plan type. Administrator privileges required.
+   *
+   * @param input - required input to pass to organizationStartTrialForPlan
+   * @returns OrganizationStartTrialPayload
+   */
+  public organizationStartTrialForPlan(
+    input: L.OrganizationStartTrialInput
+  ): LinearFetch<OrganizationStartTrialPayload> {
+    return new OrganizationStartTrialForPlanMutation(this._request).fetch(input);
   }
   /**
    * Updates the user's organization.
