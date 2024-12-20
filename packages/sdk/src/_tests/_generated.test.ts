@@ -406,6 +406,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the attachmentIssue connection query for the CustomerNeed */
+    it("attachmentIssue.needs", async () => {
+      if (_attachmentIssue) {
+        const needs: L.CustomerNeedConnection | undefined = await _attachmentIssue.needs();
+        expect(needs instanceof L.CustomerNeedConnection);
+      } else {
+        console.warn("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.needs query");
+      }
+    });
+
     /** Test the attachmentIssue connection query for the IssueRelation */
     it("attachmentIssue.relations", async () => {
       if (_attachmentIssue) {
@@ -875,6 +885,196 @@ describe("generated", () => {
     });
   });
 
+  /** Test all CustomerNeed queries */
+  describe("CustomerNeeds", () => {
+    let _customerNeed: L.CustomerNeed | undefined;
+    let _customerNeed_id: string | undefined;
+
+    /** Test the root connection query for the CustomerNeed */
+    it("customerNeeds", async () => {
+      const customerNeeds: L.CustomerNeedConnection | undefined = await client.customerNeeds();
+      const customerNeed = customerNeeds?.nodes?.[0];
+      _customerNeed_id = customerNeed?.id;
+      expect(customerNeeds instanceof L.CustomerNeedConnection);
+    });
+
+    /** Test the root query for a single CustomerNeed */
+    it("customerNeed", async () => {
+      if (_customerNeed_id) {
+        const customerNeed: L.CustomerNeed | undefined = await client.customerNeed(_customerNeed_id);
+        _customerNeed = customerNeed;
+        expect(customerNeed instanceof L.CustomerNeed);
+      } else {
+        console.warn("codegen-doc:print: No first CustomerNeed found in connection - cannot test customerNeed query");
+      }
+    });
+
+    /** Test the customerNeed.attachment query for L.Attachment */
+    it("customerNeed.attachment", async () => {
+      if (_customerNeed) {
+        const customerNeed_attachment: L.Attachment | undefined = await _customerNeed.attachment;
+        expect(customerNeed_attachment instanceof L.Attachment);
+      } else {
+        console.warn("codegen-doc:print: No CustomerNeed found - cannot test customerNeed.attachment query");
+      }
+    });
+
+    /** Test the customerNeed.comment query for L.Comment */
+    it("customerNeed.comment", async () => {
+      if (_customerNeed) {
+        const customerNeed_comment: L.Comment | undefined = await _customerNeed.comment;
+        expect(customerNeed_comment instanceof L.Comment);
+      } else {
+        console.warn("codegen-doc:print: No CustomerNeed found - cannot test customerNeed.comment query");
+      }
+    });
+
+    /** Test the customerNeed.creator query for L.User */
+    it("customerNeed.creator", async () => {
+      if (_customerNeed) {
+        const customerNeed_creator: L.User | undefined = await _customerNeed.creator;
+        expect(customerNeed_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No CustomerNeed found - cannot test customerNeed.creator query");
+      }
+    });
+
+    /** Test the customerNeed.customer query for L.Customer */
+    it("customerNeed.customer", async () => {
+      if (_customerNeed) {
+        const customerNeed_customer: L.Customer | undefined = await _customerNeed.customer;
+        expect(customerNeed_customer instanceof L.Customer);
+      } else {
+        console.warn("codegen-doc:print: No CustomerNeed found - cannot test customerNeed.customer query");
+      }
+    });
+
+    /** Test the customerNeed.issue query for L.Issue */
+    it("customerNeed.issue", async () => {
+      if (_customerNeed) {
+        const customerNeed_issue: L.Issue | undefined = await _customerNeed.issue;
+        expect(customerNeed_issue instanceof L.Issue);
+      } else {
+        console.warn("codegen-doc:print: No CustomerNeed found - cannot test customerNeed.issue query");
+      }
+    });
+
+    /** Test the customerNeed.project query for L.Project */
+    it("customerNeed.project", async () => {
+      if (_customerNeed) {
+        const customerNeed_project: L.Project | undefined = await _customerNeed.project;
+        expect(customerNeed_project instanceof L.Project);
+      } else {
+        console.warn("codegen-doc:print: No CustomerNeed found - cannot test customerNeed.project query");
+      }
+    });
+  });
+
+  /** Test all CustomerStatus queries */
+  describe("CustomerStatuses", () => {
+    let _customerStatus: L.CustomerStatus | undefined;
+    let _customerStatus_id: string | undefined;
+
+    /** Test the root connection query for the CustomerStatus */
+    it("customerStatuses", async () => {
+      const customerStatuses: L.CustomerStatusConnection | undefined = await client.customerStatuses();
+      const customerStatus = customerStatuses?.nodes?.[0];
+      _customerStatus_id = customerStatus?.id;
+      expect(customerStatuses instanceof L.CustomerStatusConnection);
+    });
+
+    /** Test the root query for a single CustomerStatus */
+    it("customerStatus", async () => {
+      if (_customerStatus_id) {
+        const customerStatus: L.CustomerStatus | undefined = await client.customerStatus(_customerStatus_id);
+        expect(customerStatus instanceof L.CustomerStatus);
+      } else {
+        console.warn(
+          "codegen-doc:print: No first CustomerStatus found in connection - cannot test customerStatus query"
+        );
+      }
+    });
+  });
+
+  /** Test all CustomerTier queries */
+  describe("CustomerTiers", () => {
+    let _customerTier: L.CustomerTier | undefined;
+    let _customerTier_id: string | undefined;
+
+    /** Test the root connection query for the CustomerTier */
+    it("customerTiers", async () => {
+      const customerTiers: L.CustomerTierConnection | undefined = await client.customerTiers();
+      const customerTier = customerTiers?.nodes?.[0];
+      _customerTier_id = customerTier?.id;
+      expect(customerTiers instanceof L.CustomerTierConnection);
+    });
+
+    /** Test the root query for a single CustomerTier */
+    it("customerTier", async () => {
+      if (_customerTier_id) {
+        const customerTier: L.CustomerTier | undefined = await client.customerTier(_customerTier_id);
+        expect(customerTier instanceof L.CustomerTier);
+      } else {
+        console.warn("codegen-doc:print: No first CustomerTier found in connection - cannot test customerTier query");
+      }
+    });
+  });
+
+  /** Test all Customer queries */
+  describe("Customers", () => {
+    let _customer: L.Customer | undefined;
+    let _customer_id: string | undefined;
+
+    /** Test the root connection query for the Customer */
+    it("customers", async () => {
+      const customers: L.CustomerConnection | undefined = await client.customers();
+      const customer = customers?.nodes?.[0];
+      _customer_id = customer?.id;
+      expect(customers instanceof L.CustomerConnection);
+    });
+
+    /** Test the root query for a single Customer */
+    it("customer", async () => {
+      if (_customer_id) {
+        const customer: L.Customer | undefined = await client.customer(_customer_id);
+        _customer = customer;
+        expect(customer instanceof L.Customer);
+      } else {
+        console.warn("codegen-doc:print: No first Customer found in connection - cannot test customer query");
+      }
+    });
+
+    /** Test the customer.owner query for L.User */
+    it("customer.owner", async () => {
+      if (_customer) {
+        const customer_owner: L.User | undefined = await _customer.owner;
+        expect(customer_owner instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Customer found - cannot test customer.owner query");
+      }
+    });
+
+    /** Test the customer.status query for L.CustomerStatus */
+    it("customer.status", async () => {
+      if (_customer) {
+        const customer_status: L.CustomerStatus | undefined = await _customer.status;
+        expect(customer_status instanceof L.CustomerStatus);
+      } else {
+        console.warn("codegen-doc:print: No Customer found - cannot test customer.status query");
+      }
+    });
+
+    /** Test the customer.tier query for L.CustomerTier */
+    it("customer.tier", async () => {
+      if (_customer) {
+        const customer_tier: L.CustomerTier | undefined = await _customer.tier;
+        expect(customer_tier instanceof L.CustomerTier);
+      } else {
+        console.warn("codegen-doc:print: No Customer found - cannot test customer.tier query");
+      }
+    });
+  });
+
   /** Test all Cycle queries */
   describe("Cycles", () => {
     let _cycle: L.Cycle | undefined;
@@ -1145,6 +1345,16 @@ describe("generated", () => {
         expect(favorite_customView instanceof L.CustomView);
       } else {
         console.warn("codegen-doc:print: No Favorite found - cannot test favorite.customView query");
+      }
+    });
+
+    /** Test the favorite.customer query for L.Customer */
+    it("favorite.customer", async () => {
+      if (_favorite) {
+        const favorite_customer: L.Customer | undefined = await _favorite.customer;
+        expect(favorite_customer instanceof L.Customer);
+      } else {
+        console.warn("codegen-doc:print: No Favorite found - cannot test favorite.customer query");
       }
     });
 
@@ -1617,6 +1827,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue connection query for the CustomerNeed */
+    it("issue.needs", async () => {
+      if (_issue) {
+        const needs: L.CustomerNeedConnection | undefined = await _issue.needs();
+        expect(needs instanceof L.CustomerNeedConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.needs query");
+      }
+    });
+
     /** Test the issue connection query for the IssueRelation */
     it("issue.relations", async () => {
       if (_issue) {
@@ -2068,6 +2288,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue connection query for the CustomerNeed */
+    it("issue.needs", async () => {
+      if (_issue) {
+        const needs: L.CustomerNeedConnection | undefined = await _issue.needs();
+        expect(needs instanceof L.CustomerNeedConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.needs query");
+      }
+    });
+
     /** Test the issue connection query for the IssueRelation */
     it("issue.relations", async () => {
       if (_issue) {
@@ -2229,6 +2459,16 @@ describe("generated", () => {
     });
   });
 
+  /** Test IssueTitleSuggestionFromCustomerRequest query */
+  describe("IssueTitleSuggestionFromCustomerRequest", () => {
+    /** Test the root model query for IssueTitleSuggestionFromCustomerRequest */
+    it("issueTitleSuggestionFromCustomerRequest", async () => {
+      const issueTitleSuggestionFromCustomerRequest: L.IssueTitleSuggestionFromCustomerRequestPayload | undefined =
+        await client.issueTitleSuggestionFromCustomerRequest("mock-request");
+      expect(issueTitleSuggestionFromCustomerRequest instanceof L.IssueTitleSuggestionFromCustomerRequestPayload);
+    });
+  });
+
   /** Test IssueVcsBranchSearch query */
   describe("IssueVcsBranchSearch", () => {
     let _issueVcsBranchSearch: L.Issue | undefined;
@@ -2320,6 +2560,18 @@ describe("generated", () => {
       } else {
         console.warn(
           "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.labels query"
+        );
+      }
+    });
+
+    /** Test the issueVcsBranchSearch connection query for the CustomerNeed */
+    it("issueVcsBranchSearch.needs", async () => {
+      if (_issueVcsBranchSearch) {
+        const needs: L.CustomerNeedConnection | undefined = await _issueVcsBranchSearch.needs();
+        expect(needs instanceof L.CustomerNeedConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.needs query"
         );
       }
     });
@@ -2440,6 +2692,16 @@ describe("generated", () => {
         expect(labels instanceof L.IssueLabelConnection);
       } else {
         console.warn("codegen-doc:print: No issue found - cannot test _issue.labels query");
+      }
+    });
+
+    /** Test the issue connection query for the CustomerNeed */
+    it("issue.needs", async () => {
+      if (_issue) {
+        const needs: L.CustomerNeedConnection | undefined = await _issue.needs();
+        expect(needs instanceof L.CustomerNeedConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.needs query");
       }
     });
 
