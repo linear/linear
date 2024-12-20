@@ -12779,7 +12779,7 @@ mutation updateCustomer(
   }
 }
 # Upserts a customer, creating it if it doesn't exists, updating it otherwise. Matches against an
-# existing customer with `id` or `externalIds`
+# existing customer with `id` or `externalId`
 mutation customerUpsert(
   # The customer to create.
   $input: CustomerUpsertInput!
