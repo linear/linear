@@ -8522,7 +8522,7 @@
       {
         "kind": "OBJECT",
         "name": "Customer",
-        "description": "[ALPHA] A customer whose needs will be tied to issues or projects.",
+        "description": "A customer whose needs will be tied to issues or projects.",
         "fields": [
           {
             "name": "id",
@@ -9533,7 +9533,7 @@
       {
         "kind": "OBJECT",
         "name": "CustomerNeed",
-        "description": "[ALPHA] A customer need, expressed through a reference to an issue, project, or comment.",
+        "description": "A customer need, expressed through a reference to an issue, project, or comment.",
         "fields": [
           {
             "name": "id",
@@ -10108,6 +10108,18 @@
             "deprecationReason": null
           },
           {
+            "name": "customerExternalId",
+            "description": "The external ID of the customer the need belongs to.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "issueId",
             "description": "The issue this need is referencing.",
             "type": {
@@ -10193,7 +10205,19 @@
           },
           {
             "name": "url",
-            "description": "Optional URL to the source of the customer need.",
+            "description": "[DEPRECATED] Optional URL to the source of the customer need.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "attachmentUrl",
+            "description": "Optional URL for the attachment associated with the customer need.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -10488,6 +10512,18 @@
             "deprecationReason": null
           },
           {
+            "name": "customerExternalId",
+            "description": "The external ID of the customer the need belongs to.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "issueId",
             "description": "The issue this need is referencing.",
             "type": {
@@ -10549,7 +10585,19 @@
           },
           {
             "name": "url",
-            "description": "Optional URL to the source of the customer need.",
+            "description": "[DEPRECATED] Optional URL to the source of the customer need.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "attachmentUrl",
+            "description": "Optional URL for the attachment associated with the customer need.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -11187,7 +11235,7 @@
       {
         "kind": "OBJECT",
         "name": "CustomerStatus",
-        "description": "[ALPHA] A customer status.",
+        "description": "A customer status.",
         "fields": [
           {
             "name": "id",
@@ -11888,7 +11936,7 @@
       {
         "kind": "OBJECT",
         "name": "CustomerTier",
-        "description": "[ALPHA] A customer tier.",
+        "description": "A customer tier.",
         "fields": [
           {
             "name": "id",
@@ -12549,6 +12597,165 @@
           {
             "name": "externalIds",
             "description": "The ids of the customers in external systems.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slackChannelId",
+            "description": "The ID of the Slack channel used to interact with the customer.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ownerId",
+            "description": "The user who owns the customer.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "statusId",
+            "description": "The status of the customer.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "revenue",
+            "description": "The annual revenue generated by the customer.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "size",
+            "description": "The size of the customer.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "tierId",
+            "description": "The tier of the customer customer.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "logoUrl",
+            "description": "The URL of the customer's logo.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "CustomerUpsertInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "The identifier in UUID v4 format.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the customer.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "domains",
+            "description": "The domains associated with this customer.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "externalId",
+            "description": "The id of the customers in external systems.",
             "type": {
               "kind": "LIST",
               "name": null,
@@ -24812,6 +25019,35 @@
       },
       {
         "kind": "ENUM",
+        "name": "GitLinkKind",
+        "description": "[Internal] The kind of link between an issue and a pull request.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "closes",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "contributes",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "links",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
         "name": "GithubOrgType",
         "description": null,
         "fields": null,
@@ -32543,6 +32779,107 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "needs",
+            "description": "Customer needs associated with the issue.",
+            "args": [
+              {
+                "name": "filter",
+                "description": "Filter returned needs.",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "CustomerNeedFilter",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "CustomerNeedConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -34204,6 +34541,18 @@
           {
             "name": "needs",
             "description": "Serialized array of JSONs representing customer needs.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "schedule",
+            "description": "Serialized array of JSONs representing the recurring issue's schedule.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -40263,6 +40612,107 @@
             "deprecationReason": null
           },
           {
+            "name": "needs",
+            "description": "Customer needs associated with the issue.",
+            "args": [
+              {
+                "name": "filter",
+                "description": "Filter returned needs.",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "CustomerNeedFilter",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "CustomerNeedConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "metadata",
             "description": "Metadata related to search result.",
             "args": [],
@@ -42758,6 +43208,18 @@
                 "defaultValue": null,
                 "isDeprecated": false,
                 "deprecationReason": null
+              },
+              {
+                "name": "linkKind",
+                "description": "[Internal] The kind of link between the issue and the pull request.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "GitLinkKind",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
               }
             ],
             "type": {
@@ -44239,7 +44701,7 @@
           },
           {
             "name": "customerNeedCreate",
-            "description": "[ALPHA] Creates a new customer need.",
+            "description": "Creates a new customer need.",
             "args": [
               {
                 "name": "input",
@@ -44272,7 +44734,7 @@
           },
           {
             "name": "customerNeedCreateFromAttachment",
-            "description": "[ALPHA] Creates a new customer need out of an attachment",
+            "description": "Creates a new customer need out of an attachment",
             "args": [
               {
                 "name": "input",
@@ -44305,7 +44767,7 @@
           },
           {
             "name": "customerNeedUpdate",
-            "description": "[ALPHA] Updates a customer need",
+            "description": "Updates a customer need",
             "args": [
               {
                 "name": "input",
@@ -44354,7 +44816,7 @@
           },
           {
             "name": "customerNeedDelete",
-            "description": "[ALPHA] Deletes a customer need.",
+            "description": "Deletes a customer need.",
             "args": [
               {
                 "name": "id",
@@ -44387,7 +44849,7 @@
           },
           {
             "name": "customerNeedArchive",
-            "description": "[ALPHA] Archives a customer need.",
+            "description": "Archives a customer need.",
             "args": [
               {
                 "name": "id",
@@ -44420,7 +44882,7 @@
           },
           {
             "name": "customerNeedUnarchive",
-            "description": "[ALPHA] Unarchives a customer need.",
+            "description": "Unarchives a customer need.",
             "args": [
               {
                 "name": "id",
@@ -44453,7 +44915,7 @@
           },
           {
             "name": "customerCreate",
-            "description": "[ALPHA] Creates a new customer.",
+            "description": "Creates a new customer.",
             "args": [
               {
                 "name": "input",
@@ -44486,7 +44948,7 @@
           },
           {
             "name": "customerUpdate",
-            "description": "[ALPHA] Updates a customer",
+            "description": "Updates a customer",
             "args": [
               {
                 "name": "input",
@@ -44535,7 +44997,7 @@
           },
           {
             "name": "customerDelete",
-            "description": "[ALPHA] Deletes a customer.",
+            "description": "Deletes a customer.",
             "args": [
               {
                 "name": "id",
@@ -44568,7 +45030,7 @@
           },
           {
             "name": "customerMerge",
-            "description": "[ALPHA] Merges two customers.",
+            "description": "Merges two customers.",
             "args": [
               {
                 "name": "sourceCustomerId",
@@ -44616,8 +45078,41 @@
             "deprecationReason": null
           },
           {
+            "name": "customerUpsert",
+            "description": "Upserts a customer, creating it if it doesn't exists, updating it otherwise. Matches against an existing customer with `id` or `externalIds`",
+            "args": [
+              {
+                "name": "input",
+                "description": "The customer to create.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "CustomerUpsertInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "CustomerPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "customerTierCreate",
-            "description": "[ALPHA] Creates a new customer tier.",
+            "description": "Creates a new customer tier.",
             "args": [
               {
                 "name": "input",
@@ -44650,7 +45145,7 @@
           },
           {
             "name": "customerTierUpdate",
-            "description": "[ALPHA] Updates a customer tier.",
+            "description": "Updates a customer tier.",
             "args": [
               {
                 "name": "input",
@@ -44699,7 +45194,7 @@
           },
           {
             "name": "customerTierDelete",
-            "description": "[ALPHA] Deletes a customer tier.",
+            "description": "Deletes a customer tier.",
             "args": [
               {
                 "name": "id",
@@ -51148,9 +51643,26 @@
             "deprecationReason": null
           },
           {
-            "name": "organizationStartTrial",
-            "description": "Starts a trial for the organization. Administrator privileges required.",
-            "args": [],
+            "name": "organizationStartTrialForPlan",
+            "description": "Starts a trial for the organization on the specified plan type. Administrator privileges required.",
+            "args": [
+              {
+                "name": "input",
+                "description": "Plan details for trial",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "OrganizationStartTrialInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -51162,6 +51674,22 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "organizationStartTrial",
+            "description": "[DEPRECATED] Starts a trial for the organization. Administrator privileges required.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "OrganizationStartTrialPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": true,
+            "deprecationReason": "Use organizationStartTrialForPlan"
           },
           {
             "name": "projectLinkCreate",
@@ -56520,15 +57048,15 @@
         "fields": [
           {
             "name": "notificationsDisabled",
-            "description": "Whether notifications are enabled for this channel.",
+            "description": "[DEPRECATED] Whether notifications are enabled for this channel. Use notificationChannelPreferences instead.",
             "args": [],
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "This field has been replaced by notificationChannelPreferences"
           },
           {
             "name": "schedule",
@@ -56556,7 +57084,7 @@
         "inputFields": [
           {
             "name": "notificationsDisabled",
-            "description": "Whether notifications are enabled for this channel.",
+            "description": "[DEPRECATED] Whether notifications are enabled for this channel. Use notificationChannelPreferences instead.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -63255,6 +63783,50 @@
             "deprecationReason": null
           },
           {
+            "name": "initiativeUpdateReminderFrequencyInWeeks",
+            "description": "The n-weekly frequency at which to prompt for initiative updates. When not set, reminders are off.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeUpdateRemindersDay",
+            "description": "The day at which to prompt for initiative updates.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "Day",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeUpdateRemindersHour",
+            "description": "The hour at which to prompt for initiative updates.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "fiscalYearStartMonth",
             "description": "The month at which the fiscal year starts. Defaults to January (0).",
             "args": [],
@@ -65833,6 +66405,33 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "OrganizationStartTrialInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "planType",
+            "description": "The plan type to trial.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "OrganizationStartTrialPayload",
         "description": null,
@@ -65976,6 +66575,42 @@
           {
             "name": "projectUpdateRemindersHour",
             "description": "The hour at which project updates are sent.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeUpdateReminderFrequencyInWeeks",
+            "description": "[ALPHA] The n-weekly frequency at which to prompt for initiative updates.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeUpdateRemindersDay",
+            "description": "[ALPHA] The day at which initiative updates are sent.",
+            "type": {
+              "kind": "ENUM",
+              "name": "Day",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeUpdateRemindersHour",
+            "description": "[ALPHA] The hour at which initiative updates are sent.",
             "type": {
               "kind": "SCALAR",
               "name": "Float",
@@ -67233,6 +67868,34 @@
             "deprecationReason": null
           },
           {
+            "name": "title",
+            "description": "The post's title.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slugId",
+            "description": "The post's unique URL slug.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "creator",
             "description": "The user who wrote the post.",
             "args": [],
@@ -67354,6 +68017,12 @@
         "enumValues": [
           {
             "name": "summary",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "update",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -81215,7 +81884,7 @@
           },
           {
             "name": "issueTitleSuggestionFromCustomerRequest",
-            "description": "[ALPHA] Suggests issue title based on a customer request.",
+            "description": "Suggests issue title based on a customer request.",
             "args": [
               {
                 "name": "request",
@@ -81336,7 +82005,7 @@
               },
               {
                 "name": "sorts",
-                "description": "[INTERNAL] Sort returned customers.",
+                "description": "Sort returned customers.",
                 "type": {
                   "kind": "LIST",
                   "name": null,
@@ -92072,17 +92741,9 @@
             "name": "every",
             "description": "Compound filters, all of which need to be matched.",
             "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "StringItemComparator",
-                  "ofType": null
-                }
-              }
+              "kind": "INPUT_OBJECT",
+              "name": "StringItemComparator",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -92092,17 +92753,9 @@
             "name": "some",
             "description": "Compound filters, one of which needs to be matched.",
             "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "StringItemComparator",
-                  "ofType": null
-                }
-              }
+              "kind": "INPUT_OBJECT",
+              "name": "StringItemComparator",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -101936,7 +102589,7 @@
           },
           {
             "name": "notificationDeliveryPreferences",
-            "description": "The notification delivery preferences for the user.",
+            "description": "The notification delivery preferences for the user. Note: notificationDisabled field is deprecated in favor of notificationChannelPreferences.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -102068,7 +102721,7 @@
           },
           {
             "name": "subscribedToUnreadNotificationsReminder",
-            "description": "Whether this user is subscribed to unread notifications reminder emails or not.",
+            "description": "[DEPRECATED] Whether this user is subscribed to unread notifications reminder emails or not.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -102079,8 +102732,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "This field has been replaced by notificationChannelPreferences"
           },
           {
             "name": "showFullUserNames",
@@ -102415,7 +103068,7 @@
           },
           {
             "name": "subscribedToUnreadNotificationsReminder",
-            "description": "Whether this user is subscribed to email notifications reminder or not.",
+            "description": "[DEPRECATED] Whether this user is subscribed to email notifications reminder or not.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -102427,7 +103080,7 @@
           },
           {
             "name": "notificationPreferences",
-            "description": "The user's notification preferences.",
+            "description": "[DEPRECATED] The user's notification preferences.",
             "type": {
               "kind": "SCALAR",
               "name": "JSONObject",
@@ -103387,6 +104040,12 @@
           },
           {
             "name": "feedFollowing",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "workspaceMembers",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
