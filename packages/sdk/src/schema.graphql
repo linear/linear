@@ -3449,7 +3449,7 @@ input CustomerUpsertInput {
   """
   The id of the customers in external systems.
   """
-  externalId: [String!]
+  externalId: String
   """
   The identifier in UUID v4 format.
   """
@@ -11176,6 +11176,10 @@ type IssueTitleSuggestionFromCustomerRequestPayload {
 
 input IssueUpdateInput {
   """
+  The identifiers of the issue labels to be added to this issue.
+  """
+  addedLabelIds: [String!]
+  """
   The identifier of the user to assign the issue to.
   """
   assigneeId: String
@@ -11235,6 +11239,10 @@ input IssueUpdateInput {
   The project milestone associated with the issue.
   """
   projectMilestoneId: String
+  """
+  The identifiers of the issue labels to be removed from this issue.
+  """
+  removedLabelIds: [String!]
   """
   [Internal] The timestamp at which an issue will be considered in breach of SLA.
   """
@@ -12311,7 +12319,7 @@ type Mutation {
     input: CustomerUpdateInput!
   ): CustomerPayload!
   """
-  Upserts a customer, creating it if it doesn't exists, updating it otherwise. Matches against an existing customer with `id` or `externalIds`
+  Upserts a customer, creating it if it doesn't exists, updating it otherwise. Matches against an existing customer with `id` or `externalId`
   """
   customerUpsert(
     """

@@ -2060,7 +2060,7 @@ export type CustomerUpsertInput = {
   /** The domains associated with this customer. */
   domains?: Maybe<Array<Scalars["String"]>>;
   /** The id of the customers in external systems. */
-  externalId?: Maybe<Array<Scalars["String"]>>;
+  externalId?: Maybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. */
   id?: Maybe<Scalars["String"]>;
   /** The URL of the customer's logo. */
@@ -6517,6 +6517,8 @@ export type IssueTitleSuggestionFromCustomerRequestPayload = {
 };
 
 export type IssueUpdateInput = {
+  /** The identifiers of the issue labels to be added to this issue. */
+  addedLabelIds?: Maybe<Array<Scalars["String"]>>;
   /** The identifier of the user to assign the issue to. */
   assigneeId?: Maybe<Scalars["String"]>;
   /** Whether the issue was automatically closed because its parent issue was closed. */
@@ -6547,6 +6549,8 @@ export type IssueUpdateInput = {
   projectId?: Maybe<Scalars["String"]>;
   /** The project milestone associated with the issue. */
   projectMilestoneId?: Maybe<Scalars["String"]>;
+  /** The identifiers of the issue labels to be removed from this issue. */
+  removedLabelIds?: Maybe<Array<Scalars["String"]>>;
   /** [Internal] The timestamp at which an issue will be considered in breach of SLA. */
   slaBreachesAt?: Maybe<Scalars["DateTime"]>;
   /** The SLA day count type for the issue. Whether SLA should be business days only or calendar days (default). */
@@ -6869,7 +6873,7 @@ export type Mutation = {
   customerTierUpdate: CustomerTierPayload;
   /** Updates a customer */
   customerUpdate: CustomerPayload;
-  /** Upserts a customer, creating it if it doesn't exists, updating it otherwise. Matches against an existing customer with `id` or `externalIds` */
+  /** Upserts a customer, creating it if it doesn't exists, updating it otherwise. Matches against an existing customer with `id` or `externalId` */
   customerUpsert: CustomerPayload;
   /** Archives a cycle. */
   cycleArchive: CycleArchivePayload;

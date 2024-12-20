@@ -31991,7 +31991,7 @@ export class LinearSdk extends Request {
     return new UpdateCustomerMutation(this._request).fetch(id, input);
   }
   /**
-   * Upserts a customer, creating it if it doesn't exists, updating it otherwise. Matches against an existing customer with `id` or `externalIds`
+   * Upserts a customer, creating it if it doesn't exists, updating it otherwise. Matches against an existing customer with `id` or `externalId`
    *
    * @param input - required input to pass to customerUpsert
    * @returns CustomerPayload
