@@ -77296,7 +77296,39 @@
         "fields": [
           {
             "name": "count",
-            "description": "Number of projects using this project status.",
+            "description": "Total number of projects using this project status.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "privateCount",
+            "description": "Total number of projects using this project status that are not visible to the user because they are in a private team.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "archivedTeamCount",
+            "description": "Total number of projects using this project status that are not visible to the user because they are in an archived team.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
