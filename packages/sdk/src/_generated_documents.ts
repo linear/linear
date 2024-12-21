@@ -12148,8 +12148,12 @@ export type ProjectStatusConnection = {
 
 export type ProjectStatusCountPayload = {
   __typename?: "ProjectStatusCountPayload";
-  /** Number of projects using this project status. */
+  /** Total number of projects using this project status that are not visible to the user because they are in an archived team. */
+  archivedTeamCount: Scalars["Float"];
+  /** Total number of projects using this project status. */
   count: Scalars["Float"];
+  /** Total number of projects using this project status that are not visible to the user because they are in a private team. */
+  privateCount: Scalars["Float"];
 };
 
 export type ProjectStatusCreateInput = {
@@ -20345,7 +20349,7 @@ export type ProjectStatusConnectionFragment = { __typename: "ProjectStatusConnec
 
 export type ProjectStatusCountPayloadFragment = { __typename: "ProjectStatusCountPayload" } & Pick<
   ProjectStatusCountPayload,
-  "count"
+  "privateCount" | "archivedTeamCount" | "count"
 >;
 
 export type ProjectStatusPayloadFragment = { __typename: "ProjectStatusPayload" } & Pick<
@@ -36385,6 +36389,8 @@ export const ProjectStatusCountPayloadFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "privateCount" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedTeamCount" } },
           { kind: "Field", name: { kind: "Name", value: "count" } },
         ],
       },

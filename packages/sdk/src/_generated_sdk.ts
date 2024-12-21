@@ -10353,11 +10353,17 @@ export class ProjectStatusConnection extends Connection<ProjectStatus> {
 export class ProjectStatusCountPayload extends Request {
   public constructor(request: LinearRequest, data: L.ProjectStatusCountPayloadFragment) {
     super(request);
+    this.archivedTeamCount = data.archivedTeamCount;
     this.count = data.count;
+    this.privateCount = data.privateCount;
   }
 
-  /** Number of projects using this project status. */
+  /** Total number of projects using this project status that are not visible to the user because they are in an archived team. */
+  public archivedTeamCount: number;
+  /** Total number of projects using this project status. */
   public count: number;
+  /** Total number of projects using this project status that are not visible to the user because they are in a private team. */
+  public privateCount: number;
 }
 /**
  * ProjectStatusPayload model
