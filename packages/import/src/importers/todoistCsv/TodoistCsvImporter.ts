@@ -76,16 +76,16 @@ export class TodoistCsvImporter implements Importer {
   };
 
   private mapPriority(priority: number): IssuePriority {
-    // Todoist uses 1-4 priority scale where 4 is highest
+    // Todoist uses 1-4 priority scale where 1 is highest (just like Linear)
     // Linear uses 0-4 scale where 1 is highest (0 is no priority)
     switch (priority) {
-      case 4:
-        return 1;
-      case 3:
-        return 2;
-      case 2:
-        return 3;
       case 1:
+        return 1;
+      case 2:
+        return 2;
+      case 3:
+        return 3;
+      case 4:
         return 4;
       default:
         return 0;
