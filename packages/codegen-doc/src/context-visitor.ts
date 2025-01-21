@@ -9,6 +9,7 @@ import {
   ScalarTypeDefinitionNode,
 } from "graphql";
 import { OperationType, PluginConfig, PluginContext } from "./types";
+import { nodeHasSkipComment } from "./utils";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments
@@ -53,8 +54,10 @@ export class ContextVisitor<Config extends PluginConfig> {
           .filter(interfaceDefinition => !["Node", "Entity"].includes(interfaceDefinition.name.value))
           .map(interfaceDefinition => [
             interfaceDefinition.name.value,
-            this._objects.filter(objectDefinition =>
-              objectDefinition.interfaces?.some(i => i.name.value === interfaceDefinition.name.value)
+            this._objects.filter(
+              objectDefinition =>
+                !nodeHasSkipComment({ config: this._config } as unknown as PluginContext, objectDefinition) &&
+                objectDefinition.interfaces?.some(i => i.name.value === interfaceDefinition.name.value)
             ),
           ])
       ),
