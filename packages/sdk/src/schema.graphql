@@ -293,24 +293,6 @@ type Attachment implements Node {
 }
 
 """
-A generic payload return from entity archive mutations.
-"""
-type AttachmentArchivePayload implements ArchivePayload {
-  """
-  The archived/unarchived entity. Null if entity was deleted.
-  """
-  entity: Attachment
-  """
-  The identifier of the last sync operation.
-  """
-  lastSyncId: Float!
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-"""
 Attachment collection filtering options.
 """
 input AttachmentCollectionFilter {
@@ -839,13 +821,24 @@ type AuthOauthClientWithScope {
   webhookUrl: String
 }
 
+type AuthOauthClientWithTokenCount {
+  """
+  The auth OAuth client.
+  """
+  client: AuthOauthClient!
+  """
+  The count of tokens matching the app, scopes, and actor mode.
+  """
+  tokenCount: Float!
+}
+
 type AuthOauthClientWithTokens {
   """
   The auth OAuth client.
   """
   client: AuthOauthClient!
   """
-  The token matching the app, scope, and actor.
+  The tokens matching the user, app, scopes, and actor mode.
   """
   tokens: [OauthToken!]!
 }
@@ -2329,6 +2322,10 @@ type Customer implements Node {
   """
   id: ID!
   """
+  The integration that manages the Customer.
+  """
+  integration: Integration
+  """
   The customer's logo URL.
   """
   logoUrl: String
@@ -2587,6 +2584,45 @@ input CustomerFilter {
 }
 
 """
+[Internal] An import of customer data from an external service.
+"""
+type CustomerImport implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  File URL for the uploaded CSV for the import.
+  """
+  csvFileUrl: String!
+  """
+  User readable error message, if one has occurred during the import.
+  """
+  error: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Current step progress in % (0-100).
+  """
+  progress: Float
+  """
+  The status for the import job.
+  """
+  status: String!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
 A customer need, expressed through a reference to an issue, project, or comment.
 """
 type CustomerNeed implements Node {
@@ -2644,9 +2680,9 @@ type CustomerNeed implements Node {
   """
   updatedAt: DateTime!
   """
-  Optional URL to the source of the customer need. Used when manually creating a need.
+  [DEPRECATED] Optional URL to the source of the customer need. Used when manually creating a need.
   """
-  url: String
+  url: String @deprecated(reason: "Use attachment.url instead")
 }
 
 """
@@ -2780,7 +2816,7 @@ input CustomerNeedCreateInput {
   """
   priority: Float
   """
-  The project this need is referencing.
+  [INTERNAL] The project this need is referencing.
   """
   projectId: String
   """
@@ -2892,7 +2928,7 @@ input CustomerNeedUpdateInput {
   """
   priority: Float
   """
-  The project this need is referencing.
+  [INTERNAL] The project this need is referencing.
   """
   projectId: String
   """
@@ -3536,6 +3572,10 @@ type Cycle implements Node {
   The number of in progress estimation points after each day.
   """
   inProgressScopeHistory: [Float!]!
+  """
+  The cycle inherited from.
+  """
+  inheritedFrom: Cycle
   """
   The total number of issues in the cycle after each day.
   """
@@ -4227,10 +4267,6 @@ type Document implements Node {
   """
   content: String
   """
-  [Internal] The documents content as a Prosemirror document.
-  """
-  contentData: JSON @deprecated(reason: "Use content instead.")
-  """
   [Internal] The documents content as YJS state.
   """
   contentState: String
@@ -4259,7 +4295,7 @@ type Document implements Node {
   """
   id: ID!
   """
-  [Internal] The initiative that the document is associated with.
+  The initiative that the document is associated with.
   """
   initiative: Initiative
   """
@@ -4419,6 +4455,10 @@ type DocumentContent implements Node {
   The issue that the content is associated with.
   """
   issue: Issue
+  """
+  [ALPHA] The meeting that the content is associated with.
+  """
+  meeting: Meeting
   """
   The project that the content is associated with.
   """
@@ -4838,10 +4878,6 @@ type DocumentSearchResult implements Node {
   """
   content: String
   """
-  [Internal] The documents content as a Prosemirror document.
-  """
-  contentData: JSON @deprecated(reason: "Use content instead.")
-  """
   [Internal] The documents content as YJS state.
   """
   contentState: String
@@ -4870,7 +4906,7 @@ type DocumentSearchResult implements Node {
   """
   id: ID!
   """
-  [Internal] The initiative that the document is associated with.
+  The initiative that the document is associated with.
   """
   initiative: Initiative
   """
@@ -6842,7 +6878,11 @@ type ImageUploadFromUrlPayload {
 
 input InheritanceEntityMapping {
   """
-  Mapping of the entity ID to the new entity ID.
+  Mapping of the IssueLabel ID to the new IssueLabel name.
+  """
+  issueLabels: JSONObject
+  """
+  Mapping of the WorkflowState ID to the new WorkflowState ID.
   """
   workflowStates: JSONObject!
 }
@@ -6924,6 +6964,10 @@ type Initiative implements Node {
   [Internal] Settings for all integrations associated with that initiative.
   """
   integrationsSettings: IntegrationsSettings
+  """
+  [ALPHA] The last initiative update posted for this initiative.
+  """
+  lastUpdate: InitiativeUpdate
   """
   Links associated with the initiative.
   """
@@ -7631,9 +7675,17 @@ type InitiativeUpdate implements Node {
   """
   id: ID!
   """
+  [Internal] Serialized JSON representing current state of the initiative properties when posting the initiative update.
+  """
+  infoSnapshot: JSONObject
+  """
   The initiative that the update is associated with.
   """
   initiative: Initiative!
+  """
+  Whether initiative update diff should be hidden.
+  """
+  isDiffHidden: Boolean!
   """
   Emoji reaction summary, grouped by emoji type.
   """
@@ -7724,6 +7776,18 @@ input InitiativeUpdateInput {
   Whether the initiative has been trashed.
   """
   trashed: Boolean
+  """
+  [Internal] The n-weekly frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
+  """
+  updateReminderFrequencyInWeeks: Float
+  """
+  [Internal] The day at which to prompt for updates.
+  """
+  updateRemindersDay: Day
+  """
+  [Internal] The hour at which to prompt for updates.
+  """
+  updateRemindersHour: Int
 }
 
 """
@@ -8305,6 +8369,10 @@ type Issue implements Node {
   The time at which the issue was added to a project.
   """
   addedToProjectAt: DateTime
+  """
+  The time at which the issue was added to a team.
+  """
+  addedToTeamAt: DateTime
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
@@ -10568,6 +10636,10 @@ type IssueSearchResult implements Node {
   """
   addedToProjectAt: DateTime
   """
+  The time at which the issue was added to a team.
+  """
+  addedToTeamAt: DateTime
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -11628,6 +11700,103 @@ input ManualSort {
 }
 
 """
+A meeting that can be attached to different entities.
+"""
+type Meeting implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The color of the icon.
+  """
+  color: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the meeting.
+  """
+  creator: User
+  """
+  The time at which the meeting is set to end.
+  """
+  endsAt: DateTime
+  """
+  The time at which the meeting was hidden. Null if the entity has not been hidden.
+  """
+  hiddenAt: DateTime
+  """
+  The icon of the meeting.
+  """
+  icon: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  [Internal] The initiative that the meeting is associated with.
+  """
+  initiative: Initiative
+  """
+  The location of the meeting.
+  """
+  location: String
+  """
+  The meeting link of the meeting.
+  """
+  meetingLink: String
+  """
+  The project that the meeting is associated with.
+  """
+  project: Project
+  """
+  Link to a recording of the meeting.
+  """
+  recordingLink: String
+  """
+  The order of the item in the resources list.
+  """
+  sortOrder: Float!
+  """
+  The time at which the meeting is set to start.
+  """
+  startsAt: DateTime
+  """
+  The meeting title.
+  """
+  title: String!
+  """
+  A flag that indicates whether the meeting is in the trash bin.
+  """
+  trashed: Boolean
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user who last updated the meeting.
+  """
+  updatedBy: User
+}
+
+type MeetingConnection {
+  edges: [MeetingEdge!]!
+  nodes: [Meeting!]!
+  pageInfo: PageInfo!
+}
+
+type MeetingEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: Meeting!
+}
+
+"""
 Issue project milestone options.
 """
 input MilestoneSort {
@@ -11669,15 +11838,6 @@ type Mutation {
     """
     id: String!
   ): DeletePayload!
-  """
-  [DEPRECATED] Archives an issue attachment.
-  """
-  attachmentArchive(
-    """
-    The identifier of the attachment to archive.
-    """
-    id: String!
-  ): AttachmentArchivePayload! @deprecated(reason: "This mutation is deprecated, please use `attachmentDelete` instead")
   """
   Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
   """
@@ -11898,6 +12058,10 @@ type Mutation {
     """
     issueId: String!
     """
+    An optional Intercom conversation part ID to link to
+    """
+    partId: String
+    """
     The title to use for the attachment.
     """
     title: String
@@ -12033,6 +12197,10 @@ type Mutation {
     The title to use for the attachment.
     """
     title: String
+    """
+    The URL of the Zendesk ticket to link.
+    """
+    url: String
   ): AttachmentPayload!
   """
   Begin syncing the thread for an existing Slack message attachment with a comment thread on its issue.
@@ -14172,37 +14340,6 @@ type Mutation {
     id: String!
   ): ProjectArchivePayload!
   """
-  Creates a new project link.
-  """
-  projectLinkCreate(
-    """
-    The project link object to create.
-    """
-    input: ProjectLinkCreateInput!
-  ): ProjectLinkPayload!
-  """
-  Deletes a project link.
-  """
-  projectLinkDelete(
-    """
-    The identifier of the project link to delete.
-    """
-    id: String!
-  ): DeletePayload!
-  """
-  Updates a project link.
-  """
-  projectLinkUpdate(
-    """
-    The identifier of the project link to update.
-    """
-    id: String!
-    """
-    The project link object to update.
-    """
-    input: ProjectLinkUpdateInput!
-  ): ProjectLinkPayload!
-  """
   Creates a new project milestone.
   """
   projectMilestoneCreate(
@@ -15408,25 +15545,6 @@ enum NotificationChannel {
 A user's notification channel preferences, indicating if a channel is enabled or not
 """
 type NotificationChannelPreferences {
-  """
-  Whether notifications are currently enabled for desktop.
-  """
-  desktop: Boolean!
-  """
-  Whether notifications are currently enabled for email.
-  """
-  email: Boolean!
-  """
-  Whether notifications are currently enabled for mobile.
-  """
-  mobile: Boolean!
-  """
-  Whether notifications are currently enabled for Slack.
-  """
-  slack: Boolean!
-}
-
-input NotificationChannelPreferencesInput {
   """
   Whether notifications are currently enabled for desktop.
   """
@@ -16787,6 +16905,10 @@ input NullableStringComparator {
   """
   containsIgnoreCase: String
   """
+  Contains case and accent insensitive constraint. Matches any values that contain the given string case and accent insensitive.
+  """
+  containsIgnoreCaseAndAccent: String
+  """
   Ends with constraint. Matches any values that end with the given string.
   """
   endsWith: String
@@ -17954,10 +18076,6 @@ input OrganizationInviteCreateInput {
   """
   id: String
   """
-  The message to send to the invitee.
-  """
-  message: String
-  """
   [INTERNAL] Optional metadata about the invite.
   """
   metadata: JSONObject
@@ -18650,6 +18768,130 @@ type Post implements Node {
 }
 
 """
+[Internal] A post related notification.
+"""
+type PostNotification implements Entity & Node & Notification {
+  """
+  The user that caused the notification.
+  """
+  actor: User
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorAvatarColor: String!
+  """
+  [Internal] Notification avatar URL.
+  """
+  actorAvatarUrl: String
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorInitials: String
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
+  Related comment ID. Null if the notification is not related to a comment.
+  """
+  commentId: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The time at when an email reminder for this notification was sent to the user. Null, if no email
+      reminder has been sent.
+  """
+  emailedAt: DateTime
+  """
+  The external user that caused the notification.
+  """
+  externalUserActor: ExternalUser
+  """
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
+  """
+  groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
+  [Internal] If notification actor was Linear.
+  """
+  isLinearActor: Boolean!
+  """
+  [Internal] Issue's status type for issue notifications.
+  """
+  issueStatusType: String
+  """
+  Related parent comment ID. Null if the notification is not related to a comment.
+  """
+  parentCommentId: String
+  """
+  Related post ID.
+  """
+  postId: String!
+  """
+  [Internal] Project update health for new updates.
+  """
+  projectUpdateHealth: String
+  """
+  Name of the reaction emoji related to the notification.
+  """
+  reactionEmoji: String
+  """
+  The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  """
+  readAt: DateTime
+  """
+  The time until a notification will be snoozed. After that it will appear in the inbox again.
+  """
+  snoozedUntilAt: DateTime
+  """
+  [Internal] Notification subtitle.
+  """
+  subtitle: String!
+  """
+  [Internal] Notification title.
+  """
+  title: String!
+  """
+  Notification type.
+  """
+  type: String!
+  """
+  The time at which a notification was unsnoozed..
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  [Internal] URL to the target of the notification.
+  """
+  url: String!
+  """
+  The user that received the notification.
+  """
+  user: User!
+}
+
+"""
 Type of Post
 """
 enum PostType {
@@ -18962,38 +19204,13 @@ type Project implements Node {
   """
   lastAppliedTemplate: Template
   """
+  The last project update posted for this project.
+  """
+  lastUpdate: ProjectUpdate
+  """
   The project lead.
   """
   lead: User
-  """
-  [DEPRECATED] Links associated with the project.
-  """
-  links(
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): ProjectLinkConnection! @deprecated(reason: "Use externalLinks instead")
   """
   Users that are members of the project.
   """
@@ -19713,116 +19930,6 @@ type ProjectHistoryEdge {
 }
 
 """
-An external link for a project.
-"""
-type ProjectLink implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The user who created the link.
-  """
-  creator: User!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The link's label.
-  """
-  label: String!
-  """
-  The project that the link is associated with.
-  """
-  project: Project!
-  """
-  The order of the item in the project resources list.
-  """
-  sortOrder: Float!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The link's URL.
-  """
-  url: String!
-}
-
-type ProjectLinkConnection {
-  edges: [ProjectLinkEdge!]!
-  nodes: [ProjectLink!]!
-  pageInfo: PageInfo!
-}
-
-input ProjectLinkCreateInput {
-  """
-  The identifier in UUID v4 format. If none is provided, the backend will generate one.
-  """
-  id: String
-  """
-  The label for the link.
-  """
-  label: String!
-  """
-  Related project for the link.
-  """
-  projectId: String!
-  """
-  The order of the item in the project resources list.
-  """
-  sortOrder: Float
-  """
-  The URL of the link.
-  """
-  url: String!
-}
-
-type ProjectLinkEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: ProjectLink!
-}
-
-type ProjectLinkPayload {
-  """
-  The identifier of the last sync operation.
-  """
-  lastSyncId: Float!
-  """
-  The project that was created or updated.
-  """
-  projectLink: ProjectLink!
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-input ProjectLinkUpdateInput {
-  """
-  The label for the link.
-  """
-  label: String
-  """
-  The order of the item in the project resources list.
-  """
-  sortOrder: Float
-  """
-  The URL of the link.
-  """
-  url: String
-}
-
-"""
 A milestone for a project.
 """
 type ProjectMilestone implements Node {
@@ -19842,10 +19949,6 @@ type ProjectMilestone implements Node {
   The project milestone's description in markdown format.
   """
   description: String
-  """
-  [Internal] The project milestone's description as a Prosemirror document.
-  """
-  descriptionData: JSON @deprecated(reason: "Use `descriptionState` instead.")
   """
   [Internal] The project milestone's description as YJS state.
   """
@@ -20893,38 +20996,13 @@ type ProjectSearchResult implements Node {
   """
   lastAppliedTemplate: Template
   """
+  The last project update posted for this project.
+  """
+  lastUpdate: ProjectUpdate
+  """
   The project lead.
   """
   lead: User
-  """
-  [DEPRECATED] Links associated with the project.
-  """
-  links(
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): ProjectLinkConnection! @deprecated(reason: "Use externalLinks instead")
   """
   Users that are members of the project.
   """
@@ -21269,9 +21347,17 @@ type ProjectStatusConnection {
 
 type ProjectStatusCountPayload {
   """
-  Number of projects using this project status.
+  Total number of projects using this project status that are not visible to the user because they are in an archived team.
+  """
+  archivedTeamCount: Float!
+  """
+  Total number of projects using this project status.
   """
   count: Float!
+  """
+  Total number of projects using this project status that are not visible to the user because they are in a private team.
+  """
+  privateCount: Float!
 }
 
 input ProjectStatusCreateInput {
@@ -21744,6 +21830,18 @@ input ProjectUpdateInput {
   Whether the project has been trashed.
   """
   trashed: Boolean
+  """
+  [Internal] The n-weekly frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
+  """
+  updateReminderFrequencyInWeeks: Float
+  """
+  [Internal] The day at which to prompt for updates.
+  """
+  updateRemindersDay: Day
+  """
+  [Internal] The hour at which to prompt for updates.
+  """
+  updateRemindersHour: Int
 }
 
 """
@@ -23464,39 +23562,6 @@ type Query {
   Suggests filters for a project view based on a text prompt.
   """
   projectFilterSuggestion(prompt: String!): ProjectFilterSuggestionPayload!
-  """
-  One specific project link.
-  """
-  projectLink(id: String!): ProjectLink!
-  """
-  All links for the project.
-  """
-  projectLinks(
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): ProjectLinkConnection!
   """
   One specific project milestone.
   """
@@ -25487,6 +25552,10 @@ input SourceTypeComparator {
   """
   containsIgnoreCase: String
   """
+  Contains case and accent insensitive constraint. Matches any values that contain the given string case and accent insensitive.
+  """
+  containsIgnoreCaseAndAccent: String
+  """
   Ends with constraint. Matches any values that end with the given string.
   """
   endsWith: String
@@ -25582,6 +25651,10 @@ input StringComparator {
   """
   containsIgnoreCase: String
   """
+  Contains case and accent insensitive constraint. Matches any values that contain the given string case and accent insensitive.
+  """
+  containsIgnoreCaseAndAccent: String
+  """
   Ends with constraint. Matches any values that end with the given string.
   """
   endsWith: String
@@ -25647,6 +25720,10 @@ input StringItemComparator {
   Contains case insensitive constraint. Matches any values that contain the given string case insensitive.
   """
   containsIgnoreCase: String
+  """
+  Contains case and accent insensitive constraint. Matches any values that contain the given string case and accent insensitive.
+  """
+  containsIgnoreCaseAndAccent: String
   """
   Ends with constraint. Matches any values that end with the given string.
   """
@@ -25823,6 +25900,10 @@ type Team implements Node {
   The canceled workflow state which auto closed issues will be set to. Defaults to the first canceled state.
   """
   autoCloseStateId: String
+  """
+  [Internal] The team's child teams.
+  """
+  children: [Team!]!
   """
   The team's color.
   """
@@ -26183,6 +26264,10 @@ type Team implements Node {
   The organization that the team is associated with.
   """
   organization: Organization!
+  """
+  [Internal] The team's parent team.
+  """
+  parent: Team
   """
   Whether the team is private or not.
   """
@@ -28377,10 +28462,6 @@ type UserSettings implements Node {
   """
   notificationDeliveryPreferences: NotificationDeliveryPreferences!
   """
-  The notification channel settings the user has selected.
-  """
-  notificationPreferences: JSONObject!
-  """
   Whether to show full user names instead of display names.
   """
   showFullUserNames: Boolean!
@@ -28400,11 +28481,6 @@ type UserSettings implements Node {
   Whether this user is subscribed to privacy and legal update emails or not.
   """
   subscribedToPrivacyLegalUpdates: Boolean!
-  """
-  [DEPRECATED] Whether this user is subscribed to unread notifications reminder emails or not.
-  """
-  subscribedToUnreadNotificationsReminder: Boolean!
-    @deprecated(reason: "This field has been replaced by notificationChannelPreferences")
   """
   The email types the user has unsubscribed from.
   """
@@ -28474,15 +28550,11 @@ input UserSettingsUpdateInput {
   """
   The user's notification channel preferences.
   """
-  notificationChannelPreferences: NotificationChannelPreferencesInput
+  notificationChannelPreferences: PartialNotificationChannelPreferencesInput
   """
   The user's notification delivery preferences.
   """
   notificationDeliveryPreferences: NotificationDeliveryPreferencesInput
-  """
-  [DEPRECATED] The user's notification preferences.
-  """
-  notificationPreferences: JSONObject
   """
   The user's settings.
   """
@@ -28503,10 +28575,6 @@ input UserSettingsUpdateInput {
   Whether this user is subscribed to privacy and legal update emails or not.
   """
   subscribedToPrivacyLegalUpdates: Boolean
-  """
-  [DEPRECATED] Whether this user is subscribed to email notifications reminder or not.
-  """
-  subscribedToUnreadNotificationsReminder: Boolean
   """
   The types of emails the user has unsubscribed from.
   """

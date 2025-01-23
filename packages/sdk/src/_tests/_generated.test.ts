@@ -1044,6 +1044,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the customer.integration query for L.Integration */
+    it("customer.integration", async () => {
+      if (_customer) {
+        const customer_integration: L.Integration | undefined = await _customer.integration;
+        expect(customer_integration instanceof L.Integration);
+      } else {
+        console.warn("codegen-doc:print: No Customer found - cannot test customer.integration query");
+      }
+    });
+
     /** Test the customer.owner query for L.User */
     it("customer.owner", async () => {
       if (_customer) {
@@ -1119,6 +1129,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the cycle.inheritedFrom query for L.Cycle */
+    it("cycle.inheritedFrom", async () => {
+      if (_cycle) {
+        const cycle_inheritedFrom: L.Cycle | undefined = await _cycle.inheritedFrom;
+        expect(cycle_inheritedFrom instanceof L.Cycle);
+      } else {
+        console.warn("codegen-doc:print: No Cycle found - cannot test cycle.inheritedFrom query");
+      }
+    });
+
     /** Test the cycle.team query for L.Team */
     it("cycle.team", async () => {
       if (_cycle) {
@@ -1181,6 +1201,16 @@ describe("generated", () => {
         expect(document_creator instanceof L.User);
       } else {
         console.warn("codegen-doc:print: No Document found - cannot test document.creator query");
+      }
+    });
+
+    /** Test the document.initiative query for L.Initiative */
+    it("document.initiative", async () => {
+      if (_document) {
+        const document_initiative: L.Initiative | undefined = await _document.initiative;
+        expect(document_initiative instanceof L.Initiative);
+      } else {
+        console.warn("codegen-doc:print: No Document found - cannot test document.initiative query");
       }
     });
 
@@ -3231,51 +3261,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test all ProjectLink queries */
-  describe("ProjectLinks", () => {
-    let _projectLink: L.ProjectLink | undefined;
-    let _projectLink_id: string | undefined;
-
-    /** Test the root connection query for the ProjectLink */
-    it("projectLinks", async () => {
-      const projectLinks: L.ProjectLinkConnection | undefined = await client.projectLinks();
-      const projectLink = projectLinks?.nodes?.[0];
-      _projectLink_id = projectLink?.id;
-      expect(projectLinks instanceof L.ProjectLinkConnection);
-    });
-
-    /** Test the root query for a single ProjectLink */
-    it("projectLink", async () => {
-      if (_projectLink_id) {
-        const projectLink: L.ProjectLink | undefined = await client.projectLink(_projectLink_id);
-        _projectLink = projectLink;
-        expect(projectLink instanceof L.ProjectLink);
-      } else {
-        console.warn("codegen-doc:print: No first ProjectLink found in connection - cannot test projectLink query");
-      }
-    });
-
-    /** Test the projectLink.creator query for L.User */
-    it("projectLink.creator", async () => {
-      if (_projectLink) {
-        const projectLink_creator: L.User | undefined = await _projectLink.creator;
-        expect(projectLink_creator instanceof L.User);
-      } else {
-        console.warn("codegen-doc:print: No ProjectLink found - cannot test projectLink.creator query");
-      }
-    });
-
-    /** Test the projectLink.project query for L.Project */
-    it("projectLink.project", async () => {
-      if (_projectLink) {
-        const projectLink_project: L.Project | undefined = await _projectLink.project;
-        expect(projectLink_project instanceof L.Project);
-      } else {
-        console.warn("codegen-doc:print: No ProjectLink found - cannot test projectLink.project query");
-      }
-    });
-  });
-
   /** Test all ProjectMilestone queries */
   describe("ProjectMilestones", () => {
     let _projectMilestone: L.ProjectMilestone | undefined;
@@ -3645,16 +3630,6 @@ describe("generated", () => {
       }
     });
 
-    /** Test the project connection query for the ProjectLink */
-    it("project.links", async () => {
-      if (_project) {
-        const links: L.ProjectLinkConnection | undefined = await _project.links();
-        expect(links instanceof L.ProjectLinkConnection);
-      } else {
-        console.warn("codegen-doc:print: No project found - cannot test _project.links query");
-      }
-    });
-
     /** Test the project connection query for the User */
     it("project.members", async () => {
       if (_project) {
@@ -3742,6 +3717,16 @@ describe("generated", () => {
         expect(project_lastAppliedTemplate instanceof L.Template);
       } else {
         console.warn("codegen-doc:print: No Project found - cannot test project.lastAppliedTemplate query");
+      }
+    });
+
+    /** Test the project.lastUpdate query for L.ProjectUpdate */
+    it("project.lastUpdate", async () => {
+      if (_project) {
+        const project_lastUpdate: L.ProjectUpdate | undefined = await _project.lastUpdate;
+        expect(project_lastUpdate instanceof L.ProjectUpdate);
+      } else {
+        console.warn("codegen-doc:print: No Project found - cannot test project.lastUpdate query");
       }
     });
 
