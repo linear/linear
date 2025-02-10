@@ -3620,6 +3620,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the project connection query for the ProjectRelation */
+    it("project.inverseRelations", async () => {
+      if (_project) {
+        const inverseRelations: L.ProjectRelationConnection | undefined = await _project.inverseRelations();
+        expect(inverseRelations instanceof L.ProjectRelationConnection);
+      } else {
+        console.warn("codegen-doc:print: No project found - cannot test _project.inverseRelations query");
+      }
+    });
+
     /** Test the project connection query for the Issue */
     it("project.issues", async () => {
       if (_project) {
@@ -3657,6 +3667,16 @@ describe("generated", () => {
         expect(projectUpdates instanceof L.ProjectUpdateConnection);
       } else {
         console.warn("codegen-doc:print: No project found - cannot test _project.projectUpdates query");
+      }
+    });
+
+    /** Test the project connection query for the ProjectRelation */
+    it("project.relations", async () => {
+      if (_project) {
+        const relations: L.ProjectRelationConnection | undefined = await _project.relations();
+        expect(relations instanceof L.ProjectRelationConnection);
+      } else {
+        console.warn("codegen-doc:print: No project found - cannot test _project.relations query");
       }
     });
 

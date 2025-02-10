@@ -3,6 +3,9 @@ schema {
   mutation: Mutation
 }
 
+"Indicates exactly one field must be supplied and this field must not be `null`."
+directive @oneOf on INPUT_OBJECT
+
 """
 A bot actor is an actor that is not a user, but an application or integration.
 """
@@ -573,6 +576,10 @@ input AuditEntryFilter {
   """
   actor: NullableUserFilter
   """
+  Compound filters, all of which need to be matched by the issue.
+  """
+  and: [AuditEntryFilter!]
+  """
   Comparator for the country code.
   """
   countryCode: StringComparator
@@ -588,6 +595,10 @@ input AuditEntryFilter {
   Comparator for the IP address.
   """
   ip: StringComparator
+  """
+  Compound filters, one of which need to be matched by the issue.
+  """
+  or: [AuditEntryFilter!]
   """
   Comparator for the type.
   """
@@ -609,72 +620,6 @@ type AuditEntryType {
   type: String!
 }
 
-type AuthApiKey {
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-}
-
-input AuthApiKeyCreateInput {
-  """
-  The identifier in UUID v4 format. If none is provided, the backend will generate one.
-  """
-  id: String
-  """
-  The API key value.
-  """
-  key: String!
-  """
-  The label for the API key.
-  """
-  label: String!
-}
-
-type AuthApiKeyPayload {
-  """
-  The auth API key that was created.
-  """
-  authApiKey: AuthApiKey!
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-"""
-An email address that can be used for submitting issues.
-"""
-type AuthEmailIntakeAddress {
-  """
-  Unique email address user name (before @) used for incoming email.
-  """
-  address: String!
-  """
-  The auth user who created the email intake address.
-  """
-  creator: AuthUser
-  """
-  Whether the email address is enabled.
-  """
-  enabled: Boolean!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The auth organization that the email address is associated with.
-  """
-  organization: AuthOrganization!
-}
-
-type AuthIntegration {
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-}
-
 """
 [INTERNAL] An OAuth userId/createdDate tuple
 """
@@ -687,160 +632,6 @@ type AuthMembership {
   The authorizing userId
   """
   userId: String!
-}
-
-type AuthOauthClient {
-  archivedAt: DateTime
-  """
-  OAuth application's client ID.
-  """
-  clientId: String!
-  """
-  OAuth application's client secret.
-  """
-  clientSecret: String!
-  """
-  The ID of the user who created the OAuth application.
-  """
-  creatorId: String!
-  """
-  Information about the application.
-  """
-  description: String
-  """
-  Name of the developer.
-  """
-  developer: String!
-  """
-  Url of the developer.
-  """
-  developerUrl: String!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  Image of the application.
-  """
-  imageUrl: String
-  """
-  OAuth application's client name.
-  """
-  name: String!
-  """
-  The ID of the workspace the OAuth application belongs to.
-  """
-  organizationId: String!
-  """
-  Whether the OAuth application can be installed in other organizations.
-  """
-  publicEnabled: Boolean!
-  """
-  List of allowed redirect URIs for the application.
-  """
-  redirectUris: [String!]!
-  """
-  The resource types to request when creating new webhooks.
-  """
-  webhookResourceTypes: [String!]!
-  """
-  Webhook secret
-  """
-  webhookSecret: String
-  """
-  Webhook URL
-  """
-  webhookUrl: String
-}
-
-"""
-AuthOauthClient with token creator IDs and counts (memberships), for use in the GraphQL API.
-"""
-type AuthOauthClientWithMemberships {
-  """
-  OAuth application's ID.
-  """
-  appId: String!
-  """
-  OAuth application's client ID.
-  """
-  clientId: String!
-  """
-  Image of the application.
-  """
-  imageUrl: String
-  """
-  User IDs and membership dates of everyone who has authorized the application with the set of scopes.
-  """
-  memberships: [AuthMembership!]!
-  """
-  Application name.
-  """
-  name: String!
-  """
-  Scopes that are authorized for this application for a given user.
-  """
-  scope: [String!]!
-  """
-  Total number of members that authorized the application.
-  """
-  totalMembers: Float!
-  """
-  The application's webhook URL.
-  """
-  webhookUrl: String
-}
-
-"""
-AuthOauthClient with scope from OauthToken, for use in the GraphQL API.
-"""
-type AuthOauthClientWithScope {
-  """
-  OAuth application's ID.
-  """
-  appId: String!
-  """
-  OAuth application's client ID.
-  """
-  clientId: String!
-  """
-  Image of the application.
-  """
-  imageUrl: String
-  """
-  Application name.
-  """
-  name: String!
-  """
-  Scopes that are authorized for this application for a given user.
-  """
-  scope: [String!]!
-  """
-  The application's webhook URL.
-  """
-  webhookUrl: String
-}
-
-type AuthOauthClientWithTokenCount {
-  """
-  The auth OAuth client.
-  """
-  client: AuthOauthClient!
-  """
-  The count of tokens matching the app, scopes, and actor mode.
-  """
-  tokenCount: Float!
-}
-
-type AuthOauthClientWithTokens {
-  """
-  The auth OAuth client.
-  """
-  client: AuthOauthClient!
-  """
-  The tokens matching the user, app, scopes, and actor mode.
-  """
-  tokens: [OauthToken!]!
 }
 
 """
@@ -906,84 +697,6 @@ type AuthOrganization {
   userCount: Float!
 }
 
-type AuthOrganizationBucketNamePayload {
-  """
-  The imports bucket name for the organization.
-  """
-  importsBucketName: String!
-  """
-  The region for the organization.
-  """
-  region: String!
-  """
-  The uploads bucket name for the organization.
-  """
-  uploadsBucketName: String!
-}
-
-type AuthOrganizationDomain {
-  authType: OrganizationDomainAuthType!
-  claimed: Boolean
-  """
-  Prevent users with this domain to create new workspaces.
-  """
-  disableOrganizationCreation: Boolean
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  name: String!
-  organizationId: String!
-  verified: Boolean!
-}
-
-type AuthOrganizationExistsPayload {
-  """
-  Whether the organization exists.
-  """
-  exists: Boolean!
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-"""
-An invitation to the organization that has been sent via email.
-"""
-type AuthOrganizationInvite {
-  """
-  The time at which the invite will be expiring. Null, if the invite shouldn't expire.
-  """
-  expiresAt: DateTime
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-}
-
-type AuthOrganizationPayload {
-  """
-  The auth organization that was updated.
-  """
-  authOrganization: AuthOrganization!
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-input AuthOrganizationUpdateInput {
-  """
-  The organization's unique invite hash.
-  """
-  inviteHash: String
-  """
-  The organization's unique URL key.
-  """
-  urlKey: String
-}
-
 type AuthResolverResponse {
   """
   Should the signup flow allow access for the domain.
@@ -1023,13 +736,6 @@ type AuthResolverResponse {
   users: [AuthUser!]!
 }
 
-type AuthSuccessPayload {
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
 """
 A user that has access to the the resources of an organization.
 """
@@ -1067,77 +773,6 @@ type AuthUser {
   User account ID the user belongs to.
   """
   userAccountId: String!
-}
-
-"""
-User authentication session.
-"""
-type AuthenticationSession {
-  """
-  Used web browser.
-  """
-  browserType: String
-  """
-  Client used for the session
-  """
-  client: String
-  """
-  Country codes of all seen locations.
-  """
-  countryCodes: [String!]!
-  """
-  Date when the session was created.
-  """
-  createdAt: DateTime!
-  id: String!
-  """
-  IP address.
-  """
-  ip: String
-  """
-  When was the session last seen
-  """
-  lastActiveAt: DateTime
-  """
-  Human readable location
-  """
-  location: String
-  """
-  Location city name.
-  """
-  locationCity: String
-  """
-  Location country name.
-  """
-  locationCountry: String
-  """
-  Location country code.
-  """
-  locationCountryCode: String
-  """
-  Location region code.
-  """
-  locationRegionCode: String
-  """
-  Name of the session, derived from the client and operating system
-  """
-  name: String!
-  """
-  Operating system used for the session
-  """
-  operatingSystem: String
-  """
-  Type of application used to authenticate.
-  """
-  type: AuthenticationSessionType!
-  """
-  Date when the session was last updated.
-  """
-  updatedAt: DateTime!
-  """
-  Session's user-agent.
-  """
-  userAgent: String
 }
 
 """
@@ -1250,29 +885,6 @@ type AuthorizedApplication {
   Whether or not webhooks are enabled for the application.
   """
   webhooksEnabled: Boolean!
-}
-
-type AuthorizedApplicationBase {
-  """
-  OAuth application's ID.
-  """
-  appId: String!
-  """
-  OAuth application's client ID.
-  """
-  clientId: String!
-  """
-  Image of the application.
-  """
-  imageUrl: String
-  """
-  Application name.
-  """
-  name: String!
-  """
-  Scopes that are authorized for this application for a given user.
-  """
-  scope: [String!]!
 }
 
 """
@@ -1638,24 +1250,6 @@ input CommentFilter {
   user: UserFilter
 }
 
-"""
-A comment related notification.
-"""
-type CommentNotification {
-  """
-  Related comment ID. Null if the notification is not related to a comment.
-  """
-  commentId: String
-  """
-  Related parent comment ID. Null if the notification is not related to a comment.
-  """
-  parentCommentId: String
-  """
-  Name of the reaction emoji related to the notification.
-  """
-  reactionEmoji: String
-}
-
 type CommentPayload {
   """
   The comment that was created or updated.
@@ -1848,59 +1442,6 @@ input CreatedAtSort {
 }
 
 """
-[ALPHA] A custom attribute on a Customer entity.
-"""
-type CustomAttribute implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The customer that this custom attribute is attached to.
-  """
-  customer: Customer!
-  """
-  The field that is defining this custom attribute.
-  """
-  field: CustomerSchemaField!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The type of the value stored by the attribute.
-  """
-  type: SchemaFieldType!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The value of the custom attribute.
-  """
-  value: JSON!
-}
-
-type CustomAttributeConnection {
-  edges: [CustomAttributeEdge!]!
-  nodes: [CustomAttribute!]!
-  pageInfo: PageInfo!
-}
-
-type CustomAttributeEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: CustomAttribute!
-}
-
-"""
 A custom view that has been saved by a user.
 """
 type CustomView implements Node {
@@ -2085,10 +1626,6 @@ input CustomViewCreateInput {
   """
   filterData: IssueFilter
   """
-  The filters applied to issues in the custom view.
-  """
-  filters: JSONObject
-  """
   The icon of the custom view.
   """
   icon: String
@@ -2256,10 +1793,6 @@ input CustomViewUpdateInput {
   """
   filterData: IssueFilter
   """
-  The filters applied to issues in the custom view.
-  """
-  filters: JSONObject
-  """
   The icon of the custom view.
   """
   icon: String
@@ -2350,6 +1883,10 @@ type Customer implements Node {
   """
   slackChannelId: String
   """
+  The customer's unique URL slug.
+  """
+  slugId: String!
+  """
   The current status of the customer.
   """
   status: CustomerStatus!
@@ -2362,84 +1899,6 @@ type Customer implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
-}
-
-"""
-Customer filtering options.
-"""
-input CustomerCollectionFilter {
-  """
-  Compound filters, all of which need to be matched by the customer.
-  """
-  and: [CustomerCollectionFilter!]
-  """
-  Comparator for the created at date.
-  """
-  createdAt: DateComparator
-  """
-  Comparator for the customer's domains.
-  """
-  domains: StringArrayComparator
-  """
-  Filters that needs to be matched by all customers.
-  """
-  every: CustomerFilter
-  """
-  Comparator for the customer's external IDs.
-  """
-  externalIds: StringArrayComparator
-  """
-  Comparator for the identifier.
-  """
-  id: IDComparator
-  """
-  Comparator for the collection length.
-  """
-  length: NumberComparator
-  """
-  Comparator for the customer name.
-  """
-  name: StringComparator
-  """
-  Filters that the customer's needs must satisfy.
-  """
-  needs: CustomerNeedCollectionFilter
-  """
-  Compound filters, one of which need to be matched by the customer.
-  """
-  or: [CustomerCollectionFilter!]
-  """
-  Filters that the customer owner must satisfy.
-  """
-  owner: NullableUserFilter
-  """
-  Comparator for the customer generated revenue.
-  """
-  revenue: NumberComparator
-  """
-  Comparator for the customer size.
-  """
-  size: NumberComparator
-  """
-  Comparator for the customer slack channel ID.
-  """
-  slackChannelId: StringComparator
-  """
-  Filters that needs to be matched by some customers.
-  """
-  some: CustomerFilter
-  """
-  Filters that the customer's status must satisfy.
-  """
-  status: CustomerStatusFilter
-  """
-  Filters that the customer's tier must satisfy.
-  """
-  tier: CustomerTierFilter
-  """
-  Comparator for the updated at date.
-  """
-  updatedAt: DateComparator
 }
 
 type CustomerConnection {
@@ -2581,45 +2040,6 @@ input CustomerFilter {
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
-}
-
-"""
-[Internal] An import of customer data from an external service.
-"""
-type CustomerImport implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  File URL for the uploaded CSV for the import.
-  """
-  csvFileUrl: String!
-  """
-  User readable error message, if one has occurred during the import.
-  """
-  error: String
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  Current step progress in % (0-100).
-  """
-  progress: Float
-  """
-  The status for the import job.
-  """
-  status: String!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
 }
 
 """
@@ -2796,6 +2216,10 @@ input CustomerNeedCreateInput {
   """
   commentId: String
   """
+  Create need as a user with the provided name. This option is only available to OAuth applications creating needs in `actor=application` mode.
+  """
+  createAsUser: String
+  """
   The external ID of the customer the need belongs to.
   """
   customerExternalId: String
@@ -2803,6 +2227,10 @@ input CustomerNeedCreateInput {
   The uuid of the customer the need belongs to.
   """
   customerId: String
+  """
+  Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating needs in `actor=application` mode.
+  """
+  displayIconUrl: String
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -2819,10 +2247,6 @@ input CustomerNeedCreateInput {
   [INTERNAL] The project this need is referencing.
   """
   projectId: String
-  """
-  [DEPRECATED] Optional URL to the source of the customer need.
-  """
-  url: String
 }
 
 type CustomerNeedEdge {
@@ -2931,10 +2355,6 @@ input CustomerNeedUpdateInput {
   [INTERNAL] The project this need is referencing.
   """
   projectId: String
-  """
-  [DEPRECATED] Optional URL to the source of the customer need.
-  """
-  url: String
 }
 
 type CustomerPayload {
@@ -2953,93 +2373,17 @@ type CustomerPayload {
 }
 
 """
-[ALPHA] A customer schema.
+Issue customer sorting options.
 """
-type CustomerSchema implements Node {
+input CustomerSort {
   """
-  The time at which the entity was archived. Null if the entity has not been archived.
+  Whether nulls should be sorted first or last
   """
-  archivedAt: DateTime
+  nulls: PaginationNulls = last
   """
-  The time at which the entity was created.
+  The order for the individual sort
   """
-  createdAt: DateTime!
-  """
-  The schema display name.
-  """
-  displayName: String!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
-type CustomerSchemaConnection {
-  edges: [CustomerSchemaEdge!]!
-  nodes: [CustomerSchema!]!
-  pageInfo: PageInfo!
-}
-
-type CustomerSchemaEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: CustomerSchema!
-}
-
-"""
-[ALPHA] A customer schema field.
-"""
-type CustomerSchemaField implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  Whether this field is enabled to be used as a custom attribute.
-  """
-  enabled: Boolean!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The name of the field in the schema.
-  """
-  name: String!
-  """
-  The type of the field in the schema.
-  """
-  type: SchemaFieldType!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
-type CustomerSchemaFieldConnection {
-  edges: [CustomerSchemaFieldEdge!]!
-  nodes: [CustomerSchemaField!]!
-  pageInfo: PageInfo!
-}
-
-type CustomerSchemaFieldEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: CustomerSchemaField!
+  order: PaginationSortOrder
 }
 
 """
@@ -3129,33 +2473,6 @@ type CustomerStatusConnection {
   pageInfo: PageInfo!
 }
 
-input CustomerStatusCreateInput {
-  """
-  The UI color of the status as a HEX string.
-  """
-  color: String!
-  """
-  Description of the status.
-  """
-  description: String
-  """
-  The identifier in UUID v4 format. If none is provided, the backend will generate one.
-  """
-  id: String
-  """
-  The name of the status.
-  """
-  name: String!
-  """
-  The position of the status in the workspace's customer flow.
-  """
-  position: Float
-  """
-  The type of the customer status.
-  """
-  type: CustomerStatusType!
-}
-
 type CustomerStatusEdge {
   """
   Used in `before` and `after` args
@@ -3210,21 +2527,6 @@ input CustomerStatusFilter {
   updatedAt: DateComparator
 }
 
-type CustomerStatusPayload {
-  """
-  The identifier of the last sync operation.
-  """
-  lastSyncId: Float!
-  """
-  The customer status that was created or updated.
-  """
-  status: CustomerStatus!
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
 """
 Customer status sorting options.
 """
@@ -3245,29 +2547,6 @@ A type of customer status.
 enum CustomerStatusType {
   active
   inactive
-}
-
-input CustomerStatusUpdateInput {
-  """
-  The UI color of the status as a HEX string.
-  """
-  color: String
-  """
-  Description of the status.
-  """
-  description: String
-  """
-  The name of the status.
-  """
-  name: String
-  """
-  The position of the status in the workspace's customer flow.
-  """
-  position: Float
-  """
-  The type of the customer status.
-  """
-  type: CustomerStatusType
 }
 
 """
@@ -3996,83 +3275,6 @@ input CycleUpdateInput {
 }
 
 """
-[Internal] A dashboard, usually a collection of widgets to display several insights at once.
-"""
-type Dashboard implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The color of the icon of the dashboard.
-  """
-  color: String
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The user who created the dashboard.
-  """
-  creator: User
-  """
-  The description of the dashboard.
-  """
-  description: String
-  """
-  The icon of the dashboard.
-  """
-  icon: String
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The name of the dashboard.
-  """
-  name: String!
-  """
-  The organization of the dashboard.
-  """
-  organization: Organization!
-  """
-  The owner of the dashboard.
-  """
-  owner: User
-  """
-  Whether the dashboard is shared with everyone in the organization.
-  """
-  shared: Boolean!
-  """
-  The dashboard's unique URL slug.
-  """
-  slugId: String!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The user who last updated the dashboard.
-  """
-  updatedBy: User
-}
-
-type DashboardConnection {
-  edges: [DashboardEdge!]!
-  nodes: [Dashboard!]!
-  pageInfo: PageInfo!
-}
-
-type DashboardEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: Dashboard!
-}
-
-"""
 Comparator for dates.
 """
 input DateComparator {
@@ -4166,55 +3368,6 @@ type DeletePayload implements ArchivePayload {
   Whether the operation was successful.
   """
   success: Boolean!
-}
-
-"""
-A diary entry
-"""
-type DiaryEntry implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  [Internal] The entry content as a Prosemirror document.
-  """
-  bodyData: String
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The date for which the entry is created
-  """
-  date: TimelessDate!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The user who the diary belongs to.
-  """
-  user: User!
-}
-
-type DiaryEntryConnection {
-  edges: [DiaryEntryEdge!]!
-  nodes: [DiaryEntry!]!
-  pageInfo: PageInfo!
-}
-
-type DiaryEntryEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: DiaryEntry!
 }
 
 """
@@ -4355,64 +3508,6 @@ type DocumentArchivePayload implements ArchivePayload {
   success: Boolean!
 }
 
-"""
-Document filtering options.
-"""
-input DocumentCollectionFilter {
-  """
-  Compound filters, all of which need to be matched by the document.
-  """
-  and: [DocumentCollectionFilter!]
-  """
-  Comparator for the created at date.
-  """
-  createdAt: DateComparator
-  """
-  Filters that the document's creator must satisfy.
-  """
-  creator: UserFilter
-  """
-  Filters that needs to be matched by all documents.
-  """
-  every: DocumentFilter
-  """
-  Comparator for the identifier.
-  """
-  id: IDComparator
-  """
-  Filters that the document's initiative must satisfy.
-  """
-  initiative: InitiativeFilter
-  """
-  Comparator for the collection length.
-  """
-  length: NumberComparator
-  """
-  Compound filters, one of which need to be matched by the document.
-  """
-  or: [DocumentCollectionFilter!]
-  """
-  Filters that the document's project must satisfy.
-  """
-  project: ProjectFilter
-  """
-  Comparator for the document slug ID.
-  """
-  slugId: StringComparator
-  """
-  Filters that needs to be matched by some documents.
-  """
-  some: DocumentFilter
-  """
-  Comparator for the document title.
-  """
-  title: StringComparator
-  """
-  Comparator for the updated at date.
-  """
-  updatedAt: DateComparator
-}
-
 type DocumentConnection {
   edges: [DocumentEdge!]!
   nodes: [Document!]!
@@ -4478,71 +3573,6 @@ type DocumentContent implements Node {
   updatedAt: DateTime!
 }
 
-"""
-Document content filtering options.
-"""
-input DocumentContentFilter {
-  """
-  Comparator for the created at date.
-  """
-  createdAt: DateComparator
-  """
-  Filters that the document content document must satisfy.
-  """
-  document: DocumentFilter
-  """
-  Comparator for the identifier.
-  """
-  id: IDComparator
-  """
-  Filters that the document content project must satisfy.
-  """
-  project: ProjectFilter
-  """
-  Comparator for the updated at date.
-  """
-  updatedAt: DateComparator
-}
-
-"""
-A document content history for a document.
-"""
-type DocumentContentHistory implements Node {
-  """
-  IDs of actors whose edits went into this history item.
-  """
-  actorIds: [String!]!
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  [Internal] The document content as a Prosemirror document.
-  """
-  contentData: JSONObject
-  """
-  The timestamp associated with the DocumentContent when it was originally saved.
-  """
-  contentDataSnapshotAt: DateTime!
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The document content that this history item is associated with.
-  """
-  documentContent: DocumentContent!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
 type DocumentContentHistoryPayload {
   """
   The document content history entries.
@@ -4586,10 +3616,6 @@ input DocumentCreateInput {
   The document content as markdown.
   """
   content: String
-  """
-  [Internal] The document content as a Prosemirror document.
-  """
-  contentData: JSONObject
   """
   The icon of the document.
   """
@@ -4952,12 +3978,6 @@ type DocumentSearchResult implements Node {
   url: String!
 }
 
-type DocumentSearchResultConnection {
-  edges: [DocumentSearchResultEdge!]!
-  nodes: [DocumentSearchResult!]!
-  pageInfo: PageInfo!
-}
-
 type DocumentSearchResultEdge {
   """
   Used in `before` and `after` args
@@ -4975,10 +3995,6 @@ input DocumentUpdateInput {
   The document content as markdown.
   """
   content: String
-  """
-  [Internal] The document content as a Prosemirror document.
-  """
-  contentData: JSONObject
   """
   The time at which the document was hidden.
   """
@@ -5247,10 +4263,6 @@ input EmailUserAccountAuthChallengeInput {
   Whether to only return the login code. This is used by mobile apps to skip showing the login link.
   """
   loginCodeOnly: Boolean
-  """
-  Signup code.
-  """
-  signupCode: String
 }
 
 type EmailUserAccountAuthChallengeResponse {
@@ -5664,20 +4676,6 @@ type Facet implements Node {
   updatedAt: DateTime!
 }
 
-type FacetConnection {
-  edges: [FacetEdge!]!
-  nodes: [Facet!]!
-  pageInfo: PageInfo!
-}
-
-type FacetEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: Facet!
-}
-
 enum FacetPageSource {
   projects
   teamIssues
@@ -5963,218 +4961,20 @@ input FavoriteUpdateInput {
 }
 
 """
-A feature flag for a project or an issue.
+Cadence to generate feed summary
 """
-type FeatureFlag implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The user who created the feature flag.
-  """
-  creator: User
-  """
-  The description of the feature flag.
-  """
-  description: String
-  """
-  Url to the feature flag provider's page about the feature flag.
-  """
-  externalUrl: String!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The integration providing the feature flag.
-  """
-  integration: Integration!
-  """
-  Whether the feature flag is enabled.
-  """
-  isEnabled: Boolean!
-  """
-  The issue the feature flag is associated with.
-  """
-  issue: Issue
-  """
-  The unique key as defined by the feature flag provider.
-  """
-  key: String!
-  """
-  Date when the stage was last changed.
-  """
-  lastStageUpdatedAt: DateTime
-  """
-  The user who last changed the stage of the feature flag.
-  """
-  lastStageUpdatedBy: User
-  """
-  The organization of the feature flag.
-  """
-  organization: Organization!
-  """
-  The pending rollout stage for the feature flag.
-  """
-  pendingRolloutStage: FeatureFlagRolloutStage
-  """
-  The project the feature flag is associated with.
-  """
-  project: Project
-  """
-  The rollout stage of the feature flag.
-  """
-  rolloutStage: FeatureFlagRolloutStage!
-  """
-  The status of the feature flag.
-  """
-  status: String!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
-type FeatureFlagConnection {
-  edges: [FeatureFlagEdge!]!
-  nodes: [FeatureFlag!]!
-  pageInfo: PageInfo!
-}
-
-type FeatureFlagEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: FeatureFlag!
+enum FeedSummarySchedule {
+  daily
+  never
+  weekly
 }
 
 """
-A rollout stage for a feature flag.
+By which resolution is frequency defined.
 """
-type FeatureFlagRolloutStage implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The description of the rollout stage.
-  """
-  description: String
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The integration providing the feature flag.
-  """
-  integration: Integration!
-  """
-  The name of the rollout stage.
-  """
-  name: String!
-  """
-  The organization of the feature flag rollout stage.
-  """
-  organization: Organization!
-  """
-  Which feature flag provider segments this rollout stage is associated with.
-  """
-  segmentKeys: [String!]!
-  """
-  The order of the rollout stages within an organization.
-  """
-  sortOrder: Float!
-  """
-  The type of the feature flag rollout stage.
-  """
-  type: FeatureFlagRolloutStageType!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
-type FeatureFlagRolloutStageConnection {
-  edges: [FeatureFlagRolloutStageEdge!]!
-  nodes: [FeatureFlagRolloutStage!]!
-  pageInfo: PageInfo!
-}
-
-type FeatureFlagRolloutStageEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: FeatureFlagRolloutStage!
-}
-
-"""
-The type of a feature flag rollout stage.
-"""
-enum FeatureFlagRolloutStageType {
-  dev
-  full
-  internal
-  partial
-}
-
-"""
-[Internal] An item in a users feed.
-"""
-type FeedItem implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The initiative update that is in the feed.
-  """
-  initiativeUpdate: InitiativeUpdate
-  """
-  The organization that will see this feed item.
-  """
-  organization: Organization!
-  """
-  The post that is in the feed.
-  """
-  post: Post
-  """
-  The project update that is in the feed.
-  """
-  projectUpdate: ProjectUpdate
-  """
-  The team that will see this feed item.
-  """
-  team: Team
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The user that will see this feed item.
-  """
-  user: User
+enum FrequencyResolutionType {
+  daily
+  weekly
 }
 
 type FrontAttachmentPayload {
@@ -6186,32 +4986,6 @@ type FrontAttachmentPayload {
   Whether the operation was successful.
   """
   success: Boolean!
-}
-
-"""
-Front specific settings.
-"""
-type FrontSettings {
-  """
-  Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.
-  """
-  automateTicketReopeningOnCancellation: Boolean
-  """
-  Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue
-  """
-  automateTicketReopeningOnComment: Boolean
-  """
-  Whether a ticket should be automatically reopened when its linked Linear issue is completed.
-  """
-  automateTicketReopeningOnCompletion: Boolean
-  """
-  Whether an internal message should be added when someone comments on an issue.
-  """
-  sendNoteOnComment: Boolean
-  """
-  Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).
-  """
-  sendNoteOnStatusChange: Boolean
 }
 
 input FrontSettingsInput {
@@ -6288,10 +5062,6 @@ type GitAutomationStateConnection {
 
 input GitAutomationStateCreateInput {
   """
-  [DEPRECATED] The target branch pattern. If null, all branches are targeted.
-  """
-  branchPattern: String
-  """
   The event that triggers the automation.
   """
   event: GitAutomationStates!
@@ -6337,10 +5107,6 @@ type GitAutomationStatePayload {
 }
 
 input GitAutomationStateUpdateInput {
-  """
-  [DEPRECATED] The target branch pattern. If null, all branches are targeted.
-  """
-  branchPattern: String
   """
   The event that triggers the automation.
   """
@@ -6528,32 +5294,6 @@ type GitHubEnterpriseServerPayload {
   webhookSecret: String!
 }
 
-"""
-Metadata and settings for a GitHub import integration.
-"""
-type GitHubImportSettings {
-  """
-  A map storing all available issue labels per repository
-  """
-  labels: JSONObject
-  """
-  The avatar URL for the GitHub organization.
-  """
-  orgAvatarUrl: String!
-  """
-  The GitHub organization's name.
-  """
-  orgLogin: String!
-  """
-  The type of Github org
-  """
-  orgType: GithubOrgType!
-  """
-  The names of the repositories connected for the GitHub integration.
-  """
-  repositories: [GitHubRepo!]!
-}
-
 input GitHubImportSettingsInput {
   """
   A map storing all available issue labels per repository
@@ -6577,35 +5317,11 @@ input GitHubImportSettingsInput {
   repositories: [GitHubRepoInput!]!
 }
 
-"""
-Metadata and settings for a GitHub Personal integration.
-"""
-type GitHubPersonalSettings {
-  """
-  The GitHub user's name.
-  """
-  login: String!
-}
-
 input GitHubPersonalSettingsInput {
   """
   The GitHub user's name.
   """
   login: String!
-}
-
-"""
-GitHub repos available to sync.
-"""
-type GitHubRepo {
-  """
-  The full name of the repository.
-  """
-  fullName: String!
-  """
-  The GitHub repo id.
-  """
-  id: Float!
 }
 
 input GitHubRepoInput {
@@ -6617,36 +5333,6 @@ input GitHubRepoInput {
   The GitHub repo id.
   """
   id: Float!
-}
-
-"""
-Mapping of Linear teams to GitHub repos.
-"""
-type GitHubRepoMapping {
-  """
-  Whether the sync for this mapping is bidirectional.
-  """
-  bidirectional: Boolean
-  """
-  Whether this mapping is the default one for issue creation.
-  """
-  default: Boolean
-  """
-  Labels to filter incoming GitHub issue creation by.
-  """
-  gitHubLabels: [String!]
-  """
-  The GitHub repo id.
-  """
-  gitHubRepoId: Float!
-  """
-  The unique identifier for this mapping.
-  """
-  id: String!
-  """
-  The Linear team id to map to the given project.
-  """
-  linearTeamId: String!
 }
 
 input GitHubRepoMappingInput {
@@ -6676,32 +5362,6 @@ input GitHubRepoMappingInput {
   linearTeamId: String!
 }
 
-"""
-Metadata and settings for a GitHub integration.
-"""
-type GitHubSettings {
-  """
-  The avatar URL for the GitHub organization.
-  """
-  orgAvatarUrl: String
-  """
-  The GitHub organization's name.
-  """
-  orgLogin: String!
-  """
-  The type of Github org
-  """
-  orgType: GithubOrgType
-  """
-  The names of the repositories connected for the GitHub integration.
-  """
-  repositories: [GitHubRepo!]
-  """
-  Mapping of team to repository for syncing.
-  """
-  repositoriesMapping: [GitHubRepoMapping!]
-}
-
 input GitHubSettingsInput {
   """
   The avatar URL for the GitHub organization.
@@ -6715,6 +5375,7 @@ input GitHubSettingsInput {
   The type of Github org
   """
   orgType: GithubOrgType
+  pullRequestReviewTool: PullRequestReviewTool
   """
   The names of the repositories connected for the GitHub integration.
   """
@@ -6742,24 +5403,6 @@ type GitLabIntegrationCreatePayload {
   The webhook secret to provide to GitLab.
   """
   webhookSecret: String!
-}
-
-"""
-Metadata and settings for a GitLab integration.
-"""
-type GitLabSettings {
-  """
-  The ISO timestamp the GitLab access token expires.
-  """
-  expiresAt: String
-  """
-  Whether the token is limited to a read-only scope.
-  """
-  readonly: Boolean
-  """
-  The self-hosted URL of the GitLab instance.
-  """
-  url: String
 }
 
 input GitLabSettingsInput {
@@ -6791,16 +5434,6 @@ enum GithubOrgType {
   user
 }
 
-"""
-Google Sheets specific settings.
-"""
-type GoogleSheetsSettings {
-  sheetId: Float!
-  spreadsheetId: String!
-  spreadsheetUrl: String!
-  updatedIssuesAt: DateTime
-}
-
 input GoogleSheetsSettingsInput {
   sheetId: Float!
   spreadsheetId: String!
@@ -6825,14 +5458,6 @@ input GoogleUserAccountAuthInput {
   The URI to redirect the user to.
   """
   redirectUri: String
-  """
-  Signup code.
-  """
-  signupCode: String
-  """
-  The identifiers of the teams to auto-join.
-  """
-  teamIdsToJoin: [String!]
   """
   The timezone of the user's browser.
   """
@@ -6916,11 +5541,15 @@ type Initiative implements Node {
   """
   description: String
   """
-  The health of the initiative.
+  [Internal] The resolution of the reminder frequency.
+  """
+  frequencyResolution: FrequencyResolutionType!
+  """
+  [ALPHA] The health of the initiative.
   """
   health: InitiativeUpdateHealthType
   """
-  The time at which the initiative health was updated.
+  [ALPHA] The time at which the initiative health was updated.
   """
   healthUpdatedAt: DateTime
   """
@@ -7067,6 +5696,10 @@ type Initiative implements Node {
   """
   trashed: Boolean
   """
+  [Internal] The frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
+  """
+  updateReminderFrequency: Float
+  """
   [Internal] The n-weekly frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
   """
   updateReminderFrequencyInWeeks: Float
@@ -7128,6 +5761,14 @@ input InitiativeCollectionFilter {
   """
   every: InitiativeFilter
   """
+  [Internal] Comparator for the initiative health: onTrack, atRisk, offTrack
+  """
+  health: StringComparator
+  """
+  [Internal] Comparator for the initiative health (with age): onTrack, atRisk, offTrack, outdated, noUpdate
+  """
+  healthWithAge: StringComparator
+  """
   Comparator for the identifier.
   """
   id: IDComparator
@@ -7152,7 +5793,7 @@ input InitiativeCollectionFilter {
   """
   some: InitiativeFilter
   """
-  Comparator for the initiative status.
+  Comparator for the initiative status: Planned, Active, Completed
   """
   status: StringComparator
   """
@@ -7242,6 +5883,14 @@ input InitiativeFilter {
   """
   creator: UserFilter
   """
+  [Internal] Comparator for the initiative health: onTrack, atRisk, offTrack
+  """
+  health: StringComparator
+  """
+  [Internal] Comparator for the initiative health (with age): onTrack, atRisk, offTrack, outdated, noUpdate
+  """
+  healthWithAge: StringComparator
+  """
   Comparator for the identifier.
   """
   id: IDComparator
@@ -7258,7 +5907,7 @@ input InitiativeFilter {
   """
   slugId: StringComparator
   """
-  Comparator for the initiative status.
+  Comparator for the initiative status: Planned, Active, Completed
   """
   status: StringComparator
   """
@@ -7705,20 +6354,6 @@ type InitiativeUpdate implements Node {
   user: User!
 }
 
-type InitiativeUpdateConnection {
-  edges: [InitiativeUpdateEdge!]!
-  nodes: [InitiativeUpdate!]!
-  pageInfo: PageInfo!
-}
-
-type InitiativeUpdateEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: InitiativeUpdate!
-}
-
 """
 The health type when the update is created.
 """
@@ -7744,6 +6379,10 @@ input InitiativeUpdateInput {
   The description of the initiative.
   """
   description: String
+  """
+  [Internal] The frequency resolution.
+  """
+  frequencyResolution: FrequencyResolutionType
   """
   The initiative's icon.
   """
@@ -7776,6 +6415,10 @@ input InitiativeUpdateInput {
   Whether the initiative has been trashed.
   """
   trashed: Boolean
+  """
+  [Internal] The frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
+  """
+  updateReminderFrequency: Float
   """
   [Internal] The n-weekly frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
   """
@@ -7914,6 +6557,7 @@ enum IntegrationService {
   notion
   opsgenie
   pagerDuty
+  salesforce
   sentry
   slack
   slackAsks
@@ -7926,35 +6570,6 @@ enum IntegrationService {
   slackProjectPost
   slackProjectUpdatesPost
   zendesk
-}
-
-"""
-The integration resource's settings.
-"""
-type IntegrationSettings {
-  front: FrontSettings
-  gitHub: GitHubSettings
-  gitHubImport: GitHubImportSettings
-  gitHubPersonal: GitHubPersonalSettings
-  gitLab: GitLabSettings
-  googleSheets: GoogleSheetsSettings
-  intercom: IntercomSettings
-  jira: JiraSettings
-  jiraPersonal: JiraPersonalSettings
-  launchDarkly: LaunchDarklySettings
-  notion: NotionSettings
-  opsgenie: OpsgenieSettings
-  pagerDuty: PagerDutySettings
-  sentry: SentrySettings
-  slack: SlackSettings
-  slackAsks: SlackAsksSettings
-  slackCustomViewNotifications: SlackPostSettings
-  slackInitiativePost: SlackPostSettings
-  slackOrgInitiativeUpdatesPost: SlackPostSettings
-  slackOrgProjectUpdatesPost: SlackPostSettings
-  slackPost: SlackPostSettings
-  slackProjectPost: SlackPostSettings
-  zendesk: ZendeskSettings
 }
 
 input IntegrationSettingsInput {
@@ -8066,6 +6681,13 @@ type IntegrationTemplatePayload {
   success: Boolean!
 }
 
+input IntegrationUpdateInput {
+  """
+  The settings to update.
+  """
+  settings: IntegrationSettingsInput
+}
+
 """
 The configuration of all integrations for different entities.
 """
@@ -8153,12 +6775,6 @@ type IntegrationsSettings implements Node {
   updatedAt: DateTime!
 }
 
-type IntegrationsSettingsConnection {
-  edges: [IntegrationsSettingsEdge!]!
-  nodes: [IntegrationsSettings!]!
-  pageInfo: PageInfo!
-}
-
 input IntegrationsSettingsCreateInput {
   """
   The type of view to which the integration settings context is associated with.
@@ -8234,14 +6850,6 @@ input IntegrationsSettingsCreateInput {
   teamId: String
 }
 
-type IntegrationsSettingsEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: IntegrationsSettings!
-}
-
 type IntegrationsSettingsPayload {
   """
   The settings that were created or updated.
@@ -8306,32 +6914,6 @@ input IntegrationsSettingsUpdateInput {
   Whether to send a Slack message when a project update is created to workspace channel.
   """
   slackProjectUpdateCreatedToWorkspace: Boolean
-}
-
-"""
-Intercom specific settings.
-"""
-type IntercomSettings {
-  """
-  Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.
-  """
-  automateTicketReopeningOnCancellation: Boolean
-  """
-  Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue
-  """
-  automateTicketReopeningOnComment: Boolean
-  """
-  Whether a ticket should be automatically reopened when its linked Linear issue is completed.
-  """
-  automateTicketReopeningOnCompletion: Boolean
-  """
-  Whether an internal message should be added when someone comments on an issue.
-  """
-  sendNoteOnComment: Boolean
-  """
-  Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).
-  """
-  sendNoteOnStatusChange: Boolean
 }
 
 input IntercomSettingsInput {
@@ -9138,10 +7720,6 @@ input IssueCreateInput {
   The identifier of the user to assign the issue to.
   """
   assigneeId: String
-  """
-  The position of the issue in its column on the board view.
-  """
-  boardOrder: Float
   """
   The date when the issue was completed (e.g. if importing from another system). Must be a date in the past and after createdAt date. Cannot be provided with an incompatible workflow state.
   """
@@ -9972,24 +8550,6 @@ type IssueImportJqlCheckPayload {
   Returns true if the JQL query has been validated successfully, false otherwise
   """
   success: Boolean!
-}
-
-"""
-Issue import mapping input.
-"""
-input IssueImportMappingInput {
-  """
-  The mapping configuration for epics.
-  """
-  epics: JSONObject
-  """
-  The mapping configuration for users.
-  """
-  users: JSONObject
-  """
-  The mapping configuration for workflow states.
-  """
-  workflowStates: JSONObject
 }
 
 type IssueImportPayload {
@@ -11151,12 +9711,6 @@ type IssueSearchResult implements Node {
   url: String!
 }
 
-type IssueSearchResultConnection {
-  edges: [IssueSearchResultEdge!]!
-  nodes: [IssueSearchResult!]!
-  pageInfo: PageInfo!
-}
-
 type IssueSearchResultEdge {
   """
   Used in `before` and `after` args
@@ -11182,6 +9736,10 @@ input IssueSortInput {
   """
   createdAt: CreatedAtSort
   """
+  Sort by customer
+  """
+  customer: CustomerSort
+  """
   Sort by Cycle start date
   """
   cycle: CycleSort
@@ -11197,6 +9755,10 @@ input IssueSortInput {
   Sort by label
   """
   label: LabelSort
+  """
+  Sort by label group
+  """
+  labelGroup: LabelGroupSort
   """
   Sort by manual order
   """
@@ -11260,10 +9822,6 @@ input IssueUpdateInput {
   """
   autoClosedByParentClosing: Boolean
   """
-  The position of the issue in its column on the board view.
-  """
-  boardOrder: Float
-  """
   The cycle associated with the issue.
   """
   cycleId: String
@@ -11272,7 +9830,7 @@ input IssueUpdateInput {
   """
   description: String
   """
-  The issue description as a Prosemirror document.
+  [Internal] The issue description as a Prosemirror document.
   """
   descriptionData: JSON
   """
@@ -11388,32 +9946,6 @@ input JiraConfigurationInput {
   Whether this integration will be setup using the manual webhook flow.
   """
   manualSetup: Boolean
-  """
-  [DEPRECATED] The Jira project keys to scope the integration to.
-  """
-  project: String
-}
-
-"""
-Tuple for mapping Jira projects to Linear teams.
-"""
-type JiraLinearMapping {
-  """
-  Whether the sync for this mapping is bidirectional.
-  """
-  bidirectional: Boolean
-  """
-  Whether this mapping is the default one for issue creation.
-  """
-  default: Boolean
-  """
-  The Jira id for this project.
-  """
-  jiraProjectId: String!
-  """
-  The Linear team id to map to the given project.
-  """
-  linearTeamId: String!
 }
 
 input JiraLinearMappingInput {
@@ -11435,39 +9967,11 @@ input JiraLinearMappingInput {
   linearTeamId: String!
 }
 
-"""
-Jira personal specific settings.
-"""
-type JiraPersonalSettings {
-  """
-  The name of the Jira site currently authorized through the integration.
-  """
-  siteName: String
-}
-
 input JiraPersonalSettingsInput {
   """
   The name of the Jira site currently authorized through the integration.
   """
   siteName: String
-}
-
-"""
-Metadata about a Jira project.
-"""
-type JiraProjectData {
-  """
-  The Jira id for this project.
-  """
-  id: String!
-  """
-  The Jira key for this project, such as ENG.
-  """
-  key: String!
-  """
-  The Jira name for this project, such as Engineering.
-  """
-  name: String!
 }
 
 input JiraProjectDataInput {
@@ -11483,32 +9987,6 @@ input JiraProjectDataInput {
   The Jira name for this project, such as Engineering.
   """
   name: String!
-}
-
-"""
-Jira specific settings.
-"""
-type JiraSettings {
-  """
-  Whether this integration is for Jira Server or not.
-  """
-  isJiraServer: Boolean
-  """
-  Whether this integration is using a manual setup flow.
-  """
-  manualSetup: Boolean
-  """
-  The mapping of Jira project id => Linear team id.
-  """
-  projectMapping: [JiraLinearMapping!]
-  """
-  The Jira projects for the organization.
-  """
-  projects: [JiraProjectData!]!
-  """
-  Whether the user needs to provide setup information about the webhook to complete the integration setup. Only relevant for integrations that use a manual setup flow
-  """
-  setupPending: Boolean
 }
 
 input JiraSettingsInput {
@@ -11566,6 +10044,24 @@ input JoinOrganizationInput {
   The identifier of the organization.
   """
   organizationId: String!
+}
+
+"""
+Issue label-group sorting options.
+"""
+input LabelGroupSort {
+  """
+  The label-group id to sort by
+  """
+  labelGroupId: String!
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -11651,20 +10147,6 @@ input LabelSort {
   The order for the individual sort
   """
   order: PaginationSortOrder
-}
-
-"""
-LaunchDarkly specific settings.
-"""
-type LaunchDarklySettings {
-  """
-  The environment of the LaunchDarkly integration.
-  """
-  environment: String!
-  """
-  The project key of the LaunchDarkly integration.
-  """
-  projectKey: String!
 }
 
 input LaunchDarklySettingsInput {
@@ -11780,20 +10262,6 @@ type Meeting implements Node {
   The user who last updated the meeting.
   """
   updatedBy: User
-}
-
-type MeetingConnection {
-  edges: [MeetingEdge!]!
-  nodes: [Meeting!]!
-  pageInfo: PageInfo!
-}
-
-type MeetingEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: Meeting!
 }
 
 """
@@ -11976,18 +10444,6 @@ type Mutation {
     """
     linkKind: GitLinkKind
     """
-    The GitHub pull request number to link.
-    """
-    number: Float
-    """
-    The owner of the GitHub repository.
-    """
-    owner: String
-    """
-    The name of the GitHub repository.
-    """
-    repo: String
-    """
     The title to use for the attachment.
     """
     title: String
@@ -12100,10 +10556,6 @@ type Mutation {
   """
   attachmentLinkSlack(
     """
-    [DEPRECATED] The Slack channel ID for the message to link.
-    """
-    channel: String
-    """
     Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
     """
     createAsUser: String
@@ -12120,10 +10572,6 @@ type Mutation {
     """
     issueId: String!
     """
-    [DEPRECATED] The latest timestamp for the Slack message.
-    """
-    latest: String
-    """
     Whether to begin syncing the message's Slack thread with a comment thread on the issue.
     """
     syncToCommentThread: Boolean
@@ -12131,10 +10579,6 @@ type Mutation {
     The title to use for the attachment.
     """
     title: String
-    """
-    [DEPRECATED] Unique identifier of either a thread's parent message or a message in the thread.
-    """
-    ts: String
     """
     The Slack message URL for the message to link.
     """
@@ -12419,6 +10863,10 @@ type Mutation {
     The identifier of the customer need to delete.
     """
     id: String!
+    """
+    Whether to keep the attachment associated with the customer need.
+    """
+    keepAttachment: Boolean
   ): DeletePayload!
   """
   Unarchives a customer need.
@@ -13239,7 +11687,7 @@ type Mutation {
     organizationSlug: String!
   ): IntegrationPayload!
   """
-  [INTERNAL] Updates the integration.
+  [INTERNAL] Updates the integration settings.
   """
   integrationSettingsUpdate(
     """
@@ -13250,7 +11698,7 @@ type Mutation {
     An integration settings object.
     """
     input: IntegrationSettingsInput!
-  ): IntegrationPayload!
+  ): IntegrationPayload! @deprecated(reason: "Use integrationUpdate instead.")
   """
   Integrates the organization with Slack.
   """
@@ -13445,6 +11893,19 @@ type Mutation {
     id: String!
   ): DeletePayload!
   """
+  [INTERNAL] Updates the integration.
+  """
+  integrationUpdate(
+    """
+    The identifier of the integration to update.
+    """
+    id: String!
+    """
+    A partial integration object to update the integration with.
+    """
+    input: IntegrationUpdateInput!
+  ): IntegrationPayload!
+  """
   Integrates the organization with Zendesk.
   """
   integrationZendesk(
@@ -13595,10 +12056,6 @@ type Mutation {
     """
     instantProcess: Boolean
     """
-    ID of the organization into which to import data.
-    """
-    organizationId: String
-    """
     ID of the team into which to import data.
     """
     teamId: String
@@ -13627,10 +12084,6 @@ type Mutation {
     Jira personal access token to access Jira REST API.
     """
     jiraToken: String
-    """
-    ID of the organization into which to import data.
-    """
-    organizationId: String
     """
     ID of the team into which to import data. Empty to create new team.
     """
@@ -13665,10 +12118,6 @@ type Mutation {
     """
     instantProcess: Boolean
     """
-    ID of the organization into which to import data.
-    """
-    organizationId: String
-    """
     ID of the team into which to import data.
     """
     teamId: String
@@ -13690,10 +12139,6 @@ type Mutation {
     """
     githubRepoIds: [Int!]
     """
-    Whether or not we should import GitHub organization level projects.
-    """
-    githubShouldImportOrgProjects: Boolean
-    """
     Whether or not we should collect the data for closed issues.
     """
     includeClosedIssues: Boolean
@@ -13701,14 +12146,6 @@ type Mutation {
     Whether to instantly process the import with the default configuration mapping.
     """
     instantProcess: Boolean
-    """
-    [DEPRECATED] ID of the Github import integration to use to access issues.
-    """
-    integrationId: String
-    """
-    ID of the organization into which to import data.
-    """
-    organizationId: String
     """
     ID of the team into which to import data.
     """
@@ -13754,10 +12191,6 @@ type Mutation {
     A custom JQL query to filter issues being imported
     """
     jql: String
-    """
-    ID of the organization into which to import data.
-    """
-    organizationId: String
     """
     ID of the team into which to import data. Empty to create new team.
     """
@@ -14607,9 +13040,18 @@ type Mutation {
   """
   resendOrganizationInvite(
     """
-    The identifier of the organization invite to be re-send.
+    The identifier of the organization invite to re-send.
     """
     id: String!
+  ): DeletePayload!
+  """
+  Re-send an organization invite tied to an email address.
+  """
+  resendOrganizationInviteByEmail(
+    """
+    The email address tied to the organization invite to re-send.
+    """
+    email: String!
   ): DeletePayload!
   """
   Archives a roadmap.
@@ -15335,24 +13777,6 @@ enum NotificationCategory {
 }
 
 """
-Metadata about a single notification category
-"""
-type NotificationCategoryMetadata {
-  """
-  The category's description
-  """
-  description: String!
-  """
-  The category's sort order among all categories
-  """
-  sortOrder: Float!
-  """
-  The category's title
-  """
-  title: String!
-}
-
-"""
 A user's notification category preferences.
 """
 type NotificationCategoryPreferences {
@@ -15470,68 +13894,6 @@ input NotificationCategoryPreferencesInput {
 }
 
 """
-Metadata about notification categories
-"""
-type NotificationCategoryPreferencesMetadata {
-  """
-  The metadata for notifications about apps and integrations.
-  """
-  appsAndIntegrations: NotificationCategoryMetadata!
-  """
-  The metadata for notifications about assignments.
-  """
-  assignments: NotificationCategoryMetadata!
-  """
-  The metadata for notifications about comments and replies.
-  """
-  commentsAndReplies: NotificationCategoryMetadata!
-  """
-  The preferences for customer notifications.
-  """
-  customers: NotificationCategoryMetadata!
-  """
-  The metadata for notifications about document changes.
-  """
-  documentChanges: NotificationCategoryMetadata!
-  """
-  The metadata for notifications about mentions.
-  """
-  mentions: NotificationCategoryMetadata!
-  """
-  The metadata for notifications about posts and updates.
-  """
-  postsAndUpdates: NotificationCategoryMetadata!
-  """
-  The metadata for notifications about reactions.
-  """
-  reactions: NotificationCategoryMetadata!
-  """
-  The metadata for notifications about reminders.
-  """
-  reminders: NotificationCategoryMetadata!
-  """
-  The metadata for notifications about reviews.
-  """
-  reviews: NotificationCategoryMetadata!
-  """
-  The metadata for notifications about status changes.
-  """
-  statusChanges: NotificationCategoryMetadata!
-  """
-  The metadata for notifications about subscriptions.
-  """
-  subscriptions: NotificationCategoryMetadata!
-  """
-  The preferences for system notifications.
-  """
-  system: NotificationCategoryMetadata!
-  """
-  The preferences for triage notifications.
-  """
-  triage: NotificationCategoryMetadata!
-}
-
-"""
 The delivery channels a user can receive notifications in.
 """
 enum NotificationChannel {
@@ -15594,10 +13956,6 @@ type NotificationDeliveryPreferencesChannel {
 }
 
 input NotificationDeliveryPreferencesChannelInput {
-  """
-  [DEPRECATED] Whether notifications are enabled for this channel. Use notificationChannelPreferences instead.
-  """
-  notificationsDisabled: Boolean
   """
   The schedule for notifications on this channel.
   """
@@ -15977,20 +14335,6 @@ input NotificationUpdateInput {
   snoozedUntilAt: DateTime
 }
 
-"""
-Notion specific settings.
-"""
-type NotionSettings {
-  """
-  The ID of the Notion workspace being connected.
-  """
-  workspaceId: String!
-  """
-  The name of the Notion workspace being connected.
-  """
-  workspaceName: String!
-}
-
 input NotionSettingsInput {
   """
   The ID of the Notion workspace being connected.
@@ -16297,56 +14641,6 @@ input NullableDocumentContentFilter {
 }
 
 """
-Document filtering options.
-"""
-input NullableDocumentFilter {
-  """
-  Compound filters, all of which need to be matched by the document.
-  """
-  and: [NullableDocumentFilter!]
-  """
-  Comparator for the created at date.
-  """
-  createdAt: DateComparator
-  """
-  Filters that the document's creator must satisfy.
-  """
-  creator: UserFilter
-  """
-  Comparator for the identifier.
-  """
-  id: IDComparator
-  """
-  Filters that the document's initiative must satisfy.
-  """
-  initiative: InitiativeFilter
-  """
-  Filter based on the existence of the relation.
-  """
-  null: Boolean
-  """
-  Compound filters, one of which need to be matched by the document.
-  """
-  or: [NullableDocumentFilter!]
-  """
-  Filters that the document's project must satisfy.
-  """
-  project: ProjectFilter
-  """
-  Comparator for the document slug ID.
-  """
-  slugId: StringComparator
-  """
-  Comparator for the document title.
-  """
-  title: StringComparator
-  """
-  Comparator for the updated at date.
-  """
-  updatedAt: DateComparator
-}
-
-"""
 Issue filtering options.
 """
 input NullableIssueFilter {
@@ -16643,11 +14937,11 @@ input NullableProjectFilter {
   """
   hasViolatedRelations: RelationExistsComparator
   """
-  Comparator for the project health.
+  Comparator for the project health: onTrack, atRisk, offTrack
   """
   health: StringComparator
   """
-  Comparator for the project health (with age).
+  Comparator for the project health (with age): onTrack, atRisk, offTrack, outdated, noUpdate
   """
   healthWithAge: StringComparator
   """
@@ -16818,78 +15112,6 @@ input NullableProjectUpdateFilter {
   Filters that the project update creator must satisfy.
   """
   user: UserFilter
-}
-
-"""
-Options for filtering projects by project updates.
-"""
-input NullableProjectUpdatesFilter {
-  """
-  Compound filters, all of which need to be matched by the project updates.
-  """
-  and: [NullableProjectUpdatesFilter!]
-  """
-  Comparator for the created at date.
-  """
-  createdAt: DateComparator
-  """
-  Comparator for the project update health.
-  """
-  health: StringComparator
-  """
-  Comparator for the identifier.
-  """
-  id: IDComparator
-  """
-  Filter based on the existence of the relation.
-  """
-  null: Boolean
-  """
-  Compound filters, one of which need to be matched by the project updates.
-  """
-  or: [NullableProjectUpdatesFilter!]
-  """
-  Comparator for the updated at date.
-  """
-  updatedAt: DateComparator
-}
-
-"""
-Reaction filtering options.
-"""
-input NullableReactionFilter {
-  """
-  Compound filters, all of which need to be matched by the reaction.
-  """
-  and: [NullableReactionFilter!]
-  """
-  Comparator for the created at date.
-  """
-  createdAt: DateComparator
-  """
-  Comparator for the reactions custom emoji.
-  """
-  customEmojiId: IDComparator
-  """
-  Comparator for the reactions emoji.
-  """
-  emoji: StringComparator
-  """
-  Comparator for the identifier.
-  """
-  id: IDComparator
-  """
-  Filter based on the existence of the relation.
-  """
-  null: Boolean
-  """
-  Compound filters, one of which need to be matched by the reaction.
-  """
-  or: [NullableReactionFilter!]
-  """
-  Comparator for the updated at date.
-  """
-  updatedAt: DateComparator
 }
 
 """
@@ -17109,6 +15331,10 @@ input NullableUserFilter {
   """
   and: [NullableUserFilter!]
   """
+  Comparator for the user's app status.
+  """
+  app: BooleanComparator
+  """
   Filters that the users assigned issues must satisfy.
   """
   assignedIssues: IssueCollectionFilter
@@ -17128,6 +15354,10 @@ input NullableUserFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Comparator for the user's invited status.
+  """
+  invited: BooleanComparator
   """
   Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user.
   """
@@ -17195,85 +15425,6 @@ enum OAuthClientApprovalStatus {
   approved
   denied
   requested
-}
-
-"""
-OAuth2 client application
-"""
-type OauthClient implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  OAuth application's client ID.
-  """
-  clientId: String!
-  """
-  OAuth application's client secret.
-  """
-  clientSecret: String!
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The user who created the OAuth application.
-  """
-  creator: User!
-  """
-  Information about the application.
-  """
-  description: String
-  """
-  Name of the developer.
-  """
-  developer: String!
-  """
-  Url of the developer.
-  """
-  developerUrl: String!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  Image of the application.
-  """
-  imageUrl: String
-  """
-  OAuth application's client name.
-  """
-  name: String!
-  """
-  The organization that the OAuth application is associated with.
-  """
-  organization: Organization!
-  """
-  Whether the OAuth application can be installed in other organizations.
-  """
-  publicEnabled: Boolean!
-  """
-  List of allowed redirect URIs for the application.
-  """
-  redirectUris: [String!]!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The resource types to request when creating new webhooks.
-  """
-  webhookResourceTypes: [String!]!
-  """
-  Webhook secret token for verifying the origin on the recipient side.
-  """
-  webhookSecret: String
-  """
-  Webhook URL.
-  """
-  webhookUrl: String
 }
 
 """
@@ -17443,59 +15594,12 @@ type OauthClientApprovalNotification implements Entity & Node & Notification {
   user: User!
 }
 
-type OauthClientConnection {
-  edges: [OauthClientEdge!]!
-  nodes: [OauthClient!]!
-  pageInfo: PageInfo!
-}
-
-type OauthClientEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: OauthClient!
-}
-
-type OauthToken {
-  """
-  OAuth2 client for which the access token belongs to.
-  """
-  client: AuthOauthClient!
-  clientId: String!
-  createdAt: DateTime!
-  id: Float!
-  revokedAt: DateTime
-  """
-  Scopes associated with the access token.
-  """
-  scope: [String!]!
-  """
-  Auth user who authorized the OAuth application.
-  """
-  user: AuthUser!
-  """
-  Id of the user who authorized the OAuth application.
-  """
-  userId: String!
-}
-
 input OnboardingCustomerSurvey {
   companyRole: String
   companySize: String
 }
 
 input OpsgenieInput {
-  """
-  The date when the Opsgenie API failed with an unauthorized error.
-  """
-  apiFailedWithUnauthorizedErrorAt: DateTime
-}
-
-"""
-Opsgenie specific settings.
-"""
-type OpsgenieSettings {
   """
   The date when the Opsgenie API failed with an unauthorized error.
   """
@@ -18148,33 +16252,6 @@ type OrganizationInviteFullDetailsPayload {
   status: OrganizationInviteStatus!
 }
 
-type OrganizationInviteLinkDetailsPayload {
-  """
-  Allowed authentication providers, empty array means all are allowed.
-  """
-  allowedAuthServices: [String!]!
-  """
-  ID of the workspace the invite link is for.
-  """
-  organizationId: String
-  """
-  URL of the workspace logo the invite link is for.
-  """
-  organizationLogoUrl: String
-  """
-  Name of the workspace the invite link is for.
-  """
-  organizationName: String
-  """
-  Region of the workspace the invite link is for.
-  """
-  organizationRegion: String
-  """
-  URL key of the workspace the invite link is for.
-  """
-  organizationUrlKey: String
-}
-
 type OrganizationInvitePayload {
   """
   The identifier of the last sync operation.
@@ -18267,17 +16344,6 @@ type OrganizationPayload {
   The organization that was created or updated.
   """
   organization: Organization
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-type OrganizationRegionResponse {
-  """
-  The region for the organization.
-  """
-  region: String
   """
   Whether the operation was successful.
   """
@@ -18442,16 +16508,6 @@ input PagerDutyInput {
 }
 
 """
-PagerDuty specific settings.
-"""
-type PagerDutySettings {
-  """
-  The date when the PagerDuty API failed with an unauthorized error.
-  """
-  apiFailedWithUnauthorizedErrorAt: DateTime
-}
-
-"""
 How to treat NULL values, whether they should appear first or last
 """
 enum PaginationNulls {
@@ -18538,86 +16594,6 @@ type PaidSubscription implements Node {
   updatedAt: DateTime!
 }
 
-"""
-A user's notification category preferences.
-"""
-type PartialNotificationCategoryPreferences {
-  """
-  The preferences for notifications about apps and integrations.
-  """
-  appsAndIntegrations: PartialNotificationChannelPreferences
-  """
-  The preferences for notifications about assignments.
-  """
-  assignments: PartialNotificationChannelPreferences
-  """
-  The preferences for notifications about comments and replies.
-  """
-  commentsAndReplies: PartialNotificationChannelPreferences
-  """
-  The preferences for notifications about customers.
-  """
-  customers: PartialNotificationChannelPreferences
-  """
-  The preferences for notifications about document changes.
-  """
-  documentChanges: PartialNotificationChannelPreferences
-  """
-  The preferences for notifications about mentions.
-  """
-  mentions: PartialNotificationChannelPreferences
-  """
-  The preferences for notifications about posts and updates.
-  """
-  postsAndUpdates: PartialNotificationChannelPreferences
-  """
-  The preferences for notifications about reactions.
-  """
-  reactions: PartialNotificationChannelPreferences
-  """
-  The preferences for notifications about reminders.
-  """
-  reminders: PartialNotificationChannelPreferences
-  """
-  The preferences for notifications about reviews.
-  """
-  reviews: PartialNotificationChannelPreferences
-  """
-  The preferences for notifications about status changes.
-  """
-  statusChanges: PartialNotificationChannelPreferences
-  """
-  The preferences for notifications about subscriptions.
-  """
-  subscriptions: PartialNotificationChannelPreferences
-  """
-  The preferences for notifications about triage.
-  """
-  triage: PartialNotificationChannelPreferences
-}
-
-"""
-A user's notification category preferences for a channel.
-"""
-type PartialNotificationChannelPreferences {
-  """
-  Whether notifications are currently enabled for desktop.
-  """
-  desktop: Boolean
-  """
-  Whether notifications are currently enabled for email.
-  """
-  email: Boolean
-  """
-  Whether notifications are currently enabled for mobile.
-  """
-  mobile: Boolean
-  """
-  Whether notifications are currently enabled for Slack.
-  """
-  slack: Boolean
-}
-
 input PartialNotificationChannelPreferencesInput {
   """
   Whether notifications are currently enabled for desktop.
@@ -18637,60 +16613,6 @@ input PartialNotificationChannelPreferencesInput {
   slack: Boolean
 }
 
-"""
-Registered passkey for authentication.
-"""
-type Passkey {
-  aaguid: String!
-  """
-  Used web browser. Only set on creation.
-  """
-  browserType: String
-  """
-  Type of application used to create.
-  """
-  clientType: AuthenticationSessionType!
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  id: String!
-  """
-  IP address. Only set on creation.
-  """
-  ip: String
-  label: String!
-  """
-  The time when the passkey was last used.
-  """
-  lastUsedAt: DateTime!
-  lastUsedSessionId: String
-  """
-  Location city name. Only set on creation.
-  """
-  locationCity: String
-  """
-  Location country name. Only set on creation.
-  """
-  locationCountry: String
-  """
-  Location country code. Only set on creation.
-  """
-  locationCountryCode: String
-  """
-  Location region code. Only set on creation.
-  """
-  locationRegionCode: String
-  """
-  Date when the passkey was last updated.
-  """
-  updatedAt: DateTime!
-  """
-  Creating session's user-agent. Only set on creation.
-  """
-  userAgent: String
-}
-
 type PasskeyLoginStartResponse {
   options: JSONObject!
   success: Boolean!
@@ -18704,6 +16626,10 @@ type Post implements Node {
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
+  """
+  The update content summarized for audio consumption.
+  """
+  audioSummary: String
   """
   The update content in markdown format.
   """
@@ -19081,6 +17007,10 @@ type Project implements Node {
   """
   favorite: Favorite
   """
+  [Internal] The resolution of the reminder frequency.
+  """
+  frequencyResolution: FrequencyResolutionType!
+  """
   The health of the project.
   """
   health: ProjectUpdateHealthType
@@ -19162,6 +17092,35 @@ type Project implements Node {
   Settings for all integrations associated with that project.
   """
   integrationsSettings: IntegrationsSettings
+  """
+  Inverse relations associated with this project.
+  """
+  inverseRelations(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectRelationConnection!
   """
   The total number of issues in the project after each week.
   """
@@ -19335,6 +17294,35 @@ type Project implements Node {
     orderBy: PaginationOrderBy
   ): ProjectUpdateConnection!
   """
+  Relations associated with this project.
+  """
+  relations(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectRelationConnection!
+  """
   The overall scope (total estimate points) of the project.
   """
   scope: Float!
@@ -19427,6 +17415,10 @@ type Project implements Node {
   A flag that indicates whether the project is in the trash bin.
   """
   trashed: Boolean
+  """
+  [Internal] The frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
+  """
+  updateReminderFrequency: Float
   """
   [Internal] The n-weekly frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
   """
@@ -19529,11 +17521,11 @@ input ProjectCollectionFilter {
   """
   hasViolatedRelations: RelationExistsComparator
   """
-  Comparator for the project health.
+  Comparator for the project health: onTrack, atRisk, offTrack
   """
   health: StringComparator
   """
-  Comparator for the project health (with age).
+  Comparator for the project health (with age): onTrack, atRisk, offTrack, outdated, noUpdate
   """
   healthWithAge: StringComparator
   """
@@ -19698,10 +17690,6 @@ input ProjectCreateInput {
   """
   startDateResolution: DateResolutionType
   """
-  [DEPRECATED] The state of the project.
-  """
-  state: String
-  """
   The ID of the project status.
   """
   statusId: String
@@ -19784,11 +17772,11 @@ input ProjectFilter {
   """
   hasViolatedRelations: RelationExistsComparator
   """
-  Comparator for the project health.
+  Comparator for the project health: onTrack, atRisk, offTrack
   """
   health: StringComparator
   """
-  Comparator for the project health (with age).
+  Comparator for the project health (with age): onTrack, atRisk, offTrack, outdated, noUpdate
   """
   healthWithAge: StringComparator
   """
@@ -20873,6 +18861,10 @@ type ProjectSearchResult implements Node {
   """
   favorite: Favorite
   """
+  [Internal] The resolution of the reminder frequency.
+  """
+  frequencyResolution: FrequencyResolutionType!
+  """
   The health of the project.
   """
   health: ProjectUpdateHealthType
@@ -20954,6 +18946,35 @@ type ProjectSearchResult implements Node {
   Settings for all integrations associated with that project.
   """
   integrationsSettings: IntegrationsSettings
+  """
+  Inverse relations associated with this project.
+  """
+  inverseRelations(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectRelationConnection!
   """
   The total number of issues in the project after each week.
   """
@@ -21131,6 +19152,35 @@ type ProjectSearchResult implements Node {
     orderBy: PaginationOrderBy
   ): ProjectUpdateConnection!
   """
+  Relations associated with this project.
+  """
+  relations(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectRelationConnection!
+  """
   The overall scope (total estimate points) of the project.
   """
   scope: Float!
@@ -21224,6 +19274,10 @@ type ProjectSearchResult implements Node {
   """
   trashed: Boolean
   """
+  [Internal] The frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
+  """
+  updateReminderFrequency: Float
+  """
   [Internal] The n-weekly frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
   """
   updateReminderFrequencyInWeeks: Float
@@ -21244,12 +19298,6 @@ type ProjectSearchResult implements Node {
   Project URL.
   """
   url: String!
-}
-
-type ProjectSearchResultConnection {
-  edges: [ProjectSearchResultEdge!]!
-  nodes: [ProjectSearchResult!]!
-  pageInfo: PageInfo!
 }
 
 type ProjectSearchResultEdge {
@@ -21589,6 +19637,10 @@ type ProjectUpdate implements Node {
   """
   isDiffHidden: Boolean!
   """
+  Whether the project update is stale.
+  """
+  isStale: Boolean!
+  """
   The project that the update is associated with.
   """
   project: Project!
@@ -21751,6 +19803,10 @@ input ProjectUpdateInput {
   """
   description: String
   """
+  [Internal] The frequency resolution.
+  """
+  frequencyResolution: FrequencyResolutionType
+  """
   The icon of the project.
   """
   icon: String
@@ -21807,10 +19863,6 @@ input ProjectUpdateInput {
   """
   startDateResolution: DateResolutionType
   """
-  [DEPRECATED] The state of the project.
-  """
-  state: String
-  """
   The ID of the project status.
   """
   statusId: String
@@ -21830,6 +19882,10 @@ input ProjectUpdateInput {
   Whether the project has been trashed.
   """
   trashed: Boolean
+  """
+  [Internal] The frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
+  """
+  updateReminderFrequency: Float
   """
   [Internal] The n-weekly frequency at which to prompt for updates. When not set, reminders are inherited from workspace.
   """
@@ -22070,175 +20126,9 @@ input ProjectUpdatesFilter {
   updatedAt: DateComparator
 }
 
-"""
-[ALPHA] A pull request check.
-"""
-type PullRequestCheck {
-  """
-  The date/time at which when the check was completed.
-  """
-  completedAt: DateTime
-  """
-  Whether the check is required.
-  """
-  isRequired: Boolean
-  """
-  The name of the check.
-  """
-  name: String!
-  """
-  The date/time at which when the check was started.
-  """
-  startedAt: DateTime
-  """
-  The status of the check.
-  """
-  status: String!
-  """
-  The URL of the check.
-  """
-  url: String
-}
-
-input PullRequestCheckInput {
-  """
-  The date/time at which when the check was completed.
-  """
-  completedAt: DateTime
-  """
-  Whether the check is required.
-  """
-  isRequired: Boolean
-  """
-  The name of the check.
-  """
-  name: String!
-  """
-  The date/time at which when the check was started.
-  """
-  startedAt: DateTime
-  """
-  The status of the check.
-  """
-  status: String!
-  """
-  The URL of the check.
-  """
-  url: String
-}
-
-"""
-A comment on a pull request.
-"""
-type PullRequestComment implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
-"""
-[ALPHA] A pull request reviewer.
-"""
-type PullRequestReviewer {
-  """
-  The decision made by the reviewer.
-  """
-  decision: PullRequestReviewerDecision!
-  """
-  The ID of the external user who reviewed the pull request.
-  """
-  externalUserId: String
-  """
-  The date when the pull request was last reviewed.
-  """
-  lastReviewedAt: DateTime
-  """
-  The ID of the user who reviewed the pull request.
-  """
-  userId: String
-}
-
-"""
-[ALPHA] The decision made by a pull request reviewer.
-"""
-enum PullRequestReviewerDecision {
-  approved
-  changesRequested
-  pending
-}
-
-input PullRequestReviewerInput {
-  """
-  The decision made by the reviewer.
-  """
-  decision: PullRequestReviewerDecision!
-  """
-  The ID of the external user who reviewed the pull request.
-  """
-  externalUserId: String
-  """
-  The date when the pull request was last reviewed.
-  """
-  lastReviewedAt: DateTime
-  """
-  The ID of the user who reviewed the pull request.
-  """
-  userId: String
-}
-
-"""
-[ALPHA] User-specific state for a pull request.
-"""
-type PullRequestUserState {
-  """
-  The date when the user's attention was last needed on the pull request.
-  """
-  attentionLastNeededAt: DateTime
-  """
-  The date when the user last interacted with the pull request.
-  """
-  lastActivityAt: DateTime
-  """
-  The date when the user last dismissed the pull request from view.
-  """
-  lastDismissedAt: DateTime
-  """
-  The ID of the user the state belongs to.
-  """
-  userId: String!
-}
-
-input PullRequestUserStateInput {
-  """
-  The date when the user's attention was last needed on the pull request.
-  """
-  attentionLastNeededAt: DateTime
-  """
-  The date when the user last interacted with the pull request.
-  """
-  lastActivityAt: DateTime
-  """
-  The date when the user last dismissed the pull request from view.
-  """
-  lastDismissedAt: DateTime
-  """
-  The ID of the user the state belongs to.
-  """
-  userId: String!
+enum PullRequestReviewTool {
+  graphite
+  source
 }
 
 """
@@ -22264,12 +20154,6 @@ type PushSubscription implements Node {
   updatedAt: DateTime!
 }
 
-type PushSubscriptionConnection {
-  edges: [PushSubscriptionEdge!]!
-  nodes: [PushSubscription!]!
-  pageInfo: PageInfo!
-}
-
 input PushSubscriptionCreateInput {
   """
   The data of the subscription in stringified JSON format.
@@ -22283,18 +20167,6 @@ input PushSubscriptionCreateInput {
   Whether this is a subscription payload for Google Cloud Messaging or Apple Push Notification service.
   """
   type: PushSubscriptionType = web
-  """
-  The user identifier of the subscription.
-  """
-  userId: String
-}
-
-type PushSubscriptionEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: PushSubscription!
 }
 
 type PushSubscriptionPayload {
@@ -22599,10 +20471,6 @@ type Query {
     The identifier of the comment to retrieve.
     """
     id: String
-    """
-    [Deprecated] The issue for which to find the comment.
-    """
-    issueId: String
   ): Comment!
   """
   All comments.
@@ -23067,6 +20935,10 @@ type Query {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    Filter returned initiatives.
+    """
+    filter: InitiativeFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -24482,12 +22354,6 @@ input ReactionCollectionFilter {
   updatedAt: DateComparator
 }
 
-type ReactionConnection {
-  edges: [ReactionEdge!]!
-  nodes: [Reaction!]!
-  pageInfo: PageInfo!
-}
-
 input ReactionCreateInput {
   """
   The comment to associate the reaction with.
@@ -24525,14 +22391,6 @@ input ReactionCreateInput {
   [Internal] The pull request to associate the reaction with.
   """
   pullRequestId: String
-}
-
-type ReactionEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: Reaction!
 }
 
 """
@@ -24600,57 +22458,6 @@ enum ReleaseChannel {
   internal
   preRelease
   public
-}
-
-"""
-A reminder that can be attached to different entities.
-"""
-type Reminder implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The reminder's comment.
-  """
-  comment: String
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The document that the reminder is associated with.
-  """
-  documentId: Document
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The issue that the reminder is associated with.
-  """
-  issueId: Issue
-  """
-  The project that the reminder is associated with.
-  """
-  projectId: Project
-  """
-  The time when a reminder triggers a notification in the user's inbox.
-  """
-  remindAt: DateTime
-  """
-  Scheduling settings for recurring reminders.
-  """
-  schedule: JSONObject
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The user that created a reminder.
-  """
-  user: User!
 }
 
 """
@@ -25039,32 +22846,11 @@ enum SLADayCountType {
   onlyBusinessDays
 }
 
-enum SchemaFieldType {
-  booleanType
-  dateType
-  numberType
-  stringType
-}
-
 enum SendStrategy {
   desktop
   desktopAndPush
   desktopThenPush
   push
-}
-
-"""
-Sentry specific settings.
-"""
-type SentrySettings {
-  """
-  The ID of the Sentry organization being connected.
-  """
-  organizationId: Int!
-  """
-  The slug of the Sentry organization being connected.
-  """
-  organizationSlug: String!
 }
 
 input SentrySettingsInput {
@@ -25076,55 +22862,14 @@ input SentrySettingsInput {
   The slug of the Sentry organization being connected.
   """
   organizationSlug: String!
-}
-
-"""
-Shared Slack integration settings.
-"""
-type SharedSlackSettings {
   """
-  Enterprise id of the connected Slack enterprise
+  Whether Sentry issues resolving completes Linear issues.
   """
-  enterpriseId: String
+  resolvingCompletesIssues: Boolean!
   """
-  Enterprise name of the connected Slack enterprise
+  Whether Sentry issues unresolving reopens Linear issues.
   """
-  enterpriseName: String
-  """
-  Whether to show unfurl previews in Slack
-  """
-  shouldUnfurl: Boolean
-  """
-  Slack workspace id
-  """
-  teamId: String
-  """
-  Slack workspace name
-  """
-  teamName: String
-}
-
-input SharedSlackSettingsInput {
-  """
-  Enterprise id of the connected Slack enterprise
-  """
-  enterpriseId: String
-  """
-  Enterprise name of the connected Slack enterprise
-  """
-  enterpriseName: String
-  """
-  Whether to show unfurl previews in Slack
-  """
-  shouldUnfurl: Boolean
-  """
-  Slack workspace id
-  """
-  teamId: String
-  """
-  Slack workspace name
-  """
-  teamName: String
+  unresolvingReopensIssues: Boolean!
 }
 
 """
@@ -25188,40 +22933,6 @@ input SlaStatusSort {
   The order for the individual sort
   """
   order: PaginationSortOrder
-}
-
-"""
-Slack Asks specific settings.
-"""
-type SlackAsksSettings {
-  """
-  The user role type that is allowed to manage Asks settings.
-  """
-  canAdministrate: UserRoleType!
-  """
-  Enterprise id of the connected Slack enterprise
-  """
-  enterpriseId: String
-  """
-  Enterprise name of the connected Slack enterprise
-  """
-  enterpriseName: String
-  """
-  Whether to show unfurl previews in Slack
-  """
-  shouldUnfurl: Boolean
-  """
-  The mapping of Slack channel ID => Slack channel name for connected channels.
-  """
-  slackChannelMapping: [SlackChannelNameMapping!]
-  """
-  Slack workspace id
-  """
-  teamId: String
-  """
-  Slack workspace name
-  """
-  teamName: String
 }
 
 input SlackAsksSettingsInput {
@@ -25435,51 +23146,11 @@ enum SlackChannelType {
   Public
 }
 
-"""
-Slack notification specific settings.
-"""
-type SlackPostSettings {
-  channel: String!
-  channelId: String!
-  channelType: SlackChannelType
-  configurationUrl: String!
-}
-
 input SlackPostSettingsInput {
   channel: String!
   channelId: String!
   channelType: SlackChannelType
   configurationUrl: String!
-}
-
-"""
-Settings for the regular Slack integration.
-"""
-type SlackSettings {
-  """
-  Enterprise id of the connected Slack enterprise
-  """
-  enterpriseId: String
-  """
-  Enterprise name of the connected Slack enterprise
-  """
-  enterpriseName: String
-  """
-  Whether Linear should automatically respond with issue unfurls when an issue identifier is mentioned in a Slack message.
-  """
-  linkOnIssueIdMention: Boolean!
-  """
-  Whether to show unfurl previews in Slack
-  """
-  shouldUnfurl: Boolean
-  """
-  Slack workspace id
-  """
-  teamId: String
-  """
-  Slack workspace name
-  """
-  teamName: String
 }
 
 input SlackSettingsInput {
@@ -25861,13 +23532,6 @@ type SyncedExternalThread {
   url: String
 }
 
-type SynchronizedPayload {
-  """
-  The identifier of the last sync operation.
-  """
-  lastSyncId: Float!
-}
-
 """
 An organizational unit that contains issues.
 """
@@ -26014,9 +23678,17 @@ type Team implements Node {
   """
   description: String
   """
+  The name of the team including it's parent team name if it has one.
+  """
+  displayName: String!
+  """
   The workflow state into which issues are moved when a PR has been opened as draft.
   """
   draftWorkflowState: WorkflowState @deprecated(reason: "Use team.gitAutomationStates instead.")
+  """
+  [Internal] Facets associated with the team.
+  """
+  facets: [Facet!]!
   """
   The Git automation states for the team.
   """
@@ -26619,10 +24291,6 @@ input TeamCreateInput {
   """
   issueEstimationType: String
   """
-  [DEPRECATED] Whether issues without priority should be sorted first.
-  """
-  issueOrderingNoPriorityFirst: Boolean
-  """
   The key of the team. If not given, the key will be generated based on the name of the team.
   """
   key: String
@@ -26634,10 +24302,6 @@ input TeamCreateInput {
   The name of the team.
   """
   name: String!
-  """
-  The organization associated with the team.
-  """
-  organizationId: String
   """
   The parent team ID.
   """
@@ -27022,10 +24686,6 @@ input TeamUpdateInput {
   """
   issueEstimationType: String
   """
-  [DEPRECATED] Whether issues without priority should be sorted first.
-  """
-  issueOrderingNoPriorityFirst: Boolean
-  """
   Whether new users should join this team by default. Mutation restricted to workspace admins!
   """
   joinByDefault: Boolean
@@ -27406,44 +25066,6 @@ Represents a date in ISO 8601 format. Accepts shortcuts like `2021` to represent
 scalar TimelessDate
 
 """
-Comparator for timeless dates.
-"""
-input TimelessDateComparator {
-  """
-  Equals constraint.
-  """
-  eq: TimelessDateOrDuration
-  """
-  Greater-than constraint. Matches any values that are greater than the given value.
-  """
-  gt: TimelessDateOrDuration
-  """
-  Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.
-  """
-  gte: TimelessDateOrDuration
-  """
-  In-array constraint.
-  """
-  in: [TimelessDateOrDuration!]
-  """
-  Less-than constraint. Matches any values that are less than the given value.
-  """
-  lt: TimelessDateOrDuration
-  """
-  Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.
-  """
-  lte: TimelessDateOrDuration
-  """
-  Not-equals constraint.
-  """
-  neq: TimelessDateOrDuration
-  """
-  Not-in-array constraint.
-  """
-  nin: [TimelessDateOrDuration!]
-}
-
-"""
 Represents a date in ISO 8601 format or a duration. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings (e.g '-P2W1D'), which are not converted to dates.
 """
 scalar TimelessDateOrDuration
@@ -27471,10 +25093,6 @@ input TokenUserAccountAuthInput {
   An optional invite link for an organization.
   """
   inviteLink: String
-  """
-  The identifiers of the teams to auto-join.
-  """
-  teamIdsToJoin: [String!]
   """
   The timezone of the user's browser.
   """
@@ -27895,7 +25513,7 @@ type User implements Node {
     orderBy: PaginationOrderBy
   ): IssueDraftConnection!
   """
-  The last time the user was seen online. If null, the user is currently online.
+  The last time the user was seen online.
   """
   lastSeen: DateTime
   """
@@ -27995,86 +25613,6 @@ type User implements Node {
   url: String!
 }
 
-"""
-A user account.
-"""
-type UserAccount {
-  """
-  The time at which the model was archived.
-  """
-  archivedAt: DateTime
-  """
-  Whether not to send email auth links in the email auth emails.
-  """
-  authTokenLinkDisabled: Boolean!
-  """
-  The time at which the model was created.
-  """
-  createdAt: DateTime!
-  """
-  The user's email address.
-  """
-  email: String!
-  """
-  The models identifier.
-  """
-  id: ID!
-  """
-  The user's name.
-  """
-  name: String
-  """
-  The authentication service used to create the account.
-  """
-  service: String!
-  """
-  The time at which the model was updated.
-  """
-  updatedAt: DateTime!
-}
-
-"""
-[INTERNAL] An email change verification challenge.
-"""
-type UserAccountEmailChange {
-  """
-  The time at which the model was archived.
-  """
-  archivedAt: DateTime
-  """
-  The timestamp this verification challenge was canceled at.
-  """
-  canceledAt: DateTime
-  """
-  The timestamp the verification codes expire at.
-  """
-  expiresAt: DateTime!
-  """
-  The model's identifier.
-  """
-  id: ID!
-  """
-  The new email the user account wants to change to.
-  """
-  newEmail: String!
-  """
-  The timestamp the new email was verified at.
-  """
-  newEmailVerifiedAt: DateTime
-  """
-  The user account's current email.
-  """
-  oldEmail: String!
-  """
-  The timestamp the old email was verified at.
-  """
-  oldEmailVerifiedAt: DateTime
-  """
-  The time at which the model was updated.
-  """
-  updatedAt: DateTime!
-}
-
 type UserAdminPayload {
   """
   Whether the operation was successful.
@@ -28149,6 +25687,10 @@ input UserCollectionFilter {
   """
   and: [UserCollectionFilter!]
   """
+  Comparator for the user's app status.
+  """
+  app: BooleanComparator
+  """
   Filters that the users assigned issues must satisfy.
   """
   assignedIssues: IssueCollectionFilter
@@ -28172,6 +25714,10 @@ input UserCollectionFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Comparator for the user's invited status.
+  """
+  invited: BooleanComparator
   """
   Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user.
   """
@@ -28233,6 +25779,10 @@ input UserFilter {
   """
   and: [UserFilter!]
   """
+  Comparator for the user's app status.
+  """
+  app: BooleanComparator
+  """
   Filters that the users assigned issues must satisfy.
   """
   assignedIssues: IssueCollectionFilter
@@ -28252,6 +25802,10 @@ input UserFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Comparator for the user's invited status.
+  """
+  invited: BooleanComparator
   """
   Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user.
   """
@@ -28421,6 +25975,7 @@ The different permission roles available to users on an organization.
 """
 enum UserRoleType {
   admin
+  app
   guest
   user
 }
@@ -28544,6 +26099,10 @@ type UserSettingsPayload {
 
 input UserSettingsUpdateInput {
   """
+  [Internal] How often to generate a feed summary.
+  """
+  feedSummarySchedule: FeedSummarySchedule
+  """
   The user's notification category preferences.
   """
   notificationCategoryPreferences: NotificationCategoryPreferencesInput
@@ -28575,10 +26134,6 @@ input UserSettingsUpdateInput {
   Whether this user is subscribed to privacy and legal update emails or not.
   """
   subscribedToPrivacyLegalUpdates: Boolean
-  """
-  The types of emails the user has unsubscribed from.
-  """
-  unsubscribedFrom: [String!]
   """
   [Internal] The user's usage warning history.
   """
@@ -28672,10 +26227,6 @@ input ViewPreferencesCreateInput {
   The custom view these view preferences are associated with.
   """
   customViewId: String
-  """
-  The cycle these view preferences are associated with.
-  """
-  cycleId: String
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -28789,7 +26340,9 @@ enum ViewType {
   cycle
   embeddedCustomerNeeds
   feedAll
+  feedCreated
   feedFollowing
+  feedPopular
   inbox
   initiative
   initiativeOverview
@@ -28804,6 +26357,7 @@ enum ViewType {
   myIssuesSubscribedTo
   myReviews
   project
+  projectCustomerNeeds
   projectDocuments
   projects
   projectsAll
@@ -28967,20 +26521,6 @@ type WebhookFailureEvent {
   webhook: Webhook!
 }
 
-type WebhookFailureEventConnection {
-  edges: [WebhookFailureEventEdge!]!
-  nodes: [WebhookFailureEvent!]!
-  pageInfo: PageInfo!
-}
-
-type WebhookFailureEventEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: WebhookFailureEvent!
-}
-
 type WebhookPayload {
   """
   The identifier of the last sync operation.
@@ -29017,267 +26557,6 @@ input WebhookUpdateInput {
   The URL that will be called on data changes.
   """
   url: String
-}
-
-"""
-[Internal] A widget, contains a small configuration on how to display a specific piece of content, like an insight.
-"""
-type Widget implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The user who created the widget.
-  """
-  creator: User
-  """
-  The dashboard that the dashboard item belongs to.
-  """
-  dashboard: Dashboard
-  """
-  The description of the widget.
-  """
-  description: String
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The config for the insights chart.
-  """
-  insight: JSONObject
-  """
-  The filter that determines which issues are used to populate the dashboard item chart.
-  """
-  issueFilter: JSONObject
-  """
-  The title of the widget.
-  """
-  name: String
-  """
-  The sort order of the widget.
-  """
-  sortOrder: Float!
-  """
-  The type of the widget.
-  """
-  type: String!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The user who last updated the widget.
-  """
-  updatedBy: User
-}
-
-type WidgetConnection {
-  edges: [WidgetEdge!]!
-  nodes: [Widget!]!
-  pageInfo: PageInfo!
-}
-
-type WidgetEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: Widget!
-}
-
-"""
-A condition to match for the workflow to be triggered.
-"""
-input WorkflowCondition {
-  """
-  Trigger the workflow when an issue matches the filter. Can only be used when the trigger type is `Issue`.
-  """
-  issueFilter: IssueFilter
-  """
-  Triggers the workflow when a project matches the filter. Can only be used when the trigger type is `Project`.
-  """
-  projectFilter: ProjectFilter
-}
-
-type WorkflowCronJobDefinition implements Node {
-  """
-  An array of activities that will be executed as part of the workflow cron job.
-  """
-  activities: JSONObject!
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The user who created the workflow cron job.
-  """
-  creator: User!
-  """
-  The description of the workflow cron job.
-  """
-  description: String
-  enabled: Boolean!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The name of the workflow cron job.
-  """
-  name: String!
-  """
-  Cron schedule which is used to execute the workflow cron job.
-  """
-  schedule: JSONObject!
-  """
-  The sort order of the workflow cron job definition within its siblings.
-  """
-  sortOrder: String!
-  """
-  The team associated with the workflow cron job.
-  """
-  team: Team!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
-type WorkflowCronJobDefinitionConnection {
-  edges: [WorkflowCronJobDefinitionEdge!]!
-  nodes: [WorkflowCronJobDefinition!]!
-  pageInfo: PageInfo!
-}
-
-type WorkflowCronJobDefinitionEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: WorkflowCronJobDefinition!
-}
-
-type WorkflowDefinition implements Node {
-  """
-  An array of activities that will be executed as part of the workflow.
-  """
-  activities: JSONObject!
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The conditions that need to be match for the workflow to be triggered.
-  """
-  conditions: JSONObject
-  """
-  The type of view to which this workflow's context is associated with.
-  """
-  contextViewType: ContextViewType
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The user who created the workflow.
-  """
-  creator: User!
-  """
-  The context custom view associated with the workflow.
-  """
-  customView: CustomView
-  """
-  The contextual cycle view associated with the workflow.
-  """
-  cycle: Cycle
-  """
-  The description of the workflow.
-  """
-  description: String
-  enabled: Boolean!
-  """
-  The name of the group that the workflow belongs to.
-  """
-  groupName: String
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The contextual initiative view associated with the workflow.
-  """
-  initiative: Initiative
-  """
-  The contextual label view associated with the workflow.
-  """
-  label: IssueLabel
-  """
-  The name of the workflow.
-  """
-  name: String!
-  """
-  The contextual project view associated with the workflow.
-  """
-  project: Project
-  """
-  The sort order of the workflow definition within its siblings.
-  """
-  sortOrder: String!
-  """
-  The team associated with the workflow. If not set, the workflow is associated with the entire organization.
-  """
-  team: Team
-  """
-  The type of the event that triggers off the workflow.
-  """
-  trigger: WorkflowTrigger!
-  """
-  The object type (e.g. Issue) that triggers this workflow.
-  """
-  triggerType: WorkflowTriggerType!
-  """
-  The type of the workflow.
-  """
-  type: WorkflowType!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The contextual user view associated with the workflow.
-  """
-  user: User
-  """
-  The type of user view to which this workflow's context is associated with.
-  """
-  userContextViewType: UserContextViewType
-}
-
-type WorkflowDefinitionConnection {
-  edges: [WorkflowDefinitionEdge!]!
-  nodes: [WorkflowDefinition!]!
-  pageInfo: PageInfo!
-}
-
-type WorkflowDefinitionEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: WorkflowDefinition!
 }
 
 """
@@ -29525,25 +26804,6 @@ input WorkflowStateUpdateInput {
   position: Float
 }
 
-enum WorkflowTrigger {
-  entityCreated
-  entityCreatedOrUpdated
-  entityRemoved
-  entityUnarchived
-  entityUpdated
-}
-
-enum WorkflowTriggerType {
-  issue
-  project
-}
-
-enum WorkflowType {
-  custom
-  sla
-  viewSubscription
-}
-
 """
 [INTERNAL] Public information of the OAuth application, plus the userIds and scopes for those users.
 """
@@ -29580,48 +26840,6 @@ type WorkspaceAuthorizedApplication {
   Whether or not webhooks are enabled for the application.
   """
   webhooksEnabled: Boolean!
-}
-
-"""
-Zendesk specific settings.
-"""
-type ZendeskSettings {
-  """
-  Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.
-  """
-  automateTicketReopeningOnCancellation: Boolean
-  """
-  Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue
-  """
-  automateTicketReopeningOnComment: Boolean
-  """
-  Whether a ticket should be automatically reopened when its linked Linear issue is completed.
-  """
-  automateTicketReopeningOnCompletion: Boolean
-  """
-  The ID of the Linear bot user.
-  """
-  botUserId: String
-  """
-  [INTERNAL] Temporary flag indicating if the integration has the necessary scopes for Customers
-  """
-  canReadCustomers: Boolean
-  """
-  Whether an internal message should be added when someone comments on an issue.
-  """
-  sendNoteOnComment: Boolean
-  """
-  Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).
-  """
-  sendNoteOnStatusChange: Boolean
-  """
-  The subdomain of the Zendesk organization being connected.
-  """
-  subdomain: String!
-  """
-  The URL of the connected Zendesk organization.
-  """
-  url: String!
 }
 
 input ZendeskSettingsInput {
