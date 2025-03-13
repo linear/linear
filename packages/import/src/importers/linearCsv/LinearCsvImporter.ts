@@ -105,7 +105,7 @@ export class LinearCsvImporter implements Importer {
 // Linear CSV exports add a single quote to the beginning of text fields when that field could otherwise be interpreted
 // as a formula. When we're sending the data to the API, we need to strip that leading single quote.
 function stripLeadingSingleQuote(input: string): string {
-  return input.replace(/^'([+\-=@])/, "$1");
+  return input.replace(/^'([+\-=@∑√∏<>＜＞≤≥＝≠±÷×])/, "$1");
 }
 
 const mapPriority = (input: LinearPriority) => {
