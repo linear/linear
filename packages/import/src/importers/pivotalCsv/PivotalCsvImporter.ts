@@ -48,7 +48,7 @@ export class PivotalCsvImporter implements Importer {
   }
 
   public import = async (): Promise<ImportResult> => {
-    const data = (await csv().fromFile(this.filePath)) as PivotalIssueType[];
+    const data = (await csv({ flatKeys: true }).fromFile(this.filePath)) as PivotalIssueType[];
 
     const importData: ImportResult = {
       issues: [],
