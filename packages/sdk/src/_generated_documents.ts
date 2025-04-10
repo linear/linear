@@ -15389,16 +15389,10 @@ export type UserSettingsUpdateInput = {
 };
 
 export type UserUpdateInput = {
-  /** Whether the user account is active. */
-  active?: Maybe<Scalars["Boolean"]>;
-  /** Whether the user account has admin privileges. */
-  admin?: Maybe<Scalars["Boolean"]>;
   /** The avatar image URL of the user. */
   avatarUrl?: Maybe<Scalars["String"]>;
   /** The user description or a short bio. */
   description?: Maybe<Scalars["String"]>;
-  /** Reason for deactivation. */
-  disableReason?: Maybe<Scalars["String"]>;
   /** The display name of the user. */
   displayName?: Maybe<Scalars["String"]>;
   /** The name of the user. */
