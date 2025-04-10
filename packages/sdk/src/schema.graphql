@@ -27457,14 +27457,6 @@ input UserSettingsUpdateInput {
 
 input UserUpdateInput {
   """
-  Whether the user account is active.
-  """
-  active: Boolean
-  """
-  Whether the user account has admin privileges.
-  """
-  admin: Boolean
-  """
   The avatar image URL of the user.
   """
   avatarUrl: String
@@ -27472,10 +27464,6 @@ input UserUpdateInput {
   The user description or a short bio.
   """
   description: String
-  """
-  Reason for deactivation.
-  """
-  disableReason: String
   """
   The display name of the user.
   """
