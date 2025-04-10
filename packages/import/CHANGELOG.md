@@ -1,5 +1,16 @@
 # Change Log
 
+## 2.2.8
+
+### Patch Changes
+
+- 5324c92: chore(deps): update dependency patch versions
+- ae6f8c4: fix: use flat keys to parse Pivotal CSVs
+- Updated dependencies [5324c92]
+- Updated dependencies [b544d47]
+- Updated dependencies [671674a]
+  - @linear/sdk@39.0.0
+
 ## 2.2.7
 
 ### Patch Changes
