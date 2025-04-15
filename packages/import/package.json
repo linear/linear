@@ -36,7 +36,8 @@
     "jira2md": "2.0.4",
     "lodash": "4.17.21",
     "node-fetch": "2.6.1",
-    "ora": "^5.4.1"
+    "ora": "^5.4.1",
+    "turndown": "7.2.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.1.0",
@@ -48,7 +49,8 @@
     "rollup": "^2.38.3",
     "rollup-plugin-gzip": "^2.5.0",
     "rollup-plugin-terser": "^7.0.2",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "@types/turndown": "5.0.5"
   },
   "publishConfig": {
     "access": "public"

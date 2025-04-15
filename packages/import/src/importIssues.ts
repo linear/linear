@@ -263,7 +263,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
     const issueAssigneeId = issue.assigneeId?.toLowerCase();
     const existingAssigneeId: Id | undefined = !!issueAssigneeId
-      ? existingUserMapByEmail[issueAssigneeId] ?? existingUserMapByName[issueAssigneeId]
+      ? (existingUserMapByEmail[issueAssigneeId] ?? existingUserMapByName[issueAssigneeId])
       : undefined;
 
     let assigneeId: Id | undefined;
