@@ -179,25 +179,41 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
               const operationCall = `new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${
                 optionalIdArg ? `{${optionalIdArg.name}: ${fieldQueryArgs[0]}}` : printList(fieldQueryArgs)
               })`;
-              return printModelField(
-                field,
-                `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}${
-                  reduceNonNullType(field.query.type) ? "" : " | undefined"
-                }> | undefined {
-                  return ${
-                    field.nonNull ? operationCall : printTernary(printList(fieldQueryArgs, " && "), operationCall)
-                  }
-                }`
-              );
+              return printLines([
+                printModelField(
+                  field,
+                  `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}${
+                    reduceNonNullType(field.query.type) ? "" : " | undefined"
+                  }> | undefined {
+                    return ${
+                      field.nonNull ? operationCall : printTernary(printList(fieldQueryArgs, " && "), operationCall)
+                    }
+                  }`
+                ),
+                printModelField(
+                  field,
+                  `public get ${field.name}Id(): string | undefined {
+                    return this._${field.name}?.id
+                  }`
+                ),
+              ]);
             } else {
-              return printModelField(
-                field,
-                `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}${
-                  reduceNonNullType(field.query.type) ? "" : " | undefined"
-                }> {
-                  return new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}()
-                }`
-              );
+              return printLines([
+                printModelField(
+                  field,
+                  `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}${
+                    reduceNonNullType(field.query.type) ? "" : " | undefined"
+                  }> {
+                    return new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}()
+                  }`
+                ),
+                printModelField(
+                  field,
+                  `public get ${field.name}Id(): string | undefined {
+                    return this._${field.name}?.id
+                  }`
+                ),
+              ]);
             }
           })
         ),
