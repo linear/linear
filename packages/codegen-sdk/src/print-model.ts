@@ -191,7 +191,16 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                   }`
                 ),
                 printModelField(
-                  field,
+                  {
+                    ...field,
+                    node: {
+                      ...field.node,
+                      description: {
+                        kind: "StringValue",
+                        value: `The ID of ${field.node.description?.value?.toLowerCase().replace(/^the\s+/i, "") || field.name}`,
+                      },
+                    },
+                  },
                   `public get ${field.name}Id(): string | undefined {
                     return this._${field.name}?.id
                   }`
@@ -208,7 +217,16 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                   }`
                 ),
                 printModelField(
-                  field,
+                  {
+                    ...field,
+                    node: {
+                      ...field.node,
+                      description: {
+                        kind: "StringValue",
+                        value: `The ID of ${field.node.description?.value?.toLowerCase().replace(/^the\s+/i, "") || field.name}`,
+                      },
+                    },
+                  },
                   `public get ${field.name}Id(): string | undefined {
                     return this._${field.name}?.id
                   }`
