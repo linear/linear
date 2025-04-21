@@ -390,6 +390,10 @@ export class AsksChannelConnectPayload extends Request {
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
+  /** The ID of integration that was created or updated. */
+  public get integrationId(): string | undefined {
+    return this._integration?.id;
+  }
 }
 /**
  * Issue attachment (e.g. support ticket, pull request).
@@ -449,15 +453,27 @@ export class Attachment extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of creator of the attachment. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The non-Linear user who created the attachment. */
   public get externalUserCreator(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserCreator?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserCreator?.id)
       : undefined;
   }
+  /** The ID of non-linear user who created the attachment. */
+  public get externalUserCreatorId(): string | undefined {
+    return this._externalUserCreator?.id;
+  }
   /** The issue this attachment belongs to. */
   public get issue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
+  }
+  /** The ID of issue this attachment belongs to. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
   }
 
   /** Creates a new attachment, or updates existing if the same `url` and `issueId` is used. */
@@ -517,6 +533,10 @@ export class AttachmentPayload extends Request {
   /** The issue attachment that was created. */
   public get attachment(): LinearFetch<Attachment> | undefined {
     return new AttachmentQuery(this._request).fetch(this._attachment.id);
+  }
+  /** The ID of issue attachment that was created. */
+  public get attachmentId(): string | undefined {
+    return this._attachment?.id;
   }
 }
 /**
@@ -584,9 +604,17 @@ export class AuditEntry extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
+  /** The ID of user that caused the audit entry to be created. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
   /** The organization the audit log belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The ID of organization the audit log belongs to. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
   }
 }
 /**
@@ -925,23 +953,43 @@ export class Comment extends Request {
   public get externalUser(): LinearFetch<ExternalUser> | undefined {
     return this._externalUser?.id ? new ExternalUserQuery(this._request).fetch(this._externalUser?.id) : undefined;
   }
+  /** The ID of external user who wrote the comment. */
+  public get externalUserId(): string | undefined {
+    return this._externalUser?.id;
+  }
   /** The initiative update that the comment is associated with. */
   public get initiativeUpdate(): LinearFetch<InitiativeUpdate> | undefined {
     return this._initiativeUpdate?.id
       ? new InitiativeUpdateQuery(this._request).fetch(this._initiativeUpdate?.id)
       : undefined;
   }
+  /** The ID of initiative update that the comment is associated with. */
+  public get initiativeUpdateId(): string | undefined {
+    return this._initiativeUpdate?.id;
+  }
   /** The issue that the comment is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** The ID of issue that the comment is associated with. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
   }
   /** The parent comment under which the current comment is nested. */
   public get parent(): LinearFetch<Comment> | undefined {
     return this._parent?.id ? new CommentQuery(this._request).fetch({ id: this._parent?.id }) : undefined;
   }
+  /** The ID of parent comment under which the current comment is nested. */
+  public get parentId(): string | undefined {
+    return this._parent?.id;
+  }
   /** The project update that the comment is associated with. */
   public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
+  }
+  /** The ID of project update that the comment is associated with. */
+  public get projectUpdateId(): string | undefined {
+    return this._projectUpdate?.id;
   }
   /** The comment that resolved the thread. */
   public get resolvingComment(): LinearFetch<Comment> | undefined {
@@ -949,13 +997,25 @@ export class Comment extends Request {
       ? new CommentQuery(this._request).fetch({ id: this._resolvingComment?.id })
       : undefined;
   }
+  /** The ID of comment that resolved the thread. */
+  public get resolvingCommentId(): string | undefined {
+    return this._resolvingComment?.id;
+  }
   /** The user that resolved the thread. */
   public get resolvingUser(): LinearFetch<User> | undefined {
     return this._resolvingUser?.id ? new UserQuery(this._request).fetch(this._resolvingUser?.id) : undefined;
   }
+  /** The ID of user that resolved the thread. */
+  public get resolvingUserId(): string | undefined {
+    return this._resolvingUser?.id;
+  }
   /** The user who wrote the comment. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of user who wrote the comment. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
   /** The children of the comment. */
   public children(variables?: L.Comment_ChildrenQueryVariables) {
@@ -1018,6 +1078,10 @@ export class CommentPayload extends Request {
   /** The comment that was created or updated. */
   public get comment(): LinearFetch<Comment> | undefined {
     return new CommentQuery(this._request).fetch({ id: this._comment.id });
+  }
+  /** The ID of comment that was created or updated. */
+  public get commentId(): string | undefined {
+    return this._comment?.id;
   }
 }
 /**
@@ -1150,21 +1214,41 @@ export class CustomView extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
+  /** The ID of user who created the custom view. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The organization of the custom view. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The ID of organization of the custom view. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
   }
   /** The user who owns the custom view. */
   public get owner(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._owner.id);
   }
+  /** The ID of user who owns the custom view. */
+  public get ownerId(): string | undefined {
+    return this._owner?.id;
+  }
   /** The team associated with the custom view. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
+  /** The ID of team associated with the custom view. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The user who last updated the custom view. */
   public get updatedBy(): LinearFetch<User> | undefined {
     return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
+  }
+  /** The ID of user who last updated the custom view. */
+  public get updatedById(): string | undefined {
+    return this._updatedBy?.id;
   }
   /** Issues associated with the custom view. */
   public issues(variables?: Omit<L.CustomView_IssuesQueryVariables, "id">) {
@@ -1284,37 +1368,73 @@ export class CustomViewNotificationSubscription extends Request {
   public get customView(): LinearFetch<CustomView> | undefined {
     return new CustomViewQuery(this._request).fetch(this._customView.id);
   }
+  /** The ID of custom view subscribed to. */
+  public get customViewId(): string | undefined {
+    return this._customView?.id;
+  }
   /** The customer associated with the notification subscription. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
+  }
+  /** The ID of customer associated with the notification subscription. */
+  public get customerId(): string | undefined {
+    return this._customer?.id;
   }
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
+  /** The ID of contextual cycle view associated with the notification subscription. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
+  }
   /** The contextual initiative view associated with the notification subscription. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of contextual initiative view associated with the notification subscription. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
+  /** The ID of contextual label view associated with the notification subscription. */
+  public get labelId(): string | undefined {
+    return this._label?.id;
+  }
   /** The contextual project view associated with the notification subscription. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of contextual project view associated with the notification subscription. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** The user that subscribed to receive notifications. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
+  /** The ID of user that subscribed to receive notifications. */
+  public get subscriberId(): string | undefined {
+    return this._subscriber?.id;
+  }
   /** The team associated with the notification subscription. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
+  /** The ID of team associated with the notification subscription. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The user view associated with the notification subscription. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of user view associated with the notification subscription. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -1340,6 +1460,10 @@ export class CustomViewPayload extends Request {
   /** The custom view that was created or updated. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return new CustomViewQuery(this._request).fetch(this._customView.id);
+  }
+  /** The ID of custom view that was created or updated. */
+  public get customViewId(): string | undefined {
+    return this._customView?.id;
   }
 }
 /**
@@ -1429,17 +1553,33 @@ export class Customer extends Request {
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
+  /** The ID of integration that manages the customer. */
+  public get integrationId(): string | undefined {
+    return this._integration?.id;
+  }
   /** The user who owns the customer. */
   public get owner(): LinearFetch<User> | undefined {
     return this._owner?.id ? new UserQuery(this._request).fetch(this._owner?.id) : undefined;
+  }
+  /** The ID of user who owns the customer. */
+  public get ownerId(): string | undefined {
+    return this._owner?.id;
   }
   /** The current status of the customer. */
   public get status(): LinearFetch<CustomerStatus> | undefined {
     return new CustomerStatusQuery(this._request).fetch(this._status.id);
   }
+  /** The ID of current status of the customer. */
+  public get statusId(): string | undefined {
+    return this._status?.id;
+  }
   /** The tier of the customer. */
   public get tier(): LinearFetch<CustomerTier> | undefined {
     return this._tier?.id ? new CustomerTierQuery(this._request).fetch(this._tier?.id) : undefined;
+  }
+  /** The ID of tier of the customer. */
+  public get tierId(): string | undefined {
+    return this._tier?.id;
   }
 
   /** Creates a new customer. */
@@ -1528,25 +1668,49 @@ export class CustomerNeed extends Request {
   public get attachment(): LinearFetch<Attachment> | undefined {
     return this._attachment?.id ? new AttachmentQuery(this._request).fetch(this._attachment?.id) : undefined;
   }
+  /** The ID of attachment this need is referencing. */
+  public get attachmentId(): string | undefined {
+    return this._attachment?.id;
+  }
   /** The comment this need is referencing. */
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
+  }
+  /** The ID of comment this need is referencing. */
+  public get commentId(): string | undefined {
+    return this._comment?.id;
   }
   /** The creator of the customer need. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of creator of the customer need. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The customer that this need is attached to. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
+  }
+  /** The ID of customer that this need is attached to. */
+  public get customerId(): string | undefined {
+    return this._customer?.id;
   }
   /** The issue this need is referencing. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
+  /** The ID of issue this need is referencing. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
+  }
   /** The project this need is referencing. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of project this need is referencing. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
 
   /** Archives a customer need. */
@@ -1594,6 +1758,10 @@ export class CustomerNeedArchivePayload extends Request {
   public get entity(): LinearFetch<CustomerNeed> | undefined {
     return this._entity?.id ? new CustomerNeedQuery(this._request).fetch(this._entity?.id) : undefined;
   }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
+  }
 }
 /**
  * CustomerNeedConnection model
@@ -1639,6 +1807,10 @@ export class CustomerNeedPayload extends Request {
   /** The customer need that was created or updated. */
   public get need(): LinearFetch<CustomerNeed> | undefined {
     return new CustomerNeedQuery(this._request).fetch(this._need.id);
+  }
+  /** The ID of customer need that was created or updated. */
+  public get needId(): string | undefined {
+    return this._need?.id;
   }
 }
 /**
@@ -1702,37 +1874,73 @@ export class CustomerNotificationSubscription extends Request {
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
+  /** The ID of contextual custom view associated with the notification subscription. */
+  public get customViewId(): string | undefined {
+    return this._customView?.id;
+  }
   /** The customer subscribed to. */
   public get customer(): LinearFetch<Customer> | undefined {
     return new CustomerQuery(this._request).fetch(this._customer.id);
+  }
+  /** The ID of customer subscribed to. */
+  public get customerId(): string | undefined {
+    return this._customer?.id;
   }
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
+  /** The ID of contextual cycle view associated with the notification subscription. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
+  }
   /** The contextual initiative view associated with the notification subscription. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of contextual initiative view associated with the notification subscription. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
+  /** The ID of contextual label view associated with the notification subscription. */
+  public get labelId(): string | undefined {
+    return this._label?.id;
+  }
   /** The contextual project view associated with the notification subscription. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of contextual project view associated with the notification subscription. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** The user that subscribed to receive notifications. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
+  /** The ID of user that subscribed to receive notifications. */
+  public get subscriberId(): string | undefined {
+    return this._subscriber?.id;
+  }
   /** The team associated with the notification subscription. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
+  /** The ID of team associated with the notification subscription. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The user view associated with the notification subscription. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of user view associated with the notification subscription. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -1758,6 +1966,10 @@ export class CustomerPayload extends Request {
   /** The customer that was created or updated. */
   public get customer(): LinearFetch<Customer> | undefined {
     return new CustomerQuery(this._request).fetch(this._customer.id);
+  }
+  /** The ID of customer that was created or updated. */
+  public get customerId(): string | undefined {
+    return this._customer?.id;
   }
 }
 /**
@@ -1923,6 +2135,10 @@ export class CustomerTierPayload extends Request {
   public get tier(): LinearFetch<CustomerTier> | undefined {
     return new CustomerTierQuery(this._request).fetch(this._tier.id);
   }
+  /** The ID of customer tier that was created or updated. */
+  public get tierId(): string | undefined {
+    return this._tier?.id;
+  }
 }
 /**
  * A set of issues to be resolved in a specified amount of time.
@@ -1998,9 +2214,17 @@ export class Cycle extends Request {
   public get inheritedFrom(): LinearFetch<Cycle> | undefined {
     return this._inheritedFrom?.id ? new CycleQuery(this._request).fetch(this._inheritedFrom?.id) : undefined;
   }
+  /** The ID of cycle inherited from. */
+  public get inheritedFromId(): string | undefined {
+    return this._inheritedFrom?.id;
+  }
   /** The team that the cycle is associated with. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
+  }
+  /** The ID of team that the cycle is associated with. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
   /** Issues associated with the cycle. */
   public issues(variables?: Omit<L.Cycle_IssuesQueryVariables, "id">) {
@@ -2046,6 +2270,10 @@ export class CycleArchivePayload extends Request {
   /** The archived/unarchived entity. Null if entity was deleted. */
   public get entity(): LinearFetch<Cycle> | undefined {
     return this._entity?.id ? new CycleQuery(this._request).fetch(this._entity?.id) : undefined;
+  }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
   }
 }
 /**
@@ -2130,37 +2358,73 @@ export class CycleNotificationSubscription extends Request {
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
+  /** The ID of contextual custom view associated with the notification subscription. */
+  public get customViewId(): string | undefined {
+    return this._customView?.id;
+  }
   /** The customer associated with the notification subscription. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
+  }
+  /** The ID of customer associated with the notification subscription. */
+  public get customerId(): string | undefined {
+    return this._customer?.id;
   }
   /** The cycle subscribed to. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return new CycleQuery(this._request).fetch(this._cycle.id);
   }
+  /** The ID of cycle subscribed to. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
+  }
   /** The contextual initiative view associated with the notification subscription. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of contextual initiative view associated with the notification subscription. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
+  /** The ID of contextual label view associated with the notification subscription. */
+  public get labelId(): string | undefined {
+    return this._label?.id;
+  }
   /** The contextual project view associated with the notification subscription. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of contextual project view associated with the notification subscription. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** The user that subscribed to receive notifications. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
+  /** The ID of user that subscribed to receive notifications. */
+  public get subscriberId(): string | undefined {
+    return this._subscriber?.id;
+  }
   /** The team associated with the notification subscription. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
+  /** The ID of team associated with the notification subscription. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The user view associated with the notification subscription. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of user view associated with the notification subscription. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -2186,6 +2450,10 @@ export class CyclePayload extends Request {
   /** The Cycle that was created or updated. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The ID of cycle that was created or updated. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
   }
 }
 /**
@@ -2280,9 +2548,17 @@ export class Document extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who created the document. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The initiative that the document is associated with. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of initiative that the document is associated with. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The last template that was applied to this document. */
   public get lastAppliedTemplate(): LinearFetch<Template> | undefined {
@@ -2290,13 +2566,25 @@ export class Document extends Request {
       ? new TemplateQuery(this._request).fetch(this._lastAppliedTemplate?.id)
       : undefined;
   }
+  /** The ID of last template that was applied to this document. */
+  public get lastAppliedTemplateId(): string | undefined {
+    return this._lastAppliedTemplate?.id;
+  }
   /** The project that the document is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
+  /** The ID of project that the document is associated with. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
+  }
   /** The user who last updated the document. */
   public get updatedBy(): LinearFetch<User> | undefined {
     return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
+  }
+  /** The ID of user who last updated the document. */
+  public get updatedById(): string | undefined {
+    return this._updatedBy?.id;
   }
   /** Comments associated with the document. */
   public comments(variables?: Omit<L.Document_CommentsQueryVariables, "id">) {
@@ -2342,6 +2630,10 @@ export class DocumentArchivePayload extends Request {
   /** The archived/unarchived entity. Null if entity was deleted. */
   public get entity(): LinearFetch<Document> | undefined {
     return this._entity?.id ? new DocumentQuery(this._request).fetch(this._entity?.id) : undefined;
+  }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
   }
 }
 /**
@@ -2415,23 +2707,43 @@ export class DocumentContent extends Request {
   public get document(): LinearFetch<Document> | undefined {
     return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
   }
+  /** The ID of document that the content is associated with. */
+  public get documentId(): string | undefined {
+    return this._document?.id;
+  }
   /** The initiative that the content is associated with. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of initiative that the content is associated with. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The issue that the content is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
   }
+  /** The ID of issue that the content is associated with. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
+  }
   /** The project that the content is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of project that the content is associated with. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** The project milestone that the content is associated with. */
   public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
     return this._projectMilestone?.id
       ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
       : undefined;
+  }
+  /** The ID of project milestone that the content is associated with. */
+  public get projectMilestoneId(): string | undefined {
+    return this._projectMilestone?.id;
   }
 }
 /**
@@ -2546,15 +2858,27 @@ export class DocumentNotification extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
+  /** The ID of user that caused the notification. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
   /** The external user that caused the notification. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
+  /** The ID of external user that caused the notification. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
   /** The user that received the notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user that received the notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -2580,6 +2904,10 @@ export class DocumentPayload extends Request {
   /** The document that was created or updated. */
   public get document(): LinearFetch<Document> | undefined {
     return new DocumentQuery(this._request).fetch(this._document.id);
+  }
+  /** The ID of document that was created or updated. */
+  public get documentId(): string | undefined {
+    return this._document?.id;
   }
 }
 /**
@@ -2678,9 +3006,17 @@ export class DocumentSearchResult extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who created the document. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The initiative that the document is associated with. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of initiative that the document is associated with. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The last template that was applied to this document. */
   public get lastAppliedTemplate(): LinearFetch<Template> | undefined {
@@ -2688,13 +3024,25 @@ export class DocumentSearchResult extends Request {
       ? new TemplateQuery(this._request).fetch(this._lastAppliedTemplate?.id)
       : undefined;
   }
+  /** The ID of last template that was applied to this document. */
+  public get lastAppliedTemplateId(): string | undefined {
+    return this._lastAppliedTemplate?.id;
+  }
   /** The project that the document is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
+  /** The ID of project that the document is associated with. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
+  }
   /** The user who last updated the document. */
   public get updatedBy(): LinearFetch<User> | undefined {
     return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
+  }
+  /** The ID of user who last updated the document. */
+  public get updatedById(): string | undefined {
+    return this._updatedBy?.id;
   }
 }
 /**
@@ -2753,9 +3101,17 @@ export class Draft extends Request {
   public get customerNeed(): LinearFetch<CustomerNeed> | undefined {
     return this._customerNeed?.id ? new CustomerNeedQuery(this._request).fetch(this._customerNeed?.id) : undefined;
   }
+  /** The ID of customer need that this draft is referencing. */
+  public get customerNeedId(): string | undefined {
+    return this._customerNeed?.id;
+  }
   /** The initiative for which this is a draft initiative update. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of initiative for which this is a draft initiative update. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The initiative update for which this is a draft comment. */
   public get initiativeUpdate(): LinearFetch<InitiativeUpdate> | undefined {
@@ -2763,25 +3119,49 @@ export class Draft extends Request {
       ? new InitiativeUpdateQuery(this._request).fetch(this._initiativeUpdate?.id)
       : undefined;
   }
+  /** The ID of initiative update for which this is a draft comment. */
+  public get initiativeUpdateId(): string | undefined {
+    return this._initiativeUpdate?.id;
+  }
   /** The issue for which this is a draft comment. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** The ID of issue for which this is a draft comment. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
   }
   /** The comment for which this is a draft comment reply. */
   public get parentComment(): LinearFetch<Comment> | undefined {
     return this._parentComment?.id ? new CommentQuery(this._request).fetch({ id: this._parentComment?.id }) : undefined;
   }
+  /** The ID of comment for which this is a draft comment reply. */
+  public get parentCommentId(): string | undefined {
+    return this._parentComment?.id;
+  }
   /** The project for which this is a draft project update. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of project for which this is a draft project update. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** The project update for which this is a draft comment. */
   public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
   }
+  /** The ID of project update for which this is a draft comment. */
+  public get projectUpdateId(): string | undefined {
+    return this._projectUpdate?.id;
+  }
   /** The user who created the draft. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user who created the draft. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -2848,17 +3228,33 @@ export class EmailIntakeAddress extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who created the email intake address. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The organization that the email address is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The ID of organization that the email address is associated with. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
   }
   /** The team that the email address is associated with. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
+  /** The ID of team that the email address is associated with. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The template that the email address is associated with. */
   public get template(): LinearFetch<Template> | undefined {
     return this._template?.id ? new TemplateQuery(this._request).fetch(this._template?.id) : undefined;
+  }
+  /** The ID of template that the email address is associated with. */
+  public get templateId(): string | undefined {
+    return this._template?.id;
   }
 
   /** Creates a new email intake address. */
@@ -2970,9 +3366,17 @@ export class Emoji extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who created the emoji. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The organization that the emoji belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The ID of organization that the emoji belongs to. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
   }
 
   /** Creates a custom emoji. */
@@ -3028,6 +3432,10 @@ export class EmojiPayload extends Request {
   /** The emoji that was created. */
   public get emoji(): LinearFetch<Emoji> | undefined {
     return new EmojiQuery(this._request).fetch(this._emoji.id);
+  }
+  /** The ID of emoji that was created. */
+  public get emojiId(): string | undefined {
+    return this._emoji?.id;
   }
 }
 /**
@@ -3101,9 +3509,17 @@ export class EntityExternalLink extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
+  /** The ID of user who created the link. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The initiative that the link is associated with. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of initiative that the link is associated with. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
 
   /** Creates a new entity link. */
@@ -3164,6 +3580,10 @@ export class EntityExternalLinkPayload extends Request {
   public get entityExternalLink(): LinearFetch<EntityExternalLink> | undefined {
     return new EntityExternalLinkQuery(this._request).fetch(this._entityExternalLink.id);
   }
+  /** The ID of link that was created or updated. */
+  public get entityExternalLinkId(): string | undefined {
+    return this._entityExternalLink?.id;
+  }
 }
 /**
  * An external authenticated (e.g., through Slack) user which doesn't have a Linear account, but can create and update entities in Linear from the external system that authenticated them.
@@ -3209,6 +3629,10 @@ export class ExternalUser extends Request {
   /** Organization the external user belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The ID of organization the external user belongs to. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
   }
 }
 /**
@@ -3279,23 +3703,43 @@ export class Facet extends Request {
       ? new InitiativeQuery(this._request).fetch(this._sourceInitiative?.id)
       : undefined;
   }
+  /** The ID of owning initiative. */
+  public get sourceInitiativeId(): string | undefined {
+    return this._sourceInitiative?.id;
+  }
   /** The owning organization. */
   public get sourceOrganization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The ID of owning organization. */
+  public get sourceOrganizationId(): string | undefined {
+    return this._sourceOrganization?.id;
   }
   /** The owning project. */
   public get sourceProject(): LinearFetch<Project> | undefined {
     return this._sourceProject?.id ? new ProjectQuery(this._request).fetch(this._sourceProject?.id) : undefined;
   }
+  /** The ID of owning project. */
+  public get sourceProjectId(): string | undefined {
+    return this._sourceProject?.id;
+  }
   /** The owning team. */
   public get sourceTeam(): LinearFetch<Team> | undefined {
     return this._sourceTeam?.id ? new TeamQuery(this._request).fetch(this._sourceTeam?.id) : undefined;
+  }
+  /** The ID of owning team. */
+  public get sourceTeamId(): string | undefined {
+    return this._sourceTeam?.id;
   }
   /** The targeted custom view. */
   public get targetCustomView(): LinearFetch<CustomView> | undefined {
     return this._targetCustomView?.id
       ? new CustomViewQuery(this._request).fetch(this._targetCustomView?.id)
       : undefined;
+  }
+  /** The ID of targeted custom view. */
+  public get targetCustomViewId(): string | undefined {
+    return this._targetCustomView?.id;
   }
 }
 /**
@@ -3378,57 +3822,113 @@ export class Favorite extends Request {
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
+  /** The ID of favorited custom view. */
+  public get customViewId(): string | undefined {
+    return this._customView?.id;
+  }
   /** The favorited customer. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
+  }
+  /** The ID of favorited customer. */
+  public get customerId(): string | undefined {
+    return this._customer?.id;
   }
   /** The favorited cycle. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
+  /** The ID of favorited cycle. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
+  }
   /** The favorited document. */
   public get document(): LinearFetch<Document> | undefined {
     return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
+  }
+  /** The ID of favorited document. */
+  public get documentId(): string | undefined {
+    return this._document?.id;
   }
   /** The favorited initiative. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
+  /** The ID of favorited initiative. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
+  }
   /** The favorited issue. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** The ID of favorited issue. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
   }
   /** The favorited label. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
+  /** The ID of favorited label. */
+  public get labelId(): string | undefined {
+    return this._label?.id;
+  }
   /** The owner of the favorite. */
   public get owner(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._owner.id);
+  }
+  /** The ID of owner of the favorite. */
+  public get ownerId(): string | undefined {
+    return this._owner?.id;
   }
   /** The parent folder of the favorite. */
   public get parent(): LinearFetch<Favorite> | undefined {
     return this._parent?.id ? new FavoriteQuery(this._request).fetch(this._parent?.id) : undefined;
   }
+  /** The ID of parent folder of the favorite. */
+  public get parentId(): string | undefined {
+    return this._parent?.id;
+  }
   /** The team of the favorited predefined view. */
   public get predefinedViewTeam(): LinearFetch<Team> | undefined {
     return this._predefinedViewTeam?.id ? new TeamQuery(this._request).fetch(this._predefinedViewTeam?.id) : undefined;
+  }
+  /** The ID of team of the favorited predefined view. */
+  public get predefinedViewTeamId(): string | undefined {
+    return this._predefinedViewTeam?.id;
   }
   /** The favorited project. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
+  /** The ID of favorited project. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
+  }
   /** [DEPRECATED] The favorited team of the project. */
   public get projectTeam(): LinearFetch<Team> | undefined {
     return this._projectTeam?.id ? new TeamQuery(this._request).fetch(this._projectTeam?.id) : undefined;
+  }
+  /** The ID of [deprecated] the favorited team of the project. */
+  public get projectTeamId(): string | undefined {
+    return this._projectTeam?.id;
   }
   /** The favorited roadmap. */
   public get roadmap(): LinearFetch<Roadmap> | undefined {
     return this._roadmap?.id ? new RoadmapQuery(this._request).fetch(this._roadmap?.id) : undefined;
   }
+  /** The ID of favorited roadmap. */
+  public get roadmapId(): string | undefined {
+    return this._roadmap?.id;
+  }
   /** The favorited user. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of favorited user. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
   /** Children of the favorite. Only applies to favorites of type folder. */
   public children(variables?: Omit<L.Favorite_ChildrenQueryVariables, "id">) {
@@ -3492,6 +3992,10 @@ export class FavoritePayload extends Request {
   public get favorite(): LinearFetch<Favorite> | undefined {
     return new FavoriteQuery(this._request).fetch(this._favorite.id);
   }
+  /** The ID of object that was added as a favorite. */
+  public get favoriteId(): string | undefined {
+    return this._favorite?.id;
+  }
 }
 /**
  * FrontAttachmentPayload model
@@ -3516,6 +4020,10 @@ export class FrontAttachmentPayload extends Request {
   /** The issue attachment that was created. */
   public get attachment(): LinearFetch<Attachment> | undefined {
     return new AttachmentQuery(this._request).fetch(this._attachment.id);
+  }
+  /** The ID of issue attachment that was created. */
+  public get attachmentId(): string | undefined {
+    return this._attachment?.id;
   }
 }
 /**
@@ -3562,9 +4070,17 @@ export class GitAutomationState extends Request {
   public get state(): LinearFetch<WorkflowState> | undefined {
     return this._state?.id ? new WorkflowStateQuery(this._request).fetch(this._state?.id) : undefined;
   }
+  /** The ID of associated workflow state. */
+  public get stateId(): string | undefined {
+    return this._state?.id;
+  }
   /** The team to which this automation state belongs. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
+  }
+  /** The ID of team to which this automation state belongs. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
 
   /** Creates a new automation state. */
@@ -3661,6 +4177,10 @@ export class GitAutomationTargetBranch extends Request {
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
+  /** The ID of team to which this git target branch automation belongs. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
 
   /** Creates a Git target branch automation. */
   public create(input: L.GitAutomationTargetBranchCreateInput) {
@@ -3723,6 +4243,10 @@ export class GitHubCommitIntegrationPayload extends Request {
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
+  /** The ID of integration that was created or updated. */
+  public get integrationId(): string | undefined {
+    return this._integration?.id;
+  }
 }
 /**
  * GitHubEnterpriseServerInstallVerificationPayload model
@@ -3772,6 +4296,10 @@ export class GitHubEnterpriseServerPayload extends Request {
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
+  /** The ID of integration that was created or updated. */
+  public get integrationId(): string | undefined {
+    return this._integration?.id;
+  }
 }
 /**
  * GitLabIntegrationCreatePayload model
@@ -3799,6 +4327,10 @@ export class GitLabIntegrationCreatePayload extends Request {
   /** The integration that was created or updated. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
+  }
+  /** The ID of integration that was created or updated. */
+  public get integrationId(): string | undefined {
+    return this._integration?.id;
   }
 }
 /**
@@ -3924,23 +4456,43 @@ export class Initiative extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who created the initiative. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** Settings for all integrations associated with that initiative. */
   public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
     return this._integrationsSettings?.id
       ? new IntegrationsSettingsQuery(this._request).fetch(this._integrationsSettings?.id)
       : undefined;
   }
+  /** The ID of settings for all integrations associated with that initiative. */
+  public get integrationsSettingsId(): string | undefined {
+    return this._integrationsSettings?.id;
+  }
   /** The last initiative update posted for this initiative. */
   public get lastUpdate(): LinearFetch<InitiativeUpdate> | undefined {
     return this._lastUpdate?.id ? new InitiativeUpdateQuery(this._request).fetch(this._lastUpdate?.id) : undefined;
+  }
+  /** The ID of last initiative update posted for this initiative. */
+  public get lastUpdateId(): string | undefined {
+    return this._lastUpdate?.id;
   }
   /** The organization of the initiative. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
+  /** The ID of organization of the initiative. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
+  }
   /** The user who owns the initiative. */
   public get owner(): LinearFetch<User> | undefined {
     return this._owner?.id ? new UserQuery(this._request).fetch(this._owner?.id) : undefined;
+  }
+  /** The ID of user who owns the initiative. */
+  public get ownerId(): string | undefined {
+    return this._owner?.id;
   }
   /** History entries associated with the initiative. */
   public history(variables?: Omit<L.Initiative_HistoryQueryVariables, "id">) {
@@ -3999,6 +4551,10 @@ export class InitiativeArchivePayload extends Request {
   public get entity(): LinearFetch<Initiative> | undefined {
     return this._entity?.id ? new InitiativeQuery(this._request).fetch(this._entity?.id) : undefined;
   }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
+  }
 }
 /**
  * InitiativeConnection model
@@ -4056,6 +4612,10 @@ export class InitiativeHistory extends Request {
   /** The initiative that the history is associated with. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return new InitiativeQuery(this._request).fetch(this._initiative.id);
+  }
+  /** The ID of initiative that the history is associated with. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
 }
 /**
@@ -4152,15 +4712,27 @@ export class InitiativeNotification extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
+  /** The ID of user that caused the notification. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
   /** The external user that caused the notification. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
+  /** The ID of external user that caused the notification. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
   /** The user that received the notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user that received the notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -4224,37 +4796,73 @@ export class InitiativeNotificationSubscription extends Request {
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
+  /** The ID of contextual custom view associated with the notification subscription. */
+  public get customViewId(): string | undefined {
+    return this._customView?.id;
+  }
   /** The customer associated with the notification subscription. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
+  }
+  /** The ID of customer associated with the notification subscription. */
+  public get customerId(): string | undefined {
+    return this._customer?.id;
   }
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
+  /** The ID of contextual cycle view associated with the notification subscription. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
+  }
   /** The initiative subscribed to. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return new InitiativeQuery(this._request).fetch(this._initiative.id);
+  }
+  /** The ID of initiative subscribed to. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
+  /** The ID of contextual label view associated with the notification subscription. */
+  public get labelId(): string | undefined {
+    return this._label?.id;
+  }
   /** The contextual project view associated with the notification subscription. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of contextual project view associated with the notification subscription. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** The user that subscribed to receive notifications. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
+  /** The ID of user that subscribed to receive notifications. */
+  public get subscriberId(): string | undefined {
+    return this._subscriber?.id;
+  }
   /** The team associated with the notification subscription. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
+  /** The ID of team associated with the notification subscription. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The user view associated with the notification subscription. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of user view associated with the notification subscription. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -4280,6 +4888,10 @@ export class InitiativePayload extends Request {
   /** The initiative that was created or updated. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return new InitiativeQuery(this._request).fetch(this._initiative.id);
+  }
+  /** The ID of initiative that was created or updated. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
 }
 /**
@@ -4322,13 +4934,25 @@ export class InitiativeRelation extends Request {
   public get initiative(): LinearFetch<Initiative> | undefined {
     return new InitiativeQuery(this._request).fetch(this._initiative.id);
   }
+  /** The ID of parent initiative. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
+  }
   /** The child initiative. */
   public get relatedInitiative(): LinearFetch<Initiative> | undefined {
     return new InitiativeQuery(this._request).fetch(this._relatedInitiative.id);
   }
+  /** The ID of child initiative. */
+  public get relatedInitiativeId(): string | undefined {
+    return this._relatedInitiative?.id;
+  }
   /** The last user who created or modified the relation. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of last user who created or modified the relation. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 
   /** Creates a new initiative relation. */
@@ -4424,9 +5048,17 @@ export class InitiativeToProject extends Request {
   public get initiative(): LinearFetch<Initiative> | undefined {
     return new InitiativeQuery(this._request).fetch(this._initiative.id);
   }
+  /** The ID of initiative that the project is associated with. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
+  }
   /** The project that the initiative is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
+  }
+  /** The ID of project that the initiative is associated with. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
 
   /** Creates a new initiativeToProject join. */
@@ -4486,6 +5118,10 @@ export class InitiativeToProjectPayload extends Request {
   /** The initiativeToProject that was created or updated. */
   public get initiativeToProject(): LinearFetch<InitiativeToProject> | undefined {
     return new InitiativeToProjectQuery(this._request).fetch(this._initiativeToProject.id);
+  }
+  /** The ID of initiativetoproject that was created or updated. */
+  public get initiativeToProjectId(): string | undefined {
+    return this._initiativeToProject?.id;
   }
 }
 /**
@@ -4556,9 +5192,17 @@ export class InitiativeUpdate extends Request {
   public get initiative(): LinearFetch<Initiative> | undefined {
     return new InitiativeQuery(this._request).fetch(this._initiative.id);
   }
+  /** The ID of initiative that the update is associated with. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
+  }
   /** The user who wrote the update. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user who wrote the update. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
   /** Comments associated with the initiative update. */
   public comments(variables?: Omit<L.InitiativeUpdate_CommentsQueryVariables, "id">) {
@@ -4605,6 +5249,10 @@ export class InitiativeUpdateArchivePayload extends Request {
   public get entity(): LinearFetch<InitiativeUpdate> | undefined {
     return this._entity?.id ? new InitiativeUpdateQuery(this._request).fetch(this._entity?.id) : undefined;
   }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
+  }
 }
 /**
  * InitiativeUpdateConnection model
@@ -4650,6 +5298,10 @@ export class InitiativeUpdatePayload extends Request {
   /** The initiative update that was created. */
   public get initiativeUpdate(): LinearFetch<InitiativeUpdate> | undefined {
     return new InitiativeUpdateQuery(this._request).fetch(this._initiativeUpdate.id);
+  }
+  /** The ID of initiative update that was created. */
+  public get initiativeUpdateId(): string | undefined {
+    return this._initiativeUpdate?.id;
   }
 }
 /**
@@ -4708,13 +5360,25 @@ export class Integration extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
+  /** The ID of user that added the integration. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The organization that the integration is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
+  /** The ID of organization that the integration is associated with. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
+  }
   /** The team that the integration is associated with. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The ID of team that the integration is associated with. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
 
   /** Archives an integration. */
@@ -4789,6 +5453,10 @@ export class IntegrationPayload extends Request {
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
+  /** The ID of integration that was created or updated. */
+  public get integrationId(): string | undefined {
+    return this._integration?.id;
+  }
 }
 /**
  * IntegrationRequestPayload model
@@ -4843,9 +5511,17 @@ export class IntegrationTemplate extends Request {
   public get integration(): LinearFetch<Integration> | undefined {
     return new IntegrationQuery(this._request).fetch(this._integration.id);
   }
+  /** The ID of integration that the template is associated with. */
+  public get integrationId(): string | undefined {
+    return this._integration?.id;
+  }
   /** The template that the integration is associated with. */
   public get template(): LinearFetch<Template> | undefined {
     return new TemplateQuery(this._request).fetch(this._template.id);
+  }
+  /** The ID of template that the integration is associated with. */
+  public get templateId(): string | undefined {
+    return this._template?.id;
   }
 
   /** Creates a new integrationTemplate join. */
@@ -4901,6 +5577,10 @@ export class IntegrationTemplatePayload extends Request {
   /** The IntegrationTemplate that was created or updated. */
   public get integrationTemplate(): LinearFetch<IntegrationTemplate> | undefined {
     return new IntegrationTemplateQuery(this._request).fetch(this._integrationTemplate.id);
+  }
+  /** The ID of integrationtemplate that was created or updated. */
+  public get integrationTemplateId(): string | undefined {
+    return this._integrationTemplate?.id;
   }
 }
 /**
@@ -4979,13 +5659,25 @@ export class IntegrationsSettings extends Request {
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
   }
+  /** The ID of initiative which those settings apply to. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
+  }
   /** Project which those settings apply to. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
+  /** The ID of project which those settings apply to. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
+  }
   /** Team which those settings apply to. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The ID of team which those settings apply to. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
 
   /** Creates new settings for one or more integrations. */
@@ -5020,6 +5712,10 @@ export class IntegrationsSettingsPayload extends Request {
   /** The settings that were created or updated. */
   public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
     return new IntegrationsSettingsQuery(this._request).fetch(this._integrationsSettings.id);
+  }
+  /** The ID of settings that were created or updated. */
+  public get integrationsSettingsId(): string | undefined {
+    return this._integrationsSettings?.id;
   }
 }
 /**
@@ -5195,13 +5891,25 @@ export class Issue extends Request {
   public get assignee(): LinearFetch<User> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
   }
+  /** The ID of user to whom the issue is assigned to. */
+  public get assigneeId(): string | undefined {
+    return this._assignee?.id;
+  }
   /** The user who created the issue. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who created the issue. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The cycle that the issue is associated with. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The ID of cycle that the issue is associated with. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
   }
   /** The external user who created the issue. */
   public get externalUserCreator(): LinearFetch<ExternalUser> | undefined {
@@ -5209,9 +5917,17 @@ export class Issue extends Request {
       ? new ExternalUserQuery(this._request).fetch(this._externalUserCreator?.id)
       : undefined;
   }
+  /** The ID of external user who created the issue. */
+  public get externalUserCreatorId(): string | undefined {
+    return this._externalUserCreator?.id;
+  }
   /** The users favorite associated with this issue. */
   public get favorite(): LinearFetch<Favorite> | undefined {
     return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
+  }
+  /** The ID of users favorite associated with this issue. */
+  public get favoriteId(): string | undefined {
+    return this._favorite?.id;
   }
   /** The last template that was applied to this issue. */
   public get lastAppliedTemplate(): LinearFetch<Template> | undefined {
@@ -5219,13 +5935,25 @@ export class Issue extends Request {
       ? new TemplateQuery(this._request).fetch(this._lastAppliedTemplate?.id)
       : undefined;
   }
+  /** The ID of last template that was applied to this issue. */
+  public get lastAppliedTemplateId(): string | undefined {
+    return this._lastAppliedTemplate?.id;
+  }
   /** The parent of the issue. */
   public get parent(): LinearFetch<Issue> | undefined {
     return this._parent?.id ? new IssueQuery(this._request).fetch(this._parent?.id) : undefined;
   }
+  /** The ID of parent of the issue. */
+  public get parentId(): string | undefined {
+    return this._parent?.id;
+  }
   /** The project that the issue is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of project that the issue is associated with. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** The projectMilestone that the issue is associated with. */
   public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
@@ -5233,27 +5961,51 @@ export class Issue extends Request {
       ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
       : undefined;
   }
+  /** The ID of projectmilestone that the issue is associated with. */
+  public get projectMilestoneId(): string | undefined {
+    return this._projectMilestone?.id;
+  }
   /** The recurring issue template that created this issue. */
   public get recurringIssueTemplate(): LinearFetch<Template> | undefined {
     return this._recurringIssueTemplate?.id
       ? new TemplateQuery(this._request).fetch(this._recurringIssueTemplate?.id)
       : undefined;
   }
+  /** The ID of recurring issue template that created this issue. */
+  public get recurringIssueTemplateId(): string | undefined {
+    return this._recurringIssueTemplate?.id;
+  }
   /** The user who snoozed the issue. */
   public get snoozedBy(): LinearFetch<User> | undefined {
     return this._snoozedBy?.id ? new UserQuery(this._request).fetch(this._snoozedBy?.id) : undefined;
+  }
+  /** The ID of user who snoozed the issue. */
+  public get snoozedById(): string | undefined {
+    return this._snoozedBy?.id;
   }
   /** The comment that this issue was created from. */
   public get sourceComment(): LinearFetch<Comment> | undefined {
     return this._sourceComment?.id ? new CommentQuery(this._request).fetch({ id: this._sourceComment?.id }) : undefined;
   }
+  /** The ID of comment that this issue was created from. */
+  public get sourceCommentId(): string | undefined {
+    return this._sourceComment?.id;
+  }
   /** The workflow state that the issue is associated with. */
   public get state(): LinearFetch<WorkflowState> | undefined {
     return new WorkflowStateQuery(this._request).fetch(this._state.id);
   }
+  /** The ID of workflow state that the issue is associated with. */
+  public get stateId(): string | undefined {
+    return this._state?.id;
+  }
   /** The team that the issue is associated with. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
+  }
+  /** The ID of team that the issue is associated with. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
   /** Attachments associated with the issue. */
   public attachments(variables?: Omit<L.Issue_AttachmentsQueryVariables, "id">) {
@@ -5335,6 +6087,10 @@ export class IssueArchivePayload extends Request {
   /** The archived/unarchived entity. Null if entity was deleted. */
   public get entity(): LinearFetch<Issue> | undefined {
     return this._entity?.id ? new IssueQuery(this._request).fetch(this._entity?.id) : undefined;
+  }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
   }
 }
 /**
@@ -5583,41 +6339,81 @@ export class IssueHistory extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
+  /** The ID of actor that performed the actions. this field may be empty in the case of integrations or automations. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
   /** The linked attachment. */
   public get attachment(): LinearFetch<Attachment> | undefined {
     return this._attachment?.id ? new AttachmentQuery(this._request).fetch(this._attachment?.id) : undefined;
+  }
+  /** The ID of linked attachment. */
+  public get attachmentId(): string | undefined {
+    return this._attachment?.id;
   }
   /** The user that was unassigned from the issue. */
   public get fromAssignee(): LinearFetch<User> | undefined {
     return this._fromAssignee?.id ? new UserQuery(this._request).fetch(this._fromAssignee?.id) : undefined;
   }
+  /** The ID of user that was unassigned from the issue. */
+  public get fromAssigneeId(): string | undefined {
+    return this._fromAssignee?.id;
+  }
   /** The cycle that the issue was moved from. */
   public get fromCycle(): LinearFetch<Cycle> | undefined {
     return this._fromCycle?.id ? new CycleQuery(this._request).fetch(this._fromCycle?.id) : undefined;
+  }
+  /** The ID of cycle that the issue was moved from. */
+  public get fromCycleId(): string | undefined {
+    return this._fromCycle?.id;
   }
   /** The parent issue that the issue was moved from. */
   public get fromParent(): LinearFetch<Issue> | undefined {
     return this._fromParent?.id ? new IssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
   }
+  /** The ID of parent issue that the issue was moved from. */
+  public get fromParentId(): string | undefined {
+    return this._fromParent?.id;
+  }
   /** The project that the issue was moved from. */
   public get fromProject(): LinearFetch<Project> | undefined {
     return this._fromProject?.id ? new ProjectQuery(this._request).fetch(this._fromProject?.id) : undefined;
+  }
+  /** The ID of project that the issue was moved from. */
+  public get fromProjectId(): string | undefined {
+    return this._fromProject?.id;
   }
   /** The state that the issue was moved from. */
   public get fromState(): LinearFetch<WorkflowState> | undefined {
     return this._fromState?.id ? new WorkflowStateQuery(this._request).fetch(this._fromState?.id) : undefined;
   }
+  /** The ID of state that the issue was moved from. */
+  public get fromStateId(): string | undefined {
+    return this._fromState?.id;
+  }
   /** The team that the issue was moved from. */
   public get fromTeam(): LinearFetch<Team> | undefined {
     return this._fromTeam?.id ? new TeamQuery(this._request).fetch(this._fromTeam?.id) : undefined;
+  }
+  /** The ID of team that the issue was moved from. */
+  public get fromTeamId(): string | undefined {
+    return this._fromTeam?.id;
   }
   /** The issue that was changed. */
   public get issue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
   }
+  /** The ID of issue that was changed. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
+  }
   /** The user that was assigned to the issue. */
   public get toAssignee(): LinearFetch<User> | undefined {
     return this._toAssignee?.id ? new UserQuery(this._request).fetch(this._toAssignee?.id) : undefined;
+  }
+  /** The ID of user that was assigned to the issue. */
+  public get toAssigneeId(): string | undefined {
+    return this._toAssignee?.id;
   }
   /** The new project created from the issue. */
   public get toConvertedProject(): LinearFetch<Project> | undefined {
@@ -5625,25 +6421,49 @@ export class IssueHistory extends Request {
       ? new ProjectQuery(this._request).fetch(this._toConvertedProject?.id)
       : undefined;
   }
+  /** The ID of new project created from the issue. */
+  public get toConvertedProjectId(): string | undefined {
+    return this._toConvertedProject?.id;
+  }
   /** The cycle that the issue was moved to. */
   public get toCycle(): LinearFetch<Cycle> | undefined {
     return this._toCycle?.id ? new CycleQuery(this._request).fetch(this._toCycle?.id) : undefined;
+  }
+  /** The ID of cycle that the issue was moved to. */
+  public get toCycleId(): string | undefined {
+    return this._toCycle?.id;
   }
   /** The parent issue that the issue was moved to. */
   public get toParent(): LinearFetch<Issue> | undefined {
     return this._toParent?.id ? new IssueQuery(this._request).fetch(this._toParent?.id) : undefined;
   }
+  /** The ID of parent issue that the issue was moved to. */
+  public get toParentId(): string | undefined {
+    return this._toParent?.id;
+  }
   /** The project that the issue was moved to. */
   public get toProject(): LinearFetch<Project> | undefined {
     return this._toProject?.id ? new ProjectQuery(this._request).fetch(this._toProject?.id) : undefined;
+  }
+  /** The ID of project that the issue was moved to. */
+  public get toProjectId(): string | undefined {
+    return this._toProject?.id;
   }
   /** The state that the issue was moved to. */
   public get toState(): LinearFetch<WorkflowState> | undefined {
     return this._toState?.id ? new WorkflowStateQuery(this._request).fetch(this._toState?.id) : undefined;
   }
+  /** The ID of state that the issue was moved to. */
+  public get toStateId(): string | undefined {
+    return this._toState?.id;
+  }
   /** The team that the issue was moved to. */
   public get toTeam(): LinearFetch<Team> | undefined {
     return this._toTeam?.id ? new TeamQuery(this._request).fetch(this._toTeam?.id) : undefined;
+  }
+  /** The ID of team that the issue was moved to. */
+  public get toTeamId(): string | undefined {
+    return this._toTeam?.id;
   }
 }
 /**
@@ -5883,20 +6703,40 @@ export class IssueLabel extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who created the label. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The original label inherited from. */
   public get inheritedFrom(): LinearFetch<IssueLabel> | undefined {
     return this._inheritedFrom?.id ? new IssueLabelQuery(this._request).fetch(this._inheritedFrom?.id) : undefined;
   }
+  /** The ID of original label inherited from. */
+  public get inheritedFromId(): string | undefined {
+    return this._inheritedFrom?.id;
+  }
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The ID of organization */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
   }
   /** The parent label. */
   public get parent(): LinearFetch<IssueLabel> | undefined {
     return this._parent?.id ? new IssueLabelQuery(this._request).fetch(this._parent?.id) : undefined;
   }
+  /** The ID of parent label. */
+  public get parentId(): string | undefined {
+    return this._parent?.id;
+  }
   /** The team that the label is associated with. If null, the label is associated with the global workspace. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The ID of team that the label is associated with. if null, the label is associated with the global workspace. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
   /** Children of the label. */
   public children(variables?: Omit<L.IssueLabel_ChildrenQueryVariables, "id">) {
@@ -5963,6 +6803,10 @@ export class IssueLabelPayload extends Request {
   /** The label that was created or updated. */
   public get issueLabel(): LinearFetch<IssueLabel> | undefined {
     return new IssueLabelQuery(this._request).fetch(this._issueLabel.id);
+  }
+  /** The ID of label that was created or updated. */
+  public get issueLabelId(): string | undefined {
+    return this._issueLabel?.id;
   }
 }
 /**
@@ -6048,9 +6892,17 @@ export class IssueNotification extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
+  /** The ID of user that caused the notification. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
   /** The comment related to the notification. */
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
+  }
+  /** The ID of comment related to the notification. */
+  public get commentId(): string | undefined {
+    return this._comment?.id;
   }
   /** The external user that caused the notification. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
@@ -6058,21 +6910,41 @@ export class IssueNotification extends Request {
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
+  /** The ID of external user that caused the notification. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
   /** The issue related to the notification. */
   public get issue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
+  }
+  /** The ID of issue related to the notification. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
   }
   /** The parent comment related to the notification, if a notification is a reply comment notification. */
   public get parentComment(): LinearFetch<Comment> | undefined {
     return this._parentComment?.id ? new CommentQuery(this._request).fetch({ id: this._parentComment?.id }) : undefined;
   }
+  /** The ID of parent comment related to the notification, if a notification is a reply comment notification. */
+  public get parentCommentId(): string | undefined {
+    return this._parentComment?.id;
+  }
   /** The team related to the issue notification. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
+  /** The ID of team related to the issue notification. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The user that received the notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user that received the notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -6098,6 +6970,10 @@ export class IssuePayload extends Request {
   /** The issue that was created or updated. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** The ID of issue that was created or updated. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
   }
 }
 /**
@@ -6156,9 +7032,17 @@ export class IssueRelation extends Request {
   public get issue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
   }
+  /** The ID of issue whose relationship is being described. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
+  }
   /** The related issue. */
   public get relatedIssue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._relatedIssue.id);
+  }
+  /** The ID of related issue. */
+  public get relatedIssueId(): string | undefined {
+    return this._relatedIssue?.id;
   }
 
   /** Creates a new issue relation. */
@@ -6236,6 +7120,10 @@ export class IssueRelationPayload extends Request {
   /** The issue relation that was created or updated. */
   public get issueRelation(): LinearFetch<IssueRelation> | undefined {
     return new IssueRelationQuery(this._request).fetch(this._issueRelation.id);
+  }
+  /** The ID of issue relation that was created or updated. */
+  public get issueRelationId(): string | undefined {
+    return this._issueRelation?.id;
   }
 }
 /**
@@ -6436,13 +7324,25 @@ export class IssueSearchResult extends Request {
   public get assignee(): LinearFetch<User> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
   }
+  /** The ID of user to whom the issue is assigned to. */
+  public get assigneeId(): string | undefined {
+    return this._assignee?.id;
+  }
   /** The user who created the issue. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who created the issue. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The cycle that the issue is associated with. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
+  }
+  /** The ID of cycle that the issue is associated with. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
   }
   /** The external user who created the issue. */
   public get externalUserCreator(): LinearFetch<ExternalUser> | undefined {
@@ -6450,9 +7350,17 @@ export class IssueSearchResult extends Request {
       ? new ExternalUserQuery(this._request).fetch(this._externalUserCreator?.id)
       : undefined;
   }
+  /** The ID of external user who created the issue. */
+  public get externalUserCreatorId(): string | undefined {
+    return this._externalUserCreator?.id;
+  }
   /** The users favorite associated with this issue. */
   public get favorite(): LinearFetch<Favorite> | undefined {
     return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
+  }
+  /** The ID of users favorite associated with this issue. */
+  public get favoriteId(): string | undefined {
+    return this._favorite?.id;
   }
   /** The last template that was applied to this issue. */
   public get lastAppliedTemplate(): LinearFetch<Template> | undefined {
@@ -6460,13 +7368,25 @@ export class IssueSearchResult extends Request {
       ? new TemplateQuery(this._request).fetch(this._lastAppliedTemplate?.id)
       : undefined;
   }
+  /** The ID of last template that was applied to this issue. */
+  public get lastAppliedTemplateId(): string | undefined {
+    return this._lastAppliedTemplate?.id;
+  }
   /** The parent of the issue. */
   public get parent(): LinearFetch<Issue> | undefined {
     return this._parent?.id ? new IssueQuery(this._request).fetch(this._parent?.id) : undefined;
   }
+  /** The ID of parent of the issue. */
+  public get parentId(): string | undefined {
+    return this._parent?.id;
+  }
   /** The project that the issue is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of project that the issue is associated with. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** The projectMilestone that the issue is associated with. */
   public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
@@ -6474,27 +7394,51 @@ export class IssueSearchResult extends Request {
       ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
       : undefined;
   }
+  /** The ID of projectmilestone that the issue is associated with. */
+  public get projectMilestoneId(): string | undefined {
+    return this._projectMilestone?.id;
+  }
   /** The recurring issue template that created this issue. */
   public get recurringIssueTemplate(): LinearFetch<Template> | undefined {
     return this._recurringIssueTemplate?.id
       ? new TemplateQuery(this._request).fetch(this._recurringIssueTemplate?.id)
       : undefined;
   }
+  /** The ID of recurring issue template that created this issue. */
+  public get recurringIssueTemplateId(): string | undefined {
+    return this._recurringIssueTemplate?.id;
+  }
   /** The user who snoozed the issue. */
   public get snoozedBy(): LinearFetch<User> | undefined {
     return this._snoozedBy?.id ? new UserQuery(this._request).fetch(this._snoozedBy?.id) : undefined;
+  }
+  /** The ID of user who snoozed the issue. */
+  public get snoozedById(): string | undefined {
+    return this._snoozedBy?.id;
   }
   /** The comment that this issue was created from. */
   public get sourceComment(): LinearFetch<Comment> | undefined {
     return this._sourceComment?.id ? new CommentQuery(this._request).fetch({ id: this._sourceComment?.id }) : undefined;
   }
+  /** The ID of comment that this issue was created from. */
+  public get sourceCommentId(): string | undefined {
+    return this._sourceComment?.id;
+  }
   /** The workflow state that the issue is associated with. */
   public get state(): LinearFetch<WorkflowState> | undefined {
     return new WorkflowStateQuery(this._request).fetch(this._state.id);
   }
+  /** The ID of workflow state that the issue is associated with. */
+  public get stateId(): string | undefined {
+    return this._state?.id;
+  }
   /** The team that the issue is associated with. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
+  }
+  /** The ID of team that the issue is associated with. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
 }
 /**
@@ -6576,37 +7520,73 @@ export class LabelNotificationSubscription extends Request {
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
+  /** The ID of contextual custom view associated with the notification subscription. */
+  public get customViewId(): string | undefined {
+    return this._customView?.id;
+  }
   /** The customer associated with the notification subscription. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
+  }
+  /** The ID of customer associated with the notification subscription. */
+  public get customerId(): string | undefined {
+    return this._customer?.id;
   }
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
+  /** The ID of contextual cycle view associated with the notification subscription. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
+  }
   /** The contextual initiative view associated with the notification subscription. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of contextual initiative view associated with the notification subscription. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The label subscribed to. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return new IssueLabelQuery(this._request).fetch(this._label.id);
   }
+  /** The ID of label subscribed to. */
+  public get labelId(): string | undefined {
+    return this._label?.id;
+  }
   /** The contextual project view associated with the notification subscription. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of contextual project view associated with the notification subscription. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** The user that subscribed to receive notifications. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
+  /** The ID of user that subscribed to receive notifications. */
+  public get subscriberId(): string | undefined {
+    return this._subscriber?.id;
+  }
   /** The team associated with the notification subscription. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
+  /** The ID of team associated with the notification subscription. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The user view associated with the notification subscription. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of user view associated with the notification subscription. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -6694,13 +7674,25 @@ export class Meeting extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who created the meeting. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The project that the meeting is associated with. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
   }
+  /** The ID of project that the meeting is associated with. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
+  }
   /** The user who last updated the meeting. */
   public get updatedBy(): LinearFetch<User> | undefined {
     return this._updatedBy?.id ? new UserQuery(this._request).fetch(this._updatedBy?.id) : undefined;
+  }
+  /** The ID of user who last updated the meeting. */
+  public get updatedById(): string | undefined {
+    return this._updatedBy?.id;
   }
 }
 /**
@@ -6776,15 +7768,27 @@ export class Notification extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
+  /** The ID of user that caused the notification. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
   /** The external user that caused the notification. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
+  /** The ID of external user that caused the notification. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
   /** The user that received the notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user that received the notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 
   /** Archives a notification. */
@@ -7136,37 +8140,73 @@ export class NotificationSubscription extends Request {
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
+  /** The ID of contextual custom view associated with the notification subscription. */
+  public get customViewId(): string | undefined {
+    return this._customView?.id;
+  }
   /** The customer associated with the notification subscription. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
+  }
+  /** The ID of customer associated with the notification subscription. */
+  public get customerId(): string | undefined {
+    return this._customer?.id;
   }
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
+  /** The ID of contextual cycle view associated with the notification subscription. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
+  }
   /** The contextual initiative view associated with the notification subscription. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of contextual initiative view associated with the notification subscription. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
+  /** The ID of contextual label view associated with the notification subscription. */
+  public get labelId(): string | undefined {
+    return this._label?.id;
+  }
   /** The contextual project view associated with the notification subscription. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of contextual project view associated with the notification subscription. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** The user that subscribed to receive notifications. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
+  /** The ID of user that subscribed to receive notifications. */
+  public get subscriberId(): string | undefined {
+    return this._subscriber?.id;
+  }
   /** The team associated with the notification subscription. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
+  /** The ID of team associated with the notification subscription. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The user view associated with the notification subscription. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of user view associated with the notification subscription. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 
   /** Creates a new notification subscription for a cycle, custom view, label, project or team. */
@@ -7386,15 +8426,27 @@ export class OauthClientApprovalNotification extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
+  /** The ID of user that caused the notification. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
   /** The external user that caused the notification. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
+  /** The ID of external user that caused the notification. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
   /** The user that received the notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user that received the notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -7659,6 +8711,10 @@ export class OrganizationDomain extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who added the domain. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
 
   /** Deletes a domain. */
   public delete() {
@@ -7736,13 +8792,25 @@ export class OrganizationInvite extends Request {
   public get invitee(): LinearFetch<User> | undefined {
     return this._invitee?.id ? new UserQuery(this._request).fetch(this._invitee?.id) : undefined;
   }
+  /** The ID of user who has accepted the invite. null, if the invite hasn't been accepted. */
+  public get inviteeId(): string | undefined {
+    return this._invitee?.id;
+  }
   /** The user who created the invitation. */
   public get inviter(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._inviter.id);
   }
+  /** The ID of user who created the invitation. */
+  public get inviterId(): string | undefined {
+    return this._inviter?.id;
+  }
   /** The organization that the invite is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The ID of organization that the invite is associated with. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
   }
 
   /** Creates a new organization invite. */
@@ -7848,6 +8916,10 @@ export class OrganizationInvitePayload extends Request {
   public get organizationInvite(): LinearFetch<OrganizationInvite> | undefined {
     return new OrganizationInviteQuery(this._request).fetch(this._organizationInvite.id);
   }
+  /** The ID of organization invite that was created or updated. */
+  public get organizationInviteId(): string | undefined {
+    return this._organizationInvite?.id;
+  }
 }
 /**
  * OrganizationIpRestriction model
@@ -7911,6 +8983,10 @@ export class OrganizationPayload extends Request {
   /** The organization that was created or updated. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The ID of organization that was created or updated. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
   }
 }
 /**
@@ -8012,9 +9088,17 @@ export class PaidSubscription extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of creator of the subscription. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The organization that the subscription is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The ID of organization that the subscription is associated with. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
   }
 }
 /**
@@ -8203,13 +9287,25 @@ export class Project extends Request {
   public get convertedFromIssue(): LinearFetch<Issue> | undefined {
     return this._convertedFromIssue?.id ? new IssueQuery(this._request).fetch(this._convertedFromIssue?.id) : undefined;
   }
+  /** The ID of project was created based on this issue. */
+  public get convertedFromIssueId(): string | undefined {
+    return this._convertedFromIssue?.id;
+  }
   /** The user who created the project. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who created the project. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The user's favorite associated with this project. */
   public get favorite(): LinearFetch<Favorite> | undefined {
     return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
+  }
+  /** The ID of user's favorite associated with this project. */
+  public get favoriteId(): string | undefined {
+    return this._favorite?.id;
   }
   /** Settings for all integrations associated with that project. */
   public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
@@ -8217,23 +9313,43 @@ export class Project extends Request {
       ? new IntegrationsSettingsQuery(this._request).fetch(this._integrationsSettings?.id)
       : undefined;
   }
+  /** The ID of settings for all integrations associated with that project. */
+  public get integrationsSettingsId(): string | undefined {
+    return this._integrationsSettings?.id;
+  }
   /** The last template that was applied to this project. */
   public get lastAppliedTemplate(): LinearFetch<Template> | undefined {
     return this._lastAppliedTemplate?.id
       ? new TemplateQuery(this._request).fetch(this._lastAppliedTemplate?.id)
       : undefined;
   }
+  /** The ID of last template that was applied to this project. */
+  public get lastAppliedTemplateId(): string | undefined {
+    return this._lastAppliedTemplate?.id;
+  }
   /** The last project update posted for this project. */
   public get lastUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return this._lastUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._lastUpdate?.id) : undefined;
+  }
+  /** The ID of last project update posted for this project. */
+  public get lastUpdateId(): string | undefined {
+    return this._lastUpdate?.id;
   }
   /** The project lead. */
   public get lead(): LinearFetch<User> | undefined {
     return this._lead?.id ? new UserQuery(this._request).fetch(this._lead?.id) : undefined;
   }
+  /** The ID of project lead. */
+  public get leadId(): string | undefined {
+    return this._lead?.id;
+  }
   /** The status that the project is associated with. */
   public get status(): LinearFetch<ProjectStatus> | undefined {
     return new ProjectStatusQuery(this._request).fetch(this._status.id);
+  }
+  /** The ID of status that the project is associated with. */
+  public get statusId(): string | undefined {
+    return this._status?.id;
   }
   /** Comments associated with the project overview. */
   public comments(variables?: Omit<L.Project_CommentsQueryVariables, "id">) {
@@ -8328,6 +9444,10 @@ export class ProjectArchivePayload extends Request {
   public get entity(): LinearFetch<Project> | undefined {
     return this._entity?.id ? new ProjectQuery(this._request).fetch(this._entity?.id) : undefined;
   }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
+  }
 }
 /**
  * ProjectConnection model
@@ -8404,6 +9524,10 @@ export class ProjectHistory extends Request {
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
+  /** The ID of project that the history is associated with. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
+  }
 }
 /**
  * ProjectHistoryConnection model
@@ -8479,6 +9603,10 @@ export class ProjectMilestone extends Request {
   /** The project of the milestone. */
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
+  }
+  /** The ID of project of the milestone. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** Issues associated with the project milestone. */
   public issues(variables?: Omit<L.ProjectMilestone_IssuesQueryVariables, "id">) {
@@ -8570,6 +9698,10 @@ export class ProjectMilestoneMovePayload extends Request {
   public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
     return new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone.id);
   }
+  /** The ID of project milestone that was created or updated. */
+  public get projectMilestoneId(): string | undefined {
+    return this._projectMilestone?.id;
+  }
 }
 /**
  * ProjectMilestoneMoveProjectTeams model
@@ -8612,6 +9744,10 @@ export class ProjectMilestonePayload extends Request {
   /** The project milestone that was created or updated. */
   public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
     return new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone.id);
+  }
+  /** The ID of project milestone that was created or updated. */
+  public get projectMilestoneId(): string | undefined {
+    return this._projectMilestone?.id;
   }
 }
 /**
@@ -8704,13 +9840,25 @@ export class ProjectNotification extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
+  /** The ID of user that caused the notification. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
   /** The comment related to the notification. */
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
   }
+  /** The ID of comment related to the notification. */
+  public get commentId(): string | undefined {
+    return this._comment?.id;
+  }
   /** The document related to the notification. */
   public get document(): LinearFetch<Document> | undefined {
     return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
+  }
+  /** The ID of document related to the notification. */
+  public get documentId(): string | undefined {
+    return this._document?.id;
   }
   /** The external user that caused the notification. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
@@ -8718,9 +9866,17 @@ export class ProjectNotification extends Request {
       ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
       : undefined;
   }
+  /** The ID of external user that caused the notification. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
   /** The initiative related to the notification. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of initiative related to the notification. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The initiative update related to the notification. */
   public get initiativeUpdate(): LinearFetch<InitiativeUpdate> | undefined {
@@ -8728,21 +9884,41 @@ export class ProjectNotification extends Request {
       ? new InitiativeUpdateQuery(this._request).fetch(this._initiativeUpdate?.id)
       : undefined;
   }
+  /** The ID of initiative update related to the notification. */
+  public get initiativeUpdateId(): string | undefined {
+    return this._initiativeUpdate?.id;
+  }
   /** The parent comment related to the notification, if a notification is a reply comment notification. */
   public get parentComment(): LinearFetch<Comment> | undefined {
     return this._parentComment?.id ? new CommentQuery(this._request).fetch({ id: this._parentComment?.id }) : undefined;
+  }
+  /** The ID of parent comment related to the notification, if a notification is a reply comment notification. */
+  public get parentCommentId(): string | undefined {
+    return this._parentComment?.id;
   }
   /** The project related to the notification. */
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
+  /** The ID of project related to the notification. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
+  }
   /** The project update related to the notification. */
   public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
   }
+  /** The ID of project update related to the notification. */
+  public get projectUpdateId(): string | undefined {
+    return this._projectUpdate?.id;
+  }
   /** The user that received the notification. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user that received the notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -8806,37 +9982,73 @@ export class ProjectNotificationSubscription extends Request {
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
+  /** The ID of contextual custom view associated with the notification subscription. */
+  public get customViewId(): string | undefined {
+    return this._customView?.id;
+  }
   /** The customer associated with the notification subscription. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
+  }
+  /** The ID of customer associated with the notification subscription. */
+  public get customerId(): string | undefined {
+    return this._customer?.id;
   }
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
+  /** The ID of contextual cycle view associated with the notification subscription. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
+  }
   /** The contextual initiative view associated with the notification subscription. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of contextual initiative view associated with the notification subscription. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
+  /** The ID of contextual label view associated with the notification subscription. */
+  public get labelId(): string | undefined {
+    return this._label?.id;
+  }
   /** The project subscribed to. */
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
+  }
+  /** The ID of project subscribed to. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** The user that subscribed to receive notifications. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
+  /** The ID of user that subscribed to receive notifications. */
+  public get subscriberId(): string | undefined {
+    return this._subscriber?.id;
+  }
   /** The team associated with the notification subscription. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
+  /** The ID of team associated with the notification subscription. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The user view associated with the notification subscription. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of user view associated with the notification subscription. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -8862,6 +10074,10 @@ export class ProjectPayload extends Request {
   /** The project that was created or updated. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of project that was created or updated. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
 }
 /**
@@ -8914,15 +10130,27 @@ export class ProjectRelation extends Request {
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
+  /** The ID of project whose relationship is being described. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
+  }
   /** The milestone within the project whose relationship is being described. */
   public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
     return this._projectMilestone?.id
       ? new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone?.id)
       : undefined;
   }
+  /** The ID of milestone within the project whose relationship is being described. */
+  public get projectMilestoneId(): string | undefined {
+    return this._projectMilestone?.id;
+  }
   /** The related project. */
   public get relatedProject(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._relatedProject.id);
+  }
+  /** The ID of related project. */
+  public get relatedProjectId(): string | undefined {
+    return this._relatedProject?.id;
   }
   /** The milestone within the related project whose relationship is being described. */
   public get relatedProjectMilestone(): LinearFetch<ProjectMilestone> | undefined {
@@ -8930,9 +10158,17 @@ export class ProjectRelation extends Request {
       ? new ProjectMilestoneQuery(this._request).fetch(this._relatedProjectMilestone?.id)
       : undefined;
   }
+  /** The ID of milestone within the related project whose relationship is being described. */
+  public get relatedProjectMilestoneId(): string | undefined {
+    return this._relatedProjectMilestone?.id;
+  }
   /** The last user who created or modified the relation. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of last user who created or modified the relation. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 
   /** Creates a new project relation. */
@@ -8992,6 +10228,10 @@ export class ProjectRelationPayload extends Request {
   /** The project relation that was created or updated. */
   public get projectRelation(): LinearFetch<ProjectRelation> | undefined {
     return new ProjectRelationQuery(this._request).fetch(this._projectRelation.id);
+  }
+  /** The ID of project relation that was created or updated. */
+  public get projectRelationId(): string | undefined {
+    return this._projectRelation?.id;
   }
 }
 /**
@@ -9189,13 +10429,25 @@ export class ProjectSearchResult extends Request {
   public get convertedFromIssue(): LinearFetch<Issue> | undefined {
     return this._convertedFromIssue?.id ? new IssueQuery(this._request).fetch(this._convertedFromIssue?.id) : undefined;
   }
+  /** The ID of project was created based on this issue. */
+  public get convertedFromIssueId(): string | undefined {
+    return this._convertedFromIssue?.id;
+  }
   /** The user who created the project. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who created the project. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The user's favorite associated with this project. */
   public get favorite(): LinearFetch<Favorite> | undefined {
     return this._favorite?.id ? new FavoriteQuery(this._request).fetch(this._favorite?.id) : undefined;
+  }
+  /** The ID of user's favorite associated with this project. */
+  public get favoriteId(): string | undefined {
+    return this._favorite?.id;
   }
   /** Settings for all integrations associated with that project. */
   public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
@@ -9203,23 +10455,43 @@ export class ProjectSearchResult extends Request {
       ? new IntegrationsSettingsQuery(this._request).fetch(this._integrationsSettings?.id)
       : undefined;
   }
+  /** The ID of settings for all integrations associated with that project. */
+  public get integrationsSettingsId(): string | undefined {
+    return this._integrationsSettings?.id;
+  }
   /** The last template that was applied to this project. */
   public get lastAppliedTemplate(): LinearFetch<Template> | undefined {
     return this._lastAppliedTemplate?.id
       ? new TemplateQuery(this._request).fetch(this._lastAppliedTemplate?.id)
       : undefined;
   }
+  /** The ID of last template that was applied to this project. */
+  public get lastAppliedTemplateId(): string | undefined {
+    return this._lastAppliedTemplate?.id;
+  }
   /** The last project update posted for this project. */
   public get lastUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return this._lastUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._lastUpdate?.id) : undefined;
+  }
+  /** The ID of last project update posted for this project. */
+  public get lastUpdateId(): string | undefined {
+    return this._lastUpdate?.id;
   }
   /** The project lead. */
   public get lead(): LinearFetch<User> | undefined {
     return this._lead?.id ? new UserQuery(this._request).fetch(this._lead?.id) : undefined;
   }
+  /** The ID of project lead. */
+  public get leadId(): string | undefined {
+    return this._lead?.id;
+  }
   /** The status that the project is associated with. */
   public get status(): LinearFetch<ProjectStatus> | undefined {
     return new ProjectStatusQuery(this._request).fetch(this._status.id);
+  }
+  /** The ID of status that the project is associated with. */
+  public get statusId(): string | undefined {
+    return this._status?.id;
   }
 }
 /**
@@ -9308,6 +10580,10 @@ export class ProjectStatusArchivePayload extends Request {
   public get entity(): LinearFetch<ProjectStatus> | undefined {
     return this._entity?.id ? new ProjectStatusQuery(this._request).fetch(this._entity?.id) : undefined;
   }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
+  }
 }
 /**
  * ProjectStatusConnection model
@@ -9374,6 +10650,10 @@ export class ProjectStatusPayload extends Request {
   /** The project status that was created or updated. */
   public get status(): LinearFetch<ProjectStatus> | undefined {
     return new ProjectStatusQuery(this._request).fetch(this._status.id);
+  }
+  /** The ID of project status that was created or updated. */
+  public get statusId(): string | undefined {
+    return this._status?.id;
   }
 }
 /**
@@ -9444,9 +10724,17 @@ export class ProjectUpdate extends Request {
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
+  /** The ID of project that the update is associated with. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
+  }
   /** The user who wrote the update. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user who wrote the update. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
   /** Comments associated with the project update. */
   public comments(variables?: Omit<L.ProjectUpdate_CommentsQueryVariables, "id">) {
@@ -9497,6 +10785,10 @@ export class ProjectUpdateArchivePayload extends Request {
   public get entity(): LinearFetch<ProjectUpdate> | undefined {
     return this._entity?.id ? new ProjectUpdateQuery(this._request).fetch(this._entity?.id) : undefined;
   }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
+  }
 }
 /**
  * ProjectUpdateConnection model
@@ -9542,6 +10834,10 @@ export class ProjectUpdatePayload extends Request {
   /** The project update that was created or updated. */
   public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return new ProjectUpdateQuery(this._request).fetch(this._projectUpdate.id);
+  }
+  /** The ID of project update that was created or updated. */
+  public get projectUpdateId(): string | undefined {
+    return this._projectUpdate?.id;
   }
 }
 /**
@@ -9731,9 +11027,17 @@ export class Reaction extends Request {
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
   }
+  /** The ID of comment that the reaction is associated with. */
+  public get commentId(): string | undefined {
+    return this._comment?.id;
+  }
   /** The external user that created the reaction. */
   public get externalUser(): LinearFetch<ExternalUser> | undefined {
     return this._externalUser?.id ? new ExternalUserQuery(this._request).fetch(this._externalUser?.id) : undefined;
+  }
+  /** The ID of external user that created the reaction. */
+  public get externalUserId(): string | undefined {
+    return this._externalUser?.id;
   }
   /** The initiative update that the reaction is associated with. */
   public get initiativeUpdate(): LinearFetch<InitiativeUpdate> | undefined {
@@ -9741,17 +11045,33 @@ export class Reaction extends Request {
       ? new InitiativeUpdateQuery(this._request).fetch(this._initiativeUpdate?.id)
       : undefined;
   }
+  /** The ID of initiative update that the reaction is associated with. */
+  public get initiativeUpdateId(): string | undefined {
+    return this._initiativeUpdate?.id;
+  }
   /** The issue that the reaction is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** The ID of issue that the reaction is associated with. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
   }
   /** The project update that the reaction is associated with. */
   public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
   }
+  /** The ID of project update that the reaction is associated with. */
+  public get projectUpdateId(): string | undefined {
+    return this._projectUpdate?.id;
+  }
   /** The user that created the reaction. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of user that created the reaction. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 
   /** Creates a new reaction. */
@@ -9835,13 +11155,25 @@ export class Roadmap extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
   }
+  /** The ID of user who created the roadmap. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The organization of the roadmap. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
+  /** The ID of organization of the roadmap. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
+  }
   /** The user who owns the roadmap. */
   public get owner(): LinearFetch<User> | undefined {
     return this._owner?.id ? new UserQuery(this._request).fetch(this._owner?.id) : undefined;
+  }
+  /** The ID of user who owns the roadmap. */
+  public get ownerId(): string | undefined {
+    return this._owner?.id;
   }
   /** Projects associated with the roadmap. */
   public projects(variables?: Omit<L.Roadmap_ProjectsQueryVariables, "id">) {
@@ -9892,6 +11224,10 @@ export class RoadmapArchivePayload extends Request {
   public get entity(): LinearFetch<Roadmap> | undefined {
     return this._entity?.id ? new RoadmapQuery(this._request).fetch(this._entity?.id) : undefined;
   }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
+  }
 }
 /**
  * RoadmapConnection model
@@ -9938,6 +11274,10 @@ export class RoadmapPayload extends Request {
   public get roadmap(): LinearFetch<Roadmap> | undefined {
     return new RoadmapQuery(this._request).fetch(this._roadmap.id);
   }
+  /** The ID of roadmap that was created or updated. */
+  public get roadmapId(): string | undefined {
+    return this._roadmap?.id;
+  }
 }
 /**
  * Join table between projects and roadmaps.
@@ -9977,9 +11317,17 @@ export class RoadmapToProject extends Request {
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
+  /** The ID of project that the roadmap is associated with. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
+  }
   /** The roadmap that the project is associated with. */
   public get roadmap(): LinearFetch<Roadmap> | undefined {
     return new RoadmapQuery(this._request).fetch(this._roadmap.id);
+  }
+  /** The ID of roadmap that the project is associated with. */
+  public get roadmapId(): string | undefined {
+    return this._roadmap?.id;
   }
 
   /** Creates a new roadmapToProject join. */
@@ -10040,6 +11388,10 @@ export class RoadmapToProjectPayload extends Request {
   public get roadmapToProject(): LinearFetch<RoadmapToProject> | undefined {
     return new RoadmapToProjectQuery(this._request).fetch(this._roadmapToProject.id);
   }
+  /** The ID of roadmaptoproject that was created or updated. */
+  public get roadmapToProjectId(): string | undefined {
+    return this._roadmapToProject?.id;
+  }
 }
 /**
  * Tuple for mapping Slack channel IDs to names.
@@ -10091,6 +11443,10 @@ export class SlackChannelConnectPayload extends Request {
   /** The integration that was created or updated. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
+  }
+  /** The ID of integration that was created or updated. */
+  public get integrationId(): string | undefined {
+    return this._integration?.id;
   }
 }
 /**
@@ -10424,11 +11780,19 @@ export class Team extends Request {
   public get activeCycle(): LinearFetch<Cycle> | undefined {
     return this._activeCycle?.id ? new CycleQuery(this._request).fetch(this._activeCycle?.id) : undefined;
   }
+  /** The ID of team's currently active cycle. */
+  public get activeCycleId(): string | undefined {
+    return this._activeCycle?.id;
+  }
   /** The default workflow state into which issues are set when they are opened by team members. */
   public get defaultIssueState(): LinearFetch<WorkflowState> | undefined {
     return this._defaultIssueState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._defaultIssueState?.id)
       : undefined;
+  }
+  /** The ID of default workflow state into which issues are set when they are opened by team members. */
+  public get defaultIssueStateId(): string | undefined {
+    return this._defaultIssueState?.id;
   }
   /** The default template to use for new projects created for the team. */
   public get defaultProjectTemplate(): LinearFetch<Template> | undefined {
@@ -10436,11 +11800,19 @@ export class Team extends Request {
       ? new TemplateQuery(this._request).fetch(this._defaultProjectTemplate?.id)
       : undefined;
   }
+  /** The ID of default template to use for new projects created for the team. */
+  public get defaultProjectTemplateId(): string | undefined {
+    return this._defaultProjectTemplate?.id;
+  }
   /** The default template to use for new issues created by members of the team. */
   public get defaultTemplateForMembers(): LinearFetch<Template> | undefined {
     return this._defaultTemplateForMembers?.id
       ? new TemplateQuery(this._request).fetch(this._defaultTemplateForMembers?.id)
       : undefined;
+  }
+  /** The ID of default template to use for new issues created by members of the team. */
+  public get defaultTemplateForMembersId(): string | undefined {
+    return this._defaultTemplateForMembers?.id;
   }
   /** The default template to use for new issues created by non-members of the team. */
   public get defaultTemplateForNonMembers(): LinearFetch<Template> | undefined {
@@ -10448,11 +11820,19 @@ export class Team extends Request {
       ? new TemplateQuery(this._request).fetch(this._defaultTemplateForNonMembers?.id)
       : undefined;
   }
+  /** The ID of default template to use for new issues created by non-members of the team. */
+  public get defaultTemplateForNonMembersId(): string | undefined {
+    return this._defaultTemplateForNonMembers?.id;
+  }
   /** The workflow state into which issues are moved when a PR has been opened as draft. */
   public get draftWorkflowState(): LinearFetch<WorkflowState> | undefined {
     return this._draftWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._draftWorkflowState?.id)
       : undefined;
+  }
+  /** The ID of workflow state into which issues are moved when a pr has been opened as draft. */
+  public get draftWorkflowStateId(): string | undefined {
+    return this._draftWorkflowState?.id;
   }
   /** Settings for all integrations associated with that team. */
   public get integrationsSettings(): LinearFetch<IntegrationsSettings> | undefined {
@@ -10460,11 +11840,19 @@ export class Team extends Request {
       ? new IntegrationsSettingsQuery(this._request).fetch(this._integrationsSettings?.id)
       : undefined;
   }
+  /** The ID of settings for all integrations associated with that team. */
+  public get integrationsSettingsId(): string | undefined {
+    return this._integrationsSettings?.id;
+  }
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. Defaults to the first canceled state. */
   public get markedAsDuplicateWorkflowState(): LinearFetch<WorkflowState> | undefined {
     return this._markedAsDuplicateWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._markedAsDuplicateWorkflowState?.id)
       : undefined;
+  }
+  /** The ID of workflow state into which issues are moved when they are marked as a duplicate of another issue. defaults to the first canceled state. */
+  public get markedAsDuplicateWorkflowStateId(): string | undefined {
+    return this._markedAsDuplicateWorkflowState?.id;
   }
   /** The workflow state into which issues are moved when a PR has been merged. */
   public get mergeWorkflowState(): LinearFetch<WorkflowState> | undefined {
@@ -10472,15 +11860,27 @@ export class Team extends Request {
       ? new WorkflowStateQuery(this._request).fetch(this._mergeWorkflowState?.id)
       : undefined;
   }
+  /** The ID of workflow state into which issues are moved when a pr has been merged. */
+  public get mergeWorkflowStateId(): string | undefined {
+    return this._mergeWorkflowState?.id;
+  }
   /** The workflow state into which issues are moved when a PR is ready to be merged. */
   public get mergeableWorkflowState(): LinearFetch<WorkflowState> | undefined {
     return this._mergeableWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._mergeableWorkflowState?.id)
       : undefined;
   }
+  /** The ID of workflow state into which issues are moved when a pr is ready to be merged. */
+  public get mergeableWorkflowStateId(): string | undefined {
+    return this._mergeableWorkflowState?.id;
+  }
   /** The organization that the team is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The ID of organization that the team is associated with. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
   }
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
   public get reviewWorkflowState(): LinearFetch<WorkflowState> | undefined {
@@ -10488,11 +11888,19 @@ export class Team extends Request {
       ? new WorkflowStateQuery(this._request).fetch(this._reviewWorkflowState?.id)
       : undefined;
   }
+  /** The ID of workflow state into which issues are moved when a review has been requested for the pr. */
+  public get reviewWorkflowStateId(): string | undefined {
+    return this._reviewWorkflowState?.id;
+  }
   /** The workflow state into which issues are moved when a PR has been opened. */
   public get startWorkflowState(): LinearFetch<WorkflowState> | undefined {
     return this._startWorkflowState?.id
       ? new WorkflowStateQuery(this._request).fetch(this._startWorkflowState?.id)
       : undefined;
+  }
+  /** The ID of workflow state into which issues are moved when a pr has been opened. */
+  public get startWorkflowStateId(): string | undefined {
+    return this._startWorkflowState?.id;
   }
   /** The workflow state into which issues are set when they are opened by non-team members or integrations if triage is enabled. */
   public get triageIssueState(): LinearFetch<WorkflowState> | undefined {
@@ -10500,11 +11908,19 @@ export class Team extends Request {
       ? new WorkflowStateQuery(this._request).fetch(this._triageIssueState?.id)
       : undefined;
   }
+  /** The ID of workflow state into which issues are set when they are opened by non-team members or integrations if triage is enabled. */
+  public get triageIssueStateId(): string | undefined {
+    return this._triageIssueState?.id;
+  }
   /** Team's triage responsibility. */
   public get triageResponsibility(): LinearFetch<TriageResponsibility> | undefined {
     return this._triageResponsibility?.id
       ? new TriageResponsibilityQuery(this._request).fetch(this._triageResponsibility?.id)
       : undefined;
+  }
+  /** The ID of team's triage responsibility. */
+  public get triageResponsibilityId(): string | undefined {
+    return this._triageResponsibility?.id;
   }
   /** Cycles associated with the team. */
   public cycles(variables?: Omit<L.Team_CyclesQueryVariables, "id">) {
@@ -10587,6 +12003,10 @@ export class TeamArchivePayload extends Request {
   public get entity(): LinearFetch<Team> | undefined {
     return this._entity?.id ? new TeamQuery(this._request).fetch(this._entity?.id) : undefined;
   }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
+  }
 }
 /**
  * TeamConnection model
@@ -10650,9 +12070,17 @@ export class TeamMembership extends Request {
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
+  /** The ID of team that the membership is associated with. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The user that the membership is associated with. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user that the membership is associated with. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 
   /** Creates a new team membership. */
@@ -10714,6 +12142,10 @@ export class TeamMembershipPayload extends Request {
     return this._teamMembership?.id
       ? new TeamMembershipQuery(this._request).fetch(this._teamMembership?.id)
       : undefined;
+  }
+  /** The ID of team membership that was created or updated. */
+  public get teamMembershipId(): string | undefined {
+    return this._teamMembership?.id;
   }
 }
 /**
@@ -10777,37 +12209,73 @@ export class TeamNotificationSubscription extends Request {
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
+  /** The ID of contextual custom view associated with the notification subscription. */
+  public get customViewId(): string | undefined {
+    return this._customView?.id;
+  }
   /** The customer associated with the notification subscription. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
+  }
+  /** The ID of customer associated with the notification subscription. */
+  public get customerId(): string | undefined {
+    return this._customer?.id;
   }
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
+  /** The ID of contextual cycle view associated with the notification subscription. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
+  }
   /** The contextual initiative view associated with the notification subscription. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of contextual initiative view associated with the notification subscription. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
+  /** The ID of contextual label view associated with the notification subscription. */
+  public get labelId(): string | undefined {
+    return this._label?.id;
+  }
   /** The contextual project view associated with the notification subscription. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of contextual project view associated with the notification subscription. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** The user that subscribed to receive notifications. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
+  /** The ID of user that subscribed to receive notifications. */
+  public get subscriberId(): string | undefined {
+    return this._subscriber?.id;
+  }
   /** The team subscribed to. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
+  /** The ID of team subscribed to. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The user view associated with the notification subscription. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of user view associated with the notification subscription. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -10833,6 +12301,10 @@ export class TeamPayload extends Request {
   /** The team that was created or updated. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The ID of team that was created or updated. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
 }
 /**
@@ -10889,21 +12361,41 @@ export class Template extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who created the template. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The original template inherited from. */
   public get inheritedFrom(): LinearFetch<Template> | undefined {
     return this._inheritedFrom?.id ? new TemplateQuery(this._request).fetch(this._inheritedFrom?.id) : undefined;
+  }
+  /** The ID of original template inherited from. */
+  public get inheritedFromId(): string | undefined {
+    return this._inheritedFrom?.id;
   }
   /** The user who last updated the template. */
   public get lastUpdatedBy(): LinearFetch<User> | undefined {
     return this._lastUpdatedBy?.id ? new UserQuery(this._request).fetch(this._lastUpdatedBy?.id) : undefined;
   }
+  /** The ID of user who last updated the template. */
+  public get lastUpdatedById(): string | undefined {
+    return this._lastUpdatedBy?.id;
+  }
   /** The organization that the template is associated with. If null, the template is associated with a particular team. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
+  /** The ID of organization that the template is associated with. if null, the template is associated with a particular team. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
+  }
   /** The team that the template is associated with. If null, the template is global to the workspace. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The ID of team that the template is associated with. if null, the template is global to the workspace. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
 
   /** Creates a new template. */
@@ -10964,6 +12456,10 @@ export class TemplatePayload extends Request {
   public get template(): LinearFetch<Template> | undefined {
     return new TemplateQuery(this._request).fetch(this._template.id);
   }
+  /** The ID of template that was created or updated. */
+  public get templateId(): string | undefined {
+    return this._template?.id;
+  }
 }
 /**
  * A time schedule.
@@ -11010,9 +12506,17 @@ export class TimeSchedule extends Request {
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
   }
+  /** The ID of identifier of the linear integration populating the schedule. */
+  public get integrationId(): string | undefined {
+    return this._integration?.id;
+  }
   /** The organization of the schedule. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The ID of organization of the schedule. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
   }
 
   /** Creates a new time schedule. */
@@ -11096,6 +12600,10 @@ export class TimeSchedulePayload extends Request {
   public get timeSchedule(): LinearFetch<TimeSchedule> | undefined {
     return new TimeScheduleQuery(this._request).fetch(this._timeSchedule.id);
   }
+  /** The ID of timeSchedule */
+  public get timeScheduleId(): string | undefined {
+    return this._timeSchedule?.id;
+  }
 }
 /**
  * A team's triage responsibility.
@@ -11142,13 +12650,25 @@ export class TriageResponsibility extends Request {
   public get currentUser(): LinearFetch<User> | undefined {
     return this._currentUser?.id ? new UserQuery(this._request).fetch(this._currentUser?.id) : undefined;
   }
+  /** The ID of user currently responsible for triage. */
+  public get currentUserId(): string | undefined {
+    return this._currentUser?.id;
+  }
   /** The team to which the triage responsibility belongs to. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
   }
+  /** The ID of team to which the triage responsibility belongs to. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The time schedule used for scheduling. */
   public get timeSchedule(): LinearFetch<TimeSchedule> | undefined {
     return this._timeSchedule?.id ? new TimeScheduleQuery(this._request).fetch(this._timeSchedule?.id) : undefined;
+  }
+  /** The ID of time schedule used for scheduling. */
+  public get timeScheduleId(): string | undefined {
+    return this._timeSchedule?.id;
   }
 
   /** Creates a new triage responsibility. */
@@ -11222,6 +12742,10 @@ export class TriageResponsibilityPayload extends Request {
   public success: boolean;
   public get triageResponsibility(): LinearFetch<TriageResponsibility> | undefined {
     return new TriageResponsibilityQuery(this._request).fetch(this._triageResponsibility.id);
+  }
+  /** The ID of triageResponsibility */
+  public get triageResponsibilityId(): string | undefined {
+    return this._triageResponsibility?.id;
   }
 }
 /**
@@ -11389,6 +12913,10 @@ export class User extends Request {
   /** Organization the user belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
+  }
+  /** The ID of organization the user belongs to. */
+  public get organizationId(): string | undefined {
+    return this._organization?.id;
   }
   /** Issues assigned to the user. */
   public assignedIssues(variables?: Omit<L.User_AssignedIssuesQueryVariables, "id">) {
@@ -11568,37 +13096,73 @@ export class UserNotificationSubscription extends Request {
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
   }
+  /** The ID of contextual custom view associated with the notification subscription. */
+  public get customViewId(): string | undefined {
+    return this._customView?.id;
+  }
   /** The customer associated with the notification subscription. */
   public get customer(): LinearFetch<Customer> | undefined {
     return this._customer?.id ? new CustomerQuery(this._request).fetch(this._customer?.id) : undefined;
+  }
+  /** The ID of customer associated with the notification subscription. */
+  public get customerId(): string | undefined {
+    return this._customer?.id;
   }
   /** The contextual cycle view associated with the notification subscription. */
   public get cycle(): LinearFetch<Cycle> | undefined {
     return this._cycle?.id ? new CycleQuery(this._request).fetch(this._cycle?.id) : undefined;
   }
+  /** The ID of contextual cycle view associated with the notification subscription. */
+  public get cycleId(): string | undefined {
+    return this._cycle?.id;
+  }
   /** The contextual initiative view associated with the notification subscription. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of contextual initiative view associated with the notification subscription. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
   }
   /** The contextual label view associated with the notification subscription. */
   public get label(): LinearFetch<IssueLabel> | undefined {
     return this._label?.id ? new IssueLabelQuery(this._request).fetch(this._label?.id) : undefined;
   }
+  /** The ID of contextual label view associated with the notification subscription. */
+  public get labelId(): string | undefined {
+    return this._label?.id;
+  }
   /** The contextual project view associated with the notification subscription. */
   public get project(): LinearFetch<Project> | undefined {
     return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of contextual project view associated with the notification subscription. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
   }
   /** The user that subscribed to receive notifications. */
   public get subscriber(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._subscriber.id);
   }
+  /** The ID of user that subscribed to receive notifications. */
+  public get subscriberId(): string | undefined {
+    return this._subscriber?.id;
+  }
   /** The team associated with the notification subscription. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
   }
+  /** The ID of team associated with the notification subscription. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
+  }
   /** The user subscribed to. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user subscribed to. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -11624,6 +13188,10 @@ export class UserPayload extends Request {
   /** The user that was created or updated. */
   public get user(): LinearFetch<User> | undefined {
     return this._user?.id ? new UserQuery(this._request).fetch(this._user?.id) : undefined;
+  }
+  /** The ID of user that was created or updated. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 }
 /**
@@ -11701,6 +13269,10 @@ export class UserSettings extends Request {
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
   }
+  /** The ID of user associated with these settings. */
+  public get userId(): string | undefined {
+    return this._user?.id;
+  }
 
   /** Updates the user's settings. */
   public update(input: L.UserSettingsUpdateInput) {
@@ -11769,6 +13341,10 @@ export class UserSettingsPayload extends Request {
   /** The user's settings. */
   public get userSettings(): LinearFetch<UserSettings> {
     return new UserSettingsQuery(this._request).fetch();
+  }
+  /** The ID of user's settings. */
+  public get userSettingsId(): string | undefined {
+    return this._userSettings?.id;
   }
 }
 /**
@@ -11915,9 +13491,17 @@ export class Webhook extends Request {
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
+  /** The ID of user who created the webhook. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
   /** The team that the webhook is associated with. If null, the webhook is associated with all public teams of the organization or multiple teams. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The ID of team that the webhook is associated with. if null, the webhook is associated with all public teams of the organization or multiple teams. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
 
   /** Creates a new webhook. */
@@ -11990,6 +13574,10 @@ export class WebhookFailureEvent extends Request {
   public get webhook(): LinearFetch<Webhook> | undefined {
     return new WebhookQuery(this._request).fetch(this._webhook.id);
   }
+  /** The ID of webhook that this failure event is associated with. */
+  public get webhookId(): string | undefined {
+    return this._webhook?.id;
+  }
 }
 /**
  * WebhookPayload model
@@ -12014,6 +13602,10 @@ export class WebhookPayload extends Request {
   /** The webhook entity being mutated. */
   public get webhook(): LinearFetch<Webhook> | undefined {
     return new WebhookQuery(this._request).fetch(this._webhook.id);
+  }
+  /** The ID of webhook entity being mutated. */
+  public get webhookId(): string | undefined {
+    return this._webhook?.id;
   }
 }
 /**
@@ -12066,9 +13658,17 @@ export class WorkflowState extends Request {
   public get inheritedFrom(): LinearFetch<WorkflowState> | undefined {
     return this._inheritedFrom?.id ? new WorkflowStateQuery(this._request).fetch(this._inheritedFrom?.id) : undefined;
   }
+  /** The ID of state inherited from */
+  public get inheritedFromId(): string | undefined {
+    return this._inheritedFrom?.id;
+  }
   /** The team to which this state belongs to. */
   public get team(): LinearFetch<Team> | undefined {
     return new TeamQuery(this._request).fetch(this._team.id);
+  }
+  /** The ID of team to which this state belongs to. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
   /** Issues belonging in this state. */
   public issues(variables?: Omit<L.WorkflowState_IssuesQueryVariables, "id">) {
@@ -12110,6 +13710,10 @@ export class WorkflowStateArchivePayload extends Request {
   /** The archived/unarchived entity. Null if entity was deleted. */
   public get entity(): LinearFetch<WorkflowState> | undefined {
     return this._entity?.id ? new WorkflowStateQuery(this._request).fetch(this._entity?.id) : undefined;
+  }
+  /** The ID of archived/unarchived entity. null if entity was deleted. */
+  public get entityId(): string | undefined {
+    return this._entity?.id;
   }
 }
 /**
@@ -12156,6 +13760,10 @@ export class WorkflowStatePayload extends Request {
   /** The state that was created or updated. */
   public get workflowState(): LinearFetch<WorkflowState> | undefined {
     return new WorkflowStateQuery(this._request).fetch(this._workflowState.id);
+  }
+  /** The ID of state that was created or updated. */
+  public get workflowStateId(): string | undefined {
+    return this._workflowState?.id;
   }
 }
 /**
