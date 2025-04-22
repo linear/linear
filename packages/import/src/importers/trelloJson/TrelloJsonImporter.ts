@@ -155,13 +155,12 @@ export class TrelloJsonImporter implements Importer {
         archived: card.closed || cardList?.closed,
       });
 
-      const allLabels =
-        card.labels?.map(label => ({
-          id: label.id,
-          color: mapLabelColor(label.color),
-          // Trello allows labels with no name and only a color value, but we must specify a name
-          name: label.name || `Trello-${label.color}`,
-        })) ?? [];
+      const allLabels = card.labels?.map(label => ({
+        id: label.id,
+        color: mapLabelColor(label.color),
+        // Trello allows labels with no name and only a color value, but we must specify a name
+        name: label.name || `Trello-${label.color}`,
+      })) ?? [];
 
       for (const label of allLabels) {
         const { id, ...labelData } = label;
