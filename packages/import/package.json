@@ -20,6 +20,7 @@
   ],
   "scripts": {
     "cli": "ts-node src/cli",
+    "cli:local": "NODE_TLS_REJECT_UNAUTHORIZED=0 ts-node src/cli --local",
     "dev:import": "NODE_ENV=development yarn build:import",
     "build:import": "run-s build:clean build:rollup",
     "build:rollup": "npx rollup -c",

@@ -97,7 +97,8 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
     }
 
     if (importer) {
-      await importIssues(importAnswers.linearApiKey, importer);
+      const apiUrl = process.argv.includes("--local") ? "https://local.linear.dev:8090/graphql/" : undefined;
+      await importIssues(importAnswers.linearApiKey, importer, apiUrl);
     }
   } catch (e) {
     // Deal with the fact the chain failed

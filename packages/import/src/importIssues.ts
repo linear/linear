@@ -38,8 +38,8 @@ const defaultStateColors: Record<IssueStatus, string> = {
 /**
  * Import issues into Linear via the API.
  */
-export const importIssues = async (apiKey: string, importer: Importer): Promise<void> => {
-  const client = new LinearClient({ apiKey });
+export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: string): Promise<void> => {
+  const client = new LinearClient({ apiKey, apiUrl });
   const importData = await importer.import();
 
   const viewerQuery = await client.viewer;
@@ -47,6 +47,8 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
   let spinner = ora("Fetching teams and users").start();
 
   const allTeams = await client.paginate(client.teams, {});
+  allTeams.sort((a, b) => a.displayName.localeCompare(b.displayName));
+
   const allUsers = await client.paginate(client.users, { includeDisabled: false });
 
   spinner.stop();
@@ -75,7 +77,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
       message: "Import into team:",
       choices: async () => {
         return allTeams.map(team => ({
-          name: `[${team.key}] ${team.name}`,
+          name: `[${team.key}] ${team.displayName}`,
           value: team.id,
         }));
       },
@@ -263,7 +265,7 @@ export const importIssues = async (apiKey: string, importer: Importer): Promise<
 
     const issueAssigneeId = issue.assigneeId?.toLowerCase();
     const existingAssigneeId: Id | undefined = !!issueAssigneeId
-      ? existingUserMapByEmail[issueAssigneeId] ?? existingUserMapByName[issueAssigneeId]
+      ? (existingUserMapByEmail[issueAssigneeId] ?? existingUserMapByName[issueAssigneeId])
       : undefined;
 
     let assigneeId: Id | undefined;
