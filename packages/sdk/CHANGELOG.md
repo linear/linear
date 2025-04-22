@@ -1,5 +1,11 @@
 # Change Log
 
+## 39.1.1
+
+### Patch Changes
+
+- afa5a82: chore(deps): update dependency patch versions
+
 ## 39.1.0
 
 ### Minor Changes
