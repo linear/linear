@@ -61,6 +61,14 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
     },
   ]);
 
+  const publicFieldNames = new Set([
+    ...model.fields.scalar.map(f => f.name),
+    ...model.fields.scalarList.map(f => f.name),
+    ...model.fields.object.map(f => f.name),
+    ...model.fields.list.map(f => f.name),
+    ...model.fields.enum.map(f => f.name),
+  ]);
+
   return printLines([
     printDebug(model),
     printComment([model.node.description?.value ?? `${model.name} model`, ...args.jsdoc]),
@@ -174,30 +182,59 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             const fieldQueryArgs = (allOptional && optionalIdArg ? [optionalIdArg] : field.args)?.map(
               arg => `this._${field.name}${field.nonNull ? "" : "?"}.${arg.name}`
             );
+            const idGetterName = `${field.name}Id`;
+            const skipIdGetter = publicFieldNames.has(idGetterName);
+            const shouldGeneratePrivateField =
+              field.args.some(arg => !arg.optional) ||
+              (field.args.every(arg => arg.optional) && !!field.args.find(arg => arg.name === "id"));
 
-            if (fieldQueryArgs.length) {
+            if (shouldGeneratePrivateField) {
               const operationCall = `new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${
                 optionalIdArg ? `{${optionalIdArg.name}: ${fieldQueryArgs[0]}}` : printList(fieldQueryArgs)
               })`;
-              return printModelField(
-                field,
-                `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}${
-                  reduceNonNullType(field.query.type) ? "" : " | undefined"
-                }> | undefined {
-                  return ${
-                    field.nonNull ? operationCall : printTernary(printList(fieldQueryArgs, " && "), operationCall)
-                  }
-                }`
-              );
+              return printLines([
+                printModelField(
+                  field,
+                  `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}${
+                    reduceNonNullType(field.query.type) ? "" : " | undefined"
+                  }> | undefined {
+                    return ${
+                      field.nonNull ? operationCall : printTernary(printList(fieldQueryArgs, " && "), operationCall)
+                    }
+                  }`
+                ),
+                !skipIdGetter
+                  ? printModelField(
+                      {
+                        ...field,
+                        node: {
+                          ...field.node,
+                          description: {
+                            kind: "StringValue",
+                            value: `The ID of ${
+                              field.node.description?.value?.toLowerCase().replace(/^the\s+/i, "") || field.name
+                            }`,
+                          },
+                        },
+                      },
+                      `public get ${field.name}Id(): string | undefined {
+                    return this._${field.name}?.id
+                  }`
+                    )
+                  : undefined,
+              ]);
             } else {
-              return printModelField(
-                field,
-                `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}${
-                  reduceNonNullType(field.query.type) ? "" : " | undefined"
-                }> {
-                  return new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}()
-                }`
-              );
+              return printLines([
+                printModelField(
+                  field,
+                  `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}${
+                    reduceNonNullType(field.query.type) ? "" : " | undefined"
+                  }> {
+                    return new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}()
+                  }`
+                ),
+                // ID getter is not needed here as there's no private field _${field.name} to get the id from
+              ]);
             }
           })
         ),
