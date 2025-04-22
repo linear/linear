@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.3.0
+
+### Minor Changes
+
+- d8f3bed: Added static methods to retrieve IDs of the related entities
+
+### Patch Changes
+
+- afa5a82: chore(deps): update dependency patch versions
+
 ## 2.2.13
 
 ### Patch Changes
