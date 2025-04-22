@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.2.9
+
+### Patch Changes
+
+- afa5a82: chore(deps): update dependency patch versions
+- Updated dependencies [afa5a82]
+  - @linear/sdk@39.1.1
+
 ## 2.2.8
 
 ### Patch Changes
