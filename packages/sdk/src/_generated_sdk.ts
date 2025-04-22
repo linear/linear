@@ -608,10 +608,6 @@ export class AuditEntry extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** The ID of organization the audit log belongs to. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
-  }
 }
 /**
  * AuditEntryConnection model
@@ -1217,10 +1213,6 @@ export class CustomView extends Request {
   /** The organization of the custom view. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
-  }
-  /** The ID of organization of the custom view. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
   }
   /** The user who owns the custom view. */
   public get owner(): LinearFetch<User> | undefined {
@@ -3232,10 +3224,6 @@ export class EmailIntakeAddress extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** The ID of organization that the email address is associated with. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
-  }
   /** The team that the email address is associated with. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
@@ -3369,10 +3357,6 @@ export class Emoji extends Request {
   /** The organization that the emoji belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
-  }
-  /** The ID of organization that the emoji belongs to. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
   }
 
   /** Creates a custom emoji. */
@@ -3626,10 +3610,6 @@ export class ExternalUser extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** The ID of organization the external user belongs to. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
-  }
 }
 /**
  * ExternalUserConnection model
@@ -3706,10 +3686,6 @@ export class Facet extends Request {
   /** The owning organization. */
   public get sourceOrganization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
-  }
-  /** The ID of owning organization. */
-  public get sourceOrganizationId(): string | undefined {
-    return this._sourceOrganization?.id;
   }
   /** The owning project. */
   public get sourceProject(): LinearFetch<Project> | undefined {
@@ -4477,10 +4453,6 @@ export class Initiative extends Request {
   /** The organization of the initiative. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
-  }
-  /** The ID of organization of the initiative. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
   }
   /** The user who owns the initiative. */
   public get owner(): LinearFetch<User> | undefined {
@@ -5363,10 +5335,6 @@ export class Integration extends Request {
   /** The organization that the integration is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
-  }
-  /** The ID of organization that the integration is associated with. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
   }
   /** The team that the integration is associated with. */
   public get team(): LinearFetch<Team> | undefined {
@@ -6653,10 +6621,6 @@ export class IssueLabel extends Request {
   }
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
-  }
-  /** The ID of organization */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
   }
   /** The parent label. */
   public get parent(): LinearFetch<IssueLabel> | undefined {
@@ -8732,10 +8696,6 @@ export class OrganizationInvite extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** The ID of organization that the invite is associated with. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
-  }
 
   /** Creates a new organization invite. */
   public create(input: L.OrganizationInviteCreateInput) {
@@ -8908,10 +8868,6 @@ export class OrganizationPayload extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** The ID of organization that was created or updated. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
-  }
 }
 /**
  * OrganizationStartTrialPayload model
@@ -9019,10 +8975,6 @@ export class PaidSubscription extends Request {
   /** The organization that the subscription is associated with. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
-  }
-  /** The ID of organization that the subscription is associated with. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
   }
 }
 /**
@@ -11071,10 +11023,6 @@ export class Roadmap extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** The ID of organization of the roadmap. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
-  }
   /** The user who owns the roadmap. */
   public get owner(): LinearFetch<User> | undefined {
     return this._owner?.id ? new UserQuery(this._request).fetch(this._owner?.id) : undefined;
@@ -11778,10 +11726,6 @@ export class Team extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** The ID of organization that the team is associated with. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
-  }
   /** The workflow state into which issues are moved when a review has been requested for the PR. */
   public get reviewWorkflowState(): LinearFetch<WorkflowState> | undefined {
     return this._reviewWorkflowState?.id
@@ -12285,10 +12229,6 @@ export class Template extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
-  /** The ID of organization that the template is associated with. if null, the template is associated with a particular team. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
-  }
   /** The team that the template is associated with. If null, the template is global to the workspace. */
   public get team(): LinearFetch<Team> | undefined {
     return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
@@ -12413,10 +12353,6 @@ export class TimeSchedule extends Request {
   /** The organization of the schedule. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
-  }
-  /** The ID of organization of the schedule. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
   }
 
   /** Creates a new time schedule. */
@@ -12813,10 +12749,6 @@ export class User extends Request {
   /** Organization the user belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
-  }
-  /** The ID of organization the user belongs to. */
-  public get organizationId(): string | undefined {
-    return this._organization?.id;
   }
   /** Issues assigned to the user. */
   public assignedIssues(variables?: Omit<L.User_AssignedIssuesQueryVariables, "id">) {
@@ -13241,10 +13173,6 @@ export class UserSettingsPayload extends Request {
   /** The user's settings. */
   public get userSettings(): LinearFetch<UserSettings> {
     return new UserSettingsQuery(this._request).fetch();
-  }
-  /** The ID of user's settings. */
-  public get userSettingsId(): string | undefined {
-    return this._userSettings?.id;
   }
 }
 /**
