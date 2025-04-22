@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.3.0
+
+### Minor Changes
+
+- d8f3bed: Added static methods to retrieve IDs of the related entities
+
 ## 2.2.13
 
 ### Patch Changes
