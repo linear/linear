@@ -61,6 +61,14 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
     },
   ]);
 
+  const publicFieldNames = new Set([
+    ...model.fields.scalar.map(f => f.name),
+    ...model.fields.scalarList.map(f => f.name),
+    ...model.fields.object.map(f => f.name),
+    ...model.fields.list.map(f => f.name),
+    ...model.fields.enum.map(f => f.name),
+  ]);
+
   return printLines([
     printDebug(model),
     printComment([model.node.description?.value ?? `${model.name} model`, ...args.jsdoc]),
@@ -174,6 +182,8 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             const fieldQueryArgs = (allOptional && optionalIdArg ? [optionalIdArg] : field.args)?.map(
               arg => `this._${field.name}${field.nonNull ? "" : "?"}.${arg.name}`
             );
+            const idGetterName = `${field.name}Id`;
+            const skipIdGetter = publicFieldNames.has(idGetterName);
 
             if (fieldQueryArgs.length) {
               const operationCall = `new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${
@@ -190,21 +200,25 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                     }
                   }`
                 ),
-                printModelField(
-                  {
-                    ...field,
-                    node: {
-                      ...field.node,
-                      description: {
-                        kind: "StringValue",
-                        value: `The ID of ${field.node.description?.value?.toLowerCase().replace(/^the\s+/i, "") || field.name}`,
+                !skipIdGetter
+                  ? printModelField(
+                      {
+                        ...field,
+                        node: {
+                          ...field.node,
+                          description: {
+                            kind: "StringValue",
+                            value: `The ID of ${
+                              field.node.description?.value?.toLowerCase().replace(/^the\s+/i, "") || field.name
+                            }`,
+                          },
+                        },
                       },
-                    },
-                  },
-                  `public get ${field.name}Id(): string | undefined {
+                      `public get ${field.name}Id(): string | undefined {
                     return this._${field.name}?.id
                   }`
-                ),
+                    )
+                  : undefined,
               ]);
             } else {
               return printLines([
@@ -216,21 +230,25 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                     return new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}()
                   }`
                 ),
-                printModelField(
-                  {
-                    ...field,
-                    node: {
-                      ...field.node,
-                      description: {
-                        kind: "StringValue",
-                        value: `The ID of ${field.node.description?.value?.toLowerCase().replace(/^the\s+/i, "") || field.name}`,
+                !skipIdGetter
+                  ? printModelField(
+                      {
+                        ...field,
+                        node: {
+                          ...field.node,
+                          description: {
+                            kind: "StringValue",
+                            value: `The ID of ${
+                              field.node.description?.value?.toLowerCase().replace(/^the\s+/i, "") || field.name
+                            }`,
+                          },
+                        },
                       },
-                    },
-                  },
-                  `public get ${field.name}Id(): string | undefined {
+                      `public get ${field.name}Id(): string | undefined {
                     return this._${field.name}?.id
                   }`
-                ),
+                    )
+                  : undefined,
               ]);
             }
           })

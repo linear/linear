@@ -604,10 +604,6 @@ export class AuditEntry extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The ID of user that caused the audit entry to be created. */
-  public get actorId(): string | undefined {
-    return this._actor?.id;
-  }
   /** The organization the audit log belongs to. */
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
@@ -6339,65 +6335,33 @@ export class IssueHistory extends Request {
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
   }
-  /** The ID of actor that performed the actions. this field may be empty in the case of integrations or automations. */
-  public get actorId(): string | undefined {
-    return this._actor?.id;
-  }
   /** The linked attachment. */
   public get attachment(): LinearFetch<Attachment> | undefined {
     return this._attachment?.id ? new AttachmentQuery(this._request).fetch(this._attachment?.id) : undefined;
-  }
-  /** The ID of linked attachment. */
-  public get attachmentId(): string | undefined {
-    return this._attachment?.id;
   }
   /** The user that was unassigned from the issue. */
   public get fromAssignee(): LinearFetch<User> | undefined {
     return this._fromAssignee?.id ? new UserQuery(this._request).fetch(this._fromAssignee?.id) : undefined;
   }
-  /** The ID of user that was unassigned from the issue. */
-  public get fromAssigneeId(): string | undefined {
-    return this._fromAssignee?.id;
-  }
   /** The cycle that the issue was moved from. */
   public get fromCycle(): LinearFetch<Cycle> | undefined {
     return this._fromCycle?.id ? new CycleQuery(this._request).fetch(this._fromCycle?.id) : undefined;
-  }
-  /** The ID of cycle that the issue was moved from. */
-  public get fromCycleId(): string | undefined {
-    return this._fromCycle?.id;
   }
   /** The parent issue that the issue was moved from. */
   public get fromParent(): LinearFetch<Issue> | undefined {
     return this._fromParent?.id ? new IssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
   }
-  /** The ID of parent issue that the issue was moved from. */
-  public get fromParentId(): string | undefined {
-    return this._fromParent?.id;
-  }
   /** The project that the issue was moved from. */
   public get fromProject(): LinearFetch<Project> | undefined {
     return this._fromProject?.id ? new ProjectQuery(this._request).fetch(this._fromProject?.id) : undefined;
-  }
-  /** The ID of project that the issue was moved from. */
-  public get fromProjectId(): string | undefined {
-    return this._fromProject?.id;
   }
   /** The state that the issue was moved from. */
   public get fromState(): LinearFetch<WorkflowState> | undefined {
     return this._fromState?.id ? new WorkflowStateQuery(this._request).fetch(this._fromState?.id) : undefined;
   }
-  /** The ID of state that the issue was moved from. */
-  public get fromStateId(): string | undefined {
-    return this._fromState?.id;
-  }
   /** The team that the issue was moved from. */
   public get fromTeam(): LinearFetch<Team> | undefined {
     return this._fromTeam?.id ? new TeamQuery(this._request).fetch(this._fromTeam?.id) : undefined;
-  }
-  /** The ID of team that the issue was moved from. */
-  public get fromTeamId(): string | undefined {
-    return this._fromTeam?.id;
   }
   /** The issue that was changed. */
   public get issue(): LinearFetch<Issue> | undefined {
@@ -6411,59 +6375,31 @@ export class IssueHistory extends Request {
   public get toAssignee(): LinearFetch<User> | undefined {
     return this._toAssignee?.id ? new UserQuery(this._request).fetch(this._toAssignee?.id) : undefined;
   }
-  /** The ID of user that was assigned to the issue. */
-  public get toAssigneeId(): string | undefined {
-    return this._toAssignee?.id;
-  }
   /** The new project created from the issue. */
   public get toConvertedProject(): LinearFetch<Project> | undefined {
     return this._toConvertedProject?.id
       ? new ProjectQuery(this._request).fetch(this._toConvertedProject?.id)
       : undefined;
   }
-  /** The ID of new project created from the issue. */
-  public get toConvertedProjectId(): string | undefined {
-    return this._toConvertedProject?.id;
-  }
   /** The cycle that the issue was moved to. */
   public get toCycle(): LinearFetch<Cycle> | undefined {
     return this._toCycle?.id ? new CycleQuery(this._request).fetch(this._toCycle?.id) : undefined;
-  }
-  /** The ID of cycle that the issue was moved to. */
-  public get toCycleId(): string | undefined {
-    return this._toCycle?.id;
   }
   /** The parent issue that the issue was moved to. */
   public get toParent(): LinearFetch<Issue> | undefined {
     return this._toParent?.id ? new IssueQuery(this._request).fetch(this._toParent?.id) : undefined;
   }
-  /** The ID of parent issue that the issue was moved to. */
-  public get toParentId(): string | undefined {
-    return this._toParent?.id;
-  }
   /** The project that the issue was moved to. */
   public get toProject(): LinearFetch<Project> | undefined {
     return this._toProject?.id ? new ProjectQuery(this._request).fetch(this._toProject?.id) : undefined;
-  }
-  /** The ID of project that the issue was moved to. */
-  public get toProjectId(): string | undefined {
-    return this._toProject?.id;
   }
   /** The state that the issue was moved to. */
   public get toState(): LinearFetch<WorkflowState> | undefined {
     return this._toState?.id ? new WorkflowStateQuery(this._request).fetch(this._toState?.id) : undefined;
   }
-  /** The ID of state that the issue was moved to. */
-  public get toStateId(): string | undefined {
-    return this._toState?.id;
-  }
   /** The team that the issue was moved to. */
   public get toTeam(): LinearFetch<Team> | undefined {
     return this._toTeam?.id ? new TeamQuery(this._request).fetch(this._toTeam?.id) : undefined;
-  }
-  /** The ID of team that the issue was moved to. */
-  public get toTeamId(): string | undefined {
-    return this._toTeam?.id;
   }
 }
 /**
@@ -6900,10 +6836,6 @@ export class IssueNotification extends Request {
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
   }
-  /** The ID of comment related to the notification. */
-  public get commentId(): string | undefined {
-    return this._comment?.id;
-  }
   /** The external user that caused the notification. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
@@ -6918,17 +6850,9 @@ export class IssueNotification extends Request {
   public get issue(): LinearFetch<Issue> | undefined {
     return new IssueQuery(this._request).fetch(this._issue.id);
   }
-  /** The ID of issue related to the notification. */
-  public get issueId(): string | undefined {
-    return this._issue?.id;
-  }
   /** The parent comment related to the notification, if a notification is a reply comment notification. */
   public get parentComment(): LinearFetch<Comment> | undefined {
     return this._parentComment?.id ? new CommentQuery(this._request).fetch({ id: this._parentComment?.id }) : undefined;
-  }
-  /** The ID of parent comment related to the notification, if a notification is a reply comment notification. */
-  public get parentCommentId(): string | undefined {
-    return this._parentComment?.id;
   }
   /** The team related to the issue notification. */
   public get team(): LinearFetch<Team> | undefined {
@@ -9848,10 +9772,6 @@ export class ProjectNotification extends Request {
   public get comment(): LinearFetch<Comment> | undefined {
     return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
   }
-  /** The ID of comment related to the notification. */
-  public get commentId(): string | undefined {
-    return this._comment?.id;
-  }
   /** The document related to the notification. */
   public get document(): LinearFetch<Document> | undefined {
     return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
@@ -9892,25 +9812,13 @@ export class ProjectNotification extends Request {
   public get parentComment(): LinearFetch<Comment> | undefined {
     return this._parentComment?.id ? new CommentQuery(this._request).fetch({ id: this._parentComment?.id }) : undefined;
   }
-  /** The ID of parent comment related to the notification, if a notification is a reply comment notification. */
-  public get parentCommentId(): string | undefined {
-    return this._parentComment?.id;
-  }
   /** The project related to the notification. */
   public get project(): LinearFetch<Project> | undefined {
     return new ProjectQuery(this._request).fetch(this._project.id);
   }
-  /** The ID of project related to the notification. */
-  public get projectId(): string | undefined {
-    return this._project?.id;
-  }
   /** The project update related to the notification. */
   public get projectUpdate(): LinearFetch<ProjectUpdate> | undefined {
     return this._projectUpdate?.id ? new ProjectUpdateQuery(this._request).fetch(this._projectUpdate?.id) : undefined;
-  }
-  /** The ID of project update related to the notification. */
-  public get projectUpdateId(): string | undefined {
-    return this._projectUpdate?.id;
   }
   /** The user that received the notification. */
   public get user(): LinearFetch<User> | undefined {
@@ -11810,19 +11718,11 @@ export class Team extends Request {
       ? new TemplateQuery(this._request).fetch(this._defaultTemplateForMembers?.id)
       : undefined;
   }
-  /** The ID of default template to use for new issues created by members of the team. */
-  public get defaultTemplateForMembersId(): string | undefined {
-    return this._defaultTemplateForMembers?.id;
-  }
   /** The default template to use for new issues created by non-members of the team. */
   public get defaultTemplateForNonMembers(): LinearFetch<Template> | undefined {
     return this._defaultTemplateForNonMembers?.id
       ? new TemplateQuery(this._request).fetch(this._defaultTemplateForNonMembers?.id)
       : undefined;
-  }
-  /** The ID of default template to use for new issues created by non-members of the team. */
-  public get defaultTemplateForNonMembersId(): string | undefined {
-    return this._defaultTemplateForNonMembers?.id;
   }
   /** The workflow state into which issues are moved when a PR has been opened as draft. */
   public get draftWorkflowState(): LinearFetch<WorkflowState> | undefined {
