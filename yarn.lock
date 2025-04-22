@@ -599,14 +599,14 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@changesets/apply-release-plan@^7.0.10":
-  version "7.0.10"
-  resolved "https://registry.yarnpkg.com/@changesets/apply-release-plan/-/apply-release-plan-7.0.10.tgz#d6f64258bd8706dd57aaefcdab052b6e4ced8ec5"
-  integrity sha512-wNyeIJ3yDsVspYvHnEz1xQDq18D9ifed3lI+wxRQRK4pArUcuHgCTrHv0QRnnwjhVCQACxZ+CBih3wgOct6UXw==
+"@changesets/apply-release-plan@^7.0.12":
+  version "7.0.12"
+  resolved "https://registry.yarnpkg.com/@changesets/apply-release-plan/-/apply-release-plan-7.0.12.tgz#8413977f117fa95f6e2db6f0c35479a2eba6960a"
+  integrity sha512-EaET7As5CeuhTzvXTQCRZeBUcisoYPDDcXvgTE/2jmmypKp0RC7LxKj/yzqeh/1qFTZI7oDGFcL1PHRuQuketQ==
   dependencies:
     "@changesets/config" "^3.1.1"
     "@changesets/get-version-range-type" "^0.4.0"
-    "@changesets/git" "^3.0.2"
+    "@changesets/git" "^3.0.4"
     "@changesets/should-skip-package" "^0.1.2"
     "@changesets/types" "^6.1.0"
     "@manypkg/get-packages" "^1.1.3"
@@ -638,21 +638,21 @@
     "@changesets/types" "^6.1.0"
 
 "@changesets/cli@^2.14.1":
-  version "2.28.1"
-  resolved "https://registry.yarnpkg.com/@changesets/cli/-/cli-2.28.1.tgz#b7f27d5e2083ffc296bfe4accdd66124fa0af291"
-  integrity sha512-PiIyGRmSc6JddQJe/W1hRPjiN4VrMvb2VfQ6Uydy2punBioQrsxppyG5WafinKcW1mT0jOe/wU4k9Zy5ff21AA==
+  version "2.29.2"
+  resolved "https://registry.yarnpkg.com/@changesets/cli/-/cli-2.29.2.tgz#0d774d690ffdfa0dcc8970d3e16cb93215d3b32b"
+  integrity sha512-vwDemKjGYMOc0l6WUUTGqyAWH3AmueeyoJa1KmFRtCYiCoY5K3B68ErYpDB6H48T4lLI4czum4IEjh6ildxUeg==
   dependencies:
-    "@changesets/apply-release-plan" "^7.0.10"
+    "@changesets/apply-release-plan" "^7.0.12"
     "@changesets/assemble-release-plan" "^6.0.6"
     "@changesets/changelog-git" "^0.2.1"
     "@changesets/config" "^3.1.1"
     "@changesets/errors" "^0.2.0"
     "@changesets/get-dependents-graph" "^2.1.3"
-    "@changesets/get-release-plan" "^4.0.8"
-    "@changesets/git" "^3.0.2"
+    "@changesets/get-release-plan" "^4.0.10"
+    "@changesets/git" "^3.0.4"
     "@changesets/logger" "^0.1.1"
     "@changesets/pre" "^2.0.2"
-    "@changesets/read" "^0.6.3"
+    "@changesets/read" "^0.6.5"
     "@changesets/should-skip-package" "^0.1.2"
     "@changesets/types" "^6.1.0"
     "@changesets/write" "^0.4.0"
@@ -701,15 +701,15 @@
     picocolors "^1.1.0"
     semver "^7.5.3"
 
-"@changesets/get-release-plan@^4.0.8":
-  version "4.0.8"
-  resolved "https://registry.yarnpkg.com/@changesets/get-release-plan/-/get-release-plan-4.0.8.tgz#528ef38720e3c09aec5a3ff49c8aea8e318347ef"
-  integrity sha512-MM4mq2+DQU1ZT7nqxnpveDMTkMBLnwNX44cX7NSxlXmr7f8hO6/S2MXNiXG54uf/0nYnefv0cfy4Czf/ZL/EKQ==
+"@changesets/get-release-plan@^4.0.10":
+  version "4.0.10"
+  resolved "https://registry.yarnpkg.com/@changesets/get-release-plan/-/get-release-plan-4.0.10.tgz#2e35996232250511fdbc11085620a4f02b9bc123"
+  integrity sha512-CCJ/f3edYaA3MqoEnWvGGuZm0uMEMzNJ97z9hdUR34AOvajSwySwsIzC/bBu3+kuGDsB+cny4FljG8UBWAa7jg==
   dependencies:
     "@changesets/assemble-release-plan" "^6.0.6"
     "@changesets/config" "^3.1.1"
     "@changesets/pre" "^2.0.2"
-    "@changesets/read" "^0.6.3"
+    "@changesets/read" "^0.6.5"
     "@changesets/types" "^6.1.0"
     "@manypkg/get-packages" "^1.1.3"
 
@@ -718,10 +718,10 @@
   resolved "https://registry.yarnpkg.com/@changesets/get-version-range-type/-/get-version-range-type-0.4.0.tgz#429a90410eefef4368502c41c63413e291740bf5"
   integrity sha512-hwawtob9DryoGTpixy1D3ZXbGgJu1Rhr+ySH2PvTLHvkZuQ7sRT4oQwMh0hbqZH1weAooedEjRsbrWcGLCeyVQ==
 
-"@changesets/git@^3.0.2":
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/@changesets/git/-/git-3.0.2.tgz#669c700049dc3b8ba53f46de45f5c4b1e6ddea3b"
-  integrity sha512-r1/Kju9Y8OxRRdvna+nxpQIsMsRQn9dhhAZt94FLDeu0Hij2hnOozW8iqnHBgvu+KdnJppCveQwK4odwfw/aWQ==
+"@changesets/git@^3.0.4":
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/@changesets/git/-/git-3.0.4.tgz#75e3811ab407ec010beb51131ceb5c6b3975c914"
+  integrity sha512-BXANzRFkX+XcC1q/d27NKvlJ1yf7PSAgi8JG6dt8EfbHFHi4neau7mufcSca5zRhwOL8j9s6EqsxmT+s+/E6Sw==
   dependencies:
     "@changesets/errors" "^0.2.0"
     "@manypkg/get-packages" "^1.1.3"
@@ -754,12 +754,12 @@
     "@manypkg/get-packages" "^1.1.3"
     fs-extra "^7.0.1"
 
-"@changesets/read@^0.6.3":
-  version "0.6.3"
-  resolved "https://registry.yarnpkg.com/@changesets/read/-/read-0.6.3.tgz#3760ec591fa8eb4452e73c846d20fc54ebe24fba"
-  integrity sha512-9H4p/OuJ3jXEUTjaVGdQEhBdqoT2cO5Ts95JTFsQyawmKzpL8FnIeJSyhTDPW1MBRDnwZlHFEM9SpPwJDY5wIg==
+"@changesets/read@^0.6.5":
+  version "0.6.5"
+  resolved "https://registry.yarnpkg.com/@changesets/read/-/read-0.6.5.tgz#7a68457e6356d3df187aa18e388f1b8dba3d2156"
+  integrity sha512-UPzNGhsSjHD3Veb0xO/MwvasGe8eMyNrR/sT9gR8Q3DhOQZirgKhhXv/8hVsI0QpPjR004Z9iFxoJU6in3uGMg==
   dependencies:
-    "@changesets/git" "^3.0.2"
+    "@changesets/git" "^3.0.4"
     "@changesets/logger" "^0.1.1"
     "@changesets/parse" "^0.4.1"
     "@changesets/types" "^6.1.0"
@@ -2611,9 +2611,9 @@
     form-data "^4.0.0"
 
 "@types/node@*":
-  version "22.14.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.14.0.tgz#d3bfa3936fef0dbacd79ea3eb17d521c628bb47e"
-  integrity sha512-Kmpl+z84ILoG+3T/zQFyAJsU6EPTmOCj8/2+83fSN6djd6I4o7uOuGIH6vq3PrjY5BGitSbFuMN18j3iknubbA==
+  version "22.14.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.14.1.tgz#53b54585cec81c21eee3697521e31312d6ca1e6f"
+  integrity sha512-u0HuPQwe/dHrItgHHpmw3N2fYCR6x4ivMNbPHRkBVP4CvN+kiRrKHWk3i8tXiO/joPwXLMYvF9TTF0eqgHIuOw==
   dependencies:
     undici-types "~6.21.0"
 
@@ -2665,9 +2665,9 @@
   integrity sha512-8TV6R3h2j7a91c+1DXdJi3Syo69zzIZbz7Lg5tORM5LEJG7X/E6a1V3drRyBRZq7/utz7A+c4OgYLiLcYGHG6w==
 
 "@types/react@*":
-  version "19.1.0"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-19.1.0.tgz#73c43ad9bc43496ca8184332b111e2aef63fc9da"
-  integrity sha512-UaicktuQI+9UKyA4njtDOGBD/67t8YEBt2xdfqu8+gP9hqPUPsiXlNPcpS2gVdjmis5GKPG3fCxbQLVgxsQZ8w==
+  version "19.1.2"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-19.1.2.tgz#11df86f66f188f212c90ecb537327ec68bfd593f"
+  integrity sha512-oxLPMytKchWGbnQM9O7D67uPa9paTNxO7jVoNMXgkkErULBPhPARCfkKL9ytcIJJRGjbsVwW4ugJzyFFvm/Tiw==
   dependencies:
     csstype "^3.0.2"
 
@@ -3709,9 +3709,9 @@ camelcase@^6.0.0:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001688:
-  version "1.0.30001712"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001712.tgz#41ee150f12de11b5f57c5889d4f30deb451deedf"
-  integrity sha512-MBqPpGYYdQ7/hfKiet9SCI+nmN5/hp4ZzveOJubl5DTAMa5oggjAuoi0Z4onBpKPFI2ePGnQuQIzF3VxDjDJig==
+  version "1.0.30001715"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001715.tgz#bd325a37ad366e3fe90827d74062807a34fbaeb2"
+  integrity sha512-7ptkFGMm2OAOgvZpwgA4yjQ5SQbrNVGdRjzH0pBdy1Fasvcr+KAeECmbCAECzTuDuoX0FCY8KzUxjf9+9kfZEw==
 
 capital-case@^1.0.4:
   version "1.0.4"
@@ -4815,9 +4815,9 @@ dotenv-expand@~10.0.0:
   integrity sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==
 
 dotenv@^16.3.1:
-  version "16.4.7"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.4.7.tgz#0e20c5b82950140aa99be360a8a5f52335f53c26"
-  integrity sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==
+  version "16.5.0"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.5.0.tgz#092b49f25f808f020050051d1ff258e404c78692"
+  integrity sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==
 
 dotenv@^8.2.0:
   version "8.6.0"
@@ -4873,9 +4873,9 @@ ejs@^3.1.7:
     jake "^10.8.5"
 
 electron-to-chromium@^1.5.73:
-  version "1.5.135"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.135.tgz#6d835020fa0c7f02f30d7608c2f3c0a764236699"
-  integrity sha512-8gXUdEmvb+WCaYUhA0Svr08uSeRjM2w3x5uHOc1QbaEVzJXB8rgm5eptieXzyKoVEtinLvW6MtTcurA65PeS1Q==
+  version "1.5.140"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.140.tgz#91d9279fe72963f22c5784cc7f3461b5fed34786"
+  integrity sha512-o82Rj+ONp4Ip7Cl1r7lrqx/pXhbp/lh9DpKcMNscFJdh8ebyRofnc7Sh01B4jx403RI0oqTBvlZ7OBIZLMr2+Q==
 
 elegant-spinner@^1.0.1:
   version "1.0.1"
@@ -10035,9 +10035,9 @@ parse-json@^5.0.0, parse-json@^5.2.0:
     lines-and-columns "^1.1.6"
 
 parse-path@^7.0.0:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/parse-path/-/parse-path-7.0.1.tgz#ae548cd36315fd8881a3610eae99fa08123ee0e2"
-  integrity sha512-6ReLMptznuuOEzLoGEa+I1oWRSj2Zna5jLWC+l6zlfAI4dbbSaIES29ThzuPkbhNahT65dWzfoZEO6cfJw2Ksg==
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/parse-path/-/parse-path-7.1.0.tgz#41fb513cb122831807a4c7b29c8727947a09d8c6"
+  integrity sha512-EuCycjZtfPcjWk7KTksnJ5xPMvWGA/6i4zrLYhRG0hGvC3GPU/jGUj3Cy+ZR0v30duV3e23R95T1lE2+lsndSw==
   dependencies:
     protocols "^2.0.0"
 
