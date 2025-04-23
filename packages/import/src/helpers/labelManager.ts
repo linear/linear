@@ -117,7 +117,7 @@ const handleIssueLabels = async (
       if (!actualLabelId) {
         // Check for naming conflicts
         const existingLabel = manager.getLabelByName(labelName, teamId);
-        const newLabelName = existingLabel ? `${labelName} (imported)` : labelName;
+        const newLabelName = existingLabel ? renameConflictingLabel(labelName) : labelName;
 
         actualLabelId = await createLabel(client, {
           name: newLabelName,
@@ -143,7 +143,7 @@ const handleIssueLabels = async (
 
     // Check for conflicts with existing group labels
     if (manager.getGroupLabel({ name: labelName })) {
-      rootLabelName = `${labelName} (imported)`;
+      rootLabelName = renameConflictingLabel(labelName);
     }
 
     // Check for existing root label
@@ -159,6 +159,8 @@ const handleIssueLabels = async (
     labelMapping[labelId] = { type: "root", id: actualLabelId, existedBeforeImport: rootLabel?.existedBeforeImport };
   }
 };
+
+const renameConflictingLabel = (labelName: string) => `${labelName} (imported)`;
 
 function parseLabelName(fullName: string): [string | undefined, string] {
   // Ensure every part is truncated to 80 characters
@@ -321,9 +323,17 @@ const createLabel = async (
     teamId: Id;
   }
 ) => {
-  const response = await client.createIssueLabel({ name, description, color, teamId, parentId });
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return (await response?.issueLabel)!.id;
+  try {
+    const response = await client.createIssueLabel({ name, description, color, teamId, parentId });
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return (await response?.issueLabel)!.id;
+  } catch {
+    // If the label failed to create it's likely it's a name conflict, in which case we try one more time with a new name
+    const newName = renameConflictingLabel(name);
+    const response = await client.createIssueLabel({ name: newName, description, color, teamId, parentId });
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return (await response?.issueLabel)!.id;
+  }
 };
 
 const deleteLabel = async (client: LinearClient, labelId: Id) => {

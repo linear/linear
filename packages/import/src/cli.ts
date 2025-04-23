@@ -97,7 +97,9 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
     }
 
     if (importer) {
-      await importIssues(importAnswers.linearApiKey, importer);
+      const apiUrlIndex = process.argv.indexOf("--apiUrl");
+      const apiUrl = apiUrlIndex > -1 ? process.argv[apiUrlIndex + 1] : undefined;
+      await importIssues(importAnswers.linearApiKey, importer, apiUrl);
     }
   } catch (e) {
     // Deal with the fact the chain failed
