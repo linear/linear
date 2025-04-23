@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.10
+
+### Patch Changes
+
+- ebe4595: Handle multiple checklists for single Trello card
+
 ## 2.2.9
 
 ### Patch Changes
