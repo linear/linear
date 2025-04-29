@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.11
+
+### Patch Changes
+
+- 0320fae: Any label group that is created needs to set isGroup: true during creation.
+
 ## 2.2.10
 
 ### Patch Changes
