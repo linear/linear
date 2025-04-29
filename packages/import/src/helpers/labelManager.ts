@@ -1,6 +1,6 @@
 import { IssueLabel, LinearClient } from "@linear/sdk";
-import { ImportResult } from "../types";
 import _ from "lodash";
+import { ImportResult } from "../types";
 
 type Id = string;
 const WORKSPACE_ID = "workspace";
@@ -68,7 +68,7 @@ const handleIssueLabels = async (
       }
 
       if (!actualLabelId) {
-        actualLabelId = await createLabel(client, { name: fullName, teamId });
+        actualLabelId = await createLabel(client, { name: fullName, teamId, isGroup: false });
         const newRootLabel = new Label(actualLabelId, fullName);
         manager.addLabel({ label: newRootLabel, teamId });
       }
@@ -95,12 +95,12 @@ const handleIssueLabels = async (
         if (rootLabelConflict) {
           // Create the group label with a modified name
           const groupName = `${group} (imported)`;
-          const groupId = await createLabel(client, { name: groupName, teamId });
+          const groupId = await createLabel(client, { name: groupName, teamId, isGroup: true });
           groupLabel = new GroupLabel(groupId, groupName);
           manager.addLabel({ label: groupLabel, teamId });
         } else {
           // Create new group label
-          const groupId = await createLabel(client, { name: group, teamId });
+          const groupId = await createLabel(client, { name: group, teamId, isGroup: true });
           groupLabel = new GroupLabel(groupId, group);
           manager.addLabel({ label: groupLabel, teamId });
         }
@@ -123,6 +123,7 @@ const handleIssueLabels = async (
           name: newLabelName,
           parentId: groupLabel.id,
           teamId,
+          isGroup: false,
         });
 
         const subgroupLabel = new SubgroupLabel(actualLabelId, newLabelName);
@@ -151,7 +152,7 @@ const handleIssueLabels = async (
     actualLabelId = rootLabel?.id;
 
     if (!actualLabelId) {
-      actualLabelId = await createLabel(client, { name: rootLabelName, teamId });
+      actualLabelId = await createLabel(client, { name: rootLabelName, teamId, isGroup: false });
       const newRootLabel = new Label(actualLabelId, rootLabelName);
       manager.addLabel({ label: newRootLabel, teamId });
     }
@@ -311,12 +312,14 @@ const createLabel = async (
   client: LinearClient,
   {
     name,
+    isGroup,
     description,
     color,
     parentId,
     teamId,
   }: {
     name: string;
+    isGroup: boolean;
     description?: string;
     color?: string;
     parentId?: Id;
@@ -324,13 +327,13 @@ const createLabel = async (
   }
 ) => {
   try {
-    const response = await client.createIssueLabel({ name, description, color, teamId, parentId });
+    const response = await client.createIssueLabel({ name, description, color, teamId, parentId, isGroup });
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return (await response?.issueLabel)!.id;
   } catch {
     // If the label failed to create it's likely it's a name conflict, in which case we try one more time with a new name
     const newName = renameConflictingLabel(name);
-    const response = await client.createIssueLabel({ name: newName, description, color, teamId, parentId });
+    const response = await client.createIssueLabel({ name: newName, description, color, teamId, parentId, isGroup });
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return (await response?.issueLabel)!.id;
   }
