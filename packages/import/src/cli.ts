@@ -5,13 +5,14 @@ import * as inquirer from "inquirer";
 import { importIssues } from "./importIssues";
 import { asanaCsvImport } from "./importers/asanaCsv";
 import { githubImport } from "./importers/github";
+import { gitlabCsvImporter } from "./importers/gitlabCsv";
+import { heightImport } from "./importers/height";
 import { jiraCsvImport } from "./importers/jiraCsv";
 import { linearCsvImporter } from "./importers/linearCsv";
 import { pivotalCsvImport } from "./importers/pivotalCsv";
 import { shortcutCsvImport } from "./importers/shortcutCsv";
 import { trelloJsonImport } from "./importers/trelloJson";
 import { ImportAnswers } from "./types";
-import { gitlabCsvImporter } from "./importers/gitlabCsv";
 
 inquirer.registerPrompt("filePath", require("inquirer-file-path"));
 
@@ -57,6 +58,10 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
             value: "trelloJson",
           },
           {
+            name: "Height",
+            value: "height",
+          },
+          {
             name: "Linear (CSV export)",
             value: "linearCsv",
           },
@@ -87,6 +92,9 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
         break;
       case "trelloJson":
         importer = await trelloJsonImport();
+        break;
+      case "height":
+        importer = await heightImport();
         break;
       case "linearCsv":
         importer = await linearCsvImporter();
