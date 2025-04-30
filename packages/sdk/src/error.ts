@@ -119,6 +119,39 @@ export class InvalidInputLinearError extends LinearError {
 export class RatelimitedLinearError extends LinearError {
   public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
     super(error, errors, LinearErrorType.Ratelimited);
+
+    const headers = error?.response?.headers;
+    this.retryAfter = this.parseNumber(headers?.get("retry-after"));
+    this.requestsLimit = this.parseNumber(headers?.get("x-ratelimit-requests-limit"));
+    this.requestsRemaining = this.parseNumber(headers?.get("x-ratelimit-requests-remaining"));
+    this.requestsResetAt = this.parseNumber(headers?.get("x-ratelimit-requests-reset"));
+    this.complexityLimit = this.parseNumber(headers?.get("x-ratelimit-complexity-limit"));
+    this.complexityRemaining = this.parseNumber(headers?.get("x-ratelimit-complexity-remaining"));
+    this.complexityResetAt = this.parseNumber(headers?.get("x-ratelimit-complexity-reset"));
+  }
+
+  /** How long, in seconds, the user agent should wait before making a follow-up request. */
+  public retryAfter: number | undefined;
+
+  /** The max amount of requests allowed in the duration. */
+  public requestsLimit: number | undefined;
+  /** The remaining requests before rate limiting kicks in. */
+  public requestsRemaining: number | undefined;
+  /** Unix timestamp at which the requests will be reset. */
+  public requestsResetAt: number | undefined;
+
+  /** The max amount of complexity allowed in the duration. */
+  public complexityLimit: number | undefined;
+  /** The remaining complexity before rate limiting kicks in. */
+  public complexityRemaining: number | undefined;
+  /** Unix timestamp at which the complexity will be reset. */
+  public complexityResetAt: number | undefined;
+
+  private parseNumber(value: string | undefined | null): number | undefined {
+    if (value === undefined || value === null || value === "") {
+      return undefined;
+    }
+    return Number(value) ?? undefined;
   }
 }
 
