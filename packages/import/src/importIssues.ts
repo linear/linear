@@ -1,14 +1,14 @@
 /* eslint-disable no-console */
 import { LinearClient } from "@linear/sdk";
-import { format } from "date-fns";
 import chalk from "chalk";
+import { Presets, SingleBar } from "cli-progress";
+import { format } from "date-fns";
 import * as inquirer from "inquirer";
 import { uniq } from "lodash";
+import ora from "ora";
+import { handleLabels } from "./helpers/labelManager";
 import { Comment, Importer, ImportResult } from "./types";
 import { replaceImagesInMarkdown } from "./utils/replaceImages";
-import { handleLabels } from "./helpers/labelManager";
-import { Presets, SingleBar } from "cli-progress";
-import ora from "ora";
 
 type Id = string;
 
@@ -279,27 +279,32 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
 
     const formattedDueDate = issue.dueDate ? format(issue.dueDate, "yyyy-MM-dd") : undefined;
 
-    const createdIssue = await createIssueWithRetries(client, {
-      teamId,
-      projectId: projectId as unknown as string,
-      title: issue.title,
-      description,
-      priority: issue.priority,
-      labelIds,
-      stateId,
-      assigneeId,
-      createdAt: issue.createdAt,
-      completedAt: issue.completedAt,
-      dueDate: formattedDueDate,
-      estimate: issue.estimate,
-    });
+    try {
+      const createdIssue = await createIssueWithRetries(client, {
+        teamId,
+        projectId: projectId as unknown as string,
+        title: issue.title,
+        description,
+        priority: issue.priority,
+        labelIds,
+        stateId,
+        assigneeId,
+        createdAt: issue.createdAt,
+        completedAt: issue.completedAt,
+        dueDate: formattedDueDate,
+        estimate: issue.estimate,
+      });
 
-    if (issue.archived) {
-      await (await createdIssue.issue)?.archive();
+      if (issue.archived) {
+        await (await createdIssue.issue)?.archive();
+      }
+
+      issueCursor++;
+      issuesProgressBar.update(issueCursor);
+    } catch (error) {
+      issuesProgressBar.stop();
+      throw error;
     }
-
-    issueCursor++;
-    issuesProgressBar.update(issueCursor);
   }
 
   issuesProgressBar.stop();

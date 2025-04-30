@@ -53,6 +53,7 @@ export enum LinearErrorType {
   "UserError" = "UserError",
   "GraphqlError" = "GraphqlError",
   "LockTimeout" = "LockTimeout",
+  "UsageLimitExceeded" = "UsageLimitExceeded",
 }
 
 /**

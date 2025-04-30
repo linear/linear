@@ -5,13 +5,13 @@ import * as inquirer from "inquirer";
 import { importIssues } from "./importIssues";
 import { asanaCsvImport } from "./importers/asanaCsv";
 import { githubImport } from "./importers/github";
+import { gitlabCsvImporter } from "./importers/gitlabCsv";
 import { jiraCsvImport } from "./importers/jiraCsv";
 import { linearCsvImporter } from "./importers/linearCsv";
 import { pivotalCsvImport } from "./importers/pivotalCsv";
 import { shortcutCsvImport } from "./importers/shortcutCsv";
 import { trelloJsonImport } from "./importers/trelloJson";
 import { ImportAnswers } from "./types";
-import { gitlabCsvImporter } from "./importers/gitlabCsv";
 
 inquirer.registerPrompt("filePath", require("inquirer-file-path"));
 
@@ -101,8 +101,14 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
       const apiUrl = apiUrlIndex > -1 ? process.argv[apiUrlIndex + 1] : undefined;
       await importIssues(importAnswers.linearApiKey, importer, apiUrl);
     }
-  } catch (e) {
-    // Deal with the fact the chain failed
-    console.error(e);
+  } catch (error) {
+    const userFriendlyMessage = error.errors?.[0]?.message;
+    if (error.type !== "UsageLimitExceeded") {
+      // Don't log the when the usage limit is exceeded as we already know the cause.
+      console.error(error);
+    }
+    if (userFriendlyMessage) {
+      console.log(chalk.red(userFriendlyMessage));
+    }
   }
 })();
