@@ -1,5 +1,11 @@
 # Change Log
 
+## 39.2.0
+
+### Minor Changes
+
+- d1175c1: Populating ratelimit results on rate limited error
+
 ## 39.1.1
 
 ### Patch Changes
