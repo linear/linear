@@ -104,7 +104,7 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
   } catch (error) {
     const userFriendlyMessage = error.errors?.[0]?.message;
     if (error.type !== "UsageLimitExceeded") {
-      // Don't log the when the usage limit is exceeded as we already know the cause.
+      // Don't log when the usage limit is exceeded as we already know the cause.
       console.error(error);
     }
     if (userFriendlyMessage) {
