@@ -18,6 +18,7 @@ const errorMap: Record<LinearErrorType, string> = {
   [LinearErrorType.UserError]: "user error",
   [LinearErrorType.GraphqlError]: "graphql error",
   [LinearErrorType.LockTimeout]: "lock timeout",
+  [LinearErrorType.UsageLimitExceeded]: "usage limit exceeded",
 };
 
 /**
@@ -215,6 +216,12 @@ export class LockTimeoutLinearError extends LinearError {
   }
 }
 
+export class UsageLimitExceededLinearError extends LinearError {
+  public constructor(error?: LinearErrorRaw, errors?: LinearGraphQLError[]) {
+    super(error, errors, LinearErrorType.UsageLimitExceeded);
+  }
+}
+
 /**
  * A map between the Linear error type and the LinearError class
  */
@@ -232,6 +239,7 @@ const errorConstructorMap: Record<LinearErrorType, typeof LinearError> = {
   [LinearErrorType.UserError]: UserLinearError,
   [LinearErrorType.GraphqlError]: GraphqlLinearError,
   [LinearErrorType.LockTimeout]: LockTimeoutLinearError,
+  [LinearErrorType.UsageLimitExceeded]: UsageLimitExceededLinearError,
 };
 
 export function parseLinearError(error?: LinearErrorRaw | LinearError): LinearError {
