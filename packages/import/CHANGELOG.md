@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.2.12
+
+### Patch Changes
+
+- b8d5351: feat: gracefully handle usage limit
+- Updated dependencies [b8d5351]
+  - @linear/sdk@39.2.1
+
 ## 2.2.11
 
 ### Patch Changes
