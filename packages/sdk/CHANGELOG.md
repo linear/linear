@@ -1,5 +1,11 @@
 # Change Log
 
+## 39.2.1
+
+### Patch Changes
+
+- b8d5351: feat: gracefully handle usage limit
+
 ## 39.2.0
 
 ### Minor Changes
