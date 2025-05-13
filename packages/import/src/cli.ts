@@ -10,6 +10,7 @@ import { jiraCsvImport } from "./importers/jiraCsv";
 import { linearCsvImporter } from "./importers/linearCsv";
 import { pivotalCsvImport } from "./importers/pivotalCsv";
 import { shortcutCsvImport } from "./importers/shortcutCsv";
+import { todoistCsvImport } from "./importers/todoistCsv";
 import { trelloJsonImport } from "./importers/trelloJson";
 import { ImportAnswers } from "./types";
 
@@ -60,6 +61,10 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
             name: "Linear (CSV export)",
             value: "linearCsv",
           },
+          {
+            name: "Todoist (CSV export)",
+            value: "todoistCsv",
+          },
         ],
       },
     ]);
@@ -90,6 +95,9 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
         break;
       case "linearCsv":
         importer = await linearCsvImporter();
+        break;
+      case "todoistCsv":
+        importer = await todoistCsvImport();
         break;
       default:
         console.log(chalk.red(`Invalid importer`));
