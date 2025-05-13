@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.3.2
+
+### Patch Changes
+
+- 59123ce: chore(deps): update dependency patch versions
+
 ## 2.3.1
 
 ### Patch Changes
