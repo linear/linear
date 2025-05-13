@@ -76,7 +76,7 @@ export default [
     plugins: nodePlugins,
   },
   {
-    input: "src/index.ts",
+    input: "src/index_umd.ts",
     output: [
       {
         dir: "./",
@@ -91,7 +91,7 @@ export default [
     plugins: [...browserPlugins, ...minPlugins],
   },
   {
-    input: "src/index.ts",
+    input: "src/index_umd.ts",
     output: [
       {
         dir: "./",
