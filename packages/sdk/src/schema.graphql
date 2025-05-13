@@ -241,7 +241,7 @@ type ArchiveResponse {
   """
   Whether the dependencies for the model objects are included in the archive.
   """
-  includesDependencies: Boolean!
+  includesDependencies: [String!]!
   """
   The total number of entities in the archive.
   """
@@ -293,6 +293,10 @@ type Attachment implements Node {
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
+  """
+  The body data of the attachment, if any.
+  """
+  bodyData: String
   """
   The time at which the entity was created.
   """
@@ -1110,9 +1114,9 @@ type Comment implements Node {
   """
   resolvingUser: User
   """
-  [Internal] Summary for comment thread.
+  [Internal] A generated summary of the comment thread.
   """
-  summaryText: String
+  threadSummary: JSONObject
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -1553,6 +1557,10 @@ type CustomView implements Node {
   """
   description: String
   """
+  The filter applied to feed items in the custom view.
+  """
+  feedItemFilterData: JSONObject
+  """
   The filter applied to issues in the custom view.
   """
   filterData: JSONObject!
@@ -1708,6 +1716,10 @@ input CustomViewCreateInput {
   The description of the custom view.
   """
   description: String
+  """
+  The feed item filter applied to issues in the custom view.
+  """
+  feedItemFilterData: FeedItemFilter
   """
   The filter applied to issues in the custom view.
   """
@@ -1880,6 +1892,10 @@ input CustomViewUpdateInput {
   """
   description: String
   """
+  The feed item filter applied to issues in the custom view.
+  """
+  feedItemFilterData: FeedItemFilter
+  """
   The filter applied to issues in the custom view.
   """
   filterData: IssueFilter
@@ -1953,6 +1969,10 @@ type Customer implements Node {
   The customer's logo URL.
   """
   logoUrl: String
+  """
+  The ID of the main source, when a customer has multiple sources. Must be one of externalIds.
+  """
+  mainSourceId: String
   """
   The customer's name.
   """
@@ -2029,6 +2049,10 @@ input CustomerCreateInput {
   The URL of the customer's logo.
   """
   logoUrl: String
+  """
+  The main source of the customer, for customers with multiple sources. Must be one of externalIds.
+  """
+  mainSourceId: String
   """
   The name of the customer.
   """
@@ -2563,6 +2587,10 @@ type CustomerNeedPayload {
 
 input CustomerNeedUpdateInput {
   """
+  Whether to also update the priority of needs from the same customer on the same issue/project.
+  """
+  applyPriorityToRelatedNeeds: Boolean
+  """
   Optional URL for the attachment associated with the customer need.
   """
   attachmentUrl: String
@@ -3058,6 +3086,10 @@ input CustomerUpdateInput {
   The URL of the customer's logo.
   """
   logoUrl: String
+  """
+  The main source of the customer, for customers with multiple sources. Must be one of externalIds.
+  """
+  mainSourceId: String
   """
   The name of the customer.
   """
@@ -4580,6 +4612,11 @@ input DueDateSort {
 }
 
 """
+Represents a duration in ISO 8601 format. Accepts ISO 8601 duration strings or integers in milliseconds.
+"""
+scalar Duration
+
+"""
 An email address that can be used for submitting issues.
 """
 type EmailIntakeAddress implements Node {
@@ -4600,6 +4637,10 @@ type EmailIntakeAddress implements Node {
   """
   creator: User
   """
+  Whether issues created from that email address will be turned into customer requests.
+  """
+  customerRequestsEnabled: Boolean!
+  """
   Whether the email address is enabled.
   """
   enabled: Boolean!
@@ -4611,6 +4652,10 @@ type EmailIntakeAddress implements Node {
   The organization that the email address is associated with.
   """
   organization: Organization!
+  """
+  Whether email replies are enabled.
+  """
+  repliesEnabled: Boolean!
   """
   The team that the email address is associated with.
   """
@@ -4658,9 +4703,17 @@ type EmailIntakeAddressPayload {
 
 input EmailIntakeAddressUpdateInput {
   """
+  Whether customer requests are enabled.
+  """
+  customerRequestsEnabled: Boolean
+  """
   Whether the email address is currently enabled. If set to false, the email address will be disabled and no longer accept incoming emails.
   """
-  enabled: Boolean!
+  enabled: Boolean
+  """
+  Whether email replies are enabled.
+  """
+  repliesEnabled: Boolean
 }
 
 input EmailUnsubscribeInput {
@@ -5101,6 +5154,10 @@ type Facet implements Node {
   """
   sortOrder: Float!
   """
+  The owning feed user.
+  """
+  sourceFeedUser: User
+  """
   The owning initiative.
   """
   sourceInitiative: Initiative
@@ -5132,6 +5189,7 @@ type Facet implements Node {
 }
 
 enum FacetPageSource {
+  feed
   projects
   teamIssues
 }
@@ -5421,6 +5479,56 @@ input FavoriteUpdateInput {
   The position of the item in the favorites list.
   """
   sortOrder: Float
+}
+
+"""
+Feed item filtering options
+"""
+input FeedItemFilter {
+  """
+  Compound filters, all of which need to be matched by the feed item.
+  """
+  and: [FeedItemFilter!]
+  """
+  Filters that the feed item author must satisfy.
+  """
+  author: UserFilter
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the feed item.
+  """
+  or: [FeedItemFilter!]
+  """
+  Filters that the feed item's project update must satisfy.
+  """
+  projectUpdate: ProjectUpdateFilter
+  """
+  Filters that the related feed item initiatives must satisfy.
+  """
+  relatedInitiatives: InitiativeCollectionFilter
+  """
+  Filters that the related feed item team must satisfy.
+  """
+  relatedTeams: TeamCollectionFilter
+  """
+  Comparator for the project or initiative update health: onTrack, atRisk, offTrack
+  """
+  updateHealth: StringComparator
+  """
+  Comparator for the update type: initiative, project
+  """
+  updateType: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 """
@@ -5905,10 +6013,53 @@ enum GithubOrgType {
   user
 }
 
+input GoogleSheetsExportSettings {
+  """
+  Whether the export is enabled.
+  """
+  enabled: Boolean
+  """
+  The ID of the target sheet (tab) within the Google Sheet.
+  """
+  sheetId: Float
+  """
+  The ID of the exported Google Sheet.
+  """
+  spreadsheetId: String
+  """
+  The URL of the exported Google Sheet.
+  """
+  spreadsheetUrl: String
+  """
+  The date of the most recent export.
+  """
+  updatedAt: DateTime
+}
+
 input GoogleSheetsSettingsInput {
-  sheetId: Float!
-  spreadsheetId: String!
-  spreadsheetUrl: String!
+  """
+  The export settings for issues.
+  """
+  issue: GoogleSheetsExportSettings
+  """
+  The export settings for projects.
+  """
+  project: GoogleSheetsExportSettings
+  """
+  [Deprecated] The ID of the target sheet (tab) within the Google Sheet.
+  """
+  sheetId: Float
+  """
+  [Deprecated] The ID of the exported Google Sheet.
+  """
+  spreadsheetId: String
+  """
+  [Deprecated] The URL of the exported Google Sheet.
+  """
+  spreadsheetUrl: String
+  """
+  [Deprecated] The date of the most recent export.
+  """
   updatedIssuesAt: DateTime
 }
 
@@ -6224,6 +6375,10 @@ Initiative collection filtering options.
 """
 input InitiativeCollectionFilter {
   """
+  Filters that the initiative must be an ancestor of.
+  """
+  ancestors: InitiativeCollectionFilter
+  """
   Compound filters, all of which need to be matched by the initiative.
   """
   and: [InitiativeCollectionFilter!]
@@ -6263,6 +6418,10 @@ input InitiativeCollectionFilter {
   Compound filters, one of which need to be matched by the initiative.
   """
   or: [InitiativeCollectionFilter!]
+  """
+  Filters that the initiative owner must satisfy.
+  """
+  owner: UserFilter
   """
   Comparator for the initiative slug ID.
   """
@@ -6350,6 +6509,10 @@ Initiative filtering options.
 """
 input InitiativeFilter {
   """
+  Filters that the initiative must be an ancestor of.
+  """
+  ancestors: InitiativeCollectionFilter
+  """
   Compound filters, all of which need to be matched by the initiative.
   """
   and: [InitiativeFilter!]
@@ -6381,6 +6544,10 @@ input InitiativeFilter {
   Compound filters, one of which need to be matched by the initiative.
   """
   or: [InitiativeFilter!]
+  """
+  Filters that the initiative owner must satisfy.
+  """
+  owner: UserFilter
   """
   Comparator for the initiative slug ID.
   """
@@ -8220,6 +8387,10 @@ type Issue implements Node {
     orderBy: PaginationOrderBy
   ): UserConnection!
   """
+  [Internal] The time at which the most recent suggestions for this issue were generated.
+  """
+  suggestionsGeneratedAt: DateTime
+  """
   The team that the issue is associated with.
   """
   team: Team!
@@ -8299,6 +8470,10 @@ input IssueCollectionFilter {
   """
   addedToCyclePeriod: CyclePeriodComparator
   """
+  [Internal] Age (created -> now) comparator, defined if the issue is still open.
+  """
+  ageTime: NullableDurationComparator
+  """
   Compound filters, all of which need to be matched by the issue.
   """
   and: [IssueCollectionFilter!]
@@ -8355,6 +8530,10 @@ input IssueCollectionFilter {
   """
   cycle: NullableCycleFilter
   """
+  [Internal] Cycle time (started -> completed) comparator.
+  """
+  cycleTime: NullableDurationComparator
+  """
   Comparator for the issues description.
   """
   description: NullableStringComparator
@@ -8398,6 +8577,10 @@ input IssueCollectionFilter {
   Filters that the last applied template must satisfy.
   """
   lastAppliedTemplate: NullableTemplateFilter
+  """
+  [Internal] Lead time (created -> completed) comparator.
+  """
+  leadTime: NullableDurationComparator
   """
   Comparator for the collection length.
   """
@@ -8482,6 +8665,10 @@ input IssueCollectionFilter {
   Comparator for the issues title.
   """
   title: StringComparator
+  """
+  [Internal] Triage time (entered triaged -> triaged) comparator.
+  """
+  triageTime: NullableDurationComparator
   """
   Comparator for the issues triaged at date.
   """
@@ -8583,6 +8770,10 @@ input IssueCreateInput {
   [Internal] The timestamp at which an issue will be considered in breach of SLA.
   """
   slaBreachesAt: DateTime
+  """
+  [Internal] The timestamp at which the issue's SLA was started.
+  """
+  slaStartedAt: DateTime
   """
   The SLA day count type for the issue. Whether SLA should be business days only or calendar days (default).
   """
@@ -8779,6 +8970,10 @@ input IssueFilter {
   """
   addedToCyclePeriod: CyclePeriodComparator
   """
+  [Internal] Age (created -> now) comparator, defined if the issue is still open.
+  """
+  ageTime: NullableDurationComparator
+  """
   Compound filters, all of which need to be matched by the issue.
   """
   and: [IssueFilter!]
@@ -8835,6 +9030,10 @@ input IssueFilter {
   """
   cycle: NullableCycleFilter
   """
+  [Internal] Cycle time (started -> completed) comparator.
+  """
+  cycleTime: NullableDurationComparator
+  """
   Comparator for the issues description.
   """
   description: NullableStringComparator
@@ -8874,6 +9073,10 @@ input IssueFilter {
   Filters that the last applied template must satisfy.
   """
   lastAppliedTemplate: NullableTemplateFilter
+  """
+  [Internal] Lead time (created -> completed) comparator.
+  """
+  leadTime: NullableDurationComparator
   """
   Filters that the issue's customer needs must satisfy.
   """
@@ -8950,6 +9153,10 @@ input IssueFilter {
   Comparator for the issues title.
   """
   title: StringComparator
+  """
+  [Internal] Triage time (entered triaged -> triaged) comparator.
+  """
+  triageTime: NullableDurationComparator
   """
   Comparator for the issues triaged at date.
   """
@@ -9522,6 +9729,10 @@ input IssueLabelCollectionFilter {
   """
   id: IDComparator
   """
+  Comparator for whether the label is a group label.
+  """
+  isGroup: BooleanComparator
+  """
   Comparator for the collection length.
   """
   length: NumberComparator
@@ -9616,6 +9827,10 @@ input IssueLabelFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Comparator for whether the label is a group label.
+  """
+  isGroup: BooleanComparator
   """
   Comparator for the name.
   """
@@ -10485,6 +10700,10 @@ type IssueSearchResult implements Node {
     orderBy: PaginationOrderBy
   ): UserConnection!
   """
+  [Internal] The time at which the most recent suggestions for this issue were generated.
+  """
+  suggestionsGeneratedAt: DateTime
+  """
   The team that the issue is associated with.
   """
   team: Team!
@@ -10572,6 +10791,10 @@ input IssueSortInput {
   """
   labelGroup: LabelGroupSort
   """
+  [ALPHA] Sort by number of links associated with the issue
+  """
+  linkCount: LinkCountSort
+  """
   Sort by manual order
   """
   manual: ManualSort
@@ -10587,6 +10810,10 @@ input IssueSortInput {
   Sort by Project name
   """
   project: ProjectSort
+  """
+  Sort by the root issue
+  """
+  rootIssue: RootIssueSort
   """
   Sort by SLA status
   """
@@ -10693,6 +10920,10 @@ input IssueUpdateInput {
   [Internal] The timestamp at which an issue will be considered in breach of SLA.
   """
   slaBreachesAt: DateTime
+  """
+  [Internal] The timestamp at which the issue's SLA was started.
+  """
+  slaStartedAt: DateTime
   """
   The SLA day count type for the issue. Whether SLA should be business days only or calendar days (default).
   """
@@ -10811,6 +11042,10 @@ input JiraSettingsInput {
   """
   isJiraServer: Boolean = false
   """
+  The label of the Jira instance, for visual identification purposes only
+  """
+  label: String
+  """
   Whether this integration is using a manual setup flow.
   """
   manualSetup: Boolean
@@ -10830,9 +11065,17 @@ input JiraSettingsInput {
 
 input JiraUpdateInput {
   """
+  The Jira personal access token.
+  """
+  accessToken: String
+  """
   Whether to delete the current manual webhook configuration.
   """
   deleteWebhook: Boolean
+  """
+  The Jira user email address associated with the personal access token.
+  """
+  email: String
   """
   The id of the integration to update.
   """
@@ -10978,6 +11221,20 @@ input LaunchDarklySettingsInput {
   The project key of the LaunchDarkly integration.
   """
   projectKey: String!
+}
+
+"""
+[ALPHA] Issue link count sorting options.
+"""
+input LinkCountSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 type LogoutResponse {
@@ -13659,6 +13916,19 @@ type Mutation {
     authId: String!
   ): PasskeyLoginStartResponse!
   """
+  [Internal] Adds a label to a project.
+  """
+  projectAddLabel(
+    """
+    The identifier of the project to add the label to.
+    """
+    id: String!
+    """
+    The identifier of the label to add.
+    """
+    labelId: String!
+  ): ProjectPayload!
+  """
   Archives a project.
   """
   projectArchive(
@@ -13781,6 +14051,19 @@ type Mutation {
     """
     input: ProjectRelationUpdateInput!
   ): ProjectRelationPayload!
+  """
+  [Internal] Removes a label from a project.
+  """
+  projectRemoveLabel(
+    """
+    The identifier of the project to remove the label from.
+    """
+    id: String!
+    """
+    The identifier of the label to remove.
+    """
+    labelId: String!
+  ): ProjectPayload!
   """
   Archives a project status.
   """
@@ -13936,6 +14219,10 @@ type Mutation {
     The identifier of the Google Sheets integration to update.
     """
     id: String!
+    """
+    The type of export.
+    """
+    type: String
   ): IntegrationPayload!
   """
   Re-send an organization invite.
@@ -13963,7 +14250,7 @@ type Mutation {
     The identifier of the roadmap to archive.
     """
     id: String!
-  ): RoadmapArchivePayload!
+  ): RoadmapArchivePayload! @deprecated(reason: "Roadmaps are deprecated, use initiatives instead.")
   """
   Creates a new roadmap.
   """
@@ -13972,7 +14259,7 @@ type Mutation {
     The properties of the roadmap to create.
     """
     input: RoadmapCreateInput!
-  ): RoadmapPayload!
+  ): RoadmapPayload! @deprecated(reason: "Roadmaps are deprecated, use initiatives instead.")
   """
   Deletes a roadmap.
   """
@@ -13981,7 +14268,7 @@ type Mutation {
     The identifier of the roadmap to delete.
     """
     id: String!
-  ): DeletePayload!
+  ): DeletePayload! @deprecated(reason: "Roadmaps are deprecated, use initiatives instead.")
   """
   Creates a new roadmapToProject join.
   """
@@ -14021,7 +14308,7 @@ type Mutation {
     The identifier of the roadmap to unarchive.
     """
     id: String!
-  ): RoadmapArchivePayload!
+  ): RoadmapArchivePayload! @deprecated(reason: "Roadmaps are deprecated, use initiatives instead.")
   """
   Updates a roadmap.
   """
@@ -14034,7 +14321,7 @@ type Mutation {
     The properties of the roadmap to update.
     """
     input: RoadmapUpdateInput!
-  ): RoadmapPayload!
+  ): RoadmapPayload! @deprecated(reason: "Roadmaps are deprecated, use initiatives instead.")
   """
   Authenticates a user account via email and authentication token for SAML.
   """
@@ -15560,6 +15847,48 @@ input NullableDocumentContentFilter {
 }
 
 """
+Nullable comparator for optional durations.
+"""
+input NullableDurationComparator {
+  """
+  Equals constraint.
+  """
+  eq: Duration
+  """
+  Greater-than constraint. Matches any values that are greater than the given value.
+  """
+  gt: Duration
+  """
+  Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value.
+  """
+  gte: Duration
+  """
+  In-array constraint.
+  """
+  in: [Duration!]
+  """
+  Less-than constraint. Matches any values that are less than the given value.
+  """
+  lt: Duration
+  """
+  Less-than-or-equal constraint. Matches any values that are less than or equal to the given value.
+  """
+  lte: Duration
+  """
+  Not-equals constraint.
+  """
+  neq: Duration
+  """
+  Not-in-array constraint.
+  """
+  nin: [Duration!]
+  """
+  Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+  """
+  null: Boolean
+}
+
+"""
 Issue filtering options.
 """
 input NullableIssueFilter {
@@ -15571,6 +15900,10 @@ input NullableIssueFilter {
   Comparator for the period when issue was added to a cycle.
   """
   addedToCyclePeriod: CyclePeriodComparator
+  """
+  [Internal] Age (created -> now) comparator, defined if the issue is still open.
+  """
+  ageTime: NullableDurationComparator
   """
   Compound filters, all of which need to be matched by the issue.
   """
@@ -15628,6 +15961,10 @@ input NullableIssueFilter {
   """
   cycle: NullableCycleFilter
   """
+  [Internal] Cycle time (started -> completed) comparator.
+  """
+  cycleTime: NullableDurationComparator
+  """
   Comparator for the issues description.
   """
   description: NullableStringComparator
@@ -15667,6 +16004,10 @@ input NullableIssueFilter {
   Filters that the last applied template must satisfy.
   """
   lastAppliedTemplate: NullableTemplateFilter
+  """
+  [Internal] Lead time (created -> completed) comparator.
+  """
+  leadTime: NullableDurationComparator
   """
   Filters that the issue's customer needs must satisfy.
   """
@@ -15747,6 +16088,10 @@ input NullableIssueFilter {
   Comparator for the issues title.
   """
   title: StringComparator
+  """
+  [Internal] Triage time (entered triaged -> triaged) comparator.
+  """
+  triageTime: NullableDurationComparator
   """
   Comparator for the issues triaged at date.
   """
@@ -15879,6 +16224,10 @@ input NullableProjectFilter {
   Filters that the projects issues must satisfy.
   """
   issues: IssueCollectionFilter
+  """
+  [Internal] Filters that project labels must satisfy.
+  """
+  labels: ProjectLabelCollectionFilter
   """
   Filters that the last applied template must satisfy.
   """
@@ -16696,6 +17045,39 @@ type Organization implements Node {
   """
   previousUrlKeys: [String!]!
   """
+  [Internal] Project labels associated with the organization.
+  """
+  projectLabels(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned project labels.
+    """
+    filter: ProjectLabelFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectLabelConnection!
+  """
   The organization's project statuses.
   """
   projectStatuses: [ProjectStatus!]!
@@ -17305,6 +17687,10 @@ type OrganizationStartTrialPayload {
 
 input OrganizationUpdateInput {
   """
+  [INTERNAL] Whether the organization has enabled the AI add-on.
+  """
+  aiAddonEnabled: Boolean
+  """
   Whether member users are allowed to send invites.
   """
   allowMembersToInvite: Boolean
@@ -17614,10 +18000,6 @@ type Post implements Node {
   """
   id: ID!
   """
-  The project that the post is associated with.
-  """
-  project: Project
-  """
   Emoji reaction summary, grouped by emoji type.
   """
   reactionData: JSONObject!
@@ -17804,6 +18186,16 @@ input PrioritySort {
   The order for the individual sort
   """
   order: PaginationSortOrder
+}
+
+"""
+[Internal] The scope of product intelligence suggestion data for a team.
+"""
+enum ProductIntelligenceScope {
+  none
+  team
+  teamHierarchy
+  workspace
 }
 
 """
@@ -18126,6 +18518,39 @@ type Project implements Node {
   """
   labelIds: [String!]!
   """
+  [Internal] Labels associated with this project.
+  """
+  labels(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned project labels.
+    """
+    filter: ProjectLabelFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectLabelConnection!
+  """
   The last template that was applied to this project.
   """
   lastAppliedTemplate: Template
@@ -18178,6 +18603,39 @@ type Project implements Node {
   The project's name.
   """
   name: String!
+  """
+  Customer needs associated with the project.
+  """
+  needs(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned needs.
+    """
+    filter: CustomerNeedFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CustomerNeedConnection!
   """
   The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
   """
@@ -18460,6 +18918,10 @@ type ProjectAttachment implements Node {
   """
   source: JSONObject
   """
+  An accessor helper to source.type, defines the source type of the attachment.
+  """
+  sourceType: String
+  """
   Optional subtitle of the attachment
   """
   subtitle: String
@@ -18562,6 +19024,10 @@ input ProjectCollectionFilter {
   Filters that the projects issues must satisfy.
   """
   issues: IssueCollectionFilter
+  """
+  [Internal] Filters that project labels must satisfy.
+  """
+  labels: ProjectLabelCollectionFilter
   """
   Filters that the last applied template must satisfy.
   """
@@ -18675,6 +19141,10 @@ input ProjectCreateInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  [Internal]The identifiers of the project labels associated with this project.
+  """
+  labelIds: [String!]
   """
   The ID of the last template applied to the project.
   """
@@ -18818,6 +19288,10 @@ input ProjectFilter {
   """
   issues: IssueCollectionFilter
   """
+  [Internal] Filters that project labels must satisfy.
+  """
+  labels: ProjectLabelCollectionFilter
+  """
   Filters that the last applied template must satisfy.
   """
   lastAppliedTemplate: NullableTemplateFilter
@@ -18945,6 +19419,164 @@ type ProjectHistoryEdge {
   """
   cursor: String!
   node: ProjectHistory!
+}
+
+"""
+[Internal] Labels that can be associated with projects.
+"""
+type ProjectLabel implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The label's color as a HEX string.
+  """
+  color: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the label.
+  """
+  creator: User
+  """
+  The label's description.
+  """
+  description: String
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  Whether the label is a group.
+  """
+  isGroup: Boolean!
+  """
+  The label's name.
+  """
+  name: String!
+  organization: Organization!
+  """
+  The parent label.
+  """
+  parent: ProjectLabel
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Project label filtering options.
+"""
+input ProjectLabelCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the label.
+  """
+  and: [ProjectLabelCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the project labels creator must satisfy.
+  """
+  creator: NullableUserFilter
+  """
+  Filters that needs to be matched by all project labels.
+  """
+  every: ProjectLabelFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for whether the label is a group label.
+  """
+  isGroup: BooleanComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Comparator for the name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the label.
+  """
+  or: [ProjectLabelCollectionFilter!]
+  """
+  Filters that the project label's parent label must satisfy.
+  """
+  parent: ProjectLabelFilter
+  """
+  Filters that needs to be matched by some project labels.
+  """
+  some: ProjectLabelCollectionFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
+type ProjectLabelConnection {
+  edges: [ProjectLabelEdge!]!
+  nodes: [ProjectLabel!]!
+  pageInfo: PageInfo!
+}
+
+type ProjectLabelEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: ProjectLabel!
+}
+
+"""
+[Internal] Project label filtering options.
+"""
+input ProjectLabelFilter {
+  """
+  Compound filters, all of which need to be matched by the label.
+  """
+  and: [ProjectLabelFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the project labels creator must satisfy.
+  """
+  creator: NullableUserFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for whether the label is a group label.
+  """
+  isGroup: BooleanComparator
+  """
+  Comparator for the name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the label.
+  """
+  or: [ProjectLabelFilter!]
+  """
+  Filters that the project label's parent label must satisfy.
+  """
+  parent: ProjectLabelFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 """
@@ -20051,6 +20683,39 @@ type ProjectSearchResult implements Node {
   """
   labelIds: [String!]!
   """
+  [Internal] Labels associated with this project.
+  """
+  labels(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned project labels.
+    """
+    filter: ProjectLabelFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectLabelConnection!
+  """
   The last template that was applied to this project.
   """
   lastAppliedTemplate: Template
@@ -20107,6 +20772,39 @@ type ProjectSearchResult implements Node {
   The project's name.
   """
   name: String!
+  """
+  Customer needs associated with the project.
+  """
+  needs(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned needs.
+    """
+    filter: CustomerNeedFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CustomerNeedConnection!
   """
   The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
   """
@@ -20593,6 +21291,7 @@ input ProjectStatusUpdateInput {
 Different tabs available inside a project.
 """
 enum ProjectTab {
+  customers
   documents
   issues
 }
@@ -20852,6 +21551,10 @@ input ProjectUpdateInput {
   The icon of the project.
   """
   icon: String
+  """
+  [Internal] The identifiers of the project labels associated with this project.
+  """
+  labelIds: [String!]
   """
   The ID of the last template applied to the project.
   """
@@ -21688,7 +22391,16 @@ type Query {
   """
   One specific customer need
   """
-  customerNeed(id: String!): CustomerNeed!
+  customerNeed(
+    """
+    The hash of the need to retrieve.
+    """
+    hash: String
+    """
+    The identifier of the need to retrieve.
+    """
+    id: String
+  ): CustomerNeed!
   """
   All customer needs.
   """
@@ -22855,7 +23567,7 @@ type Query {
   """
   One specific roadmap.
   """
-  roadmap(id: String!): Roadmap!
+  roadmap(id: String!): Roadmap! @deprecated(reason: "Roadmaps are deprecated, use initiatives instead.")
   """
   One specific roadmapToProject.
   """
@@ -22917,7 +23629,7 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
-  ): RoadmapConnection!
+  ): RoadmapConnection! @deprecated(reason: "Roadmaps are deprecated, use initiatives instead.")
   """
   Search documents.
   """
@@ -22950,10 +23662,6 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
-    """
-    Size of search snippet to return (default: 100)
-    """
-    snippetSize: Float
     """
     UUID of a team to use as a boost.
     """
@@ -23000,10 +23708,6 @@ type Query {
     """
     orderBy: PaginationOrderBy
     """
-    Size of search snippet to return (default: 100)
-    """
-    snippetSize: Float
-    """
     UUID of a team to use as a boost.
     """
     teamId: String
@@ -23044,10 +23748,6 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
-    """
-    Size of search snippet to return (default: 100)
-    """
-    snippetSize: Float
     """
     UUID of a team to use as a boost.
     """
@@ -24047,6 +24747,24 @@ input RoadmapUpdateInput {
   sortOrder: Float
 }
 
+"""
+Issue root-issue sorting options.
+"""
+input RootIssueSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+  """
+  The sort to apply to the root issues
+  """
+  sort: IssueSortInput!
+}
+
 enum SLADayCountType {
   all
   onlyBusinessDays
@@ -24798,6 +25516,10 @@ type Team implements Node {
   Team's currently active cycle.
   """
   activeCycle: Cycle
+  """
+  Whether to enable resolved thread AI summaries.
+  """
+  aiThreadSummariesEnabled: Boolean!
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
@@ -25561,6 +26283,10 @@ input TeamCreateInput {
   """
   inheritIssueEstimation: Boolean
   """
+  [Internal] Whether the team should inherit workflow statuses from its parent.
+  """
+  inheritWorkflowStatuses: Boolean
+  """
   Whether to allow zeros in issues estimates.
   """
   issueEstimationAllowZero: Boolean
@@ -25592,6 +26318,10 @@ input TeamCreateInput {
   Internal. Whether the team is private or not.
   """
   private: Boolean
+  """
+  [Internal] The scope of product intelligence suggestion data for the team.
+  """
+  productIntelligenceScope: ProductIntelligenceScope
   """
   Whether an issue needs to have a priority set before leaving triage.
   """
@@ -25876,6 +26606,10 @@ input TeamSort {
 
 input TeamUpdateInput {
   """
+  Whether to enable resolved thread AI summaries.
+  """
+  aiThreadSummariesEnabled: Boolean
+  """
   Period after which closed and completed issues are automatically archived, in months.
   """
   autoArchivePeriod: Float
@@ -26007,6 +26741,10 @@ input TeamUpdateInput {
   Whether the team is private or not.
   """
   private: Boolean
+  """
+  [Internal] The scope of product intelligence suggestion data for the team.
+  """
+  productIntelligenceScope: ProductIntelligenceScope
   """
   Whether an issue needs to have a priority set before leaving triage.
   """
@@ -26931,10 +27669,6 @@ type UserAuthorizedApplication {
   """
   appUserAuthentication: AppUserAuthentication
   """
-  Whether the application supports app users.
-  """
-  appUserEnabled: Boolean!
-  """
   Error associated with the application needing to be requested for approval in the workspace.
   """
   approvalErrorCode: String
@@ -27142,6 +27876,7 @@ enum UserFlagType {
   analyticsWelcomeDismissed
   canPlaySnake
   canPlayTetris
+  commandMenuClearShortcutTip
   completedOnboarding
   cycleWelcomeDismissed
   desktopDownloadToastDismissed
@@ -27555,6 +28290,10 @@ input ViewPreferencesCreateInput {
   """
   projectId: String
   """
+  [Internal] The project label these view preferences are associated with.
+  """
+  projectLabelId: String
+  """
   The roadmap these view preferences are associated with.
   """
   roadmapId: String
@@ -27663,6 +28402,7 @@ enum ViewType {
   project
   projectCustomerNeeds
   projectDocuments
+  projectLabel
   projects
   projectsAll
   projectsBacklog
@@ -28084,6 +28824,10 @@ type WorkflowStatePayload {
 Issue workflow state sorting options.
 """
 input WorkflowStateSort {
+  """
+  Whether to sort closed issues by recency
+  """
+  closedIssuesOrderedByRecency: Boolean = false
   """
   Whether nulls should be sorted first or last
   """
