@@ -14,6 +14,8 @@ export type Scalars = {
   DateTime: Date;
   /** Represents a date and time in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago) */
   DateTimeOrDuration: Date | string;
+  /** Represents a duration in ISO 8601 format. Accepts ISO 8601 duration strings or integers in milliseconds. */
+  Duration: any;
   /** The `JSON` scalar type represents arbitrary values as *stringified* JSON */
   JSON: Record<string, unknown>;
   /** The `JSONObject` scalar type represents arbitrary values as *embedded* JSON */
@@ -171,7 +173,7 @@ export type ArchiveResponse = {
   /** The version of the remote database. Incremented by 1 for each migration run on the database. */
   databaseVersion: Scalars["Float"];
   /** Whether the dependencies for the model objects are included in the archive. */
-  includesDependencies: Scalars["Boolean"];
+  includesDependencies: Array<Scalars["String"]>;
   /** The total number of entities in the archive. */
   totalCount: Scalars["Float"];
 };
@@ -203,6 +205,8 @@ export type Attachment = Node & {
   __typename?: "Attachment";
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The body data of the attachment, if any. */
+  bodyData?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The creator of the attachment. */
@@ -657,8 +661,8 @@ export type Comment = Node & {
   resolvingComment?: Maybe<Comment>;
   /** The user that resolved the thread. */
   resolvingUser?: Maybe<User>;
-  /** [Internal] Summary for comment thread. */
-  summaryText?: Maybe<Scalars["String"]>;
+  /** [Internal] A generated summary of the comment thread. */
+  threadSummary?: Maybe<Scalars["JSONObject"]>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -928,6 +932,8 @@ export type CustomView = Node & {
   creator: User;
   /** The description of the custom view. */
   description?: Maybe<Scalars["String"]>;
+  /** The filter applied to feed items in the custom view. */
+  feedItemFilterData?: Maybe<Scalars["JSONObject"]>;
   /** The filter applied to issues in the custom view. */
   filterData: Scalars["JSONObject"];
   /**
@@ -1009,6 +1015,8 @@ export type CustomViewCreateInput = {
   color?: Maybe<Scalars["String"]>;
   /** The description of the custom view. */
   description?: Maybe<Scalars["String"]>;
+  /** The feed item filter applied to issues in the custom view. */
+  feedItemFilterData?: Maybe<FeedItemFilter>;
   /** The filter applied to issues in the custom view. */
   filterData?: Maybe<IssueFilter>;
   /** The icon of the custom view. */
@@ -1113,6 +1121,8 @@ export type CustomViewUpdateInput = {
   color?: Maybe<Scalars["String"]>;
   /** The description of the custom view. */
   description?: Maybe<Scalars["String"]>;
+  /** The feed item filter applied to issues in the custom view. */
+  feedItemFilterData?: Maybe<FeedItemFilter>;
   /** The filter applied to issues in the custom view. */
   filterData?: Maybe<IssueFilter>;
   /** The icon of the custom view. */
@@ -1152,6 +1162,8 @@ export type Customer = Node & {
   integration?: Maybe<Integration>;
   /** The customer's logo URL. */
   logoUrl?: Maybe<Scalars["String"]>;
+  /** The ID of the main source, when a customer has multiple sources. Must be one of externalIds. */
+  mainSourceId?: Maybe<Scalars["String"]>;
   /** The customer's name. */
   name: Scalars["String"];
   /** The user who owns the customer. */
@@ -1199,6 +1211,8 @@ export type CustomerCreateInput = {
   id?: Maybe<Scalars["String"]>;
   /** The URL of the customer's logo. */
   logoUrl?: Maybe<Scalars["String"]>;
+  /** The main source of the customer, for customers with multiple sources. Must be one of externalIds. */
+  mainSourceId?: Maybe<Scalars["String"]>;
   /** The name of the customer. */
   name: Scalars["String"];
   /** The user who owns the customer. */
@@ -1503,6 +1517,8 @@ export type CustomerNeedPayload = {
 };
 
 export type CustomerNeedUpdateInput = {
+  /** Whether to also update the priority of needs from the same customer on the same issue/project. */
+  applyPriorityToRelatedNeeds?: Maybe<Scalars["Boolean"]>;
   /** Optional URL for the attachment associated with the customer need. */
   attachmentUrl?: Maybe<Scalars["String"]>;
   /** The content of the need in markdown format. */
@@ -1798,6 +1814,8 @@ export type CustomerUpdateInput = {
   externalIds?: Maybe<Array<Scalars["String"]>>;
   /** The URL of the customer's logo. */
   logoUrl?: Maybe<Scalars["String"]>;
+  /** The main source of the customer, for customers with multiple sources. Must be one of externalIds. */
+  mainSourceId?: Maybe<Scalars["String"]>;
   /** The name of the customer. */
   name?: Maybe<Scalars["String"]>;
   /** The user who owns the customer. */
@@ -2664,12 +2682,16 @@ export type EmailIntakeAddress = Node & {
   createdAt: Scalars["DateTime"];
   /** The user who created the email intake address. */
   creator?: Maybe<User>;
+  /** Whether issues created from that email address will be turned into customer requests. */
+  customerRequestsEnabled: Scalars["Boolean"];
   /** Whether the email address is enabled. */
   enabled: Scalars["Boolean"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The organization that the email address is associated with. */
   organization: Organization;
+  /** Whether email replies are enabled. */
+  repliesEnabled: Scalars["Boolean"];
   /** The team that the email address is associated with. */
   team?: Maybe<Team>;
   /** The template that the email address is associated with. */
@@ -2701,8 +2723,12 @@ export type EmailIntakeAddressPayload = {
 };
 
 export type EmailIntakeAddressUpdateInput = {
+  /** Whether customer requests are enabled. */
+  customerRequestsEnabled?: Maybe<Scalars["Boolean"]>;
   /** Whether the email address is currently enabled. If set to false, the email address will be disabled and no longer accept incoming emails. */
-  enabled: Scalars["Boolean"];
+  enabled?: Maybe<Scalars["Boolean"]>;
+  /** Whether email replies are enabled. */
+  repliesEnabled?: Maybe<Scalars["Boolean"]>;
 };
 
 export type EmailUnsubscribeInput = {
@@ -2982,6 +3008,8 @@ export type Facet = Node & {
   id: Scalars["ID"];
   /** The sort order of the facet. */
   sortOrder: Scalars["Float"];
+  /** The owning feed user. */
+  sourceFeedUser?: Maybe<User>;
   /** The owning initiative. */
   sourceInitiative?: Maybe<Initiative>;
   /** The owning organization. */
@@ -3002,6 +3030,7 @@ export type Facet = Node & {
 };
 
 export enum FacetPageSource {
+  Feed = "feed",
   Projects = "projects",
   TeamIssues = "teamIssues",
 }
@@ -3162,6 +3191,32 @@ export type FavoriteUpdateInput = {
   parentId?: Maybe<Scalars["String"]>;
   /** The position of the item in the favorites list. */
   sortOrder?: Maybe<Scalars["Float"]>;
+};
+
+/** Feed item filtering options */
+export type FeedItemFilter = {
+  /** Compound filters, all of which need to be matched by the feed item. */
+  and?: Maybe<Array<FeedItemFilter>>;
+  /** Filters that the feed item author must satisfy. */
+  author?: Maybe<UserFilter>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Compound filters, one of which need to be matched by the feed item. */
+  or?: Maybe<Array<FeedItemFilter>>;
+  /** Filters that the feed item's project update must satisfy. */
+  projectUpdate?: Maybe<ProjectUpdateFilter>;
+  /** Filters that the related feed item initiatives must satisfy. */
+  relatedInitiatives?: Maybe<InitiativeCollectionFilter>;
+  /** Filters that the related feed item team must satisfy. */
+  relatedTeams?: Maybe<TeamCollectionFilter>;
+  /** Comparator for the project or initiative update health: onTrack, atRisk, offTrack */
+  updateHealth?: Maybe<StringComparator>;
+  /** Comparator for the update type: initiative, project */
+  updateType?: Maybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 /** Cadence to generate feed summary */
@@ -3469,10 +3524,31 @@ export enum GithubOrgType {
   User = "user",
 }
 
+export type GoogleSheetsExportSettings = {
+  /** Whether the export is enabled. */
+  enabled?: Maybe<Scalars["Boolean"]>;
+  /** The ID of the target sheet (tab) within the Google Sheet. */
+  sheetId?: Maybe<Scalars["Float"]>;
+  /** The ID of the exported Google Sheet. */
+  spreadsheetId?: Maybe<Scalars["String"]>;
+  /** The URL of the exported Google Sheet. */
+  spreadsheetUrl?: Maybe<Scalars["String"]>;
+  /** The date of the most recent export. */
+  updatedAt?: Maybe<Scalars["DateTime"]>;
+};
+
 export type GoogleSheetsSettingsInput = {
-  sheetId: Scalars["Float"];
-  spreadsheetId: Scalars["String"];
-  spreadsheetUrl: Scalars["String"];
+  /** The export settings for issues. */
+  issue?: Maybe<GoogleSheetsExportSettings>;
+  /** The export settings for projects. */
+  project?: Maybe<GoogleSheetsExportSettings>;
+  /** [Deprecated] The ID of the target sheet (tab) within the Google Sheet. */
+  sheetId?: Maybe<Scalars["Float"]>;
+  /** [Deprecated] The ID of the exported Google Sheet. */
+  spreadsheetId?: Maybe<Scalars["String"]>;
+  /** [Deprecated] The URL of the exported Google Sheet. */
+  spreadsheetUrl?: Maybe<Scalars["String"]>;
+  /** [Deprecated] The date of the most recent export. */
   updatedIssuesAt?: Maybe<Scalars["DateTime"]>;
 };
 
@@ -3636,6 +3712,8 @@ export type InitiativeArchivePayload = ArchivePayload & {
 
 /** Initiative collection filtering options. */
 export type InitiativeCollectionFilter = {
+  /** Filters that the initiative must be an ancestor of. */
+  ancestors?: Maybe<InitiativeCollectionFilter>;
   /** Compound filters, all of which need to be matched by the initiative. */
   and?: Maybe<Array<InitiativeCollectionFilter>>;
   /** Comparator for the created at date. */
@@ -3656,6 +3734,8 @@ export type InitiativeCollectionFilter = {
   name?: Maybe<StringComparator>;
   /** Compound filters, one of which need to be matched by the initiative. */
   or?: Maybe<Array<InitiativeCollectionFilter>>;
+  /** Filters that the initiative owner must satisfy. */
+  owner?: Maybe<UserFilter>;
   /** Comparator for the initiative slug ID. */
   slugId?: Maybe<StringComparator>;
   /** Filters that needs to be matched by some initiatives. */
@@ -3708,6 +3788,8 @@ export type InitiativeEdge = {
 
 /** Initiative filtering options. */
 export type InitiativeFilter = {
+  /** Filters that the initiative must be an ancestor of. */
+  ancestors?: Maybe<InitiativeCollectionFilter>;
   /** Compound filters, all of which need to be matched by the initiative. */
   and?: Maybe<Array<InitiativeFilter>>;
   /** Comparator for the created at date. */
@@ -3724,6 +3806,8 @@ export type InitiativeFilter = {
   name?: Maybe<StringComparator>;
   /** Compound filters, one of which need to be matched by the initiative. */
   or?: Maybe<Array<InitiativeFilter>>;
+  /** Filters that the initiative owner must satisfy. */
+  owner?: Maybe<UserFilter>;
   /** Comparator for the initiative slug ID. */
   slugId?: Maybe<StringComparator>;
   /** Comparator for the initiative status: Planned, Active, Completed */
@@ -4694,6 +4778,8 @@ export type Issue = Node & {
   subIssueSortOrder?: Maybe<Scalars["Float"]>;
   /** Users who are subscribed to the issue. */
   subscribers: UserConnection;
+  /** [Internal] The time at which the most recent suggestions for this issue were generated. */
+  suggestionsGeneratedAt?: Maybe<Scalars["DateTime"]>;
   /** The team that the issue is associated with. */
   team: Team;
   /** The issue's title. */
@@ -4840,6 +4926,8 @@ export type IssueCollectionFilter = {
   addedToCycleAt?: Maybe<NullableDateComparator>;
   /** Comparator for the period when issue was added to a cycle. */
   addedToCyclePeriod?: Maybe<CyclePeriodComparator>;
+  /** [Internal] Age (created -> now) comparator, defined if the issue is still open. */
+  ageTime?: Maybe<NullableDurationComparator>;
   /** Compound filters, all of which need to be matched by the issue. */
   and?: Maybe<Array<IssueCollectionFilter>>;
   /** Comparator for the issues archived at date. */
@@ -4868,6 +4956,8 @@ export type IssueCollectionFilter = {
   customerCount?: Maybe<NumberComparator>;
   /** Filters that the issues cycle must satisfy. */
   cycle?: Maybe<NullableCycleFilter>;
+  /** [Internal] Cycle time (started -> completed) comparator. */
+  cycleTime?: Maybe<NullableDurationComparator>;
   /** Comparator for the issues description. */
   description?: Maybe<NullableStringComparator>;
   /** Comparator for the issues due date. */
@@ -4890,6 +4980,8 @@ export type IssueCollectionFilter = {
   labels?: Maybe<IssueLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
   lastAppliedTemplate?: Maybe<NullableTemplateFilter>;
+  /** [Internal] Lead time (created -> completed) comparator. */
+  leadTime?: Maybe<NullableDurationComparator>;
   /** Comparator for the collection length. */
   length?: Maybe<NumberComparator>;
   /** Filters that the issue's customer needs must satisfy. */
@@ -4932,6 +5024,8 @@ export type IssueCollectionFilter = {
   team?: Maybe<TeamFilter>;
   /** Comparator for the issues title. */
   title?: Maybe<StringComparator>;
+  /** [Internal] Triage time (entered triaged -> triaged) comparator. */
+  triageTime?: Maybe<NullableDurationComparator>;
   /** Comparator for the issues triaged at date. */
   triagedAt?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
@@ -4988,6 +5082,8 @@ export type IssueCreateInput = {
   referenceCommentId?: Maybe<Scalars["String"]>;
   /** [Internal] The timestamp at which an issue will be considered in breach of SLA. */
   slaBreachesAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] The timestamp at which the issue's SLA was started. */
+  slaStartedAt?: Maybe<Scalars["DateTime"]>;
   /** The SLA day count type for the issue. Whether SLA should be business days only or calendar days (default). */
   slaType?: Maybe<SLADayCountType>;
   /** The position of the issue related to other issues. */
@@ -5101,6 +5197,8 @@ export type IssueFilter = {
   addedToCycleAt?: Maybe<NullableDateComparator>;
   /** Comparator for the period when issue was added to a cycle. */
   addedToCyclePeriod?: Maybe<CyclePeriodComparator>;
+  /** [Internal] Age (created -> now) comparator, defined if the issue is still open. */
+  ageTime?: Maybe<NullableDurationComparator>;
   /** Compound filters, all of which need to be matched by the issue. */
   and?: Maybe<Array<IssueFilter>>;
   /** Comparator for the issues archived at date. */
@@ -5129,6 +5227,8 @@ export type IssueFilter = {
   customerCount?: Maybe<NumberComparator>;
   /** Filters that the issues cycle must satisfy. */
   cycle?: Maybe<NullableCycleFilter>;
+  /** [Internal] Cycle time (started -> completed) comparator. */
+  cycleTime?: Maybe<NullableDurationComparator>;
   /** Comparator for the issues description. */
   description?: Maybe<NullableStringComparator>;
   /** Comparator for the issues due date. */
@@ -5149,6 +5249,8 @@ export type IssueFilter = {
   labels?: Maybe<IssueLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
   lastAppliedTemplate?: Maybe<NullableTemplateFilter>;
+  /** [Internal] Lead time (created -> completed) comparator. */
+  leadTime?: Maybe<NullableDurationComparator>;
   /** Filters that the issue's customer needs must satisfy. */
   needs?: Maybe<CustomerNeedCollectionFilter>;
   /** Comparator for the issues number. */
@@ -5187,6 +5289,8 @@ export type IssueFilter = {
   team?: Maybe<TeamFilter>;
   /** Comparator for the issues title. */
   title?: Maybe<StringComparator>;
+  /** [Internal] Triage time (entered triaged -> triaged) comparator. */
+  triageTime?: Maybe<NullableDurationComparator>;
   /** Comparator for the issues triaged at date. */
   triagedAt?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
@@ -5507,6 +5611,8 @@ export type IssueLabelCollectionFilter = {
   every?: Maybe<IssueLabelFilter>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Comparator for whether the label is a group label. */
+  isGroup?: Maybe<BooleanComparator>;
   /** Comparator for the collection length. */
   length?: Maybe<NumberComparator>;
   /** Comparator for the name. */
@@ -5564,6 +5670,8 @@ export type IssueLabelFilter = {
   creator?: Maybe<NullableUserFilter>;
   /** Comparator for the identifier. */
   id?: Maybe<IdComparator>;
+  /** Comparator for whether the label is a group label. */
+  isGroup?: Maybe<BooleanComparator>;
   /** Comparator for the name. */
   name?: Maybe<StringComparator>;
   /** Compound filters, one of which need to be matched by the label. */
@@ -5921,6 +6029,8 @@ export type IssueSearchResult = Node & {
   subIssueSortOrder?: Maybe<Scalars["Float"]>;
   /** Users who are subscribed to the issue. */
   subscribers: UserConnection;
+  /** [Internal] The time at which the most recent suggestions for this issue were generated. */
+  suggestionsGeneratedAt?: Maybe<Scalars["DateTime"]>;
   /** The team that the issue is associated with. */
   team: Team;
   /** The issue's title. */
@@ -6059,6 +6169,8 @@ export type IssueSortInput = {
   label?: Maybe<LabelSort>;
   /** Sort by label group */
   labelGroup?: Maybe<LabelGroupSort>;
+  /** [ALPHA] Sort by number of links associated with the issue */
+  linkCount?: Maybe<LinkCountSort>;
   /** Sort by manual order */
   manual?: Maybe<ManualSort>;
   /** Sort by Project Milestone target date */
@@ -6067,6 +6179,8 @@ export type IssueSortInput = {
   priority?: Maybe<PrioritySort>;
   /** Sort by Project name */
   project?: Maybe<ProjectSort>;
+  /** Sort by the root issue */
+  rootIssue?: Maybe<RootIssueSort>;
   /** Sort by SLA status */
   slaStatus?: Maybe<SlaStatusSort>;
   /** Sort by Team name */
@@ -6124,6 +6238,8 @@ export type IssueUpdateInput = {
   removedLabelIds?: Maybe<Array<Scalars["String"]>>;
   /** [Internal] The timestamp at which an issue will be considered in breach of SLA. */
   slaBreachesAt?: Maybe<Scalars["DateTime"]>;
+  /** [Internal] The timestamp at which the issue's SLA was started. */
+  slaStartedAt?: Maybe<Scalars["DateTime"]>;
   /** The SLA day count type for the issue. Whether SLA should be business days only or calendar days (default). */
   slaType?: Maybe<SLADayCountType>;
   /** The identifier of the user who snoozed the issue. */
@@ -6185,6 +6301,8 @@ export type JiraProjectDataInput = {
 export type JiraSettingsInput = {
   /** Whether this integration is for Jira Server or not. */
   isJiraServer?: Maybe<Scalars["Boolean"]>;
+  /** The label of the Jira instance, for visual identification purposes only */
+  label?: Maybe<Scalars["String"]>;
   /** Whether this integration is using a manual setup flow. */
   manualSetup?: Maybe<Scalars["Boolean"]>;
   /** The mapping of Jira project id => Linear team id. */
@@ -6196,8 +6314,12 @@ export type JiraSettingsInput = {
 };
 
 export type JiraUpdateInput = {
+  /** The Jira personal access token. */
+  accessToken?: Maybe<Scalars["String"]>;
   /** Whether to delete the current manual webhook configuration. */
   deleteWebhook?: Maybe<Scalars["Boolean"]>;
+  /** The Jira user email address associated with the personal access token. */
+  email?: Maybe<Scalars["String"]>;
   /** The id of the integration to update. */
   id: Scalars["String"];
   /** Whether to refresh Jira metadata for the integration. */
@@ -6282,6 +6404,14 @@ export type LaunchDarklySettingsInput = {
   environment: Scalars["String"];
   /** The project key of the LaunchDarkly integration. */
   projectKey: Scalars["String"];
+};
+
+/** [ALPHA] Issue link count sorting options. */
+export type LinkCountSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 export type LogoutResponse = {
@@ -6779,6 +6909,8 @@ export type Mutation = {
   passkeyLoginFinish: AuthResolverResponse;
   /** [INTERNAL] Starts passkey login process. */
   passkeyLoginStart: PasskeyLoginStartResponse;
+  /** [Internal] Adds a label to a project. */
+  projectAddLabel: ProjectPayload;
   /**
    * Archives a project.
    * @deprecated Deprecated in favor of projectDelete.
@@ -6804,6 +6936,8 @@ export type Mutation = {
   projectRelationDelete: DeletePayload;
   /** Updates a project relation. */
   projectRelationUpdate: ProjectRelationPayload;
+  /** [Internal] Removes a label from a project. */
+  projectRemoveLabel: ProjectPayload;
   /** Archives a project status. */
   projectStatusArchive: ProjectStatusArchivePayload;
   /** Creates a new project status. */
@@ -6843,11 +6977,20 @@ export type Mutation = {
   resendOrganizationInvite: DeletePayload;
   /** Re-send an organization invite tied to an email address. */
   resendOrganizationInviteByEmail: DeletePayload;
-  /** Archives a roadmap. */
+  /**
+   * Archives a roadmap.
+   * @deprecated Roadmaps are deprecated, use initiatives instead.
+   */
   roadmapArchive: RoadmapArchivePayload;
-  /** Creates a new roadmap. */
+  /**
+   * Creates a new roadmap.
+   * @deprecated Roadmaps are deprecated, use initiatives instead.
+   */
   roadmapCreate: RoadmapPayload;
-  /** Deletes a roadmap. */
+  /**
+   * Deletes a roadmap.
+   * @deprecated Roadmaps are deprecated, use initiatives instead.
+   */
   roadmapDelete: DeletePayload;
   /** Creates a new roadmapToProject join. */
   roadmapToProjectCreate: RoadmapToProjectPayload;
@@ -6855,9 +6998,15 @@ export type Mutation = {
   roadmapToProjectDelete: DeletePayload;
   /** Updates a roadmapToProject. */
   roadmapToProjectUpdate: RoadmapToProjectPayload;
-  /** Unarchives a roadmap. */
+  /**
+   * Unarchives a roadmap.
+   * @deprecated Roadmaps are deprecated, use initiatives instead.
+   */
   roadmapUnarchive: RoadmapArchivePayload;
-  /** Updates a roadmap. */
+  /**
+   * Updates a roadmap.
+   * @deprecated Roadmaps are deprecated, use initiatives instead.
+   */
   roadmapUpdate: RoadmapPayload;
   /** Authenticates a user account via email and authentication token for SAML. */
   samlTokenUserAccountAuth: AuthResolverResponse;
@@ -7928,6 +8077,11 @@ export type MutationPasskeyLoginStartArgs = {
   authId: Scalars["String"];
 };
 
+export type MutationProjectAddLabelArgs = {
+  id: Scalars["String"];
+  labelId: Scalars["String"];
+};
+
 export type MutationProjectArchiveArgs = {
   id: Scalars["String"];
   trash?: Maybe<Scalars["Boolean"]>;
@@ -7976,6 +8130,11 @@ export type MutationProjectRelationDeleteArgs = {
 export type MutationProjectRelationUpdateArgs = {
   id: Scalars["String"];
   input: ProjectRelationUpdateInput;
+};
+
+export type MutationProjectRemoveLabelArgs = {
+  id: Scalars["String"];
+  labelId: Scalars["String"];
 };
 
 export type MutationProjectStatusArchiveArgs = {
@@ -8043,6 +8202,7 @@ export type MutationReactionDeleteArgs = {
 
 export type MutationRefreshGoogleSheetsDataArgs = {
   id: Scalars["String"];
+  type?: Maybe<Scalars["String"]>;
 };
 
 export type MutationResendOrganizationInviteArgs = {
@@ -8890,12 +9050,36 @@ export type NullableDocumentContentFilter = {
   updatedAt?: Maybe<DateComparator>;
 };
 
+/** Nullable comparator for optional durations. */
+export type NullableDurationComparator = {
+  /** Equals constraint. */
+  eq?: Maybe<Scalars["Duration"]>;
+  /** Greater-than constraint. Matches any values that are greater than the given value. */
+  gt?: Maybe<Scalars["Duration"]>;
+  /** Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value. */
+  gte?: Maybe<Scalars["Duration"]>;
+  /** In-array constraint. */
+  in?: Maybe<Array<Scalars["Duration"]>>;
+  /** Less-than constraint. Matches any values that are less than the given value. */
+  lt?: Maybe<Scalars["Duration"]>;
+  /** Less-than-or-equal constraint. Matches any values that are less than or equal to the given value. */
+  lte?: Maybe<Scalars["Duration"]>;
+  /** Not-equals constraint. */
+  neq?: Maybe<Scalars["Duration"]>;
+  /** Not-in-array constraint. */
+  nin?: Maybe<Array<Scalars["Duration"]>>;
+  /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
+  null?: Maybe<Scalars["Boolean"]>;
+};
+
 /** Issue filtering options. */
 export type NullableIssueFilter = {
   /** Comparator for the issues added to cycle at date. */
   addedToCycleAt?: Maybe<NullableDateComparator>;
   /** Comparator for the period when issue was added to a cycle. */
   addedToCyclePeriod?: Maybe<CyclePeriodComparator>;
+  /** [Internal] Age (created -> now) comparator, defined if the issue is still open. */
+  ageTime?: Maybe<NullableDurationComparator>;
   /** Compound filters, all of which need to be matched by the issue. */
   and?: Maybe<Array<NullableIssueFilter>>;
   /** Comparator for the issues archived at date. */
@@ -8924,6 +9108,8 @@ export type NullableIssueFilter = {
   customerCount?: Maybe<NumberComparator>;
   /** Filters that the issues cycle must satisfy. */
   cycle?: Maybe<NullableCycleFilter>;
+  /** [Internal] Cycle time (started -> completed) comparator. */
+  cycleTime?: Maybe<NullableDurationComparator>;
   /** Comparator for the issues description. */
   description?: Maybe<NullableStringComparator>;
   /** Comparator for the issues due date. */
@@ -8944,6 +9130,8 @@ export type NullableIssueFilter = {
   labels?: Maybe<IssueLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
   lastAppliedTemplate?: Maybe<NullableTemplateFilter>;
+  /** [Internal] Lead time (created -> completed) comparator. */
+  leadTime?: Maybe<NullableDurationComparator>;
   /** Filters that the issue's customer needs must satisfy. */
   needs?: Maybe<CustomerNeedCollectionFilter>;
   /** Filter based on the existence of the relation. */
@@ -8984,6 +9172,8 @@ export type NullableIssueFilter = {
   team?: Maybe<TeamFilter>;
   /** Comparator for the issues title. */
   title?: Maybe<StringComparator>;
+  /** [Internal] Triage time (entered triaged -> triaged) comparator. */
+  triageTime?: Maybe<NullableDurationComparator>;
   /** Comparator for the issues triaged at date. */
   triagedAt?: Maybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
@@ -9052,6 +9242,8 @@ export type NullableProjectFilter = {
   initiatives?: Maybe<InitiativeCollectionFilter>;
   /** Filters that the projects issues must satisfy. */
   issues?: Maybe<IssueCollectionFilter>;
+  /** [Internal] Filters that project labels must satisfy. */
+  labels?: Maybe<ProjectLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
   lastAppliedTemplate?: Maybe<NullableTemplateFilter>;
   /** Filters that the projects lead must satisfy. */
@@ -9463,6 +9655,8 @@ export type Organization = Node & {
   periodUploadVolume: Scalars["Float"];
   /** Previously used URL keys for the organization (last 3 are kept and redirected). */
   previousUrlKeys: Array<Scalars["String"]>;
+  /** [Internal] Project labels associated with the organization. */
+  projectLabels: ProjectLabelConnection;
   /** The organization's project statuses. */
   projectStatuses: Array<ProjectStatus>;
   /** The n-weekly frequency at which to prompt for project updates. When not set, reminders are off. */
@@ -9535,6 +9729,17 @@ export type OrganizationLabelsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
   filter?: Maybe<IssueLabelFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** An organization. Organizations are root-level objects that contain user accounts and teams. */
+export type OrganizationProjectLabelsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<ProjectLabelFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -9851,6 +10056,8 @@ export type OrganizationStartTrialPayload = {
 };
 
 export type OrganizationUpdateInput = {
+  /** [INTERNAL] Whether the organization has enabled the AI add-on. */
+  aiAddonEnabled?: Maybe<Scalars["Boolean"]>;
   /** Whether member users are allowed to send invites. */
   allowMembersToInvite?: Maybe<Scalars["Boolean"]>;
   /** List of services that are allowed to be used for login. */
@@ -10028,8 +10235,6 @@ export type Post = Node & {
   feedSummaryScheduleAtCreate?: Maybe<FeedSummarySchedule>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
-  /** The project that the post is associated with. */
-  project?: Maybe<Project>;
   /** Emoji reaction summary, grouped by emoji type. */
   reactionData: Scalars["JSONObject"];
   /** The post's unique URL slug. */
@@ -10140,6 +10345,14 @@ export type PrioritySort = {
   order?: Maybe<PaginationSortOrder>;
 };
 
+/** [Internal] The scope of product intelligence suggestion data for a team. */
+export enum ProductIntelligenceScope {
+  None = "none",
+  Team = "team",
+  TeamHierarchy = "teamHierarchy",
+  Workspace = "workspace",
+}
+
 /** A project. */
 export type Project = Node & {
   __typename?: "Project";
@@ -10207,6 +10420,8 @@ export type Project = Node & {
   issues: IssueConnection;
   /** Id of the labels associated with this project. */
   labelIds: Array<Scalars["String"]>;
+  /** [Internal] Labels associated with this project. */
+  labels: ProjectLabelConnection;
   /** The last template that was applied to this project. */
   lastAppliedTemplate?: Maybe<Template>;
   /** The last project update posted for this project. */
@@ -10217,6 +10432,8 @@ export type Project = Node & {
   members: UserConnection;
   /** The project's name. */
   name: Scalars["String"];
+  /** Customer needs associated with the project. */
+  needs: CustomerNeedConnection;
   /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
   priority: Scalars["Int"];
   /** The priority of the project as a label. */
@@ -10370,6 +10587,17 @@ export type ProjectIssuesArgs = {
 };
 
 /** A project. */
+export type ProjectLabelsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<ProjectLabelFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** A project. */
 export type ProjectMembersArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
@@ -10377,6 +10605,17 @@ export type ProjectMembersArgs = {
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   includeDisabled?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** A project. */
+export type ProjectNeedsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CustomerNeedFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 };
@@ -10449,6 +10688,8 @@ export type ProjectAttachment = Node & {
   metadata: Scalars["JSONObject"];
   /** Information about the external source which created the attachment. */
   source?: Maybe<Scalars["JSONObject"]>;
+  /** An accessor helper to source.type, defines the source type of the attachment. */
+  sourceType?: Maybe<Scalars["String"]>;
   /** Optional subtitle of the attachment */
   subtitle?: Maybe<Scalars["String"]>;
   /** Title of the attachment. */
@@ -10504,6 +10745,8 @@ export type ProjectCollectionFilter = {
   initiatives?: Maybe<InitiativeCollectionFilter>;
   /** Filters that the projects issues must satisfy. */
   issues?: Maybe<IssueCollectionFilter>;
+  /** [Internal] Filters that project labels must satisfy. */
+  labels?: Maybe<ProjectLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
   lastAppliedTemplate?: Maybe<NullableTemplateFilter>;
   /** Filters that the projects lead must satisfy. */
@@ -10566,6 +10809,8 @@ export type ProjectCreateInput = {
   icon?: Maybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
+  /** [Internal]The identifiers of the project labels associated with this project. */
+  labelIds?: Maybe<Array<Scalars["String"]>>;
   /** The ID of the last template applied to the project. */
   lastAppliedTemplateId?: Maybe<Scalars["String"]>;
   /** The identifier of the project lead. */
@@ -10641,6 +10886,8 @@ export type ProjectFilter = {
   initiatives?: Maybe<InitiativeCollectionFilter>;
   /** Filters that the projects issues must satisfy. */
   issues?: Maybe<IssueCollectionFilter>;
+  /** [Internal] Filters that project labels must satisfy. */
+  labels?: Maybe<ProjectLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
   lastAppliedTemplate?: Maybe<NullableTemplateFilter>;
   /** Filters that the projects lead must satisfy. */
@@ -10719,6 +10966,99 @@ export type ProjectHistoryEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: ProjectHistory;
+};
+
+/** [Internal] Labels that can be associated with projects. */
+export type ProjectLabel = Node & {
+  __typename?: "ProjectLabel";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The label's color as a HEX string. */
+  color: Scalars["String"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The user who created the label. */
+  creator?: Maybe<User>;
+  /** The label's description. */
+  description?: Maybe<Scalars["String"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** Whether the label is a group. */
+  isGroup: Scalars["Boolean"];
+  /** The label's name. */
+  name: Scalars["String"];
+  organization: Organization;
+  /** The parent label. */
+  parent?: Maybe<ProjectLabel>;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+/** Project label filtering options. */
+export type ProjectLabelCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the label. */
+  and?: Maybe<Array<ProjectLabelCollectionFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the project labels creator must satisfy. */
+  creator?: Maybe<NullableUserFilter>;
+  /** Filters that needs to be matched by all project labels. */
+  every?: Maybe<ProjectLabelFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for whether the label is a group label. */
+  isGroup?: Maybe<BooleanComparator>;
+  /** Comparator for the collection length. */
+  length?: Maybe<NumberComparator>;
+  /** Comparator for the name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the label. */
+  or?: Maybe<Array<ProjectLabelCollectionFilter>>;
+  /** Filters that the project label's parent label must satisfy. */
+  parent?: Maybe<ProjectLabelFilter>;
+  /** Filters that needs to be matched by some project labels. */
+  some?: Maybe<ProjectLabelCollectionFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
+export type ProjectLabelConnection = {
+  __typename?: "ProjectLabelConnection";
+  edges: Array<ProjectLabelEdge>;
+  nodes: Array<ProjectLabel>;
+  pageInfo: PageInfo;
+};
+
+export type ProjectLabelEdge = {
+  __typename?: "ProjectLabelEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: ProjectLabel;
+};
+
+/** [Internal] Project label filtering options. */
+export type ProjectLabelFilter = {
+  /** Compound filters, all of which need to be matched by the label. */
+  and?: Maybe<Array<ProjectLabelFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that the project labels creator must satisfy. */
+  creator?: Maybe<NullableUserFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for whether the label is a group label. */
+  isGroup?: Maybe<BooleanComparator>;
+  /** Comparator for the name. */
+  name?: Maybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the label. */
+  or?: Maybe<Array<ProjectLabelFilter>>;
+  /** Filters that the project label's parent label must satisfy. */
+  parent?: Maybe<ProjectLabelFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 /** A milestone for a project. */
@@ -11249,6 +11589,8 @@ export type ProjectSearchResult = Node & {
   issues: IssueConnection;
   /** Id of the labels associated with this project. */
   labelIds: Array<Scalars["String"]>;
+  /** [Internal] Labels associated with this project. */
+  labels: ProjectLabelConnection;
   /** The last template that was applied to this project. */
   lastAppliedTemplate?: Maybe<Template>;
   /** The last project update posted for this project. */
@@ -11261,6 +11603,8 @@ export type ProjectSearchResult = Node & {
   metadata: Scalars["JSONObject"];
   /** The project's name. */
   name: Scalars["String"];
+  /** Customer needs associated with the project. */
+  needs: CustomerNeedConnection;
   /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
   priority: Scalars["Int"];
   /** The priority of the project as a label. */
@@ -11406,6 +11750,16 @@ export type ProjectSearchResultIssuesArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
+export type ProjectSearchResultLabelsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<ProjectLabelFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
 export type ProjectSearchResultMembersArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
@@ -11413,6 +11767,16 @@ export type ProjectSearchResultMembersArgs = {
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   includeDisabled?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type ProjectSearchResultNeedsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CustomerNeedFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
 };
@@ -11611,6 +11975,7 @@ export type ProjectStatusUpdateInput = {
 
 /** Different tabs available inside a project. */
 export enum ProjectTab {
+  Customers = "customers",
   Documents = "documents",
   Issues = "issues",
 }
@@ -11758,6 +12123,8 @@ export type ProjectUpdateInput = {
   frequencyResolution?: Maybe<FrequencyResolutionType>;
   /** The icon of the project. */
   icon?: Maybe<Scalars["String"]>;
+  /** [Internal] The identifiers of the project labels associated with this project. */
+  labelIds?: Maybe<Array<Scalars["String"]>>;
   /** The ID of the last template applied to the project. */
   lastAppliedTemplateId?: Maybe<Scalars["String"]>;
   /** The identifier of the project lead. */
@@ -12254,13 +12621,19 @@ export type Query = {
   pushSubscriptionTest: PushSubscriptionTestPayload;
   /** The status of the rate limiter. */
   rateLimitStatus: RateLimitPayload;
-  /** One specific roadmap. */
+  /**
+   * One specific roadmap.
+   * @deprecated Roadmaps are deprecated, use initiatives instead.
+   */
   roadmap: Roadmap;
   /** One specific roadmapToProject. */
   roadmapToProject: RoadmapToProject;
   /** Custom views for the user. */
   roadmapToProjects: RoadmapToProjectConnection;
-  /** All roadmaps in the workspace. */
+  /**
+   * All roadmaps in the workspace.
+   * @deprecated Roadmaps are deprecated, use initiatives instead.
+   */
   roadmaps: RoadmapConnection;
   /** Search documents. */
   searchDocuments: DocumentSearchPayload;
@@ -12442,7 +12815,8 @@ export type QueryCustomerArgs = {
 };
 
 export type QueryCustomerNeedArgs = {
-  id: Scalars["String"];
+  hash?: Maybe<Scalars["String"]>;
+  id?: Maybe<Scalars["String"]>;
 };
 
 export type QueryCustomerNeedsArgs = {
@@ -12924,7 +13298,6 @@ export type QuerySearchDocumentsArgs = {
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
-  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 };
@@ -12938,7 +13311,6 @@ export type QuerySearchIssuesArgs = {
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
-  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 };
@@ -12951,7 +13323,6 @@ export type QuerySearchProjectsArgs = {
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
-  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 };
@@ -13451,6 +13822,16 @@ export type RoadmapUpdateInput = {
   sortOrder?: Maybe<Scalars["Float"]>;
 };
 
+/** Issue root-issue sorting options. */
+export type RootIssueSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
+  /** The sort to apply to the root issues */
+  sort: IssueSortInput;
+};
+
 export enum SLADayCountType {
   All = "all",
   OnlyBusinessDays = "onlyBusinessDays",
@@ -13886,6 +14267,8 @@ export type Team = Node & {
   __typename?: "Team";
   /** Team's currently active cycle. */
   activeCycle?: Maybe<Cycle>;
+  /** Whether to enable resolved thread AI summaries. */
+  aiThreadSummariesEnabled: Scalars["Boolean"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** Period after which automatically closed and completed issues are automatically archived in months. */
@@ -14284,6 +14667,8 @@ export type TeamCreateInput = {
   id?: Maybe<Scalars["String"]>;
   /** Whether the team should inherit estimation settings from its parent. Only applies to sub-teams. */
   inheritIssueEstimation?: Maybe<Scalars["Boolean"]>;
+  /** [Internal] Whether the team should inherit workflow statuses from its parent. */
+  inheritWorkflowStatuses?: Maybe<Scalars["Boolean"]>;
   /** Whether to allow zeros in issues estimates. */
   issueEstimationAllowZero?: Maybe<Scalars["Boolean"]>;
   /** Whether to add additional points to the estimate scale. */
@@ -14300,6 +14685,8 @@ export type TeamCreateInput = {
   parentId?: Maybe<Scalars["String"]>;
   /** Internal. Whether the team is private or not. */
   private?: Maybe<Scalars["Boolean"]>;
+  /** [Internal] The scope of product intelligence suggestion data for the team. */
+  productIntelligenceScope?: Maybe<ProductIntelligenceScope>;
   /** Whether an issue needs to have a priority set before leaving triage. */
   requirePriorityToLeaveTriage?: Maybe<Scalars["Boolean"]>;
   /** Whether to move issues to bottom of the column when changing state. */
@@ -14474,6 +14861,8 @@ export type TeamSort = {
 };
 
 export type TeamUpdateInput = {
+  /** Whether to enable resolved thread AI summaries. */
+  aiThreadSummariesEnabled?: Maybe<Scalars["Boolean"]>;
   /** Period after which closed and completed issues are automatically archived, in months. */
   autoArchivePeriod?: Maybe<Scalars["Float"]>;
   /** [INTERNAL] Whether to automatically close all sub-issues when a parent issue in this team is closed. */
@@ -14540,6 +14929,8 @@ export type TeamUpdateInput = {
   parentId?: Maybe<Scalars["String"]>;
   /** Whether the team is private or not. */
   private?: Maybe<Scalars["Boolean"]>;
+  /** [Internal] The scope of product intelligence suggestion data for the team. */
+  productIntelligenceScope?: Maybe<ProductIntelligenceScope>;
   /** Whether an issue needs to have a priority set before leaving triage. */
   requirePriorityToLeaveTriage?: Maybe<Scalars["Boolean"]>;
   /** Whether the team is managed by SCIM integration. Mutation restricted to workspace admins and only unsetting is allowed! */
@@ -15059,8 +15450,6 @@ export type UserAuthorizedApplication = {
   __typename?: "UserAuthorizedApplication";
   /** Details of the app user's existing token, if any. */
   appUserAuthentication?: Maybe<AppUserAuthentication>;
-  /** Whether the application supports app users. */
-  appUserEnabled: Scalars["Boolean"];
   /** Error associated with the application needing to be requested for approval in the workspace. */
   approvalErrorCode?: Maybe<Scalars["String"]>;
   /** OAuth application's client ID. */
@@ -15179,6 +15568,7 @@ export enum UserFlagType {
   AnalyticsWelcomeDismissed = "analyticsWelcomeDismissed",
   CanPlaySnake = "canPlaySnake",
   CanPlayTetris = "canPlayTetris",
+  CommandMenuClearShortcutTip = "commandMenuClearShortcutTip",
   CompletedOnboarding = "completedOnboarding",
   CycleWelcomeDismissed = "cycleWelcomeDismissed",
   DesktopDownloadToastDismissed = "desktopDownloadToastDismissed",
@@ -15444,6 +15834,8 @@ export type ViewPreferencesCreateInput = {
   preferences: Scalars["JSONObject"];
   /** The project these view preferences are associated with. */
   projectId?: Maybe<Scalars["String"]>;
+  /** [Internal] The project label these view preferences are associated with. */
+  projectLabelId?: Maybe<Scalars["String"]>;
   /** The roadmap these view preferences are associated with. */
   roadmapId?: Maybe<Scalars["String"]>;
   /** The team these view preferences are associated with. */
@@ -15525,6 +15917,7 @@ export enum ViewType {
   Project = "project",
   ProjectCustomerNeeds = "projectCustomerNeeds",
   ProjectDocuments = "projectDocuments",
+  ProjectLabel = "projectLabel",
   Projects = "projects",
   ProjectsAll = "projectsAll",
   ProjectsBacklog = "projectsBacklog",
@@ -15780,6 +16173,8 @@ export type WorkflowStatePayload = {
 
 /** Issue workflow state sorting options. */
 export type WorkflowStateSort = {
+  /** Whether to sort closed issues by recency */
+  closedIssuesOrderedByRecency?: Maybe<Scalars["Boolean"]>;
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
   /** The order for the individual sort */
@@ -16034,6 +16429,7 @@ export type CustomViewFragment = { __typename: "CustomView" } & Pick<
   | "color"
   | "slugId"
   | "description"
+  | "feedItemFilterData"
   | "filterData"
   | "projectFilterData"
   | "filters"
@@ -16102,6 +16498,7 @@ export type CustomerTierFragment = { __typename: "CustomerTier" } & Pick<
 export type CustomerFragment = { __typename: "Customer" } & Pick<
   Customer,
   | "slackChannelId"
+  | "mainSourceId"
   | "revenue"
   | "approximateNeedCount"
   | "logoUrl"
@@ -16204,6 +16601,7 @@ export type FacetFragment = { __typename: "Facet" } & Pick<
   Facet,
   "updatedAt" | "sourcePage" | "sortOrder" | "archivedAt" | "createdAt" | "id"
 > & {
+    sourceFeedUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     sourceInitiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
     sourceProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
     sourceTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -17027,7 +17425,7 @@ export type ApiKeyFragment = { __typename: "ApiKey" } & Pick<
 
 export type EmailIntakeAddressFragment = { __typename: "EmailIntakeAddress" } & Pick<
   EmailIntakeAddress,
-  "updatedAt" | "archivedAt" | "createdAt" | "id" | "address" | "enabled"
+  "updatedAt" | "archivedAt" | "createdAt" | "id" | "address" | "repliesEnabled" | "customerRequestsEnabled" | "enabled"
 > & {
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
     template?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
@@ -17434,6 +17832,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "cyclesEnabled"
   | "issueEstimationExtended"
   | "issueEstimationAllowZero"
+  | "aiThreadSummariesEnabled"
   | "groupIssueHistory"
   | "slackIssueComments"
   | "slackNewIssue"
@@ -17543,6 +17942,7 @@ export type AttachmentFragment = { __typename: "Attachment" } & Pick<
   | "groupBySource"
   | "source"
   | "url"
+  | "bodyData"
   | "updatedAt"
   | "archivedAt"
   | "createdAt"
@@ -17771,7 +18171,6 @@ export type UserAuthorizedApplicationFragment = { __typename: "UserAuthorizedApp
   | "clientId"
   | "developerUrl"
   | "webhooksEnabled"
-  | "appUserEnabled"
   | "createdByLinear"
   | "isAuthorized"
 >;
@@ -18586,6 +18985,8 @@ type Node_ProjectAttachment_Fragment = { __typename: "ProjectAttachment" } & Pic
 
 type Node_ProjectHistory_Fragment = { __typename: "ProjectHistory" } & Pick<ProjectHistory, "id">;
 
+type Node_ProjectLabel_Fragment = { __typename: "ProjectLabel" } & Pick<ProjectLabel, "id">;
+
 type Node_ProjectMilestone_Fragment = { __typename: "ProjectMilestone" } & Pick<ProjectMilestone, "id">;
 
 type Node_ProjectNotification_Fragment = { __typename: "ProjectNotification" } & Pick<ProjectNotification, "id">;
@@ -18710,6 +19111,7 @@ export type NodeFragment =
   | Node_Project_Fragment
   | Node_ProjectAttachment_Fragment
   | Node_ProjectHistory_Fragment
+  | Node_ProjectLabel_Fragment
   | Node_ProjectMilestone_Fragment
   | Node_ProjectNotification_Fragment
   | Node_ProjectNotificationSubscription_Fragment
@@ -19736,7 +20138,8 @@ export type CustomerQueryVariables = Exact<{
 export type CustomerQuery = { __typename?: "Query" } & { customer: { __typename?: "Customer" } & CustomerFragment };
 
 export type CustomerNeedQueryVariables = Exact<{
-  id: Scalars["String"];
+  hash?: Maybe<Scalars["String"]>;
+  id?: Maybe<Scalars["String"]>;
 }>;
 
 export type CustomerNeedQuery = { __typename?: "Query" } & {
@@ -21044,6 +21447,23 @@ export type Project_MembersQuery = { __typename?: "Query" } & {
   project: { __typename?: "Project" } & { members: { __typename?: "UserConnection" } & UserConnectionFragment };
 };
 
+export type Project_NeedsQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<CustomerNeedFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type Project_NeedsQuery = { __typename?: "Query" } & {
+  project: { __typename?: "Project" } & {
+    needs: { __typename?: "CustomerNeedConnection" } & CustomerNeedConnectionFragment;
+  };
+};
+
 export type Project_ProjectMilestonesQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
@@ -21338,7 +21758,6 @@ export type SearchDocumentsQueryVariables = Exact<{
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
-  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
@@ -21355,7 +21774,6 @@ export type SearchDocuments_ArchivePayloadQueryVariables = Exact<{
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
-  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
@@ -21375,7 +21793,6 @@ export type SearchIssuesQueryVariables = Exact<{
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
-  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
@@ -21393,7 +21810,6 @@ export type SearchIssues_ArchivePayloadQueryVariables = Exact<{
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
-  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
@@ -21412,7 +21828,6 @@ export type SearchProjectsQueryVariables = Exact<{
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
-  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
@@ -21429,7 +21844,6 @@ export type SearchProjects_ArchivePayloadQueryVariables = Exact<{
   includeComments?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
-  snippetSize?: Maybe<Scalars["Float"]>;
   teamId?: Maybe<Scalars["String"]>;
   term: Scalars["String"];
 }>;
@@ -24158,6 +24572,7 @@ export type DeleteReactionMutation = { __typename?: "Mutation" } & {
 
 export type RefreshGoogleSheetsDataMutationVariables = Exact<{
   id: Scalars["String"];
+  type?: Maybe<Scalars["String"]>;
 }>;
 
 export type RefreshGoogleSheetsDataMutation = { __typename?: "Mutation" } & {
@@ -24918,6 +25333,14 @@ export const FacetFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "sourceFeedUser" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           {
             kind: "Field",
             name: { kind: "Name", value: "sourceInitiative" },
@@ -26931,7 +27354,6 @@ export const UserAuthorizedApplicationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "clientId" } },
           { kind: "Field", name: { kind: "Name", value: "developerUrl" } },
           { kind: "Field", name: { kind: "Name", value: "webhooksEnabled" } },
-          { kind: "Field", name: { kind: "Name", value: "appUserEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "createdByLinear" } },
           { kind: "Field", name: { kind: "Name", value: "isAuthorized" } },
         ],
@@ -27687,6 +28109,7 @@ export const AttachmentFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "groupBySource" } },
           { kind: "Field", name: { kind: "Name", value: "source" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "bodyData" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "creator" },
@@ -28476,6 +28899,7 @@ export const CustomViewFragmentDoc = {
           },
           { kind: "Field", name: { kind: "Name", value: "slugId" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "feedItemFilterData" } },
           { kind: "Field", name: { kind: "Name", value: "filterData" } },
           { kind: "Field", name: { kind: "Name", value: "projectFilterData" } },
           { kind: "Field", name: { kind: "Name", value: "filters" } },
@@ -28638,6 +29062,7 @@ export const CustomerFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "slackChannelId" } },
+          { kind: "Field", name: { kind: "Name", value: "mainSourceId" } },
           { kind: "Field", name: { kind: "Name", value: "revenue" } },
           { kind: "Field", name: { kind: "Name", value: "approximateNeedCount" } },
           {
@@ -29585,6 +30010,8 @@ export const EmailIntakeAddressFragmentDoc = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "address" } },
+          { kind: "Field", name: { kind: "Name", value: "repliesEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "customerRequestsEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "enabled" } },
         ],
       },
@@ -34290,6 +34717,7 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "cyclesEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "issueEstimationExtended" } },
           { kind: "Field", name: { kind: "Name", value: "issueEstimationAllowZero" } },
+          { kind: "Field", name: { kind: "Name", value: "aiThreadSummariesEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "groupIssueHistory" } },
           { kind: "Field", name: { kind: "Name", value: "slackIssueComments" } },
           { kind: "Field", name: { kind: "Name", value: "slackNewIssue" } },
@@ -38337,8 +38765,13 @@ export const CustomerNeedDocument = {
       variableDefinitions: [
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "hash" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
       ],
       selectionSet: {
@@ -38348,6 +38781,11 @@ export const CustomerNeedDocument = {
             kind: "Field",
             name: { kind: "Name", value: "customerNeed" },
             arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "hash" },
+                value: { kind: "Variable", name: { kind: "Name", value: "hash" } },
+              },
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "id" },
@@ -46948,6 +47386,127 @@ export const Project_MembersDocument = {
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_MembersQuery, Project_MembersQueryVariables>;
+export const Project_NeedsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "project_needs" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "CustomerNeedFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "needs" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CustomerNeedConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...CustomerNeedConnectionFragmentDoc.definitions,
+    ...CustomerNeedFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<Project_NeedsQuery, Project_NeedsQueryVariables>;
 export const Project_ProjectMilestonesDocument = {
   kind: "Document",
   definitions: [
@@ -48884,11 +49443,6 @@ export const SearchDocumentsDocument = {
         },
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Float" } },
-        },
-        {
-          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -48939,11 +49493,6 @@ export const SearchDocumentsDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "snippetSize" },
-                value: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
               },
               {
                 kind: "Argument",
@@ -49015,11 +49564,6 @@ export const SearchDocuments_ArchivePayloadDocument = {
         },
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Float" } },
-        },
-        {
-          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -49070,11 +49614,6 @@ export const SearchDocuments_ArchivePayloadDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "snippetSize" },
-                value: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
               },
               {
                 kind: "Argument",
@@ -49157,11 +49696,6 @@ export const SearchIssuesDocument = {
         },
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Float" } },
-        },
-        {
-          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -49217,11 +49751,6 @@ export const SearchIssuesDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "snippetSize" },
-                value: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
               },
               {
                 kind: "Argument",
@@ -49300,11 +49829,6 @@ export const SearchIssues_ArchivePayloadDocument = {
         },
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Float" } },
-        },
-        {
-          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -49360,11 +49884,6 @@ export const SearchIssues_ArchivePayloadDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "snippetSize" },
-                value: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
               },
               {
                 kind: "Argument",
@@ -49442,11 +49961,6 @@ export const SearchProjectsDocument = {
         },
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Float" } },
-        },
-        {
-          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -49497,11 +50011,6 @@ export const SearchProjectsDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "snippetSize" },
-                value: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
               },
               {
                 kind: "Argument",
@@ -49574,11 +50083,6 @@ export const SearchProjects_ArchivePayloadDocument = {
         },
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Float" } },
-        },
-        {
-          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "teamId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -49629,11 +50133,6 @@ export const SearchProjects_ArchivePayloadDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "snippetSize" },
-                value: { kind: "Variable", name: { kind: "Name", value: "snippetSize" } },
               },
               {
                 kind: "Argument",
@@ -64653,6 +65152,11 @@ export const RefreshGoogleSheetsDataDocument = {
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "type" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
       ],
       selectionSet: {
         kind: "SelectionSet",
@@ -64665,6 +65169,11 @@ export const RefreshGoogleSheetsDataDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "id" },
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "type" },
+                value: { kind: "Variable", name: { kind: "Name", value: "type" } },
               },
             ],
             selectionSet: {

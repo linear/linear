@@ -911,7 +911,7 @@ describe("generated", () => {
     /** Test the root query for a single CustomerNeed */
     it("customerNeed", async () => {
       if (_customerNeed_id) {
-        const customerNeed: L.CustomerNeed | undefined = await client.customerNeed(_customerNeed_id);
+        const customerNeed: L.CustomerNeed | undefined = await client.customerNeed({ id: _customerNeed_id });
         _customerNeed = customerNeed;
         expect(customerNeed instanceof L.CustomerNeed);
       } else {
@@ -3714,6 +3714,16 @@ describe("generated", () => {
         expect(members instanceof L.UserConnection);
       } else {
         console.warn("codegen-doc:print: No project found - cannot test _project.members query");
+      }
+    });
+
+    /** Test the project connection query for the CustomerNeed */
+    it("project.needs", async () => {
+      if (_project) {
+        const needs: L.CustomerNeedConnection | undefined = await _project.needs();
+        expect(needs instanceof L.CustomerNeedConnection);
+      } else {
+        console.warn("codegen-doc:print: No project found - cannot test _project.needs query");
       }
     });
 
