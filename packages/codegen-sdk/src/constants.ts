@@ -31,3 +31,7 @@ export const Sdk = {
   VARIABLE_NAME: "variables",
   VARIABLE_TYPE: "Variables",
 };
+
+export const WebhookModels = {
+  ISSUE: "Issue",
+};

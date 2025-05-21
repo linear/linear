@@ -5710,6 +5710,99 @@ export class IntegrationsSettingsPayload extends Request {
   }
 }
 /**
+ * Webhook type for
+ * An issue.
+ */
+export type IssueWebhook = {
+  /** The time at which the issue was added to a cycle. */
+  addedToCycleAt?: Date;
+  /** The time at which the issue was added to a project. */
+  addedToProjectAt?: Date;
+  /** The time at which the issue was added to a team. */
+  addedToTeamAt?: Date;
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Date;
+  /** The time at which the issue was automatically archived by the auto pruning process. */
+  autoArchivedAt?: Date;
+  /** The time at which the issue was automatically closed by the auto pruning process. */
+  autoClosedAt?: Date;
+  /** The order of the item in its column on the board. */
+  boardOrder: number;
+  /** Suggested branch name for the issue. */
+  branchName: string;
+  /** The time at which the issue was moved into canceled state. */
+  canceledAt?: Date;
+  /** The time at which the issue was moved into completed state. */
+  completedAt?: Date;
+  /** The time at which the entity was created. */
+  createdAt: Date;
+  /** Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk). */
+  customerTicketCount: number;
+  /** The issue's description in markdown format. */
+  description?: string;
+  /** The date at which the issue is due. */
+  dueDate?: L.Scalars["TimelessDate"];
+  /** The estimate of the complexity of the issue.. */
+  estimate?: number;
+  /** The unique identifier of the entity. */
+  id: string;
+  /** Issue's human readable identifier (e.g. ENG-123). */
+  identifier: string;
+  /** Id of the labels associated with this issue. */
+  labelIds: string[];
+  /** The issue's unique number. */
+  number: number;
+  /** Previous identifiers of the issue if it has been moved between teams. */
+  previousIdentifiers: string[];
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  priority: number;
+  /** Label for the priority. */
+  priorityLabel: string;
+  /** The order of the item in relation to other items in the organization, when ordered by priority. */
+  prioritySortOrder: number;
+  /** Emoji reaction summary, grouped by emoji type. */
+  reactionData: L.Scalars["JSONObject"];
+  /** The time at which the issue's SLA will breach. */
+  slaBreachesAt?: Date;
+  /** The time at which the issue's SLA will enter high risk state. */
+  slaHighRiskAt?: Date;
+  /** The time at which the issue's SLA will enter medium risk state. */
+  slaMediumRiskAt?: Date;
+  /** The time at which the issue's SLA began. */
+  slaStartedAt?: Date;
+  /** The type of SLA set on the issue. Calendar days or business days. */
+  slaType?: string;
+  /** The time until an issue will be snoozed in Triage view. */
+  snoozedUntilAt?: Date;
+  /** The order of the item in relation to other items in the organization. */
+  sortOrder: number;
+  /** The time at which the issue was moved into started state. */
+  startedAt?: Date;
+  /** The time at which the issue entered triage. */
+  startedTriageAt?: Date;
+  /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
+  subIssueSortOrder?: number;
+  /** The issue's title. */
+  title: string;
+  /** A flag that indicates whether the issue is in the trash bin. */
+  trashed?: boolean;
+  /** The time at which the issue left triage. */
+  triagedAt?: Date;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Date;
+  /** Issue URL. */
+  url: string;
+  /** Reactions associated with the issue. */
+  reactions: Reaction[];
+  /** The bot that created the issue, if applicable. */
+  botActor?: ActorBot;
+  /** Integration type that created this issue, if applicable. */
+  integrationSourceType?: L.IntegrationService;
+};
+/**
  * An issue.
  *
  * @param request - function to call the graphql client

@@ -69,7 +69,49 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
     ...model.fields.enum.map(f => f.name),
   ]);
 
+  const isWebhookModel = model.name === "Issue";
+
   return printLines([
+    isWebhookModel
+      ? printLines([
+          printDebug(model),
+          printComment(["Webhook type for", model.node.description?.value ?? `${model.name} model`]),
+          `export type ${model.name}Webhook = {
+        ${printLines([
+          printDebug("fields.scalar"),
+          printLines(
+            model.fields.scalar.map(field =>
+              printModelField(field, `${field.name}${field.nonNull ? "" : "?"}: ${field.type}`)
+            )
+          ),
+          printDebug("fields.scalarList"),
+          printLines(
+            model.fields.scalarList.map(field =>
+              printModelField(field, `${field.name}${field.nonNull ? "" : "?"}: ${field.type}`)
+            )
+          ),
+          printDebug("fields.list"),
+          printLines(
+            model.fields.list.map(field =>
+              printModelField(field, `${field.name}${field.nonNull ? "" : "?"}: ${field.listType}[]`)
+            )
+          ),
+          printDebug("fields.object"),
+          printLines(
+            model.fields.object.map((field /** Ignore objects returned by an operation */) =>
+              printModelField(field, `${field.name}${field.nonNull ? "" : "?"}: ${field.object.name.value}`)
+            )
+          ),
+          printDebug("fields.enum"),
+          printLines(
+            model.fields.enum.map(field =>
+              printModelField(field, `${field.name}${field.nonNull ? "" : "?"}: ${field.type}`)
+            )
+          ),
+        ])}
+      }`,
+        ])
+      : "",
     printDebug(model),
     printComment([model.node.description?.value ?? `${model.name} model`, ...args.jsdoc]),
     `export class ${model.name} extends ${Sdk.REQUEST_CLASS} {
