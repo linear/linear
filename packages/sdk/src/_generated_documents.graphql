@@ -313,6 +313,10 @@ fragment CustomerNeed on CustomerNeed {
   customer {
     id
   }
+  # The issue this customer need was originally created on. Will be undefined if the customer need hasn't been moved.
+  originalIssue {
+    id
+  }
   # The issue this need is referencing.
   issue {
     id
@@ -2273,8 +2277,6 @@ fragment User on User {
   email
   # The user's full name.
   name
-  # Unique hash for the user to be used in invite URLs.
-  inviteHash
   # User's profile URL.
   url
   # Whether the user account is active or disabled (suspended).
@@ -2289,6 +2291,8 @@ fragment User on User {
   isMe
   # [DEPRECATED] Hash for the user to be used in calendar URLs.
   calendarHash
+  # [DEPRECATED] Unique hash for the user to be used in invite URLs.
+  inviteHash
 }
 
 # A user's notification category preferences.
@@ -3037,6 +3041,10 @@ fragment Issue on Issue {
   dueDate
   # The estimate of the complexity of the issue..
   estimate
+  # The external services the issue is synced with.
+  syncedWith {
+    ...ExternalEntityInfo
+  }
   # The external user who created the issue.
   externalUserCreator {
     id
@@ -3263,6 +3271,8 @@ fragment Organization on Organization {
   samlEnabled
   # Whether SCIM provisioning is enabled for organization.
   scimEnabled
+  # Whether label creation, update, and deletion is restricted to admins.
+  restrictLabelManagementToAdmins
   # Whether member users are allowed to send invites.
   allowMembersToInvite
   # Whether team creation is restricted to admins.
@@ -3660,6 +3670,15 @@ fragment WebhookFailureEvent on WebhookFailureEvent {
   }
 }
 
+# Information about an external entity.
+fragment ExternalEntityInfo on ExternalEntityInfo {
+  __typename
+  # The id of the external entity.
+  id
+  # The name of the service this entity is synced with.
+  service
+}
+
 # Issue attachment (e.g. support ticket, pull request).
 fragment Attachment on Attachment {
   __typename
@@ -3685,6 +3704,10 @@ fragment Attachment on Attachment {
   }
   # The issue this attachment belongs to.
   issue {
+    id
+  }
+  # The issue this attachment was originally created on. Will be undefined if the attachment hasn't been moved.
+  originalIssue {
     id
   }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -3819,6 +3842,28 @@ fragment IssueLabel on IssueLabel {
   }
   # Whether this label is considered to be a group.
   isGroup
+}
+
+# Metadata about the external GitHub entity.
+fragment ExternalEntityInfoGithubMetadata on ExternalEntityInfoGithubMetadata {
+  __typename
+  # The number of the issue.
+  number
+  # The owner of the repository.
+  owner
+  # The repository name.
+  repo
+}
+
+# Metadata about the external Jira entity.
+fragment ExternalEntityInfoJiraMetadata on ExternalEntityInfoJiraMetadata {
+  __typename
+  # The id of the Jira issue type.
+  issueTypeId
+  # The id of the Jira project.
+  projectId
+  # The key of the Jira issue.
+  issueKey
 }
 
 # Notification subscriptions for models.
@@ -4556,6 +4601,22 @@ fragment CustomerNeedPayload on CustomerNeedPayload {
   }
   # The identifier of the last sync operation.
   lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment CustomerNeedUpdatePayload on CustomerNeedUpdatePayload {
+  __typename
+  # The customer need that was created or updated.
+  need {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The related customer needs that were updated.
+  updatedRelatedNeeds {
+    ...CustomerNeed
+  }
   # Whether the operation was successful.
   success
 }
@@ -5307,6 +5368,10 @@ fragment IssueSearchResult on IssueSearchResult {
   dueDate
   # The estimate of the complexity of the issue..
   estimate
+  # The external services the issue is synced with.
+  syncedWith {
+    ...ExternalEntityInfo
+  }
   # The external user who created the issue.
   externalUserCreator {
     id
@@ -5412,6 +5477,65 @@ fragment IssueSearchResult on IssueSearchResult {
   state {
     id
   }
+}
+
+fragment IssueSuggestion on IssueSuggestion {
+  __typename
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  issue {
+    id
+  }
+  issueId
+  metadata {
+    ...IssueSuggestionMetadata
+  }
+  state
+  stateChangedAt
+  suggestedIssue {
+    id
+  }
+  suggestedIssueId
+  suggestedLabel {
+    id
+  }
+  suggestedLabelId
+  suggestedProject {
+    id
+  }
+  suggestedTeam {
+    id
+  }
+  suggestedUser {
+    id
+  }
+  suggestedUserId
+  type
+}
+
+fragment IssueSuggestionConnection on IssueSuggestionConnection {
+  __typename
+  nodes {
+    ...IssueSuggestion
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment IssueSuggestionMetadata on IssueSuggestionMetadata {
+  __typename
+  classification
+  evalLogId
+  reasons
+  score
 }
 
 fragment IssueTitleSuggestionFromCustomerRequestPayload on IssueTitleSuggestionFromCustomerRequestPayload {
@@ -6559,6 +6683,72 @@ query attachmentIssue_comments(
     }
   }
 }
+# Attachments previously associated with the issue before being moved to another issue.
+query attachmentIssue_formerAttachments(
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned attachments.
+  $filter: AttachmentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    formerAttachments(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...AttachmentConnection
+    }
+  }
+}
+# Customer needs previously associated with the issue before being moved to another issue.
+query attachmentIssue_formerNeeds(
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned needs.
+  $filter: CustomerNeedFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    formerNeeds(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CustomerNeedConnection
+    }
+  }
+}
 # History entries associated with the issue.
 query attachmentIssue_history(
   # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
@@ -7652,6 +7842,8 @@ query initiative_projects(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # [ALPHA] Whether to include projects from sub-initiatives. Defaults to true.
+  $includeSubInitiatives: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -7664,6 +7856,7 @@ query initiative_projects(
       filter: $filter
       first: $first
       includeArchived: $includeArchived
+      includeSubInitiatives: $includeSubInitiatives
       last: $last
       orderBy: $orderBy
     ) {
@@ -8023,6 +8216,70 @@ query issue_comments(
       orderBy: $orderBy
     ) {
       ...CommentConnection
+    }
+  }
+}
+# Attachments previously associated with the issue before being moved to another issue.
+query issue_formerAttachments(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned attachments.
+  $filter: AttachmentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    formerAttachments(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...AttachmentConnection
+    }
+  }
+}
+# Customer needs previously associated with the issue before being moved to another issue.
+query issue_formerNeeds(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned needs.
+  $filter: CustomerNeedFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    formerNeeds(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CustomerNeedConnection
     }
   }
 }
@@ -8586,6 +8843,72 @@ query issueVcsBranchSearch_comments(
       orderBy: $orderBy
     ) {
       ...CommentConnection
+    }
+  }
+}
+# Attachments previously associated with the issue before being moved to another issue.
+query issueVcsBranchSearch_formerAttachments(
+  # The VCS branch name to search for.
+  $branchName: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned attachments.
+  $filter: AttachmentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issueVcsBranchSearch(branchName: $branchName) {
+    formerAttachments(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...AttachmentConnection
+    }
+  }
+}
+# Customer needs previously associated with the issue before being moved to another issue.
+query issueVcsBranchSearch_formerNeeds(
+  # The VCS branch name to search for.
+  $branchName: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned needs.
+  $filter: CustomerNeedFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issueVcsBranchSearch(branchName: $branchName) {
+    formerNeeds(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CustomerNeedConnection
     }
   }
 }
@@ -11881,7 +12204,7 @@ mutation updateCustomerNeed(
   $input: CustomerNeedUpdateInput!
 ) {
   customerNeedUpdate(id: $id, input: $input) {
-    ...CustomerNeedPayload
+    ...CustomerNeedUpdatePayload
   }
 }
 # Creates a new customer tier.
@@ -12611,6 +12934,19 @@ mutation integrationRequest(
 ) {
   integrationRequest(input: $input) {
     ...IntegrationRequestPayload
+  }
+}
+# Integrates the organization with Salesforce.
+mutation integrationSalesforce(
+  # The Salesforce OAuth code.
+  $code: String!
+  # The Salesforce OAuth redirect URI.
+  $redirectUri: String!
+  # The Salesforce installation subdomain.
+  $subdomain: String!
+) {
+  integrationSalesforce(code: $code, redirectUri: $redirectUri, subdomain: $subdomain) {
+    ...IntegrationPayload
   }
 }
 # Integrates the organization with Sentry.
