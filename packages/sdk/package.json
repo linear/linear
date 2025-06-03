@@ -24,11 +24,12 @@
     "generate:changeset:schema": "ts-node scripts/generate-schema-changeset.ts",
     "generate:clean": "npx rimraf src/**/_generated*",
     "generate:doc": "npx graphql-codegen --config codegen.doc.yml",
-    "generate:schema": "npx graphql-codegen --config codegen.schema.yml",
+    "generate:schema": "npx graphql-codegen --config codegen.schema.yml; npx graphql-codegen --config codegen.webhook-schema.yml",
+    "generate:webhook-schema": "npx graphql-codegen --config codegen.webhook-schema.yml",
     "generate:sdk": "npx graphql-codegen --config codegen.sdk.yml && yarn update:scalars",
     "generate:test": "npx graphql-codegen --config codegen.test.yml",
     "update:scalars": "ts-node scripts/update-scalars.ts",
-    "schema": "npx graphql-codegen --config codegen.schema.yml",
+    "schema": "npx graphql-codegen --config codegen.schema.yml;npx graphql-codegen --config codegen.webhook-schema.yml",
     "scratch": "ts-node src/scratch.ts"
   },
   "dependencies": {

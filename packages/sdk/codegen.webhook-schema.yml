@@ -1,0 +1,15 @@
+overwrite: true
+schema: https://studio.apollographql.com/public/Linear-Webhooks/variant/current
+hooks:
+  afterOneFileWrite:
+    - prettier --write
+generates:
+  src/schema-webhook.json:
+    plugins:
+      - introspection
+  src/schema-webhook.graphql:
+    plugins:
+      - schema-ast
+    config:
+      includeDirectives: true
+      sort: true
