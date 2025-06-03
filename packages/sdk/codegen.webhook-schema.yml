@@ -1,5 +1,5 @@
 overwrite: true
-schema: https://studio.apollographql.com/public/Linear-Webhooks/variant/current
+schema: ./Linear-Webhooks@current.graphql
 hooks:
   afterOneFileWrite:
     - prettier --write

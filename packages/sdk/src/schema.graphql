@@ -61,6 +61,10 @@ type ApiKey implements Node {
   """
   label: String!
   """
+  Organization the API key belongs to.
+  """
+  organization: Organization!
+  """
   The sync groups that this API key requests access to. If null, the API key has access to all sync groups the user has access to. The final set of sync groups is computed as the intersection of these requested groups with the user's base sync groups.
   """
   requestedSyncGroups: [String!]
@@ -325,6 +329,10 @@ type Attachment implements Node {
   Custom metadata related to the attachment.
   """
   metadata: JSONObject!
+  """
+  The issue this attachment was originally created on. Will be undefined if the attachment hasn't been moved.
+  """
+  originalIssue: Issue
   """
   Information about the source which created the attachment.
   """
@@ -1114,6 +1122,10 @@ type Comment implements Node {
   """
   resolvingUser: User
   """
+  The external services the comment is synced with.
+  """
+  syncedWith: [ExternalEntityInfo!]
+  """
   [Internal] A generated summary of the comment thread.
   """
   threadSummary: JSONObject
@@ -1218,7 +1230,7 @@ input CommentCreateInput {
   """
   bodyData: JSON
   """
-  Create comment as a user with the provided name. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  Create comment as a user with the provided name. This option is only available to OAuth applications creating comments in `actor=app` mode.
   """
   createAsUser: String
   """
@@ -1230,7 +1242,7 @@ input CommentCreateInput {
   """
   createdAt: DateTime
   """
-  Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   """
   displayIconUrl: String
   """
@@ -2230,6 +2242,10 @@ type CustomerNeed implements Node {
   """
   issue: Issue
   """
+  The issue this customer need was originally created on. Will be undefined if the customer need hasn't been moved.
+  """
+  originalIssue: Issue
+  """
   Whether the customer need is important or not. 0 = Not important, 1 = Important.
   """
   priority: Float!
@@ -2363,7 +2379,7 @@ input CustomerNeedCreateInput {
   """
   commentId: String
   """
-  Create need as a user with the provided name. This option is only available to OAuth applications creating needs in `actor=application` mode.
+  Create need as a user with the provided name. This option is only available to OAuth applications creating needs in `actor=app` mode.
   """
   createAsUser: String
   """
@@ -2375,7 +2391,7 @@ input CustomerNeedCreateInput {
   """
   customerId: String
   """
-  Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating needs in `actor=application` mode.
+  Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating needs in `actor=app` mode.
   """
   displayIconUrl: String
   """
@@ -2628,6 +2644,25 @@ input CustomerNeedUpdateInput {
   projectId: String
 }
 
+type CustomerNeedUpdatePayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The customer need that was created or updated.
+  """
+  need: CustomerNeed!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+  """
+  The related customer needs that were updated.
+  """
+  updatedRelatedNeeds: [CustomerNeed!]!
+}
+
 """
 A customer notification subscription.
 """
@@ -2819,7 +2854,7 @@ type CustomerStatus implements Node {
   """
   The type of the customer status.
   """
-  type: CustomerStatusType!
+  type: CustomerStatusType @deprecated(reason: "Customer statuses are no longer grouped by type.")
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -2831,6 +2866,29 @@ type CustomerStatusConnection {
   edges: [CustomerStatusEdge!]!
   nodes: [CustomerStatus!]!
   pageInfo: PageInfo!
+}
+
+input CustomerStatusCreateInput {
+  """
+  The UI color of the status as a HEX string.
+  """
+  color: String!
+  """
+  Description of the status.
+  """
+  description: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The name of the status.
+  """
+  name: String!
+  """
+  The position of the status in the workspace's customer flow.
+  """
+  position: Float
 }
 
 type CustomerStatusEdge {
@@ -2887,6 +2945,21 @@ input CustomerStatusFilter {
   updatedAt: DateComparator
 }
 
+type CustomerStatusPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The customer status that was created or updated.
+  """
+  status: CustomerStatus!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 """
 Customer status sorting options.
 """
@@ -2902,11 +2975,30 @@ input CustomerStatusSort {
 }
 
 """
-A type of customer status.
+[DEPRECATED] A type of customer status.
 """
 enum CustomerStatusType {
   active
   inactive
+}
+
+input CustomerStatusUpdateInput {
+  """
+  The UI color of the status as a HEX string.
+  """
+  color: String
+  """
+  Description of the status.
+  """
+  description: String
+  """
+  The name of the status.
+  """
+  name: String
+  """
+  The position of the status in the workspace's customer flow.
+  """
+  position: Float
 }
 
 """
@@ -3683,10 +3775,6 @@ type Dashboard implements Node {
   """
   issueFilter: JSONObject
   """
-  The layout of the widgets on the dashboard.
-  """
-  layout: JSONObject!
-  """
   The name of the dashboard.
   """
   name: String!
@@ -3710,6 +3798,10 @@ type Dashboard implements Node {
   The dashboard's unique URL slug.
   """
   slugId: String!
+  """
+  The sort order of the dashboard within the organization or its team.
+  """
+  sortOrder: Float!
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -5073,6 +5165,96 @@ input EstimateSort {
 }
 
 """
+Information about an external entity.
+"""
+type ExternalEntityInfo {
+  """
+  The id of the external entity.
+  """
+  id: String!
+  """
+  Metadata about the external entity.
+  """
+  metadata: ExternalEntityInfoMetadata
+  """
+  The name of the service this entity is synced with.
+  """
+  service: ExternalSyncService!
+}
+
+"""
+Metadata about the external GitHub entity.
+"""
+type ExternalEntityInfoGithubMetadata {
+  """
+  The number of the issue.
+  """
+  number: Float
+  """
+  The owner of the repository.
+  """
+  owner: String
+  """
+  The repository name.
+  """
+  repo: String
+}
+
+"""
+Metadata about the external Jira entity.
+"""
+type ExternalEntityInfoJiraMetadata {
+  """
+  The key of the Jira issue.
+  """
+  issueKey: String
+  """
+  The id of the Jira issue type.
+  """
+  issueTypeId: String
+  """
+  The id of the Jira project.
+  """
+  projectId: String
+}
+
+union ExternalEntityInfoMetadata =
+  | ExternalEntityInfoGithubMetadata
+  | ExternalEntityInfoJiraMetadata
+  | ExternalEntitySlackMetadata
+
+"""
+Metadata about the external Slack entity.
+"""
+type ExternalEntitySlackMetadata {
+  """
+  The id of the Slack channel.
+  """
+  channelId: String
+  """
+  The name of the Slack channel.
+  """
+  channelName: String
+  """
+  Whether the entity originated from Slack (not Linear).
+  """
+  isFromSlack: Boolean!
+  """
+  The URL of the Slack message.
+  """
+  messageUrl: String
+}
+
+"""
+The service that syncs an external entity to Linear.
+"""
+enum ExternalSyncService {
+  github
+  jira
+  slack
+}
+
+"""
 An external authenticated (e.g., through Slack) user which doesn't have a Linear account, but can create and update entities in Linear from the external system that authenticated them.
 """
 type ExternalUser implements Node {
@@ -5316,6 +5498,10 @@ type Favorite implements Node {
   """
   project: Project
   """
+  [Internal] The favorited project label.
+  """
+  projectLabel: ProjectLabel
+  """
   The targeted tab of the project.
   """
   projectTab: ProjectTab
@@ -5425,6 +5611,10 @@ input FavoriteCreateInput {
   The identifier of the project to favorite.
   """
   projectId: String
+  """
+  [Internal] The identifier of the label to favorite.
+  """
+  projectLabelId: String
   """
   The tab of the project to favorite.
   """
@@ -6167,6 +6357,10 @@ type Initiative implements Node {
   """
   description: String
   """
+  [Internal] Facets associated with the initiative.
+  """
+  facets: [Facet!]!
+  """
   The resolution of the reminder frequency.
   """
   frequencyResolution: FrequencyResolutionType!
@@ -6289,6 +6483,10 @@ type Initiative implements Node {
     """
     includeArchived: Boolean
     """
+    [ALPHA] Whether to include projects from sub-initiatives. Defaults to true.
+    """
+    includeSubInitiatives: Boolean
+    """
     The number of items to backward paginate (used with before). Defaults to 50.
     """
     last: Int
@@ -6313,6 +6511,39 @@ type Initiative implements Node {
   The status of the initiative. One of Planned, Active, Completed
   """
   status: InitiativeStatus!
+  """
+  [ALPHA] Sub-initiatives associated with the initiative.
+  """
+  subInitiatives(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned sub-initiatives.
+    """
+    filter: InitiativeFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): InitiativeConnection!
   """
   The estimated completion date of the initiative.
   """
@@ -7420,6 +7651,13 @@ type IntegrationConnection {
   pageInfo: PageInfo!
 }
 
+input IntegrationCustomerDataAttributesRefreshInput {
+  """
+  The integration service to refresh customer data attributes from.
+  """
+  service: String!
+}
+
 type IntegrationEdge {
   """
   Used in `before` and `after` args
@@ -7528,6 +7766,7 @@ input IntegrationSettingsInput {
   notion: NotionSettingsInput
   opsgenie: OpsgenieInput
   pagerDuty: PagerDutyInput
+  salesforce: SalesforceSettingsInput
   sentry: SentrySettingsInput
   slack: SlackSettingsInput
   slackAsks: SlackAsksSettingsInput
@@ -8081,6 +8320,72 @@ type Issue implements Node {
   """
   favorite: Favorite
   """
+  Attachments previously associated with the issue before being moved to another issue.
+  """
+  formerAttachments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned attachments.
+    """
+    filter: AttachmentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AttachmentConnection!
+  """
+  Customer needs previously associated with the issue before being moved to another issue.
+  """
+  formerNeeds(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned needs.
+    """
+    filter: CustomerNeedFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CustomerNeedConnection!
+  """
   History entries associated with the issue.
   """
   history(
@@ -8117,6 +8422,35 @@ type Issue implements Node {
   Issue's human readable identifier (e.g. ENG-123).
   """
   identifier: String!
+  """
+  [Internal] Incoming product intelligence relation suggestions for the issue.
+  """
+  incomingSuggestions(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueSuggestionConnection!
   """
   Integration type that created this issue, if applicable.
   """
@@ -8387,9 +8721,42 @@ type Issue implements Node {
     orderBy: PaginationOrderBy
   ): UserConnection!
   """
+  [Internal] Product intelligence suggestions for the issue.
+  """
+  suggestions(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueSuggestionConnection!
+  """
   [Internal] The time at which the most recent suggestions for this issue were generated.
   """
   suggestionsGeneratedAt: DateTime
+  """
+  The external services the issue is synced with.
+  """
+  syncedWith: [ExternalEntityInfo!]
   """
   The team that the issue is associated with.
   """
@@ -8566,6 +8933,26 @@ input IssueCollectionFilter {
   """
   hasRelatedRelations: RelationExistsComparator
   """
+  [Internal] Comparator for filtering issues which have suggested assignees.
+  """
+  hasSuggestedAssignees: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have suggested labels.
+  """
+  hasSuggestedLabels: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have suggested projects.
+  """
+  hasSuggestedProjects: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have suggested related issues.
+  """
+  hasSuggestedRelatedIssues: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have suggested similar issues.
+  """
+  hasSuggestedSimilarIssues: RelationExistsComparator
+  """
   Comparator for the identifier.
   """
   id: IDComparator
@@ -8695,7 +9082,7 @@ input IssueCreateInput {
   """
   completedAt: DateTime
   """
-  Create issue as a user with the provided name. This option is only available to OAuth applications creating issues in `actor=application` mode.
+  Create issue as a user with the provided name. This option is only available to OAuth applications creating issues in `actor=app` mode.
   """
   createAsUser: String
   """
@@ -8715,7 +9102,7 @@ input IssueCreateInput {
   """
   descriptionData: JSON
   """
-  Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   """
   displayIconUrl: String
   """
@@ -9061,6 +9448,26 @@ input IssueFilter {
   Comparator for filtering issues with relations.
   """
   hasRelatedRelations: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have suggested assignees.
+  """
+  hasSuggestedAssignees: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have suggested labels.
+  """
+  hasSuggestedLabels: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have suggested projects.
+  """
+  hasSuggestedProjects: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have suggested related issues.
+  """
+  hasSuggestedRelatedIssues: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have suggested similar issues.
+  """
+  hasSuggestedSimilarIssues: RelationExistsComparator
   """
   Comparator for the identifier.
   """
@@ -9648,7 +10055,7 @@ type IssueLabel implements Node {
   """
   inheritedFrom: IssueLabel
   """
-  Whether this label is considered to be a group.
+  Whether the label is a group.
   """
   isGroup: Boolean!
   """
@@ -10390,6 +10797,72 @@ type IssueSearchResult implements Node {
   """
   favorite: Favorite
   """
+  Attachments previously associated with the issue before being moved to another issue.
+  """
+  formerAttachments(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned attachments.
+    """
+    filter: AttachmentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AttachmentConnection!
+  """
+  Customer needs previously associated with the issue before being moved to another issue.
+  """
+  formerNeeds(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned needs.
+    """
+    filter: CustomerNeedFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): CustomerNeedConnection!
+  """
   History entries associated with the issue.
   """
   history(
@@ -10426,6 +10899,35 @@ type IssueSearchResult implements Node {
   Issue's human readable identifier (e.g. ENG-123).
   """
   identifier: String!
+  """
+  [Internal] Incoming product intelligence relation suggestions for the issue.
+  """
+  incomingSuggestions(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueSuggestionConnection!
   """
   Integration type that created this issue, if applicable.
   """
@@ -10700,9 +11202,42 @@ type IssueSearchResult implements Node {
     orderBy: PaginationOrderBy
   ): UserConnection!
   """
+  [Internal] Product intelligence suggestions for the issue.
+  """
+  suggestions(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueSuggestionConnection!
+  """
   [Internal] The time at which the most recent suggestions for this issue were generated.
   """
   suggestionsGeneratedAt: DateTime
+  """
+  The external services the issue is synced with.
+  """
+  syncedWith: [ExternalEntityInfo!]
   """
   The team that the issue is associated with.
   """
@@ -10834,6 +11369,77 @@ input IssueSortInput {
   Sort by workflow state type
   """
   workflowState: WorkflowStateSort
+}
+
+type IssueSuggestion implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  issue: Issue!
+  issueId: String!
+  metadata: IssueSuggestionMetadata
+  state: IssueSuggestionState!
+  stateChangedAt: DateTime!
+  suggestedIssue: Issue
+  suggestedIssueId: String
+  suggestedLabel: IssueLabel
+  suggestedLabelId: String
+  suggestedProject: Project
+  suggestedTeam: Team
+  suggestedUser: User
+  suggestedUserId: String
+  type: IssueSuggestionType!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type IssueSuggestionConnection {
+  edges: [IssueSuggestionEdge!]!
+  nodes: [IssueSuggestion!]!
+  pageInfo: PageInfo!
+}
+
+type IssueSuggestionEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: IssueSuggestion!
+}
+
+type IssueSuggestionMetadata {
+  classification: String
+  evalLogId: String
+  reasons: [String!]
+  score: Float
+}
+
+enum IssueSuggestionState {
+  accepted
+  active
+  dismissed
+  stale
+}
+
+enum IssueSuggestionType {
+  assignee
+  label
+  project
+  relatedIssue
+  similarIssue
+  team
 }
 
 type IssueTitleSuggestionFromCustomerRequestPayload {
@@ -11423,11 +12029,11 @@ type Mutation {
     """
     channelId: String!
     """
-    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
     """
     createAsUser: String
     """
-    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
     """
     displayIconUrl: String
     """
@@ -11460,11 +12066,11 @@ type Mutation {
     """
     conversationId: String!
     """
-    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
     """
     createAsUser: String
     """
-    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
     """
     displayIconUrl: String
     """
@@ -11485,11 +12091,11 @@ type Mutation {
   """
   attachmentLinkGitHubIssue(
     """
-    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
     """
     createAsUser: String
     """
-    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
     """
     displayIconUrl: String
     """
@@ -11514,11 +12120,11 @@ type Mutation {
   """
   attachmentLinkGitHubPR(
     """
-    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
     """
     createAsUser: String
     """
-    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
     """
     displayIconUrl: String
     """
@@ -11547,11 +12153,11 @@ type Mutation {
   """
   attachmentLinkGitLabMR(
     """
-    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
     """
     createAsUser: String
     """
-    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
     """
     displayIconUrl: String
     """
@@ -11588,11 +12194,11 @@ type Mutation {
     """
     conversationId: String!
     """
-    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
     """
     createAsUser: String
     """
-    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
     """
     displayIconUrl: String
     """
@@ -11617,11 +12223,11 @@ type Mutation {
   """
   attachmentLinkJiraIssue(
     """
-    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
     """
     createAsUser: String
     """
-    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
     """
     displayIconUrl: String
     """
@@ -11646,15 +12252,44 @@ type Mutation {
     url: String
   ): AttachmentPayload!
   """
+  Link an existing Salesforce case to an issue.
+  """
+  attachmentLinkSalesforce(
+    """
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
+    """
+    createAsUser: String
+    """
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
+    """
+    displayIconUrl: String
+    """
+    Optional attachment ID that may be provided through the API.
+    """
+    id: String
+    """
+    The issue for which to link the Salesforce case.
+    """
+    issueId: String!
+    """
+    The title to use for the attachment.
+    """
+    title: String
+    """
+    The URL of the Salesforce case to link.
+    """
+    url: String!
+  ): AttachmentPayload!
+  """
   Link an existing Slack message to an issue.
   """
   attachmentLinkSlack(
     """
-    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
     """
     createAsUser: String
     """
-    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
     """
     displayIconUrl: String
     """
@@ -11683,11 +12318,11 @@ type Mutation {
   """
   attachmentLinkURL(
     """
-    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
     """
     createAsUser: String
     """
-    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
     """
     displayIconUrl: String
     """
@@ -11712,11 +12347,11 @@ type Mutation {
   """
   attachmentLinkZendesk(
     """
-    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+    Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
     """
     createAsUser: String
     """
-    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+    Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
     """
     displayIconUrl: String
     """
@@ -11996,7 +12631,38 @@ type Mutation {
     The properties of the customer need to update.
     """
     input: CustomerNeedUpdateInput!
-  ): CustomerNeedPayload!
+  ): CustomerNeedUpdatePayload!
+  """
+  Creates a new customer status.
+  """
+  customerStatusCreate(
+    """
+    The CustomerStatus object to create.
+    """
+    input: CustomerStatusCreateInput!
+  ): CustomerStatusPayload!
+  """
+  Deletes a customer status.
+  """
+  customerStatusDelete(
+    """
+    The identifier of the customer status to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  Updates a customer status.
+  """
+  customerStatusUpdate(
+    """
+    The identifier of the customer status to update.
+    """
+    id: String!
+    """
+    A partial CustomerStatus object to update the CustomerStatus with.
+    """
+    input: CustomerStatusUpdateInput!
+  ): CustomerStatusPayload!
   """
   Creates a new customer tier.
   """
@@ -12586,6 +13252,15 @@ type Mutation {
     redirectUri: String!
   ): AsksChannelConnectPayload!
   """
+  [INTERNAL] Refreshes the customer data attributes from the specified integration service.
+  """
+  integrationCustomerDataAttributesRefresh(
+    """
+    The integration service to refresh customer data attributes from.
+    """
+    input: IntegrationCustomerDataAttributesRefreshInput!
+  ): IntegrationPayload!
+  """
   Deletes an integration.
   """
   integrationDelete(
@@ -12847,6 +13522,23 @@ type Mutation {
     """
     input: IntegrationRequestInput!
   ): IntegrationRequestPayload!
+  """
+  Integrates the organization with Salesforce.
+  """
+  integrationSalesforce(
+    """
+    The Salesforce OAuth code.
+    """
+    code: String!
+    """
+    The Salesforce OAuth redirect URI.
+    """
+    redirectUri: String!
+    """
+    The Salesforce installation subdomain.
+    """
+    subdomain: String!
+  ): IntegrationPayload!
   """
   Integrates the organization with Sentry.
   """
@@ -15993,6 +16685,26 @@ input NullableIssueFilter {
   """
   hasRelatedRelations: RelationExistsComparator
   """
+  [Internal] Comparator for filtering issues which have suggested assignees.
+  """
+  hasSuggestedAssignees: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have suggested labels.
+  """
+  hasSuggestedLabels: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have suggested projects.
+  """
+  hasSuggestedProjects: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have suggested related issues.
+  """
+  hasSuggestedRelatedIssues: RelationExistsComparator
+  """
+  [Internal] Comparator for filtering issues which have suggested similar issues.
+  """
+  hasSuggestedSimilarIssues: RelationExistsComparator
+  """
   Comparator for the identifier.
   """
   id: IDComparator
@@ -16152,6 +16864,10 @@ input NullableProjectFilter {
   Filters that the project's team must satisfy.
   """
   accessibleTeams: TeamCollectionFilter
+  """
+  [ALPHA] Comparator for the project activity type: buzzin, active, some, none
+  """
+  activityType: StringComparator
   """
   Compound filters, all of which need to be matched by the project.
   """
@@ -16927,6 +17643,10 @@ type Organization implements Node {
   """
   deletionRequestedAt: DateTime
   """
+  [Internal] Facets associated with the organization.
+  """
+  facets: [Facet!]!
+  """
   Whether the organization has enabled the feed feature.
   """
   feedEnabled: Boolean!
@@ -17102,6 +17822,10 @@ type Organization implements Node {
   The feature release channel the organization belongs to.
   """
   releaseChannel: ReleaseChannel!
+  """
+  Whether workspace label creation, update, and deletion is restricted to admins.
+  """
+  restrictLabelManagementToAdmins: Boolean
   """
   Whether team creation is restricted to admins.
   """
@@ -17691,6 +18415,10 @@ input OrganizationUpdateInput {
   """
   aiAddonEnabled: Boolean
   """
+  [INTERNAL] Whether the organization has opted in to AI telemetry.
+  """
+  aiTelemetryEnabled: Boolean
+  """
   Whether member users are allowed to send invites.
   """
   allowMembersToInvite: Boolean
@@ -17759,6 +18487,10 @@ input OrganizationUpdateInput {
   """
   oauthAppReview: Boolean
   """
+  [INTERNAL] Whether the organization has enabled the member API keys.
+  """
+  personalApiKeysEnabled: Boolean
+  """
   The n-weekly frequency at which to prompt for project updates.
   """
   projectUpdateReminderFrequencyInWeeks: Float
@@ -17774,6 +18506,10 @@ input OrganizationUpdateInput {
   Whether the organization has opted for reduced customer support attachment information.
   """
   reducedPersonalInformation: Boolean
+  """
+  Whether label creation is restricted to admins.
+  """
+  restrictLabelManagementToAdmins: Boolean
   """
   Whether team creation is restricted to admins.
   """
@@ -18357,6 +19093,10 @@ type Project implements Node {
     """
     orderBy: PaginationOrderBy
   ): EntityExternalLinkConnection!
+  """
+  [Internal] Facets associated with the project.
+  """
+  facets: [Facet!]!
   """
   The user's favorite associated with this project.
   """
@@ -18949,6 +19689,10 @@ input ProjectCollectionFilter {
   """
   accessibleTeams: TeamCollectionFilter
   """
+  [ALPHA] Comparator for the project activity type: buzzin, active, some, none
+  """
+  activityType: StringComparator
+  """
   Compound filters, all of which need to be matched by the project.
   """
   and: [ProjectCollectionFilter!]
@@ -19215,6 +19959,10 @@ input ProjectFilter {
   Filters that the project's team must satisfy.
   """
   accessibleTeams: TeamCollectionFilter
+  """
+  [ALPHA] Comparator for the project activity type: buzzin, active, some, none
+  """
+  activityType: StringComparator
   """
   Compound filters, all of which need to be matched by the project.
   """
@@ -20522,6 +21270,10 @@ type ProjectSearchResult implements Node {
     """
     orderBy: PaginationOrderBy
   ): EntityExternalLinkConnection!
+  """
+  [Internal] Facets associated with the project.
+  """
+  facets: [Facet!]!
   """
   The user's favorite associated with this project.
   """
@@ -24770,6 +25522,37 @@ enum SLADayCountType {
   onlyBusinessDays
 }
 
+input SalesforceSettingsInput {
+  """
+  Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.
+  """
+  automateTicketReopeningOnCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue
+  """
+  automateTicketReopeningOnComment: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear issue is completed.
+  """
+  automateTicketReopeningOnCompletion: Boolean
+  """
+  Whether an internal message should be added when someone comments on an issue.
+  """
+  sendNoteOnComment: Boolean
+  """
+  Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled).
+  """
+  sendNoteOnStatusChange: Boolean
+  """
+  The Salesforce subdomain.
+  """
+  subdomain: String
+  """
+  The Salesforce instance URL.
+  """
+  url: String
+}
+
 """
 [ALPHA] Payload returned by semantic search.
 """
@@ -26283,6 +27066,10 @@ input TeamCreateInput {
   """
   inheritIssueEstimation: Boolean
   """
+  [Internal] Whether the team should inherit its product intelligence scope from its parent. Only applies to sub-teams.
+  """
+  inheritProductIntelligenceScope: Boolean
+  """
   [Internal] Whether the team should inherit workflow statuses from its parent.
   """
   inheritWorkflowStatuses: Boolean
@@ -26701,6 +27488,10 @@ input TeamUpdateInput {
   Whether the team should inherit estimation settings from its parent. Only applies to sub-teams.
   """
   inheritIssueEstimation: Boolean
+  """
+  [Internal] Whether the team should inherit its product intelligence scope from its parent. Only applies to sub-teams.
+  """
+  inheritProductIntelligenceScope: Boolean
   """
   [Internal] Whether the team should inherit workflow statuses from its parent.
   """
@@ -27504,6 +28295,10 @@ type User implements Node {
   """
   email: String!
   """
+  The user's GitHub user ID.
+  """
+  gitHubUserId: String
+  """
   Whether the user is a guest in the workspace and limited to accessing a subset of teams.
   """
   guest: Boolean!
@@ -27516,9 +28311,9 @@ type User implements Node {
   """
   initials: String!
   """
-  Unique hash for the user to be used in invite URLs.
+  [DEPRECATED] Unique hash for the user to be used in invite URLs.
   """
-  inviteHash: String!
+  inviteHash: String! @deprecated(reason: "This hash is not in use anymore, this value will always be empty.")
   """
   Whether the user is the currently authenticated user.
   """
@@ -28380,6 +29175,7 @@ enum ViewType {
   customer
   customers
   cycle
+  dashboards
   embeddedCustomerNeeds
   feedAll
   feedCreated
