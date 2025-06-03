@@ -242,6 +242,10 @@ export class ApiKey extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** Organization the API key belongs to. */
+  public get organization(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
 }
 /**
  * ApiKeyConnection model
@@ -284,6 +288,36 @@ export class ApiKeyPayload extends Request {
   public success: boolean;
   /** The API key that was created. */
   public apiKey: ApiKey;
+}
+/**
+ * Complete payload for an app user notification webhook.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AppUserNotificationWebhookPayloadFragment response data
+ */
+export class AppUserNotificationWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.AppUserNotificationWebhookPayloadFragment) {
+    super(request);
+    this.action = data.action;
+    this.appUserId = data.appUserId;
+    this.createdAt = data.createdAt;
+    this.oauthClientId = data.oauthClientId;
+    this.organizationId = data.organizationId;
+    this.type = data.type;
+  }
+
+  /** The action of the notification. */
+  public action: string;
+  /** The app user id of the webhook. */
+  public appUserId: string;
+  /** The timestamp the webhook was created at. */
+  public createdAt: string;
+  /** The oauth client id of the webhook. */
+  public oauthClientId: string;
+  /** The organization id of the webhook. */
+  public organizationId: string;
+  /** The type of the notification. */
+  public type: string;
 }
 /**
  * Public information of the OAuth application.
@@ -405,6 +439,7 @@ export class Attachment extends Request {
   private _creator?: L.AttachmentFragment["creator"];
   private _externalUserCreator?: L.AttachmentFragment["externalUserCreator"];
   private _issue: L.AttachmentFragment["issue"];
+  private _originalIssue?: L.AttachmentFragment["originalIssue"];
 
   public constructor(request: LinearRequest, data: L.AttachmentFragment) {
     super(request);
@@ -423,6 +458,7 @@ export class Attachment extends Request {
     this._creator = data.creator ?? undefined;
     this._externalUserCreator = data.externalUserCreator ?? undefined;
     this._issue = data.issue;
+    this._originalIssue = data.originalIssue ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -477,6 +513,14 @@ export class Attachment extends Request {
   /** The ID of issue this attachment belongs to. */
   public get issueId(): string | undefined {
     return this._issue?.id;
+  }
+  /** The issue this attachment was originally created on. Will be undefined if the attachment hasn't been moved. */
+  public get originalIssue(): LinearFetch<Issue> | undefined {
+    return this._originalIssue?.id ? new IssueQuery(this._request).fetch(this._originalIssue?.id) : undefined;
+  }
+  /** The ID of issue this attachment was originally created on. will be undefined if the attachment hasn't been moved. */
+  public get originalIssueId(): string | undefined {
+    return this._originalIssue?.id;
   }
 
   /** Creates a new attachment, or updates existing if the same `url` and `issueId` is used. */
@@ -556,6 +600,63 @@ export class AttachmentSourcesPayload extends Request {
 
   /** A unique list of all source types used in this workspace. */
   public sources: L.Scalars["JSONObject"];
+}
+/**
+ * Payload for an attachment webhook.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AttachmentWebhookPayloadFragment response data
+ */
+export class AttachmentWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.AttachmentWebhookPayloadFragment) {
+    super(request);
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.createdAt = data.createdAt;
+    this.creatorId = data.creatorId ?? undefined;
+    this.externalUserCreatorId = data.externalUserCreatorId ?? undefined;
+    this.groupBySource = data.groupBySource;
+    this.id = data.id;
+    this.issueId = data.issueId;
+    this.metadata = data.metadata;
+    this.originalIssueId = data.originalIssueId ?? undefined;
+    this.source = data.source ?? undefined;
+    this.sourceType = data.sourceType ?? undefined;
+    this.subtitle = data.subtitle ?? undefined;
+    this.title = data.title;
+    this.updatedAt = data.updatedAt;
+    this.url = data.url;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the creator of the attachment. */
+  public creatorId?: string;
+  /** The ID of the non-Linear user who created the attachment. */
+  public externalUserCreatorId?: string;
+  /** Whether attachments for the same source application should be grouped in the Linear UI. */
+  public groupBySource: boolean;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the issue this attachment belongs to. */
+  public issueId: string;
+  /** Custom metadata related to the attachment. */
+  public metadata: L.Scalars["JSONObject"];
+  /** The ID of the issue this attachment belonged to originally. */
+  public originalIssueId?: string;
+  /** Information about the source which created the attachment. */
+  public source?: L.Scalars["JSONObject"];
+  /** The source type of the attachment. */
+  public sourceType?: string;
+  /** Optional subtitle of the attachment. */
+  public subtitle?: string;
+  /** The title of the attachment. */
+  public title: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The URL of the attachment. */
+  public url: string;
 }
 /**
  * Workspace audit log entry object.
@@ -872,6 +973,30 @@ export class AuthorizingUser extends Request {
   public name: string;
 }
 /**
+ * Base class for entity webhook payloads.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.BaseEntityWebhookPayloadFragment response data
+ */
+export class BaseEntityWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.BaseEntityWebhookPayloadFragment) {
+    super(request);
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.createdAt = data.createdAt;
+    this.id = data.id;
+    this.updatedAt = data.updatedAt;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+}
+/**
  * A comment associated with an issue.
  *
  * @param request - function to call the graphql client
@@ -903,6 +1028,7 @@ export class Comment extends Request {
     this.documentContent = data.documentContent ? new DocumentContent(request, data.documentContent) : undefined;
     this.externalThread = data.externalThread ? new SyncedExternalThread(request, data.externalThread) : undefined;
     this.reactions = data.reactions.map(node => new Reaction(request, node));
+    this.syncedWith = data.syncedWith ? data.syncedWith.map(node => new ExternalEntityInfo(request, node)) : undefined;
     this._externalUser = data.externalUser ?? undefined;
     this._initiativeUpdate = data.initiativeUpdate ?? undefined;
     this._issue = data.issue ?? undefined;
@@ -938,6 +1064,8 @@ export class Comment extends Request {
   public url: string;
   /** Reactions associated with the comment. */
   public reactions: Reaction[];
+  /** The external services the comment is synced with. */
+  public syncedWith?: ExternalEntityInfo[];
   /** The bot that created the comment. */
   public botActor?: ActorBot;
   /** The document content that the comment is associated with. */
@@ -1030,6 +1158,39 @@ export class Comment extends Request {
   }
 }
 /**
+ * Certain properties of a comment.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CommentChildWebhookPayloadFragment response data
+ */
+export class CommentChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.CommentChildWebhookPayloadFragment) {
+    super(request);
+    this.body = data.body;
+    this.documentContentId = data.documentContentId ?? undefined;
+    this.id = data.id;
+    this.initiativeUpdateId = data.initiativeUpdateId ?? undefined;
+    this.issueId = data.issueId ?? undefined;
+    this.projectUpdateId = data.projectUpdateId ?? undefined;
+    this.userId = data.userId ?? undefined;
+  }
+
+  /** The body of the comment. */
+  public body: string;
+  /** The ID of the document content this comment belongs to. */
+  public documentContentId?: string;
+  /** The ID of the comment. */
+  public id: string;
+  /** The ID of the initiative update this comment belongs to. */
+  public initiativeUpdateId?: string;
+  /** The ID of the issue this comment belongs to. */
+  public issueId?: string;
+  /** The ID of the project update this comment belongs to. */
+  public projectUpdateId?: string;
+  /** The ID of the user who created this comment. */
+  public userId?: string;
+}
+/**
  * CommentConnection model
  *
  * @param request - function to call the graphql client
@@ -1078,6 +1239,108 @@ export class CommentPayload extends Request {
   public get commentId(): string | undefined {
     return this._comment?.id;
   }
+}
+/**
+ * Payload for a comment webhook.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CommentWebhookPayloadFragment response data
+ */
+export class CommentWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.CommentWebhookPayloadFragment) {
+    super(request);
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.body = data.body;
+    this.botActor = data.botActor ?? undefined;
+    this.createdAt = data.createdAt;
+    this.documentContentId = data.documentContentId ?? undefined;
+    this.editedAt = data.editedAt ?? undefined;
+    this.externalUserId = data.externalUserId ?? undefined;
+    this.id = data.id;
+    this.initiativeUpdateId = data.initiativeUpdateId ?? undefined;
+    this.issueId = data.issueId ?? undefined;
+    this.parentId = data.parentId ?? undefined;
+    this.postId = data.postId ?? undefined;
+    this.projectUpdateId = data.projectUpdateId ?? undefined;
+    this.quotedText = data.quotedText ?? undefined;
+    this.reactionData = data.reactionData;
+    this.resolvedAt = data.resolvedAt ?? undefined;
+    this.resolvingCommentId = data.resolvingCommentId ?? undefined;
+    this.resolvingUserId = data.resolvingUserId ?? undefined;
+    this.syncedWith = data.syncedWith ?? undefined;
+    this.updatedAt = data.updatedAt;
+    this.userId = data.userId ?? undefined;
+    this.documentContent = data.documentContent
+      ? new BaseEntityWebhookPayload(request, data.documentContent)
+      : undefined;
+    this.externalUser = data.externalUser ? new ExternalUserChildWebhookPayload(request, data.externalUser) : undefined;
+    this.initiativeUpdate = data.initiativeUpdate
+      ? new InitiativeUpdateChildWebhookPayload(request, data.initiativeUpdate)
+      : undefined;
+    this.issue = data.issue ? new IssueChildWebhookPayload(request, data.issue) : undefined;
+    this.parent = data.parent ? new CommentChildWebhookPayload(request, data.parent) : undefined;
+    this.projectUpdate = data.projectUpdate
+      ? new ProjectUpdateChildWebhookPayload(request, data.projectUpdate)
+      : undefined;
+    this.user = data.user ? new UserChildWebhookPayload(request, data.user) : undefined;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The body of the comment. */
+  public body: string;
+  /** The bot actor data for this comment. */
+  public botActor?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the document content this comment belongs to. */
+  public documentContentId?: string;
+  /** When the comment was last edited. */
+  public editedAt?: string;
+  /** The ID of the external user who created this comment. */
+  public externalUserId?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the initiative update this comment belongs to. */
+  public initiativeUpdateId?: string;
+  /** The ID of the issue this comment belongs to. */
+  public issueId?: string;
+  /** The ID of the parent comment. */
+  public parentId?: string;
+  /** The ID of the post this comment belongs to. */
+  public postId?: string;
+  /** The ID of the project update this comment belongs to. */
+  public projectUpdateId?: string;
+  /** The quoted text in this comment. */
+  public quotedText?: string;
+  /** The reaction data for this comment. */
+  public reactionData: L.Scalars["JSONObject"];
+  /** When the comment was resolved. */
+  public resolvedAt?: string;
+  /** The ID of the comment that resolved this comment. */
+  public resolvingCommentId?: string;
+  /** The ID of the user who resolved this comment. */
+  public resolvingUserId?: string;
+  /** The entity this comment is synced with. */
+  public syncedWith?: L.Scalars["JSONObject"];
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The ID of the user who created this comment. */
+  public userId?: string;
+  /** The document content for this comment. */
+  public documentContent?: BaseEntityWebhookPayload;
+  /** The external user who created this comment. */
+  public externalUser?: ExternalUserChildWebhookPayload;
+  /** The initiative update this comment belongs to. */
+  public initiativeUpdate?: InitiativeUpdateChildWebhookPayload;
+  /** The issue this comment belongs to. */
+  public issue?: IssueChildWebhookPayload;
+  /** The parent comment. */
+  public parent?: CommentChildWebhookPayload;
+  /** The project update this comment belongs to. */
+  public projectUpdate?: ProjectUpdateChildWebhookPayload;
+  /** The user who created this comment. */
+  public user?: UserChildWebhookPayload;
 }
 /**
  * ContactPayload model
@@ -1625,6 +1888,7 @@ export class CustomerNeed extends Request {
   private _creator?: L.CustomerNeedFragment["creator"];
   private _customer?: L.CustomerNeedFragment["customer"];
   private _issue?: L.CustomerNeedFragment["issue"];
+  private _originalIssue?: L.CustomerNeedFragment["originalIssue"];
   private _project?: L.CustomerNeedFragment["project"];
 
   public constructor(request: LinearRequest, data: L.CustomerNeedFragment) {
@@ -1641,6 +1905,7 @@ export class CustomerNeed extends Request {
     this._creator = data.creator ?? undefined;
     this._customer = data.customer ?? undefined;
     this._issue = data.issue ?? undefined;
+    this._originalIssue = data.originalIssue ?? undefined;
     this._project = data.project ?? undefined;
   }
 
@@ -1700,6 +1965,14 @@ export class CustomerNeed extends Request {
   /** The ID of issue this need is referencing. */
   public get issueId(): string | undefined {
     return this._issue?.id;
+  }
+  /** The issue this customer need was originally created on. Will be undefined if the customer need hasn't been moved. */
+  public get originalIssue(): LinearFetch<Issue> | undefined {
+    return this._originalIssue?.id ? new IssueQuery(this._request).fetch(this._originalIssue?.id) : undefined;
+  }
+  /** The ID of issue this customer need was originally created on. will be undefined if the customer need hasn't been moved. */
+  public get originalIssueId(): string | undefined {
+    return this._originalIssue?.id;
   }
   /** The project this need is referencing. */
   public get project(): LinearFetch<Project> | undefined {
@@ -1801,6 +2074,38 @@ export class CustomerNeedPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+  /** The customer need that was created or updated. */
+  public get need(): LinearFetch<CustomerNeed> | undefined {
+    return new CustomerNeedQuery(this._request).fetch({ id: this._need.id });
+  }
+  /** The ID of customer need that was created or updated. */
+  public get needId(): string | undefined {
+    return this._need?.id;
+  }
+}
+/**
+ * CustomerNeedUpdatePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CustomerNeedUpdatePayloadFragment response data
+ */
+export class CustomerNeedUpdatePayload extends Request {
+  private _need: L.CustomerNeedUpdatePayloadFragment["need"];
+
+  public constructor(request: LinearRequest, data: L.CustomerNeedUpdatePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this.updatedRelatedNeeds = data.updatedRelatedNeeds.map(node => new CustomerNeed(request, node));
+    this._need = data.need;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The related customer needs that were updated. */
+  public updatedRelatedNeeds: CustomerNeed[];
   /** The customer need that was created or updated. */
   public get need(): LinearFetch<CustomerNeed> | undefined {
     return new CustomerNeedQuery(this._request).fetch({ id: this._need.id });
@@ -1986,7 +2291,7 @@ export class CustomerStatus extends Request {
     this.name = data.name;
     this.position = data.position;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this.type = data.type;
+    this.type = data.type ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -2009,7 +2314,41 @@ export class CustomerStatus extends Request {
    */
   public updatedAt: Date;
   /** The type of the customer status. */
-  public type: L.CustomerStatusType;
+  public type?: L.CustomerStatusType;
+
+  /** Creates a new customer status. */
+  public create(input: L.CustomerStatusCreateInput) {
+    return new CreateCustomerStatusMutation(this._request).fetch(input);
+  }
+  /** Deletes a customer status. */
+  public delete() {
+    return new DeleteCustomerStatusMutation(this._request).fetch(this.id);
+  }
+  /** Updates a customer status. */
+  public update(input: L.CustomerStatusUpdateInput) {
+    return new UpdateCustomerStatusMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * Certain properties of a customer status.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CustomerStatusChildWebhookPayloadFragment response data
+ */
+export class CustomerStatusChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.CustomerStatusChildWebhookPayloadFragment) {
+    super(request);
+    this.id = data.id;
+    this.name = data.name;
+    this.type = data.type;
+  }
+
+  /** The ID of the customer status. */
+  public id: string;
+  /** The name of the customer status. */
+  public name: string;
+  /** The type of the customer status. */
+  public type: string;
 }
 /**
  * CustomerStatusConnection model
@@ -2030,6 +2369,35 @@ export class CustomerStatusConnection extends Connection<CustomerStatus> {
       data.nodes.map(node => new CustomerStatus(request, node)),
       new PageInfo(request, data.pageInfo)
     );
+  }
+}
+/**
+ * CustomerStatusPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CustomerStatusPayloadFragment response data
+ */
+export class CustomerStatusPayload extends Request {
+  private _status: L.CustomerStatusPayloadFragment["status"];
+
+  public constructor(request: LinearRequest, data: L.CustomerStatusPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._status = data.status;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The customer status that was created or updated. */
+  public get status(): LinearFetch<CustomerStatus> | undefined {
+    return new CustomerStatusQuery(this._request).fetch(this._status.id);
+  }
+  /** The ID of customer status that was created or updated. */
+  public get statusId(): string | undefined {
+    return this._status?.id;
   }
 }
 /**
@@ -2086,6 +2454,30 @@ export class CustomerTier extends Request {
   public update(input: L.CustomerTierUpdateInput) {
     return new UpdateCustomerTierMutation(this._request).fetch(this.id, input);
   }
+}
+/**
+ * Certain properties of a customer tier.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CustomerTierChildWebhookPayloadFragment response data
+ */
+export class CustomerTierChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.CustomerTierChildWebhookPayloadFragment) {
+    super(request);
+    this.color = data.color;
+    this.displayName = data.displayName;
+    this.id = data.id;
+    this.name = data.name;
+  }
+
+  /** The color of the customer tier. */
+  public color: string;
+  /** The display name of the customer tier. */
+  public displayName: string;
+  /** The ID of the customer tier. */
+  public id: string;
+  /** The name of the customer tier. */
+  public name: string;
 }
 /**
  * CustomerTierConnection model
@@ -2272,6 +2664,33 @@ export class CycleArchivePayload extends Request {
   public get entityId(): string | undefined {
     return this._entity?.id;
   }
+}
+/**
+ * Certain properties of a cycle.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CycleChildWebhookPayloadFragment response data
+ */
+export class CycleChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.CycleChildWebhookPayloadFragment) {
+    super(request);
+    this.endsAt = data.endsAt;
+    this.id = data.id;
+    this.name = data.name;
+    this.number = data.number;
+    this.startsAt = data.startsAt;
+  }
+
+  /** The end date of the cycle. */
+  public endsAt: string;
+  /** The ID of the cycle. */
+  public id: string;
+  /** The name of the cycle. */
+  public name: string;
+  /** The number of the cycle. */
+  public number: number;
+  /** The start date of the cycle. */
+  public startsAt: string;
 }
 /**
  * CycleConnection model
@@ -2632,6 +3051,36 @@ export class DocumentArchivePayload extends Request {
   public get entityId(): string | undefined {
     return this._entity?.id;
   }
+}
+/**
+ * Certain properties of a document.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.DocumentChildWebhookPayloadFragment response data
+ */
+export class DocumentChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.DocumentChildWebhookPayloadFragment) {
+    super(request);
+    this.id = data.id;
+    this.initiativeId = data.initiativeId ?? undefined;
+    this.projectId = data.projectId ?? undefined;
+    this.title = data.title;
+    this.initiative = data.initiative ? new InitiativeChildWebhookPayload(request, data.initiative) : undefined;
+    this.project = data.project ? new ProjectChildWebhookPayload(request, data.project) : undefined;
+  }
+
+  /** The ID of the document. */
+  public id: string;
+  /** The ID of the initiative this document belongs to. */
+  public initiativeId?: string;
+  /** The ID of the project this document belongs to. */
+  public projectId?: string;
+  /** The title of the document. */
+  public title: string;
+  /** The initiative this document belongs to. */
+  public initiative?: InitiativeChildWebhookPayload;
+  /** The project this document belongs to. */
+  public project?: ProjectChildWebhookPayload;
 }
 /**
  * DocumentConnection model
@@ -3583,6 +4032,90 @@ export class EntityExternalLinkPayload extends Request {
   }
 }
 /**
+ * Information about an external entity.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ExternalEntityInfoFragment response data
+ */
+export class ExternalEntityInfo extends Request {
+  public constructor(request: LinearRequest, data: L.ExternalEntityInfoFragment) {
+    super(request);
+    this.id = data.id;
+    this.service = data.service;
+  }
+
+  /** The id of the external entity. */
+  public id: string;
+  /** The name of the service this entity is synced with. */
+  public service: L.ExternalSyncService;
+}
+/**
+ * Metadata about the external GitHub entity.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ExternalEntityInfoGithubMetadataFragment response data
+ */
+export class ExternalEntityInfoGithubMetadata extends Request {
+  public constructor(request: LinearRequest, data: L.ExternalEntityInfoGithubMetadataFragment) {
+    super(request);
+    this.number = data.number ?? undefined;
+    this.owner = data.owner ?? undefined;
+    this.repo = data.repo ?? undefined;
+  }
+
+  /** The number of the issue. */
+  public number?: number;
+  /** The owner of the repository. */
+  public owner?: string;
+  /** The repository name. */
+  public repo?: string;
+}
+/**
+ * Metadata about the external Jira entity.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ExternalEntityInfoJiraMetadataFragment response data
+ */
+export class ExternalEntityInfoJiraMetadata extends Request {
+  public constructor(request: LinearRequest, data: L.ExternalEntityInfoJiraMetadataFragment) {
+    super(request);
+    this.issueKey = data.issueKey ?? undefined;
+    this.issueTypeId = data.issueTypeId ?? undefined;
+    this.projectId = data.projectId ?? undefined;
+  }
+
+  /** The key of the Jira issue. */
+  public issueKey?: string;
+  /** The id of the Jira issue type. */
+  public issueTypeId?: string;
+  /** The id of the Jira project. */
+  public projectId?: string;
+}
+/**
+ * Metadata about the external Slack entity.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ExternalEntitySlackMetadataFragment response data
+ */
+export class ExternalEntitySlackMetadata extends Request {
+  public constructor(request: LinearRequest, data: L.ExternalEntitySlackMetadataFragment) {
+    super(request);
+    this.channelId = data.channelId ?? undefined;
+    this.channelName = data.channelName ?? undefined;
+    this.isFromSlack = data.isFromSlack;
+    this.messageUrl = data.messageUrl ?? undefined;
+  }
+
+  /** The id of the Slack channel. */
+  public channelId?: string;
+  /** The name of the Slack channel. */
+  public channelName?: string;
+  /** Whether the entity originated from Slack (not Linear). */
+  public isFromSlack: boolean;
+  /** The URL of the Slack message. */
+  public messageUrl?: string;
+}
+/**
  * An external authenticated (e.g., through Slack) user which doesn't have a Linear account, but can create and update entities in Linear from the external system that authenticated them.
  *
  * @param request - function to call the graphql client
@@ -3627,6 +4160,27 @@ export class ExternalUser extends Request {
   public get organization(): LinearFetch<Organization> {
     return new OrganizationQuery(this._request).fetch();
   }
+}
+/**
+ * Certain properties of an external user.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ExternalUserChildWebhookPayloadFragment response data
+ */
+export class ExternalUserChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.ExternalUserChildWebhookPayloadFragment) {
+    super(request);
+    this.email = data.email;
+    this.id = data.id;
+    this.name = data.name;
+  }
+
+  /** The email of the external user. */
+  public email: string;
+  /** The ID of the external user. */
+  public id: string;
+  /** The name of the external user. */
+  public name: string;
 }
 /**
  * ExternalUserConnection model
@@ -4552,6 +5106,27 @@ export class InitiativeArchivePayload extends Request {
   }
 }
 /**
+ * Certain properties of an initiative.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InitiativeChildWebhookPayloadFragment response data
+ */
+export class InitiativeChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.InitiativeChildWebhookPayloadFragment) {
+    super(request);
+    this.id = data.id;
+    this.name = data.name;
+    this.url = data.url;
+  }
+
+  /** The ID of the initiative. */
+  public id: string;
+  /** The name of the initiative. */
+  public name: string;
+  /** The URL of the initiative. */
+  public url: string;
+}
+/**
  * InitiativeConnection model
  *
  * @param request - function to call the graphql client
@@ -5250,6 +5825,30 @@ export class InitiativeUpdateArchivePayload extends Request {
   }
 }
 /**
+ * Certain properties of an initiative update.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InitiativeUpdateChildWebhookPayloadFragment response data
+ */
+export class InitiativeUpdateChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.InitiativeUpdateChildWebhookPayloadFragment) {
+    super(request);
+    this.bodyData = data.bodyData;
+    this.editedAt = data.editedAt;
+    this.health = data.health;
+    this.id = data.id;
+  }
+
+  /** The body of the initiative update. */
+  public bodyData: string;
+  /** The edited at timestamp of the initiative update. */
+  public editedAt: string;
+  /** The health of the initiative update. */
+  public health: string;
+  /** The ID of the initiative update. */
+  public id: string;
+}
+/**
  * InitiativeUpdateConnection model
  *
  * @param request - function to call the graphql client
@@ -5318,6 +5917,183 @@ export class InitiativeUpdateReminderPayload extends Request {
   public success: boolean;
 }
 /**
+ * Payload for an initiative update webhook.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InitiativeUpdateWebhookPayloadFragment response data
+ */
+export class InitiativeUpdateWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.InitiativeUpdateWebhookPayloadFragment) {
+    super(request);
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.body = data.body;
+    this.bodyData = data.bodyData;
+    this.createdAt = data.createdAt;
+    this.editedAt = data.editedAt;
+    this.health = data.health;
+    this.id = data.id;
+    this.initiativeId = data.initiativeId;
+    this.reactionData = data.reactionData;
+    this.slugId = data.slugId;
+    this.updatedAt = data.updatedAt;
+    this.url = data.url ?? undefined;
+    this.userId = data.userId;
+    this.initiative = new InitiativeChildWebhookPayload(request, data.initiative);
+    this.user = new UserChildWebhookPayload(request, data.user);
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The body of the initiative update. */
+  public body: string;
+  /** The body data of the initiative update. */
+  public bodyData: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The edited at timestamp of the initiative update. */
+  public editedAt: string;
+  /** The health of the initiative update. */
+  public health: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The initiative id of the initiative update. */
+  public initiativeId: string;
+  /** The reaction data for this initiative update. */
+  public reactionData: L.Scalars["JSONObject"];
+  /** The slug id of the initiative update. */
+  public slugId: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The URL of the initiative update. */
+  public url?: string;
+  /** The user id of the initiative update. */
+  public userId: string;
+  /** The initiative that the initiative update belongs to. */
+  public initiative: InitiativeChildWebhookPayload;
+  /** The user that created the initiative update. */
+  public user: UserChildWebhookPayload;
+}
+/**
+ * Payload for an initiative webhook.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.InitiativeWebhookPayloadFragment response data
+ */
+export class InitiativeWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.InitiativeWebhookPayloadFragment) {
+    super(request);
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.color = data.color ?? undefined;
+    this.completedAt = data.completedAt ?? undefined;
+    this.createdAt = data.createdAt;
+    this.creatorId = data.creatorId ?? undefined;
+    this.description = data.description;
+    this.frequencyResolution = data.frequencyResolution;
+    this.health = data.health ?? undefined;
+    this.healthUpdatedAt = data.healthUpdatedAt ?? undefined;
+    this.icon = data.icon ?? undefined;
+    this.id = data.id;
+    this.lastUpdateId = data.lastUpdateId ?? undefined;
+    this.name = data.name;
+    this.organizationId = data.organizationId;
+    this.ownerId = data.ownerId ?? undefined;
+    this.slugId = data.slugId;
+    this.sortOrder = data.sortOrder;
+    this.startedAt = data.startedAt ?? undefined;
+    this.status = data.status;
+    this.targetDate = data.targetDate ?? undefined;
+    this.targetDateResolution = data.targetDateResolution ?? undefined;
+    this.trashed = data.trashed ?? undefined;
+    this.updateReminderFrequency = data.updateReminderFrequency ?? undefined;
+    this.updateReminderFrequencyInWeeks = data.updateReminderFrequencyInWeeks ?? undefined;
+    this.updateRemindersDay = data.updateRemindersDay ?? undefined;
+    this.updateRemindersHour = data.updateRemindersHour ?? undefined;
+    this.updatedAt = data.updatedAt;
+    this.url = data.url;
+    this.creator = data.creator ? new UserChildWebhookPayload(request, data.creator) : undefined;
+    this.lastUpdate = data.lastUpdate ? new InitiativeUpdateChildWebhookPayload(request, data.lastUpdate) : undefined;
+    this.owner = data.owner ? new UserChildWebhookPayload(request, data.owner) : undefined;
+    this.parentInitiative = data.parentInitiative
+      ? new InitiativeChildWebhookPayload(request, data.parentInitiative)
+      : undefined;
+    this.projects = data.projects
+      ? data.projects.map(node => new ProjectChildWebhookPayload(request, node))
+      : undefined;
+    this.subInitiatives = data.subInitiatives
+      ? data.subInitiatives.map(node => new InitiativeChildWebhookPayload(request, node))
+      : undefined;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The color of the initiative. */
+  public color?: string;
+  /** When the initiative was completed. */
+  public completedAt?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the user who created the initiative. */
+  public creatorId?: string;
+  /** The description of the initiative. */
+  public description: string;
+  /** The resolution of the update reminder frequency. */
+  public frequencyResolution: string;
+  /** The health status of the initiative. */
+  public health?: string;
+  /** When the health status was last updated. */
+  public healthUpdatedAt?: string;
+  /** The icon of the initiative. */
+  public icon?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the last update for this initiative. */
+  public lastUpdateId?: string;
+  /** The name of the initiative. */
+  public name: string;
+  /** The ID of the organization this initiative belongs to. */
+  public organizationId: string;
+  /** The ID of the user who owns the initiative. */
+  public ownerId?: string;
+  /** The unique slug identifier of the initiative. */
+  public slugId: string;
+  /** The sort order of the initiative within the organization. */
+  public sortOrder: number;
+  /** When the initiative was started. */
+  public startedAt?: string;
+  /** The current status of the initiative. */
+  public status: string;
+  /** The target date of the initiative. */
+  public targetDate?: string;
+  /** The resolution of the target date. */
+  public targetDateResolution?: string;
+  /** Whether the initiative is trashed. */
+  public trashed?: boolean;
+  /** The frequency of update reminders. */
+  public updateReminderFrequency?: number;
+  /** The frequency of update reminders in weeks. */
+  public updateReminderFrequencyInWeeks?: number;
+  /** The day of the week for update reminders. */
+  public updateRemindersDay?: number;
+  /** The hour of the day for update reminders. */
+  public updateRemindersHour?: number;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The URL of the initiative. */
+  public url: string;
+  /** The projects associated with the initiative. */
+  public projects?: ProjectChildWebhookPayload[];
+  /** The sub-initiatives associated with the initiative. */
+  public subInitiatives?: InitiativeChildWebhookPayload[];
+  /** The user who created the initiative. */
+  public creator?: UserChildWebhookPayload;
+  /** The last update for this initiative. */
+  public lastUpdate?: InitiativeUpdateChildWebhookPayload;
+  /** The user who owns the initiative. */
+  public owner?: UserChildWebhookPayload;
+  /** The parent initiative associated with the initiative. */
+  public parentInitiative?: InitiativeChildWebhookPayload;
+}
+/**
  * An integration with an external service.
  *
  * @param request - function to call the graphql client
@@ -5380,6 +6156,24 @@ export class Integration extends Request {
   public delete() {
     return new DeleteIntegrationMutation(this._request).fetch(this.id);
   }
+}
+/**
+ * Certain properties of an integration.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IntegrationChildWebhookPayloadFragment response data
+ */
+export class IntegrationChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IntegrationChildWebhookPayloadFragment) {
+    super(request);
+    this.id = data.id;
+    this.service = data.service;
+  }
+
+  /** The ID of the integration. */
+  public id: string;
+  /** The service of the integration. */
+  public service: string;
 }
 /**
  * IntegrationConnection model
@@ -5774,6 +6568,7 @@ export class Issue extends Request {
     this.url = data.url;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this.reactions = data.reactions.map(node => new Reaction(request, node));
+    this.syncedWith = data.syncedWith ? data.syncedWith.map(node => new ExternalEntityInfo(request, node)) : undefined;
     this.integrationSourceType = data.integrationSourceType ?? undefined;
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
@@ -5874,6 +6669,8 @@ export class Issue extends Request {
   public url: string;
   /** Reactions associated with the issue. */
   public reactions: Reaction[];
+  /** The external services the issue is synced with. */
+  public syncedWith?: ExternalEntityInfo[];
   /** The bot that created the issue, if applicable. */
   public botActor?: ActorBot;
   /** Integration type that created this issue, if applicable. */
@@ -6010,6 +6807,14 @@ export class Issue extends Request {
   public comments(variables?: Omit<L.Issue_CommentsQueryVariables, "id">) {
     return new Issue_CommentsQuery(this._request, this.id, variables).fetch(variables);
   }
+  /** Attachments previously associated with the issue before being moved to another issue. */
+  public formerAttachments(variables?: Omit<L.Issue_FormerAttachmentsQueryVariables, "id">) {
+    return new Issue_FormerAttachmentsQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Customer needs previously associated with the issue before being moved to another issue. */
+  public formerNeeds(variables?: Omit<L.Issue_FormerNeedsQueryVariables, "id">) {
+    return new Issue_FormerNeedsQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** History entries associated with the issue. */
   public history(variables?: Omit<L.Issue_HistoryQueryVariables, "id">) {
     return new Issue_HistoryQuery(this._request, this.id, variables).fetch(variables);
@@ -6085,6 +6890,48 @@ export class IssueArchivePayload extends Request {
   }
 }
 /**
+ * Payload for an issue assigned to you notification.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueAssignedToYouNotificationWebhookPayloadFragment response data
+ */
+export class IssueAssignedToYouNotificationWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IssueAssignedToYouNotificationWebhookPayloadFragment) {
+    super(request);
+    this.actorId = data.actorId ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.createdAt = data.createdAt;
+    this.id = data.id;
+    this.issueId = data.issueId;
+    this.type = data.type;
+    this.updatedAt = data.updatedAt;
+    this.userId = data.userId;
+    this.actor = data.actor ? new UserChildWebhookPayload(request, data.actor) : undefined;
+    this.issue = new IssueWithDescriptionChildWebhookPayload(request, data.issue);
+  }
+
+  /** The ID of the actor who caused the notification. */
+  public actorId?: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the issue this notification belongs to. */
+  public issueId: string;
+  /** An issue assigned to you notification type. */
+  public type: L.Scalars["IssueAssignedToYouNotificationType"];
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The ID of the user who received the notification. */
+  public userId: string;
+  /** The actor who caused the notification. */
+  public actor?: UserChildWebhookPayload;
+  /** The issue this notification belongs to. */
+  public issue: IssueWithDescriptionChildWebhookPayload;
+}
+/**
  * IssueBatchPayload model
  *
  * @param request - function to call the graphql client
@@ -6104,6 +6951,36 @@ export class IssueBatchPayload extends Request {
   public success: boolean;
   /** The issues that were updated. */
   public issues: Issue[];
+}
+/**
+ * Certain properties of an issue.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueChildWebhookPayloadFragment response data
+ */
+export class IssueChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IssueChildWebhookPayloadFragment) {
+    super(request);
+    this.id = data.id;
+    this.identifier = data.identifier;
+    this.teamId = data.teamId;
+    this.title = data.title;
+    this.url = data.url;
+    this.team = new TeamChildWebhookPayload(request, data.team);
+  }
+
+  /** The ID of the issue. */
+  public id: string;
+  /** The identifier of the issue. */
+  public identifier: string;
+  /** The ID of the team that the issue belongs to. */
+  public teamId: string;
+  /** The title of the issue. */
+  public title: string;
+  /** The URL of the issue. */
+  public url: string;
+  /** The ID of the team that the issue belongs to. */
+  public team: TeamChildWebhookPayload;
 }
 /**
  * IssueConnection model
@@ -6621,7 +7498,7 @@ export class IssueLabel extends Request {
   public description?: string;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Whether this label is considered to be a group. */
+  /** Whether the label is a group. */
   public isGroup: boolean;
   /** The label's name. */
   public name: string;
@@ -6687,6 +7564,30 @@ export class IssueLabel extends Request {
   }
 }
 /**
+ * Certain properties of an issue label.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueLabelChildWebhookPayloadFragment response data
+ */
+export class IssueLabelChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IssueLabelChildWebhookPayloadFragment) {
+    super(request);
+    this.color = data.color;
+    this.id = data.id;
+    this.name = data.name;
+    this.parentId = data.parentId ?? undefined;
+  }
+
+  /** The color of the issue label. */
+  public color: string;
+  /** The ID of the issue label. */
+  public id: string;
+  /** The name of the issue label. */
+  public name: string;
+  /** The parent ID of the issue label. */
+  public parentId?: string;
+}
+/**
  * IssueLabelConnection model
  *
  * @param request - function to call the graphql client
@@ -6735,6 +7636,96 @@ export class IssueLabelPayload extends Request {
   public get issueLabelId(): string | undefined {
     return this._issueLabel?.id;
   }
+}
+/**
+ * Payload for an issue label webhook.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueLabelWebhookPayloadFragment response data
+ */
+export class IssueLabelWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IssueLabelWebhookPayloadFragment) {
+    super(request);
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.color = data.color;
+    this.createdAt = data.createdAt;
+    this.creatorId = data.creatorId ?? undefined;
+    this.description = data.description ?? undefined;
+    this.id = data.id;
+    this.inheritedFromId = data.inheritedFromId ?? undefined;
+    this.isGroup = data.isGroup;
+    this.name = data.name;
+    this.parentId = data.parentId ?? undefined;
+    this.teamId = data.teamId ?? undefined;
+    this.updatedAt = data.updatedAt;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The color of the issue label. */
+  public color: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The creator ID of the issue label. */
+  public creatorId?: string;
+  /** The label's description. */
+  public description?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The original label inherited from. */
+  public inheritedFromId?: string;
+  /** Whether the label is a group. */
+  public isGroup: boolean;
+  /** The name of the issue label. */
+  public name: string;
+  /** The parent ID of the issue label. */
+  public parentId?: string;
+  /** The team ID of the issue label. */
+  public teamId?: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+}
+/**
+ * Payload for an issue mention notification.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueMentionNotificationWebhookPayloadFragment response data
+ */
+export class IssueMentionNotificationWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IssueMentionNotificationWebhookPayloadFragment) {
+    super(request);
+    this.actorId = data.actorId ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.createdAt = data.createdAt;
+    this.id = data.id;
+    this.issueId = data.issueId;
+    this.type = data.type;
+    this.updatedAt = data.updatedAt;
+    this.userId = data.userId;
+    this.actor = data.actor ? new UserChildWebhookPayload(request, data.actor) : undefined;
+    this.issue = new IssueWithDescriptionChildWebhookPayload(request, data.issue);
+  }
+
+  /** The ID of the actor who caused the notification. */
+  public actorId?: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the issue this notification belongs to. */
+  public issueId: string;
+  /** An issue mention notification type. */
+  public type: L.Scalars["IssueMentionNotificationType"];
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The ID of the user who received the notification. */
+  public userId: string;
+  /** The actor who caused the notification. */
+  public actor?: UserChildWebhookPayload;
+  /** The issue this notification belongs to. */
+  public issue: IssueWithDescriptionChildWebhookPayload;
 }
 /**
  * An issue related notification.
@@ -7129,6 +8120,7 @@ export class IssueSearchResult extends Request {
     this.url = data.url;
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this.reactions = data.reactions.map(node => new Reaction(request, node));
+    this.syncedWith = data.syncedWith ? data.syncedWith.map(node => new ExternalEntityInfo(request, node)) : undefined;
     this.integrationSourceType = data.integrationSourceType ?? undefined;
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
@@ -7231,6 +8223,8 @@ export class IssueSearchResult extends Request {
   public url: string;
   /** Reactions associated with the issue. */
   public reactions: Reaction[];
+  /** The external services the issue is synced with. */
+  public syncedWith?: ExternalEntityInfo[];
   /** The bot that created the issue, if applicable. */
   public botActor?: ActorBot;
   /** Integration type that created this issue, if applicable. */
@@ -7357,6 +8351,129 @@ export class IssueSearchResult extends Request {
   }
 }
 /**
+ * IssueSuggestion model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueSuggestionFragment response data
+ */
+export class IssueSuggestion extends Request {
+  private _issue: L.IssueSuggestionFragment["issue"];
+  private _suggestedIssue?: L.IssueSuggestionFragment["suggestedIssue"];
+  private _suggestedLabel?: L.IssueSuggestionFragment["suggestedLabel"];
+  private _suggestedProject?: L.IssueSuggestionFragment["suggestedProject"];
+  private _suggestedTeam?: L.IssueSuggestionFragment["suggestedTeam"];
+  private _suggestedUser?: L.IssueSuggestionFragment["suggestedUser"];
+
+  public constructor(request: LinearRequest, data: L.IssueSuggestionFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.issueId = data.issueId;
+    this.stateChangedAt = parseDate(data.stateChangedAt) ?? new Date();
+    this.suggestedIssueId = data.suggestedIssueId ?? undefined;
+    this.suggestedLabelId = data.suggestedLabelId ?? undefined;
+    this.suggestedUserId = data.suggestedUserId ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.metadata = data.metadata ? new IssueSuggestionMetadata(request, data.metadata) : undefined;
+    this.state = data.state;
+    this.type = data.type;
+    this._issue = data.issue;
+    this._suggestedIssue = data.suggestedIssue ?? undefined;
+    this._suggestedLabel = data.suggestedLabel ?? undefined;
+    this._suggestedProject = data.suggestedProject ?? undefined;
+    this._suggestedTeam = data.suggestedTeam ?? undefined;
+    this._suggestedUser = data.suggestedUser ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  public issueId: string;
+  public stateChangedAt: Date;
+  public suggestedIssueId?: string;
+  public suggestedLabelId?: string;
+  public suggestedUserId?: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  public metadata?: IssueSuggestionMetadata;
+  public state: L.IssueSuggestionState;
+  public type: L.IssueSuggestionType;
+  public get issue(): LinearFetch<Issue> | undefined {
+    return new IssueQuery(this._request).fetch(this._issue.id);
+  }
+  public get suggestedIssue(): LinearFetch<Issue> | undefined {
+    return this._suggestedIssue?.id ? new IssueQuery(this._request).fetch(this._suggestedIssue?.id) : undefined;
+  }
+  public get suggestedLabel(): LinearFetch<IssueLabel> | undefined {
+    return this._suggestedLabel?.id ? new IssueLabelQuery(this._request).fetch(this._suggestedLabel?.id) : undefined;
+  }
+  public get suggestedProject(): LinearFetch<Project> | undefined {
+    return this._suggestedProject?.id ? new ProjectQuery(this._request).fetch(this._suggestedProject?.id) : undefined;
+  }
+  /** The ID of suggestedProject */
+  public get suggestedProjectId(): string | undefined {
+    return this._suggestedProject?.id;
+  }
+  public get suggestedTeam(): LinearFetch<Team> | undefined {
+    return this._suggestedTeam?.id ? new TeamQuery(this._request).fetch(this._suggestedTeam?.id) : undefined;
+  }
+  /** The ID of suggestedTeam */
+  public get suggestedTeamId(): string | undefined {
+    return this._suggestedTeam?.id;
+  }
+  public get suggestedUser(): LinearFetch<User> | undefined {
+    return this._suggestedUser?.id ? new UserQuery(this._request).fetch(this._suggestedUser?.id) : undefined;
+  }
+}
+/**
+ * IssueSuggestionConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this IssueSuggestionConnection model
+ * @param data - IssueSuggestionConnection response data
+ */
+export class IssueSuggestionConnection extends Connection<IssueSuggestion> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueSuggestion> | undefined>,
+    data: L.IssueSuggestionConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new IssueSuggestion(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * IssueSuggestionMetadata model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueSuggestionMetadataFragment response data
+ */
+export class IssueSuggestionMetadata extends Request {
+  public constructor(request: LinearRequest, data: L.IssueSuggestionMetadataFragment) {
+    super(request);
+    this.classification = data.classification ?? undefined;
+    this.evalLogId = data.evalLogId ?? undefined;
+    this.reasons = data.reasons ?? undefined;
+    this.score = data.score ?? undefined;
+  }
+
+  public classification?: string;
+  public evalLogId?: string;
+  public reasons?: string[];
+  public score?: number;
+}
+/**
  * IssueTitleSuggestionFromCustomerRequestPayload model
  *
  * @param request - function to call the graphql client
@@ -7373,6 +8490,241 @@ export class IssueTitleSuggestionFromCustomerRequestPayload extends Request {
   public lastSyncId: number;
   /** The suggested issue title. */
   public title: string;
+}
+/**
+ * Payload for an issue webhook.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueWebhookPayloadFragment response data
+ */
+export class IssueWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IssueWebhookPayloadFragment) {
+    super(request);
+    this.addedToCycleAt = data.addedToCycleAt ?? undefined;
+    this.addedToProjectAt = data.addedToProjectAt ?? undefined;
+    this.addedToTeamAt = data.addedToTeamAt ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.assigneeId = data.assigneeId ?? undefined;
+    this.autoArchivedAt = data.autoArchivedAt ?? undefined;
+    this.autoClosedAt = data.autoClosedAt ?? undefined;
+    this.botActor = data.botActor ?? undefined;
+    this.canceledAt = data.canceledAt ?? undefined;
+    this.completedAt = data.completedAt ?? undefined;
+    this.createdAt = data.createdAt;
+    this.creatorId = data.creatorId ?? undefined;
+    this.cycleId = data.cycleId ?? undefined;
+    this.description = data.description ?? undefined;
+    this.descriptionData = data.descriptionData ?? undefined;
+    this.dueDate = data.dueDate ?? undefined;
+    this.estimate = data.estimate ?? undefined;
+    this.externalUserCreatorId = data.externalUserCreatorId ?? undefined;
+    this.id = data.id;
+    this.identifier = data.identifier;
+    this.integrationSourceType = data.integrationSourceType ?? undefined;
+    this.labelIds = data.labelIds;
+    this.lastAppliedTemplateId = data.lastAppliedTemplateId ?? undefined;
+    this.number = data.number;
+    this.parentId = data.parentId ?? undefined;
+    this.previousIdentifiers = data.previousIdentifiers;
+    this.priority = data.priority;
+    this.priorityLabel = data.priorityLabel;
+    this.prioritySortOrder = data.prioritySortOrder;
+    this.projectId = data.projectId ?? undefined;
+    this.projectMilestoneId = data.projectMilestoneId ?? undefined;
+    this.reactionData = data.reactionData;
+    this.recurringIssueTemplateId = data.recurringIssueTemplateId ?? undefined;
+    this.slaBreachesAt = data.slaBreachesAt ?? undefined;
+    this.slaHighRiskAt = data.slaHighRiskAt ?? undefined;
+    this.slaMediumRiskAt = data.slaMediumRiskAt ?? undefined;
+    this.slaStartedAt = data.slaStartedAt ?? undefined;
+    this.slaType = data.slaType ?? undefined;
+    this.snoozedUntilAt = data.snoozedUntilAt ?? undefined;
+    this.sortOrder = data.sortOrder;
+    this.sourceCommentId = data.sourceCommentId ?? undefined;
+    this.startedAt = data.startedAt ?? undefined;
+    this.startedTriageAt = data.startedTriageAt ?? undefined;
+    this.stateId = data.stateId;
+    this.subIssueSortOrder = data.subIssueSortOrder ?? undefined;
+    this.subscriberIds = data.subscriberIds;
+    this.syncedWith = data.syncedWith ?? undefined;
+    this.teamId = data.teamId;
+    this.title = data.title;
+    this.trashed = data.trashed ?? undefined;
+    this.triagedAt = data.triagedAt ?? undefined;
+    this.updatedAt = data.updatedAt;
+    this.url = data.url;
+    this.assignee = data.assignee ? new UserChildWebhookPayload(request, data.assignee) : undefined;
+    this.creator = data.creator ? new UserChildWebhookPayload(request, data.creator) : undefined;
+    this.cycle = data.cycle ? new CycleChildWebhookPayload(request, data.cycle) : undefined;
+    this.externalUserCreator = data.externalUserCreator
+      ? new ExternalUserChildWebhookPayload(request, data.externalUserCreator)
+      : undefined;
+    this.project = data.project ? new ProjectChildWebhookPayload(request, data.project) : undefined;
+    this.projectMilestone = data.projectMilestone
+      ? new ProjectMilestoneChildWebhookPayload(request, data.projectMilestone)
+      : undefined;
+    this.state = new WorkflowStateChildWebhookPayload(request, data.state);
+    this.team = data.team ? new TeamChildWebhookPayload(request, data.team) : undefined;
+    this.labels = data.labels.map(node => new IssueLabelChildWebhookPayload(request, node));
+  }
+
+  /** The time at which the issue was added to a cycle. */
+  public addedToCycleAt?: string;
+  /** The time at which the issue was added to a project. */
+  public addedToProjectAt?: string;
+  /** The time at which the issue was added to a team. */
+  public addedToTeamAt?: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The ID of the user that is assigned to the issue. */
+  public assigneeId?: string;
+  /** The time at which the issue was auto-archived. */
+  public autoArchivedAt?: string;
+  /** The time at which the issue was auto-closed. */
+  public autoClosedAt?: string;
+  /** The bot actor data for this issue. */
+  public botActor?: string;
+  /** The time at which the issue was canceled. */
+  public canceledAt?: string;
+  /** The time at which the issue was completed. */
+  public completedAt?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the user that created the issue. */
+  public creatorId?: string;
+  /** The ID of the cycle that the issue belongs to. */
+  public cycleId?: string;
+  /** The description of the issue. */
+  public description?: string;
+  /** The description data of the issue. */
+  public descriptionData?: string;
+  /** The due date of the issue. */
+  public dueDate?: string;
+  /** The estimate of the complexity of the issue.. */
+  public estimate?: number;
+  /** The ID of the external user that created the issue. */
+  public externalUserCreatorId?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The identifier of the issue. */
+  public identifier: string;
+  /** Integration type that created this issue, if applicable. */
+  public integrationSourceType?: string;
+  /** Id of the labels associated with this issue. */
+  public labelIds: string[];
+  /** The ID of the last template that was applied to the issue. */
+  public lastAppliedTemplateId?: string;
+  /** The issue's unique number. */
+  public number: number;
+  /** The ID of the parent issue. */
+  public parentId?: string;
+  /** Previous identifiers of the issue if it has been moved between teams. */
+  public previousIdentifiers: string[];
+  /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  public priority: number;
+  /** The label of the issue's priority. */
+  public priorityLabel: string;
+  /** The order of the item in relation to other items in the organization, when ordered by priority. */
+  public prioritySortOrder: number;
+  /** The ID of the project that the issue belongs to. */
+  public projectId?: string;
+  /** The ID of the project milestone that the issue belongs to. */
+  public projectMilestoneId?: string;
+  /** The reaction data for this issue. */
+  public reactionData: L.Scalars["JSONObject"];
+  /** The ID of the recurring issue template that created the issue. */
+  public recurringIssueTemplateId?: string;
+  /** The time at which the issue would breach its SLA. */
+  public slaBreachesAt?: string;
+  /** The time at which the issue would enter SLA high risk. */
+  public slaHighRiskAt?: string;
+  /** The time at which the issue would enter SLA medium risk. */
+  public slaMediumRiskAt?: string;
+  /** The time at which the issue's SLA started. */
+  public slaStartedAt?: string;
+  /** The type of SLA the issue is under. */
+  public slaType?: string;
+  /** The time until an issue will be snoozed in Triage view. */
+  public snoozedUntilAt?: string;
+  /** The order of the item in relation to other items in the organization. */
+  public sortOrder: number;
+  /** The ID of the source comment that the issue was created from. */
+  public sourceCommentId?: string;
+  /** The time at which the issue was moved into started state. */
+  public startedAt?: string;
+  /** The time at which the issue entered triage. */
+  public startedTriageAt?: string;
+  /** The ID of the issue's current workflow state. */
+  public stateId: string;
+  /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
+  public subIssueSortOrder?: number;
+  /** The IDs of the users that are subscribed to the issue. */
+  public subscriberIds: string[];
+  /** The entity this issue is synced with. */
+  public syncedWith?: L.Scalars["JSONObject"];
+  /** The ID of the team that the issue belongs to. */
+  public teamId: string;
+  /** The issue's title. */
+  public title: string;
+  /** A flag that indicates whether the issue is in the trash bin. */
+  public trashed?: boolean;
+  /** The time at which the issue was triaged. */
+  public triagedAt?: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The URL of the issue. */
+  public url: string;
+  /** The labels associated with this issue. */
+  public labels: IssueLabelChildWebhookPayload[];
+  /** The user that is assigned to the issue. */
+  public assignee?: UserChildWebhookPayload;
+  /** The user that created the issue. */
+  public creator?: UserChildWebhookPayload;
+  /** The cycle that the issue belongs to. */
+  public cycle?: CycleChildWebhookPayload;
+  /** The external user that created the issue. */
+  public externalUserCreator?: ExternalUserChildWebhookPayload;
+  /** The project that the issue belongs to. */
+  public project?: ProjectChildWebhookPayload;
+  /** The project milestone that the issue belongs to. */
+  public projectMilestone?: ProjectMilestoneChildWebhookPayload;
+  /** The issue's current workflow state. */
+  public state: WorkflowStateChildWebhookPayload;
+  /** The team that the issue belongs to. */
+  public team?: TeamChildWebhookPayload;
+}
+/**
+ * Certain properties of an issue, including its description.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueWithDescriptionChildWebhookPayloadFragment response data
+ */
+export class IssueWithDescriptionChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IssueWithDescriptionChildWebhookPayloadFragment) {
+    super(request);
+    this.description = data.description ?? undefined;
+    this.id = data.id;
+    this.identifier = data.identifier;
+    this.teamId = data.teamId;
+    this.title = data.title;
+    this.url = data.url;
+    this.team = new TeamChildWebhookPayload(request, data.team);
+  }
+
+  /** The description of the issue. */
+  public description?: string;
+  /** The ID of the issue. */
+  public id: string;
+  /** The identifier of the issue. */
+  public identifier: string;
+  /** The ID of the team that the issue belongs to. */
+  public teamId: string;
+  /** The title of the issue. */
+  public title: string;
+  /** The URL of the issue. */
+  public url: string;
+  /** The ID of the team that the issue belongs to. */
+  public team: TeamChildWebhookPayload;
 }
 /**
  * A label notification subscription.
@@ -8365,6 +9717,24 @@ export class OauthClientApprovalNotification extends Request {
   }
 }
 /**
+ * Certain properties of an OAuth client.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OauthClientChildWebhookPayloadFragment response data
+ */
+export class OauthClientChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OauthClientChildWebhookPayloadFragment) {
+    super(request);
+    this.id = data.id;
+    this.name = data.name;
+  }
+
+  /** The ID of the OAuth client. */
+  public id: string;
+  /** The name of the OAuth client. */
+  public name: string;
+}
+/**
  * An organization. Organizations are root-level objects that contain user accounts and teams.
  *
  * @param request - function to call the graphql client
@@ -8396,6 +9766,7 @@ export class Organization extends Request {
     this.previousUrlKeys = data.previousUrlKeys;
     this.projectUpdateReminderFrequencyInWeeks = data.projectUpdateReminderFrequencyInWeeks ?? undefined;
     this.projectUpdateRemindersHour = data.projectUpdateRemindersHour;
+    this.restrictLabelManagementToAdmins = data.restrictLabelManagementToAdmins ?? undefined;
     this.restrictTeamCreationToAdmins = data.restrictTeamCreationToAdmins ?? undefined;
     this.roadmapEnabled = data.roadmapEnabled;
     this.samlEnabled = data.samlEnabled;
@@ -8463,6 +9834,8 @@ export class Organization extends Request {
   public projectUpdateReminderFrequencyInWeeks?: number;
   /** The hour at which to prompt for project updates. */
   public projectUpdateRemindersHour: number;
+  /** Whether workspace label creation, update, and deletion is restricted to admins. */
+  public restrictLabelManagementToAdmins?: boolean;
   /** Whether team creation is restricted to admins. */
   public restrictTeamCreationToAdmins?: boolean;
   /** Whether the organization is using a roadmap. */
@@ -8912,6 +10285,83 @@ export class OrganizationStartTrialPayload extends Request {
   public success: boolean;
 }
 /**
+ * Generic notification payload.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.OtherNotificationWebhookPayloadFragment response data
+ */
+export class OtherNotificationWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.OtherNotificationWebhookPayloadFragment) {
+    super(request);
+    this.actorId = data.actorId ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.commentId = data.commentId ?? undefined;
+    this.createdAt = data.createdAt;
+    this.documentId = data.documentId ?? undefined;
+    this.id = data.id;
+    this.issueId = data.issueId ?? undefined;
+    this.parentCommentId = data.parentCommentId ?? undefined;
+    this.projectId = data.projectId ?? undefined;
+    this.projectUpdateId = data.projectUpdateId ?? undefined;
+    this.reactionEmoji = data.reactionEmoji ?? undefined;
+    this.updatedAt = data.updatedAt;
+    this.userId = data.userId;
+    this.actor = data.actor ? new UserChildWebhookPayload(request, data.actor) : undefined;
+    this.comment = data.comment ? new CommentChildWebhookPayload(request, data.comment) : undefined;
+    this.document = data.document ? new DocumentChildWebhookPayload(request, data.document) : undefined;
+    this.issue = data.issue ? new IssueWithDescriptionChildWebhookPayload(request, data.issue) : undefined;
+    this.parentComment = data.parentComment ? new CommentChildWebhookPayload(request, data.parentComment) : undefined;
+    this.project = data.project ? new ProjectChildWebhookPayload(request, data.project) : undefined;
+    this.projectUpdate = data.projectUpdate
+      ? new ProjectUpdateChildWebhookPayload(request, data.projectUpdate)
+      : undefined;
+    this.type = data.type;
+  }
+
+  /** The ID of the actor who caused the notification. */
+  public actorId?: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The ID of the comment this notification belongs to. */
+  public commentId?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the document this notification belongs to. */
+  public documentId?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the issue this notification belongs to. */
+  public issueId?: string;
+  /** The ID of the parent comment this notification belongs to. */
+  public parentCommentId?: string;
+  /** The ID of the project this notification belongs to. */
+  public projectId?: string;
+  /** The ID of the project update this notification belongs to. */
+  public projectUpdateId?: string;
+  /** The emoji of the reaction this notification is for. */
+  public reactionEmoji?: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The ID of the user who received the notification. */
+  public userId: string;
+  /** The actor who caused the notification. */
+  public actor?: UserChildWebhookPayload;
+  /** The comment this notification belongs to. */
+  public comment?: CommentChildWebhookPayload;
+  /** The document this notification belongs to. */
+  public document?: DocumentChildWebhookPayload;
+  /** The issue this notification belongs to. */
+  public issue?: IssueWithDescriptionChildWebhookPayload;
+  /** The parent comment this notification belongs to. */
+  public parentComment?: CommentChildWebhookPayload;
+  /** The project this notification belongs to. */
+  public project?: ProjectChildWebhookPayload;
+  /** The project update this notification belongs to. */
+  public projectUpdate?: ProjectUpdateChildWebhookPayload;
+  /** The type of the notification. */
+  public type: L.OtherNotificationType;
+}
+/**
  * PageInfo model
  *
  * @param request - function to call the graphql client
@@ -9357,6 +10807,27 @@ export class ProjectArchivePayload extends Request {
   }
 }
 /**
+ * Certain properties of a project.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectChildWebhookPayloadFragment response data
+ */
+export class ProjectChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.ProjectChildWebhookPayloadFragment) {
+    super(request);
+    this.id = data.id;
+    this.name = data.name;
+    this.url = data.url;
+  }
+
+  /** The ID of the project. */
+  public id: string;
+  /** The name of the project. */
+  public name: string;
+  /** The URL of the project. */
+  public url: string;
+}
+/**
  * ProjectConnection model
  *
  * @param request - function to call the graphql client
@@ -9531,6 +11002,27 @@ export class ProjectMilestone extends Request {
   public update(input: L.ProjectMilestoneUpdateInput) {
     return new UpdateProjectMilestoneMutation(this._request).fetch(this.id, input);
   }
+}
+/**
+ * Certain properties of a project milestone.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectMilestoneChildWebhookPayloadFragment response data
+ */
+export class ProjectMilestoneChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.ProjectMilestoneChildWebhookPayloadFragment) {
+    super(request);
+    this.id = data.id;
+    this.name = data.name;
+    this.targetDate = data.targetDate;
+  }
+
+  /** The ID of the project milestone. */
+  public id: string;
+  /** The name of the project milestone. */
+  public name: string;
+  /** The target date of the project milestone. */
+  public targetDate: string;
 }
 /**
  * ProjectMilestoneConnection model
@@ -10477,6 +11969,30 @@ export class ProjectStatusArchivePayload extends Request {
   }
 }
 /**
+ * Certain properties of a project status.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectStatusChildWebhookPayloadFragment response data
+ */
+export class ProjectStatusChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.ProjectStatusChildWebhookPayloadFragment) {
+    super(request);
+    this.color = data.color;
+    this.id = data.id;
+    this.name = data.name;
+    this.type = data.type;
+  }
+
+  /** The color of the project status. */
+  public color: string;
+  /** The ID of the project status. */
+  public id: string;
+  /** The name of the project status. */
+  public name: string;
+  /** The type of the project status. */
+  public type: string;
+}
+/**
  * ProjectStatusConnection model
  *
  * @param request - function to call the graphql client
@@ -10682,6 +12198,30 @@ export class ProjectUpdateArchivePayload extends Request {
   }
 }
 /**
+ * Certain properties of a project update.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectUpdateChildWebhookPayloadFragment response data
+ */
+export class ProjectUpdateChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.ProjectUpdateChildWebhookPayloadFragment) {
+    super(request);
+    this.body = data.body;
+    this.id = data.id;
+    this.userId = data.userId;
+    this.project = new ProjectChildWebhookPayload(request, data.project);
+  }
+
+  /** The body of the project update. */
+  public body: string;
+  /** The ID of the project update. */
+  public id: string;
+  /** The ID of the user who wrote the project update. */
+  public userId: string;
+  /** The project that the project update belongs to. */
+  public project: ProjectChildWebhookPayload;
+}
+/**
  * ProjectUpdateConnection model
  *
  * @param request - function to call the graphql client
@@ -10748,6 +12288,214 @@ export class ProjectUpdateReminderPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+}
+/**
+ * Payload for a project update webhook.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectUpdateWebhookPayloadFragment response data
+ */
+export class ProjectUpdateWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.ProjectUpdateWebhookPayloadFragment) {
+    super(request);
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.body = data.body;
+    this.bodyData = data.bodyData;
+    this.createdAt = data.createdAt;
+    this.editedAt = data.editedAt;
+    this.health = data.health;
+    this.id = data.id;
+    this.projectId = data.projectId;
+    this.reactionData = data.reactionData;
+    this.slugId = data.slugId;
+    this.updatedAt = data.updatedAt;
+    this.url = data.url ?? undefined;
+    this.userId = data.userId;
+    this.project = new ProjectChildWebhookPayload(request, data.project);
+    this.user = new UserChildWebhookPayload(request, data.user);
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The body of the project update. */
+  public body: string;
+  /** The body data of the project update. */
+  public bodyData: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The edited at timestamp of the project update. */
+  public editedAt: string;
+  /** The health of the project update. */
+  public health: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The project id of the project update. */
+  public projectId: string;
+  /** The reaction data for this project update. */
+  public reactionData: L.Scalars["JSONObject"];
+  /** The slug id of the project update. */
+  public slugId: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The URL of the project update. */
+  public url?: string;
+  /** The user id of the project update. */
+  public userId: string;
+  /** The project that the project update belongs to. */
+  public project: ProjectChildWebhookPayload;
+  /** The user who wrote the project update. */
+  public user: UserChildWebhookPayload;
+}
+/**
+ * Payload for a project webhook.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectWebhookPayloadFragment response data
+ */
+export class ProjectWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.ProjectWebhookPayloadFragment) {
+    super(request);
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.autoArchivedAt = data.autoArchivedAt ?? undefined;
+    this.canceledAt = data.canceledAt ?? undefined;
+    this.color = data.color;
+    this.completedAt = data.completedAt ?? undefined;
+    this.completedIssueCountHistory = data.completedIssueCountHistory;
+    this.completedScopeHistory = data.completedScopeHistory;
+    this.content = data.content ?? undefined;
+    this.convertedFromIssueId = data.convertedFromIssueId ?? undefined;
+    this.createdAt = data.createdAt;
+    this.creatorId = data.creatorId ?? undefined;
+    this.description = data.description;
+    this.documentContentId = data.documentContentId ?? undefined;
+    this.health = data.health ?? undefined;
+    this.healthUpdatedAt = data.healthUpdatedAt ?? undefined;
+    this.icon = data.icon ?? undefined;
+    this.id = data.id;
+    this.inProgressScopeHistory = data.inProgressScopeHistory;
+    this.issueCountHistory = data.issueCountHistory;
+    this.labelIds = data.labelIds;
+    this.lastAppliedTemplateId = data.lastAppliedTemplateId ?? undefined;
+    this.lastUpdateId = data.lastUpdateId ?? undefined;
+    this.leadId = data.leadId ?? undefined;
+    this.memberIds = data.memberIds;
+    this.name = data.name;
+    this.priority = data.priority;
+    this.prioritySortOrder = data.prioritySortOrder;
+    this.projectUpdateRemindersPausedUntilAt = data.projectUpdateRemindersPausedUntilAt ?? undefined;
+    this.scopeHistory = data.scopeHistory;
+    this.slugId = data.slugId;
+    this.sortOrder = data.sortOrder;
+    this.startDate = data.startDate ?? undefined;
+    this.startDateResolution = data.startDateResolution ?? undefined;
+    this.startedAt = data.startedAt ?? undefined;
+    this.statusId = data.statusId;
+    this.targetDate = data.targetDate ?? undefined;
+    this.targetDateResolution = data.targetDateResolution ?? undefined;
+    this.teamIds = data.teamIds;
+    this.trashed = data.trashed ?? undefined;
+    this.updatedAt = data.updatedAt;
+    this.url = data.url;
+    this.lead = data.lead ? new UserChildWebhookPayload(request, data.lead) : undefined;
+    this.status = data.status ? new ProjectStatusChildWebhookPayload(request, data.status) : undefined;
+    this.initiatives = data.initiatives
+      ? data.initiatives.map(node => new InitiativeChildWebhookPayload(request, node))
+      : undefined;
+    this.milestones = data.milestones
+      ? data.milestones.map(node => new ProjectMilestoneChildWebhookPayload(request, node))
+      : undefined;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The auto archived at timestamp of the project. */
+  public autoArchivedAt?: string;
+  /** The canceled at timestamp of the project. */
+  public canceledAt?: string;
+  /** The project's color. */
+  public color: string;
+  /** The completed at timestamp of the project. */
+  public completedAt?: string;
+  /** The number of completed issues in the project after each week. */
+  public completedIssueCountHistory: number[];
+  /** The number of completed estimation points after each week. */
+  public completedScopeHistory: number[];
+  /** The content of the project. */
+  public content?: string;
+  /** The ID of the issue that was converted to the project. */
+  public convertedFromIssueId?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the user who created the project. */
+  public creatorId?: string;
+  /** The project's description. */
+  public description: string;
+  /** The document content ID of the project. */
+  public documentContentId?: string;
+  /** The health of the project. */
+  public health?: string;
+  /** The time at which the project health was updated. */
+  public healthUpdatedAt?: string;
+  /** The icon of the project. */
+  public icon?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The number of in progress estimation points after each week. */
+  public inProgressScopeHistory: number[];
+  /** The total number of issues in the project after each week. */
+  public issueCountHistory: number[];
+  /** IDs of the labels associated with this project. */
+  public labelIds: string[];
+  /** The ID of the last template that was applied to the project. */
+  public lastAppliedTemplateId?: string;
+  /** The ID of the last update posted for this project. */
+  public lastUpdateId?: string;
+  /** The ID of the project lead. */
+  public leadId?: string;
+  /** IDs of the members of the project. */
+  public memberIds: string[];
+  /** The project's name. */
+  public name: string;
+  /** The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
+  public priority: number;
+  /** The sort order for the project within the organization, when ordered by priority. */
+  public prioritySortOrder: number;
+  /** The time at which the project update reminders were paused until. */
+  public projectUpdateRemindersPausedUntilAt?: string;
+  /** The total number of estimation points after each week. */
+  public scopeHistory: number[];
+  /** The project's unique URL slug. */
+  public slugId: string;
+  /** The sort order for the project within the organization. */
+  public sortOrder: number;
+  /** The estimated start date of the project. */
+  public startDate?: string;
+  /** The resolution of the project's estimated start date. */
+  public startDateResolution?: string;
+  /** The time at which the project was moved into started state. */
+  public startedAt?: string;
+  /** The ID of the project status. */
+  public statusId: string;
+  /** The target date of the project. */
+  public targetDate?: string;
+  /** The resolution of the project's target date. */
+  public targetDateResolution?: string;
+  /** IDs of the teams associated with this project. */
+  public teamIds: string[];
+  /** The trashed status of the project. */
+  public trashed?: boolean;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The URL of the project. */
+  public url: string;
+  /** The initiatives associated with the project. */
+  public initiatives?: InitiativeChildWebhookPayload[];
+  /** The milestones associated with the project. */
+  public milestones?: ProjectMilestoneChildWebhookPayload[];
+  /** The project lead. */
+  public lead?: UserChildWebhookPayload;
+  /** The project status. */
+  public status?: ProjectStatusChildWebhookPayload;
 }
 /**
  * A user's web or mobile push notification subscription.
@@ -10992,6 +12740,68 @@ export class ReactionPayload extends Request {
   public lastSyncId: number;
   public success: boolean;
   public reaction: Reaction;
+}
+/**
+ * Payload for a reaction webhook.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReactionWebhookPayloadFragment response data
+ */
+export class ReactionWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.ReactionWebhookPayloadFragment) {
+    super(request);
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.commentId = data.commentId ?? undefined;
+    this.createdAt = data.createdAt;
+    this.emoji = data.emoji;
+    this.externalUserId = data.externalUserId ?? undefined;
+    this.id = data.id;
+    this.initiativeUpdateId = data.initiativeUpdateId ?? undefined;
+    this.issueId = data.issueId ?? undefined;
+    this.postId = data.postId ?? undefined;
+    this.projectUpdateId = data.projectUpdateId ?? undefined;
+    this.updatedAt = data.updatedAt;
+    this.userId = data.userId ?? undefined;
+    this.comment = data.comment ? new CommentChildWebhookPayload(request, data.comment) : undefined;
+    this.issue = data.issue ? new IssueChildWebhookPayload(request, data.issue) : undefined;
+    this.projectUpdate = data.projectUpdate
+      ? new ProjectUpdateChildWebhookPayload(request, data.projectUpdate)
+      : undefined;
+    this.user = data.user ? new UserChildWebhookPayload(request, data.user) : undefined;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The ID of the comment that the reaction is associated with. */
+  public commentId?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** Name of the reaction's emoji. */
+  public emoji: string;
+  /** The ID of the external user that created the reaction. */
+  public externalUserId?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the initiative update that the reaction is associated with. */
+  public initiativeUpdateId?: string;
+  /** The ID of the issue that the reaction is associated with. */
+  public issueId?: string;
+  /** The ID of the post that the reaction is associated with. */
+  public postId?: string;
+  /** The ID of the project update that the reaction is associated with. */
+  public projectUpdateId?: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The ID of the user that created the reaction. */
+  public userId?: string;
+  /** The comment the reaction is associated with. */
+  public comment?: CommentChildWebhookPayload;
+  /** The issue the reaction is associated with. */
+  public issue?: IssueChildWebhookPayload;
+  /** The project update the reaction is associated with. */
+  public projectUpdate?: ProjectUpdateChildWebhookPayload;
+  /** The user that created the reaction. */
+  public user?: UserChildWebhookPayload;
 }
 /**
  * A roadmap for projects.
@@ -11887,6 +13697,27 @@ export class TeamArchivePayload extends Request {
   }
 }
 /**
+ * Certain properties of a team.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.TeamChildWebhookPayloadFragment response data
+ */
+export class TeamChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.TeamChildWebhookPayloadFragment) {
+    super(request);
+    this.id = data.id;
+    this.key = data.key;
+    this.name = data.name;
+  }
+
+  /** The ID of the team. */
+  public id: string;
+  /** The key of the team. */
+  public key: string;
+  /** The name of the team. */
+  public name: string;
+}
+/**
  * TeamConnection model
  *
  * @param request - function to call the graphql client
@@ -12710,6 +14541,7 @@ export class User extends Request {
     this.disableReason = data.disableReason ?? undefined;
     this.displayName = data.displayName;
     this.email = data.email;
+    this.gitHubUserId = data.gitHubUserId ?? undefined;
     this.guest = data.guest;
     this.id = data.id;
     this.initials = data.initials;
@@ -12751,13 +14583,15 @@ export class User extends Request {
   public displayName: string;
   /** The user's email address. */
   public email: string;
+  /** The user's GitHub user ID. */
+  public gitHubUserId?: string;
   /** Whether the user is a guest in the workspace and limited to accessing a subset of teams. */
   public guest: boolean;
   /** The unique identifier of the entity. */
   public id: string;
   /** The initials of the user. */
   public initials: string;
-  /** Unique hash for the user to be used in invite URLs. */
+  /** [DEPRECATED] Unique hash for the user to be used in invite URLs. */
   public inviteHash: string;
   /** Whether the user is the currently authenticated user. */
   public isMe: boolean;
@@ -12876,6 +14710,33 @@ export class UserAuthorizedApplication extends Request {
   public name: string;
   /** Whether or not webhooks are enabled for the application. */
   public webhooksEnabled: boolean;
+}
+/**
+ * Certain properties of a user.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.UserChildWebhookPayloadFragment response data
+ */
+export class UserChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.UserChildWebhookPayloadFragment) {
+    super(request);
+    this.avatarUrl = data.avatarUrl ?? undefined;
+    this.email = data.email;
+    this.id = data.id;
+    this.name = data.name;
+    this.url = data.url;
+  }
+
+  /** The avatar URL of the user. */
+  public avatarUrl?: string;
+  /** The email of the user. */
+  public email: string;
+  /** The ID of the user. */
+  public id: string;
+  /** The name of the user. */
+  public name: string;
+  /** The URL of the user. */
+  public url: string;
 }
 /**
  * UserConnection model
@@ -13205,6 +15066,66 @@ export class UserSettingsPayload extends Request {
   public get userSettings(): LinearFetch<UserSettings> {
     return new UserSettingsQuery(this._request).fetch();
   }
+}
+/**
+ * Payload for a user webhook.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.UserWebhookPayloadFragment response data
+ */
+export class UserWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.UserWebhookPayloadFragment) {
+    super(request);
+    this.active = data.active;
+    this.admin = data.admin;
+    this.app = data.app;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.avatarUrl = data.avatarUrl ?? undefined;
+    this.createdAt = data.createdAt;
+    this.description = data.description ?? undefined;
+    this.disableReason = data.disableReason ?? undefined;
+    this.displayName = data.displayName;
+    this.email = data.email;
+    this.guest = data.guest;
+    this.id = data.id;
+    this.name = data.name;
+    this.timezone = data.timezone ?? undefined;
+    this.updatedAt = data.updatedAt;
+    this.url = data.url;
+  }
+
+  /** Whether the user is active. */
+  public active: boolean;
+  /** Whether the user is an admin. */
+  public admin: boolean;
+  /** Whether the user is an app. */
+  public app: boolean;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The avatar URL of the user. */
+  public avatarUrl?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The description of the user. */
+  public description?: string;
+  /** The reason the user is disabled. */
+  public disableReason?: string;
+  /** The display name of the user. */
+  public displayName: string;
+  /** The email of the user. */
+  public email: string;
+  /** Whether the user is a guest. */
+  public guest: boolean;
+  /** The ID of the entity. */
+  public id: string;
+  /** The name of the user. */
+  public name: string;
+  /** The local timezone of the user. */
+  public timezone?: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The URL of the user. */
+  public url: string;
 }
 /**
  * View preferences.
@@ -13574,6 +15495,30 @@ export class WorkflowStateArchivePayload extends Request {
   public get entityId(): string | undefined {
     return this._entity?.id;
   }
+}
+/**
+ * Certain properties of a workflow state.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.WorkflowStateChildWebhookPayloadFragment response data
+ */
+export class WorkflowStateChildWebhookPayload extends Request {
+  public constructor(request: LinearRequest, data: L.WorkflowStateChildWebhookPayloadFragment) {
+    super(request);
+    this.color = data.color;
+    this.id = data.id;
+    this.name = data.name;
+    this.type = data.type;
+  }
+
+  /** The color of the workflow state. */
+  public color: string;
+  /** The ID of the workflow state. */
+  public id: string;
+  /** The name of the workflow state. */
+  public name: string;
+  /** The type of the workflow state. */
+  public type: string;
 }
 /**
  * WorkflowStateConnection model
@@ -17646,6 +19591,43 @@ export class AttachmentLinkJiraIssueMutation extends Request {
 }
 
 /**
+ * A fetchable AttachmentLinkSalesforce Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AttachmentLinkSalesforceMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AttachmentLinkSalesforce mutation and return a AttachmentPayload
+   *
+   * @param issueId - required issueId to pass to attachmentLinkSalesforce
+   * @param url - required url to pass to attachmentLinkSalesforce
+   * @param variables - variables without 'issueId', 'url' to pass into the AttachmentLinkSalesforceMutation
+   * @returns parsed response from AttachmentLinkSalesforceMutation
+   */
+  public async fetch(
+    issueId: string,
+    url: string,
+    variables?: Omit<L.AttachmentLinkSalesforceMutationVariables, "issueId" | "url">
+  ): LinearFetch<AttachmentPayload> {
+    const response = await this._request<
+      L.AttachmentLinkSalesforceMutation,
+      L.AttachmentLinkSalesforceMutationVariables
+    >(L.AttachmentLinkSalesforceDocument, {
+      issueId,
+      url,
+      ...variables,
+    });
+    const data = response.attachmentLinkSalesforce;
+
+    return new AttachmentPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable AttachmentLinkSlack Mutation
  *
  * @param request - function to call the graphql client
@@ -18465,13 +20447,13 @@ export class UpdateCustomerNeedMutation extends Request {
   }
 
   /**
-   * Call the UpdateCustomerNeed mutation and return a CustomerNeedPayload
+   * Call the UpdateCustomerNeed mutation and return a CustomerNeedUpdatePayload
    *
    * @param id - required id to pass to updateCustomerNeed
    * @param input - required input to pass to updateCustomerNeed
    * @returns parsed response from UpdateCustomerNeedMutation
    */
-  public async fetch(id: string, input: L.CustomerNeedUpdateInput): LinearFetch<CustomerNeedPayload> {
+  public async fetch(id: string, input: L.CustomerNeedUpdateInput): LinearFetch<CustomerNeedUpdatePayload> {
     const response = await this._request<L.UpdateCustomerNeedMutation, L.UpdateCustomerNeedMutationVariables>(
       L.UpdateCustomerNeedDocument,
       {
@@ -18481,7 +20463,96 @@ export class UpdateCustomerNeedMutation extends Request {
     );
     const data = response.customerNeedUpdate;
 
-    return new CustomerNeedPayload(this._request, data);
+    return new CustomerNeedUpdatePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateCustomerStatus Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateCustomerStatusMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateCustomerStatus mutation and return a CustomerStatusPayload
+   *
+   * @param input - required input to pass to createCustomerStatus
+   * @returns parsed response from CreateCustomerStatusMutation
+   */
+  public async fetch(input: L.CustomerStatusCreateInput): LinearFetch<CustomerStatusPayload> {
+    const response = await this._request<L.CreateCustomerStatusMutation, L.CreateCustomerStatusMutationVariables>(
+      L.CreateCustomerStatusDocument,
+      {
+        input,
+      }
+    );
+    const data = response.customerStatusCreate;
+
+    return new CustomerStatusPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable DeleteCustomerStatus Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class DeleteCustomerStatusMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the DeleteCustomerStatus mutation and return a DeletePayload
+   *
+   * @param id - required id to pass to deleteCustomerStatus
+   * @returns parsed response from DeleteCustomerStatusMutation
+   */
+  public async fetch(id: string): LinearFetch<DeletePayload> {
+    const response = await this._request<L.DeleteCustomerStatusMutation, L.DeleteCustomerStatusMutationVariables>(
+      L.DeleteCustomerStatusDocument,
+      {
+        id,
+      }
+    );
+    const data = response.customerStatusDelete;
+
+    return new DeletePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateCustomerStatus Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateCustomerStatusMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateCustomerStatus mutation and return a CustomerStatusPayload
+   *
+   * @param id - required id to pass to updateCustomerStatus
+   * @param input - required input to pass to updateCustomerStatus
+   * @returns parsed response from UpdateCustomerStatusMutation
+   */
+  public async fetch(id: string, input: L.CustomerStatusUpdateInput): LinearFetch<CustomerStatusPayload> {
+    const response = await this._request<L.UpdateCustomerStatusMutation, L.UpdateCustomerStatusMutationVariables>(
+      L.UpdateCustomerStatusDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.customerStatusUpdate;
+
+    return new CustomerStatusPayload(this._request, data);
   }
 }
 
@@ -20680,6 +22751,39 @@ export class IntegrationRequestMutation extends Request {
     const data = response.integrationRequest;
 
     return new IntegrationRequestPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationSalesforce Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationSalesforceMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationSalesforce mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationSalesforce
+   * @param redirectUri - required redirectUri to pass to integrationSalesforce
+   * @param subdomain - required subdomain to pass to integrationSalesforce
+   * @returns parsed response from IntegrationSalesforceMutation
+   */
+  public async fetch(code: string, redirectUri: string, subdomain: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<L.IntegrationSalesforceMutation, L.IntegrationSalesforceMutationVariables>(
+      L.IntegrationSalesforceDocument,
+      {
+        code,
+        redirectUri,
+        subdomain,
+      }
+    );
+    const data = response.integrationSalesforce;
+
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -25316,6 +27420,116 @@ export class AttachmentIssue_CommentsQuery extends Request {
 }
 
 /**
+ * A fetchable AttachmentIssue_FormerAttachments Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ * @param variables - variables without 'id' to pass into the AttachmentIssue_FormerAttachmentsQuery
+ */
+export class AttachmentIssue_FormerAttachmentsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AttachmentIssue_FormerAttachmentsQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AttachmentIssue_FormerAttachmentsQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AttachmentIssue_FormerAttachments query and return a AttachmentConnection
+   *
+   * @param variables - variables without 'id' to pass into the AttachmentIssue_FormerAttachmentsQuery
+   * @returns parsed response from AttachmentIssue_FormerAttachmentsQuery
+   */
+  public async fetch(
+    variables?: Omit<L.AttachmentIssue_FormerAttachmentsQueryVariables, "id">
+  ): LinearFetch<AttachmentConnection> {
+    const response = await this._request<
+      L.AttachmentIssue_FormerAttachmentsQuery,
+      L.AttachmentIssue_FormerAttachmentsQueryVariables
+    >(L.AttachmentIssue_FormerAttachmentsDocument, {
+      id: this._id,
+      ...this._variables,
+      ...variables,
+    });
+    const data = response.attachmentIssue.formerAttachments;
+
+    return new AttachmentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable AttachmentIssue_FormerNeeds Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to attachmentIssue
+ * @param variables - variables without 'id' to pass into the AttachmentIssue_FormerNeedsQuery
+ */
+export class AttachmentIssue_FormerNeedsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AttachmentIssue_FormerNeedsQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AttachmentIssue_FormerNeedsQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AttachmentIssue_FormerNeeds query and return a CustomerNeedConnection
+   *
+   * @param variables - variables without 'id' to pass into the AttachmentIssue_FormerNeedsQuery
+   * @returns parsed response from AttachmentIssue_FormerNeedsQuery
+   */
+  public async fetch(
+    variables?: Omit<L.AttachmentIssue_FormerNeedsQueryVariables, "id">
+  ): LinearFetch<CustomerNeedConnection> {
+    const response = await this._request<
+      L.AttachmentIssue_FormerNeedsQuery,
+      L.AttachmentIssue_FormerNeedsQueryVariables
+    >(L.AttachmentIssue_FormerNeedsDocument, {
+      id: this._id,
+      ...this._variables,
+      ...variables,
+    });
+    const data = response.attachmentIssue.formerNeeds;
+
+    return new CustomerNeedConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable AttachmentIssue_History Query
  *
  * @param request - function to call the graphql client
@@ -26627,6 +28841,110 @@ export class Issue_CommentsQuery extends Request {
 }
 
 /**
+ * A fetchable Issue_FormerAttachments Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to issue
+ * @param variables - variables without 'id' to pass into the Issue_FormerAttachmentsQuery
+ */
+export class Issue_FormerAttachmentsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Issue_FormerAttachmentsQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.Issue_FormerAttachmentsQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Issue_FormerAttachments query and return a AttachmentConnection
+   *
+   * @param variables - variables without 'id' to pass into the Issue_FormerAttachmentsQuery
+   * @returns parsed response from Issue_FormerAttachmentsQuery
+   */
+  public async fetch(
+    variables?: Omit<L.Issue_FormerAttachmentsQueryVariables, "id">
+  ): LinearFetch<AttachmentConnection> {
+    const response = await this._request<L.Issue_FormerAttachmentsQuery, L.Issue_FormerAttachmentsQueryVariables>(
+      L.Issue_FormerAttachmentsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.issue.formerAttachments;
+
+    return new AttachmentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Issue_FormerNeeds Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to issue
+ * @param variables - variables without 'id' to pass into the Issue_FormerNeedsQuery
+ */
+export class Issue_FormerNeedsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Issue_FormerNeedsQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Issue_FormerNeedsQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Issue_FormerNeeds query and return a CustomerNeedConnection
+   *
+   * @param variables - variables without 'id' to pass into the Issue_FormerNeedsQuery
+   * @returns parsed response from Issue_FormerNeedsQuery
+   */
+  public async fetch(variables?: Omit<L.Issue_FormerNeedsQueryVariables, "id">): LinearFetch<CustomerNeedConnection> {
+    const response = await this._request<L.Issue_FormerNeedsQuery, L.Issue_FormerNeedsQueryVariables>(
+      L.Issue_FormerNeedsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.issue.formerNeeds;
+
+    return new CustomerNeedConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Issue_History Query
  *
  * @param request - function to call the graphql client
@@ -27204,6 +29522,122 @@ export class IssueVcsBranchSearch_CommentsQuery extends Request {
     const data = response.issueVcsBranchSearch?.comments;
     if (data) {
       return new CommentConnection(
+        this._request,
+        connection =>
+          this.fetch(
+            defaultConnection({
+              ...this._variables,
+              ...variables,
+              ...connection,
+            })
+          ),
+        data
+      );
+    } else {
+      return undefined;
+    }
+  }
+}
+
+/**
+ * A fetchable IssueVcsBranchSearch_FormerAttachments Query
+ *
+ * @param request - function to call the graphql client
+ * @param branchName - required branchName to pass to issueVcsBranchSearch
+ * @param variables - variables without 'branchName' to pass into the IssueVcsBranchSearch_FormerAttachmentsQuery
+ */
+export class IssueVcsBranchSearch_FormerAttachmentsQuery extends Request {
+  private _branchName: string;
+  private _variables?: Omit<L.IssueVcsBranchSearch_FormerAttachmentsQueryVariables, "branchName">;
+
+  public constructor(
+    request: LinearRequest,
+    branchName: string,
+    variables?: Omit<L.IssueVcsBranchSearch_FormerAttachmentsQueryVariables, "branchName">
+  ) {
+    super(request);
+    this._branchName = branchName;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the IssueVcsBranchSearch_FormerAttachments query and return a AttachmentConnection
+   *
+   * @param variables - variables without 'branchName' to pass into the IssueVcsBranchSearch_FormerAttachmentsQuery
+   * @returns parsed response from IssueVcsBranchSearch_FormerAttachmentsQuery
+   */
+  public async fetch(
+    variables?: Omit<L.IssueVcsBranchSearch_FormerAttachmentsQueryVariables, "branchName">
+  ): LinearFetch<AttachmentConnection | undefined> {
+    const response = await this._request<
+      L.IssueVcsBranchSearch_FormerAttachmentsQuery,
+      L.IssueVcsBranchSearch_FormerAttachmentsQueryVariables
+    >(L.IssueVcsBranchSearch_FormerAttachmentsDocument, {
+      branchName: this._branchName,
+      ...this._variables,
+      ...variables,
+    });
+    const data = response.issueVcsBranchSearch?.formerAttachments;
+    if (data) {
+      return new AttachmentConnection(
+        this._request,
+        connection =>
+          this.fetch(
+            defaultConnection({
+              ...this._variables,
+              ...variables,
+              ...connection,
+            })
+          ),
+        data
+      );
+    } else {
+      return undefined;
+    }
+  }
+}
+
+/**
+ * A fetchable IssueVcsBranchSearch_FormerNeeds Query
+ *
+ * @param request - function to call the graphql client
+ * @param branchName - required branchName to pass to issueVcsBranchSearch
+ * @param variables - variables without 'branchName' to pass into the IssueVcsBranchSearch_FormerNeedsQuery
+ */
+export class IssueVcsBranchSearch_FormerNeedsQuery extends Request {
+  private _branchName: string;
+  private _variables?: Omit<L.IssueVcsBranchSearch_FormerNeedsQueryVariables, "branchName">;
+
+  public constructor(
+    request: LinearRequest,
+    branchName: string,
+    variables?: Omit<L.IssueVcsBranchSearch_FormerNeedsQueryVariables, "branchName">
+  ) {
+    super(request);
+    this._branchName = branchName;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the IssueVcsBranchSearch_FormerNeeds query and return a CustomerNeedConnection
+   *
+   * @param variables - variables without 'branchName' to pass into the IssueVcsBranchSearch_FormerNeedsQuery
+   * @returns parsed response from IssueVcsBranchSearch_FormerNeedsQuery
+   */
+  public async fetch(
+    variables?: Omit<L.IssueVcsBranchSearch_FormerNeedsQueryVariables, "branchName">
+  ): LinearFetch<CustomerNeedConnection | undefined> {
+    const response = await this._request<
+      L.IssueVcsBranchSearch_FormerNeedsQuery,
+      L.IssueVcsBranchSearch_FormerNeedsQueryVariables
+    >(L.IssueVcsBranchSearch_FormerNeedsDocument, {
+      branchName: this._branchName,
+      ...this._variables,
+      ...variables,
+    });
+    const data = response.issueVcsBranchSearch?.formerNeeds;
+    if (data) {
+      return new CustomerNeedConnection(
         this._request,
         connection =>
           this.fetch(
@@ -31777,6 +34211,21 @@ export class LinearSdk extends Request {
     return new AttachmentLinkJiraIssueMutation(this._request).fetch(issueId, jiraIssueId, variables);
   }
   /**
+   * Link an existing Salesforce case to an issue.
+   *
+   * @param issueId - required issueId to pass to attachmentLinkSalesforce
+   * @param url - required url to pass to attachmentLinkSalesforce
+   * @param variables - variables without 'issueId', 'url' to pass into the AttachmentLinkSalesforceMutation
+   * @returns AttachmentPayload
+   */
+  public attachmentLinkSalesforce(
+    issueId: string,
+    url: string,
+    variables?: Omit<L.AttachmentLinkSalesforceMutationVariables, "issueId" | "url">
+  ): LinearFetch<AttachmentPayload> {
+    return new AttachmentLinkSalesforceMutation(this._request).fetch(issueId, url, variables);
+  }
+  /**
    * Link an existing Slack message to an issue.
    *
    * @param issueId - required issueId to pass to attachmentLinkSlack
@@ -32061,10 +34510,38 @@ export class LinearSdk extends Request {
    *
    * @param id - required id to pass to updateCustomerNeed
    * @param input - required input to pass to updateCustomerNeed
-   * @returns CustomerNeedPayload
+   * @returns CustomerNeedUpdatePayload
    */
-  public updateCustomerNeed(id: string, input: L.CustomerNeedUpdateInput): LinearFetch<CustomerNeedPayload> {
+  public updateCustomerNeed(id: string, input: L.CustomerNeedUpdateInput): LinearFetch<CustomerNeedUpdatePayload> {
     return new UpdateCustomerNeedMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Creates a new customer status.
+   *
+   * @param input - required input to pass to createCustomerStatus
+   * @returns CustomerStatusPayload
+   */
+  public createCustomerStatus(input: L.CustomerStatusCreateInput): LinearFetch<CustomerStatusPayload> {
+    return new CreateCustomerStatusMutation(this._request).fetch(input);
+  }
+  /**
+   * Deletes a customer status.
+   *
+   * @param id - required id to pass to deleteCustomerStatus
+   * @returns DeletePayload
+   */
+  public deleteCustomerStatus(id: string): LinearFetch<DeletePayload> {
+    return new DeleteCustomerStatusMutation(this._request).fetch(id);
+  }
+  /**
+   * Updates a customer status.
+   *
+   * @param id - required id to pass to updateCustomerStatus
+   * @param input - required input to pass to updateCustomerStatus
+   * @returns CustomerStatusPayload
+   */
+  public updateCustomerStatus(id: string, input: L.CustomerStatusUpdateInput): LinearFetch<CustomerStatusPayload> {
+    return new UpdateCustomerStatusMutation(this._request).fetch(id, input);
   }
   /**
    * Creates a new customer tier.
@@ -32798,6 +35275,17 @@ export class LinearSdk extends Request {
    */
   public integrationRequest(input: L.IntegrationRequestInput): LinearFetch<IntegrationRequestPayload> {
     return new IntegrationRequestMutation(this._request).fetch(input);
+  }
+  /**
+   * Integrates the organization with Salesforce.
+   *
+   * @param code - required code to pass to integrationSalesforce
+   * @param redirectUri - required redirectUri to pass to integrationSalesforce
+   * @param subdomain - required subdomain to pass to integrationSalesforce
+   * @returns IntegrationPayload
+   */
+  public integrationSalesforce(code: string, redirectUri: string, subdomain: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationSalesforceMutation(this._request).fetch(code, redirectUri, subdomain);
   }
   /**
    * Integrates the organization with Sentry.
