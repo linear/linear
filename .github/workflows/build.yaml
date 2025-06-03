@@ -27,6 +27,14 @@ jobs:
         with:
           node-version: "18"
 
+      - name: Install Rover
+        uses: apollographql-gh-actions/install-rover@v1
+
+      - name: Fetch webhook schema
+        run: rover graph fetch Linear-Webhooks@current --output ../packages/sdk/Linear-Webhooks@current.graphql
+        env:
+          APOLLO_KEY: ${{ secrets.APOLLO_WEBHOOK_KEY }}
+
       - name: Install dependencies
         run: yarn
 
