@@ -1,13 +1,13 @@
-overwrite: true
+overwrite: false
 schema: ./Linear-Webhooks@current.graphql
 hooks:
   afterOneFileWrite:
     - prettier --write
 generates:
-  src/schema-webhook.json:
+  src/schema.json:
     plugins:
       - introspection
-  src/schema-webhook.graphql:
+  src/schema.graphql:
     plugins:
       - schema-ast
     config:
