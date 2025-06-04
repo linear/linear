@@ -17,9 +17,9 @@ export type Scalars = {
   /** Represents a duration in ISO 8601 format. Accepts ISO 8601 duration strings or integers in milliseconds. */
   Duration: any;
   /** An issue assignment notification type. */
-  IssueAssignedToYouNotificationType: any;
+  IssueAssignedToYouNotificationType: "issueAssignedToYou";
   /** An issue mention notification type. */
-  IssueMentionNotificationType: any;
+  IssueMentionNotificationType: "issueMention";
   /** The `JSON` scalar type represents arbitrary values as *stringified* JSON */
   JSON: Record<string, unknown>;
   /** The `JSONObject` scalar type represents arbitrary values as *embedded* JSON */

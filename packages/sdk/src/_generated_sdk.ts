@@ -6921,7 +6921,7 @@ export class IssueAssignedToYouNotificationWebhookPayload extends Request {
   /** The ID of the issue this notification belongs to. */
   public issueId: string;
   /** An issue assigned to you notification type. */
-  public type: L.Scalars["IssueAssignedToYouNotificationType"];
+  public type: "issueAssignedToYou";
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The ID of the user who received the notification. */
@@ -7717,7 +7717,7 @@ export class IssueMentionNotificationWebhookPayload extends Request {
   /** The ID of the issue this notification belongs to. */
   public issueId: string;
   /** An issue mention notification type. */
-  public type: L.Scalars["IssueMentionNotificationType"];
+  public type: "issueMention";
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The ID of the user who received the notification. */
