@@ -72,6 +72,29 @@ export interface ImportResult {
   resourceURLSuffix?: string;
 }
 
+
+/** Input for creating an issue through the Importer. */
+export interface ImportIssue {
+  title: string;
+  description?: string;
+  status?: string; // This might map to a stateId later
+  assigneeId?: string;
+  priority?: IssuePriority;
+  // comments?: Comment[]; // Comments might need separate handling if supported
+  // labels?: string[]; // Label names or IDs
+  url?: string;
+  createdAt?: Date;
+  dueDate?: Date;
+  completedAt?: Date;
+  startedAt?: Date;
+  archived?: boolean;
+  estimate?: number;
+  teamId: string; // Target team for the issue
+  stateId?: string; // Target state for the issue
+  projectId?: string; // Target project for the issue
+}
+
+
 /**
  * Generic importer interface.
  */

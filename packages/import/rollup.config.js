@@ -29,7 +29,15 @@ export default [
         sourcemap: true,
       },
     ],
-    plugins: [typescript(), commonjs(), json()],
+    plugins: [
+      typescript(),
+      commonjs({
+        sourceMap: true, // Enable source maps for CommonJS modules
+        transformMixedEsModules: true, // Allow transforming mixed ES/CommonJS modules
+      }),
+      json(),
+    ],
+    external: ["@linear/sdk", "@microsoft/microsoft-graph-client", "isomorphic-fetch", "chalk", "inquirer", "cli-progress", "date-fns", "lodash", "ora", "csvtojson", "fs", "inquirer-file-path", "jira2md", "node-fetch"],
   },
   {
     input: "src/index.ts",
@@ -47,7 +55,17 @@ export default [
         sourcemap: true,
       },
     ],
-    plugins: [typescript(), resolve(), commonjs(), json(), ...minPlugins],
+    plugins: [
+      resolve(),
+      typescript(),
+      commonjs({
+        sourceMap: true,
+        transformMixedEsModules: true,
+      }),
+      json(),
+      ...minPlugins
+    ],
+    external: ["@linear/sdk", "@microsoft/microsoft-graph-client", "isomorphic-fetch"],
   },
   {
     input: "src/index.ts",
@@ -65,6 +83,15 @@ export default [
         sourcemap: true,
       },
     ],
-    plugins: [typescript()],
+    plugins: [
+      resolve(),
+      typescript(),
+      commonjs({ // Added commonjs here as well, as it was missing
+        sourceMap: true,
+        transformMixedEsModules: true,
+      }),
+      json()
+    ],
+    external: ["@linear/sdk", "@microsoft/microsoft-graph-client", "isomorphic-fetch"],
   },
 ];

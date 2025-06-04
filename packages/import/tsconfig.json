@@ -3,7 +3,9 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "declarationDir": "dist"
+    "declarationDir": "dist",
+    "moduleResolution": "node", // Explicitly set moduleResolution
+    "esModuleInterop": true // Add esModuleInterop
   },
   "exclude": ["bin", "src/_tests", "dist", "rollup.config.js"]
 }

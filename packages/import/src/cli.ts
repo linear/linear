@@ -11,6 +11,8 @@ import { linearCsvImporter } from "./importers/linearCsv";
 import { pivotalCsvImport } from "./importers/pivotalCsv";
 import { shortcutCsvImport } from "./importers/shortcutCsv";
 import { trelloJsonImport } from "./importers/trelloJson";
+// MS Planner Importer - Import the function
+import { plannerImporter } from "./importers/planner";
 import { ImportAnswers } from "./types";
 
 inquirer.registerPrompt("filePath", require("inquirer-file-path"));
@@ -60,6 +62,11 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
             name: "Linear (CSV export)",
             value: "linearCsv",
           },
+          // MS Planner Importer - Add to list of choices
+          {
+            name: "Microsoft Planner",
+            value: "planner",
+          },
         ],
       },
     ]);
@@ -90,6 +97,10 @@ inquirer.registerPrompt("filePath", require("inquirer-file-path"));
         break;
       case "linearCsv":
         importer = await linearCsvImporter();
+        break;
+      // MS Planner Importer - Add new case
+      case "planner":
+        importer = await plannerImporter(importAnswers.linearApiKey);
         break;
       default:
         console.log(chalk.red(`Invalid importer`));

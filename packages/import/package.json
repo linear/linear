@@ -37,7 +37,8 @@
     "jira2md": "2.0.4",
     "lodash": "4.17.21",
     "node-fetch": "2.6.1",
-    "ora": "^5.4.1"
+    "ora": "^5.4.1",
+    "@microsoft/microsoft-graph-client": "^3.0.7"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.1.0",

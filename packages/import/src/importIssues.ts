@@ -46,8 +46,9 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
 
   let spinner = ora("Fetching teams and users").start();
 
+  // Explicitly type team and user for sort function
   const allTeams = await client.paginate(client.teams, {});
-  allTeams.sort((a, b) => a.displayName.localeCompare(b.displayName));
+  allTeams.sort((a: { displayName: string }, b: { displayName: string }) => a.displayName.localeCompare(b.displayName));
 
   const allUsers = await client.paginate(client.users, { includeDisabled: false });
 
@@ -76,7 +77,7 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
       name: "targetTeamId",
       message: "Import into team:",
       choices: async () => {
-        return allTeams.map(team => ({
+        return allTeams.map((team: { key: string; displayName: string; id: string }) => ({
           name: `[${team.key}] ${team.displayName}`,
           value: team.id,
         }));
@@ -116,7 +117,7 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
         const teamProjects = await team?.projects();
 
         const projects = teamProjects?.nodes ?? [];
-        return projects.map(project => ({
+        return projects.map((project: { name: string; id: string }) => ({
           name: project.name,
           value: project.id,
         }));
@@ -144,7 +145,7 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
       name: "targetAssignee",
       message: "Assign to user:",
       choices: () => {
-        const map = allUsers.map(user => ({
+        const map = allUsers.map((user: { name: string; id: string }) => ({
           name: user.name,
           value: user.id,
         }));
@@ -173,7 +174,7 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
     teamId = team?.id;
   } else {
     // Use existing team
-    const existingTeam = allTeams?.find(team => team.id === importAnswers.targetTeamId);
+    const existingTeam = allTeams?.find((team: { id: string }) => team.id === importAnswers.targetTeamId);
 
     teamKey = existingTeam?.key;
     teamId = importAnswers.targetTeamId as string;
@@ -334,7 +335,7 @@ const createIssueWithRetries = async (
   client: LinearClient,
   input: Parameters<LinearClient["createIssue"]>[0],
   retries = 3
-): ReturnType<LinearClient["createIssue"]> => {
+): Promise<any> => { // Changed ReturnType to Promise<any>
   try {
     return await client.createIssue(input);
   } catch (error) {

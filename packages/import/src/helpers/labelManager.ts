@@ -284,24 +284,26 @@ class LabelManager {
 
   private async initializeLabels(existingLabels: IssueLabel[]) {
     // We want to process groups first.
-    existingLabels.sort(a => (a.isGroup ? -1 : 1));
+    existingLabels.sort((a: IssueLabel, b: IssueLabel) => (a.isGroup ? -1 : b.isGroup ? 1 : 0)); // Added types for sort
 
     const isExisting = true;
 
     for (const existingLabel of existingLabels) {
       const labelName = existingLabel.name;
-      const teamId = (await existingLabel.team)?.id ?? WORKSPACE_ID;
+      // Ensure teamId is of type Id | typeof WORKSPACE_ID
+      const teamIdForLabel: Id | typeof WORKSPACE_ID = (await existingLabel.team)?.id ?? WORKSPACE_ID;
+
 
       if (existingLabel.isGroup && labelName && existingLabel.id) {
-        this.addLabel({ label: new GroupLabel(existingLabel.id, labelName, isExisting), teamId });
+        this.addLabel({ label: new GroupLabel(existingLabel.id, labelName, isExisting), teamId: teamIdForLabel });
       } else if (labelName && existingLabel.id) {
         const parent = await existingLabel.parent;
 
         if (parent) {
-          const group = this.idToLabel[parent.id]?.[teamId] as GroupLabel;
-          this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), parent: group, teamId });
+          const group = this.idToLabel[parent.id]?.[teamIdForLabel] as GroupLabel;
+          this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), parent: group, teamId: teamIdForLabel });
         } else {
-          this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), teamId });
+          this.addLabel({ label: new Label(existingLabel.id, labelName, isExisting), teamId: teamIdForLabel });
         }
       }
     }
