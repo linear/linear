@@ -10905,6 +10905,10 @@ input IssueLabelCollectionFilter {
   """
   name: StringComparator
   """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
   Compound filters, one of which need to be matched by the label.
   """
   or: [IssueLabelCollectionFilter!]
@@ -21634,6 +21638,10 @@ input ProjectLabelCollectionFilter {
   """
   name: StringComparator
   """
+  Filter based on the existence of the relation.
+  """
+  null: Boolean
+  """
   Compound filters, one of which need to be matched by the label.
   """
   or: [ProjectLabelCollectionFilter!]
@@ -31616,6 +31624,10 @@ type WorkspaceAuthorizedApplicationWithMemberships {
   UserIds and membership dates of everyone who has authorized the application
   """
   memberships: [AuthMembership!]!
+  """
+  Total number of members that authorized the application.
+  """
+  totalMembers: Float!
 }
 
 input ZendeskSettingsInput {

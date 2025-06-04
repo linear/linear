@@ -292,12 +292,10 @@ export class ApiKeyPayload extends Request {
 /**
  * Complete payload for an app user notification webhook.
  *
- * @param request - function to call the graphql client
  * @param data - L.AppUserNotificationWebhookPayloadFragment response data
  */
-export class AppUserNotificationWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.AppUserNotificationWebhookPayloadFragment) {
-    super(request);
+export class AppUserNotificationWebhookPayload {
+  public constructor(data: L.AppUserNotificationWebhookPayloadFragment) {
     this.action = data.action;
     this.appUserId = data.appUserId;
     this.createdAt = data.createdAt;
@@ -604,12 +602,10 @@ export class AttachmentSourcesPayload extends Request {
 /**
  * Payload for an attachment webhook.
  *
- * @param request - function to call the graphql client
  * @param data - L.AttachmentWebhookPayloadFragment response data
  */
-export class AttachmentWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.AttachmentWebhookPayloadFragment) {
-    super(request);
+export class AttachmentWebhookPayload {
+  public constructor(data: L.AttachmentWebhookPayloadFragment) {
     this.archivedAt = data.archivedAt ?? undefined;
     this.createdAt = data.createdAt;
     this.creatorId = data.creatorId ?? undefined;
@@ -975,12 +971,10 @@ export class AuthorizingUser extends Request {
 /**
  * Base class for entity webhook payloads.
  *
- * @param request - function to call the graphql client
  * @param data - L.BaseEntityWebhookPayloadFragment response data
  */
-export class BaseEntityWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.BaseEntityWebhookPayloadFragment) {
-    super(request);
+export class BaseEntityWebhookPayload {
+  public constructor(data: L.BaseEntityWebhookPayloadFragment) {
     this.archivedAt = data.archivedAt ?? undefined;
     this.createdAt = data.createdAt;
     this.id = data.id;
@@ -1160,12 +1154,10 @@ export class Comment extends Request {
 /**
  * Certain properties of a comment.
  *
- * @param request - function to call the graphql client
  * @param data - L.CommentChildWebhookPayloadFragment response data
  */
-export class CommentChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.CommentChildWebhookPayloadFragment) {
-    super(request);
+export class CommentChildWebhookPayload {
+  public constructor(data: L.CommentChildWebhookPayloadFragment) {
     this.body = data.body;
     this.documentContentId = data.documentContentId ?? undefined;
     this.id = data.id;
@@ -1243,12 +1235,10 @@ export class CommentPayload extends Request {
 /**
  * Payload for a comment webhook.
  *
- * @param request - function to call the graphql client
  * @param data - L.CommentWebhookPayloadFragment response data
  */
-export class CommentWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.CommentWebhookPayloadFragment) {
-    super(request);
+export class CommentWebhookPayload {
+  public constructor(data: L.CommentWebhookPayloadFragment) {
     this.archivedAt = data.archivedAt ?? undefined;
     this.body = data.body;
     this.botActor = data.botActor ?? undefined;
@@ -1270,19 +1260,15 @@ export class CommentWebhookPayload extends Request {
     this.syncedWith = data.syncedWith ?? undefined;
     this.updatedAt = data.updatedAt;
     this.userId = data.userId ?? undefined;
-    this.documentContent = data.documentContent
-      ? new BaseEntityWebhookPayload(request, data.documentContent)
-      : undefined;
-    this.externalUser = data.externalUser ? new ExternalUserChildWebhookPayload(request, data.externalUser) : undefined;
+    this.documentContent = data.documentContent ? new BaseEntityWebhookPayload(data.documentContent) : undefined;
+    this.externalUser = data.externalUser ? new ExternalUserChildWebhookPayload(data.externalUser) : undefined;
     this.initiativeUpdate = data.initiativeUpdate
-      ? new InitiativeUpdateChildWebhookPayload(request, data.initiativeUpdate)
+      ? new InitiativeUpdateChildWebhookPayload(data.initiativeUpdate)
       : undefined;
-    this.issue = data.issue ? new IssueChildWebhookPayload(request, data.issue) : undefined;
-    this.parent = data.parent ? new CommentChildWebhookPayload(request, data.parent) : undefined;
-    this.projectUpdate = data.projectUpdate
-      ? new ProjectUpdateChildWebhookPayload(request, data.projectUpdate)
-      : undefined;
-    this.user = data.user ? new UserChildWebhookPayload(request, data.user) : undefined;
+    this.issue = data.issue ? new IssueChildWebhookPayload(data.issue) : undefined;
+    this.parent = data.parent ? new CommentChildWebhookPayload(data.parent) : undefined;
+    this.projectUpdate = data.projectUpdate ? new ProjectUpdateChildWebhookPayload(data.projectUpdate) : undefined;
+    this.user = data.user ? new UserChildWebhookPayload(data.user) : undefined;
   }
 
   /** The time at which the entity was archived. */
@@ -2335,12 +2321,10 @@ export class CustomerStatus extends Request {
 /**
  * Certain properties of a customer status.
  *
- * @param request - function to call the graphql client
  * @param data - L.CustomerStatusChildWebhookPayloadFragment response data
  */
-export class CustomerStatusChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.CustomerStatusChildWebhookPayloadFragment) {
-    super(request);
+export class CustomerStatusChildWebhookPayload {
+  public constructor(data: L.CustomerStatusChildWebhookPayloadFragment) {
     this.id = data.id;
     this.name = data.name;
     this.type = data.type;
@@ -2461,12 +2445,10 @@ export class CustomerTier extends Request {
 /**
  * Certain properties of a customer tier.
  *
- * @param request - function to call the graphql client
  * @param data - L.CustomerTierChildWebhookPayloadFragment response data
  */
-export class CustomerTierChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.CustomerTierChildWebhookPayloadFragment) {
-    super(request);
+export class CustomerTierChildWebhookPayload {
+  public constructor(data: L.CustomerTierChildWebhookPayloadFragment) {
     this.color = data.color;
     this.displayName = data.displayName;
     this.id = data.id;
@@ -2671,12 +2653,10 @@ export class CycleArchivePayload extends Request {
 /**
  * Certain properties of a cycle.
  *
- * @param request - function to call the graphql client
  * @param data - L.CycleChildWebhookPayloadFragment response data
  */
-export class CycleChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.CycleChildWebhookPayloadFragment) {
-    super(request);
+export class CycleChildWebhookPayload {
+  public constructor(data: L.CycleChildWebhookPayloadFragment) {
     this.endsAt = data.endsAt;
     this.id = data.id;
     this.name = data.name;
@@ -3058,18 +3038,16 @@ export class DocumentArchivePayload extends Request {
 /**
  * Certain properties of a document.
  *
- * @param request - function to call the graphql client
  * @param data - L.DocumentChildWebhookPayloadFragment response data
  */
-export class DocumentChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.DocumentChildWebhookPayloadFragment) {
-    super(request);
+export class DocumentChildWebhookPayload {
+  public constructor(data: L.DocumentChildWebhookPayloadFragment) {
     this.id = data.id;
     this.initiativeId = data.initiativeId ?? undefined;
     this.projectId = data.projectId ?? undefined;
     this.title = data.title;
-    this.initiative = data.initiative ? new InitiativeChildWebhookPayload(request, data.initiative) : undefined;
-    this.project = data.project ? new ProjectChildWebhookPayload(request, data.project) : undefined;
+    this.initiative = data.initiative ? new InitiativeChildWebhookPayload(data.initiative) : undefined;
+    this.project = data.project ? new ProjectChildWebhookPayload(data.project) : undefined;
   }
 
   /** The ID of the document. */
@@ -4167,12 +4145,10 @@ export class ExternalUser extends Request {
 /**
  * Certain properties of an external user.
  *
- * @param request - function to call the graphql client
  * @param data - L.ExternalUserChildWebhookPayloadFragment response data
  */
-export class ExternalUserChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.ExternalUserChildWebhookPayloadFragment) {
-    super(request);
+export class ExternalUserChildWebhookPayload {
+  public constructor(data: L.ExternalUserChildWebhookPayloadFragment) {
     this.email = data.email;
     this.id = data.id;
     this.name = data.name;
@@ -5111,12 +5087,10 @@ export class InitiativeArchivePayload extends Request {
 /**
  * Certain properties of an initiative.
  *
- * @param request - function to call the graphql client
  * @param data - L.InitiativeChildWebhookPayloadFragment response data
  */
-export class InitiativeChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.InitiativeChildWebhookPayloadFragment) {
-    super(request);
+export class InitiativeChildWebhookPayload {
+  public constructor(data: L.InitiativeChildWebhookPayloadFragment) {
     this.id = data.id;
     this.name = data.name;
     this.url = data.url;
@@ -5830,12 +5804,10 @@ export class InitiativeUpdateArchivePayload extends Request {
 /**
  * Certain properties of an initiative update.
  *
- * @param request - function to call the graphql client
  * @param data - L.InitiativeUpdateChildWebhookPayloadFragment response data
  */
-export class InitiativeUpdateChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.InitiativeUpdateChildWebhookPayloadFragment) {
-    super(request);
+export class InitiativeUpdateChildWebhookPayload {
+  public constructor(data: L.InitiativeUpdateChildWebhookPayloadFragment) {
     this.bodyData = data.bodyData;
     this.editedAt = data.editedAt;
     this.health = data.health;
@@ -5922,12 +5894,10 @@ export class InitiativeUpdateReminderPayload extends Request {
 /**
  * Payload for an initiative update webhook.
  *
- * @param request - function to call the graphql client
  * @param data - L.InitiativeUpdateWebhookPayloadFragment response data
  */
-export class InitiativeUpdateWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.InitiativeUpdateWebhookPayloadFragment) {
-    super(request);
+export class InitiativeUpdateWebhookPayload {
+  public constructor(data: L.InitiativeUpdateWebhookPayloadFragment) {
     this.archivedAt = data.archivedAt ?? undefined;
     this.body = data.body;
     this.bodyData = data.bodyData;
@@ -5941,8 +5911,8 @@ export class InitiativeUpdateWebhookPayload extends Request {
     this.updatedAt = data.updatedAt;
     this.url = data.url ?? undefined;
     this.userId = data.userId;
-    this.initiative = new InitiativeChildWebhookPayload(request, data.initiative);
-    this.user = new UserChildWebhookPayload(request, data.user);
+    this.initiative = new InitiativeChildWebhookPayload(data.initiative);
+    this.user = new UserChildWebhookPayload(data.user);
   }
 
   /** The time at which the entity was archived. */
@@ -5979,12 +5949,10 @@ export class InitiativeUpdateWebhookPayload extends Request {
 /**
  * Payload for an initiative webhook.
  *
- * @param request - function to call the graphql client
  * @param data - L.InitiativeWebhookPayloadFragment response data
  */
-export class InitiativeWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.InitiativeWebhookPayloadFragment) {
-    super(request);
+export class InitiativeWebhookPayload {
+  public constructor(data: L.InitiativeWebhookPayloadFragment) {
     this.archivedAt = data.archivedAt ?? undefined;
     this.color = data.color ?? undefined;
     this.completedAt = data.completedAt ?? undefined;
@@ -6013,17 +5981,15 @@ export class InitiativeWebhookPayload extends Request {
     this.updateRemindersHour = data.updateRemindersHour ?? undefined;
     this.updatedAt = data.updatedAt;
     this.url = data.url;
-    this.creator = data.creator ? new UserChildWebhookPayload(request, data.creator) : undefined;
-    this.lastUpdate = data.lastUpdate ? new InitiativeUpdateChildWebhookPayload(request, data.lastUpdate) : undefined;
-    this.owner = data.owner ? new UserChildWebhookPayload(request, data.owner) : undefined;
+    this.creator = data.creator ? new UserChildWebhookPayload(data.creator) : undefined;
+    this.lastUpdate = data.lastUpdate ? new InitiativeUpdateChildWebhookPayload(data.lastUpdate) : undefined;
+    this.owner = data.owner ? new UserChildWebhookPayload(data.owner) : undefined;
     this.parentInitiative = data.parentInitiative
-      ? new InitiativeChildWebhookPayload(request, data.parentInitiative)
+      ? new InitiativeChildWebhookPayload(data.parentInitiative)
       : undefined;
-    this.projects = data.projects
-      ? data.projects.map(node => new ProjectChildWebhookPayload(request, node))
-      : undefined;
+    this.projects = data.projects ? data.projects.map(node => new ProjectChildWebhookPayload(node)) : undefined;
     this.subInitiatives = data.subInitiatives
-      ? data.subInitiatives.map(node => new InitiativeChildWebhookPayload(request, node))
+      ? data.subInitiatives.map(node => new InitiativeChildWebhookPayload(node))
       : undefined;
   }
 
@@ -6163,12 +6129,10 @@ export class Integration extends Request {
 /**
  * Certain properties of an integration.
  *
- * @param request - function to call the graphql client
  * @param data - L.IntegrationChildWebhookPayloadFragment response data
  */
-export class IntegrationChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.IntegrationChildWebhookPayloadFragment) {
-    super(request);
+export class IntegrationChildWebhookPayload {
+  public constructor(data: L.IntegrationChildWebhookPayloadFragment) {
     this.id = data.id;
     this.service = data.service;
   }
@@ -6895,12 +6859,10 @@ export class IssueArchivePayload extends Request {
 /**
  * Payload for an issue assigned to you notification.
  *
- * @param request - function to call the graphql client
  * @param data - L.IssueAssignedToYouNotificationWebhookPayloadFragment response data
  */
-export class IssueAssignedToYouNotificationWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.IssueAssignedToYouNotificationWebhookPayloadFragment) {
-    super(request);
+export class IssueAssignedToYouNotificationWebhookPayload {
+  public constructor(data: L.IssueAssignedToYouNotificationWebhookPayloadFragment) {
     this.actorId = data.actorId ?? undefined;
     this.archivedAt = data.archivedAt ?? undefined;
     this.createdAt = data.createdAt;
@@ -6909,8 +6871,8 @@ export class IssueAssignedToYouNotificationWebhookPayload extends Request {
     this.type = data.type;
     this.updatedAt = data.updatedAt;
     this.userId = data.userId;
-    this.actor = data.actor ? new UserChildWebhookPayload(request, data.actor) : undefined;
-    this.issue = new IssueWithDescriptionChildWebhookPayload(request, data.issue);
+    this.actor = data.actor ? new UserChildWebhookPayload(data.actor) : undefined;
+    this.issue = new IssueWithDescriptionChildWebhookPayload(data.issue);
   }
 
   /** The ID of the actor who caused the notification. */
@@ -6958,18 +6920,16 @@ export class IssueBatchPayload extends Request {
 /**
  * Certain properties of an issue.
  *
- * @param request - function to call the graphql client
  * @param data - L.IssueChildWebhookPayloadFragment response data
  */
-export class IssueChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.IssueChildWebhookPayloadFragment) {
-    super(request);
+export class IssueChildWebhookPayload {
+  public constructor(data: L.IssueChildWebhookPayloadFragment) {
     this.id = data.id;
     this.identifier = data.identifier;
     this.teamId = data.teamId;
     this.title = data.title;
     this.url = data.url;
-    this.team = new TeamChildWebhookPayload(request, data.team);
+    this.team = new TeamChildWebhookPayload(data.team);
   }
 
   /** The ID of the issue. */
@@ -7569,12 +7529,10 @@ export class IssueLabel extends Request {
 /**
  * Certain properties of an issue label.
  *
- * @param request - function to call the graphql client
  * @param data - L.IssueLabelChildWebhookPayloadFragment response data
  */
-export class IssueLabelChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.IssueLabelChildWebhookPayloadFragment) {
-    super(request);
+export class IssueLabelChildWebhookPayload {
+  public constructor(data: L.IssueLabelChildWebhookPayloadFragment) {
     this.color = data.color;
     this.id = data.id;
     this.name = data.name;
@@ -7643,12 +7601,10 @@ export class IssueLabelPayload extends Request {
 /**
  * Payload for an issue label webhook.
  *
- * @param request - function to call the graphql client
  * @param data - L.IssueLabelWebhookPayloadFragment response data
  */
-export class IssueLabelWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.IssueLabelWebhookPayloadFragment) {
-    super(request);
+export class IssueLabelWebhookPayload {
+  public constructor(data: L.IssueLabelWebhookPayloadFragment) {
     this.archivedAt = data.archivedAt ?? undefined;
     this.color = data.color;
     this.createdAt = data.createdAt;
@@ -7691,12 +7647,10 @@ export class IssueLabelWebhookPayload extends Request {
 /**
  * Payload for an issue mention notification.
  *
- * @param request - function to call the graphql client
  * @param data - L.IssueMentionNotificationWebhookPayloadFragment response data
  */
-export class IssueMentionNotificationWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.IssueMentionNotificationWebhookPayloadFragment) {
-    super(request);
+export class IssueMentionNotificationWebhookPayload {
+  public constructor(data: L.IssueMentionNotificationWebhookPayloadFragment) {
     this.actorId = data.actorId ?? undefined;
     this.archivedAt = data.archivedAt ?? undefined;
     this.createdAt = data.createdAt;
@@ -7705,8 +7659,8 @@ export class IssueMentionNotificationWebhookPayload extends Request {
     this.type = data.type;
     this.updatedAt = data.updatedAt;
     this.userId = data.userId;
-    this.actor = data.actor ? new UserChildWebhookPayload(request, data.actor) : undefined;
-    this.issue = new IssueWithDescriptionChildWebhookPayload(request, data.issue);
+    this.actor = data.actor ? new UserChildWebhookPayload(data.actor) : undefined;
+    this.issue = new IssueWithDescriptionChildWebhookPayload(data.issue);
   }
 
   /** The ID of the actor who caused the notification. */
@@ -8497,12 +8451,10 @@ export class IssueTitleSuggestionFromCustomerRequestPayload extends Request {
 /**
  * Payload for an issue webhook.
  *
- * @param request - function to call the graphql client
  * @param data - L.IssueWebhookPayloadFragment response data
  */
-export class IssueWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.IssueWebhookPayloadFragment) {
-    super(request);
+export class IssueWebhookPayload {
+  public constructor(data: L.IssueWebhookPayloadFragment) {
     this.addedToCycleAt = data.addedToCycleAt ?? undefined;
     this.addedToProjectAt = data.addedToProjectAt ?? undefined;
     this.addedToTeamAt = data.addedToTeamAt ?? undefined;
@@ -8556,19 +8508,19 @@ export class IssueWebhookPayload extends Request {
     this.triagedAt = data.triagedAt ?? undefined;
     this.updatedAt = data.updatedAt;
     this.url = data.url;
-    this.assignee = data.assignee ? new UserChildWebhookPayload(request, data.assignee) : undefined;
-    this.creator = data.creator ? new UserChildWebhookPayload(request, data.creator) : undefined;
-    this.cycle = data.cycle ? new CycleChildWebhookPayload(request, data.cycle) : undefined;
+    this.assignee = data.assignee ? new UserChildWebhookPayload(data.assignee) : undefined;
+    this.creator = data.creator ? new UserChildWebhookPayload(data.creator) : undefined;
+    this.cycle = data.cycle ? new CycleChildWebhookPayload(data.cycle) : undefined;
     this.externalUserCreator = data.externalUserCreator
-      ? new ExternalUserChildWebhookPayload(request, data.externalUserCreator)
+      ? new ExternalUserChildWebhookPayload(data.externalUserCreator)
       : undefined;
-    this.project = data.project ? new ProjectChildWebhookPayload(request, data.project) : undefined;
+    this.project = data.project ? new ProjectChildWebhookPayload(data.project) : undefined;
     this.projectMilestone = data.projectMilestone
-      ? new ProjectMilestoneChildWebhookPayload(request, data.projectMilestone)
+      ? new ProjectMilestoneChildWebhookPayload(data.projectMilestone)
       : undefined;
-    this.state = new WorkflowStateChildWebhookPayload(request, data.state);
-    this.team = data.team ? new TeamChildWebhookPayload(request, data.team) : undefined;
-    this.labels = data.labels.map(node => new IssueLabelChildWebhookPayload(request, node));
+    this.state = new WorkflowStateChildWebhookPayload(data.state);
+    this.team = data.team ? new TeamChildWebhookPayload(data.team) : undefined;
+    this.labels = data.labels.map(node => new IssueLabelChildWebhookPayload(node));
   }
 
   /** The time at which the issue was added to a cycle. */
@@ -8699,19 +8651,17 @@ export class IssueWebhookPayload extends Request {
 /**
  * Certain properties of an issue, including its description.
  *
- * @param request - function to call the graphql client
  * @param data - L.IssueWithDescriptionChildWebhookPayloadFragment response data
  */
-export class IssueWithDescriptionChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.IssueWithDescriptionChildWebhookPayloadFragment) {
-    super(request);
+export class IssueWithDescriptionChildWebhookPayload {
+  public constructor(data: L.IssueWithDescriptionChildWebhookPayloadFragment) {
     this.description = data.description ?? undefined;
     this.id = data.id;
     this.identifier = data.identifier;
     this.teamId = data.teamId;
     this.title = data.title;
     this.url = data.url;
-    this.team = new TeamChildWebhookPayload(request, data.team);
+    this.team = new TeamChildWebhookPayload(data.team);
   }
 
   /** The description of the issue. */
@@ -9722,12 +9672,10 @@ export class OauthClientApprovalNotification extends Request {
 /**
  * Certain properties of an OAuth client.
  *
- * @param request - function to call the graphql client
  * @param data - L.OauthClientChildWebhookPayloadFragment response data
  */
-export class OauthClientChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.OauthClientChildWebhookPayloadFragment) {
-    super(request);
+export class OauthClientChildWebhookPayload {
+  public constructor(data: L.OauthClientChildWebhookPayloadFragment) {
     this.id = data.id;
     this.name = data.name;
   }
@@ -10290,12 +10238,10 @@ export class OrganizationStartTrialPayload extends Request {
 /**
  * Generic notification payload.
  *
- * @param request - function to call the graphql client
  * @param data - L.OtherNotificationWebhookPayloadFragment response data
  */
-export class OtherNotificationWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.OtherNotificationWebhookPayloadFragment) {
-    super(request);
+export class OtherNotificationWebhookPayload {
+  public constructor(data: L.OtherNotificationWebhookPayloadFragment) {
     this.actorId = data.actorId ?? undefined;
     this.archivedAt = data.archivedAt ?? undefined;
     this.commentId = data.commentId ?? undefined;
@@ -10309,15 +10255,13 @@ export class OtherNotificationWebhookPayload extends Request {
     this.reactionEmoji = data.reactionEmoji ?? undefined;
     this.updatedAt = data.updatedAt;
     this.userId = data.userId;
-    this.actor = data.actor ? new UserChildWebhookPayload(request, data.actor) : undefined;
-    this.comment = data.comment ? new CommentChildWebhookPayload(request, data.comment) : undefined;
-    this.document = data.document ? new DocumentChildWebhookPayload(request, data.document) : undefined;
-    this.issue = data.issue ? new IssueWithDescriptionChildWebhookPayload(request, data.issue) : undefined;
-    this.parentComment = data.parentComment ? new CommentChildWebhookPayload(request, data.parentComment) : undefined;
-    this.project = data.project ? new ProjectChildWebhookPayload(request, data.project) : undefined;
-    this.projectUpdate = data.projectUpdate
-      ? new ProjectUpdateChildWebhookPayload(request, data.projectUpdate)
-      : undefined;
+    this.actor = data.actor ? new UserChildWebhookPayload(data.actor) : undefined;
+    this.comment = data.comment ? new CommentChildWebhookPayload(data.comment) : undefined;
+    this.document = data.document ? new DocumentChildWebhookPayload(data.document) : undefined;
+    this.issue = data.issue ? new IssueWithDescriptionChildWebhookPayload(data.issue) : undefined;
+    this.parentComment = data.parentComment ? new CommentChildWebhookPayload(data.parentComment) : undefined;
+    this.project = data.project ? new ProjectChildWebhookPayload(data.project) : undefined;
+    this.projectUpdate = data.projectUpdate ? new ProjectUpdateChildWebhookPayload(data.projectUpdate) : undefined;
     this.type = data.type;
   }
 
@@ -10812,12 +10756,10 @@ export class ProjectArchivePayload extends Request {
 /**
  * Certain properties of a project.
  *
- * @param request - function to call the graphql client
  * @param data - L.ProjectChildWebhookPayloadFragment response data
  */
-export class ProjectChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.ProjectChildWebhookPayloadFragment) {
-    super(request);
+export class ProjectChildWebhookPayload {
+  public constructor(data: L.ProjectChildWebhookPayloadFragment) {
     this.id = data.id;
     this.name = data.name;
     this.url = data.url;
@@ -11009,12 +10951,10 @@ export class ProjectMilestone extends Request {
 /**
  * Certain properties of a project milestone.
  *
- * @param request - function to call the graphql client
  * @param data - L.ProjectMilestoneChildWebhookPayloadFragment response data
  */
-export class ProjectMilestoneChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.ProjectMilestoneChildWebhookPayloadFragment) {
-    super(request);
+export class ProjectMilestoneChildWebhookPayload {
+  public constructor(data: L.ProjectMilestoneChildWebhookPayloadFragment) {
     this.id = data.id;
     this.name = data.name;
     this.targetDate = data.targetDate;
@@ -11974,12 +11914,10 @@ export class ProjectStatusArchivePayload extends Request {
 /**
  * Certain properties of a project status.
  *
- * @param request - function to call the graphql client
  * @param data - L.ProjectStatusChildWebhookPayloadFragment response data
  */
-export class ProjectStatusChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.ProjectStatusChildWebhookPayloadFragment) {
-    super(request);
+export class ProjectStatusChildWebhookPayload {
+  public constructor(data: L.ProjectStatusChildWebhookPayloadFragment) {
     this.color = data.color;
     this.id = data.id;
     this.name = data.name;
@@ -12203,16 +12141,14 @@ export class ProjectUpdateArchivePayload extends Request {
 /**
  * Certain properties of a project update.
  *
- * @param request - function to call the graphql client
  * @param data - L.ProjectUpdateChildWebhookPayloadFragment response data
  */
-export class ProjectUpdateChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.ProjectUpdateChildWebhookPayloadFragment) {
-    super(request);
+export class ProjectUpdateChildWebhookPayload {
+  public constructor(data: L.ProjectUpdateChildWebhookPayloadFragment) {
     this.body = data.body;
     this.id = data.id;
     this.userId = data.userId;
-    this.project = new ProjectChildWebhookPayload(request, data.project);
+    this.project = new ProjectChildWebhookPayload(data.project);
   }
 
   /** The body of the project update. */
@@ -12295,12 +12231,10 @@ export class ProjectUpdateReminderPayload extends Request {
 /**
  * Payload for a project update webhook.
  *
- * @param request - function to call the graphql client
  * @param data - L.ProjectUpdateWebhookPayloadFragment response data
  */
-export class ProjectUpdateWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.ProjectUpdateWebhookPayloadFragment) {
-    super(request);
+export class ProjectUpdateWebhookPayload {
+  public constructor(data: L.ProjectUpdateWebhookPayloadFragment) {
     this.archivedAt = data.archivedAt ?? undefined;
     this.body = data.body;
     this.bodyData = data.bodyData;
@@ -12314,8 +12248,8 @@ export class ProjectUpdateWebhookPayload extends Request {
     this.updatedAt = data.updatedAt;
     this.url = data.url ?? undefined;
     this.userId = data.userId;
-    this.project = new ProjectChildWebhookPayload(request, data.project);
-    this.user = new UserChildWebhookPayload(request, data.user);
+    this.project = new ProjectChildWebhookPayload(data.project);
+    this.user = new UserChildWebhookPayload(data.user);
   }
 
   /** The time at which the entity was archived. */
@@ -12352,12 +12286,10 @@ export class ProjectUpdateWebhookPayload extends Request {
 /**
  * Payload for a project webhook.
  *
- * @param request - function to call the graphql client
  * @param data - L.ProjectWebhookPayloadFragment response data
  */
-export class ProjectWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.ProjectWebhookPayloadFragment) {
-    super(request);
+export class ProjectWebhookPayload {
+  public constructor(data: L.ProjectWebhookPayloadFragment) {
     this.archivedAt = data.archivedAt ?? undefined;
     this.autoArchivedAt = data.autoArchivedAt ?? undefined;
     this.canceledAt = data.canceledAt ?? undefined;
@@ -12399,13 +12331,13 @@ export class ProjectWebhookPayload extends Request {
     this.trashed = data.trashed ?? undefined;
     this.updatedAt = data.updatedAt;
     this.url = data.url;
-    this.lead = data.lead ? new UserChildWebhookPayload(request, data.lead) : undefined;
-    this.status = data.status ? new ProjectStatusChildWebhookPayload(request, data.status) : undefined;
+    this.lead = data.lead ? new UserChildWebhookPayload(data.lead) : undefined;
+    this.status = data.status ? new ProjectStatusChildWebhookPayload(data.status) : undefined;
     this.initiatives = data.initiatives
-      ? data.initiatives.map(node => new InitiativeChildWebhookPayload(request, node))
+      ? data.initiatives.map(node => new InitiativeChildWebhookPayload(node))
       : undefined;
     this.milestones = data.milestones
-      ? data.milestones.map(node => new ProjectMilestoneChildWebhookPayload(request, node))
+      ? data.milestones.map(node => new ProjectMilestoneChildWebhookPayload(node))
       : undefined;
   }
 
@@ -12747,12 +12679,10 @@ export class ReactionPayload extends Request {
 /**
  * Payload for a reaction webhook.
  *
- * @param request - function to call the graphql client
  * @param data - L.ReactionWebhookPayloadFragment response data
  */
-export class ReactionWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.ReactionWebhookPayloadFragment) {
-    super(request);
+export class ReactionWebhookPayload {
+  public constructor(data: L.ReactionWebhookPayloadFragment) {
     this.archivedAt = data.archivedAt ?? undefined;
     this.commentId = data.commentId ?? undefined;
     this.createdAt = data.createdAt;
@@ -12765,12 +12695,10 @@ export class ReactionWebhookPayload extends Request {
     this.projectUpdateId = data.projectUpdateId ?? undefined;
     this.updatedAt = data.updatedAt;
     this.userId = data.userId ?? undefined;
-    this.comment = data.comment ? new CommentChildWebhookPayload(request, data.comment) : undefined;
-    this.issue = data.issue ? new IssueChildWebhookPayload(request, data.issue) : undefined;
-    this.projectUpdate = data.projectUpdate
-      ? new ProjectUpdateChildWebhookPayload(request, data.projectUpdate)
-      : undefined;
-    this.user = data.user ? new UserChildWebhookPayload(request, data.user) : undefined;
+    this.comment = data.comment ? new CommentChildWebhookPayload(data.comment) : undefined;
+    this.issue = data.issue ? new IssueChildWebhookPayload(data.issue) : undefined;
+    this.projectUpdate = data.projectUpdate ? new ProjectUpdateChildWebhookPayload(data.projectUpdate) : undefined;
+    this.user = data.user ? new UserChildWebhookPayload(data.user) : undefined;
   }
 
   /** The time at which the entity was archived. */
@@ -13702,12 +13630,10 @@ export class TeamArchivePayload extends Request {
 /**
  * Certain properties of a team.
  *
- * @param request - function to call the graphql client
  * @param data - L.TeamChildWebhookPayloadFragment response data
  */
-export class TeamChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.TeamChildWebhookPayloadFragment) {
-    super(request);
+export class TeamChildWebhookPayload {
+  public constructor(data: L.TeamChildWebhookPayloadFragment) {
     this.id = data.id;
     this.key = data.key;
     this.name = data.name;
@@ -14717,12 +14643,10 @@ export class UserAuthorizedApplication extends Request {
 /**
  * Certain properties of a user.
  *
- * @param request - function to call the graphql client
  * @param data - L.UserChildWebhookPayloadFragment response data
  */
-export class UserChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.UserChildWebhookPayloadFragment) {
-    super(request);
+export class UserChildWebhookPayload {
+  public constructor(data: L.UserChildWebhookPayloadFragment) {
     this.avatarUrl = data.avatarUrl ?? undefined;
     this.email = data.email;
     this.id = data.id;
@@ -15073,12 +14997,10 @@ export class UserSettingsPayload extends Request {
 /**
  * Payload for a user webhook.
  *
- * @param request - function to call the graphql client
  * @param data - L.UserWebhookPayloadFragment response data
  */
-export class UserWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.UserWebhookPayloadFragment) {
-    super(request);
+export class UserWebhookPayload {
+  public constructor(data: L.UserWebhookPayloadFragment) {
     this.active = data.active;
     this.admin = data.admin;
     this.app = data.app;
@@ -15502,12 +15424,10 @@ export class WorkflowStateArchivePayload extends Request {
 /**
  * Certain properties of a workflow state.
  *
- * @param request - function to call the graphql client
  * @param data - L.WorkflowStateChildWebhookPayloadFragment response data
  */
-export class WorkflowStateChildWebhookPayload extends Request {
-  public constructor(request: LinearRequest, data: L.WorkflowStateChildWebhookPayloadFragment) {
-    super(request);
+export class WorkflowStateChildWebhookPayload {
+  public constructor(data: L.WorkflowStateChildWebhookPayloadFragment) {
     this.color = data.color;
     this.id = data.id;
     this.name = data.name;
