@@ -3579,6 +3579,310 @@ fragment AuthenticationSessionResponse on AuthenticationSessionResponse {
   id
 }
 
+# Base class for entity webhook payloads.
+fragment BaseEntityWebhookPayload on BaseEntityWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Certain properties of a comment.
+fragment CommentChildWebhookPayload on CommentChildWebhookPayload {
+  __typename
+  # The ID of the comment.
+  id
+  # The ID of the document content this comment belongs to.
+  documentContentId
+  # The ID of the initiative update this comment belongs to.
+  initiativeUpdateId
+  # The ID of the issue this comment belongs to.
+  issueId
+  # The ID of the project update this comment belongs to.
+  projectUpdateId
+  # The ID of the user who created this comment.
+  userId
+  # The body of the comment.
+  body
+}
+
+# Certain properties of a customer status.
+fragment CustomerStatusChildWebhookPayload on CustomerStatusChildWebhookPayload {
+  __typename
+  # The ID of the customer status.
+  id
+  # The name of the customer status.
+  name
+  # The type of the customer status.
+  type
+}
+
+# Certain properties of a customer tier.
+fragment CustomerTierChildWebhookPayload on CustomerTierChildWebhookPayload {
+  __typename
+  # The ID of the customer tier.
+  id
+  # The color of the customer tier.
+  color
+  # The display name of the customer tier.
+  displayName
+  # The name of the customer tier.
+  name
+}
+
+# Certain properties of a cycle.
+fragment CycleChildWebhookPayload on CycleChildWebhookPayload {
+  __typename
+  # The ID of the cycle.
+  id
+  # The end date of the cycle.
+  endsAt
+  # The name of the cycle.
+  name
+  # The number of the cycle.
+  number
+  # The start date of the cycle.
+  startsAt
+}
+
+# Certain properties of a document.
+fragment DocumentChildWebhookPayload on DocumentChildWebhookPayload {
+  __typename
+  # The ID of the document.
+  id
+  # The ID of the initiative this document belongs to.
+  initiativeId
+  # The ID of the project this document belongs to.
+  projectId
+  # The initiative this document belongs to.
+  initiative {
+    ...InitiativeChildWebhookPayload
+  }
+  # The project this document belongs to.
+  project {
+    ...ProjectChildWebhookPayload
+  }
+  # The title of the document.
+  title
+}
+
+# Certain properties of a project milestone.
+fragment ProjectMilestoneChildWebhookPayload on ProjectMilestoneChildWebhookPayload {
+  __typename
+  # The ID of the project milestone.
+  id
+  # The name of the project milestone.
+  name
+  # The target date of the project milestone.
+  targetDate
+}
+
+# Certain properties of a project status.
+fragment ProjectStatusChildWebhookPayload on ProjectStatusChildWebhookPayload {
+  __typename
+  # The ID of the project status.
+  id
+  # The color of the project status.
+  color
+  # The name of the project status.
+  name
+  # The type of the project status.
+  type
+}
+
+# Certain properties of a project update.
+fragment ProjectUpdateChildWebhookPayload on ProjectUpdateChildWebhookPayload {
+  __typename
+  # The ID of the project update.
+  id
+  # The ID of the user who wrote the project update.
+  userId
+  # The body of the project update.
+  body
+  # The project that the project update belongs to.
+  project {
+    ...ProjectChildWebhookPayload
+  }
+}
+
+# Certain properties of a project.
+fragment ProjectChildWebhookPayload on ProjectChildWebhookPayload {
+  __typename
+  # The ID of the project.
+  id
+  # The URL of the project.
+  url
+  # The name of the project.
+  name
+}
+
+# Certain properties of a team.
+fragment TeamChildWebhookPayload on TeamChildWebhookPayload {
+  __typename
+  # The ID of the team.
+  id
+  # The key of the team.
+  key
+  # The name of the team.
+  name
+}
+
+# Certain properties of a user.
+fragment UserChildWebhookPayload on UserChildWebhookPayload {
+  __typename
+  # The ID of the user.
+  id
+  # The URL of the user.
+  url
+  # The avatar URL of the user.
+  avatarUrl
+  # The email of the user.
+  email
+  # The name of the user.
+  name
+}
+
+# Certain properties of a workflow state.
+fragment WorkflowStateChildWebhookPayload on WorkflowStateChildWebhookPayload {
+  __typename
+  # The ID of the workflow state.
+  id
+  # The color of the workflow state.
+  color
+  # The name of the workflow state.
+  name
+  # The type of the workflow state.
+  type
+}
+
+# Certain properties of an OAuth client.
+fragment OauthClientChildWebhookPayload on OauthClientChildWebhookPayload {
+  __typename
+  # The ID of the OAuth client.
+  id
+  # The name of the OAuth client.
+  name
+}
+
+# Certain properties of an external user.
+fragment ExternalUserChildWebhookPayload on ExternalUserChildWebhookPayload {
+  __typename
+  # The ID of the external user.
+  id
+  # The email of the external user.
+  email
+  # The name of the external user.
+  name
+}
+
+# Certain properties of an initiative update.
+fragment InitiativeUpdateChildWebhookPayload on InitiativeUpdateChildWebhookPayload {
+  __typename
+  # The ID of the initiative update.
+  id
+  # The body of the initiative update.
+  bodyData
+  # The edited at timestamp of the initiative update.
+  editedAt
+  # The health of the initiative update.
+  health
+}
+
+# Certain properties of an initiative.
+fragment InitiativeChildWebhookPayload on InitiativeChildWebhookPayload {
+  __typename
+  # The ID of the initiative.
+  id
+  # The URL of the initiative.
+  url
+  # The name of the initiative.
+  name
+}
+
+# Certain properties of an integration.
+fragment IntegrationChildWebhookPayload on IntegrationChildWebhookPayload {
+  __typename
+  # The ID of the integration.
+  id
+  # The service of the integration.
+  service
+}
+
+# Certain properties of an issue label.
+fragment IssueLabelChildWebhookPayload on IssueLabelChildWebhookPayload {
+  __typename
+  # The ID of the issue label.
+  id
+  # The color of the issue label.
+  color
+  # The name of the issue label.
+  name
+  # The parent ID of the issue label.
+  parentId
+}
+
+# Certain properties of an issue, including its description.
+fragment IssueWithDescriptionChildWebhookPayload on IssueWithDescriptionChildWebhookPayload {
+  __typename
+  # The ID of the issue.
+  id
+  # The ID of the team that the issue belongs to.
+  team {
+    ...TeamChildWebhookPayload
+  }
+  # The ID of the team that the issue belongs to.
+  teamId
+  # The URL of the issue.
+  url
+  # The description of the issue.
+  description
+  # The identifier of the issue.
+  identifier
+  # The title of the issue.
+  title
+}
+
+# Certain properties of an issue.
+fragment IssueChildWebhookPayload on IssueChildWebhookPayload {
+  __typename
+  # The ID of the issue.
+  id
+  # The ID of the team that the issue belongs to.
+  team {
+    ...TeamChildWebhookPayload
+  }
+  # The ID of the team that the issue belongs to.
+  teamId
+  # The URL of the issue.
+  url
+  # The identifier of the issue.
+  identifier
+  # The title of the issue.
+  title
+}
+
+# Complete payload for an app user notification webhook.
+fragment AppUserNotificationWebhookPayload on AppUserNotificationWebhookPayload {
+  __typename
+  # The action of the notification.
+  action
+  # The app user id of the webhook.
+  appUserId
+  # The oauth client id of the webhook.
+  oauthClientId
+  # The organization id of the webhook.
+  organizationId
+  # The timestamp the webhook was created at.
+  createdAt
+  # The type of the notification.
+  type
+}
+
 # Contains requested archived model objects.
 fragment ArchiveResponse on ArchiveResponse {
   __typename
@@ -3676,6 +3980,67 @@ fragment WebhookFailureEvent on WebhookFailureEvent {
   webhook {
     id
   }
+}
+
+# Generic notification payload.
+fragment OtherNotificationWebhookPayload on OtherNotificationWebhookPayload {
+  __typename
+  # The ID of the actor who caused the notification.
+  actorId
+  # The ID of the comment this notification belongs to.
+  commentId
+  # The ID of the document this notification belongs to.
+  documentId
+  # The ID of the entity.
+  id
+  # The ID of the issue this notification belongs to.
+  issueId
+  # The ID of the parent comment this notification belongs to.
+  parentCommentId
+  # The ID of the project this notification belongs to.
+  projectId
+  # The ID of the project update this notification belongs to.
+  projectUpdateId
+  # The ID of the user who received the notification.
+  userId
+  # The actor who caused the notification.
+  actor {
+    ...UserChildWebhookPayload
+  }
+  # The comment this notification belongs to.
+  comment {
+    ...CommentChildWebhookPayload
+  }
+  # The document this notification belongs to.
+  document {
+    ...DocumentChildWebhookPayload
+  }
+  # The emoji of the reaction this notification is for.
+  reactionEmoji
+  # The issue this notification belongs to.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The parent comment this notification belongs to.
+  parentComment {
+    ...CommentChildWebhookPayload
+  }
+  # The project this notification belongs to.
+  project {
+    ...ProjectChildWebhookPayload
+  }
+  # The project update this notification belongs to.
+  projectUpdate {
+    ...ProjectUpdateChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The type of the notification.
+  type
 }
 
 # Information about an external entity.
@@ -3995,6 +4360,698 @@ fragment UploadFile on UploadFile {
     ...UploadFileHeader
   }
   metaData
+}
+
+# Payload for a comment webhook.
+fragment CommentWebhookPayload on CommentWebhookPayload {
+  __typename
+  # The ID of the comment that resolved this comment.
+  resolvingCommentId
+  # The ID of the document content this comment belongs to.
+  documentContentId
+  # The ID of the entity.
+  id
+  # The ID of the external user who created this comment.
+  externalUserId
+  # The ID of the initiative update this comment belongs to.
+  initiativeUpdateId
+  # The ID of the issue this comment belongs to.
+  issueId
+  # The ID of the parent comment.
+  parentId
+  # The ID of the post this comment belongs to.
+  postId
+  # The ID of the project update this comment belongs to.
+  projectUpdateId
+  # The ID of the user who created this comment.
+  userId
+  # The ID of the user who resolved this comment.
+  resolvingUserId
+  # The body of the comment.
+  body
+  # The bot actor data for this comment.
+  botActor
+  # The document content for this comment.
+  documentContent {
+    ...BaseEntityWebhookPayload
+  }
+  # The entity this comment is synced with.
+  syncedWith
+  # The external user who created this comment.
+  externalUser {
+    ...ExternalUserChildWebhookPayload
+  }
+  # The initiative update this comment belongs to.
+  initiativeUpdate {
+    ...InitiativeUpdateChildWebhookPayload
+  }
+  # The issue this comment belongs to.
+  issue {
+    ...IssueChildWebhookPayload
+  }
+  # The parent comment.
+  parent {
+    ...CommentChildWebhookPayload
+  }
+  # The project update this comment belongs to.
+  projectUpdate {
+    ...ProjectUpdateChildWebhookPayload
+  }
+  # The quoted text in this comment.
+  quotedText
+  # The reaction data for this comment.
+  reactionData
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The user who created this comment.
+  user {
+    ...UserChildWebhookPayload
+  }
+  # When the comment was last edited.
+  editedAt
+  # When the comment was resolved.
+  resolvedAt
+}
+
+# Payload for a project update webhook.
+fragment ProjectUpdateWebhookPayload on ProjectUpdateWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The URL of the project update.
+  url
+  # The body data of the project update.
+  bodyData
+  # The body of the project update.
+  body
+  # The edited at timestamp of the project update.
+  editedAt
+  # The health of the project update.
+  health
+  # The project id of the project update.
+  projectId
+  # The project that the project update belongs to.
+  project {
+    ...ProjectChildWebhookPayload
+  }
+  # The reaction data for this project update.
+  reactionData
+  # The slug id of the project update.
+  slugId
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The user id of the project update.
+  userId
+  # The user who wrote the project update.
+  user {
+    ...UserChildWebhookPayload
+  }
+}
+
+# Payload for a project webhook.
+fragment ProjectWebhookPayload on ProjectWebhookPayload {
+  __typename
+  # IDs of the labels associated with this project.
+  labelIds
+  # IDs of the members of the project.
+  memberIds
+  # IDs of the teams associated with this project.
+  teamIds
+  # The ID of the entity.
+  id
+  # The ID of the issue that was converted to the project.
+  convertedFromIssueId
+  # The ID of the last template that was applied to the project.
+  lastAppliedTemplateId
+  # The ID of the last update posted for this project.
+  lastUpdateId
+  # The ID of the project lead.
+  leadId
+  # The ID of the project status.
+  statusId
+  # The ID of the user who created the project.
+  creatorId
+  # The URL of the project.
+  url
+  # The auto archived at timestamp of the project.
+  autoArchivedAt
+  # The canceled at timestamp of the project.
+  canceledAt
+  # The completed at timestamp of the project.
+  completedAt
+  # The content of the project.
+  content
+  # The document content ID of the project.
+  documentContentId
+  # The estimated start date of the project.
+  startDate
+  # The health of the project.
+  health
+  # The icon of the project.
+  icon
+  # The initiatives associated with the project.
+  initiatives {
+    ...InitiativeChildWebhookPayload
+  }
+  # The milestones associated with the project.
+  milestones {
+    ...ProjectMilestoneChildWebhookPayload
+  }
+  # The number of completed estimation points after each week.
+  completedScopeHistory
+  # The number of completed issues in the project after each week.
+  completedIssueCountHistory
+  # The number of in progress estimation points after each week.
+  inProgressScopeHistory
+  # The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  priority
+  # The project lead.
+  lead {
+    ...UserChildWebhookPayload
+  }
+  # The project status.
+  status {
+    ...ProjectStatusChildWebhookPayload
+  }
+  # The project's color.
+  color
+  # The project's description.
+  description
+  # The project's name.
+  name
+  # The project's unique URL slug.
+  slugId
+  # The resolution of the project's estimated start date.
+  startDateResolution
+  # The resolution of the project's target date.
+  targetDateResolution
+  # The sort order for the project within the organization, when ordered by priority.
+  prioritySortOrder
+  # The sort order for the project within the organization.
+  sortOrder
+  # The target date of the project.
+  targetDate
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The time at which the project health was updated.
+  healthUpdatedAt
+  # The time at which the project update reminders were paused until.
+  projectUpdateRemindersPausedUntilAt
+  # The time at which the project was moved into started state.
+  startedAt
+  # The total number of estimation points after each week.
+  scopeHistory
+  # The total number of issues in the project after each week.
+  issueCountHistory
+  # The trashed status of the project.
+  trashed
+}
+
+# Payload for a reaction webhook.
+fragment ReactionWebhookPayload on ReactionWebhookPayload {
+  __typename
+  # Name of the reaction's emoji.
+  emoji
+  # The ID of the comment that the reaction is associated with.
+  commentId
+  # The ID of the entity.
+  id
+  # The ID of the external user that created the reaction.
+  externalUserId
+  # The ID of the initiative update that the reaction is associated with.
+  initiativeUpdateId
+  # The ID of the issue that the reaction is associated with.
+  issueId
+  # The ID of the post that the reaction is associated with.
+  postId
+  # The ID of the project update that the reaction is associated with.
+  projectUpdateId
+  # The ID of the user that created the reaction.
+  userId
+  # The comment the reaction is associated with.
+  comment {
+    ...CommentChildWebhookPayload
+  }
+  # The issue the reaction is associated with.
+  issue {
+    ...IssueChildWebhookPayload
+  }
+  # The project update the reaction is associated with.
+  projectUpdate {
+    ...ProjectUpdateChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The user that created the reaction.
+  user {
+    ...UserChildWebhookPayload
+  }
+}
+
+# Payload for a user webhook.
+fragment UserWebhookPayload on UserWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The URL of the user.
+  url
+  # The avatar URL of the user.
+  avatarUrl
+  # The description of the user.
+  description
+  # The display name of the user.
+  displayName
+  # The email of the user.
+  email
+  # The local timezone of the user.
+  timezone
+  # The name of the user.
+  name
+  # The reason the user is disabled.
+  disableReason
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # Whether the user is a guest.
+  guest
+  # Whether the user is active.
+  active
+  # Whether the user is an admin.
+  admin
+  # Whether the user is an app.
+  app
+}
+
+# Payload for an attachment webhook.
+fragment AttachmentWebhookPayload on AttachmentWebhookPayload {
+  __typename
+  # Custom metadata related to the attachment.
+  metadata
+  # Information about the source which created the attachment.
+  source
+  # Optional subtitle of the attachment.
+  subtitle
+  # The ID of the creator of the attachment.
+  creatorId
+  # The ID of the entity.
+  id
+  # The ID of the issue this attachment belonged to originally.
+  originalIssueId
+  # The ID of the issue this attachment belongs to.
+  issueId
+  # The ID of the non-Linear user who created the attachment.
+  externalUserCreatorId
+  # The URL of the attachment.
+  url
+  # The source type of the attachment.
+  sourceType
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The title of the attachment.
+  title
+  # Whether attachments for the same source application should be grouped in the Linear UI.
+  groupBySource
+}
+
+# Payload for an initiative update webhook.
+fragment InitiativeUpdateWebhookPayload on InitiativeUpdateWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The URL of the initiative update.
+  url
+  # The body data of the initiative update.
+  bodyData
+  # The body of the initiative update.
+  body
+  # The edited at timestamp of the initiative update.
+  editedAt
+  # The health of the initiative update.
+  health
+  # The initiative id of the initiative update.
+  initiativeId
+  # The initiative that the initiative update belongs to.
+  initiative {
+    ...InitiativeChildWebhookPayload
+  }
+  # The reaction data for this initiative update.
+  reactionData
+  # The slug id of the initiative update.
+  slugId
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The user id of the initiative update.
+  userId
+  # The user that created the initiative update.
+  user {
+    ...UserChildWebhookPayload
+  }
+}
+
+# Payload for an initiative webhook.
+fragment InitiativeWebhookPayload on InitiativeWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The ID of the last update for this initiative.
+  lastUpdateId
+  # The ID of the organization this initiative belongs to.
+  organizationId
+  # The ID of the user who created the initiative.
+  creatorId
+  # The ID of the user who owns the initiative.
+  ownerId
+  # The URL of the initiative.
+  url
+  # The color of the initiative.
+  color
+  # The current status of the initiative.
+  status
+  # The day of the week for update reminders.
+  updateRemindersDay
+  # The description of the initiative.
+  description
+  # The frequency of update reminders in weeks.
+  updateReminderFrequencyInWeeks
+  # The frequency of update reminders.
+  updateReminderFrequency
+  # The health status of the initiative.
+  health
+  # The hour of the day for update reminders.
+  updateRemindersHour
+  # The icon of the initiative.
+  icon
+  # The last update for this initiative.
+  lastUpdate {
+    ...InitiativeUpdateChildWebhookPayload
+  }
+  # The name of the initiative.
+  name
+  # The parent initiative associated with the initiative.
+  parentInitiative {
+    ...InitiativeChildWebhookPayload
+  }
+  # The projects associated with the initiative.
+  projects {
+    ...ProjectChildWebhookPayload
+  }
+  # The resolution of the target date.
+  targetDateResolution
+  # The resolution of the update reminder frequency.
+  frequencyResolution
+  # The sort order of the initiative within the organization.
+  sortOrder
+  # The sub-initiatives associated with the initiative.
+  subInitiatives {
+    ...InitiativeChildWebhookPayload
+  }
+  # The target date of the initiative.
+  targetDate
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The unique slug identifier of the initiative.
+  slugId
+  # The user who created the initiative.
+  creator {
+    ...UserChildWebhookPayload
+  }
+  # The user who owns the initiative.
+  owner {
+    ...UserChildWebhookPayload
+  }
+  # When the health status was last updated.
+  healthUpdatedAt
+  # When the initiative was completed.
+  completedAt
+  # When the initiative was started.
+  startedAt
+  # Whether the initiative is trashed.
+  trashed
+}
+
+# Payload for an issue assigned to you notification.
+fragment IssueAssignedToYouNotificationWebhookPayload on IssueAssignedToYouNotificationWebhookPayload {
+  __typename
+  # An issue assigned to you notification type.
+  type
+  # The ID of the actor who caused the notification.
+  actorId
+  # The ID of the entity.
+  id
+  # The ID of the issue this notification belongs to.
+  issueId
+  # The ID of the user who received the notification.
+  userId
+  # The actor who caused the notification.
+  actor {
+    ...UserChildWebhookPayload
+  }
+  # The issue this notification belongs to.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Payload for an issue label webhook.
+fragment IssueLabelWebhookPayload on IssueLabelWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The color of the issue label.
+  color
+  # The creator ID of the issue label.
+  creatorId
+  # The label's description.
+  description
+  # The name of the issue label.
+  name
+  # The original label inherited from.
+  inheritedFromId
+  # The parent ID of the issue label.
+  parentId
+  # The team ID of the issue label.
+  teamId
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # Whether the label is a group.
+  isGroup
+}
+
+# Payload for an issue mention notification.
+fragment IssueMentionNotificationWebhookPayload on IssueMentionNotificationWebhookPayload {
+  __typename
+  # An issue mention notification type.
+  type
+  # The ID of the actor who caused the notification.
+  actorId
+  # The ID of the entity.
+  id
+  # The ID of the issue this notification belongs to.
+  issueId
+  # The ID of the user who received the notification.
+  userId
+  # The actor who caused the notification.
+  actor {
+    ...UserChildWebhookPayload
+  }
+  # The issue this notification belongs to.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Payload for an issue webhook.
+fragment IssueWebhookPayload on IssueWebhookPayload {
+  __typename
+  # A flag that indicates whether the issue is in the trash bin.
+  trashed
+  # Id of the labels associated with this issue.
+  labelIds
+  # Integration type that created this issue, if applicable.
+  integrationSourceType
+  # Previous identifiers of the issue if it has been moved between teams.
+  previousIdentifiers
+  # The ID of the cycle that the issue belongs to.
+  cycleId
+  # The ID of the entity.
+  id
+  # The ID of the external user that created the issue.
+  externalUserCreatorId
+  # The ID of the issue's current workflow state.
+  stateId
+  # The ID of the last template that was applied to the issue.
+  lastAppliedTemplateId
+  # The ID of the parent issue.
+  parentId
+  # The ID of the project milestone that the issue belongs to.
+  projectMilestoneId
+  # The ID of the project that the issue belongs to.
+  projectId
+  # The ID of the recurring issue template that created the issue.
+  recurringIssueTemplateId
+  # The ID of the source comment that the issue was created from.
+  sourceCommentId
+  # The ID of the team that the issue belongs to.
+  teamId
+  # The ID of the user that created the issue.
+  creatorId
+  # The ID of the user that is assigned to the issue.
+  assigneeId
+  # The IDs of the users that are subscribed to the issue.
+  subscriberIds
+  # The URL of the issue.
+  url
+  # The bot actor data for this issue.
+  botActor
+  # The cycle that the issue belongs to.
+  cycle {
+    ...CycleChildWebhookPayload
+  }
+  # The description data of the issue.
+  descriptionData
+  # The description of the issue.
+  description
+  # The due date of the issue.
+  dueDate
+  # The entity this issue is synced with.
+  syncedWith
+  # The estimate of the complexity of the issue..
+  estimate
+  # The external user that created the issue.
+  externalUserCreator {
+    ...ExternalUserChildWebhookPayload
+  }
+  # The identifier of the issue.
+  identifier
+  # The issue's current workflow state.
+  state {
+    ...WorkflowStateChildWebhookPayload
+  }
+  # The issue's title.
+  title
+  # The issue's unique number.
+  number
+  # The label of the issue's priority.
+  priorityLabel
+  # The labels associated with this issue.
+  labels {
+    ...IssueLabelChildWebhookPayload
+  }
+  # The order of the item in relation to other items in the organization, when ordered by priority.
+  prioritySortOrder
+  # The order of the item in relation to other items in the organization.
+  sortOrder
+  # The order of the item in the sub-issue list. Only set if the issue has a parent.
+  subIssueSortOrder
+  # The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  priority
+  # The project milestone that the issue belongs to.
+  projectMilestone {
+    ...ProjectMilestoneChildWebhookPayload
+  }
+  # The project that the issue belongs to.
+  project {
+    ...ProjectChildWebhookPayload
+  }
+  # The reaction data for this issue.
+  reactionData
+  # The team that the issue belongs to.
+  team {
+    ...TeamChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The time at which the issue entered triage.
+  startedTriageAt
+  # The time at which the issue was added to a cycle.
+  addedToCycleAt
+  # The time at which the issue was added to a project.
+  addedToProjectAt
+  # The time at which the issue was added to a team.
+  addedToTeamAt
+  # The time at which the issue was auto-archived.
+  autoArchivedAt
+  # The time at which the issue was auto-closed.
+  autoClosedAt
+  # The time at which the issue was canceled.
+  canceledAt
+  # The time at which the issue was completed.
+  completedAt
+  # The time at which the issue was moved into started state.
+  startedAt
+  # The time at which the issue was triaged.
+  triagedAt
+  # The time at which the issue would breach its SLA.
+  slaBreachesAt
+  # The time at which the issue would enter SLA high risk.
+  slaHighRiskAt
+  # The time at which the issue would enter SLA medium risk.
+  slaMediumRiskAt
+  # The time at which the issue's SLA started.
+  slaStartedAt
+  # The time until an issue will be snoozed in Triage view.
+  snoozedUntilAt
+  # The type of SLA the issue is under.
+  slaType
+  # The user that created the issue.
+  creator {
+    ...UserChildWebhookPayload
+  }
+  # The user that is assigned to the issue.
+  assignee {
+    ...UserChildWebhookPayload
+  }
 }
 
 # Public information of the OAuth application, plus whether the application has been authorized for

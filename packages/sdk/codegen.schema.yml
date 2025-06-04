@@ -5,9 +5,11 @@ hooks:
     - prettier --write
 generates:
   src/schema.json:
+    schema: ./Linear-Webhooks@current.graphql
     plugins:
       - introspection
   src/schema.graphql:
+    schema: ./Linear-Webhooks@current.graphql
     plugins:
       - schema-ast
     config:

@@ -10,6 +10,7 @@ function updateScalars() {
         ...Doc.SCALAR_DATE_NAMES,
         ...Doc.SCALAR_JSON_NAMES,
         ...Doc.SCALAR_DATE_OR_STRING_NAMES,
+        ...Object.keys(Doc.SCALAR_NOTIFICATION_TYPE_MAP),
       ].map(name => `${name}: any`),
       to: match => {
         const name = match?.split(":")?.[0];
@@ -22,6 +23,8 @@ function updateScalars() {
           return `${name}: ${Doc.SCALAR_JSON_TYPE}`;
         } else if (Doc.SCALAR_DATE_OR_STRING_NAMES.includes(name)) {
           return `${name}: ${Doc.SCALAR_DATE_OR_STRING_TYPE}`;
+        } else if (Object.keys(Doc.SCALAR_NOTIFICATION_TYPE_MAP).includes(name)) {
+          return `${name}: "${Doc.SCALAR_NOTIFICATION_TYPE_MAP[name as keyof typeof Doc.SCALAR_NOTIFICATION_TYPE_MAP]}"`;
         } else {
           return match;
         }
