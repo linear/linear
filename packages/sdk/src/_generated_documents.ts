@@ -6246,6 +6246,8 @@ export type IssueLabelCollectionFilter = {
   length?: Maybe<NumberComparator>;
   /** Comparator for the name. */
   name?: Maybe<StringComparator>;
+  /** Filter based on the existence of the relation. */
+  null?: Maybe<Scalars["Boolean"]>;
   /** Compound filters, one of which need to be matched by the label. */
   or?: Maybe<Array<IssueLabelCollectionFilter>>;
   /** Filters that the issue label's parent label must satisfy. */
@@ -12204,6 +12206,8 @@ export type ProjectLabelCollectionFilter = {
   length?: Maybe<NumberComparator>;
   /** Comparator for the name. */
   name?: Maybe<StringComparator>;
+  /** Filter based on the existence of the relation. */
+  null?: Maybe<Scalars["Boolean"]>;
   /** Compound filters, one of which need to be matched by the label. */
   or?: Maybe<Array<ProjectLabelCollectionFilter>>;
   /** Filters that the project label's parent label must satisfy. */
@@ -17725,6 +17729,8 @@ export type WorkspaceAuthorizedApplicationWithMemberships = {
   client: AuthorizedApplication;
   /** UserIds and membership dates of everyone who has authorized the application */
   memberships: Array<AuthMembership>;
+  /** Total number of members that authorized the application. */
+  totalMembers: Scalars["Float"];
 };
 
 export type ZendeskSettingsInput = {
