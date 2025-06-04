@@ -1,5 +1,5 @@
 ---
-"@linear/sdk": minor
+"@linear/sdk": major
 ---
 
 

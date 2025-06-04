@@ -1,5 +1,6 @@
 ---
 "@linear/codegen-doc": major
+"@linear/codegen-sdk": major
 "@linear/sdk": major
 ---
 
