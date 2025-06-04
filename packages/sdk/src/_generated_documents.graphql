@@ -75,6 +75,10 @@ fragment Comment on Comment {
   documentContent {
     ...DocumentContent
   }
+  # The external services the comment is synced with.
+  syncedWith {
+    ...ExternalEntityInfo
+  }
   # The external thread that the comment is synced with.
   externalThread {
     ...SyncedExternalThread
@@ -313,6 +317,10 @@ fragment CustomerNeed on CustomerNeed {
   customer {
     id
   }
+  # The issue this customer need was originally created on. Will be undefined if the customer need hasn't been moved.
+  originalIssue {
+    id
+  }
   # The issue this need is referencing.
   issue {
     id
@@ -401,6 +409,8 @@ fragment CustomerStatus on CustomerStatus {
   description
   # The UI color of the status as a HEX string.
   color
+  # The display name of the status.
+  displayName
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -2267,14 +2277,14 @@ fragment User on User {
   createdAt
   # The unique identifier of the entity.
   id
+  # The user's GitHub user ID.
+  gitHubUserId
   # The user's display (nick) name. Unique within each organization.
   displayName
   # The user's email address.
   email
   # The user's full name.
   name
-  # Unique hash for the user to be used in invite URLs.
-  inviteHash
   # User's profile URL.
   url
   # Whether the user account is active or disabled (suspended).
@@ -2289,6 +2299,8 @@ fragment User on User {
   isMe
   # [DEPRECATED] Hash for the user to be used in calendar URLs.
   calendarHash
+  # [DEPRECATED] Unique hash for the user to be used in invite URLs.
+  inviteHash
 }
 
 # A user's notification category preferences.
@@ -3037,6 +3049,10 @@ fragment Issue on Issue {
   dueDate
   # The estimate of the complexity of the issue..
   estimate
+  # The external services the issue is synced with.
+  syncedWith {
+    ...ExternalEntityInfo
+  }
   # The external user who created the issue.
   externalUserCreator {
     id
@@ -3277,6 +3293,8 @@ fragment Organization on Organization {
   customersEnabled
   # Whether the organization is using a roadmap.
   roadmapEnabled
+  # Whether workspace label creation, update, and deletion is restricted to admins.
+  restrictLabelManagementToAdmins
   # [DEPRECATED] The frequency at which to prompt for project updates.
   projectUpdatesReminderFrequency
   # [DEPRECATED] Which day count to use for SLA calculations.
@@ -3660,6 +3678,15 @@ fragment WebhookFailureEvent on WebhookFailureEvent {
   }
 }
 
+# Information about an external entity.
+fragment ExternalEntityInfo on ExternalEntityInfo {
+  __typename
+  # The id of the external entity.
+  id
+  # The name of the service this entity is synced with.
+  service
+}
+
 # Issue attachment (e.g. support ticket, pull request).
 fragment Attachment on Attachment {
   __typename
@@ -3685,6 +3712,10 @@ fragment Attachment on Attachment {
   }
   # The issue this attachment belongs to.
   issue {
+    id
+  }
+  # The issue this attachment was originally created on. Will be undefined if the attachment hasn't been moved.
+  originalIssue {
     id
   }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -3817,8 +3848,43 @@ fragment IssueLabel on IssueLabel {
   creator {
     id
   }
-  # Whether this label is considered to be a group.
+  # Whether the label is a group.
   isGroup
+}
+
+# Metadata about the external GitHub entity.
+fragment ExternalEntityInfoGithubMetadata on ExternalEntityInfoGithubMetadata {
+  __typename
+  # The number of the issue.
+  number
+  # The owner of the repository.
+  owner
+  # The repository name.
+  repo
+}
+
+# Metadata about the external Jira entity.
+fragment ExternalEntityInfoJiraMetadata on ExternalEntityInfoJiraMetadata {
+  __typename
+  # The id of the Jira issue type.
+  issueTypeId
+  # The id of the Jira project.
+  projectId
+  # The key of the Jira issue.
+  issueKey
+}
+
+# Metadata about the external Slack entity.
+fragment ExternalEntitySlackMetadata on ExternalEntitySlackMetadata {
+  __typename
+  # The URL of the Slack message.
+  messageUrl
+  # The id of the Slack channel.
+  channelId
+  # The name of the Slack channel.
+  channelName
+  # Whether the entity originated from Slack (not Linear).
+  isFromSlack
 }
 
 # Notification subscriptions for models.
@@ -4560,6 +4626,22 @@ fragment CustomerNeedPayload on CustomerNeedPayload {
   success
 }
 
+fragment CustomerNeedUpdatePayload on CustomerNeedUpdatePayload {
+  __typename
+  # The customer need that was created or updated.
+  need {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The related customer needs that were updated.
+  updatedRelatedNeeds {
+    ...CustomerNeed
+  }
+  # Whether the operation was successful.
+  success
+}
+
 fragment CustomerPayload on CustomerPayload {
   __typename
   # The customer that was created or updated.
@@ -4580,6 +4662,18 @@ fragment CustomerStatusConnection on CustomerStatusConnection {
   pageInfo {
     ...PageInfo
   }
+}
+
+fragment CustomerStatusPayload on CustomerStatusPayload {
+  __typename
+  # The customer status that was created or updated.
+  status {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
 }
 
 fragment CustomerTierConnection on CustomerTierConnection {
@@ -5307,6 +5401,10 @@ fragment IssueSearchResult on IssueSearchResult {
   dueDate
   # The estimate of the complexity of the issue..
   estimate
+  # The external services the issue is synced with.
+  syncedWith {
+    ...ExternalEntityInfo
+  }
   # The external user who created the issue.
   externalUserCreator {
     id
@@ -5412,6 +5510,65 @@ fragment IssueSearchResult on IssueSearchResult {
   state {
     id
   }
+}
+
+fragment IssueSuggestion on IssueSuggestion {
+  __typename
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  issue {
+    id
+  }
+  issueId
+  metadata {
+    ...IssueSuggestionMetadata
+  }
+  state
+  stateChangedAt
+  suggestedIssue {
+    id
+  }
+  suggestedIssueId
+  suggestedLabel {
+    id
+  }
+  suggestedLabelId
+  suggestedProject {
+    id
+  }
+  suggestedTeam {
+    id
+  }
+  suggestedUser {
+    id
+  }
+  suggestedUserId
+  type
+}
+
+fragment IssueSuggestionConnection on IssueSuggestionConnection {
+  __typename
+  nodes {
+    ...IssueSuggestion
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment IssueSuggestionMetadata on IssueSuggestionMetadata {
+  __typename
+  classification
+  evalLogId
+  reasons
+  score
 }
 
 fragment IssueTitleSuggestionFromCustomerRequestPayload on IssueTitleSuggestionFromCustomerRequestPayload {
@@ -6559,6 +6716,72 @@ query attachmentIssue_comments(
     }
   }
 }
+# Attachments previously associated with the issue before being moved to another issue.
+query attachmentIssue_formerAttachments(
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned attachments.
+  $filter: AttachmentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    formerAttachments(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...AttachmentConnection
+    }
+  }
+}
+# Customer needs previously associated with the issue before being moved to another issue.
+query attachmentIssue_formerNeeds(
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned needs.
+  $filter: CustomerNeedFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    formerNeeds(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CustomerNeedConnection
+    }
+  }
+}
 # History entries associated with the issue.
 query attachmentIssue_history(
   # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
@@ -7652,6 +7875,8 @@ query initiative_projects(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # [ALPHA] Whether to include projects from sub-initiatives. Defaults to true.
+  $includeSubInitiatives: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -7664,6 +7889,7 @@ query initiative_projects(
       filter: $filter
       first: $first
       includeArchived: $includeArchived
+      includeSubInitiatives: $includeSubInitiatives
       last: $last
       orderBy: $orderBy
     ) {
@@ -8023,6 +8249,70 @@ query issue_comments(
       orderBy: $orderBy
     ) {
       ...CommentConnection
+    }
+  }
+}
+# Attachments previously associated with the issue before being moved to another issue.
+query issue_formerAttachments(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned attachments.
+  $filter: AttachmentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    formerAttachments(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...AttachmentConnection
+    }
+  }
+}
+# Customer needs previously associated with the issue before being moved to another issue.
+query issue_formerNeeds(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned needs.
+  $filter: CustomerNeedFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    formerNeeds(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CustomerNeedConnection
     }
   }
 }
@@ -8586,6 +8876,72 @@ query issueVcsBranchSearch_comments(
       orderBy: $orderBy
     ) {
       ...CommentConnection
+    }
+  }
+}
+# Attachments previously associated with the issue before being moved to another issue.
+query issueVcsBranchSearch_formerAttachments(
+  # The VCS branch name to search for.
+  $branchName: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned attachments.
+  $filter: AttachmentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issueVcsBranchSearch(branchName: $branchName) {
+    formerAttachments(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...AttachmentConnection
+    }
+  }
+}
+# Customer needs previously associated with the issue before being moved to another issue.
+query issueVcsBranchSearch_formerNeeds(
+  # The VCS branch name to search for.
+  $branchName: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned needs.
+  $filter: CustomerNeedFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issueVcsBranchSearch(branchName: $branchName) {
+    formerNeeds(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CustomerNeedConnection
     }
   }
 }
@@ -11368,9 +11724,9 @@ mutation deleteAttachment(
 mutation attachmentLinkDiscord(
   # The Discord channel ID for the message to link.
   $channelId: String!
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11400,9 +11756,9 @@ mutation attachmentLinkDiscord(
 mutation attachmentLinkFront(
   # The Front conversation ID to link.
   $conversationId: String!
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11424,9 +11780,9 @@ mutation attachmentLinkFront(
 }
 # Link a GitHub issue to a Linear issue.
 mutation attachmentLinkGitHubIssue(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11450,9 +11806,9 @@ mutation attachmentLinkGitHubIssue(
 }
 # Link a GitHub pull request to an issue.
 mutation attachmentLinkGitHubPR(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11479,9 +11835,9 @@ mutation attachmentLinkGitHubPR(
 }
 # Link an existing GitLab MR to an issue.
 mutation attachmentLinkGitLabMR(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11513,9 +11869,9 @@ mutation attachmentLinkGitLabMR(
 mutation attachmentLinkIntercom(
   # The Intercom conversation ID to link.
   $conversationId: String!
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11540,9 +11896,9 @@ mutation attachmentLinkIntercom(
 }
 # Link an existing Jira issue to an issue.
 mutation attachmentLinkJiraIssue(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11567,11 +11923,37 @@ mutation attachmentLinkJiraIssue(
     ...AttachmentPayload
   }
 }
+# Link an existing Salesforce case to an issue.
+mutation attachmentLinkSalesforce(
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
+  $createAsUser: String
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
+  $displayIconUrl: String
+  # Optional attachment ID that may be provided through the API.
+  $id: String
+  # The issue for which to link the Salesforce case.
+  $issueId: String!
+  # The title to use for the attachment.
+  $title: String
+  # The URL of the Salesforce case to link.
+  $url: String!
+) {
+  attachmentLinkSalesforce(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    title: $title
+    url: $url
+  ) {
+    ...AttachmentPayload
+  }
+}
 # Link an existing Slack message to an issue.
 mutation attachmentLinkSlack(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11598,9 +11980,9 @@ mutation attachmentLinkSlack(
 }
 # Link any url to an issue.
 mutation attachmentLinkURL(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # The id for the attachment.
   $id: String
@@ -11624,9 +12006,9 @@ mutation attachmentLinkURL(
 }
 # Link an existing Zendesk ticket to an issue.
 mutation attachmentLinkZendesk(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11881,7 +12263,36 @@ mutation updateCustomerNeed(
   $input: CustomerNeedUpdateInput!
 ) {
   customerNeedUpdate(id: $id, input: $input) {
-    ...CustomerNeedPayload
+    ...CustomerNeedUpdatePayload
+  }
+}
+# Creates a new customer status.
+mutation createCustomerStatus(
+  # The CustomerStatus object to create.
+  $input: CustomerStatusCreateInput!
+) {
+  customerStatusCreate(input: $input) {
+    ...CustomerStatusPayload
+  }
+}
+# Deletes a customer status.
+mutation deleteCustomerStatus(
+  # The identifier of the customer status to delete.
+  $id: String!
+) {
+  customerStatusDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates a customer status.
+mutation updateCustomerStatus(
+  # The identifier of the customer status to update.
+  $id: String!
+  # A partial CustomerStatus object to update the CustomerStatus with.
+  $input: CustomerStatusUpdateInput!
+) {
+  customerStatusUpdate(id: $id, input: $input) {
+    ...CustomerStatusPayload
   }
 }
 # Creates a new customer tier.
@@ -12611,6 +13022,19 @@ mutation integrationRequest(
 ) {
   integrationRequest(input: $input) {
     ...IntegrationRequestPayload
+  }
+}
+# Integrates the organization with Salesforce.
+mutation integrationSalesforce(
+  # The Salesforce OAuth code.
+  $code: String!
+  # The Salesforce OAuth redirect URI.
+  $redirectUri: String!
+  # The Salesforce installation subdomain.
+  $subdomain: String!
+) {
+  integrationSalesforce(code: $code, redirectUri: $redirectUri, subdomain: $subdomain) {
+    ...IntegrationPayload
   }
 }
 # Integrates the organization with Sentry.
