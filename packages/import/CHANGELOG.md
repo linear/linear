@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.2.15
+
+### Patch Changes
+
+- edf2099: chore(deps): update dependency patch versions
+- Updated dependencies [edf2099]
+- Updated dependencies [511faef]
+- Updated dependencies [511faef]
+  - @linear/sdk@42.0.0
+
 ## 2.2.14
 
 ### Patch Changes
