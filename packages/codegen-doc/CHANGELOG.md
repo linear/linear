@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- 511faef: Introduces types for webhook data payloads
+
+### Patch Changes
+
+- edf2099: chore(deps): update dependency patch versions
+
 ## 2.2.14
 
 ### Patch Changes

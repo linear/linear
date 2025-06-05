@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.27
+
+### Patch Changes
+
+- edf2099: chore(deps): update dependency patch versions
+
 ## 2.0.26
 
 ### Patch Changes
