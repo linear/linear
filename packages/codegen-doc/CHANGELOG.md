@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.0
+
+### Minor Changes
+
+- 3ea227f: Adds additional webhook payloads
+
 ## 3.0.0
 
 ### Major Changes
