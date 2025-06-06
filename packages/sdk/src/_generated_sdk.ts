@@ -1842,6 +1842,28 @@ export class Customer extends Request {
   }
 }
 /**
+ * Certain properties of a customer.
+ *
+ * @param data - L.CustomerChildWebhookPayloadFragment response data
+ */
+export class CustomerChildWebhookPayload {
+  public constructor(data: L.CustomerChildWebhookPayloadFragment) {
+    this.domains = data.domains;
+    this.externalIds = data.externalIds;
+    this.id = data.id;
+    this.name = data.name;
+  }
+
+  /** The domains associated with this customer. */
+  public domains: string[];
+  /** The ids of the customers in external systems. */
+  public externalIds: string[];
+  /** The ID of the customer. */
+  public id: string;
+  /** The name of the customer. */
+  public name: string;
+}
+/**
  * CustomerConnection model
  *
  * @param request - function to call the graphql client
@@ -2020,6 +2042,31 @@ export class CustomerNeedArchivePayload extends Request {
   }
 }
 /**
+ * Certain properties of a customer need.
+ *
+ * @param data - L.CustomerNeedChildWebhookPayloadFragment response data
+ */
+export class CustomerNeedChildWebhookPayload {
+  public constructor(data: L.CustomerNeedChildWebhookPayloadFragment) {
+    this.attachmentId = data.attachmentId ?? undefined;
+    this.customerId = data.customerId ?? undefined;
+    this.id = data.id;
+    this.issueId = data.issueId ?? undefined;
+    this.projectId = data.projectId ?? undefined;
+  }
+
+  /** The ID of the attachment this need is referencing. */
+  public attachmentId?: string;
+  /** The ID of the customer that this need is attached to. */
+  public customerId?: string;
+  /** The ID of the customer need. */
+  public id: string;
+  /** The ID of the issue this need is referencing. */
+  public issueId?: string;
+  /** The ID of the project this need is referencing. */
+  public projectId?: string;
+}
+/**
  * CustomerNeedConnection model
  *
  * @param request - function to call the graphql client
@@ -2100,6 +2147,70 @@ export class CustomerNeedUpdatePayload extends Request {
   public get needId(): string | undefined {
     return this._need?.id;
   }
+}
+/**
+ * Payload for a customer need webhook.
+ *
+ * @param data - L.CustomerNeedWebhookPayloadFragment response data
+ */
+export class CustomerNeedWebhookPayload {
+  public constructor(data: L.CustomerNeedWebhookPayloadFragment) {
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.attachmentId = data.attachmentId ?? undefined;
+    this.body = data.body ?? undefined;
+    this.commentId = data.commentId ?? undefined;
+    this.createdAt = data.createdAt;
+    this.creatorId = data.creatorId ?? undefined;
+    this.customerId = data.customerId ?? undefined;
+    this.id = data.id;
+    this.issueId = data.issueId ?? undefined;
+    this.originalIssueId = data.originalIssueId ?? undefined;
+    this.priority = data.priority;
+    this.projectAttachmentId = data.projectAttachmentId ?? undefined;
+    this.projectId = data.projectId ?? undefined;
+    this.updatedAt = data.updatedAt;
+    this.attachment = data.attachment ? new AttachmentWebhookPayload(data.attachment) : undefined;
+    this.customer = data.customer ? new CustomerChildWebhookPayload(data.customer) : undefined;
+    this.issue = data.issue ? new IssueChildWebhookPayload(data.issue) : undefined;
+    this.project = data.project ? new ProjectChildWebhookPayload(data.project) : undefined;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The ID of the attachment this need is referencing. */
+  public attachmentId?: string;
+  /** The body of the need in Markdown format. */
+  public body?: string;
+  /** The ID of the comment this need is referencing. */
+  public commentId?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the creator of the customer need. */
+  public creatorId?: string;
+  /** The ID of the customer that this need is attached to. */
+  public customerId?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the issue this need is referencing. */
+  public issueId?: string;
+  /** The issue ID this customer need was originally created on. Will be undefined if the customer need hasn't been moved. */
+  public originalIssueId?: string;
+  /** The priority of the need. */
+  public priority: number;
+  /** The ID of the project attachment this need is referencing. */
+  public projectAttachmentId?: string;
+  /** The ID of the project this need is referencing. */
+  public projectId?: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The attachment this need is referencing. */
+  public attachment?: AttachmentWebhookPayload;
+  /** The customer that this need is attached to. */
+  public customer?: CustomerChildWebhookPayload;
+  /** The issue this need is referencing. */
+  public issue?: IssueChildWebhookPayload;
+  /** The project this need is referencing. */
+  public project?: ProjectChildWebhookPayload;
 }
 /**
  * A customer notification subscription.
@@ -2273,7 +2384,7 @@ export class CustomerStatus extends Request {
     this.color = data.color;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
-    this.displayName = data.displayName ?? undefined;
+    this.displayName = data.displayName;
     this.id = data.id;
     this.name = data.name;
     this.position = data.position;
@@ -2290,7 +2401,7 @@ export class CustomerStatus extends Request {
   /** Description of the status. */
   public description?: string;
   /** The display name of the status. */
-  public displayName?: string;
+  public displayName: string;
   /** The unique identifier of the entity. */
   public id: string;
   /** The name of the status. */
@@ -2515,6 +2626,73 @@ export class CustomerTierPayload extends Request {
   }
 }
 /**
+ * Payload for a customer webhook.
+ *
+ * @param data - L.CustomerWebhookPayloadFragment response data
+ */
+export class CustomerWebhookPayload {
+  public constructor(data: L.CustomerWebhookPayloadFragment) {
+    this.approximateNeedCount = data.approximateNeedCount;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.createdAt = data.createdAt;
+    this.domains = data.domains;
+    this.externalIds = data.externalIds;
+    this.id = data.id;
+    this.logoUrl = data.logoUrl ?? undefined;
+    this.mainSourceId = data.mainSourceId ?? undefined;
+    this.name = data.name;
+    this.ownerId = data.ownerId ?? undefined;
+    this.revenue = data.revenue ?? undefined;
+    this.size = data.size ?? undefined;
+    this.slackChannelId = data.slackChannelId ?? undefined;
+    this.slugId = data.slugId;
+    this.statusId = data.statusId ?? undefined;
+    this.tierId = data.tierId ?? undefined;
+    this.updatedAt = data.updatedAt;
+    this.status = data.status ? new CustomerStatusChildWebhookPayload(data.status) : undefined;
+    this.tier = data.tier ? new CustomerTierChildWebhookPayload(data.tier) : undefined;
+  }
+
+  /** The approximate number of needs of the customer. */
+  public approximateNeedCount: number;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The domains associated with this customer. */
+  public domains: string[];
+  /** The ids of the customers in external systems. */
+  public externalIds: string[];
+  /** The ID of the entity. */
+  public id: string;
+  /** The customer's logo URL. */
+  public logoUrl?: string;
+  /** The ID of the main source, when a customer has multiple sources. Must be one of externalIds. */
+  public mainSourceId?: string;
+  /** The name of the customer. */
+  public name: string;
+  /** The ID of the user who owns the customer. */
+  public ownerId?: string;
+  /** The annual revenue generated by the customer. */
+  public revenue?: number;
+  /** The size of the customer. */
+  public size?: number;
+  /** The ID of the Slack channel used to interact with the customer. */
+  public slackChannelId?: string;
+  /** The customer's unique URL slug. */
+  public slugId: string;
+  /** The ID of the customer status. */
+  public statusId?: string;
+  /** The ID of the customer tier. */
+  public tierId?: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The customer status. */
+  public status?: CustomerStatusChildWebhookPayload;
+  /** The customer tier. */
+  public tier?: CustomerTierChildWebhookPayload;
+}
+/**
  * A set of issues to be resolved in a specified amount of time.
  *
  * @param request - function to call the graphql client
@@ -2659,7 +2837,7 @@ export class CycleChildWebhookPayload {
   public constructor(data: L.CycleChildWebhookPayloadFragment) {
     this.endsAt = data.endsAt;
     this.id = data.id;
-    this.name = data.name;
+    this.name = data.name ?? undefined;
     this.number = data.number;
     this.startsAt = data.startsAt;
   }
@@ -2669,7 +2847,7 @@ export class CycleChildWebhookPayload {
   /** The ID of the cycle. */
   public id: string;
   /** The name of the cycle. */
-  public name: string;
+  public name?: string;
   /** The number of the cycle. */
   public number: number;
   /** The start date of the cycle. */
@@ -2854,6 +3032,73 @@ export class CyclePayload extends Request {
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
+}
+/**
+ * Payload for a cycle webhook.
+ *
+ * @param data - L.CycleWebhookPayloadFragment response data
+ */
+export class CycleWebhookPayload {
+  public constructor(data: L.CycleWebhookPayloadFragment) {
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.autoArchivedAt = data.autoArchivedAt ?? undefined;
+    this.completedAt = data.completedAt ?? undefined;
+    this.completedIssueCountHistory = data.completedIssueCountHistory;
+    this.completedScopeHistory = data.completedScopeHistory;
+    this.createdAt = data.createdAt;
+    this.description = data.description ?? undefined;
+    this.endsAt = data.endsAt;
+    this.id = data.id;
+    this.inProgressScopeHistory = data.inProgressScopeHistory;
+    this.inheritedFromId = data.inheritedFromId ?? undefined;
+    this.issueCountHistory = data.issueCountHistory;
+    this.name = data.name ?? undefined;
+    this.number = data.number;
+    this.scopeHistory = data.scopeHistory;
+    this.startsAt = data.startsAt;
+    this.teamId = data.teamId;
+    this.uncompletedIssuesUponCloseIds = data.uncompletedIssuesUponCloseIds;
+    this.updatedAt = data.updatedAt;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The time at which the cycle was automatically archived by the auto pruning process. */
+  public autoArchivedAt?: string;
+  /** The completion time of the cycle. If null, the cycle hasn't been completed. */
+  public completedAt?: string;
+  /** The number of completed issues in the cycle after each day. */
+  public completedIssueCountHistory: number[];
+  /** The number of completed estimation points after each day. */
+  public completedScopeHistory: number[];
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The cycle's description. */
+  public description?: string;
+  /** The end date of the cycle. */
+  public endsAt: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The number of in progress estimation points after each day. */
+  public inProgressScopeHistory: number[];
+  /** The ID of the cycle inherited from. */
+  public inheritedFromId?: string;
+  /** The total number of issues in the cycle after each day. */
+  public issueCountHistory: number[];
+  /** The name of the cycle. */
+  public name?: string;
+  /** The number of the cycle. */
+  public number: number;
+  /** The total number of estimation points after each day. */
+  public scopeHistory: number[];
+  /** The start date of the cycle. */
+  public startsAt: string;
+  /** The team ID of the cycle. */
+  public teamId: string;
+  /** The IDs of the uncompleted issues upon close. */
+  public uncompletedIssuesUponCloseIds: string[];
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
 }
 /**
  * A generic payload return from entity deletion mutations.
@@ -6866,6 +7111,7 @@ export class IssueAssignedToYouNotificationWebhookPayload {
     this.actorId = data.actorId ?? undefined;
     this.archivedAt = data.archivedAt ?? undefined;
     this.createdAt = data.createdAt;
+    this.externalUserActorId = data.externalUserActorId ?? undefined;
     this.id = data.id;
     this.issueId = data.issueId;
     this.type = data.type;
@@ -6881,6 +7127,8 @@ export class IssueAssignedToYouNotificationWebhookPayload {
   public archivedAt?: string;
   /** The time at which the entity was created. */
   public createdAt: string;
+  /** The ID of the external user who caused the notification. */
+  public externalUserActorId?: string;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this notification belongs to. */
@@ -6946,6 +7194,119 @@ export class IssueChildWebhookPayload {
   public team: TeamChildWebhookPayload;
 }
 /**
+ * Payload for an issue comment mention notification.
+ *
+ * @param data - L.IssueCommentMentionNotificationWebhookPayloadFragment response data
+ */
+export class IssueCommentMentionNotificationWebhookPayload {
+  public constructor(data: L.IssueCommentMentionNotificationWebhookPayloadFragment) {
+    this.actorId = data.actorId ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.commentId = data.commentId;
+    this.createdAt = data.createdAt;
+    this.externalUserActorId = data.externalUserActorId ?? undefined;
+    this.id = data.id;
+    this.issueId = data.issueId;
+    this.parentCommentId = data.parentCommentId ?? undefined;
+    this.type = data.type;
+    this.updatedAt = data.updatedAt;
+    this.userId = data.userId;
+    this.actor = data.actor ? new UserChildWebhookPayload(data.actor) : undefined;
+    this.comment = new CommentChildWebhookPayload(data.comment);
+    this.issue = new IssueWithDescriptionChildWebhookPayload(data.issue);
+    this.parentComment = data.parentComment ? new CommentChildWebhookPayload(data.parentComment) : undefined;
+  }
+
+  /** The ID of the actor who caused the notification. */
+  public actorId?: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The ID of the comment this notification belongs to. */
+  public commentId: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the external user who caused the notification. */
+  public externalUserActorId?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the issue this notification belongs to. */
+  public issueId: string;
+  /** The ID of the parent comment for the comment this notification belongs to. */
+  public parentCommentId?: string;
+  /** An issue comment mention notification type. */
+  public type: "issueCommentMention";
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The ID of the user who received the notification. */
+  public userId: string;
+  /** The actor who caused the notification. */
+  public actor?: UserChildWebhookPayload;
+  /** The comment this notification belongs to. */
+  public comment: CommentChildWebhookPayload;
+  /** The issue this notification belongs to. */
+  public issue: IssueWithDescriptionChildWebhookPayload;
+  /** The parent comment for the comment this notification belongs to. */
+  public parentComment?: CommentChildWebhookPayload;
+}
+/**
+ * Payload for an issue comment reaction notification.
+ *
+ * @param data - L.IssueCommentReactionNotificationWebhookPayloadFragment response data
+ */
+export class IssueCommentReactionNotificationWebhookPayload {
+  public constructor(data: L.IssueCommentReactionNotificationWebhookPayloadFragment) {
+    this.actorId = data.actorId ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.commentId = data.commentId;
+    this.createdAt = data.createdAt;
+    this.externalUserActorId = data.externalUserActorId ?? undefined;
+    this.id = data.id;
+    this.issueId = data.issueId;
+    this.parentCommentId = data.parentCommentId ?? undefined;
+    this.reactionEmoji = data.reactionEmoji;
+    this.type = data.type;
+    this.updatedAt = data.updatedAt;
+    this.userId = data.userId;
+    this.actor = data.actor ? new UserChildWebhookPayload(data.actor) : undefined;
+    this.comment = new CommentChildWebhookPayload(data.comment);
+    this.issue = new IssueWithDescriptionChildWebhookPayload(data.issue);
+    this.parentComment = data.parentComment ? new CommentChildWebhookPayload(data.parentComment) : undefined;
+  }
+
+  /** The ID of the actor who caused the notification. */
+  public actorId?: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The ID of the comment this notification belongs to. */
+  public commentId: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the external user who caused the notification. */
+  public externalUserActorId?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the issue this notification belongs to. */
+  public issueId: string;
+  /** The ID of the parent comment for the comment this notification belongs to. */
+  public parentCommentId?: string;
+  /** The emoji of the reaction this notification is for. */
+  public reactionEmoji: string;
+  /** An issue comment reaction notification type. */
+  public type: "issueCommentReaction";
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The ID of the user who received the notification. */
+  public userId: string;
+  /** The actor who caused the notification. */
+  public actor?: UserChildWebhookPayload;
+  /** The comment this notification belongs to. */
+  public comment: CommentChildWebhookPayload;
+  /** The issue this notification belongs to. */
+  public issue: IssueWithDescriptionChildWebhookPayload;
+  /** The parent comment for the comment this notification belongs to. */
+  public parentComment?: CommentChildWebhookPayload;
+}
+/**
  * IssueConnection model
  *
  * @param request - function to call the graphql client
@@ -6965,6 +7326,52 @@ export class IssueConnection extends Connection<Issue> {
       new PageInfo(request, data.pageInfo)
     );
   }
+}
+/**
+ * Payload for an issue emoji reaction notification.
+ *
+ * @param data - L.IssueEmojiReactionNotificationWebhookPayloadFragment response data
+ */
+export class IssueEmojiReactionNotificationWebhookPayload {
+  public constructor(data: L.IssueEmojiReactionNotificationWebhookPayloadFragment) {
+    this.actorId = data.actorId ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.createdAt = data.createdAt;
+    this.externalUserActorId = data.externalUserActorId ?? undefined;
+    this.id = data.id;
+    this.issueId = data.issueId;
+    this.reactionEmoji = data.reactionEmoji;
+    this.type = data.type;
+    this.updatedAt = data.updatedAt;
+    this.userId = data.userId;
+    this.actor = data.actor ? new UserChildWebhookPayload(data.actor) : undefined;
+    this.issue = new IssueWithDescriptionChildWebhookPayload(data.issue);
+  }
+
+  /** The ID of the actor who caused the notification. */
+  public actorId?: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the external user who caused the notification. */
+  public externalUserActorId?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the issue this notification belongs to. */
+  public issueId: string;
+  /** The emoji of the reaction this notification is for. */
+  public reactionEmoji: string;
+  /** An issue emoji reaction notification type. */
+  public type: "issueEmojiReaction";
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The ID of the user who received the notification. */
+  public userId: string;
+  /** The actor who caused the notification. */
+  public actor?: UserChildWebhookPayload;
+  /** The issue this notification belongs to. */
+  public issue: IssueWithDescriptionChildWebhookPayload;
 }
 /**
  * IssueFilterSuggestionPayload model
@@ -7654,6 +8061,7 @@ export class IssueMentionNotificationWebhookPayload {
     this.actorId = data.actorId ?? undefined;
     this.archivedAt = data.archivedAt ?? undefined;
     this.createdAt = data.createdAt;
+    this.externalUserActorId = data.externalUserActorId ?? undefined;
     this.id = data.id;
     this.issueId = data.issueId;
     this.type = data.type;
@@ -7669,6 +8077,8 @@ export class IssueMentionNotificationWebhookPayload {
   public archivedAt?: string;
   /** The time at which the entity was created. */
   public createdAt: string;
+  /** The ID of the external user who caused the notification. */
+  public externalUserActorId?: string;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this notification belongs to. */
@@ -7683,6 +8093,61 @@ export class IssueMentionNotificationWebhookPayload {
   public actor?: UserChildWebhookPayload;
   /** The issue this notification belongs to. */
   public issue: IssueWithDescriptionChildWebhookPayload;
+}
+/**
+ * Payload for an issue new comment notification.
+ *
+ * @param data - L.IssueNewCommentNotificationWebhookPayloadFragment response data
+ */
+export class IssueNewCommentNotificationWebhookPayload {
+  public constructor(data: L.IssueNewCommentNotificationWebhookPayloadFragment) {
+    this.actorId = data.actorId ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.commentId = data.commentId;
+    this.createdAt = data.createdAt;
+    this.externalUserActorId = data.externalUserActorId ?? undefined;
+    this.id = data.id;
+    this.issueId = data.issueId;
+    this.parentCommentId = data.parentCommentId ?? undefined;
+    this.type = data.type;
+    this.updatedAt = data.updatedAt;
+    this.userId = data.userId;
+    this.actor = data.actor ? new UserChildWebhookPayload(data.actor) : undefined;
+    this.comment = new CommentChildWebhookPayload(data.comment);
+    this.issue = new IssueWithDescriptionChildWebhookPayload(data.issue);
+    this.parentComment = data.parentComment ? new CommentChildWebhookPayload(data.parentComment) : undefined;
+  }
+
+  /** The ID of the actor who caused the notification. */
+  public actorId?: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The ID of the comment this notification belongs to. */
+  public commentId: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the external user who caused the notification. */
+  public externalUserActorId?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the issue this notification belongs to. */
+  public issueId: string;
+  /** The ID of the parent comment for the comment this notification belongs to. */
+  public parentCommentId?: string;
+  /** An issue new comment notification type. */
+  public type: "issueNewComment";
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The ID of the user who received the notification. */
+  public userId: string;
+  /** The actor who caused the notification. */
+  public actor?: UserChildWebhookPayload;
+  /** The comment this notification belongs to. */
+  public comment: CommentChildWebhookPayload;
+  /** The issue this notification belongs to. */
+  public issue: IssueWithDescriptionChildWebhookPayload;
+  /** The parent comment for the comment this notification belongs to. */
+  public parentComment?: CommentChildWebhookPayload;
 }
 /**
  * An issue related notification.
@@ -8308,6 +8773,49 @@ export class IssueSearchResult extends Request {
   }
 }
 /**
+ * Payload for a terminal issue status change notification.
+ *
+ * @param data - L.IssueStatusChangedNotificationWebhookPayloadFragment response data
+ */
+export class IssueStatusChangedNotificationWebhookPayload {
+  public constructor(data: L.IssueStatusChangedNotificationWebhookPayloadFragment) {
+    this.actorId = data.actorId ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.createdAt = data.createdAt;
+    this.externalUserActorId = data.externalUserActorId ?? undefined;
+    this.id = data.id;
+    this.issueId = data.issueId;
+    this.type = data.type;
+    this.updatedAt = data.updatedAt;
+    this.userId = data.userId;
+    this.actor = data.actor ? new UserChildWebhookPayload(data.actor) : undefined;
+    this.issue = new IssueWithDescriptionChildWebhookPayload(data.issue);
+  }
+
+  /** The ID of the actor who caused the notification. */
+  public actorId?: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the external user who caused the notification. */
+  public externalUserActorId?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the issue this notification belongs to. */
+  public issueId: string;
+  /** A terminal issue status change notification type. */
+  public type: "issueStatusChanged";
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The ID of the user who received the notification. */
+  public userId: string;
+  /** The actor who caused the notification. */
+  public actor?: UserChildWebhookPayload;
+  /** The issue this notification belongs to. */
+  public issue: IssueWithDescriptionChildWebhookPayload;
+}
+/**
  * IssueSuggestion model
  *
  * @param request - function to call the graphql client
@@ -8447,6 +8955,49 @@ export class IssueTitleSuggestionFromCustomerRequestPayload extends Request {
   public lastSyncId: number;
   /** The suggested issue title. */
   public title: string;
+}
+/**
+ * Payload for an issue unassignment notification.
+ *
+ * @param data - L.IssueUnassignedFromYouNotificationWebhookPayloadFragment response data
+ */
+export class IssueUnassignedFromYouNotificationWebhookPayload {
+  public constructor(data: L.IssueUnassignedFromYouNotificationWebhookPayloadFragment) {
+    this.actorId = data.actorId ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.createdAt = data.createdAt;
+    this.externalUserActorId = data.externalUserActorId ?? undefined;
+    this.id = data.id;
+    this.issueId = data.issueId;
+    this.type = data.type;
+    this.updatedAt = data.updatedAt;
+    this.userId = data.userId;
+    this.actor = data.actor ? new UserChildWebhookPayload(data.actor) : undefined;
+    this.issue = new IssueWithDescriptionChildWebhookPayload(data.issue);
+  }
+
+  /** The ID of the actor who caused the notification. */
+  public actorId?: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the external user who caused the notification. */
+  public externalUserActorId?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the issue this notification belongs to. */
+  public issueId: string;
+  /** An issue unassignment notification type. */
+  public type: "issueUnassignedFromYou";
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The ID of the user who received the notification. */
+  public userId: string;
+  /** The actor who caused the notification. */
+  public actor?: UserChildWebhookPayload;
+  /** The issue this notification belongs to. */
+  public issue: IssueWithDescriptionChildWebhookPayload;
 }
 /**
  * Payload for an issue webhook.
@@ -10247,6 +10798,7 @@ export class OtherNotificationWebhookPayload {
     this.commentId = data.commentId ?? undefined;
     this.createdAt = data.createdAt;
     this.documentId = data.documentId ?? undefined;
+    this.externalUserActorId = data.externalUserActorId ?? undefined;
     this.id = data.id;
     this.issueId = data.issueId ?? undefined;
     this.parentCommentId = data.parentCommentId ?? undefined;
@@ -10275,6 +10827,8 @@ export class OtherNotificationWebhookPayload {
   public createdAt: string;
   /** The ID of the document this notification belongs to. */
   public documentId?: string;
+  /** The ID of the external user who caused the notification. */
+  public externalUserActorId?: string;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this notification belongs to. */
