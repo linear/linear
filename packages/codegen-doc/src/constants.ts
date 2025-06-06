@@ -23,5 +23,11 @@ export const Doc = {
   SCALAR_NOTIFICATION_TYPE_MAP: {
     IssueAssignedToYouNotificationType: "issueAssignedToYou",
     IssueMentionNotificationType: "issueMention",
+    IssueUnassignedFromYouNotificationType: "issueUnassignedFromYou",
+    IssueEmojiReactionNotificationType: "issueEmojiReaction",
+    IssueCommentMentionNotificationType: "issueCommentMention",
+    IssueCommentReactionNotificationType: "issueCommentReaction",
+    IssueNewCommentNotificationType: "issueNewComment",
+    IssueStatusChangedNotificationType: "issueStatusChanged",
   },
 };
