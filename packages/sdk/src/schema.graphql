@@ -15386,6 +15386,15 @@ type Mutation {
     subdomain: String!
   ): IntegrationPayload!
   """
+  [INTERNAL] Refreshes the Salesforce integration metadata.
+  """
+  integrationSalesforceMetadataRefresh(
+    """
+    The ID of the integration to refresh metadata for.
+    """
+    id: String!
+  ): IntegrationPayload!
+  """
   Integrates the organization with Sentry.
   """
   integrationSentryConnect(
@@ -28004,6 +28013,10 @@ input SalesforceSettingsInput {
   Whether a ticket should be automatically reopened when its linked Linear issue is completed.
   """
   automateTicketReopeningOnCompletion: Boolean
+  """
+  The Salesforce case status to use to reopen cases.
+  """
+  reopenCaseStatus: String
   """
   Whether an internal message should be added when someone comments on an issue.
   """
