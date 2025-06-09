@@ -148,22 +148,45 @@ export type AppUserAuthentication = {
   scope: Array<Scalars["String"]>;
 };
 
-/** Complete payload for an app user notification webhook. */
+/** Payload for app user notification webhook events. */
 export type AppUserNotificationWebhookPayload = {
   __typename?: "AppUserNotificationWebhookPayload";
-  /** The action of the notification. */
+  /** The type of action that triggered the webhook. */
   action: Scalars["String"];
-  /** The app user id of the webhook. */
+  /** ID of the app user the notification is for. */
   appUserId: Scalars["String"];
-  /** The timestamp the webhook was created at. */
-  createdAt: Scalars["String"];
-  /** The notification of the webhook. */
+  /** The time the payload was created. */
+  createdAt: Scalars["DateTime"];
+  /** Details of the notification. */
   notification: NotificationWebhookPayload;
-  /** The oauth client id of the webhook. */
+  /** ID of the OAuth client the app user is tied to. */
   oauthClientId: Scalars["String"];
-  /** The organization id of the webhook. */
+  /** ID of the organization for which the webhook belongs to. */
   organizationId: Scalars["String"];
-  /** The type of the notification. */
+  /** The type of resource. */
+  type: Scalars["String"];
+};
+
+/** Payload for app user team access change webhook events. */
+export type AppUserTeamAccessChangedWebhookPayload = {
+  __typename?: "AppUserTeamAccessChangedWebhookPayload";
+  /** The type of action that triggered the webhook. */
+  action: Scalars["String"];
+  /** IDs of the teams the app user was added to. */
+  addedTeamIds: Array<Scalars["String"]>;
+  /** ID of the app user the notification is for. */
+  appUserId: Scalars["String"];
+  /** Whether the app user can access all public teams. */
+  canAccessAllPublicTeams: Scalars["Boolean"];
+  /** The time the payload was created. */
+  createdAt: Scalars["DateTime"];
+  /** ID of the OAuth client the app user is tied to. */
+  oauthClientId: Scalars["String"];
+  /** ID of the organization for which the webhook belongs to. */
+  organizationId: Scalars["String"];
+  /** IDs of the teams the app user was removed from. */
+  removedTeamIds: Array<Scalars["String"]>;
+  /** The type of resource. */
   type: Scalars["String"];
 };
 
@@ -507,6 +530,33 @@ export type AuditEntryType = {
   type: Scalars["String"];
 };
 
+/** Payload for an audit entry webhook. */
+export type AuditEntryWebhookPayload = {
+  __typename?: "AuditEntryWebhookPayload";
+  /** The ID of the user that caused the audit entry to be created. */
+  actorId?: Maybe<Scalars["String"]>;
+  /** The time at which the entity was archived. */
+  archivedAt?: Maybe<Scalars["String"]>;
+  /** Country code of request resulting to audit entry. */
+  countryCode?: Maybe<Scalars["String"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["String"];
+  /** The ID of the entity. */
+  id: Scalars["String"];
+  /** IP from actor when entry was recorded. */
+  ip?: Maybe<Scalars["String"]>;
+  /** Additional metadata related to the audit entry. */
+  metadata?: Maybe<Scalars["JSONObject"]>;
+  /** The ID of the organization that the audit entry belongs to. */
+  organizationId: Scalars["String"];
+  /** Additional information related to the request which performed the action. */
+  requestInformation?: Maybe<Scalars["JSONObject"]>;
+  /** The type of the audit entry. */
+  type: Scalars["String"];
+  /** The time at which the entity was updated. */
+  updatedAt: Scalars["String"];
+};
+
 /** [INTERNAL] An OAuth userId/createdDate tuple */
 export type AuthMembership = {
   __typename?: "AuthMembership";
@@ -680,17 +730,13 @@ export type AuthorizingUser = {
   name: Scalars["String"];
 };
 
-/** Base class for entity webhook payloads. */
-export type BaseEntityWebhookPayload = {
-  __typename?: "BaseEntityWebhookPayload";
-  /** The time at which the entity was archived. */
-  archivedAt?: Maybe<Scalars["String"]>;
-  /** The time at which the entity was created. */
-  createdAt: Scalars["String"];
-  /** The ID of the entity. */
-  id: Scalars["String"];
-  /** The time at which the entity was updated. */
-  updatedAt: Scalars["String"];
+/** Base fields for all webhook payloads. */
+export type BaseWebhookPayload = {
+  __typename?: "BaseWebhookPayload";
+  /** The time the payload was created. */
+  createdAt: Scalars["DateTime"];
+  /** ID of the organization for which the webhook belongs to. */
+  organizationId: Scalars["String"];
 };
 
 /** Comparator for booleans. */
@@ -947,7 +993,7 @@ export type CommentWebhookPayload = {
   /** The time at which the entity was created. */
   createdAt: Scalars["String"];
   /** The document content for this comment. */
-  documentContent?: Maybe<BaseEntityWebhookPayload>;
+  documentContent?: Maybe<DocumentContentChildWebhookPayload>;
   /** The ID of the document content this comment belongs to. */
   documentContentId?: Maybe<Scalars["String"]>;
   /** When the comment was last edited. */
@@ -1086,6 +1132,19 @@ export type CreatedAtSort = {
   nulls?: Maybe<PaginationNulls>;
   /** The order for the individual sort */
   order?: Maybe<PaginationSortOrder>;
+};
+
+/** Payload for custom webhook resource events. */
+export type CustomResourceWebhookPayload = {
+  __typename?: "CustomResourceWebhookPayload";
+  /** The type of action that triggered the webhook. */
+  action: Scalars["String"];
+  /** The time the payload was created. */
+  createdAt: Scalars["DateTime"];
+  /** ID of the organization for which the webhook belongs to. */
+  organizationId: Scalars["String"];
+  /** The type of resource. */
+  type: Scalars["String"];
 };
 
 /** A custom view that has been saved by a user. */
@@ -2586,6 +2645,24 @@ export type Dashboard = Node & {
   widgets: Scalars["JSONObject"];
 };
 
+/** Union type for all possible webhook entity data payloads */
+export type DataWebhookPayload =
+  | AttachmentWebhookPayload
+  | AuditEntryWebhookPayload
+  | CommentWebhookPayload
+  | CustomerNeedWebhookPayload
+  | CustomerWebhookPayload
+  | CycleWebhookPayload
+  | DocumentWebhookPayload
+  | InitiativeUpdateWebhookPayload
+  | InitiativeWebhookPayload
+  | IssueLabelWebhookPayload
+  | IssueWebhookPayload
+  | ProjectUpdateWebhookPayload
+  | ProjectWebhookPayload
+  | ReactionWebhookPayload
+  | UserWebhookPayload;
+
 /** Comparator for dates. */
 export type DateComparator = {
   /** Equals constraint. */
@@ -2771,6 +2848,15 @@ export type DocumentContent = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+};
+
+/** Certain properties of a document content. */
+export type DocumentContentChildWebhookPayload = {
+  __typename?: "DocumentContentChildWebhookPayload";
+  /** The document this document content belongs to. */
+  document?: Maybe<DocumentChildWebhookPayload>;
+  /** The project this document belongs to. */
+  project?: Maybe<ProjectChildWebhookPayload>;
 };
 
 export type DocumentContentHistoryPayload = {
@@ -3042,6 +3128,51 @@ export type DocumentUpdateInput = {
   title?: Maybe<Scalars["String"]>;
   /** Whether the document has been trashed. */
   trashed?: Maybe<Scalars["Boolean"]>;
+};
+
+/** Payload for a document webhook. */
+export type DocumentWebhookPayload = {
+  __typename?: "DocumentWebhookPayload";
+  /** The time at which the entity was archived. */
+  archivedAt?: Maybe<Scalars["String"]>;
+  /** The color of the document. */
+  color?: Maybe<Scalars["String"]>;
+  /** The content of the document. */
+  content?: Maybe<Scalars["String"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["String"];
+  /** The ID of the user who created the document. */
+  creatorId?: Maybe<Scalars["String"]>;
+  /** The description of the document. */
+  description?: Maybe<Scalars["String"]>;
+  /** The time at which the document was hidden. */
+  hiddenAt?: Maybe<Scalars["String"]>;
+  /** The icon of the document. */
+  icon?: Maybe<Scalars["String"]>;
+  /** The ID of the entity. */
+  id: Scalars["String"];
+  /** The ID of the initiative this document belongs to. */
+  initiativeId?: Maybe<Scalars["String"]>;
+  /** The ID of the last template that was applied to this document. */
+  lastAppliedTemplateId?: Maybe<Scalars["String"]>;
+  /** The ID of the project this document belongs to. */
+  projectId?: Maybe<Scalars["String"]>;
+  /** The ID of the resource folder this document belongs to. */
+  resourceFolderId?: Maybe<Scalars["String"]>;
+  /** The document's unique URL slug. */
+  slugId: Scalars["String"];
+  /** The order of the item in the resources list. */
+  sortOrder: Scalars["Float"];
+  /** The IDs of the users who are subscribed to this document. */
+  subscriberIds?: Maybe<Array<Scalars["String"]>>;
+  /** The title of the document. */
+  title: Scalars["String"];
+  /** A flag that indicates whether the document is in the trash bin. */
+  trashed?: Maybe<Scalars["Boolean"]>;
+  /** The time at which the entity was updated. */
+  updatedAt: Scalars["String"];
+  /** The ID of the user who last updated the document. */
+  updatedById?: Maybe<Scalars["String"]>;
 };
 
 /** A general purpose draft. Used for comments, project updates, etc. */
@@ -3355,6 +3486,25 @@ export type EntityExternalLinkUpdateInput = {
   /** The order of the item in the entities resources list. */
   sortOrder?: Maybe<Scalars["Float"]>;
   /** The URL of the link. */
+  url?: Maybe<Scalars["String"]>;
+};
+
+/** Payload for entity-related webhook events. */
+export type EntityWebhookPayload = {
+  __typename?: "EntityWebhookPayload";
+  /** The type of action that triggered the webhook. */
+  action: Scalars["String"];
+  /** The time the payload was created. */
+  createdAt: Scalars["DateTime"];
+  /** The entity that was changed. */
+  data: DataWebhookPayload;
+  /** ID of the organization for which the webhook belongs to. */
+  organizationId: Scalars["String"];
+  /** The type of resource, i.e., the name of the entity. */
+  type: Scalars["String"];
+  /** In case of an update event, previous values of all updated properties. */
+  updatedFrom?: Maybe<Scalars["JSONObject"]>;
+  /** URL for the entity. */
   url?: Maybe<Scalars["String"]>;
 };
 
@@ -7187,6 +7337,23 @@ export type IssueSearchResultEdge = {
   node: IssueSearchResult;
 };
 
+/** Payload for issue SLA webhook events. */
+export type IssueSlaWebhookPayload = {
+  __typename?: "IssueSlaWebhookPayload";
+  /** The type of action that triggered the webhook. */
+  action: Scalars["String"];
+  /** The time the payload was created. */
+  createdAt: Scalars["DateTime"];
+  /** The issue that the SLA event is about. */
+  issueData: IssueWebhookPayload;
+  /** ID of the organization for which the webhook belongs to. */
+  organizationId: Scalars["String"];
+  /** The type of resource. */
+  type: Scalars["String"];
+  /** URL for the issue. */
+  url?: Maybe<Scalars["String"]>;
+};
+
 /** Issue sorting options. */
 export type IssueSortInput = {
   /** Sort by assignee name */
@@ -8061,6 +8228,8 @@ export type Mutation = {
   integrationRequest: IntegrationRequestPayload;
   /** Integrates the organization with Salesforce. */
   integrationSalesforce: IntegrationPayload;
+  /** [INTERNAL] Refreshes the Salesforce integration metadata. */
+  integrationSalesforceMetadataRefresh: IntegrationPayload;
   /** Integrates the organization with Sentry. */
   integrationSentryConnect: IntegrationPayload;
   /**
@@ -9029,6 +9198,10 @@ export type MutationIntegrationSalesforceArgs = {
   code: Scalars["String"];
   redirectUri: Scalars["String"];
   subdomain: Scalars["String"];
+};
+
+export type MutationIntegrationSalesforceMetadataRefreshArgs = {
+  id: Scalars["String"];
 };
 
 export type MutationIntegrationSentryConnectArgs = {
@@ -10864,6 +11037,21 @@ export type NumberComparator = {
   neq?: Maybe<Scalars["Float"]>;
   /** Not-in-array constraint. */
   nin?: Maybe<Array<Scalars["Float"]>>;
+};
+
+/** Payload for OAuth app webhook events. */
+export type OAuthAppWebhookPayload = {
+  __typename?: "OAuthAppWebhookPayload";
+  /** The type of action that triggered the webhook. */
+  action: Scalars["String"];
+  /** The time the payload was created. */
+  createdAt: Scalars["DateTime"];
+  /** Id of the OAuth client that was revoked. */
+  oauthClientId: Scalars["String"];
+  /** ID of the organization for which the webhook belongs to. */
+  organizationId: Scalars["String"];
+  /** The type of resource. */
+  type: Scalars["String"];
 };
 
 /** The different requests statuses possible for an OAuth client approval request. */
@@ -14142,7 +14330,7 @@ export enum PushSubscriptionType {
 
 export type Query = {
   __typename?: "Query";
-  _dummy?: Maybe<Scalars["String"]>;
+  _dummy: Scalars["String"];
   /** All teams you the user can administrate. Administrable teams are teams whose settings the user can change, but to whose issues the user doesn't necessarily have access to. */
   administrableTeams: TeamConnection;
   /** All API keys for the user. */
@@ -15611,6 +15799,8 @@ export type SalesforceSettingsInput = {
   automateTicketReopeningOnComment?: Maybe<Scalars["Boolean"]>;
   /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
   automateTicketReopeningOnCompletion?: Maybe<Scalars["Boolean"]>;
+  /** The Salesforce case status to use to reopen cases. */
+  reopenCaseStatus?: Maybe<Scalars["String"]>;
   /** Whether an internal message should be added when someone comments on an issue. */
   sendNoteOnComment?: Maybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
@@ -19788,9 +19978,9 @@ export type AuthenticationSessionResponseFragment = { __typename: "Authenticatio
   | "id"
 >;
 
-export type BaseEntityWebhookPayloadFragment = { __typename: "BaseEntityWebhookPayload" } & Pick<
-  BaseEntityWebhookPayload,
-  "id" | "archivedAt" | "createdAt" | "updatedAt"
+export type BaseWebhookPayloadFragment = { __typename: "BaseWebhookPayload" } & Pick<
+  BaseWebhookPayload,
+  "organizationId" | "createdAt"
 >;
 
 export type CommentChildWebhookPayloadFragment = { __typename: "CommentChildWebhookPayload" } & Pick<
@@ -19822,6 +20012,11 @@ export type CycleChildWebhookPayloadFragment = { __typename: "CycleChildWebhookP
   CycleChildWebhookPayload,
   "id" | "endsAt" | "name" | "number" | "startsAt"
 >;
+
+export type DocumentContentChildWebhookPayloadFragment = { __typename: "DocumentContentChildWebhookPayload" } & {
+  document?: Maybe<{ __typename?: "DocumentChildWebhookPayload" } & DocumentChildWebhookPayloadFragment>;
+  project?: Maybe<{ __typename?: "ProjectChildWebhookPayload" } & ProjectChildWebhookPayloadFragment>;
+};
 
 export type DocumentChildWebhookPayloadFragment = { __typename: "DocumentChildWebhookPayload" } & Pick<
   DocumentChildWebhookPayload,
@@ -19906,11 +20101,6 @@ export type IssueChildWebhookPayloadFragment = { __typename: "IssueChildWebhookP
   IssueChildWebhookPayload,
   "id" | "teamId" | "url" | "identifier" | "title"
 > & { team: { __typename?: "TeamChildWebhookPayload" } & TeamChildWebhookPayloadFragment };
-
-export type AppUserNotificationWebhookPayloadFragment = { __typename: "AppUserNotificationWebhookPayload" } & Pick<
-  AppUserNotificationWebhookPayload,
-  "action" | "appUserId" | "oauthClientId" | "organizationId" | "createdAt" | "type"
->;
 
 export type ArchiveResponseFragment = { __typename: "ArchiveResponse" } & Pick<
   ArchiveResponse,
@@ -20222,6 +20412,11 @@ export type UploadFileFragment = { __typename: "UploadFile" } & Pick<
   "assetUrl" | "contentType" | "filename" | "uploadUrl" | "size" | "metaData"
 > & { headers: Array<{ __typename?: "UploadFileHeader" } & UploadFileHeaderFragment> };
 
+export type OAuthAppWebhookPayloadFragment = { __typename: "OAuthAppWebhookPayload" } & Pick<
+  OAuthAppWebhookPayload,
+  "organizationId" | "oauthClientId" | "createdAt" | "action" | "type"
+>;
+
 export type CommentWebhookPayloadFragment = { __typename: "CommentWebhookPayload" } & Pick<
   CommentWebhookPayload,
   | "resolvingCommentId"
@@ -20246,7 +20441,9 @@ export type CommentWebhookPayloadFragment = { __typename: "CommentWebhookPayload
   | "editedAt"
   | "resolvedAt"
 > & {
-    documentContent?: Maybe<{ __typename?: "BaseEntityWebhookPayload" } & BaseEntityWebhookPayloadFragment>;
+    documentContent?: Maybe<
+      { __typename?: "DocumentContentChildWebhookPayload" } & DocumentContentChildWebhookPayloadFragment
+    >;
     externalUser?: Maybe<{ __typename?: "ExternalUserChildWebhookPayload" } & ExternalUserChildWebhookPayloadFragment>;
     initiativeUpdate?: Maybe<
       { __typename?: "InitiativeUpdateChildWebhookPayload" } & InitiativeUpdateChildWebhookPayloadFragment
@@ -20327,6 +20524,30 @@ export type CycleWebhookPayloadFragment = { __typename: "CycleWebhookPayload" } 
   | "updatedAt"
   | "scopeHistory"
   | "issueCountHistory"
+>;
+
+export type DocumentWebhookPayloadFragment = { __typename: "DocumentWebhookPayload" } & Pick<
+  DocumentWebhookPayload,
+  | "trashed"
+  | "id"
+  | "initiativeId"
+  | "lastAppliedTemplateId"
+  | "projectId"
+  | "resourceFolderId"
+  | "creatorId"
+  | "updatedById"
+  | "subscriberIds"
+  | "color"
+  | "content"
+  | "description"
+  | "slugId"
+  | "icon"
+  | "sortOrder"
+  | "hiddenAt"
+  | "archivedAt"
+  | "createdAt"
+  | "updatedAt"
+  | "title"
 >;
 
 export type ProjectUpdateWebhookPayloadFragment = { __typename: "ProjectUpdateWebhookPayload" } & Pick<
@@ -20473,6 +20694,21 @@ export type AttachmentWebhookPayloadFragment = { __typename: "AttachmentWebhookP
   | "updatedAt"
   | "title"
   | "groupBySource"
+>;
+
+export type AuditEntryWebhookPayloadFragment = { __typename: "AuditEntryWebhookPayload" } & Pick<
+  AuditEntryWebhookPayload,
+  | "requestInformation"
+  | "metadata"
+  | "countryCode"
+  | "ip"
+  | "id"
+  | "organizationId"
+  | "actorId"
+  | "archivedAt"
+  | "createdAt"
+  | "updatedAt"
+  | "type"
 >;
 
 export type InitiativeUpdateWebhookPayloadFragment = { __typename: "InitiativeUpdateWebhookPayload" } & Pick<
@@ -20740,6 +20976,41 @@ export type IssueWebhookPayloadFragment = { __typename: "IssueWebhookPayload" } 
     creator?: Maybe<{ __typename?: "UserChildWebhookPayload" } & UserChildWebhookPayloadFragment>;
     assignee?: Maybe<{ __typename?: "UserChildWebhookPayload" } & UserChildWebhookPayloadFragment>;
   };
+
+export type AppUserNotificationWebhookPayloadFragment = { __typename: "AppUserNotificationWebhookPayload" } & Pick<
+  AppUserNotificationWebhookPayload,
+  "oauthClientId" | "appUserId" | "organizationId" | "createdAt" | "action" | "type"
+>;
+
+export type AppUserTeamAccessChangedWebhookPayloadFragment = {
+  __typename: "AppUserTeamAccessChangedWebhookPayload";
+} & Pick<
+  AppUserTeamAccessChangedWebhookPayload,
+  | "oauthClientId"
+  | "appUserId"
+  | "organizationId"
+  | "addedTeamIds"
+  | "removedTeamIds"
+  | "createdAt"
+  | "action"
+  | "type"
+  | "canAccessAllPublicTeams"
+>;
+
+export type CustomResourceWebhookPayloadFragment = { __typename: "CustomResourceWebhookPayload" } & Pick<
+  CustomResourceWebhookPayload,
+  "organizationId" | "createdAt" | "action" | "type"
+>;
+
+export type EntityWebhookPayloadFragment = { __typename: "EntityWebhookPayload" } & Pick<
+  EntityWebhookPayload,
+  "organizationId" | "updatedFrom" | "createdAt" | "action" | "type" | "url"
+>;
+
+export type IssueSlaWebhookPayloadFragment = { __typename: "IssueSlaWebhookPayload" } & Pick<
+  IssueSlaWebhookPayload,
+  "organizationId" | "createdAt" | "action" | "type" | "url"
+> & { issueData: { __typename?: "IssueWebhookPayload" } & IssueWebhookPayloadFragment };
 
 export type UserAuthorizedApplicationFragment = { __typename: "UserAuthorizedApplication" } & Pick<
   UserAuthorizedApplication,
@@ -30039,6 +30310,24 @@ export const AuthenticationSessionResponseFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AuthenticationSessionResponseFragment, unknown>;
+export const BaseWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "BaseWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "BaseWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<BaseWebhookPayloadFragment, unknown>;
 export const CustomerNeedChildWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -30096,28 +30385,6 @@ export const IntegrationChildWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IntegrationChildWebhookPayloadFragment, unknown>;
-export const AppUserNotificationWebhookPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AppUserNotificationWebhookPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AppUserNotificationWebhookPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "action" } },
-          { kind: "Field", name: { kind: "Name", value: "appUserId" } },
-          { kind: "Field", name: { kind: "Name", value: "oauthClientId" } },
-          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "type" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<AppUserNotificationWebhookPayloadFragment, unknown>;
 export const OrganizationDomainFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -30543,26 +30810,59 @@ export const ExternalEntitySlackMetadataFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<ExternalEntitySlackMetadataFragment, unknown>;
-export const BaseEntityWebhookPayloadFragmentDoc = {
+export const OAuthAppWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
     {
       kind: "FragmentDefinition",
-      name: { kind: "Name", value: "BaseEntityWebhookPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "BaseEntityWebhookPayload" } },
+      name: { kind: "Name", value: "OAuthAppWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OAuthAppWebhookPayload" } },
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "oauthClientId" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "action" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
         ],
       },
     },
   ],
-} as unknown as DocumentNode<BaseEntityWebhookPayloadFragment, unknown>;
+} as unknown as DocumentNode<OAuthAppWebhookPayloadFragment, unknown>;
+export const DocumentContentChildWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "DocumentContentChildWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DocumentContentChildWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "document" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DocumentChildWebhookPayload" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectChildWebhookPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DocumentContentChildWebhookPayloadFragment, unknown>;
 export const ExternalUserChildWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -30660,7 +30960,9 @@ export const CommentWebhookPayloadFragmentDoc = {
             name: { kind: "Name", value: "documentContent" },
             selectionSet: {
               kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "BaseEntityWebhookPayload" } }],
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "DocumentContentChildWebhookPayload" } },
+              ],
             },
           },
           { kind: "Field", name: { kind: "Name", value: "syncedWith" } },
@@ -30970,6 +31272,42 @@ export const CycleWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<CycleWebhookPayloadFragment, unknown>;
+export const DocumentWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "DocumentWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DocumentWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "trashed" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "initiativeId" } },
+          { kind: "Field", name: { kind: "Name", value: "lastAppliedTemplateId" } },
+          { kind: "Field", name: { kind: "Name", value: "projectId" } },
+          { kind: "Field", name: { kind: "Name", value: "resourceFolderId" } },
+          { kind: "Field", name: { kind: "Name", value: "creatorId" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedById" } },
+          { kind: "Field", name: { kind: "Name", value: "subscriberIds" } },
+          { kind: "Field", name: { kind: "Name", value: "color" } },
+          { kind: "Field", name: { kind: "Name", value: "content" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "slugId" } },
+          { kind: "Field", name: { kind: "Name", value: "icon" } },
+          { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
+          { kind: "Field", name: { kind: "Name", value: "hiddenAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "title" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DocumentWebhookPayloadFragment, unknown>;
 export const ProjectUpdateWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -31287,6 +31625,33 @@ export const UserWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<UserWebhookPayloadFragment, unknown>;
+export const AuditEntryWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AuditEntryWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AuditEntryWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "requestInformation" } },
+          { kind: "Field", name: { kind: "Name", value: "metadata" } },
+          { kind: "Field", name: { kind: "Name", value: "countryCode" } },
+          { kind: "Field", name: { kind: "Name", value: "ip" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "actorId" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AuditEntryWebhookPayloadFragment, unknown>;
 export const InitiativeUpdateWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -31826,6 +32191,95 @@ export const IssueUnassignedFromYouNotificationWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IssueUnassignedFromYouNotificationWebhookPayloadFragment, unknown>;
+export const AppUserNotificationWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AppUserNotificationWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AppUserNotificationWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "oauthClientId" } },
+          { kind: "Field", name: { kind: "Name", value: "appUserId" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "action" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AppUserNotificationWebhookPayloadFragment, unknown>;
+export const AppUserTeamAccessChangedWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AppUserTeamAccessChangedWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AppUserTeamAccessChangedWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "oauthClientId" } },
+          { kind: "Field", name: { kind: "Name", value: "appUserId" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "addedTeamIds" } },
+          { kind: "Field", name: { kind: "Name", value: "removedTeamIds" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "action" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "canAccessAllPublicTeams" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AppUserTeamAccessChangedWebhookPayloadFragment, unknown>;
+export const CustomResourceWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "CustomResourceWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CustomResourceWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "action" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CustomResourceWebhookPayloadFragment, unknown>;
+export const EntityWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "EntityWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "EntityWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedFrom" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "action" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<EntityWebhookPayloadFragment, unknown>;
 export const CycleChildWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -32034,6 +32488,35 @@ export const IssueWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IssueWebhookPayloadFragment, unknown>;
+export const IssueSlaWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueSlaWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueSlaWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueData" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueWebhookPayload" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "action" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<IssueSlaWebhookPayloadFragment, unknown>;
 export const UserAuthorizedApplicationFragmentDoc = {
   kind: "Document",
   definitions: [

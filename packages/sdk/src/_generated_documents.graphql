@@ -3579,17 +3579,13 @@ fragment AuthenticationSessionResponse on AuthenticationSessionResponse {
   id
 }
 
-# Base class for entity webhook payloads.
-fragment BaseEntityWebhookPayload on BaseEntityWebhookPayload {
+# Base fields for all webhook payloads.
+fragment BaseWebhookPayload on BaseWebhookPayload {
   __typename
-  # The ID of the entity.
-  id
-  # The time at which the entity was archived.
-  archivedAt
-  # The time at which the entity was created.
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # The time the payload was created.
   createdAt
-  # The time at which the entity was updated.
-  updatedAt
 }
 
 # Certain properties of a comment.
@@ -3676,6 +3672,19 @@ fragment CycleChildWebhookPayload on CycleChildWebhookPayload {
   number
   # The start date of the cycle.
   startsAt
+}
+
+# Certain properties of a document content.
+fragment DocumentContentChildWebhookPayload on DocumentContentChildWebhookPayload {
+  __typename
+  # The document this document content belongs to.
+  document {
+    ...DocumentChildWebhookPayload
+  }
+  # The project this document belongs to.
+  project {
+    ...ProjectChildWebhookPayload
+  }
 }
 
 # Certain properties of a document.
@@ -3892,23 +3901,6 @@ fragment IssueChildWebhookPayload on IssueChildWebhookPayload {
   identifier
   # The title of the issue.
   title
-}
-
-# Complete payload for an app user notification webhook.
-fragment AppUserNotificationWebhookPayload on AppUserNotificationWebhookPayload {
-  __typename
-  # The action of the notification.
-  action
-  # The app user id of the webhook.
-  appUserId
-  # The oauth client id of the webhook.
-  oauthClientId
-  # The organization id of the webhook.
-  organizationId
-  # The timestamp the webhook was created at.
-  createdAt
-  # The type of the notification.
-  type
 }
 
 # Contains requested archived model objects.
@@ -4392,6 +4384,21 @@ fragment UploadFile on UploadFile {
   metaData
 }
 
+# Payload for OAuth app webhook events.
+fragment OAuthAppWebhookPayload on OAuthAppWebhookPayload {
+  __typename
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # Id of the OAuth client that was revoked.
+  oauthClientId
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource.
+  type
+}
+
 # Payload for a comment webhook.
 fragment CommentWebhookPayload on CommentWebhookPayload {
   __typename
@@ -4423,7 +4430,7 @@ fragment CommentWebhookPayload on CommentWebhookPayload {
   botActor
   # The document content for this comment.
   documentContent {
-    ...BaseEntityWebhookPayload
+    ...DocumentContentChildWebhookPayload
   }
   # The entity this comment is synced with.
   syncedWith
@@ -4604,6 +4611,51 @@ fragment CycleWebhookPayload on CycleWebhookPayload {
   scopeHistory
   # The total number of issues in the cycle after each day.
   issueCountHistory
+}
+
+# Payload for a document webhook.
+fragment DocumentWebhookPayload on DocumentWebhookPayload {
+  __typename
+  # A flag that indicates whether the document is in the trash bin.
+  trashed
+  # The ID of the entity.
+  id
+  # The ID of the initiative this document belongs to.
+  initiativeId
+  # The ID of the last template that was applied to this document.
+  lastAppliedTemplateId
+  # The ID of the project this document belongs to.
+  projectId
+  # The ID of the resource folder this document belongs to.
+  resourceFolderId
+  # The ID of the user who created the document.
+  creatorId
+  # The ID of the user who last updated the document.
+  updatedById
+  # The IDs of the users who are subscribed to this document.
+  subscriberIds
+  # The color of the document.
+  color
+  # The content of the document.
+  content
+  # The description of the document.
+  description
+  # The document's unique URL slug.
+  slugId
+  # The icon of the document.
+  icon
+  # The order of the item in the resources list.
+  sortOrder
+  # The time at which the document was hidden.
+  hiddenAt
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The title of the document.
+  title
 }
 
 # Payload for a project update webhook.
@@ -4894,6 +4946,33 @@ fragment AttachmentWebhookPayload on AttachmentWebhookPayload {
   title
   # Whether attachments for the same source application should be grouped in the Linear UI.
   groupBySource
+}
+
+# Payload for an audit entry webhook.
+fragment AuditEntryWebhookPayload on AuditEntryWebhookPayload {
+  __typename
+  # Additional information related to the request which performed the action.
+  requestInformation
+  # Additional metadata related to the audit entry.
+  metadata
+  # Country code of request resulting to audit entry.
+  countryCode
+  # IP from actor when entry was recorded.
+  ip
+  # The ID of the entity.
+  id
+  # The ID of the organization that the audit entry belongs to.
+  organizationId
+  # The ID of the user that caused the audit entry to be created.
+  actorId
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The type of the audit entry.
+  type
 }
 
 # Payload for an initiative update webhook.
@@ -5451,6 +5530,95 @@ fragment IssueWebhookPayload on IssueWebhookPayload {
   assignee {
     ...UserChildWebhookPayload
   }
+}
+
+# Payload for app user notification webhook events.
+fragment AppUserNotificationWebhookPayload on AppUserNotificationWebhookPayload {
+  __typename
+  # ID of the OAuth client the app user is tied to.
+  oauthClientId
+  # ID of the app user the notification is for.
+  appUserId
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource.
+  type
+}
+
+# Payload for app user team access change webhook events.
+fragment AppUserTeamAccessChangedWebhookPayload on AppUserTeamAccessChangedWebhookPayload {
+  __typename
+  # ID of the OAuth client the app user is tied to.
+  oauthClientId
+  # ID of the app user the notification is for.
+  appUserId
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # IDs of the teams the app user was added to.
+  addedTeamIds
+  # IDs of the teams the app user was removed from.
+  removedTeamIds
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource.
+  type
+  # Whether the app user can access all public teams.
+  canAccessAllPublicTeams
+}
+
+# Payload for custom webhook resource events.
+fragment CustomResourceWebhookPayload on CustomResourceWebhookPayload {
+  __typename
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource.
+  type
+}
+
+# Payload for entity-related webhook events.
+fragment EntityWebhookPayload on EntityWebhookPayload {
+  __typename
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # In case of an update event, previous values of all updated properties.
+  updatedFrom
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource, i.e., the name of the entity.
+  type
+  # URL for the entity.
+  url
+}
+
+# Payload for issue SLA webhook events.
+fragment IssueSlaWebhookPayload on IssueSlaWebhookPayload {
+  __typename
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # The issue that the SLA event is about.
+  issueData {
+    ...IssueWebhookPayload
+  }
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource.
+  type
+  # URL for the issue.
+  url
 }
 
 # Public information of the OAuth application, plus whether the application has been authorized for
