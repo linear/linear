@@ -290,7 +290,7 @@ export class ApiKeyPayload extends Request {
   public apiKey: ApiKey;
 }
 /**
- * Complete payload for an app user notification webhook.
+ * Payload for app user notification webhook events.
  *
  * @param data - L.AppUserNotificationWebhookPayloadFragment response data
  */
@@ -298,23 +298,60 @@ export class AppUserNotificationWebhookPayload {
   public constructor(data: L.AppUserNotificationWebhookPayloadFragment) {
     this.action = data.action;
     this.appUserId = data.appUserId;
-    this.createdAt = data.createdAt;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.oauthClientId = data.oauthClientId;
     this.organizationId = data.organizationId;
     this.type = data.type;
   }
 
-  /** The action of the notification. */
+  /** The type of action that triggered the webhook. */
   public action: string;
-  /** The app user id of the webhook. */
+  /** ID of the app user the notification is for. */
   public appUserId: string;
-  /** The timestamp the webhook was created at. */
-  public createdAt: string;
-  /** The oauth client id of the webhook. */
+  /** The time the payload was created. */
+  public createdAt: Date;
+  /** ID of the OAuth client the app user is tied to. */
   public oauthClientId: string;
-  /** The organization id of the webhook. */
+  /** ID of the organization for which the webhook belongs to. */
   public organizationId: string;
-  /** The type of the notification. */
+  /** The type of resource. */
+  public type: string;
+}
+/**
+ * Payload for app user team access change webhook events.
+ *
+ * @param data - L.AppUserTeamAccessChangedWebhookPayloadFragment response data
+ */
+export class AppUserTeamAccessChangedWebhookPayload {
+  public constructor(data: L.AppUserTeamAccessChangedWebhookPayloadFragment) {
+    this.action = data.action;
+    this.addedTeamIds = data.addedTeamIds;
+    this.appUserId = data.appUserId;
+    this.canAccessAllPublicTeams = data.canAccessAllPublicTeams;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.oauthClientId = data.oauthClientId;
+    this.organizationId = data.organizationId;
+    this.removedTeamIds = data.removedTeamIds;
+    this.type = data.type;
+  }
+
+  /** The type of action that triggered the webhook. */
+  public action: string;
+  /** IDs of the teams the app user was added to. */
+  public addedTeamIds: string[];
+  /** ID of the app user the notification is for. */
+  public appUserId: string;
+  /** Whether the app user can access all public teams. */
+  public canAccessAllPublicTeams: boolean;
+  /** The time the payload was created. */
+  public createdAt: Date;
+  /** ID of the OAuth client the app user is tied to. */
+  public oauthClientId: string;
+  /** ID of the organization for which the webhook belongs to. */
+  public organizationId: string;
+  /** IDs of the teams the app user was removed from. */
+  public removedTeamIds: string[];
+  /** The type of resource. */
   public type: string;
 }
 /**
@@ -749,6 +786,49 @@ export class AuditEntryType extends Request {
   public type: string;
 }
 /**
+ * Payload for an audit entry webhook.
+ *
+ * @param data - L.AuditEntryWebhookPayloadFragment response data
+ */
+export class AuditEntryWebhookPayload {
+  public constructor(data: L.AuditEntryWebhookPayloadFragment) {
+    this.actorId = data.actorId ?? undefined;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.countryCode = data.countryCode ?? undefined;
+    this.createdAt = data.createdAt;
+    this.id = data.id;
+    this.ip = data.ip ?? undefined;
+    this.metadata = data.metadata ?? undefined;
+    this.organizationId = data.organizationId;
+    this.requestInformation = data.requestInformation ?? undefined;
+    this.type = data.type;
+    this.updatedAt = data.updatedAt;
+  }
+
+  /** The ID of the user that caused the audit entry to be created. */
+  public actorId?: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** Country code of request resulting to audit entry. */
+  public countryCode?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** IP from actor when entry was recorded. */
+  public ip?: string;
+  /** Additional metadata related to the audit entry. */
+  public metadata?: L.Scalars["JSONObject"];
+  /** The ID of the organization that the audit entry belongs to. */
+  public organizationId: string;
+  /** Additional information related to the request which performed the action. */
+  public requestInformation?: L.Scalars["JSONObject"];
+  /** The type of the audit entry. */
+  public type: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+}
+/**
  * An organization. Organizations are root-level objects that contain users and teams.
  *
  * @param request - function to call the graphql client
@@ -969,26 +1049,20 @@ export class AuthorizingUser extends Request {
   public name: string;
 }
 /**
- * Base class for entity webhook payloads.
+ * Base fields for all webhook payloads.
  *
- * @param data - L.BaseEntityWebhookPayloadFragment response data
+ * @param data - L.BaseWebhookPayloadFragment response data
  */
-export class BaseEntityWebhookPayload {
-  public constructor(data: L.BaseEntityWebhookPayloadFragment) {
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.createdAt = data.createdAt;
-    this.id = data.id;
-    this.updatedAt = data.updatedAt;
+export class BaseWebhookPayload {
+  public constructor(data: L.BaseWebhookPayloadFragment) {
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.organizationId = data.organizationId;
   }
 
-  /** The time at which the entity was archived. */
-  public archivedAt?: string;
-  /** The time at which the entity was created. */
-  public createdAt: string;
-  /** The ID of the entity. */
-  public id: string;
-  /** The time at which the entity was updated. */
-  public updatedAt: string;
+  /** The time the payload was created. */
+  public createdAt: Date;
+  /** ID of the organization for which the webhook belongs to. */
+  public organizationId: string;
 }
 /**
  * A comment associated with an issue.
@@ -1260,7 +1334,9 @@ export class CommentWebhookPayload {
     this.syncedWith = data.syncedWith ?? undefined;
     this.updatedAt = data.updatedAt;
     this.userId = data.userId ?? undefined;
-    this.documentContent = data.documentContent ? new BaseEntityWebhookPayload(data.documentContent) : undefined;
+    this.documentContent = data.documentContent
+      ? new DocumentContentChildWebhookPayload(data.documentContent)
+      : undefined;
     this.externalUser = data.externalUser ? new ExternalUserChildWebhookPayload(data.externalUser) : undefined;
     this.initiativeUpdate = data.initiativeUpdate
       ? new InitiativeUpdateChildWebhookPayload(data.initiativeUpdate)
@@ -1314,7 +1390,7 @@ export class CommentWebhookPayload {
   /** The ID of the user who created this comment. */
   public userId?: string;
   /** The document content for this comment. */
-  public documentContent?: BaseEntityWebhookPayload;
+  public documentContent?: DocumentContentChildWebhookPayload;
   /** The external user who created this comment. */
   public externalUser?: ExternalUserChildWebhookPayload;
   /** The initiative update this comment belongs to. */
@@ -1373,6 +1449,28 @@ export class CreateOrJoinOrganizationResponse extends Request {
 
   public organization: AuthOrganization;
   public user: AuthUser;
+}
+/**
+ * Payload for custom webhook resource events.
+ *
+ * @param data - L.CustomResourceWebhookPayloadFragment response data
+ */
+export class CustomResourceWebhookPayload {
+  public constructor(data: L.CustomResourceWebhookPayloadFragment) {
+    this.action = data.action;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.organizationId = data.organizationId;
+    this.type = data.type;
+  }
+
+  /** The type of action that triggered the webhook. */
+  public action: string;
+  /** The time the payload was created. */
+  public createdAt: Date;
+  /** ID of the organization for which the webhook belongs to. */
+  public organizationId: string;
+  /** The type of resource. */
+  public type: string;
 }
 /**
  * A custom view that has been saved by a user.
@@ -3419,6 +3517,22 @@ export class DocumentContent extends Request {
   }
 }
 /**
+ * Certain properties of a document content.
+ *
+ * @param data - L.DocumentContentChildWebhookPayloadFragment response data
+ */
+export class DocumentContentChildWebhookPayload {
+  public constructor(data: L.DocumentContentChildWebhookPayloadFragment) {
+    this.document = data.document ? new DocumentChildWebhookPayload(data.document) : undefined;
+    this.project = data.project ? new ProjectChildWebhookPayload(data.project) : undefined;
+  }
+
+  /** The document this document content belongs to. */
+  public document?: DocumentChildWebhookPayload;
+  /** The project this document belongs to. */
+  public project?: ProjectChildWebhookPayload;
+}
+/**
  * DocumentContentHistoryPayload model
  *
  * @param request - function to call the graphql client
@@ -3716,6 +3830,76 @@ export class DocumentSearchResult extends Request {
   public get updatedById(): string | undefined {
     return this._updatedBy?.id;
   }
+}
+/**
+ * Payload for a document webhook.
+ *
+ * @param data - L.DocumentWebhookPayloadFragment response data
+ */
+export class DocumentWebhookPayload {
+  public constructor(data: L.DocumentWebhookPayloadFragment) {
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.color = data.color ?? undefined;
+    this.content = data.content ?? undefined;
+    this.createdAt = data.createdAt;
+    this.creatorId = data.creatorId ?? undefined;
+    this.description = data.description ?? undefined;
+    this.hiddenAt = data.hiddenAt ?? undefined;
+    this.icon = data.icon ?? undefined;
+    this.id = data.id;
+    this.initiativeId = data.initiativeId ?? undefined;
+    this.lastAppliedTemplateId = data.lastAppliedTemplateId ?? undefined;
+    this.projectId = data.projectId ?? undefined;
+    this.resourceFolderId = data.resourceFolderId ?? undefined;
+    this.slugId = data.slugId;
+    this.sortOrder = data.sortOrder;
+    this.subscriberIds = data.subscriberIds ?? undefined;
+    this.title = data.title;
+    this.trashed = data.trashed ?? undefined;
+    this.updatedAt = data.updatedAt;
+    this.updatedById = data.updatedById ?? undefined;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The color of the document. */
+  public color?: string;
+  /** The content of the document. */
+  public content?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the user who created the document. */
+  public creatorId?: string;
+  /** The description of the document. */
+  public description?: string;
+  /** The time at which the document was hidden. */
+  public hiddenAt?: string;
+  /** The icon of the document. */
+  public icon?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the initiative this document belongs to. */
+  public initiativeId?: string;
+  /** The ID of the last template that was applied to this document. */
+  public lastAppliedTemplateId?: string;
+  /** The ID of the project this document belongs to. */
+  public projectId?: string;
+  /** The ID of the resource folder this document belongs to. */
+  public resourceFolderId?: string;
+  /** The document's unique URL slug. */
+  public slugId: string;
+  /** The order of the item in the resources list. */
+  public sortOrder: number;
+  /** The IDs of the users who are subscribed to this document. */
+  public subscriberIds?: string[];
+  /** The title of the document. */
+  public title: string;
+  /** A flag that indicates whether the document is in the trash bin. */
+  public trashed?: boolean;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The ID of the user who last updated the document. */
+  public updatedById?: string;
 }
 /**
  * A general purpose draft. Used for comments, project updates, etc.
@@ -4256,6 +4440,34 @@ export class EntityExternalLinkPayload extends Request {
   public get entityExternalLinkId(): string | undefined {
     return this._entityExternalLink?.id;
   }
+}
+/**
+ * Payload for entity-related webhook events.
+ *
+ * @param data - L.EntityWebhookPayloadFragment response data
+ */
+export class EntityWebhookPayload {
+  public constructor(data: L.EntityWebhookPayloadFragment) {
+    this.action = data.action;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.organizationId = data.organizationId;
+    this.type = data.type;
+    this.updatedFrom = data.updatedFrom ?? undefined;
+    this.url = data.url ?? undefined;
+  }
+
+  /** The type of action that triggered the webhook. */
+  public action: string;
+  /** The time the payload was created. */
+  public createdAt: Date;
+  /** ID of the organization for which the webhook belongs to. */
+  public organizationId: string;
+  /** The type of resource, i.e., the name of the entity. */
+  public type: string;
+  /** In case of an update event, previous values of all updated properties. */
+  public updatedFrom?: L.Scalars["JSONObject"];
+  /** URL for the entity. */
+  public url?: string;
 }
 /**
  * Information about an external entity.
@@ -8773,6 +8985,34 @@ export class IssueSearchResult extends Request {
   }
 }
 /**
+ * Payload for issue SLA webhook events.
+ *
+ * @param data - L.IssueSlaWebhookPayloadFragment response data
+ */
+export class IssueSlaWebhookPayload {
+  public constructor(data: L.IssueSlaWebhookPayloadFragment) {
+    this.action = data.action;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.organizationId = data.organizationId;
+    this.type = data.type;
+    this.url = data.url ?? undefined;
+    this.issueData = new IssueWebhookPayload(data.issueData);
+  }
+
+  /** The type of action that triggered the webhook. */
+  public action: string;
+  /** The time the payload was created. */
+  public createdAt: Date;
+  /** ID of the organization for which the webhook belongs to. */
+  public organizationId: string;
+  /** The type of resource. */
+  public type: string;
+  /** URL for the issue. */
+  public url?: string;
+  /** The issue that the SLA event is about. */
+  public issueData: IssueWebhookPayload;
+}
+/**
  * Payload for a terminal issue status change notification.
  *
  * @param data - L.IssueStatusChangedNotificationWebhookPayloadFragment response data
@@ -10084,6 +10324,31 @@ export class NotificationSubscriptionPayload extends Request {
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
+}
+/**
+ * Payload for OAuth app webhook events.
+ *
+ * @param data - L.OAuthAppWebhookPayloadFragment response data
+ */
+export class OAuthAppWebhookPayload {
+  public constructor(data: L.OAuthAppWebhookPayloadFragment) {
+    this.action = data.action;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.oauthClientId = data.oauthClientId;
+    this.organizationId = data.organizationId;
+    this.type = data.type;
+  }
+
+  /** The type of action that triggered the webhook. */
+  public action: string;
+  /** The time the payload was created. */
+  public createdAt: Date;
+  /** Id of the OAuth client that was revoked. */
+  public oauthClientId: string;
+  /** ID of the organization for which the webhook belongs to. */
+  public organizationId: string;
+  /** The type of resource. */
+  public type: string;
 }
 /**
  * Request to install OAuth clients on organizations and the response to the request.

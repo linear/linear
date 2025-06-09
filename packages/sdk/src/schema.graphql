@@ -169,35 +169,77 @@ type AppUserAuthentication {
 }
 
 """
-Complete payload for an app user notification webhook.
+Payload for app user notification webhook events.
 """
 type AppUserNotificationWebhookPayload {
   """
-  The action of the notification.
+  The type of action that triggered the webhook.
   """
   action: String!
   """
-  The app user id of the webhook.
+  ID of the app user the notification is for.
   """
   appUserId: String!
   """
-  The timestamp the webhook was created at.
+  The time the payload was created.
   """
-  createdAt: String!
+  createdAt: DateTime!
   """
-  The notification of the webhook.
+  Details of the notification.
   """
   notification: NotificationWebhookPayload!
   """
-  The oauth client id of the webhook.
+  ID of the OAuth client the app user is tied to.
   """
   oauthClientId: String!
   """
-  The organization id of the webhook.
+  ID of the organization for which the webhook belongs to.
   """
   organizationId: String!
   """
-  The type of the notification.
+  The type of resource.
+  """
+  type: String!
+}
+
+"""
+Payload for app user team access change webhook events.
+"""
+type AppUserTeamAccessChangedWebhookPayload {
+  """
+  The type of action that triggered the webhook.
+  """
+  action: String!
+  """
+  IDs of the teams the app user was added to.
+  """
+  addedTeamIds: [String!]!
+  """
+  ID of the app user the notification is for.
+  """
+  appUserId: String!
+  """
+  Whether the app user can access all public teams.
+  """
+  canAccessAllPublicTeams: Boolean!
+  """
+  The time the payload was created.
+  """
+  createdAt: DateTime!
+  """
+  ID of the OAuth client the app user is tied to.
+  """
+  oauthClientId: String!
+  """
+  ID of the organization for which the webhook belongs to.
+  """
+  organizationId: String!
+  """
+  IDs of the teams the app user was removed from.
+  """
+  removedTeamIds: [String!]!
+  """
+  The type of resource.
   """
   type: String!
 }
@@ -786,6 +828,56 @@ type AuditEntryType {
 }
 
 """
+Payload for an audit entry webhook.
+"""
+type AuditEntryWebhookPayload {
+  """
+  The ID of the user that caused the audit entry to be created.
+  """
+  actorId: String
+  """
+  The time at which the entity was archived.
+  """
+  archivedAt: String
+  """
+  Country code of request resulting to audit entry.
+  """
+  countryCode: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: String!
+  """
+  The ID of the entity.
+  """
+  id: String!
+  """
+  IP from actor when entry was recorded.
+  """
+  ip: String
+  """
+  Additional metadata related to the audit entry.
+  """
+  metadata: JSONObject
+  """
+  The ID of the organization that the audit entry belongs to.
+  """
+  organizationId: String!
+  """
+  Additional information related to the request which performed the action.
+  """
+  requestInformation: JSONObject
+  """
+  The type of the audit entry.
+  """
+  type: String!
+  """
+  The time at which the entity was updated.
+  """
+  updatedAt: String!
+}
+
+"""
 [INTERNAL] An OAuth userId/createdDate tuple
 """
 type AuthMembership {
@@ -1087,25 +1179,17 @@ type AuthorizingUser {
 }
 
 """
-Base class for entity webhook payloads.
+Base fields for all webhook payloads.
 """
-type BaseEntityWebhookPayload {
+type BaseWebhookPayload {
   """
-  The time at which the entity was archived.
+  The time the payload was created.
   """
-  archivedAt: String
+  createdAt: DateTime!
   """
-  The time at which the entity was created.
+  ID of the organization for which the webhook belongs to.
   """
-  createdAt: String!
-  """
-  The ID of the entity.
-  """
-  id: String!
-  """
-  The time at which the entity was updated.
-  """
-  updatedAt: String!
+  organizationId: String!
 }
 
 """
@@ -1578,7 +1662,7 @@ type CommentWebhookPayload {
   """
   The document content for this comment.
   """
-  documentContent: BaseEntityWebhookPayload
+  documentContent: DocumentContentChildWebhookPayload
   """
   The ID of the document content this comment belongs to.
   """
@@ -1816,6 +1900,28 @@ input CreatedAtSort {
   The order for the individual sort
   """
   order: PaginationSortOrder
+}
+
+"""
+Payload for custom webhook resource events.
+"""
+type CustomResourceWebhookPayload {
+  """
+  The type of action that triggered the webhook.
+  """
+  action: String!
+  """
+  The time the payload was created.
+  """
+  createdAt: DateTime!
+  """
+  ID of the organization for which the webhook belongs to.
+  """
+  organizationId: String!
+  """
+  The type of resource.
+  """
+  type: String!
 }
 
 """
@@ -4460,6 +4566,26 @@ type Dashboard implements Node {
 }
 
 """
+Union type for all possible webhook entity data payloads
+"""
+union DataWebhookPayload =
+  | AttachmentWebhookPayload
+  | AuditEntryWebhookPayload
+  | CommentWebhookPayload
+  | CustomerNeedWebhookPayload
+  | CustomerWebhookPayload
+  | CycleWebhookPayload
+  | DocumentWebhookPayload
+  | InitiativeUpdateWebhookPayload
+  | InitiativeWebhookPayload
+  | IssueLabelWebhookPayload
+  | IssueWebhookPayload
+  | ProjectUpdateWebhookPayload
+  | ProjectWebhookPayload
+  | ReactionWebhookPayload
+  | UserWebhookPayload
+
+"""
 Comparator for dates.
 """
 input DateComparator {
@@ -4790,6 +4916,20 @@ type DocumentContent implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+}
+
+"""
+Certain properties of a document content.
+"""
+type DocumentContentChildWebhookPayload {
+  """
+  The document this document content belongs to.
+  """
+  document: DocumentChildWebhookPayload
+  """
+  The project this document belongs to.
+  """
+  project: ProjectChildWebhookPayload
 }
 
 type DocumentContentHistoryPayload {
@@ -5270,6 +5410,92 @@ input DocumentUpdateInput {
   Whether the document has been trashed.
   """
   trashed: Boolean
+}
+
+"""
+Payload for a document webhook.
+"""
+type DocumentWebhookPayload {
+  """
+  The time at which the entity was archived.
+  """
+  archivedAt: String
+  """
+  The color of the document.
+  """
+  color: String
+  """
+  The content of the document.
+  """
+  content: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: String!
+  """
+  The ID of the user who created the document.
+  """
+  creatorId: String
+  """
+  The description of the document.
+  """
+  description: String
+  """
+  The time at which the document was hidden.
+  """
+  hiddenAt: String
+  """
+  The icon of the document.
+  """
+  icon: String
+  """
+  The ID of the entity.
+  """
+  id: String!
+  """
+  The ID of the initiative this document belongs to.
+  """
+  initiativeId: String
+  """
+  The ID of the last template that was applied to this document.
+  """
+  lastAppliedTemplateId: String
+  """
+  The ID of the project this document belongs to.
+  """
+  projectId: String
+  """
+  The ID of the resource folder this document belongs to.
+  """
+  resourceFolderId: String
+  """
+  The document's unique URL slug.
+  """
+  slugId: String!
+  """
+  The order of the item in the resources list.
+  """
+  sortOrder: Float!
+  """
+  The IDs of the users who are subscribed to this document.
+  """
+  subscriberIds: [String!]
+  """
+  The title of the document.
+  """
+  title: String!
+  """
+  A flag that indicates whether the document is in the trash bin.
+  """
+  trashed: Boolean
+  """
+  The time at which the entity was updated.
+  """
+  updatedAt: String!
+  """
+  The ID of the user who last updated the document.
+  """
+  updatedById: String
 }
 
 """
@@ -5768,6 +5994,40 @@ input EntityExternalLinkUpdateInput {
   sortOrder: Float
   """
   The URL of the link.
+  """
+  url: String
+}
+
+"""
+Payload for entity-related webhook events.
+"""
+type EntityWebhookPayload {
+  """
+  The type of action that triggered the webhook.
+  """
+  action: String!
+  """
+  The time the payload was created.
+  """
+  createdAt: DateTime!
+  """
+  The entity that was changed.
+  """
+  data: DataWebhookPayload!
+  """
+  ID of the organization for which the webhook belongs to.
+  """
+  organizationId: String!
+  """
+  The type of resource, i.e., the name of the entity.
+  """
+  type: String!
+  """
+  In case of an update event, previous values of all updated properties.
+  """
+  updatedFrom: JSONObject
+  """
+  URL for the entity.
   """
   url: String
 }
@@ -12722,6 +12982,36 @@ type IssueSearchResultEdge {
 }
 
 """
+Payload for issue SLA webhook events.
+"""
+type IssueSlaWebhookPayload {
+  """
+  The type of action that triggered the webhook.
+  """
+  action: String!
+  """
+  The time the payload was created.
+  """
+  createdAt: DateTime!
+  """
+  The issue that the SLA event is about.
+  """
+  issueData: IssueWebhookPayload!
+  """
+  ID of the organization for which the webhook belongs to.
+  """
+  organizationId: String!
+  """
+  The type of resource.
+  """
+  type: String!
+  """
+  URL for the issue.
+  """
+  url: String
+}
+
+"""
 Issue sorting options.
 """
 input IssueSortInput {
@@ -15384,6 +15674,15 @@ type Mutation {
     The Salesforce installation subdomain.
     """
     subdomain: String!
+  ): IntegrationPayload!
+  """
+  [INTERNAL] Refreshes the Salesforce integration metadata.
+  """
+  integrationSalesforceMetadataRefresh(
+    """
+    The ID of the integration to refresh metadata for.
+    """
+    id: String!
   ): IntegrationPayload!
   """
   Integrates the organization with Sentry.
@@ -19265,6 +19564,32 @@ input NumberComparator {
   Not-in-array constraint.
   """
   nin: [Float!]
+}
+
+"""
+Payload for OAuth app webhook events.
+"""
+type OAuthAppWebhookPayload {
+  """
+  The type of action that triggered the webhook.
+  """
+  action: String!
+  """
+  The time the payload was created.
+  """
+  createdAt: DateTime!
+  """
+  Id of the OAuth client that was revoked.
+  """
+  oauthClientId: String!
+  """
+  ID of the organization for which the webhook belongs to.
+  """
+  organizationId: String!
+  """
+  The type of resource.
+  """
+  type: String!
 }
 
 """
@@ -25185,7 +25510,7 @@ enum PushSubscriptionType {
 }
 
 type Query {
-  _dummy: String
+  _dummy: String!
   """
   All teams you the user can administrate. Administrable teams are teams whose settings the user can change, but to whose issues the user doesn't necessarily have access to.
   """
@@ -28004,6 +28329,10 @@ input SalesforceSettingsInput {
   Whether a ticket should be automatically reopened when its linked Linear issue is completed.
   """
   automateTicketReopeningOnCompletion: Boolean
+  """
+  The Salesforce case status to use to reopen cases.
+  """
+  reopenCaseStatus: String
   """
   Whether an internal message should be added when someone comments on an issue.
   """
