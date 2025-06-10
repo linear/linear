@@ -1,3 +1,6 @@
+import { DataWebhookPayload, EntityWebhookPayload, NotificationWebhookPayload } from "./_generated_documents";
+import { AppUserNotificationWebhookPayload } from "./_generated_sdk";
+
 /**
  * Input options for creating a Linear Client
  */
@@ -94,4 +97,18 @@ export interface LinearErrorRaw {
   request?: GraphQLRequestContext<Record<string, unknown>>;
   /** Error information for the response */
   response?: LinearRawResponse<unknown>;
+}
+
+/**
+ * A webhook payload for an app user notification webhook.
+ */
+export interface AppUserNotificationWebhookPayloadWithNotification extends AppUserNotificationWebhookPayload {
+  notification: NotificationWebhookPayload;
+}
+
+/**
+ * A webhook payload for an entity-specific webhook.
+ */
+export interface EntityWebhookPayloadWithEntityData extends EntityWebhookPayload {
+  data: DataWebhookPayload;
 }
