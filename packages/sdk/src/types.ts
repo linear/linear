@@ -1,5 +1,5 @@
-import { DataWebhookPayload, EntityWebhookPayload, NotificationWebhookPayload } from "./_generated_documents";
-import { AppUserNotificationWebhookPayload } from "./_generated_sdk";
+import { DataWebhookPayload, NotificationWebhookPayload } from "./_generated_documents";
+import { AppUserNotificationWebhookPayload, EntityWebhookPayload } from "./_generated_sdk";
 
 /**
  * Input options for creating a Linear Client
