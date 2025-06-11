@@ -1,5 +1,11 @@
 # Change Log
 
+## 44.1.0
+
+### Minor Changes
+
+- 879a047: Adds helper to parse webhook payloads
+
 ## 44.0.0
 
 ### Major Changes
