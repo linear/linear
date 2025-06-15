@@ -208,6 +208,331 @@ export class ActorBot extends Request {
   public userDisplayName?: string;
 }
 /**
+ * An activity within an agent context.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityFragment response data
+ */
+export class AgentActivity extends Request {
+  private _agentContext: L.AgentActivityFragment["agentContext"];
+
+  public constructor(request: LinearRequest, data: L.AgentActivityFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.type = data.type;
+    this._agentContext = data.agentContext;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The type of the activity. */
+  public type: L.AgentActivityType;
+  /** The agent context this activity belongs to. */
+  public get agentContext(): LinearFetch<AgentContext> | undefined {
+    return new AgentContextQuery(this._request).fetch(this._agentContext.id);
+  }
+  /** The ID of agent context this activity belongs to. */
+  public get agentContextId(): string | undefined {
+    return this._agentContext?.id;
+  }
+
+  /** Creates an agent activity. */
+  public create(input: L.AgentActivityCreateInput) {
+    return new CreateAgentActivityMutation(this._request).fetch(input);
+  }
+}
+/**
+ * Content for an action activity (tool call or action).
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityActionContentFragment response data
+ */
+export class AgentActivityActionContent extends Request {
+  public constructor(request: LinearRequest, data: L.AgentActivityActionContentFragment) {
+    super(request);
+    this.action = data.action;
+    this.parameter = data.parameter;
+    this.result = data.result ?? undefined;
+    this.type = data.type;
+  }
+
+  /** The action being performed. */
+  public action: string;
+  /** The parameters for the action, e.g. a file path, a keyword, etc. */
+  public parameter: string;
+  /** The result of the action in Markdown format. */
+  public result?: string;
+  /** The type of activity. */
+  public type: L.AgentActivityType;
+}
+/**
+ * AgentActivityConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this AgentActivityConnection model
+ * @param data - AgentActivityConnection response data
+ */
+export class AgentActivityConnection extends Connection<AgentActivity> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<AgentActivity> | undefined>,
+    data: L.AgentActivityConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new AgentActivity(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * Content for an error activity.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityErrorContentFragment response data
+ */
+export class AgentActivityErrorContent extends Request {
+  public constructor(request: LinearRequest, data: L.AgentActivityErrorContentFragment) {
+    super(request);
+    this.body = data.body;
+    this.type = data.type;
+  }
+
+  /** The error message in Markdown format. */
+  public body: string;
+  /** The type of activity. */
+  public type: L.AgentActivityType;
+}
+/**
+ * Content for an observation activity (chain of thought).
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityObservationContentFragment response data
+ */
+export class AgentActivityObservationContent extends Request {
+  public constructor(request: LinearRequest, data: L.AgentActivityObservationContentFragment) {
+    super(request);
+    this.body = data.body;
+    this.type = data.type;
+  }
+
+  /** The observation content in Markdown format. */
+  public body: string;
+  /** The type of activity. */
+  public type: L.AgentActivityType;
+}
+/**
+ * AgentActivityPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityPayloadFragment response data
+ */
+export class AgentActivityPayload extends Request {
+  private _agentActivity: L.AgentActivityPayloadFragment["agentActivity"];
+
+  public constructor(request: LinearRequest, data: L.AgentActivityPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._agentActivity = data.agentActivity;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The agent activity that was created or updated. */
+  public get agentActivity(): LinearFetch<AgentActivity> | undefined {
+    return new AgentActivityQuery(this._request).fetch(this._agentActivity.id);
+  }
+  /** The ID of agent activity that was created or updated. */
+  public get agentActivityId(): string | undefined {
+    return this._agentActivity?.id;
+  }
+}
+/**
+ * Content for a response activity (markdown-like completion).
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityResponseContentFragment response data
+ */
+export class AgentActivityResponseContent extends Request {
+  public constructor(request: LinearRequest, data: L.AgentActivityResponseContentFragment) {
+    super(request);
+    this.body = data.body;
+    this.type = data.type;
+  }
+
+  /** The response body in Markdown format. */
+  public body: string;
+  /** The type of activity. */
+  public type: L.AgentActivityType;
+}
+/**
+ * A context for agent activities and state management.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentContextFragment response data
+ */
+export class AgentContext extends Request {
+  private _appUser: L.AgentContextFragment["appUser"];
+  private _comment?: L.AgentContextFragment["comment"];
+  private _creator?: L.AgentContextFragment["creator"];
+  private _issue?: L.AgentContextFragment["issue"];
+
+  public constructor(request: LinearRequest, data: L.AgentContextFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.endedAt = parseDate(data.endedAt) ?? undefined;
+    this.id = data.id;
+    this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
+    this.startedAt = parseDate(data.startedAt) ?? undefined;
+    this.summary = data.summary ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.activities = data.activities.map(node => new AgentActivity(request, node));
+    this.links = data.links.map(node => new EntityExternalLink(request, node));
+    this.status = data.status;
+    this.type = data.type;
+    this._appUser = data.appUser;
+    this._comment = data.comment ?? undefined;
+    this._creator = data.creator ?? undefined;
+    this._issue = data.issue ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The time the agent context ended. */
+  public endedAt?: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Metadata about the external source that created this agent context. */
+  public sourceMetadata?: Record<string, unknown>;
+  /** The time the agent context started working. */
+  public startedAt?: Date;
+  /** A summary of the activities in this context. */
+  public summary?: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** Activities associated with this agent context. */
+  public activities: AgentActivity[];
+  /** External links associated with this agent context. */
+  public links: EntityExternalLink[];
+  /** The current status of the agent context. */
+  public status: L.AgentContextStatus;
+  /** The type of the agent context. */
+  public type: L.AgentContextType;
+  /** The agent user that is associated with this agent context. */
+  public get appUser(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._appUser.id);
+  }
+  /** The ID of agent user that is associated with this agent context. */
+  public get appUserId(): string | undefined {
+    return this._appUser?.id;
+  }
+  /** The comment this agent context is associated with. */
+  public get comment(): LinearFetch<Comment> | undefined {
+    return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
+  }
+  /** The ID of comment this agent context is associated with. */
+  public get commentId(): string | undefined {
+    return this._comment?.id;
+  }
+  /** The user that created this agent context. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The ID of user that created this agent context. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
+  /** The issue this agent context is associated with. */
+  public get issue(): LinearFetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** The ID of issue this agent context is associated with. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
+  }
+
+  /** Creates an agent context. */
+  public create(input: L.AgentContextCreateInput) {
+    return new CreateAgentContextMutation(this._request).fetch(input);
+  }
+  /** Updates an agent context. */
+  public update(input: L.AgentContextUpdateInput) {
+    return new UpdateAgentContextMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * AgentContextConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this AgentContextConnection model
+ * @param data - AgentContextConnection response data
+ */
+export class AgentContextConnection extends Connection<AgentContext> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<AgentContext> | undefined>,
+    data: L.AgentContextConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new AgentContext(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * AgentContextPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentContextPayloadFragment response data
+ */
+export class AgentContextPayload extends Request {
+  private _agentContext: L.AgentContextPayloadFragment["agentContext"];
+
+  public constructor(request: LinearRequest, data: L.AgentContextPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._agentContext = data.agentContext;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The agent context that was created or updated. */
+  public get agentContext(): LinearFetch<AgentContext> | undefined {
+    return new AgentContextQuery(this._request).fetch(this._agentContext.id);
+  }
+  /** The ID of agent context that was created or updated. */
+  public get agentContextId(): string | undefined {
+    return this._agentContext?.id;
+  }
+}
+/**
  * An API key. Grants access to the user's resources.
  *
  * @param request - function to call the graphql client
@@ -6947,6 +7272,7 @@ export class Issue extends Request {
   private _snoozedBy?: L.IssueFragment["snoozedBy"];
   private _sourceComment?: L.IssueFragment["sourceComment"];
   private _state: L.IssueFragment["state"];
+  private _supervisor?: L.IssueFragment["supervisor"];
   private _team: L.IssueFragment["team"];
 
   public constructor(request: LinearRequest, data: L.IssueFragment) {
@@ -7007,6 +7333,7 @@ export class Issue extends Request {
     this._snoozedBy = data.snoozedBy ?? undefined;
     this._sourceComment = data.sourceComment ?? undefined;
     this._state = data.state;
+    this._supervisor = data.supervisor ?? undefined;
     this._team = data.team;
   }
 
@@ -7210,6 +7537,14 @@ export class Issue extends Request {
   /** The ID of workflow state that the issue is associated with. */
   public get stateId(): string | undefined {
     return this._state?.id;
+  }
+  /** The user who has delegated this issue to be completed by an agent. */
+  public get supervisor(): LinearFetch<User> | undefined {
+    return this._supervisor?.id ? new UserQuery(this._request).fetch(this._supervisor?.id) : undefined;
+  }
+  /** The ID of user who has delegated this issue to be completed by an agent. */
+  public get supervisorId(): string | undefined {
+    return this._supervisor?.id;
   }
   /** The team that the issue is associated with. */
   public get team(): LinearFetch<Team> | undefined {
@@ -8708,6 +9043,7 @@ export class IssueSearchResult extends Request {
   private _snoozedBy?: L.IssueSearchResultFragment["snoozedBy"];
   private _sourceComment?: L.IssueSearchResultFragment["sourceComment"];
   private _state: L.IssueSearchResultFragment["state"];
+  private _supervisor?: L.IssueSearchResultFragment["supervisor"];
   private _team: L.IssueSearchResultFragment["team"];
 
   public constructor(request: LinearRequest, data: L.IssueSearchResultFragment) {
@@ -8769,6 +9105,7 @@ export class IssueSearchResult extends Request {
     this._snoozedBy = data.snoozedBy ?? undefined;
     this._sourceComment = data.sourceComment ?? undefined;
     this._state = data.state;
+    this._supervisor = data.supervisor ?? undefined;
     this._team = data.team;
   }
 
@@ -8974,6 +9311,14 @@ export class IssueSearchResult extends Request {
   /** The ID of workflow state that the issue is associated with. */
   public get stateId(): string | undefined {
     return this._state?.id;
+  }
+  /** The user who has delegated this issue to be completed by an agent. */
+  public get supervisor(): LinearFetch<User> | undefined {
+    return this._supervisor?.id ? new UserQuery(this._request).fetch(this._supervisor?.id) : undefined;
+  }
+  /** The ID of user who has delegated this issue to be completed by an agent. */
+  public get supervisorId(): string | undefined {
+    return this._supervisor?.id;
   }
   /** The team that the issue is associated with. */
   public get team(): LinearFetch<Team> | undefined {
@@ -15378,6 +15723,10 @@ export class User extends Request {
   public drafts(variables?: Omit<L.User_DraftsQueryVariables, "id">) {
     return new User_DraftsQuery(this._request, this.id, variables).fetch(variables);
   }
+  /** Issues delegated to an agent by the user. */
+  public supervisedIssues(variables?: Omit<L.User_SupervisedIssuesQueryVariables, "id">) {
+    return new User_SupervisedIssuesQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Memberships associated with the user. For easier access of the same data, use `teams` query. */
   public teamMemberships(variables?: Omit<L.User_TeamMembershipsQueryVariables, "id">) {
     return new User_TeamMembershipsQuery(this._request, this.id, variables).fetch(variables);
@@ -16336,6 +16685,132 @@ export class AdministrableTeamsQuery extends Request {
     const data = response.administrableTeams;
 
     return new TeamConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable AgentActivities Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentActivitiesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentActivities query and return a AgentActivityConnection
+   *
+   * @param variables - variables to pass into the AgentActivitiesQuery
+   * @returns parsed response from AgentActivitiesQuery
+   */
+  public async fetch(variables?: L.AgentActivitiesQueryVariables): LinearFetch<AgentActivityConnection> {
+    const response = await this._request<L.AgentActivitiesQuery, L.AgentActivitiesQueryVariables>(
+      L.AgentActivitiesDocument,
+      variables
+    );
+    const data = response.agentActivities;
+
+    return new AgentActivityConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable AgentActivity Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentActivityQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentActivity query and return a AgentActivity
+   *
+   * @param id - required id to pass to agentActivity
+   * @returns parsed response from AgentActivityQuery
+   */
+  public async fetch(id: string): LinearFetch<AgentActivity> {
+    const response = await this._request<L.AgentActivityQuery, L.AgentActivityQueryVariables>(L.AgentActivityDocument, {
+      id,
+    });
+    const data = response.agentActivity;
+
+    return new AgentActivity(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AgentContext Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentContextQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentContext query and return a AgentContext
+   *
+   * @param id - required id to pass to agentContext
+   * @returns parsed response from AgentContextQuery
+   */
+  public async fetch(id: string): LinearFetch<AgentContext> {
+    const response = await this._request<L.AgentContextQuery, L.AgentContextQueryVariables>(L.AgentContextDocument, {
+      id,
+    });
+    const data = response.agentContext;
+
+    return new AgentContext(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AgentContexts Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentContextsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentContexts query and return a AgentContextConnection
+   *
+   * @param variables - variables to pass into the AgentContextsQuery
+   * @returns parsed response from AgentContextsQuery
+   */
+  public async fetch(variables?: L.AgentContextsQueryVariables): LinearFetch<AgentContextConnection> {
+    const response = await this._request<L.AgentContextsQuery, L.AgentContextsQueryVariables>(
+      L.AgentContextsDocument,
+      variables
+    );
+    const data = response.agentContexts;
+
+    return new AgentContextConnection(
       this._request,
       connection =>
         this.fetch(
@@ -19968,6 +20443,95 @@ export class WorkflowStatesQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable CreateAgentActivity Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateAgentActivityMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateAgentActivity mutation and return a AgentActivityPayload
+   *
+   * @param input - required input to pass to createAgentActivity
+   * @returns parsed response from CreateAgentActivityMutation
+   */
+  public async fetch(input: L.AgentActivityCreateInput): LinearFetch<AgentActivityPayload> {
+    const response = await this._request<L.CreateAgentActivityMutation, L.CreateAgentActivityMutationVariables>(
+      L.CreateAgentActivityDocument,
+      {
+        input,
+      }
+    );
+    const data = response.agentActivityCreate;
+
+    return new AgentActivityPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateAgentContext Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateAgentContextMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateAgentContext mutation and return a AgentContextPayload
+   *
+   * @param input - required input to pass to createAgentContext
+   * @returns parsed response from CreateAgentContextMutation
+   */
+  public async fetch(input: L.AgentContextCreateInput): LinearFetch<AgentContextPayload> {
+    const response = await this._request<L.CreateAgentContextMutation, L.CreateAgentContextMutationVariables>(
+      L.CreateAgentContextDocument,
+      {
+        input,
+      }
+    );
+    const data = response.agentContextCreate;
+
+    return new AgentContextPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateAgentContext Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateAgentContextMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateAgentContext mutation and return a AgentContextPayload
+   *
+   * @param id - required id to pass to updateAgentContext
+   * @param input - required input to pass to updateAgentContext
+   * @returns parsed response from UpdateAgentContextMutation
+   */
+  public async fetch(id: string, input: L.AgentContextUpdateInput): LinearFetch<AgentContextPayload> {
+    const response = await this._request<L.UpdateAgentContextMutation, L.UpdateAgentContextMutationVariables>(
+      L.UpdateAgentContextDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.agentContextUpdate;
+
+    return new AgentContextPayload(this._request, data);
   }
 }
 
@@ -32646,6 +33210,59 @@ export class User_DraftsQuery extends Request {
 }
 
 /**
+ * A fetchable User_SupervisedIssues Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to user
+ * @param variables - variables without 'id' to pass into the User_SupervisedIssuesQuery
+ */
+export class User_SupervisedIssuesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.User_SupervisedIssuesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.User_SupervisedIssuesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the User_SupervisedIssues query and return a IssueConnection
+   *
+   * @param variables - variables without 'id' to pass into the User_SupervisedIssuesQuery
+   * @returns parsed response from User_SupervisedIssuesQuery
+   */
+  public async fetch(variables?: Omit<L.User_SupervisedIssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
+    const response = await this._request<L.User_SupervisedIssuesQuery, L.User_SupervisedIssuesQueryVariables>(
+      L.User_SupervisedIssuesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.user.supervisedIssues;
+
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable User_TeamMemberships Query
  *
  * @param request - function to call the graphql client
@@ -33548,6 +34165,49 @@ export class Viewer_DraftsQuery extends Request {
 }
 
 /**
+ * A fetchable Viewer_SupervisedIssues Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Viewer_SupervisedIssuesQuery
+ */
+export class Viewer_SupervisedIssuesQuery extends Request {
+  private _variables?: L.Viewer_SupervisedIssuesQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.Viewer_SupervisedIssuesQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Viewer_SupervisedIssues query and return a IssueConnection
+   *
+   * @param variables - variables to pass into the Viewer_SupervisedIssuesQuery
+   * @returns parsed response from Viewer_SupervisedIssuesQuery
+   */
+  public async fetch(variables?: L.Viewer_SupervisedIssuesQueryVariables): LinearFetch<IssueConnection> {
+    const response = await this._request<L.Viewer_SupervisedIssuesQuery, L.Viewer_SupervisedIssuesQueryVariables>(
+      L.Viewer_SupervisedIssuesDocument,
+      variables
+    );
+    const data = response.viewer.supervisedIssues;
+
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Viewer_TeamMemberships Query
  *
  * @param request - function to call the graphql client
@@ -33700,6 +34360,42 @@ export class LinearSdk extends Request {
    */
   public administrableTeams(variables?: L.AdministrableTeamsQueryVariables): LinearFetch<TeamConnection> {
     return new AdministrableTeamsQuery(this._request).fetch(variables);
+  }
+  /**
+   * All agent activities.
+   *
+   * @param variables - variables to pass into the AgentActivitiesQuery
+   * @returns AgentActivityConnection
+   */
+  public agentActivities(variables?: L.AgentActivitiesQueryVariables): LinearFetch<AgentActivityConnection> {
+    return new AgentActivitiesQuery(this._request).fetch(variables);
+  }
+  /**
+   * A specific agent activity.
+   *
+   * @param id - required id to pass to agentActivity
+   * @returns AgentActivity
+   */
+  public agentActivity(id: string): LinearFetch<AgentActivity> {
+    return new AgentActivityQuery(this._request).fetch(id);
+  }
+  /**
+   * A specific agent context.
+   *
+   * @param id - required id to pass to agentContext
+   * @returns AgentContext
+   */
+  public agentContext(id: string): LinearFetch<AgentContext> {
+    return new AgentContextQuery(this._request).fetch(id);
+  }
+  /**
+   * All agent contexts.
+   *
+   * @param variables - variables to pass into the AgentContextsQuery
+   * @returns AgentContextConnection
+   */
+  public agentContexts(variables?: L.AgentContextsQueryVariables): LinearFetch<AgentContextConnection> {
+    return new AgentContextsQuery(this._request).fetch(variables);
   }
   /**
    * All API keys for the user.
@@ -34802,6 +35498,34 @@ export class LinearSdk extends Request {
    */
   public workflowStates(variables?: L.WorkflowStatesQueryVariables): LinearFetch<WorkflowStateConnection> {
     return new WorkflowStatesQuery(this._request).fetch(variables);
+  }
+  /**
+   * Creates an agent activity.
+   *
+   * @param input - required input to pass to createAgentActivity
+   * @returns AgentActivityPayload
+   */
+  public createAgentActivity(input: L.AgentActivityCreateInput): LinearFetch<AgentActivityPayload> {
+    return new CreateAgentActivityMutation(this._request).fetch(input);
+  }
+  /**
+   * Creates an agent context.
+   *
+   * @param input - required input to pass to createAgentContext
+   * @returns AgentContextPayload
+   */
+  public createAgentContext(input: L.AgentContextCreateInput): LinearFetch<AgentContextPayload> {
+    return new CreateAgentContextMutation(this._request).fetch(input);
+  }
+  /**
+   * Updates an agent context.
+   *
+   * @param id - required id to pass to updateAgentContext
+   * @param input - required input to pass to updateAgentContext
+   * @returns AgentContextPayload
+   */
+  public updateAgentContext(id: string, input: L.AgentContextUpdateInput): LinearFetch<AgentContextPayload> {
+    return new UpdateAgentContextMutation(this._request).fetch(id, input);
   }
   /**
    * Creates an integration api key for Airbyte to connect with Linear.
