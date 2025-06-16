@@ -150,6 +150,56 @@ fragment SyncedExternalThread on SyncedExternalThread {
   id
 }
 
+# A context for agent activities and state management.
+fragment AgentContext on AgentContext {
+  __typename
+  # A summary of the activities in this context.
+  summary
+  # Activities associated with this agent context.
+  activities {
+    ...AgentActivity
+  }
+  # External links associated with this agent context.
+  links {
+    ...EntityExternalLink
+  }
+  # Metadata about the external source that created this agent context.
+  sourceMetadata
+  # The agent user that is associated with this agent context.
+  appUser {
+    id
+  }
+  # The comment this agent context is associated with.
+  comment {
+    id
+  }
+  # The current status of the agent context.
+  status
+  # The issue this agent context is associated with.
+  issue {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time the agent context ended.
+  endedAt
+  # The time the agent context started working.
+  startedAt
+  # The type of the agent context.
+  type
+  # The unique identifier of the entity.
+  id
+  # The user that created this agent context.
+  creator {
+    id
+  }
+}
+
 # A custom emoji.
 fragment Emoji on Emoji {
   __typename
@@ -2509,6 +2559,26 @@ fragment ApiKey on ApiKey {
   id
 }
 
+# An activity within an agent context.
+fragment AgentActivity on AgentActivity {
+  __typename
+  # The agent context this activity belongs to.
+  agentContext {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The type of the activity.
+  type
+  # The unique identifier of the entity.
+  id
+}
+
 # An email address that can be used for submitting issues.
 fragment EmailIntakeAddress on EmailIntakeAddress {
   __typename
@@ -3144,6 +3214,10 @@ fragment Issue on Issue {
   }
   # The user who created the issue.
   creator {
+    id
+  }
+  # The user who has delegated this issue to be completed by an agent.
+  supervisor {
     id
   }
   # The user who snoozed the issue.
@@ -3914,6 +3988,46 @@ fragment ArchiveResponse on ArchiveResponse {
   databaseVersion
   # Whether the dependencies for the model objects are included in the archive.
   includesDependencies
+}
+
+# Content for a response activity (markdown-like completion).
+fragment AgentActivityResponseContent on AgentActivityResponseContent {
+  __typename
+  # The response body in Markdown format.
+  body
+  # The type of activity.
+  type
+}
+
+# Content for an action activity (tool call or action).
+fragment AgentActivityActionContent on AgentActivityActionContent {
+  __typename
+  # The action being performed.
+  action
+  # The parameters for the action, e.g. a file path, a keyword, etc.
+  parameter
+  # The result of the action in Markdown format.
+  result
+  # The type of activity.
+  type
+}
+
+# Content for an error activity.
+fragment AgentActivityErrorContent on AgentActivityErrorContent {
+  __typename
+  # The error message in Markdown format.
+  body
+  # The type of activity.
+  type
+}
+
+# Content for an observation activity (chain of thought).
+fragment AgentActivityObservationContent on AgentActivityObservationContent {
+  __typename
+  # The observation content in Markdown format.
+  body
+  # The type of activity.
+  type
 }
 
 # Defines the membership of a user to a team.
@@ -6020,6 +6134,50 @@ fragment AuditEntry on AuditEntry {
   type
 }
 
+fragment AgentActivityConnection on AgentActivityConnection {
+  __typename
+  nodes {
+    ...AgentActivity
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment AgentActivityPayload on AgentActivityPayload {
+  __typename
+  # The agent activity that was created or updated.
+  agentActivity {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment AgentContextConnection on AgentContextConnection {
+  __typename
+  nodes {
+    ...AgentContext
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment AgentContextPayload on AgentContextPayload {
+  __typename
+  # The agent context that was created or updated.
+  agentContext {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
 fragment ApiKeyConnection on ApiKeyConnection {
   __typename
   nodes {
@@ -7122,6 +7280,10 @@ fragment IssueSearchResult on IssueSearchResult {
   creator {
     id
   }
+  # The user who has delegated this issue to be completed by an agent.
+  supervisor {
+    id
+  }
   # The user who snoozed the issue.
   snoozedBy {
     id
@@ -8164,6 +8326,76 @@ query administrableTeams(
     ...TeamConnection
   }
 }
+# All agent activities.
+query agentActivities(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  agentActivities(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...AgentActivityConnection
+  }
+}
+# A specific agent activity.
+query agentActivity(
+  # The identifier of the agent activity to retrieve.
+  $id: String!
+) {
+  agentActivity(id: $id) {
+    ...AgentActivity
+  }
+}
+# A specific agent context.
+query agentContext(
+  # The identifier of the agent context to retrieve.
+  $id: String!
+) {
+  agentContext(id: $id) {
+    ...AgentContext
+  }
+}
+# All agent contexts.
+query agentContexts(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  agentContexts(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...AgentContextConnection
+  }
+}
 # All API keys for the user.
 query apiKeys(
   # A cursor to be used with first for forward pagination
@@ -8895,6 +9127,8 @@ query customView_projects(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
 ) {
   customView(id: $id) {
     projects(
@@ -8905,6 +9139,7 @@ query customView_projects(
       includeArchived: $includeArchived
       last: $last
       orderBy: $orderBy
+      sort: $sort
     ) {
       ...ProjectConnection
     }
@@ -8951,6 +9186,8 @@ query customViews(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # Filter returned custom views.
+  $filter: CustomViewFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -8963,6 +9200,7 @@ query customViews(
   customViews(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -9505,6 +9743,8 @@ query initiative_projects(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
 ) {
   initiative(id: $id) {
     projects(
@@ -9516,6 +9756,7 @@ query initiative_projects(
       includeSubInitiatives: $includeSubInitiatives
       last: $last
       orderBy: $orderBy
+      sort: $sort
     ) {
       ...ProjectConnection
     }
@@ -11711,6 +11952,8 @@ query projects(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
 ) {
   projects(
     after: $after
@@ -11720,6 +11963,7 @@ query projects(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    sort: $sort
   ) {
     ...ProjectConnection
   }
@@ -12287,6 +12531,8 @@ query team_projects(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
 ) {
   team(id: $id) {
     projects(
@@ -12298,6 +12544,7 @@ query team_projects(
       includeSubTeams: $includeSubTeams
       last: $last
       orderBy: $orderBy
+      sort: $sort
     ) {
       ...ProjectConnection
     }
@@ -12665,6 +12912,39 @@ query user_drafts(
       orderBy: $orderBy
     ) {
       ...DraftConnection
+    }
+  }
+}
+# Issues delegated to an agent by the user.
+query user_supervisedIssues(
+  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  user(id: $id) {
+    supervisedIssues(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
     }
   }
 }
@@ -13156,6 +13436,37 @@ query viewer_drafts(
     }
   }
 }
+# Issues delegated to an agent by the user.
+query viewer_supervisedIssues(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  viewer {
+    supervisedIssues(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
 # Memberships associated with the user. For easier access of the same data, use `teams` query.
 query viewer_teamMemberships(
   # A cursor to be used with first for forward pagination
@@ -13315,6 +13626,35 @@ query workflowStates(
     orderBy: $orderBy
   ) {
     ...WorkflowStateConnection
+  }
+}
+# Creates an agent activity.
+mutation createAgentActivity(
+  # The agent activity object to create.
+  $input: AgentActivityCreateInput!
+) {
+  agentActivityCreate(input: $input) {
+    ...AgentActivityPayload
+  }
+}
+# Creates an agent context.
+mutation createAgentContext(
+  # The agent context object to create.
+  $input: AgentContextCreateInput!
+) {
+  agentContextCreate(input: $input) {
+    ...AgentContextPayload
+  }
+}
+# Updates an agent context.
+mutation updateAgentContext(
+  # The identifier of the agent context to update.
+  $id: String!
+  # The agent context object to update.
+  $input: AgentContextUpdateInput!
+) {
+  agentContextUpdate(id: $id, input: $input) {
+    ...AgentContextPayload
   }
 }
 # Creates an integration api key for Airbyte to connect with Linear.
