@@ -33,6 +33,348 @@ type ActorBot {
   userDisplayName: String
 }
 
+"""
+An activity within an agent context.
+"""
+type AgentActivity implements Node {
+  """
+  The agent context this activity belongs to.
+  """
+  agentContext: AgentContext!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The content of the activity
+  """
+  content: AgentActivityContent!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The type of the activity.
+  """
+  type: AgentActivityType!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Content for an action activity (tool call or action).
+"""
+type AgentActivityActionContent {
+  """
+  The action being performed.
+  """
+  action: String!
+  """
+  The parameters for the action, e.g. a file path, a keyword, etc.
+  """
+  parameter: String!
+  """
+  The result of the action in Markdown format.
+  """
+  result: String
+  """
+  The type of activity.
+  """
+  type: AgentActivityType!
+}
+
+type AgentActivityConnection {
+  edges: [AgentActivityEdge!]!
+  nodes: [AgentActivity!]!
+  pageInfo: PageInfo!
+}
+
+"""
+Content for different types of agent activities.
+"""
+union AgentActivityContent =
+  | AgentActivityActionContent
+  | AgentActivityErrorContent
+  | AgentActivityObservationContent
+  | AgentActivityResponseContent
+
+input AgentActivityCreateInput {
+  """
+  The agent context this activity belongs to.
+  """
+  agentContextId: String!
+  """
+  The content payload of the agent activity.
+  """
+  content: JSONObject!
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The type of the activity.
+  """
+  type: AgentActivityType!
+}
+
+type AgentActivityEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: AgentActivity!
+}
+
+"""
+Content for an error activity.
+"""
+type AgentActivityErrorContent {
+  """
+  The error message in Markdown format.
+  """
+  body: String!
+  """
+  The type of activity.
+  """
+  type: AgentActivityType!
+}
+
+"""
+Content for an observation activity (chain of thought).
+"""
+type AgentActivityObservationContent {
+  """
+  The observation content in Markdown format.
+  """
+  body: String!
+  """
+  The type of activity.
+  """
+  type: AgentActivityType!
+}
+
+type AgentActivityPayload {
+  """
+  The agent activity that was created or updated.
+  """
+  agentActivity: AgentActivity!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+Content for a response activity (markdown-like completion).
+"""
+type AgentActivityResponseContent {
+  """
+  The response body in Markdown format.
+  """
+  body: String!
+  """
+  The type of activity.
+  """
+  type: AgentActivityType!
+}
+
+"""
+The type of an agent activity.
+"""
+enum AgentActivityType {
+  action
+  error
+  observation
+  response
+}
+
+"""
+A context for agent activities and state management.
+"""
+type AgentContext implements Node {
+  """
+  Activities associated with this agent context.
+  """
+  activities(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): [AgentActivity!]!
+  """
+  The agent user that is associated with this agent context.
+  """
+  appUser: User!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The comment this agent context is associated with.
+  """
+  comment: Comment
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user that created this agent context.
+  """
+  creator: User
+  """
+  The time the agent context ended.
+  """
+  endedAt: DateTime
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The issue this agent context is associated with.
+  """
+  issue: Issue
+  """
+  External links associated with this agent context.
+  """
+  links: [EntityExternalLink!]!
+  """
+  Metadata about the external source that created this agent context.
+  """
+  sourceMetadata: JSON
+  """
+  The time the agent context started working.
+  """
+  startedAt: DateTime
+  """
+  The current status of the agent context.
+  """
+  status: AgentContextStatus!
+  """
+  A summary of the activities in this context.
+  """
+  summary: String
+  """
+  The type of the agent context.
+  """
+  type: AgentContextType!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type AgentContextConnection {
+  edges: [AgentContextEdge!]!
+  nodes: [AgentContext!]!
+  pageInfo: PageInfo!
+}
+
+input AgentContextCreateInput {
+  """
+  The comment this agent context is associated with.
+  """
+  commentId: String!
+  """
+  The user who created this agent context.
+  """
+  creatorId: String!
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  URL to the external source where this agent context was created (e.g., Slack thread, GitHub comment).
+  """
+  sourceUrl: String!
+  """
+  The type of the agent context.
+  """
+  type: AgentContextType!
+}
+
+type AgentContextEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: AgentContext!
+}
+
+type AgentContextPayload {
+  """
+  The agent context that was created or updated.
+  """
+  agentContext: AgentContext!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+The status of an agent context.
+"""
+enum AgentContextStatus {
+  active
+  awaitingInput
+  complete
+  pending
+}
+
+"""
+The type of an agent context.
+"""
+enum AgentContextType {
+  commentThread
+}
+
+input AgentContextUpdateInput {
+  """
+  The current status of the agent context.
+  """
+  status: AgentContextStatus
+  """
+  The summary of the agent context.
+  """
+  summary: String
+}
+
 input AirbyteConfigurationInput {
   """
   Linear export API key.
@@ -1949,6 +2291,10 @@ type CustomView implements Node {
   """
   description: String
   """
+  [INTERNAL] The facet associated with the custom view.
+  """
+  facet: Facet
+  """
   The filter applied to feed items in the custom view.
   """
   feedItemFilterData: JSONObject
@@ -2061,6 +2407,10 @@ type CustomView implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned projects.
+    """
+    sort: [ProjectSortInput!]
   ): ProjectConnection!
   """
   Whether the custom view is shared with everyone in the organization.
@@ -2160,6 +2510,56 @@ type CustomViewEdge {
   """
   cursor: String!
   node: CustomView!
+}
+
+"""
+Custom view filtering options.
+"""
+input CustomViewFilter {
+  """
+  Compound filters, all of which need to be matched by the custom view.
+  """
+  and: [CustomViewFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the custom view creator must satisfy.
+  """
+  creator: UserFilter
+  """
+  [INTERNAL] Filter based on whether the custom view has a facet.
+  """
+  hasFacet: Boolean
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the custom view model name.
+  """
+  modelName: StringComparator
+  """
+  Comparator for the custom view name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the custom view.
+  """
+  or: [CustomViewFilter!]
+  """
+  Comparator for whether the custom view is shared.
+  """
+  shared: BooleanComparator
+  """
+  Filters that the custom view's team must satisfy.
+  """
+  team: NullableTeamFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 type CustomViewHasSubscribersPayload {
@@ -7444,6 +7844,10 @@ type Initiative implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned projects.
+    """
+    sort: [ProjectSortInput!]
   ): ProjectConnection!
   """
   The initiative's unique URL slug.
@@ -9965,6 +10369,10 @@ type Issue implements Node {
   [Internal] The time at which the most recent suggestions for this issue were generated.
   """
   suggestionsGeneratedAt: DateTime
+  """
+  The user who has delegated this issue to be completed by an agent.
+  """
+  supervisor: User
   """
   The external services the issue is synced with.
   """
@@ -12943,6 +13351,10 @@ type IssueSearchResult implements Node {
   """
   suggestionsGeneratedAt: DateTime
   """
+  The user who has delegated this issue to be completed by an agent.
+  """
+  supervisor: User
+  """
   The external services the issue is synced with.
   """
   syncedWith: [ExternalEntityInfo!]
@@ -14098,6 +14510,37 @@ input MilestoneSort {
 }
 
 type Mutation {
+  """
+  Creates an agent activity.
+  """
+  agentActivityCreate(
+    """
+    The agent activity object to create.
+    """
+    input: AgentActivityCreateInput!
+  ): AgentActivityPayload!
+  """
+  Creates an agent context.
+  """
+  agentContextCreate(
+    """
+    The agent context object to create.
+    """
+    input: AgentContextCreateInput!
+  ): AgentContextPayload!
+  """
+  Updates an agent context.
+  """
+  agentContextUpdate(
+    """
+    The identifier of the agent context to update.
+    """
+    id: String!
+    """
+    The agent context object to update.
+    """
+    input: AgentContextUpdateInput!
+  ): AgentContextPayload!
   """
   Creates an integration api key for Airbyte to connect with Linear.
   """
@@ -20707,6 +21150,10 @@ input OrganizationUpdateInput {
   """
   reducedPersonalInformation: Boolean
   """
+  Whether agent invocation is restricted to full workspace members.
+  """
+  restrictAgentInvocationToMembers: Boolean
+  """
   Whether label creation is restricted to admins.
   """
   restrictLabelManagementToAdmins: Boolean
@@ -22737,6 +23184,20 @@ input ProjectLabelFilter {
 }
 
 """
+Project manual order sorting options.
+"""
+input ProjectManualSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
 A milestone for a project.
 """
 type ProjectMilestone implements Node {
@@ -23128,6 +23589,20 @@ input ProjectMilestoneUpdateInput {
 }
 
 """
+Project name sorting options.
+"""
+input ProjectNameSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
 A project related notification.
 """
 type ProjectNotification implements Entity & Node & Notification {
@@ -23375,6 +23850,24 @@ type ProjectPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+Project priority sorting options.
+"""
+input ProjectPrioritySort {
+  """
+  Whether to consider no priority as the highest or lowest priority
+  """
+  noPriorityFirst: Boolean = false
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -24242,6 +24735,36 @@ input ProjectSort {
 }
 
 """
+Project sorting options.
+"""
+input ProjectSortInput {
+  """
+  Sort by manual order
+  """
+  manual: ProjectManualSort
+  """
+  Sort by project name
+  """
+  name: ProjectNameSort
+  """
+  Sort by project priority
+  """
+  priority: ProjectPrioritySort
+  """
+  Sort by project start date
+  """
+  startDate: StartDateSort
+  """
+  Sort by project status
+  """
+  status: ProjectStatusSort
+  """
+  Sort by project target date
+  """
+  targetDate: TargetDateSort
+}
+
+"""
 A project status.
 """
 type ProjectStatus implements Node {
@@ -24447,6 +24970,20 @@ type ProjectStatusPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+Project status sorting options.
+"""
+input ProjectStatusSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -25545,6 +26082,82 @@ type Query {
     orderBy: PaginationOrderBy
   ): TeamConnection!
   """
+  All agent activities.
+  """
+  agentActivities(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AgentActivityConnection!
+  """
+  A specific agent activity.
+  """
+  agentActivity(
+    """
+    The identifier of the agent activity to retrieve.
+    """
+    id: String!
+  ): AgentActivity!
+  """
+  A specific agent context.
+  """
+  agentContext(
+    """
+    The identifier of the agent context to retrieve.
+    """
+    id: String!
+  ): AgentContext!
+  """
+  All agent contexts.
+  """
+  agentContexts(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AgentContextConnection!
+  """
   All API keys for the user.
   """
   apiKeys(
@@ -25592,7 +26205,7 @@ type Query {
     ids: [String!]!
   ): [Application!]!
   """
-  [INTERNAL] Get information for a list of applications with memberships
+  [DEPRECATED] [INTERNAL] Get information for a list of applications with memberships
   """
   applicationInfoWithMembershipsByIds(
     """
@@ -25600,6 +26213,9 @@ type Query {
     """
     clientIds: [String!]!
   ): [WorkspaceAuthorizedApplication!]!
+    @deprecated(
+      reason: "Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead."
+    )
   """
   Get information for an application and whether a user has approved it for the given scopes.
   """
@@ -25843,6 +26459,10 @@ type Query {
     A cursor to be used with last for backward pagination.
     """
     before: String
+    """
+    Filter returned custom views.
+    """
+    filter: CustomViewFilter
     """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
@@ -27022,6 +27642,10 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned projects.
+    """
+    sort: [ProjectSortInput!]
   ): ProjectConnection!
   """
   Sends a test push message.
@@ -27587,9 +28211,21 @@ type Query {
     clientId: String!
   ): WorkspaceAuthorizedApplicationWithMemberships!
   """
-  [INTERNAL] Get non-internal authorized applications (with limited fields) for a workspace
+  [DEPRECATED] [INTERNAL] Get non-internal authorized applications (with limited fields) for a workspace
   """
   workspaceAuthorizedApplications: [WorkspaceAuthorizedApplication!]!
+    @deprecated(
+      reason: "Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead."
+    )
+  """
+  [INTERNAL] Get non-internal authorized applications for a workspace, including each application's app user.
+  """
+  workspaceAuthorizedApplicationsWithAppUser(
+    """
+    Client IDs of specific applications to return. If not provided, all workspace-authorized applications will be returned.
+    """
+    clientIds: [String!]
+  ): [WorkspaceAuthorizedApplicationWithAppUser!]!
 }
 
 type RateLimitPayload {
@@ -28334,6 +28970,10 @@ input SalesforceSettingsInput {
   """
   reopenCaseStatus: String
   """
+  Whether to restrict visibility of the integration to issues that have been either created from Salesforce or linked to Salesforce.
+  """
+  restrictVisibility: Boolean
+  """
   Whether an internal message should be added when someone comments on an issue.
   """
   sendNoteOnComment: Boolean
@@ -28849,6 +29489,20 @@ type SsoUrlFromEmailResponse {
 }
 
 """
+Project start date sorting options.
+"""
+input StartDateSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
 Comparator for strings.
 """
 input StringArrayComparator {
@@ -29087,6 +29741,20 @@ type SyncedExternalThread {
   The external url of the thread.
   """
   url: String
+}
+
+"""
+Project target date sorting options.
+"""
+input TargetDateSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -29561,6 +30229,10 @@ type Team implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned projects.
+    """
+    sort: [ProjectSortInput!]
   ): ProjectConnection!
   """
   Whether an issue needs to have a priority set before leaving triage.
@@ -31188,6 +31860,39 @@ type User implements Node {
   """
   statusUntilAt: DateTime
   """
+  Issues delegated to an agent by the user.
+  """
+  supervisedIssues(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned issues.
+    """
+    filter: IssueFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueConnection!
+  """
   Memberships associated with the user. For easier access of the same data, use `teams` query.
   """
   teamMemberships(
@@ -32629,6 +33334,56 @@ type WorkspaceAuthorizedApplication {
   scope: [String!]!
   """
   Total number of members that authorized the application.
+  """
+  totalMembers: Float!
+  """
+  Whether or not webhooks are enabled for the application.
+  """
+  webhooksEnabled: Boolean!
+}
+
+"""
+[INTERNAL] Public information of the OAuth application, plus the app user and aggregate membership count.
+"""
+type WorkspaceAuthorizedApplicationWithAppUser {
+  """
+  OAuth application's ID.
+  """
+  appId: String!
+  """
+  The app user associated with this client, if one exists.
+  """
+  appUser: AuthMembership
+  """
+  OAuth application's client ID.
+  """
+  clientId: String!
+  """
+  Description of the application.
+  """
+  description: String
+  """
+  Developer of the application.
+  """
+  developer: String
+  """
+  Developer URL of the application.
+  """
+  developerUrl: String
+  """
+  Image of the application.
+  """
+  imageUrl: String
+  """
+  Application name.
+  """
+  name: String!
+  """
+  Scopes that are authorized for this application for a given user.
+  """
+  scope: [String!]!
+  """
+  Total number of members (including the app user, if it exists) that authorized the application.
   """
   totalMembers: Float!
   """
