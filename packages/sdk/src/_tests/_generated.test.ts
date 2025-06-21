@@ -295,6 +295,106 @@ describe("generated", () => {
     });
   });
 
+  /** Test all AgentActivity queries */
+  describe("AgentActivities", () => {
+    let _agentActivity: L.AgentActivity | undefined;
+    let _agentActivity_id: string | undefined;
+
+    /** Test the root connection query for the AgentActivity */
+    it("agentActivities", async () => {
+      const agentActivities: L.AgentActivityConnection | undefined = await client.agentActivities();
+      const agentActivity = agentActivities?.nodes?.[0];
+      _agentActivity_id = agentActivity?.id;
+      expect(agentActivities instanceof L.AgentActivityConnection);
+    });
+
+    /** Test the root query for a single AgentActivity */
+    it("agentActivity", async () => {
+      if (_agentActivity_id) {
+        const agentActivity: L.AgentActivity | undefined = await client.agentActivity(_agentActivity_id);
+        _agentActivity = agentActivity;
+        expect(agentActivity instanceof L.AgentActivity);
+      } else {
+        console.warn("codegen-doc:print: No first AgentActivity found in connection - cannot test agentActivity query");
+      }
+    });
+
+    /** Test the agentActivity.agentContext query for L.AgentContext */
+    it("agentActivity.agentContext", async () => {
+      if (_agentActivity) {
+        const agentActivity_agentContext: L.AgentContext | undefined = await _agentActivity.agentContext;
+        expect(agentActivity_agentContext instanceof L.AgentContext);
+      } else {
+        console.warn("codegen-doc:print: No AgentActivity found - cannot test agentActivity.agentContext query");
+      }
+    });
+  });
+
+  /** Test all AgentContext queries */
+  describe("AgentContexts", () => {
+    let _agentContext: L.AgentContext | undefined;
+    let _agentContext_id: string | undefined;
+
+    /** Test the root connection query for the AgentContext */
+    it("agentContexts", async () => {
+      const agentContexts: L.AgentContextConnection | undefined = await client.agentContexts();
+      const agentContext = agentContexts?.nodes?.[0];
+      _agentContext_id = agentContext?.id;
+      expect(agentContexts instanceof L.AgentContextConnection);
+    });
+
+    /** Test the root query for a single AgentContext */
+    it("agentContext", async () => {
+      if (_agentContext_id) {
+        const agentContext: L.AgentContext | undefined = await client.agentContext(_agentContext_id);
+        _agentContext = agentContext;
+        expect(agentContext instanceof L.AgentContext);
+      } else {
+        console.warn("codegen-doc:print: No first AgentContext found in connection - cannot test agentContext query");
+      }
+    });
+
+    /** Test the agentContext.appUser query for L.User */
+    it("agentContext.appUser", async () => {
+      if (_agentContext) {
+        const agentContext_appUser: L.User | undefined = await _agentContext.appUser;
+        expect(agentContext_appUser instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No AgentContext found - cannot test agentContext.appUser query");
+      }
+    });
+
+    /** Test the agentContext.comment query for L.Comment */
+    it("agentContext.comment", async () => {
+      if (_agentContext) {
+        const agentContext_comment: L.Comment | undefined = await _agentContext.comment;
+        expect(agentContext_comment instanceof L.Comment);
+      } else {
+        console.warn("codegen-doc:print: No AgentContext found - cannot test agentContext.comment query");
+      }
+    });
+
+    /** Test the agentContext.creator query for L.User */
+    it("agentContext.creator", async () => {
+      if (_agentContext) {
+        const agentContext_creator: L.User | undefined = await _agentContext.creator;
+        expect(agentContext_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No AgentContext found - cannot test agentContext.creator query");
+      }
+    });
+
+    /** Test the agentContext.issue query for L.Issue */
+    it("agentContext.issue", async () => {
+      if (_agentContext) {
+        const agentContext_issue: L.Issue | undefined = await _agentContext.issue;
+        expect(agentContext_issue instanceof L.Issue);
+      } else {
+        console.warn("codegen-doc:print: No AgentContext found - cannot test agentContext.issue query");
+      }
+    });
+  });
+
   /** Test all ApiKey queries */
   describe("ApiKeys", () => {
     /** Test the root connection query for the ApiKey */
@@ -1307,6 +1407,30 @@ describe("generated", () => {
     });
   });
 
+  /** Test EmailIntakeAddress query */
+  describe("EmailIntakeAddress", () => {
+    let _emailIntakeAddress: L.EmailIntakeAddress | undefined;
+
+    /** Test the root model query for EmailIntakeAddress */
+    it("emailIntakeAddress", async () => {
+      const emailIntakeAddress: L.EmailIntakeAddress | undefined = await client.emailIntakeAddress("mock-id");
+      _emailIntakeAddress = emailIntakeAddress;
+      expect(emailIntakeAddress instanceof L.EmailIntakeAddress);
+    });
+
+    /** Test the emailIntakeAddress model query for EmailIntakeAddress_SesDomainIdentity */
+    it("emailIntakeAddress.sesDomainIdentity", async () => {
+      if (_emailIntakeAddress) {
+        const sesDomainIdentity: L.SesDomainIdentity | undefined = _emailIntakeAddress.sesDomainIdentity;
+        expect(sesDomainIdentity instanceof L.SesDomainIdentity);
+      } else {
+        console.warn(
+          "codegen-doc:print: No emailIntakeAddress found - cannot test _emailIntakeAddress.sesDomainIdentity query"
+        );
+      }
+    });
+  });
+
   /** Test all Emoji queries */
   describe("Emojis", () => {
     let _emoji: L.Emoji | undefined;
@@ -2196,6 +2320,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue.supervisor query for L.User */
+    it("issue.supervisor", async () => {
+      if (_issue) {
+        const issue_supervisor: L.User | undefined = await _issue.supervisor;
+        expect(issue_supervisor instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.supervisor query");
+      }
+    });
+
     /** Test the issue.team query for L.Team */
     it("issue.team", async () => {
       if (_issue) {
@@ -2677,6 +2811,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue.supervisor query for L.User */
+    it("issue.supervisor", async () => {
+      if (_issue) {
+        const issue_supervisor: L.User | undefined = await _issue.supervisor;
+        expect(issue_supervisor instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.supervisor query");
+      }
+    });
+
     /** Test the issue.team query for L.Team */
     it("issue.team", async () => {
       if (_issue) {
@@ -3128,6 +3272,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue.supervisor query for L.User */
+    it("issue.supervisor", async () => {
+      if (_issue) {
+        const issue_supervisor: L.User | undefined = await _issue.supervisor;
+        expect(issue_supervisor instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.supervisor query");
+      }
+    });
+
     /** Test the issue.team query for L.Team */
     it("issue.team", async () => {
       if (_issue) {
@@ -3301,11 +3455,15 @@ describe("generated", () => {
   describe("Notifications", () => {
     let _notification:
       | L.Notification
+      | L.CustomerNeedNotification
+      | L.CustomerNotification
       | L.DocumentNotification
       | L.InitiativeNotification
       | L.IssueNotification
       | L.OauthClientApprovalNotification
+      | L.PostNotification
       | L.ProjectNotification
+      | L.PullRequestNotification
       | undefined;
     let _notification_id: string | undefined;
 
@@ -3322,11 +3480,15 @@ describe("generated", () => {
       if (_notification_id) {
         const notification:
           | L.Notification
+          | L.CustomerNeedNotification
+          | L.CustomerNotification
           | L.DocumentNotification
           | L.InitiativeNotification
           | L.IssueNotification
           | L.OauthClientApprovalNotification
+          | L.PostNotification
           | L.ProjectNotification
+          | L.PullRequestNotification
           | undefined = await client.notification(_notification_id);
         _notification = notification;
         expect(notification instanceof L.Notification);
@@ -4712,6 +4874,18 @@ describe("generated", () => {
       }
     });
 
+    /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_Feed */
+    it("userSettings_notificationCategoryPreferences.feed", async () => {
+      if (_notificationCategoryPreferences) {
+        const feed: L.NotificationChannelPreferences | undefined = _notificationCategoryPreferences.feed;
+        expect(feed instanceof L.NotificationChannelPreferences);
+      } else {
+        console.warn(
+          "codegen-doc:print: No notificationCategoryPreferences found - cannot test _notificationCategoryPreferences.feed query"
+        );
+      }
+    });
+
     /** Test the userSettings_notificationCategoryPreferences model query for UserSettings_NotificationCategoryPreferences_Mentions */
     it("userSettings_notificationCategoryPreferences.mentions", async () => {
       if (_notificationCategoryPreferences) {
@@ -4922,6 +5096,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the user connection query for the Issue */
+    it("user.supervisedIssues", async () => {
+      if (_user) {
+        const supervisedIssues: L.IssueConnection | undefined = await _user.supervisedIssues();
+        expect(supervisedIssues instanceof L.IssueConnection);
+      } else {
+        console.warn("codegen-doc:print: No user found - cannot test _user.supervisedIssues query");
+      }
+    });
+
     /** Test the user connection query for the TeamMembership */
     it("user.teamMemberships", async () => {
       if (_user) {
@@ -5001,6 +5185,16 @@ describe("generated", () => {
         expect(drafts instanceof L.DraftConnection);
       } else {
         console.warn("codegen-doc:print: No viewer found - cannot test _viewer.drafts query");
+      }
+    });
+
+    /** Test the viewer connection query for the Issue */
+    it("viewer.supervisedIssues", async () => {
+      if (_viewer) {
+        const supervisedIssues: L.IssueConnection | undefined = await _viewer.supervisedIssues();
+        expect(supervisedIssues instanceof L.IssueConnection);
+      } else {
+        console.warn("codegen-doc:print: No viewer found - cannot test _viewer.supervisedIssues query");
       }
     });
 
