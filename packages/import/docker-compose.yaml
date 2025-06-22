@@ -1,0 +1,6 @@
+services:
+  linear-import:
+    build:
+      context: .
+    volumes:
+      - $PWD:/app
