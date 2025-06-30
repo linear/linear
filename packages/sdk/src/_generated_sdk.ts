@@ -208,6 +208,331 @@ export class ActorBot extends Request {
   public userDisplayName?: string;
 }
 /**
+ * An activity within an agent context.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityFragment response data
+ */
+export class AgentActivity extends Request {
+  private _agentContext: L.AgentActivityFragment["agentContext"];
+
+  public constructor(request: LinearRequest, data: L.AgentActivityFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.type = data.type ?? undefined;
+    this._agentContext = data.agentContext;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The type of the activity. */
+  public type?: L.AgentActivityType;
+  /** The agent context this activity belongs to. */
+  public get agentContext(): LinearFetch<AgentContext> | undefined {
+    return new AgentContextQuery(this._request).fetch(this._agentContext.id);
+  }
+  /** The ID of agent context this activity belongs to. */
+  public get agentContextId(): string | undefined {
+    return this._agentContext?.id;
+  }
+
+  /** Creates an agent activity. */
+  public create(input: L.AgentActivityCreateInput) {
+    return new CreateAgentActivityMutation(this._request).fetch(input);
+  }
+}
+/**
+ * Content for an action activity (tool call or action).
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityActionContentFragment response data
+ */
+export class AgentActivityActionContent extends Request {
+  public constructor(request: LinearRequest, data: L.AgentActivityActionContentFragment) {
+    super(request);
+    this.action = data.action;
+    this.parameter = data.parameter;
+    this.result = data.result ?? undefined;
+    this.type = data.type;
+  }
+
+  /** The action being performed. */
+  public action: string;
+  /** The parameters for the action, e.g. a file path, a keyword, etc. */
+  public parameter: string;
+  /** The result of the action in Markdown format. */
+  public result?: string;
+  /** The type of activity. */
+  public type: L.AgentActivityType;
+}
+/**
+ * AgentActivityConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this AgentActivityConnection model
+ * @param data - AgentActivityConnection response data
+ */
+export class AgentActivityConnection extends Connection<AgentActivity> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<AgentActivity> | undefined>,
+    data: L.AgentActivityConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new AgentActivity(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * Content for an error activity.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityErrorContentFragment response data
+ */
+export class AgentActivityErrorContent extends Request {
+  public constructor(request: LinearRequest, data: L.AgentActivityErrorContentFragment) {
+    super(request);
+    this.body = data.body;
+    this.type = data.type;
+  }
+
+  /** The error message in Markdown format. */
+  public body: string;
+  /** The type of activity. */
+  public type: L.AgentActivityType;
+}
+/**
+ * Content for an observation activity (chain of thought).
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityObservationContentFragment response data
+ */
+export class AgentActivityObservationContent extends Request {
+  public constructor(request: LinearRequest, data: L.AgentActivityObservationContentFragment) {
+    super(request);
+    this.body = data.body;
+    this.type = data.type;
+  }
+
+  /** The observation content in Markdown format. */
+  public body: string;
+  /** The type of activity. */
+  public type: L.AgentActivityType;
+}
+/**
+ * AgentActivityPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityPayloadFragment response data
+ */
+export class AgentActivityPayload extends Request {
+  private _agentActivity: L.AgentActivityPayloadFragment["agentActivity"];
+
+  public constructor(request: LinearRequest, data: L.AgentActivityPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._agentActivity = data.agentActivity;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The agent activity that was created or updated. */
+  public get agentActivity(): LinearFetch<AgentActivity> | undefined {
+    return new AgentActivityQuery(this._request).fetch(this._agentActivity.id);
+  }
+  /** The ID of agent activity that was created or updated. */
+  public get agentActivityId(): string | undefined {
+    return this._agentActivity?.id;
+  }
+}
+/**
+ * Content for a response activity (markdown-like completion).
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityResponseContentFragment response data
+ */
+export class AgentActivityResponseContent extends Request {
+  public constructor(request: LinearRequest, data: L.AgentActivityResponseContentFragment) {
+    super(request);
+    this.body = data.body;
+    this.type = data.type;
+  }
+
+  /** The response body in Markdown format. */
+  public body: string;
+  /** The type of activity. */
+  public type: L.AgentActivityType;
+}
+/**
+ * A context for agent activities and state management.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentContextFragment response data
+ */
+export class AgentContext extends Request {
+  private _appUser: L.AgentContextFragment["appUser"];
+  private _comment?: L.AgentContextFragment["comment"];
+  private _creator?: L.AgentContextFragment["creator"];
+  private _issue?: L.AgentContextFragment["issue"];
+
+  public constructor(request: LinearRequest, data: L.AgentContextFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.endedAt = parseDate(data.endedAt) ?? undefined;
+    this.id = data.id;
+    this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
+    this.startedAt = parseDate(data.startedAt) ?? undefined;
+    this.summary = data.summary ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.activities = data.activities.map(node => new AgentActivity(request, node));
+    this.links = data.links.map(node => new EntityExternalLink(request, node));
+    this.status = data.status;
+    this.type = data.type;
+    this._appUser = data.appUser;
+    this._comment = data.comment ?? undefined;
+    this._creator = data.creator ?? undefined;
+    this._issue = data.issue ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The time the agent context ended. */
+  public endedAt?: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Metadata about the external source that created this agent context. */
+  public sourceMetadata?: Record<string, unknown>;
+  /** The time the agent context started working. */
+  public startedAt?: Date;
+  /** A summary of the activities in this context. */
+  public summary?: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** Activities associated with this agent context. */
+  public activities: AgentActivity[];
+  /** External links associated with this agent context. */
+  public links: EntityExternalLink[];
+  /** The current status of the agent context. */
+  public status: L.AgentContextStatus;
+  /** The type of the agent context. */
+  public type: L.AgentContextType;
+  /** The agent user that is associated with this agent context. */
+  public get appUser(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._appUser.id);
+  }
+  /** The ID of agent user that is associated with this agent context. */
+  public get appUserId(): string | undefined {
+    return this._appUser?.id;
+  }
+  /** The comment this agent context is associated with. */
+  public get comment(): LinearFetch<Comment> | undefined {
+    return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
+  }
+  /** The ID of comment this agent context is associated with. */
+  public get commentId(): string | undefined {
+    return this._comment?.id;
+  }
+  /** The user that created this agent context. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The ID of user that created this agent context. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
+  /** The issue this agent context is associated with. */
+  public get issue(): LinearFetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** The ID of issue this agent context is associated with. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
+  }
+
+  /** Creates an agent context. */
+  public create(input: L.AgentContextCreateInput) {
+    return new CreateAgentContextMutation(this._request).fetch(input);
+  }
+  /** Updates an agent context. */
+  public update(input: L.AgentContextUpdateInput) {
+    return new UpdateAgentContextMutation(this._request).fetch(this.id, input);
+  }
+}
+/**
+ * AgentContextConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this AgentContextConnection model
+ * @param data - AgentContextConnection response data
+ */
+export class AgentContextConnection extends Connection<AgentContext> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<AgentContext> | undefined>,
+    data: L.AgentContextConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new AgentContext(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
+ * AgentContextPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentContextPayloadFragment response data
+ */
+export class AgentContextPayload extends Request {
+  private _agentContext: L.AgentContextPayloadFragment["agentContext"];
+
+  public constructor(request: LinearRequest, data: L.AgentContextPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._agentContext = data.agentContext;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The agent context that was created or updated. */
+  public get agentContext(): LinearFetch<AgentContext> | undefined {
+    return new AgentContextQuery(this._request).fetch(this._agentContext.id);
+  }
+  /** The ID of agent context that was created or updated. */
+  public get agentContextId(): string | undefined {
+    return this._agentContext?.id;
+  }
+}
+/**
  * An API key. Grants access to the user's resources.
  *
  * @param request - function to call the graphql client
@@ -2186,6 +2511,116 @@ export class CustomerNeedConnection extends Connection<CustomerNeed> {
   }
 }
 /**
+ * A customer need related notification.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CustomerNeedNotificationFragment response data
+ */
+export class CustomerNeedNotification extends Request {
+  private _actor?: L.CustomerNeedNotificationFragment["actor"];
+  private _customerNeed: L.CustomerNeedNotificationFragment["customerNeed"];
+  private _externalUserActor?: L.CustomerNeedNotificationFragment["externalUserActor"];
+  private _relatedIssue?: L.CustomerNeedNotificationFragment["relatedIssue"];
+  private _relatedProject?: L.CustomerNeedNotificationFragment["relatedProject"];
+  private _user: L.CustomerNeedNotificationFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.CustomerNeedNotificationFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.customerNeedId = data.customerNeedId;
+    this.emailedAt = parseDate(data.emailedAt) ?? undefined;
+    this.id = data.id;
+    this.readAt = parseDate(data.readAt) ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
+    this.type = data.type;
+    this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this._actor = data.actor ?? undefined;
+    this._customerNeed = data.customerNeed;
+    this._externalUserActor = data.externalUserActor ?? undefined;
+    this._relatedIssue = data.relatedIssue ?? undefined;
+    this._relatedProject = data.relatedProject ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** Related customer need. */
+  public customerNeedId: string;
+  /**
+   * The time at when an email reminder for this notification was sent to the user. Null, if no email
+   *     reminder has been sent.
+   */
+  public emailedAt?: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  public readAt?: Date;
+  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  public snoozedUntilAt?: Date;
+  /** Notification type. */
+  public type: string;
+  /** The time at which a notification was unsnoozed.. */
+  public unsnoozedAt?: Date;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot;
+  /** The user that caused the notification. */
+  public get actor(): LinearFetch<User> | undefined {
+    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
+  }
+  /** The ID of user that caused the notification. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
+  /** The customer need related to the notification. */
+  public get customerNeed(): LinearFetch<CustomerNeed> | undefined {
+    return new CustomerNeedQuery(this._request).fetch({ id: this._customerNeed.id });
+  }
+  /** The external user that caused the notification. */
+  public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
+    return this._externalUserActor?.id
+      ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
+      : undefined;
+  }
+  /** The ID of external user that caused the notification. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
+  /** The issue related to the notification. */
+  public get relatedIssue(): LinearFetch<Issue> | undefined {
+    return this._relatedIssue?.id ? new IssueQuery(this._request).fetch(this._relatedIssue?.id) : undefined;
+  }
+  /** The ID of issue related to the notification. */
+  public get relatedIssueId(): string | undefined {
+    return this._relatedIssue?.id;
+  }
+  /** The project related to the notification. */
+  public get relatedProject(): LinearFetch<Project> | undefined {
+    return this._relatedProject?.id ? new ProjectQuery(this._request).fetch(this._relatedProject?.id) : undefined;
+  }
+  /** The ID of project related to the notification. */
+  public get relatedProjectId(): string | undefined {
+    return this._relatedProject?.id;
+  }
+  /** The user that received the notification. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user that received the notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
+  }
+}
+/**
  * CustomerNeedPayload model
  *
  * @param request - function to call the graphql client
@@ -2309,6 +2744,96 @@ export class CustomerNeedWebhookPayload {
   public issue?: IssueChildWebhookPayload;
   /** The project this need is referencing. */
   public project?: ProjectChildWebhookPayload;
+}
+/**
+ * A customer related notification.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.CustomerNotificationFragment response data
+ */
+export class CustomerNotification extends Request {
+  private _actor?: L.CustomerNotificationFragment["actor"];
+  private _customer: L.CustomerNotificationFragment["customer"];
+  private _externalUserActor?: L.CustomerNotificationFragment["externalUserActor"];
+  private _user: L.CustomerNotificationFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.CustomerNotificationFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.customerId = data.customerId;
+    this.emailedAt = parseDate(data.emailedAt) ?? undefined;
+    this.id = data.id;
+    this.readAt = parseDate(data.readAt) ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
+    this.type = data.type;
+    this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this._actor = data.actor ?? undefined;
+    this._customer = data.customer;
+    this._externalUserActor = data.externalUserActor ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** Related customer. */
+  public customerId: string;
+  /**
+   * The time at when an email reminder for this notification was sent to the user. Null, if no email
+   *     reminder has been sent.
+   */
+  public emailedAt?: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  public readAt?: Date;
+  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  public snoozedUntilAt?: Date;
+  /** Notification type. */
+  public type: string;
+  /** The time at which a notification was unsnoozed.. */
+  public unsnoozedAt?: Date;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot;
+  /** The user that caused the notification. */
+  public get actor(): LinearFetch<User> | undefined {
+    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
+  }
+  /** The ID of user that caused the notification. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
+  /** The customer related to the notification. */
+  public get customer(): LinearFetch<Customer> | undefined {
+    return new CustomerQuery(this._request).fetch(this._customer.id);
+  }
+  /** The external user that caused the notification. */
+  public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
+    return this._externalUserActor?.id
+      ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
+      : undefined;
+  }
+  /** The ID of external user that caused the notification. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
+  /** The user that received the notification. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user that received the notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
+  }
 }
 /**
  * A customer notification subscription.
@@ -4061,9 +4586,15 @@ export class EmailIntakeAddress extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.customerRequestsEnabled = data.customerRequestsEnabled;
     this.enabled = data.enabled;
+    this.forwardingEmailAddress = data.forwardingEmailAddress ?? undefined;
     this.id = data.id;
     this.repliesEnabled = data.repliesEnabled;
+    this.senderName = data.senderName ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.sesDomainIdentity = data.sesDomainIdentity
+      ? new SesDomainIdentity(request, data.sesDomainIdentity)
+      : undefined;
+    this.type = data.type;
     this._creator = data.creator ?? undefined;
     this._team = data.team ?? undefined;
     this._template = data.template ?? undefined;
@@ -4079,15 +4610,23 @@ export class EmailIntakeAddress extends Request {
   public customerRequestsEnabled: boolean;
   /** Whether the email address is enabled. */
   public enabled: boolean;
+  /** The email address used to forward emails to the intake address. */
+  public forwardingEmailAddress?: string;
   /** The unique identifier of the entity. */
   public id: string;
   /** Whether email replies are enabled. */
   public repliesEnabled: boolean;
+  /** The name to be used for outgoing emails. */
+  public senderName?: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The SES domain identity that the email address is associated with. */
+  public sesDomainIdentity?: SesDomainIdentity;
+  /** The type of the email address. */
+  public type: L.EmailIntakeAddressType;
   /** The user who created the email intake address. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -4137,11 +4676,13 @@ export class EmailIntakeAddress extends Request {
  * @param data - L.EmailIntakeAddressPayloadFragment response data
  */
 export class EmailIntakeAddressPayload extends Request {
+  private _emailIntakeAddress: L.EmailIntakeAddressPayloadFragment["emailIntakeAddress"];
+
   public constructor(request: LinearRequest, data: L.EmailIntakeAddressPayloadFragment) {
     super(request);
     this.lastSyncId = data.lastSyncId;
     this.success = data.success;
-    this.emailIntakeAddress = new EmailIntakeAddress(request, data.emailIntakeAddress);
+    this._emailIntakeAddress = data.emailIntakeAddress;
   }
 
   /** The identifier of the last sync operation. */
@@ -4149,7 +4690,13 @@ export class EmailIntakeAddressPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The email address that was created or updated. */
-  public emailIntakeAddress: EmailIntakeAddress;
+  public get emailIntakeAddress(): LinearFetch<EmailIntakeAddress> | undefined {
+    return new EmailIntakeAddressQuery(this._request).fetch(this._emailIntakeAddress.id);
+  }
+  /** The ID of email address that was created or updated. */
+  public get emailIntakeAddressId(): string | undefined {
+    return this._emailIntakeAddress?.id;
+  }
 }
 /**
  * EmailUnsubscribePayload model
@@ -5651,7 +6198,12 @@ export class InitiativeHistoryConnection extends Connection<InitiativeHistory> {
  */
 export class InitiativeNotification extends Request {
   private _actor?: L.InitiativeNotificationFragment["actor"];
+  private _comment?: L.InitiativeNotificationFragment["comment"];
+  private _document?: L.InitiativeNotificationFragment["document"];
   private _externalUserActor?: L.InitiativeNotificationFragment["externalUserActor"];
+  private _initiative?: L.InitiativeNotificationFragment["initiative"];
+  private _initiativeUpdate?: L.InitiativeNotificationFragment["initiativeUpdate"];
+  private _parentComment?: L.InitiativeNotificationFragment["parentComment"];
   private _user: L.InitiativeNotificationFragment["user"];
 
   public constructor(request: LinearRequest, data: L.InitiativeNotificationFragment) {
@@ -5672,7 +6224,12 @@ export class InitiativeNotification extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this._actor = data.actor ?? undefined;
+    this._comment = data.comment ?? undefined;
+    this._document = data.document ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
+    this._initiative = data.initiative ?? undefined;
+    this._initiativeUpdate = data.initiativeUpdate ?? undefined;
+    this._parentComment = data.parentComment ?? undefined;
     this._user = data.user;
   }
 
@@ -5720,6 +6277,18 @@ export class InitiativeNotification extends Request {
   public get actorId(): string | undefined {
     return this._actor?.id;
   }
+  /** The comment related to the notification. */
+  public get comment(): LinearFetch<Comment> | undefined {
+    return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
+  }
+  /** The document related to the notification. */
+  public get document(): LinearFetch<Document> | undefined {
+    return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
+  }
+  /** The ID of document related to the notification. */
+  public get documentId(): string | undefined {
+    return this._document?.id;
+  }
   /** The external user that caused the notification. */
   public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
     return this._externalUserActor?.id
@@ -5729,6 +6298,20 @@ export class InitiativeNotification extends Request {
   /** The ID of external user that caused the notification. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
+  }
+  /** The initiative related to the notification. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The initiative update related to the notification. */
+  public get initiativeUpdate(): LinearFetch<InitiativeUpdate> | undefined {
+    return this._initiativeUpdate?.id
+      ? new InitiativeUpdateQuery(this._request).fetch(this._initiativeUpdate?.id)
+      : undefined;
+  }
+  /** The parent comment related to the notification, if a notification is a reply comment notification. */
+  public get parentComment(): LinearFetch<Comment> | undefined {
+    return this._parentComment?.id ? new CommentQuery(this._request).fetch({ id: this._parentComment?.id }) : undefined;
   }
   /** The user that received the notification. */
   public get user(): LinearFetch<User> | undefined {
@@ -9868,6 +10451,7 @@ export class NotificationCategoryPreferences extends Request {
     this.commentsAndReplies = new NotificationChannelPreferences(request, data.commentsAndReplies);
     this.customers = new NotificationChannelPreferences(request, data.customers);
     this.documentChanges = new NotificationChannelPreferences(request, data.documentChanges);
+    this.feed = new NotificationChannelPreferences(request, data.feed);
     this.mentions = new NotificationChannelPreferences(request, data.mentions);
     this.postsAndUpdates = new NotificationChannelPreferences(request, data.postsAndUpdates);
     this.reactions = new NotificationChannelPreferences(request, data.reactions);
@@ -9889,6 +10473,8 @@ export class NotificationCategoryPreferences extends Request {
   public customers: NotificationChannelPreferences;
   /** The preferences for notifications about document changes. */
   public documentChanges: NotificationChannelPreferences;
+  /** The preferences for feed summary notifications. */
+  public feed: NotificationChannelPreferences;
   /** The preferences for notifications about mentions. */
   public mentions: NotificationChannelPreferences;
   /** The preferences for notifications about posts and updates. */
@@ -9940,11 +10526,15 @@ export class NotificationChannelPreferences extends Request {
  * @param data - NotificationConnection response data
  */
 export class NotificationConnection extends Connection<
+  | CustomerNeedNotification
+  | CustomerNotification
   | DocumentNotification
   | InitiativeNotification
   | IssueNotification
   | OauthClientApprovalNotification
+  | PostNotification
   | ProjectNotification
+  | PullRequestNotification
   | Notification
 > {
   public constructor(
@@ -9953,11 +10543,15 @@ export class NotificationConnection extends Connection<
       connection?: LinearConnectionVariables
     ) => LinearFetch<
       | LinearConnection<
+          | CustomerNeedNotification
+          | CustomerNotification
           | DocumentNotification
           | InitiativeNotification
           | IssueNotification
           | OauthClientApprovalNotification
+          | PostNotification
           | ProjectNotification
+          | PullRequestNotification
           | Notification
         >
       | undefined
@@ -9969,6 +10563,10 @@ export class NotificationConnection extends Connection<
       fetch,
       data.nodes.map(node => {
         switch (node.__typename) {
+          case "CustomerNeedNotification":
+            return new CustomerNeedNotification(request, node as L.CustomerNeedNotificationFragment);
+          case "CustomerNotification":
+            return new CustomerNotification(request, node as L.CustomerNotificationFragment);
           case "DocumentNotification":
             return new DocumentNotification(request, node as L.DocumentNotificationFragment);
           case "InitiativeNotification":
@@ -9977,8 +10575,12 @@ export class NotificationConnection extends Connection<
             return new IssueNotification(request, node as L.IssueNotificationFragment);
           case "OauthClientApprovalNotification":
             return new OauthClientApprovalNotification(request, node as L.OauthClientApprovalNotificationFragment);
+          case "PostNotification":
+            return new PostNotification(request, node as L.PostNotificationFragment);
           case "ProjectNotification":
             return new ProjectNotification(request, node as L.ProjectNotificationFragment);
+          case "PullRequestNotification":
+            return new PullRequestNotification(request, node as L.PullRequestNotificationFragment);
 
           default:
             return new Notification(request, node);
@@ -11237,6 +11839,99 @@ export class PasskeyLoginStartResponse extends Request {
   public success: boolean;
 }
 /**
+ * A post related notification.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.PostNotificationFragment response data
+ */
+export class PostNotification extends Request {
+  private _actor?: L.PostNotificationFragment["actor"];
+  private _externalUserActor?: L.PostNotificationFragment["externalUserActor"];
+  private _user: L.PostNotificationFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.PostNotificationFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.commentId = data.commentId ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.emailedAt = parseDate(data.emailedAt) ?? undefined;
+    this.id = data.id;
+    this.parentCommentId = data.parentCommentId ?? undefined;
+    this.postId = data.postId;
+    this.reactionEmoji = data.reactionEmoji ?? undefined;
+    this.readAt = parseDate(data.readAt) ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
+    this.type = data.type;
+    this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this._actor = data.actor ?? undefined;
+    this._externalUserActor = data.externalUserActor ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** Related comment ID. Null if the notification is not related to a comment. */
+  public commentId?: string;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /**
+   * The time at when an email reminder for this notification was sent to the user. Null, if no email
+   *     reminder has been sent.
+   */
+  public emailedAt?: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Related parent comment ID. Null if the notification is not related to a comment. */
+  public parentCommentId?: string;
+  /** Related post ID. */
+  public postId: string;
+  /** Name of the reaction emoji related to the notification. */
+  public reactionEmoji?: string;
+  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  public readAt?: Date;
+  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  public snoozedUntilAt?: Date;
+  /** Notification type. */
+  public type: string;
+  /** The time at which a notification was unsnoozed.. */
+  public unsnoozedAt?: Date;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot;
+  /** The user that caused the notification. */
+  public get actor(): LinearFetch<User> | undefined {
+    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
+  }
+  /** The ID of user that caused the notification. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
+  /** The external user that caused the notification. */
+  public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
+    return this._externalUserActor?.id
+      ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
+      : undefined;
+  }
+  /** The ID of external user that caused the notification. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
+  /** The user that received the notification. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user that received the notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
+  }
+}
+/**
  * A project.
  *
  * @param request - function to call the graphql client
@@ -11922,8 +12617,6 @@ export class ProjectNotification extends Request {
   private _comment?: L.ProjectNotificationFragment["comment"];
   private _document?: L.ProjectNotificationFragment["document"];
   private _externalUserActor?: L.ProjectNotificationFragment["externalUserActor"];
-  private _initiative?: L.ProjectNotificationFragment["initiative"];
-  private _initiativeUpdate?: L.ProjectNotificationFragment["initiativeUpdate"];
   private _parentComment?: L.ProjectNotificationFragment["parentComment"];
   private _project: L.ProjectNotificationFragment["project"];
   private _projectUpdate?: L.ProjectNotificationFragment["projectUpdate"];
@@ -11951,8 +12644,6 @@ export class ProjectNotification extends Request {
     this._comment = data.comment ?? undefined;
     this._document = data.document ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
-    this._initiative = data.initiative ?? undefined;
-    this._initiativeUpdate = data.initiativeUpdate ?? undefined;
     this._parentComment = data.parentComment ?? undefined;
     this._project = data.project;
     this._projectUpdate = data.projectUpdate ?? undefined;
@@ -12026,24 +12717,6 @@ export class ProjectNotification extends Request {
   /** The ID of external user that caused the notification. */
   public get externalUserActorId(): string | undefined {
     return this._externalUserActor?.id;
-  }
-  /** The initiative related to the notification. */
-  public get initiative(): LinearFetch<Initiative> | undefined {
-    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
-  }
-  /** The ID of initiative related to the notification. */
-  public get initiativeId(): string | undefined {
-    return this._initiative?.id;
-  }
-  /** The initiative update related to the notification. */
-  public get initiativeUpdate(): LinearFetch<InitiativeUpdate> | undefined {
-    return this._initiativeUpdate?.id
-      ? new InitiativeUpdateQuery(this._request).fetch(this._initiativeUpdate?.id)
-      : undefined;
-  }
-  /** The ID of initiative update related to the notification. */
-  public get initiativeUpdateId(): string | undefined {
-    return this._initiativeUpdate?.id;
   }
   /** The parent comment related to the notification, if a notification is a reply comment notification. */
   public get parentComment(): LinearFetch<Comment> | undefined {
@@ -13252,6 +13925,99 @@ export class ProjectWebhookPayload {
   public status?: ProjectStatusChildWebhookPayload;
 }
 /**
+ * A pull request related notification.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.PullRequestNotificationFragment response data
+ */
+export class PullRequestNotification extends Request {
+  private _actor?: L.PullRequestNotificationFragment["actor"];
+  private _externalUserActor?: L.PullRequestNotificationFragment["externalUserActor"];
+  private _user: L.PullRequestNotificationFragment["user"];
+
+  public constructor(request: LinearRequest, data: L.PullRequestNotificationFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.commentId = data.commentId ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.emailedAt = parseDate(data.emailedAt) ?? undefined;
+    this.id = data.id;
+    this.parentCommentId = data.parentCommentId ?? undefined;
+    this.pullRequestId = data.pullRequestId;
+    this.reactionEmoji = data.reactionEmoji ?? undefined;
+    this.readAt = parseDate(data.readAt) ?? undefined;
+    this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
+    this.type = data.type;
+    this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this._actor = data.actor ?? undefined;
+    this._externalUserActor = data.externalUserActor ?? undefined;
+    this._user = data.user;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** Related comment ID. Null if the notification is not related to a comment. */
+  public commentId?: string;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /**
+   * The time at when an email reminder for this notification was sent to the user. Null, if no email
+   *     reminder has been sent.
+   */
+  public emailedAt?: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Related parent comment ID. Null if the notification is not related to a comment. */
+  public parentCommentId?: string;
+  /** Related pull request. */
+  public pullRequestId: string;
+  /** Name of the reaction emoji related to the notification. */
+  public reactionEmoji?: string;
+  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  public readAt?: Date;
+  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  public snoozedUntilAt?: Date;
+  /** Notification type. */
+  public type: string;
+  /** The time at which a notification was unsnoozed.. */
+  public unsnoozedAt?: Date;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The bot that caused the notification. */
+  public botActor?: ActorBot;
+  /** The user that caused the notification. */
+  public get actor(): LinearFetch<User> | undefined {
+    return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
+  }
+  /** The ID of user that caused the notification. */
+  public get actorId(): string | undefined {
+    return this._actor?.id;
+  }
+  /** The external user that caused the notification. */
+  public get externalUserActor(): LinearFetch<ExternalUser> | undefined {
+    return this._externalUserActor?.id
+      ? new ExternalUserQuery(this._request).fetch(this._externalUserActor?.id)
+      : undefined;
+  }
+  /** The ID of external user that caused the notification. */
+  public get externalUserActorId(): string | undefined {
+    return this._externalUserActor?.id;
+  }
+  /** The user that received the notification. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user that received the notification. */
+  public get userId(): string | undefined {
+    return this._user?.id;
+  }
+}
+/**
  * A user's web or mobile push notification subscription.
  *
  * @param request - function to call the graphql client
@@ -13839,6 +14605,84 @@ export class RoadmapToProjectPayload extends Request {
   public get roadmapToProjectId(): string | undefined {
     return this._roadmapToProject?.id;
   }
+}
+/**
+ * SES domain identity used for sending emails from a custom domain.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SesDomainIdentityFragment response data
+ */
+export class SesDomainIdentity extends Request {
+  private _creator?: L.SesDomainIdentityFragment["creator"];
+
+  public constructor(request: LinearRequest, data: L.SesDomainIdentityFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.canSendFromCustomDomain = data.canSendFromCustomDomain;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.domain = data.domain;
+    this.id = data.id;
+    this.region = data.region;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.dnsRecords = data.dnsRecords.map(node => new SesDomainIdentityDnsRecord(request, node));
+    this._creator = data.creator ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** Whether the domain is fully verified and can be used for sending emails. */
+  public canSendFromCustomDomain: boolean;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The domain of the SES domain identity. */
+  public domain: string;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The AWS region of the SES domain identity. */
+  public region: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The DNS records for the SES domain identity. */
+  public dnsRecords: SesDomainIdentityDnsRecord[];
+  /** The user who created the SES domain identity. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The ID of user who created the ses domain identity. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
+  /** The organization of the SES domain identity. */
+  public get organization(): LinearFetch<Organization> {
+    return new OrganizationQuery(this._request).fetch();
+  }
+}
+/**
+ * A DNS record for a SES domain identity.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SesDomainIdentityDnsRecordFragment response data
+ */
+export class SesDomainIdentityDnsRecord extends Request {
+  public constructor(request: LinearRequest, data: L.SesDomainIdentityDnsRecordFragment) {
+    super(request);
+    this.content = data.content;
+    this.isVerified = data.isVerified;
+    this.name = data.name;
+    this.type = data.type;
+  }
+
+  /** The content of the DNS record. */
+  public content: string;
+  /** Whether the DNS record is verified in the domain's DNS configuration. */
+  public isVerified: boolean;
+  /** The name of the DNS record. */
+  public name: string;
+  /** The type of the DNS record. */
+  public type: string;
 }
 /**
  * Tuple for mapping Slack channel IDs to names.
@@ -15378,6 +16222,10 @@ export class User extends Request {
   public drafts(variables?: Omit<L.User_DraftsQueryVariables, "id">) {
     return new User_DraftsQuery(this._request, this.id, variables).fetch(variables);
   }
+  /** Issues delegated to an agent by the user. */
+  public supervisedIssues(variables?: Omit<L.User_SupervisedIssuesQueryVariables, "id">) {
+    return new User_SupervisedIssuesQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** Memberships associated with the user. For easier access of the same data, use `teams` query. */
   public teamMemberships(variables?: Omit<L.User_TeamMembershipsQueryVariables, "id">) {
     return new User_TeamMembershipsQuery(this._request, this.id, variables).fetch(variables);
@@ -16350,6 +17198,132 @@ export class AdministrableTeamsQuery extends Request {
 }
 
 /**
+ * A fetchable AgentActivities Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentActivitiesQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentActivities query and return a AgentActivityConnection
+   *
+   * @param variables - variables to pass into the AgentActivitiesQuery
+   * @returns parsed response from AgentActivitiesQuery
+   */
+  public async fetch(variables?: L.AgentActivitiesQueryVariables): LinearFetch<AgentActivityConnection> {
+    const response = await this._request<L.AgentActivitiesQuery, L.AgentActivitiesQueryVariables>(
+      L.AgentActivitiesDocument,
+      variables
+    );
+    const data = response.agentActivities;
+
+    return new AgentActivityConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable AgentActivity Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentActivityQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentActivity query and return a AgentActivity
+   *
+   * @param id - required id to pass to agentActivity
+   * @returns parsed response from AgentActivityQuery
+   */
+  public async fetch(id: string): LinearFetch<AgentActivity> {
+    const response = await this._request<L.AgentActivityQuery, L.AgentActivityQueryVariables>(L.AgentActivityDocument, {
+      id,
+    });
+    const data = response.agentActivity;
+
+    return new AgentActivity(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AgentContext Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentContextQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentContext query and return a AgentContext
+   *
+   * @param id - required id to pass to agentContext
+   * @returns parsed response from AgentContextQuery
+   */
+  public async fetch(id: string): LinearFetch<AgentContext> {
+    const response = await this._request<L.AgentContextQuery, L.AgentContextQueryVariables>(L.AgentContextDocument, {
+      id,
+    });
+    const data = response.agentContext;
+
+    return new AgentContext(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AgentContexts Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentContextsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentContexts query and return a AgentContextConnection
+   *
+   * @param variables - variables to pass into the AgentContextsQuery
+   * @returns parsed response from AgentContextsQuery
+   */
+  public async fetch(variables?: L.AgentContextsQueryVariables): LinearFetch<AgentContextConnection> {
+    const response = await this._request<L.AgentContextsQuery, L.AgentContextsQueryVariables>(
+      L.AgentContextsDocument,
+      variables
+    );
+    const data = response.agentContexts;
+
+    return new AgentContextConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable ApiKeys Query
  *
  * @param request - function to call the graphql client
@@ -17254,6 +18228,35 @@ export class DocumentsQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable EmailIntakeAddress Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class EmailIntakeAddressQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the EmailIntakeAddress query and return a EmailIntakeAddress
+   *
+   * @param id - required id to pass to emailIntakeAddress
+   * @returns parsed response from EmailIntakeAddressQuery
+   */
+  public async fetch(id: string): LinearFetch<EmailIntakeAddress> {
+    const response = await this._request<L.EmailIntakeAddressQuery, L.EmailIntakeAddressQueryVariables>(
+      L.EmailIntakeAddressDocument,
+      {
+        id,
+      }
+    );
+    const data = response.emailIntakeAddress;
+
+    return new EmailIntakeAddress(this._request, data);
   }
 }
 
@@ -18429,11 +19432,15 @@ export class NotificationQuery extends Request {
   public async fetch(
     id: string
   ): LinearFetch<
+    | CustomerNeedNotification
+    | CustomerNotification
     | DocumentNotification
     | InitiativeNotification
     | IssueNotification
     | OauthClientApprovalNotification
+    | PostNotification
     | ProjectNotification
+    | PullRequestNotification
     | Notification
   > {
     const response = await this._request<L.NotificationQuery, L.NotificationQueryVariables>(L.NotificationDocument, {
@@ -18442,6 +19449,10 @@ export class NotificationQuery extends Request {
     const data = response.notification;
 
     switch (data.__typename) {
+      case "CustomerNeedNotification":
+        return new CustomerNeedNotification(this._request, data as L.CustomerNeedNotificationFragment);
+      case "CustomerNotification":
+        return new CustomerNotification(this._request, data as L.CustomerNotificationFragment);
       case "DocumentNotification":
         return new DocumentNotification(this._request, data as L.DocumentNotificationFragment);
       case "InitiativeNotification":
@@ -18450,8 +19461,12 @@ export class NotificationQuery extends Request {
         return new IssueNotification(this._request, data as L.IssueNotificationFragment);
       case "OauthClientApprovalNotification":
         return new OauthClientApprovalNotification(this._request, data as L.OauthClientApprovalNotificationFragment);
+      case "PostNotification":
+        return new PostNotification(this._request, data as L.PostNotificationFragment);
       case "ProjectNotification":
         return new ProjectNotification(this._request, data as L.ProjectNotificationFragment);
+      case "PullRequestNotification":
+        return new PullRequestNotification(this._request, data as L.PullRequestNotificationFragment);
 
       default:
         return new Notification(this._request, data);
@@ -19968,6 +20983,95 @@ export class WorkflowStatesQuery extends Request {
         ),
       data
     );
+  }
+}
+
+/**
+ * A fetchable CreateAgentActivity Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateAgentActivityMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateAgentActivity mutation and return a AgentActivityPayload
+   *
+   * @param input - required input to pass to createAgentActivity
+   * @returns parsed response from CreateAgentActivityMutation
+   */
+  public async fetch(input: L.AgentActivityCreateInput): LinearFetch<AgentActivityPayload> {
+    const response = await this._request<L.CreateAgentActivityMutation, L.CreateAgentActivityMutationVariables>(
+      L.CreateAgentActivityDocument,
+      {
+        input,
+      }
+    );
+    const data = response.agentActivityCreate;
+
+    return new AgentActivityPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable CreateAgentContext Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class CreateAgentContextMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the CreateAgentContext mutation and return a AgentContextPayload
+   *
+   * @param input - required input to pass to createAgentContext
+   * @returns parsed response from CreateAgentContextMutation
+   */
+  public async fetch(input: L.AgentContextCreateInput): LinearFetch<AgentContextPayload> {
+    const response = await this._request<L.CreateAgentContextMutation, L.CreateAgentContextMutationVariables>(
+      L.CreateAgentContextDocument,
+      {
+        input,
+      }
+    );
+    const data = response.agentContextCreate;
+
+    return new AgentContextPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UpdateAgentContext Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UpdateAgentContextMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UpdateAgentContext mutation and return a AgentContextPayload
+   *
+   * @param id - required id to pass to updateAgentContext
+   * @param input - required input to pass to updateAgentContext
+   * @returns parsed response from UpdateAgentContextMutation
+   */
+  public async fetch(id: string, input: L.AgentContextUpdateInput): LinearFetch<AgentContextPayload> {
+    const response = await this._request<L.UpdateAgentContextMutation, L.UpdateAgentContextMutationVariables>(
+      L.UpdateAgentContextDocument,
+      {
+        id,
+        input,
+      }
+    );
+    const data = response.agentContextUpdate;
+
+    return new AgentContextPayload(this._request, data);
   }
 }
 
@@ -29149,6 +30253,38 @@ export class Document_CommentsQuery extends Request {
 }
 
 /**
+ * A fetchable EmailIntakeAddress_SesDomainIdentity Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to emailIntakeAddress
+ */
+export class EmailIntakeAddress_SesDomainIdentityQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the EmailIntakeAddress_SesDomainIdentity query and return a SesDomainIdentity
+   *
+   * @returns parsed response from EmailIntakeAddress_SesDomainIdentityQuery
+   */
+  public async fetch(): LinearFetch<SesDomainIdentity | undefined> {
+    const response = await this._request<
+      L.EmailIntakeAddress_SesDomainIdentityQuery,
+      L.EmailIntakeAddress_SesDomainIdentityQueryVariables
+    >(L.EmailIntakeAddress_SesDomainIdentityDocument, {
+      id: this._id,
+    });
+    const data = response.emailIntakeAddress.sesDomainIdentity;
+
+    return data ? new SesDomainIdentity(this._request, data) : undefined;
+  }
+}
+
+/**
  * A fetchable Favorite_Children Query
  *
  * @param request - function to call the graphql client
@@ -32646,6 +33782,59 @@ export class User_DraftsQuery extends Request {
 }
 
 /**
+ * A fetchable User_SupervisedIssues Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to user
+ * @param variables - variables without 'id' to pass into the User_SupervisedIssuesQuery
+ */
+export class User_SupervisedIssuesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.User_SupervisedIssuesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.User_SupervisedIssuesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the User_SupervisedIssues query and return a IssueConnection
+   *
+   * @param variables - variables without 'id' to pass into the User_SupervisedIssuesQuery
+   * @returns parsed response from User_SupervisedIssuesQuery
+   */
+  public async fetch(variables?: Omit<L.User_SupervisedIssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
+    const response = await this._request<L.User_SupervisedIssuesQuery, L.User_SupervisedIssuesQueryVariables>(
+      L.User_SupervisedIssuesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.user.supervisedIssues;
+
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable User_TeamMemberships Query
  *
  * @param request - function to call the graphql client
@@ -32945,6 +34134,32 @@ export class UserSettings_NotificationCategoryPreferences_DocumentChangesQuery e
       L.UserSettings_NotificationCategoryPreferences_DocumentChangesQueryVariables
     >(L.UserSettings_NotificationCategoryPreferences_DocumentChangesDocument, {});
     const data = response.userSettings.notificationCategoryPreferences.documentChanges;
+
+    return new NotificationChannelPreferences(this._request, data);
+  }
+}
+
+/**
+ * A fetchable UserSettings_NotificationCategoryPreferences_Feed Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserSettings_NotificationCategoryPreferences_FeedQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserSettings_NotificationCategoryPreferences_Feed query and return a NotificationChannelPreferences
+   *
+   * @returns parsed response from UserSettings_NotificationCategoryPreferences_FeedQuery
+   */
+  public async fetch(): LinearFetch<NotificationChannelPreferences> {
+    const response = await this._request<
+      L.UserSettings_NotificationCategoryPreferences_FeedQuery,
+      L.UserSettings_NotificationCategoryPreferences_FeedQueryVariables
+    >(L.UserSettings_NotificationCategoryPreferences_FeedDocument, {});
+    const data = response.userSettings.notificationCategoryPreferences.feed;
 
     return new NotificationChannelPreferences(this._request, data);
   }
@@ -33548,6 +34763,49 @@ export class Viewer_DraftsQuery extends Request {
 }
 
 /**
+ * A fetchable Viewer_SupervisedIssues Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Viewer_SupervisedIssuesQuery
+ */
+export class Viewer_SupervisedIssuesQuery extends Request {
+  private _variables?: L.Viewer_SupervisedIssuesQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.Viewer_SupervisedIssuesQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Viewer_SupervisedIssues query and return a IssueConnection
+   *
+   * @param variables - variables to pass into the Viewer_SupervisedIssuesQuery
+   * @returns parsed response from Viewer_SupervisedIssuesQuery
+   */
+  public async fetch(variables?: L.Viewer_SupervisedIssuesQueryVariables): LinearFetch<IssueConnection> {
+    const response = await this._request<L.Viewer_SupervisedIssuesQuery, L.Viewer_SupervisedIssuesQueryVariables>(
+      L.Viewer_SupervisedIssuesDocument,
+      variables
+    );
+    const data = response.viewer.supervisedIssues;
+
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Viewer_TeamMemberships Query
  *
  * @param request - function to call the graphql client
@@ -33700,6 +34958,42 @@ export class LinearSdk extends Request {
    */
   public administrableTeams(variables?: L.AdministrableTeamsQueryVariables): LinearFetch<TeamConnection> {
     return new AdministrableTeamsQuery(this._request).fetch(variables);
+  }
+  /**
+   * All agent activities.
+   *
+   * @param variables - variables to pass into the AgentActivitiesQuery
+   * @returns AgentActivityConnection
+   */
+  public agentActivities(variables?: L.AgentActivitiesQueryVariables): LinearFetch<AgentActivityConnection> {
+    return new AgentActivitiesQuery(this._request).fetch(variables);
+  }
+  /**
+   * A specific agent activity.
+   *
+   * @param id - required id to pass to agentActivity
+   * @returns AgentActivity
+   */
+  public agentActivity(id: string): LinearFetch<AgentActivity> {
+    return new AgentActivityQuery(this._request).fetch(id);
+  }
+  /**
+   * A specific agent context.
+   *
+   * @param id - required id to pass to agentContext
+   * @returns AgentContext
+   */
+  public agentContext(id: string): LinearFetch<AgentContext> {
+    return new AgentContextQuery(this._request).fetch(id);
+  }
+  /**
+   * All agent contexts.
+   *
+   * @param variables - variables to pass into the AgentContextsQuery
+   * @returns AgentContextConnection
+   */
+  public agentContexts(variables?: L.AgentContextsQueryVariables): LinearFetch<AgentContextConnection> {
+    return new AgentContextsQuery(this._request).fetch(variables);
   }
   /**
    * All API keys for the user.
@@ -33971,6 +35265,15 @@ export class LinearSdk extends Request {
    */
   public documents(variables?: L.DocumentsQueryVariables): LinearFetch<DocumentConnection> {
     return new DocumentsQuery(this._request).fetch(variables);
+  }
+  /**
+   * One specific email intake address.
+   *
+   * @param id - required id to pass to emailIntakeAddress
+   * @returns EmailIntakeAddress
+   */
+  public emailIntakeAddress(id: string): LinearFetch<EmailIntakeAddress> {
+    return new EmailIntakeAddressQuery(this._request).fetch(id);
   }
   /**
    * A specific emoji.
@@ -34332,11 +35635,15 @@ export class LinearSdk extends Request {
   public notification(
     id: string
   ): LinearFetch<
+    | CustomerNeedNotification
+    | CustomerNotification
     | DocumentNotification
     | InitiativeNotification
     | IssueNotification
     | OauthClientApprovalNotification
+    | PostNotification
     | ProjectNotification
+    | PullRequestNotification
     | Notification
   > {
     return new NotificationQuery(this._request).fetch(id);
@@ -34802,6 +36109,34 @@ export class LinearSdk extends Request {
    */
   public workflowStates(variables?: L.WorkflowStatesQueryVariables): LinearFetch<WorkflowStateConnection> {
     return new WorkflowStatesQuery(this._request).fetch(variables);
+  }
+  /**
+   * Creates an agent activity.
+   *
+   * @param input - required input to pass to createAgentActivity
+   * @returns AgentActivityPayload
+   */
+  public createAgentActivity(input: L.AgentActivityCreateInput): LinearFetch<AgentActivityPayload> {
+    return new CreateAgentActivityMutation(this._request).fetch(input);
+  }
+  /**
+   * Creates an agent context.
+   *
+   * @param input - required input to pass to createAgentContext
+   * @returns AgentContextPayload
+   */
+  public createAgentContext(input: L.AgentContextCreateInput): LinearFetch<AgentContextPayload> {
+    return new CreateAgentContextMutation(this._request).fetch(input);
+  }
+  /**
+   * Updates an agent context.
+   *
+   * @param id - required id to pass to updateAgentContext
+   * @param input - required input to pass to updateAgentContext
+   * @returns AgentContextPayload
+   */
+  public updateAgentContext(id: string, input: L.AgentContextUpdateInput): LinearFetch<AgentContextPayload> {
+    return new UpdateAgentContextMutation(this._request).fetch(id, input);
   }
   /**
    * Creates an integration api key for Airbyte to connect with Linear.
