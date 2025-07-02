@@ -1,5 +1,11 @@
 # Change Log
 
+## 45.1.0
+
+### Minor Changes
+
+- 4bef21e: feat(schema): Types AgentContextEventWebhookPayload and AgentContextWebhookPayload were added
+
 ## 45.0.0
 
 ### Major Changes
