@@ -260,6 +260,27 @@ export type AgentContextEdge = {
   node: AgentContext;
 };
 
+/** Payload for agent context webhook events. */
+export type AgentContextEventWebhookPayload = {
+  __typename?: "AgentContextEventWebhookPayload";
+  /** The type of action that triggered the webhook. */
+  action: Scalars["String"];
+  /** The agent context that the event belongs to. */
+  agentContext: AgentContextWebhookPayload;
+  /** ID of the app user the agent context belongs to. */
+  appUserId: Scalars["String"];
+  /** The comment that was created. */
+  comment?: Maybe<CommentWebhookPayload>;
+  /** The time the payload was created. */
+  createdAt: Scalars["DateTime"];
+  /** ID of the OAuth client the app user is tied to. */
+  oauthClientId: Scalars["String"];
+  /** ID of the organization for which the webhook belongs to. */
+  organizationId: Scalars["String"];
+  /** The type of resource. */
+  type: Scalars["String"];
+};
+
 export type AgentContextPayload = {
   __typename?: "AgentContextPayload";
   /** The agent context that was created or updated. */
@@ -288,6 +309,47 @@ export type AgentContextUpdateInput = {
   status?: Maybe<AgentContextStatus>;
   /** The summary of the agent context. */
   summary?: Maybe<Scalars["String"]>;
+};
+
+/** Payload for an agent context webhook. */
+export type AgentContextWebhookPayload = {
+  __typename?: "AgentContextWebhookPayload";
+  /** The ID of the agent that the agent context belongs to. */
+  appUserId: Scalars["String"];
+  /** The time at which the entity was archived. */
+  archivedAt?: Maybe<Scalars["String"]>;
+  /** The comment this agent context is associated with. */
+  comment?: Maybe<CommentChildWebhookPayload>;
+  /** The ID of the comment this agent context is associated with. */
+  commentId?: Maybe<Scalars["String"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["String"];
+  /** The user that created the agent context. */
+  creator: UserChildWebhookPayload;
+  /** The ID of the user that created the agent context. */
+  creatorId: Scalars["String"];
+  /** The time the agent context ended. */
+  endedAt?: Maybe<Scalars["String"]>;
+  /** The ID of the entity. */
+  id: Scalars["String"];
+  /** The issue this agent context is associated with. */
+  issue?: Maybe<IssueWithDescriptionChildWebhookPayload>;
+  /** The ID of the issue this agent context is associated with. */
+  issueId?: Maybe<Scalars["String"]>;
+  /** The ID of the organization that the agent context belongs to. */
+  organizationId: Scalars["String"];
+  /** Metadata about the external source that created this agent context. */
+  sourceMetadata?: Maybe<Scalars["JSONObject"]>;
+  /** The time the agent context started working. */
+  startedAt?: Maybe<Scalars["String"]>;
+  /** The current status of the agent context. */
+  status: Scalars["String"];
+  /** A summary of the activities in this context. */
+  summary?: Maybe<Scalars["String"]>;
+  /** The type of the agent context. */
+  type: Scalars["String"];
+  /** The time at which the entity was updated. */
+  updatedAt: Scalars["String"];
 };
 
 export type AirbyteConfigurationInput = {
@@ -2694,6 +2756,16 @@ export type Cycle = Node & {
   inProgressScopeHistory: Array<Scalars["Float"]>;
   /** The cycle inherited from. */
   inheritedFrom?: Maybe<Cycle>;
+  /** Whether the cycle is currently active. */
+  isActive: Scalars["Boolean"];
+  /** Whether the cycle is in the future. */
+  isFuture: Scalars["Boolean"];
+  /** Whether the cycle is the next cycle for the team. */
+  isNext: Scalars["Boolean"];
+  /** Whether the cycle is in the past. */
+  isPast: Scalars["Boolean"];
+  /** Whether the cycle is the previous cycle for the team. */
+  isPrevious: Scalars["Boolean"];
   /** The total number of issues in the cycle after each day. */
   issueCountHistory: Array<Scalars["Float"]>;
   /** Issues associated with the cycle. */
@@ -3034,6 +3106,7 @@ export type Dashboard = Node & {
 
 /** Union type for all possible webhook entity data payloads */
 export type DataWebhookPayload =
+  | AgentContextWebhookPayload
   | AttachmentWebhookPayload
   | AuditEntryWebhookPayload
   | CommentWebhookPayload
@@ -20328,6 +20401,11 @@ export type CycleFragment = { __typename: "Cycle" } & Pick<
   | "scopeHistory"
   | "issueCountHistory"
   | "id"
+  | "isActive"
+  | "isFuture"
+  | "isPast"
+  | "isNext"
+  | "isPrevious"
 > & {
     inheritedFrom?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     team: { __typename?: "Team" } & Pick<Team, "id">;
@@ -21778,6 +21856,39 @@ export type UserWebhookPayloadFragment = { __typename: "UserWebhookPayload" } & 
   | "admin"
   | "app"
 >;
+
+export type AgentContextEventWebhookPayloadFragment = { __typename: "AgentContextEventWebhookPayload" } & Pick<
+  AgentContextEventWebhookPayload,
+  "oauthClientId" | "appUserId" | "organizationId" | "createdAt" | "action" | "type"
+> & {
+    agentContext: { __typename?: "AgentContextWebhookPayload" } & AgentContextWebhookPayloadFragment;
+    comment?: Maybe<{ __typename?: "CommentWebhookPayload" } & CommentWebhookPayloadFragment>;
+  };
+
+export type AgentContextWebhookPayloadFragment = { __typename: "AgentContextWebhookPayload" } & Pick<
+  AgentContextWebhookPayload,
+  | "summary"
+  | "sourceMetadata"
+  | "appUserId"
+  | "commentId"
+  | "id"
+  | "issueId"
+  | "organizationId"
+  | "creatorId"
+  | "status"
+  | "archivedAt"
+  | "createdAt"
+  | "updatedAt"
+  | "endedAt"
+  | "startedAt"
+  | "type"
+> & {
+    comment?: Maybe<{ __typename?: "CommentChildWebhookPayload" } & CommentChildWebhookPayloadFragment>;
+    issue?: Maybe<
+      { __typename?: "IssueWithDescriptionChildWebhookPayload" } & IssueWithDescriptionChildWebhookPayloadFragment
+    >;
+    creator: { __typename?: "UserChildWebhookPayload" } & UserChildWebhookPayloadFragment;
+  };
 
 export type AttachmentWebhookPayloadFragment = { __typename: "AttachmentWebhookPayload" } & Pick<
   AttachmentWebhookPayload,
@@ -32757,207 +32868,6 @@ export const OAuthAppWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<OAuthAppWebhookPayloadFragment, unknown>;
-export const DocumentContentChildWebhookPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "DocumentContentChildWebhookPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DocumentContentChildWebhookPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "document" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DocumentChildWebhookPayload" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "project" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectChildWebhookPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<DocumentContentChildWebhookPayloadFragment, unknown>;
-export const ExternalUserChildWebhookPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ExternalUserChildWebhookPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ExternalUserChildWebhookPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "email" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<ExternalUserChildWebhookPayloadFragment, unknown>;
-export const InitiativeUpdateChildWebhookPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "InitiativeUpdateChildWebhookPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "InitiativeUpdateChildWebhookPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "bodyData" } },
-          { kind: "Field", name: { kind: "Name", value: "editedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "health" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<InitiativeUpdateChildWebhookPayloadFragment, unknown>;
-export const IssueChildWebhookPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueChildWebhookPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueChildWebhookPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "team" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamChildWebhookPayload" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "teamId" } },
-          { kind: "Field", name: { kind: "Name", value: "url" } },
-          { kind: "Field", name: { kind: "Name", value: "identifier" } },
-          { kind: "Field", name: { kind: "Name", value: "title" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<IssueChildWebhookPayloadFragment, unknown>;
-export const CommentWebhookPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "CommentWebhookPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CommentWebhookPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "resolvingCommentId" } },
-          { kind: "Field", name: { kind: "Name", value: "documentContentId" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "externalUserId" } },
-          { kind: "Field", name: { kind: "Name", value: "initiativeUpdateId" } },
-          { kind: "Field", name: { kind: "Name", value: "issueId" } },
-          { kind: "Field", name: { kind: "Name", value: "parentId" } },
-          { kind: "Field", name: { kind: "Name", value: "postId" } },
-          { kind: "Field", name: { kind: "Name", value: "projectUpdateId" } },
-          { kind: "Field", name: { kind: "Name", value: "userId" } },
-          { kind: "Field", name: { kind: "Name", value: "resolvingUserId" } },
-          { kind: "Field", name: { kind: "Name", value: "body" } },
-          { kind: "Field", name: { kind: "Name", value: "botActor" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "documentContent" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "DocumentContentChildWebhookPayload" } },
-              ],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "syncedWith" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "externalUser" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ExternalUserChildWebhookPayload" } },
-              ],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "initiativeUpdate" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "InitiativeUpdateChildWebhookPayload" } },
-              ],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issue" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueChildWebhookPayload" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "parent" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentChildWebhookPayload" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectUpdate" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectUpdateChildWebhookPayload" } },
-              ],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "quotedText" } },
-          { kind: "Field", name: { kind: "Name", value: "reactionData" } },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "user" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserChildWebhookPayload" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "editedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "resolvedAt" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<CommentWebhookPayloadFragment, unknown>;
 export const AttachmentWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -33009,6 +32919,35 @@ export const CustomerChildWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<CustomerChildWebhookPayloadFragment, unknown>;
+export const IssueChildWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueChildWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueChildWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "team" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "TeamChildWebhookPayload" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "teamId" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "identifier" } },
+          { kind: "Field", name: { kind: "Name", value: "title" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<IssueChildWebhookPayloadFragment, unknown>;
 export const CustomerNeedWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -33551,6 +33490,273 @@ export const UserWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<UserWebhookPayloadFragment, unknown>;
+export const AgentContextWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentContextWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentContextWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "summary" } },
+          { kind: "Field", name: { kind: "Name", value: "sourceMetadata" } },
+          { kind: "Field", name: { kind: "Name", value: "appUserId" } },
+          { kind: "Field", name: { kind: "Name", value: "commentId" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "issueId" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "creatorId" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "comment" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentChildWebhookPayload" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "status" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issue" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueWithDescriptionChildWebhookPayload" } },
+              ],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "endedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "startedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserChildWebhookPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentContextWebhookPayloadFragment, unknown>;
+export const DocumentContentChildWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "DocumentContentChildWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "DocumentContentChildWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "document" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "DocumentChildWebhookPayload" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectChildWebhookPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DocumentContentChildWebhookPayloadFragment, unknown>;
+export const ExternalUserChildWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ExternalUserChildWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ExternalUserChildWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "email" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ExternalUserChildWebhookPayloadFragment, unknown>;
+export const InitiativeUpdateChildWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "InitiativeUpdateChildWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "InitiativeUpdateChildWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "bodyData" } },
+          { kind: "Field", name: { kind: "Name", value: "editedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "health" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<InitiativeUpdateChildWebhookPayloadFragment, unknown>;
+export const CommentWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "CommentWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "CommentWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "resolvingCommentId" } },
+          { kind: "Field", name: { kind: "Name", value: "documentContentId" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "externalUserId" } },
+          { kind: "Field", name: { kind: "Name", value: "initiativeUpdateId" } },
+          { kind: "Field", name: { kind: "Name", value: "issueId" } },
+          { kind: "Field", name: { kind: "Name", value: "parentId" } },
+          { kind: "Field", name: { kind: "Name", value: "postId" } },
+          { kind: "Field", name: { kind: "Name", value: "projectUpdateId" } },
+          { kind: "Field", name: { kind: "Name", value: "userId" } },
+          { kind: "Field", name: { kind: "Name", value: "resolvingUserId" } },
+          { kind: "Field", name: { kind: "Name", value: "body" } },
+          { kind: "Field", name: { kind: "Name", value: "botActor" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "documentContent" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "DocumentContentChildWebhookPayload" } },
+              ],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "syncedWith" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "externalUser" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "ExternalUserChildWebhookPayload" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "initiativeUpdate" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "InitiativeUpdateChildWebhookPayload" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issue" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueChildWebhookPayload" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "parent" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentChildWebhookPayload" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectUpdate" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectUpdateChildWebhookPayload" } },
+              ],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "quotedText" } },
+          { kind: "Field", name: { kind: "Name", value: "reactionData" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserChildWebhookPayload" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "editedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "resolvedAt" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CommentWebhookPayloadFragment, unknown>;
+export const AgentContextEventWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentContextEventWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentContextEventWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "oauthClientId" } },
+          { kind: "Field", name: { kind: "Name", value: "appUserId" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "agentContext" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AgentContextWebhookPayload" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "comment" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentWebhookPayload" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "action" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentContextEventWebhookPayloadFragment, unknown>;
 export const AuditEntryWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -36968,6 +37174,11 @@ export const CycleFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "scopeHistory" } },
           { kind: "Field", name: { kind: "Name", value: "issueCountHistory" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "isActive" } },
+          { kind: "Field", name: { kind: "Name", value: "isFuture" } },
+          { kind: "Field", name: { kind: "Name", value: "isPast" } },
+          { kind: "Field", name: { kind: "Name", value: "isNext" } },
+          { kind: "Field", name: { kind: "Name", value: "isPrevious" } },
         ],
       },
     },

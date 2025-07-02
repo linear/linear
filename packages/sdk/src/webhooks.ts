@@ -20,6 +20,7 @@ import {
   InitiativeWebhookPayload,
   IssueSlaWebhookPayload,
   OAuthAppWebhookPayload,
+  AgentContextEventWebhookPayload,
 } from "./_generated_sdk";
 import { AppUserNotificationWebhookPayloadWithNotification, EntityWebhookPayloadWithEntityData } from "./types";
 
@@ -88,6 +89,9 @@ export class LinearWebhooks {
     }
     if (parsedBody.type === "PermissionChange") {
       return parsedBody as AppUserTeamAccessChangedWebhookPayload;
+    }
+    if (parsedBody.type === "AgentContextEvent") {
+      return parsedBody as AgentContextEventWebhookPayload;
     }
     const entityWebhookPayload = parsedBody as EntityWebhookPayloadWithEntityData;
     switch (entityWebhookPayload.type) {

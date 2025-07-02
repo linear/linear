@@ -532,6 +532,40 @@ export class AgentContextConnection extends Connection<AgentContext> {
   }
 }
 /**
+ * Payload for agent context webhook events.
+ *
+ * @param data - L.AgentContextEventWebhookPayloadFragment response data
+ */
+export class AgentContextEventWebhookPayload {
+  public constructor(data: L.AgentContextEventWebhookPayloadFragment) {
+    this.action = data.action;
+    this.appUserId = data.appUserId;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.oauthClientId = data.oauthClientId;
+    this.organizationId = data.organizationId;
+    this.type = data.type;
+    this.agentContext = new AgentContextWebhookPayload(data.agentContext);
+    this.comment = data.comment ? new CommentWebhookPayload(data.comment) : undefined;
+  }
+
+  /** The type of action that triggered the webhook. */
+  public action: string;
+  /** ID of the app user the agent context belongs to. */
+  public appUserId: string;
+  /** The time the payload was created. */
+  public createdAt: Date;
+  /** ID of the OAuth client the app user is tied to. */
+  public oauthClientId: string;
+  /** ID of the organization for which the webhook belongs to. */
+  public organizationId: string;
+  /** The type of resource. */
+  public type: string;
+  /** The agent context that the event belongs to. */
+  public agentContext: AgentContextWebhookPayload;
+  /** The comment that was created. */
+  public comment?: CommentWebhookPayload;
+}
+/**
  * AgentContextPayload model
  *
  * @param request - function to call the graphql client
@@ -559,6 +593,70 @@ export class AgentContextPayload extends Request {
   public get agentContextId(): string | undefined {
     return this._agentContext?.id;
   }
+}
+/**
+ * Payload for an agent context webhook.
+ *
+ * @param data - L.AgentContextWebhookPayloadFragment response data
+ */
+export class AgentContextWebhookPayload {
+  public constructor(data: L.AgentContextWebhookPayloadFragment) {
+    this.appUserId = data.appUserId;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.commentId = data.commentId ?? undefined;
+    this.createdAt = data.createdAt;
+    this.creatorId = data.creatorId;
+    this.endedAt = data.endedAt ?? undefined;
+    this.id = data.id;
+    this.issueId = data.issueId ?? undefined;
+    this.organizationId = data.organizationId;
+    this.sourceMetadata = data.sourceMetadata ?? undefined;
+    this.startedAt = data.startedAt ?? undefined;
+    this.status = data.status;
+    this.summary = data.summary ?? undefined;
+    this.type = data.type;
+    this.updatedAt = data.updatedAt;
+    this.comment = data.comment ? new CommentChildWebhookPayload(data.comment) : undefined;
+    this.creator = new UserChildWebhookPayload(data.creator);
+    this.issue = data.issue ? new IssueWithDescriptionChildWebhookPayload(data.issue) : undefined;
+  }
+
+  /** The ID of the agent that the agent context belongs to. */
+  public appUserId: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The ID of the comment this agent context is associated with. */
+  public commentId?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the user that created the agent context. */
+  public creatorId: string;
+  /** The time the agent context ended. */
+  public endedAt?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the issue this agent context is associated with. */
+  public issueId?: string;
+  /** The ID of the organization that the agent context belongs to. */
+  public organizationId: string;
+  /** Metadata about the external source that created this agent context. */
+  public sourceMetadata?: L.Scalars["JSONObject"];
+  /** The time the agent context started working. */
+  public startedAt?: string;
+  /** The current status of the agent context. */
+  public status: string;
+  /** A summary of the activities in this context. */
+  public summary?: string;
+  /** The type of the agent context. */
+  public type: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The comment this agent context is associated with. */
+  public comment?: CommentChildWebhookPayload;
+  /** The user that created the agent context. */
+  public creator: UserChildWebhookPayload;
+  /** The issue this agent context is associated with. */
+  public issue?: IssueWithDescriptionChildWebhookPayload;
 }
 /**
  * An API key. Grants access to the user's resources.
@@ -3365,6 +3463,11 @@ export class Cycle extends Request {
     this.endsAt = parseDate(data.endsAt) ?? new Date();
     this.id = data.id;
     this.inProgressScopeHistory = data.inProgressScopeHistory;
+    this.isActive = data.isActive;
+    this.isFuture = data.isFuture;
+    this.isNext = data.isNext;
+    this.isPast = data.isPast;
+    this.isPrevious = data.isPrevious;
     this.issueCountHistory = data.issueCountHistory;
     this.name = data.name ?? undefined;
     this.number = data.number;
@@ -3396,6 +3499,16 @@ export class Cycle extends Request {
   public id: string;
   /** The number of in progress estimation points after each day. */
   public inProgressScopeHistory: number[];
+  /** Whether the cycle is currently active. */
+  public isActive: boolean;
+  /** Whether the cycle is in the future. */
+  public isFuture: boolean;
+  /** Whether the cycle is the next cycle for the team. */
+  public isNext: boolean;
+  /** Whether the cycle is in the past. */
+  public isPast: boolean;
+  /** Whether the cycle is the previous cycle for the team. */
+  public isPrevious: boolean;
   /** The total number of issues in the cycle after each day. */
   public issueCountHistory: number[];
   /** The custom name of the cycle. */
