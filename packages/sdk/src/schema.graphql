@@ -33,6 +33,364 @@ type ActorBot {
   userDisplayName: String
 }
 
+"""
+An activity within an agent context.
+"""
+type AgentActivity implements Node {
+  """
+  The agent context this activity belongs to.
+  """
+  agentContext: AgentContext!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The content of the activity
+  """
+  content: AgentActivityContent!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The comment that contains the content of this activity, if any.
+  """
+  sourceComment: Comment
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Content for an action activity (tool call or action).
+"""
+type AgentActivityActionContent {
+  """
+  The action being performed.
+  """
+  action: String!
+  """
+  The parameters for the action, e.g. a file path, a keyword, etc.
+  """
+  parameter: String!
+  """
+  The result of the action in Markdown format.
+  """
+  result: String
+  """
+  The type of activity.
+  """
+  type: AgentActivityType!
+}
+
+type AgentActivityConnection {
+  edges: [AgentActivityEdge!]!
+  nodes: [AgentActivity!]!
+  pageInfo: PageInfo!
+}
+
+"""
+Content for different types of agent activities.
+"""
+union AgentActivityContent =
+  | AgentActivityActionContent
+  | AgentActivityErrorContent
+  | AgentActivityObservationContent
+  | AgentActivityResponseContent
+  | AgentActivityUserInputContent
+
+input AgentActivityCreateInput {
+  """
+  The agent context this activity belongs to.
+  """
+  agentContextId: String!
+  """
+  The content payload of the agent activity.
+  """
+  content: JSONObject!
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+}
+
+type AgentActivityEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: AgentActivity!
+}
+
+"""
+Content for an error activity.
+"""
+type AgentActivityErrorContent {
+  """
+  The error message in Markdown format.
+  """
+  body: String!
+  """
+  The type of activity.
+  """
+  type: AgentActivityType!
+}
+
+"""
+Content for an observation activity (chain of thought).
+"""
+type AgentActivityObservationContent {
+  """
+  The observation content in Markdown format.
+  """
+  body: String!
+  """
+  The type of activity.
+  """
+  type: AgentActivityType!
+}
+
+type AgentActivityPayload {
+  """
+  The agent activity that was created or updated.
+  """
+  agentActivity: AgentActivity!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+Content for a response activity.
+"""
+type AgentActivityResponseContent {
+  """
+  The ID of the comment this response references.
+  """
+  sourceCommentId: String!
+  """
+  The type of activity.
+  """
+  type: AgentActivityType!
+}
+
+"""
+The type of an agent activity.
+"""
+enum AgentActivityType {
+  action
+  error
+  observation
+  response
+  userInput
+}
+
+"""
+Content for a user input activity.
+"""
+type AgentActivityUserInputContent {
+  """
+  The user input body.
+  """
+  body: String
+  """
+  The ID of the comment this user input is sourced from.
+  """
+  sourceCommentId: String
+  """
+  The type of activity.
+  """
+  type: AgentActivityType!
+}
+
+"""
+A context for agent activities and state management.
+"""
+type AgentContext implements Node {
+  """
+  Activities associated with this agent context.
+  """
+  activities(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): [AgentActivity!]!
+  """
+  The agent user that is associated with this agent context.
+  """
+  appUser: User!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The comment this agent context is associated with.
+  """
+  comment: Comment
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user that created this agent context.
+  """
+  creator: User
+  """
+  The time the agent context ended.
+  """
+  endedAt: DateTime
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The issue this agent context is associated with.
+  """
+  issue: Issue
+  """
+  External links associated with this agent context.
+  """
+  links: [EntityExternalLink!]!
+  """
+  Metadata about the external source that created this agent context.
+  """
+  sourceMetadata: JSON
+  """
+  The time the agent context started working.
+  """
+  startedAt: DateTime
+  """
+  The current status of the agent context.
+  """
+  status: AgentContextStatus!
+  """
+  A summary of the activities in this context.
+  """
+  summary: String
+  """
+  The type of the agent context.
+  """
+  type: AgentContextType!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type AgentContextConnection {
+  edges: [AgentContextEdge!]!
+  nodes: [AgentContext!]!
+  pageInfo: PageInfo!
+}
+
+input AgentContextCreateInput {
+  """
+  The comment this agent context is associated with.
+  """
+  commentId: String!
+  """
+  The user who created this agent context.
+  """
+  creatorId: String!
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  URL to the external source where this agent context was created (e.g., Slack thread, GitHub comment).
+  """
+  sourceUrl: String!
+  """
+  The type of the agent context.
+  """
+  type: AgentContextType!
+}
+
+type AgentContextEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: AgentContext!
+}
+
+type AgentContextPayload {
+  """
+  The agent context that was created or updated.
+  """
+  agentContext: AgentContext!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+The status of an agent context.
+"""
+enum AgentContextStatus {
+  active
+  awaitingInput
+  complete
+  pending
+}
+
+"""
+The type of an agent context.
+"""
+enum AgentContextType {
+  commentThread
+}
+
+input AgentContextUpdateInput {
+  """
+  The current status of the agent context.
+  """
+  status: AgentContextStatus
+  """
+  The summary of the agent context.
+  """
+  summary: String
+}
+
 input AirbyteConfigurationInput {
   """
   Linear export API key.
@@ -1949,6 +2307,10 @@ type CustomView implements Node {
   """
   description: String
   """
+  [INTERNAL] The facet associated with the custom view.
+  """
+  facet: Facet
+  """
   The filter applied to feed items in the custom view.
   """
   feedItemFilterData: JSONObject
@@ -1992,6 +2354,10 @@ type CustomView implements Node {
     Should archived resources be included (default: false)
     """
     includeArchived: Boolean
+    """
+    Include issues from sub-teams when the custom view is associated with a team.
+    """
+    includeSubTeams: Boolean = false
     """
     The number of items to backward paginate (used with before). Defaults to 50.
     """
@@ -2054,6 +2420,10 @@ type CustomView implements Node {
     """
     includeArchived: Boolean
     """
+    Include projects from sub-teams when the custom view is associated with a team.
+    """
+    includeSubTeams: Boolean = false
+    """
     The number of items to backward paginate (used with before). Defaults to 50.
     """
     last: Int
@@ -2061,6 +2431,10 @@ type CustomView implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned projects.
+    """
+    sort: [ProjectSortInput!]
   ): ProjectConnection!
   """
   Whether the custom view is shared with everyone in the organization.
@@ -2083,6 +2457,43 @@ type CustomView implements Node {
   The user who last updated the custom view.
   """
   updatedBy: User
+  """
+  Feed items associated with the custom view.
+  """
+  updates(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned feed items.
+    """
+    filter: FeedItemFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    Include updates from sub-teams when the custom view is associated with a team.
+    """
+    includeSubTeams: Boolean = false
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): FeedItemConnection!
   """
   The current users view preferences for this custom view.
   """
@@ -2154,6 +2565,20 @@ input CustomViewCreateInput {
   teamId: String
 }
 
+"""
+Custom view creation date sorting options.
+"""
+input CustomViewCreatedAtSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
 type CustomViewEdge {
   """
   Used in `before` and `after` args
@@ -2162,11 +2587,75 @@ type CustomViewEdge {
   node: CustomView!
 }
 
+"""
+Custom view filtering options.
+"""
+input CustomViewFilter {
+  """
+  Compound filters, all of which need to be matched by the custom view.
+  """
+  and: [CustomViewFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that the custom view creator must satisfy.
+  """
+  creator: UserFilter
+  """
+  [INTERNAL] Filter based on whether the custom view has a facet.
+  """
+  hasFacet: Boolean
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the custom view model name.
+  """
+  modelName: StringComparator
+  """
+  Comparator for the custom view name.
+  """
+  name: StringComparator
+  """
+  Compound filters, one of which need to be matched by the custom view.
+  """
+  or: [CustomViewFilter!]
+  """
+  Comparator for whether the custom view is shared.
+  """
+  shared: BooleanComparator
+  """
+  Filters that the custom view's team must satisfy.
+  """
+  team: NullableTeamFilter
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 type CustomViewHasSubscribersPayload {
   """
   Whether the custom view has subscribers.
   """
   hasSubscribers: Boolean!
+}
+
+"""
+Custom view name sorting options.
+"""
+input CustomViewNameSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -2259,6 +2748,39 @@ type CustomViewPayload {
   success: Boolean!
 }
 
+"""
+Custom view shared status sorting options. Ascending order puts shared views last.
+"""
+input CustomViewSharedSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+input CustomViewSortInput {
+  """
+  Sort by custom view creation date.
+  """
+  createdAt: CustomViewCreatedAtSort
+  """
+  Sort by custom view name.
+  """
+  name: CustomViewNameSort
+  """
+  Sort by custom view shared status.
+  """
+  shared: CustomViewSharedSort
+  """
+  Sort by custom view update date.
+  """
+  updatedAt: CustomViewUpdatedAtSort
+}
+
 type CustomViewSuggestionPayload {
   """
   The suggested view description.
@@ -2323,6 +2845,20 @@ input CustomViewUpdateInput {
   The id of the team associated with the custom view.
   """
   teamId: String
+}
+
+"""
+Custom view update date sorting options.
+"""
+input CustomViewUpdatedAtSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -2895,7 +3431,7 @@ input CustomerNeedFilter {
 }
 
 """
-[Internal] A customer need related notification.
+A customer need related notification.
 """
 type CustomerNeedNotification implements Entity & Node & Notification {
   """
@@ -2926,6 +3462,10 @@ type CustomerNeedNotification implements Entity & Node & Notification {
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  """
+  The customer need related to the notification.
+  """
+  customerNeed: CustomerNeed!
   """
   Related customer need.
   """
@@ -3167,6 +3707,122 @@ type CustomerNeedWebhookPayload {
   The time at which the entity was updated.
   """
   updatedAt: String!
+}
+
+"""
+A customer related notification.
+"""
+type CustomerNotification implements Entity & Node & Notification {
+  """
+  The user that caused the notification.
+  """
+  actor: User
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorAvatarColor: String!
+  """
+  [Internal] Notification avatar URL.
+  """
+  actorAvatarUrl: String
+  """
+  [Internal] Notification actor initials if avatar is not available.
+  """
+  actorInitials: String
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The bot that caused the notification.
+  """
+  botActor: ActorBot
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The customer related to the notification.
+  """
+  customer: Customer!
+  """
+  Related customer.
+  """
+  customerId: String!
+  """
+  The time at when an email reminder for this notification was sent to the user. Null, if no email
+      reminder has been sent.
+  """
+  emailedAt: DateTime
+  """
+  The external user that caused the notification.
+  """
+  externalUserActor: ExternalUser
+  """
+  [Internal] Notifications with the same grouping key will be grouped together in the UI.
+  """
+  groupingKey: String!
+  """
+  [Internal] Priority of the notification with the same grouping key. Higher number means higher priority. If priority is the same, notifications should be sorted by `createdAt`.
+  """
+  groupingPriority: Float!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  [Internal] Inbox URL for the notification.
+  """
+  inboxUrl: String!
+  """
+  [Internal] If notification actor was Linear.
+  """
+  isLinearActor: Boolean!
+  """
+  [Internal] Issue's status type for issue notifications.
+  """
+  issueStatusType: String
+  """
+  [Internal] Project update health for new updates.
+  """
+  projectUpdateHealth: String
+  """
+  The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  """
+  readAt: DateTime
+  """
+  The time until a notification will be snoozed. After that it will appear in the inbox again.
+  """
+  snoozedUntilAt: DateTime
+  """
+  [Internal] Notification subtitle.
+  """
+  subtitle: String!
+  """
+  [Internal] Notification title.
+  """
+  title: String!
+  """
+  Notification type.
+  """
+  type: String!
+  """
+  The time at which a notification was unsnoozed..
+  """
+  unsnoozedAt: DateTime
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  [Internal] URL to the target of the notification.
+  """
+  url: String!
+  """
+  The user that received the notification.
+  """
+  user: User!
 }
 
 """
@@ -4656,6 +5312,20 @@ enum Day {
   Wednesday
 }
 
+"""
+Issue delegate sorting options.
+"""
+input DelegateSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
 input DeleteOrganizationInput {
   """
   The deletion code to confirm operation.
@@ -5635,6 +6305,10 @@ type EmailIntakeAddress implements Node {
   """
   enabled: Boolean!
   """
+  The email address used to forward emails to the intake address.
+  """
+  forwardingEmailAddress: String
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -5647,6 +6321,14 @@ type EmailIntakeAddress implements Node {
   """
   repliesEnabled: Boolean!
   """
+  The name to be used for outgoing emails.
+  """
+  senderName: String
+  """
+  The SES domain identity that the email address is associated with.
+  """
+  sesDomainIdentity: SesDomainIdentity
+  """
   The team that the email address is associated with.
   """
   team: Team
@@ -5654,6 +6336,10 @@ type EmailIntakeAddress implements Node {
   The template that the email address is associated with.
   """
   template: Template
+  """
+  The type of the email address.
+  """
+  type: EmailIntakeAddressType!
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -5663,9 +6349,21 @@ type EmailIntakeAddress implements Node {
 
 input EmailIntakeAddressCreateInput {
   """
+  The email address used to forward emails to the intake address.
+  """
+  forwardingEmailAddress: String
+  """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  Whether email replies are enabled.
+  """
+  repliesEnabled: Boolean
+  """
+  The name to be used for outgoing emails.
+  """
+  senderName: String
   """
   The identifier or key of the team this email address will intake issues for.
   """
@@ -5674,6 +6372,10 @@ input EmailIntakeAddressCreateInput {
   The identifier of the template this email address will intake issues for.
   """
   templateId: String
+  """
+  The type of the email address. If not provided, the backend will default to team or template.
+  """
+  type: EmailIntakeAddressType
 }
 
 type EmailIntakeAddressPayload {
@@ -5691,6 +6393,15 @@ type EmailIntakeAddressPayload {
   success: Boolean!
 }
 
+"""
+The type of the email address.
+"""
+enum EmailIntakeAddressType {
+  asks
+  team
+  template
+}
+
 input EmailIntakeAddressUpdateInput {
   """
   Whether customer requests are enabled.
@@ -5701,9 +6412,25 @@ input EmailIntakeAddressUpdateInput {
   """
   enabled: Boolean
   """
+  The email address used to forward emails to the intake address.
+  """
+  forwardingEmailAddress: String
+  """
   Whether email replies are enabled.
   """
   repliesEnabled: Boolean
+  """
+  The name to be used for outgoing emails.
+  """
+  senderName: String
+  """
+  The identifier or key of the team this email address will intake issues for.
+  """
+  teamId: String
+  """
+  The identifier of the template this email address will intake issues for.
+  """
+  templateId: String
 }
 
 input EmailUnsubscribeInput {
@@ -5712,7 +6439,7 @@ input EmailUnsubscribeInput {
   """
   token: String!
   """
-  Email type to unsubscribed from.
+  Email type to unsubscribe from.
   """
   type: String!
   """
@@ -6448,7 +7175,7 @@ type Favorite implements Node {
   """
   project: Project
   """
-  [Internal] The favorited project label.
+  The favorited project label.
   """
   projectLabel: ProjectLabel
   """
@@ -6562,7 +7289,7 @@ input FavoriteCreateInput {
   """
   projectId: String
   """
-  [Internal] The identifier of the label to favorite.
+  The identifier of the label to favorite.
   """
   projectLabelId: String
   """
@@ -6622,6 +7349,67 @@ input FavoriteUpdateInput {
 }
 
 """
+[Internal] An item in a users feed.
+"""
+type FeedItem implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The initiative update that is in the feed.
+  """
+  initiativeUpdate: InitiativeUpdate
+  """
+  The organization that will see this feed item.
+  """
+  organization: Organization!
+  """
+  The post that is in the feed.
+  """
+  post: Post
+  """
+  The project update that is in the feed.
+  """
+  projectUpdate: ProjectUpdate
+  """
+  The team that will see this feed item.
+  """
+  team: Team
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The user that will see this feed item.
+  """
+  user: User
+}
+
+type FeedItemConnection {
+  edges: [FeedItemEdge!]!
+  nodes: [FeedItem!]!
+  pageInfo: PageInfo!
+}
+
+type FeedItemEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: FeedItem!
+}
+
+"""
 Feed item filtering options
 """
 input FeedItemFilter {
@@ -6662,7 +7450,7 @@ input FeedItemFilter {
   """
   updateHealth: StringComparator
   """
-  Comparator for the update type: initiative, project
+  Comparator for the update type: initiative, project, team
   """
   updateType: StringComparator
   """
@@ -7178,6 +7966,10 @@ input GoogleSheetsExportSettings {
 
 input GoogleSheetsSettingsInput {
   """
+  The export settings for initiatives.
+  """
+  initiative: GoogleSheetsExportSettings
+  """
   The export settings for issues.
   """
   issue: GoogleSheetsExportSettings
@@ -7409,6 +8201,10 @@ type Initiative implements Node {
   """
   owner: User
   """
+  Parent initiative associated with the initiative.
+  """
+  parentInitiative: Initiative
+  """
   Projects associated with the initiative.
   """
   projects(
@@ -7433,7 +8229,7 @@ type Initiative implements Node {
     """
     includeArchived: Boolean
     """
-    [ALPHA] Whether to include projects from sub-initiatives. Defaults to true.
+    Whether to include projects from sub-initiatives. Defaults to true.
     """
     includeSubInitiatives: Boolean
     """
@@ -7444,6 +8240,10 @@ type Initiative implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned projects.
+    """
+    sort: [ProjectSortInput!]
   ): ProjectConnection!
   """
   The initiative's unique URL slug.
@@ -7462,7 +8262,7 @@ type Initiative implements Node {
   """
   status: InitiativeStatus!
   """
-  [ALPHA] Sub-initiatives associated with the initiative.
+  Sub-initiatives associated with the initiative.
   """
   subInitiatives(
     """
@@ -7493,6 +8293,10 @@ type Initiative implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned initiatives.
+    """
+    sort: [InitiativeSortInput!]
   ): InitiativeConnection!
   """
   The estimated completion date of the initiative.
@@ -7695,6 +8499,20 @@ input InitiativeCreateInput {
   targetDateResolution: DateResolutionType
 }
 
+"""
+Initiative creation date sorting options.
+"""
+input InitiativeCreatedAtSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
 type InitiativeEdge {
   """
   Used in `before` and `after` args
@@ -7762,6 +8580,34 @@ input InitiativeFilter {
 }
 
 """
+Initiative health sorting options.
+"""
+input InitiativeHealthSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
+Initiative health update date sorting options.
+"""
+input InitiativeHealthUpdatedAtSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
 A initiative history containing relevant change events.
 """
 type InitiativeHistory implements Node {
@@ -7807,6 +8653,34 @@ type InitiativeHistoryEdge {
 }
 
 """
+Initiative manual sorting options.
+"""
+input InitiativeManualSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
+Initiative name sorting options.
+"""
+input InitiativeNameSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
 An initiative related notification.
 """
 type InitiativeNotification implements Entity & Node & Notification {
@@ -7835,6 +8709,10 @@ type InitiativeNotification implements Entity & Node & Notification {
   """
   botActor: ActorBot
   """
+  The comment related to the notification.
+  """
+  comment: Comment
+  """
   Related comment ID. Null if the notification is not related to a comment.
   """
   commentId: String
@@ -7842,6 +8720,10 @@ type InitiativeNotification implements Entity & Node & Notification {
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  """
+  The document related to the notification.
+  """
+  document: Document
   """
   The time at when an email reminder for this notification was sent to the user. Null, if no email
       reminder has been sent.
@@ -7868,9 +8750,17 @@ type InitiativeNotification implements Entity & Node & Notification {
   """
   inboxUrl: String!
   """
+  The initiative related to the notification.
+  """
+  initiative: Initiative
+  """
   Related initiative ID.
   """
   initiativeId: String!
+  """
+  The initiative update related to the notification.
+  """
+  initiativeUpdate: InitiativeUpdate
   """
   Related initiative update ID.
   """
@@ -7883,6 +8773,10 @@ type InitiativeNotification implements Entity & Node & Notification {
   [Internal] Issue's status type for issue notifications.
   """
   issueStatusType: String
+  """
+  The parent comment related to the notification, if a notification is a reply comment notification.
+  """
+  parentComment: Comment
   """
   Related parent comment ID. Null if the notification is not related to a comment.
   """
@@ -8010,6 +8904,20 @@ type InitiativeNotificationSubscription implements Entity & Node & NotificationS
 }
 
 """
+Initiative owner sorting options.
+"""
+input InitiativeOwnerSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
 The payload returned by the initiative mutations.
 """
 type InitiativePayload {
@@ -8124,6 +9032,44 @@ input InitiativeRelationUpdateInput {
   sortOrder: Float
 }
 
+"""
+Initiative sorting options.
+"""
+input InitiativeSortInput {
+  """
+  Sort by initiative creation date.
+  """
+  createdAt: InitiativeCreatedAtSort
+  """
+  Sort by initiative health status.
+  """
+  health: InitiativeHealthSort
+  """
+  Sort by initiative health update date.
+  """
+  healthUpdatedAt: InitiativeHealthUpdatedAtSort
+  """
+  Sort by manual order.
+  """
+  manual: InitiativeManualSort
+  """
+  Sort by initiative name.
+  """
+  name: InitiativeNameSort
+  """
+  Sort by initiative owner name.
+  """
+  owner: InitiativeOwnerSort
+  """
+  Sort by initiative target date.
+  """
+  targetDate: InitiativeTargetDateSort
+  """
+  Sort by initiative update date.
+  """
+  updatedAt: InitiativeUpdatedAtSort
+}
+
 enum InitiativeStatus {
   Active
   Completed
@@ -8136,6 +9082,20 @@ Different tabs available inside an initiative.
 enum InitiativeTab {
   overview
   projects
+}
+
+"""
+Initiative target date sorting options.
+"""
+input InitiativeTargetDateSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -8660,6 +9620,20 @@ type InitiativeUpdateWebhookPayload {
   The user id of the initiative update.
   """
   userId: String!
+}
+
+"""
+Initiative update date sorting options.
+"""
+input InitiativeUpdatedAtSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -9504,6 +10478,10 @@ type Issue implements Node {
   """
   cycle: Cycle
   """
+  [Internal] The agent that is delegated to complete this issue.
+  """
+  delegate: User
+  """
   The issue's description in markdown format.
   """
   description: String
@@ -9966,6 +10944,10 @@ type Issue implements Node {
   """
   suggestionsGeneratedAt: DateTime
   """
+  [DEPRECATED] [Internal] The user who has delegated this issue to be completed by an agent.
+  """
+  supervisor: User
+  """
   The external services the issue is synced with.
   """
   syncedWith: [ExternalEntityInfo!]
@@ -10197,6 +11179,10 @@ input IssueCollectionFilter {
   [Internal] Cycle time (started -> completed) comparator.
   """
   cycleTime: NullableDurationComparator
+  """
+  [Internal] Filters that the issues delegate must satisfy.
+  """
+  delegate: NullableUserFilter
   """
   Comparator for the issues description.
   """
@@ -10923,6 +11909,10 @@ input IssueFilter {
   """
   cycleTime: NullableDurationComparator
   """
+  [Internal] Filters that the issues delegate must satisfy.
+  """
+  delegate: NullableUserFilter
+  """
   Comparator for the issues description.
   """
   description: NullableStringComparator
@@ -11593,6 +12583,10 @@ type IssueLabel implements Node {
     """
     orderBy: PaginationOrderBy
   ): IssueConnection!
+  """
+  The date when the label was last applied to an issue or project.
+  """
+  lastAppliedAt: DateTime
   """
   The label's name.
   """
@@ -12477,6 +13471,10 @@ type IssueSearchResult implements Node {
   """
   cycle: Cycle
   """
+  [Internal] The agent that is delegated to complete this issue.
+  """
+  delegate: User
+  """
   The issue's description in markdown format.
   """
   description: String
@@ -12943,6 +13941,10 @@ type IssueSearchResult implements Node {
   """
   suggestionsGeneratedAt: DateTime
   """
+  [DEPRECATED] [Internal] The user who has delegated this issue to be completed by an agent.
+  """
+  supervisor: User
+  """
   The external services the issue is synced with.
   """
   syncedWith: [ExternalEntityInfo!]
@@ -13047,6 +14049,10 @@ input IssueSortInput {
   Sort by Cycle start date
   """
   cycle: CycleSort
+  """
+  Sort by delegate name
+  """
+  delegate: DelegateSort
   """
   Sort by issue due date
   """
@@ -13322,6 +14328,10 @@ input IssueUpdateInput {
   The cycle associated with the issue.
   """
   cycleId: String
+  """
+  [Internal] The identifier of the agent user to delegate the issue to.
+  """
+  delegateId: String
   """
   The issue description in markdown format.
   """
@@ -14001,7 +15011,7 @@ input ManualSort {
 }
 
 """
-A meeting that can be attached to different entities.
+[Internal] A meeting that can be attached to different entities.
 """
 type Meeting implements Node {
   """
@@ -14098,6 +15108,37 @@ input MilestoneSort {
 }
 
 type Mutation {
+  """
+  Creates an agent activity.
+  """
+  agentActivityCreate(
+    """
+    The agent activity object to create.
+    """
+    input: AgentActivityCreateInput!
+  ): AgentActivityPayload!
+  """
+  Creates an agent context.
+  """
+  agentContextCreate(
+    """
+    The agent context object to create.
+    """
+    input: AgentContextCreateInput!
+  ): AgentContextPayload!
+  """
+  Updates an agent context.
+  """
+  agentContextUpdate(
+    """
+    The identifier of the agent context to update.
+    """
+    id: String!
+    """
+    The agent context object to update.
+    """
+    input: AgentContextUpdateInput!
+  ): AgentContextPayload!
   """
   Creates an integration api key for Airbyte to connect with Linear.
   """
@@ -16753,7 +17794,7 @@ type Mutation {
     authId: String!
   ): PasskeyLoginStartResponse!
   """
-  [Internal] Adds a label to a project.
+  Adds a label to a project.
   """
   projectAddLabel(
     """
@@ -16800,6 +17841,37 @@ type Mutation {
     """
     id: String!
   ): ProjectArchivePayload!
+  """
+  Creates a new project label.
+  """
+  projectLabelCreate(
+    """
+    The project label to create.
+    """
+    input: ProjectLabelCreateInput!
+  ): ProjectLabelPayload!
+  """
+  Deletes a project label.
+  """
+  projectLabelDelete(
+    """
+    The identifier of the label to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  Updates a project label.
+  """
+  projectLabelUpdate(
+    """
+    The identifier of the label to update.
+    """
+    id: String!
+    """
+    A partial label object to update.
+    """
+    input: ProjectLabelUpdateInput!
+  ): ProjectLabelPayload!
   """
   Creates a new project milestone.
   """
@@ -16889,7 +17961,7 @@ type Mutation {
     input: ProjectRelationUpdateInput!
   ): ProjectRelationPayload!
   """
-  [Internal] Removes a label from a project.
+  Removes a label from a project.
   """
   projectRemoveLabel(
     """
@@ -17800,6 +18872,7 @@ enum NotificationCategory {
   commentsAndReplies
   customers
   documentChanges
+  feed
   mentions
   postsAndUpdates
   reactions
@@ -17835,6 +18908,10 @@ type NotificationCategoryPreferences {
   The preferences for notifications about document changes.
   """
   documentChanges: NotificationChannelPreferences!
+  """
+  The preferences for feed summary notifications.
+  """
+  feed: NotificationChannelPreferences!
   """
   The preferences for notifications about mentions.
   """
@@ -17894,6 +18971,10 @@ input NotificationCategoryPreferencesInput {
   The preferences for notifications about document changes.
   """
   documentChanges: PartialNotificationChannelPreferencesInput
+  """
+  The preferences for notifications about feed summaries.
+  """
+  feed: PartialNotificationChannelPreferencesInput
   """
   The preferences for notifications about mentions.
   """
@@ -18813,6 +19894,10 @@ input NullableIssueFilter {
   """
   cycleTime: NullableDurationComparator
   """
+  [Internal] Filters that the issues delegate must satisfy.
+  """
+  delegate: NullableUserFilter
+  """
   Comparator for the issues description.
   """
   description: NullableStringComparator
@@ -19097,7 +20182,7 @@ input NullableProjectFilter {
   """
   issues: IssueCollectionFilter
   """
-  [Internal] Filters that project labels must satisfy.
+  Filters that project labels must satisfy.
   """
   labels: ProjectLabelCollectionFilter
   """
@@ -19965,7 +21050,7 @@ type Organization implements Node {
   """
   previousUrlKeys: [String!]!
   """
-  [Internal] Project labels associated with the organization.
+  Project labels associated with the organization.
   """
   projectLabels(
     """
@@ -20707,6 +21792,10 @@ input OrganizationUpdateInput {
   """
   reducedPersonalInformation: Boolean
   """
+  Whether agent invocation is restricted to full workspace members.
+  """
+  restrictAgentInvocationToMembers: Boolean
+  """
   Whether label creation is restricted to admins.
   """
   restrictLabelManagementToAdmins: Boolean
@@ -21162,7 +22251,7 @@ type Post implements Node {
 }
 
 """
-[Internal] A post related notification.
+A post related notification.
 """
 type PostNotification implements Entity & Node & Notification {
   """
@@ -21645,7 +22734,7 @@ type Project implements Node {
   """
   labelIds: [String!]!
   """
-  [Internal] Labels associated with this project.
+  Labels associated with this project.
   """
   labels(
     """
@@ -22174,7 +23263,7 @@ input ProjectCollectionFilter {
   """
   issues: IssueCollectionFilter
   """
-  [Internal] Filters that project labels must satisfy.
+  Filters that project labels must satisfy.
   """
   labels: ProjectLabelCollectionFilter
   """
@@ -22348,6 +23437,20 @@ input ProjectCreateInput {
   teamIds: [String!]!
 }
 
+"""
+Project creation date sorting options.
+"""
+input ProjectCreatedAtSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
 type ProjectEdge {
   """
   Used in `before` and `after` args
@@ -22441,7 +23544,7 @@ input ProjectFilter {
   """
   issues: IssueCollectionFilter
   """
-  [Internal] Filters that project labels must satisfy.
+  Filters that project labels must satisfy.
   """
   labels: ProjectLabelCollectionFilter
   """
@@ -22575,13 +23678,46 @@ type ProjectHistoryEdge {
 }
 
 """
-[Internal] Labels that can be associated with projects.
+Labels that can be associated with projects.
 """
 type ProjectLabel implements Node {
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
+  """
+  Children of the label.
+  """
+  children(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned project labels.
+    """
+    filter: ProjectLabelFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectLabelConnection!
   """
   The label's color as a HEX string.
   """
@@ -22607,6 +23743,10 @@ type ProjectLabel implements Node {
   """
   isGroup: Boolean!
   """
+  The date when the label was last applied to an issue or project.
+  """
+  lastAppliedAt: DateTime
+  """
   The label's name.
   """
   name: String!
@@ -22615,6 +23755,43 @@ type ProjectLabel implements Node {
   The parent label.
   """
   parent: ProjectLabel
+  """
+  Projects associated with the label.
+  """
+  projects(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned projects.
+    """
+    filter: ProjectFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned projects.
+    """
+    sort: [ProjectSortInput!]
+  ): ProjectConnection!
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -22686,6 +23863,33 @@ type ProjectLabelConnection {
   pageInfo: PageInfo!
 }
 
+input ProjectLabelCreateInput {
+  """
+  The color of the label.
+  """
+  color: String
+  """
+  The description of the label.
+  """
+  description: String
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  Whether the label is a group.
+  """
+  isGroup: Boolean
+  """
+  The name of the label.
+  """
+  name: String!
+  """
+  The identifier of the parent label.
+  """
+  parentId: String
+}
+
 type ProjectLabelEdge {
   """
   Used in `before` and `after` args
@@ -22695,7 +23899,7 @@ type ProjectLabelEdge {
 }
 
 """
-[Internal] Project label filtering options.
+Project label filtering options.
 """
 input ProjectLabelFilter {
   """
@@ -22734,6 +23938,54 @@ input ProjectLabelFilter {
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
+}
+
+type ProjectLabelPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The label that was created or updated.
+  """
+  projectLabel: ProjectLabel!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+input ProjectLabelUpdateInput {
+  """
+  The color of the label.
+  """
+  color: String
+  """
+  The description of the label.
+  """
+  description: String
+  """
+  The name of the label.
+  """
+  name: String
+  """
+  The identifier of the parent label.
+  """
+  parentId: String
+}
+
+"""
+Project manual order sorting options.
+"""
+input ProjectManualSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -23128,6 +24380,20 @@ input ProjectMilestoneUpdateInput {
 }
 
 """
+Project name sorting options.
+"""
+input ProjectNameSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
 A project related notification.
 """
 type ProjectNotification implements Entity & Node & Notification {
@@ -23196,14 +24462,6 @@ type ProjectNotification implements Entity & Node & Notification {
   [Internal] Inbox URL for the notification.
   """
   inboxUrl: String!
-  """
-  The initiative related to the notification.
-  """
-  initiative: Initiative
-  """
-  The initiative update related to the notification.
-  """
-  initiativeUpdate: InitiativeUpdate
   """
   [Internal] If notification actor was Linear.
   """
@@ -23375,6 +24633,24 @@ type ProjectPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+Project priority sorting options.
+"""
+input ProjectPrioritySort {
+  """
+  Whether to consider no priority as the highest or lowest priority
+  """
+  noPriorityFirst: Boolean = false
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -23862,7 +25138,7 @@ type ProjectSearchResult implements Node {
   """
   labelIds: [String!]!
   """
-  [Internal] Labels associated with this project.
+  Labels associated with this project.
   """
   labels(
     """
@@ -24242,6 +25518,44 @@ input ProjectSort {
 }
 
 """
+Project sorting options.
+"""
+input ProjectSortInput {
+  """
+  Sort by project creation date
+  """
+  createdAt: ProjectCreatedAtSort
+  """
+  Sort by manual order
+  """
+  manual: ProjectManualSort
+  """
+  Sort by project name
+  """
+  name: ProjectNameSort
+  """
+  Sort by project priority
+  """
+  priority: ProjectPrioritySort
+  """
+  Sort by project start date
+  """
+  startDate: StartDateSort
+  """
+  Sort by project status
+  """
+  status: ProjectStatusSort
+  """
+  Sort by project target date
+  """
+  targetDate: TargetDateSort
+  """
+  Sort by project update date
+  """
+  updatedAt: ProjectUpdatedAtSort
+}
+
+"""
 A project status.
 """
 type ProjectStatus implements Node {
@@ -24447,6 +25761,20 @@ type ProjectStatusPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+"""
+Project status sorting options.
+"""
+input ProjectStatusSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -24775,7 +26103,7 @@ input ProjectUpdateInput {
   """
   icon: String
   """
-  [Internal] The identifiers of the project labels associated with this project.
+  The identifiers of the project labels associated with this project.
   """
   labelIds: [String!]
   """
@@ -24987,6 +26315,20 @@ type ProjectUpdateWebhookPayload {
   The user id of the project update.
   """
   userId: String!
+}
+
+"""
+Project update date sorting options.
+"""
+input ProjectUpdatedAtSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -25295,7 +26637,7 @@ type PullRequest implements Node {
 }
 
 """
-[Internal] A pull request related notification.
+A pull request related notification.
 """
 type PullRequestNotification implements Entity & Node & Notification {
   """
@@ -25545,6 +26887,82 @@ type Query {
     orderBy: PaginationOrderBy
   ): TeamConnection!
   """
+  All agent activities.
+  """
+  agentActivities(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AgentActivityConnection!
+  """
+  A specific agent activity.
+  """
+  agentActivity(
+    """
+    The identifier of the agent activity to retrieve.
+    """
+    id: String!
+  ): AgentActivity!
+  """
+  A specific agent context.
+  """
+  agentContext(
+    """
+    The identifier of the agent context to retrieve.
+    """
+    id: String!
+  ): AgentContext!
+  """
+  All agent contexts.
+  """
+  agentContexts(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AgentContextConnection!
+  """
   All API keys for the user.
   """
   apiKeys(
@@ -25592,7 +27010,7 @@ type Query {
     ids: [String!]!
   ): [Application!]!
   """
-  [INTERNAL] Get information for a list of applications with memberships
+  [DEPRECATED] [INTERNAL] Get information for a list of applications with memberships
   """
   applicationInfoWithMembershipsByIds(
     """
@@ -25600,6 +27018,9 @@ type Query {
     """
     clientIds: [String!]!
   ): [WorkspaceAuthorizedApplication!]!
+    @deprecated(
+      reason: "Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead."
+    )
   """
   Get information for an application and whether a user has approved it for the given scopes.
   """
@@ -25844,6 +27265,10 @@ type Query {
     """
     before: String
     """
+    Filter returned custom views.
+    """
+    filter: CustomViewFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -25859,6 +27284,10 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned custom views.
+    """
+    sort: [CustomViewSortInput!]
   ): CustomViewConnection!
   """
   One specific customer.
@@ -26091,6 +27520,10 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): DocumentConnection!
+  """
+  One specific email intake address.
+  """
+  emailIntakeAddress(id: String!): EmailIntakeAddress!
   """
   A specific emoji.
   """
@@ -26357,6 +27790,10 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned initiatives.
+    """
+    sort: [InitiativeSortInput!]
   ): InitiativeConnection!
   """
   One specific integration.
@@ -26837,6 +28274,43 @@ type Query {
   """
   projectFilterSuggestion(prompt: String!): ProjectFilterSuggestionPayload!
   """
+  One specific label.
+  """
+  projectLabel(id: String!): ProjectLabel!
+  """
+  All project labels.
+  """
+  projectLabels(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned project labels.
+    """
+    filter: ProjectLabelFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ProjectLabelConnection!
+  """
   One specific project milestone.
   """
   projectMilestone(id: String!): ProjectMilestone!
@@ -27022,6 +28496,10 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned projects.
+    """
+    sort: [ProjectSortInput!]
   ): ProjectConnection!
   """
   Sends a test push message.
@@ -27587,9 +29065,21 @@ type Query {
     clientId: String!
   ): WorkspaceAuthorizedApplicationWithMemberships!
   """
-  [INTERNAL] Get non-internal authorized applications (with limited fields) for a workspace
+  [DEPRECATED] [INTERNAL] Get non-internal authorized applications (with limited fields) for a workspace
   """
   workspaceAuthorizedApplications: [WorkspaceAuthorizedApplication!]!
+    @deprecated(
+      reason: "Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead."
+    )
+  """
+  [INTERNAL] Get non-internal authorized applications for a workspace, including each application's app user.
+  """
+  workspaceAuthorizedApplicationsWithAppUser(
+    """
+    Client IDs of specific applications to return. If not provided, all workspace-authorized applications will be returned.
+    """
+    clientIds: [String!]
+  ): [WorkspaceAuthorizedApplicationWithAppUser!]!
 }
 
 type RateLimitPayload {
@@ -28334,6 +29824,10 @@ input SalesforceSettingsInput {
   """
   reopenCaseStatus: String
   """
+  Whether to restrict visibility of the integration to issues that have been either created from Salesforce or linked to Salesforce.
+  """
+  restrictVisibility: Boolean
+  """
   Whether an internal message should be added when someone comments on an issue.
   """
   sendNoteOnComment: Boolean
@@ -28423,6 +29917,75 @@ input SentrySettingsInput {
   Whether Sentry issues unresolving reopens Linear issues.
   """
   unresolvingReopensIssues: Boolean!
+}
+
+"""
+SES domain identity used for sending emails from a custom domain.
+"""
+type SesDomainIdentity implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  Whether the domain is fully verified and can be used for sending emails.
+  """
+  canSendFromCustomDomain: Boolean!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who created the SES domain identity.
+  """
+  creator: User
+  """
+  The DNS records for the SES domain identity.
+  """
+  dnsRecords: [SesDomainIdentityDnsRecord!]!
+  """
+  The domain of the SES domain identity.
+  """
+  domain: String!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The organization of the SES domain identity.
+  """
+  organization: Organization!
+  """
+  The AWS region of the SES domain identity.
+  """
+  region: String!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+A DNS record for a SES domain identity.
+"""
+type SesDomainIdentityDnsRecord {
+  """
+  The content of the DNS record.
+  """
+  content: String!
+  """
+  Whether the DNS record is verified in the domain's DNS configuration.
+  """
+  isVerified: Boolean!
+  """
+  The name of the DNS record.
+  """
+  name: String!
+  """
+  The type of the DNS record.
+  """
+  type: String!
 }
 
 """
@@ -28849,6 +30412,20 @@ type SsoUrlFromEmailResponse {
 }
 
 """
+Project start date sorting options.
+"""
+input StartDateSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
 Comparator for strings.
 """
 input StringArrayComparator {
@@ -29087,6 +30664,20 @@ type SyncedExternalThread {
   The external url of the thread.
   """
   url: String
+}
+
+"""
+Project target date sorting options.
+"""
+input TargetDateSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -29561,6 +31152,10 @@ type Team implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned projects.
+    """
+    sort: [ProjectSortInput!]
   ): ProjectConnection!
   """
   Whether an issue needs to have a priority set before leaving triage.
@@ -31188,6 +32783,39 @@ type User implements Node {
   """
   statusUntilAt: DateTime
   """
+  Issues delegated to an agent by the user.
+  """
+  supervisedIssues(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned issues.
+    """
+    filter: IssueFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueConnection!
+  """
   Memberships associated with the user. For easier access of the same data, use `teams` query.
   """
   teamMemberships(
@@ -31997,7 +33625,7 @@ input ViewPreferencesCreateInput {
   """
   projectId: String
   """
-  [Internal] The project label these view preferences are associated with.
+  The project label these view preferences are associated with.
   """
   projectLabelId: String
   """
@@ -32629,6 +34257,56 @@ type WorkspaceAuthorizedApplication {
   scope: [String!]!
   """
   Total number of members that authorized the application.
+  """
+  totalMembers: Float!
+  """
+  Whether or not webhooks are enabled for the application.
+  """
+  webhooksEnabled: Boolean!
+}
+
+"""
+[INTERNAL] Public information of the OAuth application, plus the app user and aggregate membership count.
+"""
+type WorkspaceAuthorizedApplicationWithAppUser {
+  """
+  OAuth application's ID.
+  """
+  appId: String!
+  """
+  The app user associated with this client, if one exists.
+  """
+  appUser: AuthMembership
+  """
+  OAuth application's client ID.
+  """
+  clientId: String!
+  """
+  Description of the application.
+  """
+  description: String
+  """
+  Developer of the application.
+  """
+  developer: String
+  """
+  Developer URL of the application.
+  """
+  developerUrl: String
+  """
+  Image of the application.
+  """
+  imageUrl: String
+  """
+  Application name.
+  """
+  name: String!
+  """
+  Scopes that are authorized for this application for a given user.
+  """
+  scope: [String!]!
+  """
+  Total number of members (including the app user, if it exists) that authorized the application.
   """
   totalMembers: Float!
   """
