@@ -49,6 +49,7 @@
     "gitlens.hovers.currentLine.over": "line",
     "gitlens.codeLens.enabled": false,
     "gitlens.currentLine.enabled": false,
-    "typescript.tsdk": "node_modules/typescript/lib"
+    "typescript.tsdk": "./node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
   }
 }
