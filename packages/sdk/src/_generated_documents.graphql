@@ -1,3 +1,16 @@
+# A DNS record for a SES domain identity.
+fragment SesDomainIdentityDnsRecord on SesDomainIdentityDnsRecord {
+  __typename
+  # The content of the DNS record.
+  content
+  # The name of the DNS record.
+  name
+  # The type of the DNS record.
+  type
+  # Whether the DNS record is verified in the domain's DNS configuration.
+  isVerified
+}
+
 # A Git target branch for which there are automations (GitAutomationState).
 fragment GitAutomationTargetBranch on GitAutomationTargetBranch {
   __typename
@@ -150,6 +163,56 @@ fragment SyncedExternalThread on SyncedExternalThread {
   id
 }
 
+# A context for agent activities and state management.
+fragment AgentContext on AgentContext {
+  __typename
+  # A summary of the activities in this context.
+  summary
+  # Activities associated with this agent context.
+  activities {
+    ...AgentActivity
+  }
+  # External links associated with this agent context.
+  links {
+    ...EntityExternalLink
+  }
+  # Metadata about the external source that created this agent context.
+  sourceMetadata
+  # The agent user that is associated with this agent context.
+  appUser {
+    id
+  }
+  # The comment this agent context is associated with.
+  comment {
+    id
+  }
+  # The current status of the agent context.
+  status
+  # The issue this agent context is associated with.
+  issue {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time the agent context ended.
+  endedAt
+  # The time the agent context started working.
+  startedAt
+  # The type of the agent context.
+  type
+  # The unique identifier of the entity.
+  id
+  # The user that created this agent context.
+  creator {
+    id
+  }
+}
+
 # A custom emoji.
 fragment Emoji on Emoji {
   __typename
@@ -296,6 +359,61 @@ fragment CustomView on CustomView {
   shared
 }
 
+# A customer need related notification.
+fragment CustomerNeedNotification on CustomerNeedNotification {
+  __typename
+  # Notification type.
+  type
+  # Related customer need.
+  customerNeedId
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The customer need related to the notification.
+  customerNeed {
+    id
+  }
+  # The external user that caused the notification.
+  externalUserActor {
+    id
+  }
+  # The issue related to the notification.
+  relatedIssue {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The project related to the notification.
+  relatedProject {
+    id
+  }
+  # The time at when an email reminder for this notification was sent to the user. Null, if no email
+  #     reminder has been sent.
+  emailedAt
+  # The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  readAt
+  # The time at which a notification was unsnoozed..
+  unsnoozedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification.
+  actor {
+    id
+  }
+  # The user that received the notification.
+  user {
+    id
+  }
+}
+
 # A customer need, expressed through a reference to an issue, project, or comment.
 fragment CustomerNeed on CustomerNeed {
   __typename
@@ -400,6 +518,53 @@ fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
   }
   # Whether the subscription is active or not.
   active
+}
+
+# A customer related notification.
+fragment CustomerNotification on CustomerNotification {
+  __typename
+  # Notification type.
+  type
+  # Related customer.
+  customerId
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The customer related to the notification.
+  customer {
+    id
+  }
+  # The external user that caused the notification.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at when an email reminder for this notification was sent to the user. Null, if no email
+  #     reminder has been sent.
+  emailedAt
+  # The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  readAt
+  # The time at which a notification was unsnoozed..
+  unsnoozedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification.
+  actor {
+    id
+  }
+  # The user that received the notification.
+  user {
+    id
+  }
 }
 
 # A customer status.
@@ -1117,54 +1282,6 @@ fragment LabelNotificationSubscription on LabelNotificationSubscription {
   active
 }
 
-# A meeting that can be attached to different entities.
-fragment Meeting on Meeting {
-  __typename
-  # A flag that indicates whether the meeting is in the trash bin.
-  trashed
-  # Link to a recording of the meeting.
-  recordingLink
-  # The color of the icon.
-  color
-  # The icon of the meeting.
-  icon
-  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The location of the meeting.
-  location
-  # The meeting link of the meeting.
-  meetingLink
-  # The meeting title.
-  title
-  # The order of the item in the resources list.
-  sortOrder
-  # The project that the meeting is associated with.
-  project {
-    id
-  }
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The time at which the meeting is set to end.
-  endsAt
-  # The time at which the meeting is set to start.
-  startsAt
-  # The time at which the meeting was hidden. Null if the entity has not been hidden.
-  hiddenAt
-  # The unique identifier of the entity.
-  id
-  # The user who created the meeting.
-  creator {
-    id
-  }
-  # The user who last updated the meeting.
-  updatedBy {
-    id
-  }
-}
-
 # A milestone for a project.
 fragment ProjectMilestone on ProjectMilestone {
   __typename
@@ -1239,6 +1356,14 @@ fragment Notification on Notification {
     id
   }
 
+  ... on CustomerNeedNotification {
+    ...CustomerNeedNotification
+  }
+
+  ... on CustomerNotification {
+    ...CustomerNotification
+  }
+
   ... on DocumentNotification {
     ...DocumentNotification
   }
@@ -1255,8 +1380,65 @@ fragment Notification on Notification {
     ...OauthClientApprovalNotification
   }
 
+  ... on PostNotification {
+    ...PostNotification
+  }
+
   ... on ProjectNotification {
     ...ProjectNotification
+  }
+
+  ... on PullRequestNotification {
+    ...PullRequestNotification
+  }
+}
+
+# A post related notification.
+fragment PostNotification on PostNotification {
+  __typename
+  # Name of the reaction emoji related to the notification.
+  reactionEmoji
+  # Notification type.
+  type
+  # Related comment ID. Null if the notification is not related to a comment.
+  commentId
+  # Related parent comment ID. Null if the notification is not related to a comment.
+  parentCommentId
+  # Related post ID.
+  postId
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The external user that caused the notification.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at when an email reminder for this notification was sent to the user. Null, if no email
+  #     reminder has been sent.
+  emailedAt
+  # The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  readAt
+  # The time at which a notification was unsnoozed..
+  unsnoozedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification.
+  actor {
+    id
+  }
+  # The user that received the notification.
+  user {
+    id
   }
 }
 
@@ -1349,14 +1531,6 @@ fragment ProjectNotification on ProjectNotification {
   }
   # The external user that caused the notification.
   externalUserActor {
-    id
-  }
-  # The initiative related to the notification.
-  initiative {
-    id
-  }
-  # The initiative update related to the notification.
-  initiativeUpdate {
     id
   }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -1553,6 +1727,55 @@ fragment Project on Project {
   slackIssueStatuses
   # [DEPRECATED] The type of the state.
   state
+}
+
+# A pull request related notification.
+fragment PullRequestNotification on PullRequestNotification {
+  __typename
+  # Name of the reaction emoji related to the notification.
+  reactionEmoji
+  # Notification type.
+  type
+  # Related comment ID. Null if the notification is not related to a comment.
+  commentId
+  # Related parent comment ID. Null if the notification is not related to a comment.
+  parentCommentId
+  # Related pull request.
+  pullRequestId
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The external user that caused the notification.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at when an email reminder for this notification was sent to the user. Null, if no email
+  #     reminder has been sent.
+  emailedAt
+  # The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  readAt
+  # The time at which a notification was unsnoozed..
+  unsnoozedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification.
+  actor {
+    id
+  }
+  # The user that received the notification.
+  user {
+    id
+  }
 }
 
 # A reaction associated with a comment or a project update.
@@ -2310,6 +2533,10 @@ fragment NotificationCategoryPreferences on NotificationCategoryPreferences {
   customers {
     ...NotificationChannelPreferences
   }
+  # The preferences for feed summary notifications.
+  feed {
+    ...NotificationChannelPreferences
+  }
   # The preferences for notifications about apps and integrations.
   appsAndIntegrations {
     ...NotificationChannelPreferences
@@ -2509,12 +2736,42 @@ fragment ApiKey on ApiKey {
   id
 }
 
-# An email address that can be used for submitting issues.
-fragment EmailIntakeAddress on EmailIntakeAddress {
+# An activity within an agent context.
+fragment AgentActivity on AgentActivity {
   __typename
+  # The agent context this activity belongs to.
+  agentContext {
+    id
+  }
+  # The comment that contains the content of this activity, if any.
+  sourceComment {
+    id
+  }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
+# An email address that can be used for submitting issues.
+fragment EmailIntakeAddress on EmailIntakeAddress {
+  __typename
+  # The SES domain identity that the email address is associated with.
+  sesDomainIdentity {
+    ...SesDomainIdentity
+  }
+  # The email address used to forward emails to the intake address.
+  forwardingEmailAddress
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The name to be used for outgoing emails.
+  senderName
   # The team that the email address is associated with.
   team {
     id
@@ -2527,6 +2784,8 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The type of the email address.
+  type
   # The unique identifier of the entity.
   id
   # The user who created the email intake address.
@@ -2729,13 +2988,33 @@ fragment InitiativeNotification on InitiativeNotification {
   botActor {
     ...ActorBot
   }
+  # The comment related to the notification.
+  comment {
+    id
+  }
+  # The document related to the notification.
+  document {
+    id
+  }
   # The external user that caused the notification.
   externalUserActor {
+    id
+  }
+  # The initiative related to the notification.
+  initiative {
+    id
+  }
+  # The initiative update related to the notification.
+  initiativeUpdate {
     id
   }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The parent comment related to the notification, if a notification is a reply comment notification.
+  parentComment {
+    id
+  }
   # The time at when an email reminder for this notification was sent to the user. Null, if no email
   #     reminder has been sent.
   emailedAt
@@ -2768,6 +3047,10 @@ fragment Initiative on Initiative {
   trashed
   # Initiative URL.
   url
+  # Parent initiative associated with the initiative.
+  parentInitiative {
+    id
+  }
   # Settings for all integrations associated with that initiative.
   integrationsSettings {
     id
@@ -3916,6 +4199,57 @@ fragment ArchiveResponse on ArchiveResponse {
   includesDependencies
 }
 
+# Content for a response activity.
+fragment AgentActivityResponseContent on AgentActivityResponseContent {
+  __typename
+  # The ID of the comment this response references.
+  sourceCommentId
+  # The type of activity.
+  type
+}
+
+# Content for a user input activity.
+fragment AgentActivityUserInputContent on AgentActivityUserInputContent {
+  __typename
+  # The ID of the comment this user input is sourced from.
+  sourceCommentId
+  # The type of activity.
+  type
+  # The user input body.
+  body
+}
+
+# Content for an action activity (tool call or action).
+fragment AgentActivityActionContent on AgentActivityActionContent {
+  __typename
+  # The action being performed.
+  action
+  # The parameters for the action, e.g. a file path, a keyword, etc.
+  parameter
+  # The result of the action in Markdown format.
+  result
+  # The type of activity.
+  type
+}
+
+# Content for an error activity.
+fragment AgentActivityErrorContent on AgentActivityErrorContent {
+  __typename
+  # The error message in Markdown format.
+  body
+  # The type of activity.
+  type
+}
+
+# Content for an observation activity (chain of thought).
+fragment AgentActivityObservationContent on AgentActivityObservationContent {
+  __typename
+  # The observation content in Markdown format.
+  body
+  # The type of activity.
+  type
+}
+
 # Defines the membership of a user to a team.
 fragment TeamMembership on TeamMembership {
   __typename
@@ -4204,6 +4538,8 @@ fragment IntegrationTemplate on IntegrationTemplate {
 # Labels that can be associated with issues.
 fragment IssueLabel on IssueLabel {
   __typename
+  # The date when the label was last applied to an issue or project.
+  lastAppliedAt
   # The label's color as a HEX string.
   color
   # The label's description.
@@ -4223,6 +4559,38 @@ fragment IssueLabel on IssueLabel {
   }
   # The team that the label is associated with. If null, the label is associated with the global workspace.
   team {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the label.
+  creator {
+    id
+  }
+  # Whether the label is a group.
+  isGroup
+}
+
+# Labels that can be associated with projects.
+fragment ProjectLabel on ProjectLabel {
+  __typename
+  # The date when the label was last applied to an issue or project.
+  lastAppliedAt
+  # The label's color as a HEX string.
+  color
+  # The label's description.
+  description
+  # The label's name.
+  name
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The parent label.
+  parent {
     id
   }
   # The time at which the entity was archived. Null if the entity has not been archived.
@@ -5696,6 +6064,34 @@ fragment OauthClientApproval on OauthClientApproval {
   oauthClientId
 }
 
+# SES domain identity used for sending emails from a custom domain.
+fragment SesDomainIdentity on SesDomainIdentity {
+  __typename
+  # The AWS region of the SES domain identity.
+  region
+  # The DNS records for the SES domain identity.
+  dnsRecords {
+    ...SesDomainIdentityDnsRecord
+  }
+  # The domain of the SES domain identity.
+  domain
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the SES domain identity.
+  creator {
+    id
+  }
+  # Whether the domain is fully verified and can be used for sending emails.
+  canSendFromCustomDomain
+}
+
 # The configuration of all integrations for different entities.
 fragment IntegrationsSettings on IntegrationsSettings {
   __typename
@@ -5896,6 +6292,10 @@ fragment Favorite on Favorite {
   label {
     id
   }
+  # The favorited project label.
+  projectLabel {
+    id
+  }
   # The favorited project.
   project {
     id
@@ -6018,6 +6418,50 @@ fragment AuditEntry on AuditEntry {
     id
   }
   type
+}
+
+fragment AgentActivityConnection on AgentActivityConnection {
+  __typename
+  nodes {
+    ...AgentActivity
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment AgentActivityPayload on AgentActivityPayload {
+  __typename
+  # The agent activity that was created or updated.
+  agentActivity {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment AgentContextConnection on AgentContextConnection {
+  __typename
+  nodes {
+    ...AgentContext
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment AgentContextPayload on AgentContextPayload {
+  __typename
+  # The agent context that was created or updated.
+  agentContext {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
 }
 
 fragment ApiKeyConnection on ApiKeyConnection {
@@ -6473,7 +6917,7 @@ fragment EmailIntakeAddressPayload on EmailIntakeAddressPayload {
   __typename
   # The email address that was created or updated.
   emailIntakeAddress {
-    ...EmailIntakeAddress
+    id
   }
   # The identifier of the last sync operation.
   lastSyncId
@@ -7425,6 +7869,28 @@ fragment ProjectHistoryConnection on ProjectHistoryConnection {
   }
 }
 
+fragment ProjectLabelConnection on ProjectLabelConnection {
+  __typename
+  nodes {
+    ...ProjectLabel
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ProjectLabelPayload on ProjectLabelPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The label that was created or updated.
+  projectLabel {
+    id
+  }
+  # Whether the operation was successful.
+  success
+}
+
 fragment ProjectMilestoneConnection on ProjectMilestoneConnection {
   __typename
   nodes {
@@ -8164,6 +8630,76 @@ query administrableTeams(
     ...TeamConnection
   }
 }
+# All agent activities.
+query agentActivities(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  agentActivities(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...AgentActivityConnection
+  }
+}
+# A specific agent activity.
+query agentActivity(
+  # The identifier of the agent activity to retrieve.
+  $id: String!
+) {
+  agentActivity(id: $id) {
+    ...AgentActivity
+  }
+}
+# A specific agent context.
+query agentContext(
+  # The identifier of the agent context to retrieve.
+  $id: String!
+) {
+  agentContext(id: $id) {
+    ...AgentContext
+  }
+}
+# All agent contexts.
+query agentContexts(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  agentContexts(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...AgentContextConnection
+  }
+}
 # All API keys for the user.
 query apiKeys(
   # A cursor to be used with first for forward pagination
@@ -8838,6 +9374,8 @@ query customView_issues(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Include issues from sub-teams when the custom view is associated with a team.
+  $includeSubTeams: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -8852,6 +9390,7 @@ query customView_issues(
       filter: $filter
       first: $first
       includeArchived: $includeArchived
+      includeSubTeams: $includeSubTeams
       last: $last
       orderBy: $orderBy
       sort: $sort
@@ -8891,10 +9430,14 @@ query customView_projects(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Include projects from sub-teams when the custom view is associated with a team.
+  $includeSubTeams: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
 ) {
   customView(id: $id) {
     projects(
@@ -8903,8 +9446,10 @@ query customView_projects(
       filter: $filter
       first: $first
       includeArchived: $includeArchived
+      includeSubTeams: $includeSubTeams
       last: $last
       orderBy: $orderBy
+      sort: $sort
     ) {
       ...ProjectConnection
     }
@@ -8951,6 +9496,8 @@ query customViews(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # Filter returned custom views.
+  $filter: CustomViewFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -8959,14 +9506,18 @@ query customViews(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned custom views.
+  $sort: [CustomViewSortInput!]
 ) {
   customViews(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    sort: $sort
   ) {
     ...CustomViewConnection
   }
@@ -9285,6 +9836,20 @@ query documents(
     ...DocumentConnection
   }
 }
+# One specific email intake address.
+query emailIntakeAddress($id: String!) {
+  emailIntakeAddress(id: $id) {
+    ...EmailIntakeAddress
+  }
+}
+# The SES domain identity that the email address is associated with.
+query emailIntakeAddress_sesDomainIdentity($id: String!) {
+  emailIntakeAddress(id: $id) {
+    sesDomainIdentity {
+      ...SesDomainIdentity
+    }
+  }
+}
 # A specific emoji.
 query emoji(
   # The identifier or the name of the emoji to retrieve.
@@ -9499,12 +10064,14 @@ query initiative_projects(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
-  # [ALPHA] Whether to include projects from sub-initiatives. Defaults to true.
+  # Whether to include projects from sub-initiatives. Defaults to true.
   $includeSubInitiatives: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
 ) {
   initiative(id: $id) {
     projects(
@@ -9516,8 +10083,44 @@ query initiative_projects(
       includeSubInitiatives: $includeSubInitiatives
       last: $last
       orderBy: $orderBy
+      sort: $sort
     ) {
       ...ProjectConnection
+    }
+  }
+}
+# Sub-initiatives associated with the initiative.
+query initiative_subInitiatives(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned sub-initiatives.
+  $filter: InitiativeFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned initiatives.
+  $sort: [InitiativeSortInput!]
+) {
+  initiative(id: $id) {
+    subInitiatives(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+      sort: $sort
+    ) {
+      ...InitiativeConnection
     }
   }
 }
@@ -9672,6 +10275,8 @@ query initiatives(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned initiatives.
+  $sort: [InitiativeSortInput!]
 ) {
   initiatives(
     after: $after
@@ -9681,6 +10286,7 @@ query initiatives(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    sort: $sort
   ) {
     ...InitiativeConnection
   }
@@ -10925,6 +11531,37 @@ query organization_labels(
     }
   }
 }
+# Project labels associated with the organization.
+query organization_projectLabels(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned project labels.
+  $filter: ProjectLabelFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  organization {
+    projectLabels(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ProjectLabelConnection
+    }
+  }
+}
 # The organization's subscription to a paid plan.
 query organization_subscription {
   organization {
@@ -11290,6 +11927,38 @@ query project_issues(
     }
   }
 }
+# Labels associated with this project.
+query project_labels(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned project labels.
+  $filter: ProjectLabelFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  project(id: $id) {
+    labels(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ProjectLabelConnection
+    }
+  }
+}
 # Users that are members of the project.
 query project_members(
   $id: String!
@@ -11483,6 +12152,108 @@ query project_teams(
 query projectFilterSuggestion($prompt: String!) {
   projectFilterSuggestion(prompt: $prompt) {
     ...ProjectFilterSuggestionPayload
+  }
+}
+# One specific label.
+query projectLabel($id: String!) {
+  projectLabel(id: $id) {
+    ...ProjectLabel
+  }
+}
+# Children of the label.
+query projectLabel_children(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned project labels.
+  $filter: ProjectLabelFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  projectLabel(id: $id) {
+    children(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ProjectLabelConnection
+    }
+  }
+}
+# Projects associated with the label.
+query projectLabel_projects(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned projects.
+  $filter: ProjectFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
+) {
+  projectLabel(id: $id) {
+    projects(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+      sort: $sort
+    ) {
+      ...ProjectConnection
+    }
+  }
+}
+# All project labels.
+query projectLabels(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned project labels.
+  $filter: ProjectLabelFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  projectLabels(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...ProjectLabelConnection
   }
 }
 # One specific project milestone.
@@ -11711,6 +12482,8 @@ query projects(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
 ) {
   projects(
     after: $after
@@ -11720,6 +12493,7 @@ query projects(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    sort: $sort
   ) {
     ...ProjectConnection
   }
@@ -12287,6 +13061,8 @@ query team_projects(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
 ) {
   team(id: $id) {
     projects(
@@ -12298,6 +13074,7 @@ query team_projects(
       includeSubTeams: $includeSubTeams
       last: $last
       orderBy: $orderBy
+      sort: $sort
     ) {
       ...ProjectConnection
     }
@@ -12668,6 +13445,39 @@ query user_drafts(
     }
   }
 }
+# Issues delegated to an agent by the user.
+query user_supervisedIssues(
+  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  user(id: $id) {
+    supervisedIssues(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
 # Memberships associated with the user. For easier access of the same data, use `teams` query.
 query user_teamMemberships(
   # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
@@ -12790,6 +13600,16 @@ query userSettings_notificationCategoryPreferences_documentChanges {
   userSettings {
     notificationCategoryPreferences {
       documentChanges {
+        ...NotificationChannelPreferences
+      }
+    }
+  }
+}
+# The preferences for feed summary notifications.
+query userSettings_notificationCategoryPreferences_feed {
+  userSettings {
+    notificationCategoryPreferences {
+      feed {
         ...NotificationChannelPreferences
       }
     }
@@ -13156,6 +13976,37 @@ query viewer_drafts(
     }
   }
 }
+# Issues delegated to an agent by the user.
+query viewer_supervisedIssues(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  viewer {
+    supervisedIssues(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
 # Memberships associated with the user. For easier access of the same data, use `teams` query.
 query viewer_teamMemberships(
   # A cursor to be used with first for forward pagination
@@ -13315,6 +14166,35 @@ query workflowStates(
     orderBy: $orderBy
   ) {
     ...WorkflowStateConnection
+  }
+}
+# Creates an agent activity.
+mutation createAgentActivity(
+  # The agent activity object to create.
+  $input: AgentActivityCreateInput!
+) {
+  agentActivityCreate(input: $input) {
+    ...AgentActivityPayload
+  }
+}
+# Creates an agent context.
+mutation createAgentContext(
+  # The agent context object to create.
+  $input: AgentContextCreateInput!
+) {
+  agentContextCreate(input: $input) {
+    ...AgentContextPayload
+  }
+}
+# Updates an agent context.
+mutation updateAgentContext(
+  # The identifier of the agent context to update.
+  $id: String!
+  # The agent context object to update.
+  $input: AgentContextUpdateInput!
+) {
+  agentContextUpdate(id: $id, input: $input) {
+    ...AgentContextPayload
   }
 }
 # Creates an integration api key for Airbyte to connect with Linear.
@@ -15470,6 +16350,17 @@ mutation updateOrganization(
     ...OrganizationPayload
   }
 }
+# Adds a label to a project.
+mutation projectAddLabel(
+  # The identifier of the project to add the label to.
+  $id: String!
+  # The identifier of the label to add.
+  $labelId: String!
+) {
+  projectAddLabel(id: $id, labelId: $labelId) {
+    ...ProjectPayload
+  }
+}
 # Archives a project.
 mutation archiveProject(
   # The identifier of the project to archive. Also the identifier from the URL is accepted.
@@ -15499,6 +16390,35 @@ mutation deleteProject(
 ) {
   projectDelete(id: $id) {
     ...ProjectArchivePayload
+  }
+}
+# Creates a new project label.
+mutation createProjectLabel(
+  # The project label to create.
+  $input: ProjectLabelCreateInput!
+) {
+  projectLabelCreate(input: $input) {
+    ...ProjectLabelPayload
+  }
+}
+# Deletes a project label.
+mutation deleteProjectLabel(
+  # The identifier of the label to delete.
+  $id: String!
+) {
+  projectLabelDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates a project label.
+mutation updateProjectLabel(
+  # The identifier of the label to update.
+  $id: String!
+  # A partial label object to update.
+  $input: ProjectLabelUpdateInput!
+) {
+  projectLabelUpdate(id: $id, input: $input) {
+    ...ProjectLabelPayload
   }
 }
 # Creates a new project milestone.
@@ -15557,6 +16477,17 @@ mutation updateProjectRelation(
 ) {
   projectRelationUpdate(id: $id, input: $input) {
     ...ProjectRelationPayload
+  }
+}
+# Removes a label from a project.
+mutation projectRemoveLabel(
+  # The identifier of the project to remove the label from.
+  $id: String!
+  # The identifier of the label to remove.
+  $labelId: String!
+) {
+  projectRemoveLabel(id: $id, labelId: $labelId) {
+    ...ProjectPayload
   }
 }
 # Archives a project status.
