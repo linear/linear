@@ -67,7 +67,8 @@ export class LinearGraphQLClient {
     const { headers, ...others } = this.options;
     const body = JSON.stringify({ query, variables });
 
-    const response = await isoFetch(this.url, {
+    const fetch = globalThis.fetch ?? isoFetch;
+    const response = await fetch(this.url, {
       method: "POST",
       headers: {
         ...(typeof body === "string" ? { "Content-Type": "application/json" } : {}),
