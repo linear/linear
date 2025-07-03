@@ -71,7 +71,8 @@ export class LinearWebhooks {
     | IssueSlaWebhookPayload
     | OAuthAppWebhookPayload
     | AppUserNotificationWebhookPayloadWithNotification
-    | AppUserTeamAccessChangedWebhookPayload {
+    | AppUserTeamAccessChangedWebhookPayload
+    | AgentContextEventWebhookPayload {
     const verified = this.verify(rawBody, signature, timestamp);
     if (!verified) {
       throw new Error("Invalid webhook signature");
