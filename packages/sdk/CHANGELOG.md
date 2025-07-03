@@ -1,5 +1,15 @@
 # Change Log
 
+## 45.3.0
+
+### Minor Changes
+
+- 7759a2c: Fixed return type for webhook parsing function
+
+### Patch Changes
+
+- 28939d3: Prefer global fetch implementation over isomorphic-fetch if available
+
 ## 45.2.0
 
 ### Minor Changes
