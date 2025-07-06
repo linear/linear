@@ -306,6 +306,24 @@ export class AgentActivityConnection extends Connection<AgentActivity> {
   }
 }
 /**
+ * Content for an elicitation activity.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityElicitationContentFragment response data
+ */
+export class AgentActivityElicitationContent extends Request {
+  public constructor(request: LinearRequest, data: L.AgentActivityElicitationContentFragment) {
+    super(request);
+    this.body = data.body;
+    this.type = data.type;
+  }
+
+  /** The elicitation message in Markdown format. */
+  public body: string;
+  /** The type of activity. */
+  public type: L.AgentActivityType;
+}
+/**
  * Content for an error activity.
  *
  * @param request - function to call the graphql client
@@ -371,6 +389,27 @@ export class AgentActivityPayload extends Request {
   }
 }
 /**
+ * Content for a prompt activity.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityPromptContentFragment response data
+ */
+export class AgentActivityPromptContent extends Request {
+  public constructor(request: LinearRequest, data: L.AgentActivityPromptContentFragment) {
+    super(request);
+    this.body = data.body ?? undefined;
+    this.sourceCommentId = data.sourceCommentId ?? undefined;
+    this.type = data.type;
+  }
+
+  /** A message requesting additional information or action from user. */
+  public body?: string;
+  /** The ID of the comment this prompt is sourced from. */
+  public sourceCommentId?: string;
+  /** The type of activity. */
+  public type: L.AgentActivityType;
+}
+/**
  * Content for a response activity.
  *
  * @param request - function to call the graphql client
@@ -385,27 +424,6 @@ export class AgentActivityResponseContent extends Request {
 
   /** The ID of the comment this response references. */
   public sourceCommentId: string;
-  /** The type of activity. */
-  public type: L.AgentActivityType;
-}
-/**
- * Content for a user input activity.
- *
- * @param request - function to call the graphql client
- * @param data - L.AgentActivityUserInputContentFragment response data
- */
-export class AgentActivityUserInputContent extends Request {
-  public constructor(request: LinearRequest, data: L.AgentActivityUserInputContentFragment) {
-    super(request);
-    this.body = data.body ?? undefined;
-    this.sourceCommentId = data.sourceCommentId ?? undefined;
-    this.type = data.type;
-  }
-
-  /** The user input body. */
-  public body?: string;
-  /** The ID of the comment this user input is sourced from. */
-  public sourceCommentId?: string;
   /** The type of activity. */
   public type: L.AgentActivityType;
 }
@@ -8638,7 +8656,7 @@ export class IssueImport extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.creatorId = data.creatorId;
+    this.creatorId = data.creatorId ?? undefined;
     this.csvFileUrl = data.csvFileUrl ?? undefined;
     this.displayName = data.displayName;
     this.error = data.error ?? undefined;
@@ -8658,7 +8676,7 @@ export class IssueImport extends Request {
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The id for the user that started the job. */
-  public creatorId: string;
+  public creatorId?: string;
   /** File URL for the uploaded CSV for the import, if there is one. */
   public csvFileUrl?: string;
   /** The display name of the import service. */

@@ -4209,6 +4209,17 @@ fragment ArchiveResponse on ArchiveResponse {
   includesDependencies
 }
 
+# Content for a prompt activity.
+fragment AgentActivityPromptContent on AgentActivityPromptContent {
+  __typename
+  # A message requesting additional information or action from user.
+  body
+  # The ID of the comment this prompt is sourced from.
+  sourceCommentId
+  # The type of activity.
+  type
+}
+
 # Content for a response activity.
 fragment AgentActivityResponseContent on AgentActivityResponseContent {
   __typename
@@ -4216,17 +4227,6 @@ fragment AgentActivityResponseContent on AgentActivityResponseContent {
   sourceCommentId
   # The type of activity.
   type
-}
-
-# Content for a user input activity.
-fragment AgentActivityUserInputContent on AgentActivityUserInputContent {
-  __typename
-  # The ID of the comment this user input is sourced from.
-  sourceCommentId
-  # The type of activity.
-  type
-  # The user input body.
-  body
 }
 
 # Content for an action activity (tool call or action).
@@ -4238,6 +4238,15 @@ fragment AgentActivityActionContent on AgentActivityActionContent {
   parameter
   # The result of the action in Markdown format.
   result
+  # The type of activity.
+  type
+}
+
+# Content for an elicitation activity.
+fragment AgentActivityElicitationContent on AgentActivityElicitationContent {
+  __typename
+  # The elicitation message in Markdown format.
+  body
   # The type of activity.
   type
 }
