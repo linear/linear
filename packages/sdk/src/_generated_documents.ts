@@ -105,10 +105,11 @@ export type AgentActivityConnection = {
 /** Content for different types of agent activities. */
 export type AgentActivityContent =
   | AgentActivityActionContent
+  | AgentActivityElicitationContent
   | AgentActivityErrorContent
   | AgentActivityObservationContent
-  | AgentActivityResponseContent
-  | AgentActivityUserInputContent;
+  | AgentActivityPromptContent
+  | AgentActivityResponseContent;
 
 export type AgentActivityCreateInput = {
   /** The agent context this activity belongs to. */
@@ -124,6 +125,15 @@ export type AgentActivityEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: AgentActivity;
+};
+
+/** Content for an elicitation activity. */
+export type AgentActivityElicitationContent = {
+  __typename?: "AgentActivityElicitationContent";
+  /** The elicitation message in Markdown format. */
+  body: Scalars["String"];
+  /** The type of activity. */
+  type: AgentActivityType;
 };
 
 /** Content for an error activity. */
@@ -154,6 +164,17 @@ export type AgentActivityPayload = {
   success: Scalars["Boolean"];
 };
 
+/** Content for a prompt activity. */
+export type AgentActivityPromptContent = {
+  __typename?: "AgentActivityPromptContent";
+  /** A message requesting additional information or action from user. */
+  body?: Maybe<Scalars["String"]>;
+  /** The ID of the comment this prompt is sourced from. */
+  sourceCommentId?: Maybe<Scalars["String"]>;
+  /** The type of activity. */
+  type: AgentActivityType;
+};
+
 /** Content for a response activity. */
 export type AgentActivityResponseContent = {
   __typename?: "AgentActivityResponseContent";
@@ -166,22 +187,12 @@ export type AgentActivityResponseContent = {
 /** The type of an agent activity. */
 export enum AgentActivityType {
   Action = "action",
+  Elicitation = "elicitation",
   Error = "error",
   Observation = "observation",
+  Prompt = "prompt",
   Response = "response",
-  UserInput = "userInput",
 }
-
-/** Content for a user input activity. */
-export type AgentActivityUserInputContent = {
-  __typename?: "AgentActivityUserInputContent";
-  /** The user input body. */
-  body?: Maybe<Scalars["String"]>;
-  /** The ID of the comment this user input is sourced from. */
-  sourceCommentId?: Maybe<Scalars["String"]>;
-  /** The type of activity. */
-  type: AgentActivityType;
-};
 
 /** A context for agent activities and state management. */
 export type AgentContext = Node & {
@@ -1815,7 +1826,7 @@ export type CustomerConnection = {
   pageInfo: PageInfo;
 };
 
-/** [ALPHA] Issue customer count sorting options. */
+/** Issue customer count sorting options. */
 export type CustomerCountSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
@@ -1899,7 +1910,7 @@ export type CustomerFilter = {
   updatedAt?: Maybe<DateComparator>;
 };
 
-/** [ALPHA] Issue customer important count sorting options. */
+/** Issue customer important count sorting options. */
 export type CustomerImportantCountSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
@@ -2353,7 +2364,7 @@ export type CustomerPayload = {
   success: Scalars["Boolean"];
 };
 
-/** [ALPHA] Issue customer revenue sorting options. */
+/** Issue customer revenue sorting options. */
 export type CustomerRevenueSort = {
   /** Whether nulls should be sorted first or last */
   nulls?: Maybe<PaginationNulls>;
@@ -7147,7 +7158,7 @@ export type IssueImport = Node & {
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The id for the user that started the job. */
-  creatorId: Scalars["String"];
+  creatorId?: Maybe<Scalars["String"]>;
   /** File URL for the uploaded CSV for the import, if there is one. */
   csvFileUrl?: Maybe<Scalars["String"]>;
   /** The display name of the import service. */
@@ -13394,6 +13405,14 @@ export type ProjectFilterSuggestionPayload = {
   logId?: Maybe<Scalars["String"]>;
 };
 
+/** Project health sorting options. */
+export type ProjectHealthSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
+};
+
 /** An history associated with a project. */
 export type ProjectHistory = Node & {
   __typename?: "ProjectHistory";
@@ -13586,6 +13605,14 @@ export type ProjectLabelUpdateInput = {
   name?: Maybe<Scalars["String"]>;
   /** The identifier of the parent label. */
   parentId?: Maybe<Scalars["String"]>;
+};
+
+/** Project lead sorting options. */
+export type ProjectLeadSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
 };
 
 /** Project manual order sorting options. */
@@ -14400,6 +14427,10 @@ export type ProjectSort = {
 export type ProjectSortInput = {
   /** Sort by project creation date */
   createdAt?: Maybe<ProjectCreatedAtSort>;
+  /** Sort by project health status. */
+  health?: Maybe<ProjectHealthSort>;
+  /** Sort by project lead name. */
+  lead?: Maybe<ProjectLeadSort>;
   /** Sort by manual order */
   manual?: Maybe<ProjectManualSort>;
   /** Sort by project name */
@@ -18763,6 +18794,8 @@ export type UserSettingsUpdateInput = {
   subscribedToChangelog?: Maybe<Scalars["Boolean"]>;
   /** Whether this user is subscribed to DPA emails or not. */
   subscribedToDPA?: Maybe<Scalars["Boolean"]>;
+  /** Whether this user is subscribed to general marketing communications or not. */
+  subscribedToGeneralMarketingCommunications?: Maybe<Scalars["Boolean"]>;
   /** Whether this user is subscribed to invite accepted emails or not. */
   subscribedToInviteAccepted?: Maybe<Scalars["Boolean"]>;
   /** Whether this user is subscribed to privacy and legal update emails or not. */
@@ -21254,19 +21287,24 @@ export type ArchiveResponseFragment = { __typename: "ArchiveResponse" } & Pick<
   "archive" | "totalCount" | "databaseVersion" | "includesDependencies"
 >;
 
+export type AgentActivityPromptContentFragment = { __typename: "AgentActivityPromptContent" } & Pick<
+  AgentActivityPromptContent,
+  "body" | "sourceCommentId" | "type"
+>;
+
 export type AgentActivityResponseContentFragment = { __typename: "AgentActivityResponseContent" } & Pick<
   AgentActivityResponseContent,
   "sourceCommentId" | "type"
 >;
 
-export type AgentActivityUserInputContentFragment = { __typename: "AgentActivityUserInputContent" } & Pick<
-  AgentActivityUserInputContent,
-  "sourceCommentId" | "type" | "body"
->;
-
 export type AgentActivityActionContentFragment = { __typename: "AgentActivityActionContent" } & Pick<
   AgentActivityActionContent,
   "action" | "parameter" | "result" | "type"
+>;
+
+export type AgentActivityElicitationContentFragment = { __typename: "AgentActivityElicitationContent" } & Pick<
+  AgentActivityElicitationContent,
+  "body" | "type"
 >;
 
 export type AgentActivityErrorContentFragment = { __typename: "AgentActivityErrorContent" } & Pick<
@@ -32329,6 +32367,25 @@ export const IntegrationChildWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IntegrationChildWebhookPayloadFragment, unknown>;
+export const AgentActivityPromptContentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentActivityPromptContent" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityPromptContent" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "body" } },
+          { kind: "Field", name: { kind: "Name", value: "sourceCommentId" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentActivityPromptContentFragment, unknown>;
 export const AgentActivityResponseContentFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -32347,25 +32404,6 @@ export const AgentActivityResponseContentFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AgentActivityResponseContentFragment, unknown>;
-export const AgentActivityUserInputContentFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AgentActivityUserInputContent" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityUserInputContent" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "sourceCommentId" } },
-          { kind: "Field", name: { kind: "Name", value: "type" } },
-          { kind: "Field", name: { kind: "Name", value: "body" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<AgentActivityUserInputContentFragment, unknown>;
 export const AgentActivityActionContentFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -32386,6 +32424,24 @@ export const AgentActivityActionContentFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AgentActivityActionContentFragment, unknown>;
+export const AgentActivityElicitationContentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentActivityElicitationContent" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityElicitationContent" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "body" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentActivityElicitationContentFragment, unknown>;
 export const AgentActivityErrorContentFragmentDoc = {
   kind: "Document",
   definitions: [

@@ -101,10 +101,11 @@ Content for different types of agent activities.
 """
 union AgentActivityContent =
   | AgentActivityActionContent
+  | AgentActivityElicitationContent
   | AgentActivityErrorContent
   | AgentActivityObservationContent
+  | AgentActivityPromptContent
   | AgentActivityResponseContent
-  | AgentActivityUserInputContent
 
 input AgentActivityCreateInput {
   """
@@ -127,6 +128,20 @@ type AgentActivityEdge {
   """
   cursor: String!
   node: AgentActivity!
+}
+
+"""
+Content for an elicitation activity.
+"""
+type AgentActivityElicitationContent {
+  """
+  The elicitation message in Markdown format.
+  """
+  body: String!
+  """
+  The type of activity.
+  """
+  type: AgentActivityType!
 }
 
 """
@@ -173,6 +188,24 @@ type AgentActivityPayload {
 }
 
 """
+Content for a prompt activity.
+"""
+type AgentActivityPromptContent {
+  """
+  A message requesting additional information or action from user.
+  """
+  body: String
+  """
+  The ID of the comment this prompt is sourced from.
+  """
+  sourceCommentId: String
+  """
+  The type of activity.
+  """
+  type: AgentActivityType!
+}
+
+"""
 Content for a response activity.
 """
 type AgentActivityResponseContent {
@@ -191,28 +224,11 @@ The type of an agent activity.
 """
 enum AgentActivityType {
   action
+  elicitation
   error
   observation
+  prompt
   response
-  userInput
-}
-
-"""
-Content for a user input activity.
-"""
-type AgentActivityUserInputContent {
-  """
-  The user input body.
-  """
-  body: String
-  """
-  The ID of the comment this user input is sourced from.
-  """
-  sourceCommentId: String
-  """
-  The type of activity.
-  """
-  type: AgentActivityType!
 }
 
 """
@@ -3085,7 +3101,7 @@ type CustomerConnection {
 }
 
 """
-[ALPHA] Issue customer count sorting options.
+Issue customer count sorting options.
 """
 input CustomerCountSort {
   """
@@ -3238,7 +3254,7 @@ input CustomerFilter {
 }
 
 """
-[ALPHA] Issue customer important count sorting options.
+Issue customer important count sorting options.
 """
 input CustomerImportantCountSort {
   """
@@ -4032,7 +4048,7 @@ type CustomerPayload {
 }
 
 """
-[ALPHA] Issue customer revenue sorting options.
+Issue customer revenue sorting options.
 """
 input CustomerRevenueSort {
   """
@@ -12490,7 +12506,7 @@ type IssueImport implements Node {
   """
   The id for the user that started the job.
   """
-  creatorId: String!
+  creatorId: String
   """
   File URL for the uploaded CSV for the import, if there is one.
   """
@@ -23770,6 +23786,20 @@ type ProjectFilterSuggestionPayload {
 }
 
 """
+Project health sorting options.
+"""
+input ProjectHealthSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
+"""
 An history associated with a project.
 """
 type ProjectHistory implements Node {
@@ -24109,6 +24139,20 @@ input ProjectLabelUpdateInput {
   The identifier of the parent label.
   """
   parentId: String
+}
+
+"""
+Project lead sorting options.
+"""
+input ProjectLeadSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -25662,6 +25706,14 @@ input ProjectSortInput {
   Sort by project creation date
   """
   createdAt: ProjectCreatedAtSort
+  """
+  Sort by project health status.
+  """
+  health: ProjectHealthSort
+  """
+  Sort by project lead name.
+  """
+  lead: ProjectLeadSort
   """
   Sort by manual order
   """
@@ -33578,6 +33630,10 @@ input UserSettingsUpdateInput {
   Whether this user is subscribed to DPA emails or not.
   """
   subscribedToDPA: Boolean
+  """
+  Whether this user is subscribed to general marketing communications or not.
+  """
+  subscribedToGeneralMarketingCommunications: Boolean
   """
   Whether this user is subscribed to invite accepted emails or not.
   """
