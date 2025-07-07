@@ -22,7 +22,11 @@ import {
   OAuthAppWebhookPayload,
   AgentContextEventWebhookPayload,
 } from "./_generated_sdk";
-import { AppUserNotificationWebhookPayloadWithNotification, EntityWebhookPayloadWithEntityData } from "./types";
+import {
+  AppUserNotificationWebhookPayloadWithNotification,
+  EntityWebhookPayloadWithEntityData,
+  EntityWebhookPayloadWithUnknownEntityData,
+} from "./types";
 
 export const LINEAR_WEBHOOK_SIGNATURE_HEADER = "linear-signature";
 export const LINEAR_WEBHOOK_TS_FIELD = "webhookTimestamp";
@@ -68,6 +72,7 @@ export class LinearWebhooks {
     timestamp?: number
   ):
     | EntityWebhookPayloadWithEntityData
+    | EntityWebhookPayloadWithUnknownEntityData
     | IssueSlaWebhookPayload
     | OAuthAppWebhookPayload
     | AppUserNotificationWebhookPayloadWithNotification
@@ -172,7 +177,7 @@ export class LinearWebhooks {
           data: entityWebhookPayload.data as UserWebhookPayload,
         };
       default:
-        return entityWebhookPayload;
+        return entityWebhookPayload as EntityWebhookPayloadWithUnknownEntityData;
     }
   }
 }
