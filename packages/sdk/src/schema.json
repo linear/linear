@@ -408,12 +408,17 @@
           },
           {
             "kind": "OBJECT",
-            "name": "AgentActivityUserInputContent",
+            "name": "AgentActivityPromptContent",
             "ofType": null
           },
           {
             "kind": "OBJECT",
             "name": "AgentActivityErrorContent",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "AgentActivityElicitationContent",
             "ofType": null
           }
         ]
@@ -497,6 +502,49 @@
           {
             "name": "cursor",
             "description": "Used in `before` and `after` args",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AgentActivityElicitationContent",
+        "description": "Content for an elicitation activity.",
+        "fields": [
+          {
+            "name": "type",
+            "description": "The type of activity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AgentActivityType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "body",
+            "description": "The elicitation message in Markdown format.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -683,6 +731,57 @@
       },
       {
         "kind": "OBJECT",
+        "name": "AgentActivityPromptContent",
+        "description": "Content for a prompt activity.",
+        "fields": [
+          {
+            "name": "type",
+            "description": "The type of activity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AgentActivityType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sourceCommentId",
+            "description": "The ID of the comment this prompt is sourced from.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "body",
+            "description": "A message requesting additional information or action from user.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "AgentActivityResponseContent",
         "description": "Content for a response activity.",
         "fields": [
@@ -751,7 +850,7 @@
             "deprecationReason": null
           },
           {
-            "name": "userInput",
+            "name": "elicitation",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -761,59 +860,14 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
-          }
-        ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "AgentActivityUserInputContent",
-        "description": "Content for a user input activity.",
-        "fields": [
-          {
-            "name": "type",
-            "description": "The type of activity.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "AgentActivityType",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
           },
           {
-            "name": "sourceCommentId",
-            "description": "The ID of the comment this user input is sourced from.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "body",
-            "description": "The user input body.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
+            "name": "prompt",
+            "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           }
         ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
         "possibleTypes": null
       },
       {
@@ -11108,7 +11162,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "CustomerCountSort",
-        "description": "[ALPHA] Issue customer count sorting options.",
+        "description": "Issue customer count sorting options.",
         "fields": null,
         "inputFields": [
           {
@@ -11603,7 +11657,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "CustomerImportantCountSort",
-        "description": "[ALPHA] Issue customer important count sorting options.",
+        "description": "Issue customer important count sorting options.",
         "fields": null,
         "inputFields": [
           {
@@ -14329,7 +14383,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "CustomerRevenueSort",
-        "description": "[ALPHA] Issue customer revenue sorting options.",
+        "description": "Issue customer revenue sorting options.",
         "fields": null,
         "inputFields": [
           {
@@ -44319,13 +44373,9 @@
             "description": "The id for the user that started the job.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -84423,6 +84473,41 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "ProjectHealthSort",
+        "description": "Project health sorting options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "nulls",
+            "description": "Whether nulls should be sorted first or last",
+            "type": {
+              "kind": "ENUM",
+              "name": "PaginationNulls",
+              "ofType": null
+            },
+            "defaultValue": "last",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "order",
+            "description": "The order for the individual sort",
+            "type": {
+              "kind": "ENUM",
+              "name": "PaginationSortOrder",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "ProjectHistory",
         "description": "An history associated with a project.",
@@ -85690,6 +85775,41 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "ProjectLeadSort",
+        "description": "Project lead sorting options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "nulls",
+            "description": "Whether nulls should be sorted first or last",
+            "type": {
+              "kind": "ENUM",
+              "name": "PaginationNulls",
+              "ofType": null
+            },
+            "defaultValue": "last",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "order",
+            "description": "The order for the individual sort",
+            "type": {
+              "kind": "ENUM",
+              "name": "PaginationSortOrder",
               "ofType": null
             },
             "defaultValue": null,
@@ -91190,6 +91310,30 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "ProjectUpdatedAtSort",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "health",
+            "description": "Sort by project health status.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectHealthSort",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lead",
+            "description": "Sort by project lead name.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectLeadSort",
               "ofType": null
             },
             "defaultValue": null,
@@ -119242,6 +119386,18 @@
           {
             "name": "subscribedToPrivacyLegalUpdates",
             "description": "Whether this user is subscribed to privacy and legal update emails or not.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subscribedToGeneralMarketingCommunications",
+            "description": "Whether this user is subscribed to general marketing communications or not.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
