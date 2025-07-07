@@ -1,5 +1,15 @@
 # Change Log
 
+## 45.4.0
+
+### Minor Changes
+
+- 4034c23: Better types when parsing webhooks
+
+### Patch Changes
+
+- 56a0f2f: chore(deps): update dependency patch versions
+
 ## 45.3.0
 
 ### Minor Changes
