@@ -177,7 +177,7 @@ export class LinearWebhooks {
           data: entityWebhookPayload.data as UserWebhookPayload,
         };
       default:
-        return entityWebhookPayload;
+        return entityWebhookPayload as EntityWebhookPayloadWithUnknownEntityData;
     }
   }
 }
