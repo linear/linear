@@ -2753,10 +2753,8 @@ fragment AgentActivity on AgentActivity {
   agentContext {
     id
   }
-  # The comment that contains the content of this activity, if any.
-  sourceComment {
-    id
-  }
+  # The comment ID this activity is linked to.
+  sourceCommentId
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -4214,8 +4212,6 @@ fragment AgentActivityPromptContent on AgentActivityPromptContent {
   __typename
   # A message requesting additional information or action from user.
   body
-  # The ID of the comment this prompt is sourced from.
-  sourceCommentId
   # The type of activity.
   type
 }
@@ -4223,8 +4219,8 @@ fragment AgentActivityPromptContent on AgentActivityPromptContent {
 # Content for a response activity.
 fragment AgentActivityResponseContent on AgentActivityResponseContent {
   __typename
-  # The ID of the comment this response references.
-  sourceCommentId
+  # The response content in Markdown format.
+  body
   # The type of activity.
   type
 }
