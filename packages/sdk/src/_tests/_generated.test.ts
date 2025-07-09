@@ -328,16 +328,6 @@ describe("generated", () => {
         console.warn("codegen-doc:print: No AgentActivity found - cannot test agentActivity.agentContext query");
       }
     });
-
-    /** Test the agentActivity.sourceComment query for L.Comment */
-    it("agentActivity.sourceComment", async () => {
-      if (_agentActivity) {
-        const agentActivity_sourceComment: L.Comment | undefined = await _agentActivity.sourceComment;
-        expect(agentActivity_sourceComment instanceof L.Comment);
-      } else {
-        console.warn("codegen-doc:print: No AgentActivity found - cannot test agentActivity.sourceComment query");
-      }
-    });
   });
 
   /** Test all AgentContext queries */

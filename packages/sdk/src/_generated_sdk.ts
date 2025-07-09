@@ -215,16 +215,15 @@ export class ActorBot extends Request {
  */
 export class AgentActivity extends Request {
   private _agentContext: L.AgentActivityFragment["agentContext"];
-  private _sourceComment?: L.AgentActivityFragment["sourceComment"];
 
   public constructor(request: LinearRequest, data: L.AgentActivityFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.sourceCommentId = data.sourceCommentId ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._agentContext = data.agentContext;
-    this._sourceComment = data.sourceComment ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -233,6 +232,8 @@ export class AgentActivity extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The comment ID this activity is linked to. */
+  public sourceCommentId?: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -245,14 +246,6 @@ export class AgentActivity extends Request {
   /** The ID of agent context this activity belongs to. */
   public get agentContextId(): string | undefined {
     return this._agentContext?.id;
-  }
-  /** The comment that contains the content of this activity, if any. */
-  public get sourceComment(): LinearFetch<Comment> | undefined {
-    return this._sourceComment?.id ? new CommentQuery(this._request).fetch({ id: this._sourceComment?.id }) : undefined;
-  }
-  /** The ID of comment that contains the content of this activity, if any. */
-  public get sourceCommentId(): string | undefined {
-    return this._sourceComment?.id;
   }
 
   /** Creates an agent activity. */
@@ -397,15 +390,12 @@ export class AgentActivityPayload extends Request {
 export class AgentActivityPromptContent extends Request {
   public constructor(request: LinearRequest, data: L.AgentActivityPromptContentFragment) {
     super(request);
-    this.body = data.body ?? undefined;
-    this.sourceCommentId = data.sourceCommentId ?? undefined;
+    this.body = data.body;
     this.type = data.type;
   }
 
   /** A message requesting additional information or action from user. */
-  public body?: string;
-  /** The ID of the comment this prompt is sourced from. */
-  public sourceCommentId?: string;
+  public body: string;
   /** The type of activity. */
   public type: L.AgentActivityType;
 }
@@ -418,12 +408,12 @@ export class AgentActivityPromptContent extends Request {
 export class AgentActivityResponseContent extends Request {
   public constructor(request: LinearRequest, data: L.AgentActivityResponseContentFragment) {
     super(request);
-    this.sourceCommentId = data.sourceCommentId;
+    this.body = data.body;
     this.type = data.type;
   }
 
-  /** The ID of the comment this response references. */
-  public sourceCommentId: string;
+  /** The response content in Markdown format. */
+  public body: string;
   /** The type of activity. */
   public type: L.AgentActivityType;
 }

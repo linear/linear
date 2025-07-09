@@ -73,8 +73,8 @@ export type AgentActivity = Node & {
   createdAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
-  /** The comment that contains the content of this activity, if any. */
-  sourceComment?: Maybe<Comment>;
+  /** The comment ID this activity is linked to. */
+  sourceCommentId?: Maybe<Scalars["String"]>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -168,9 +168,7 @@ export type AgentActivityPayload = {
 export type AgentActivityPromptContent = {
   __typename?: "AgentActivityPromptContent";
   /** A message requesting additional information or action from user. */
-  body?: Maybe<Scalars["String"]>;
-  /** The ID of the comment this prompt is sourced from. */
-  sourceCommentId?: Maybe<Scalars["String"]>;
+  body: Scalars["String"];
   /** The type of activity. */
   type: AgentActivityType;
 };
@@ -178,8 +176,8 @@ export type AgentActivityPromptContent = {
 /** Content for a response activity. */
 export type AgentActivityResponseContent = {
   __typename?: "AgentActivityResponseContent";
-  /** The ID of the comment this response references. */
-  sourceCommentId: Scalars["String"];
+  /** The response content in Markdown format. */
+  body: Scalars["String"];
   /** The type of activity. */
   type: AgentActivityType;
 };
@@ -15444,7 +15442,10 @@ export type Query = {
   searchIssues: IssueSearchPayload;
   /** Search projects. */
   searchProjects: ProjectSearchPayload;
-  /** [ALPHA] Search for various resources using natural language. */
+  /**
+   * [INTERNAL] Search for various resources using natural language.
+   * @deprecated Use specific search endpoints like searchIssues, searchProjects, searchDocuments instead.
+   */
   semanticSearch: SemanticSearchPayload;
   /** Fetch SSO login URL for the email provided. */
   ssoUrlFromEmail: SsoUrlFromEmailResponse;
@@ -16755,14 +16756,14 @@ export type SalesforceSettingsInput = {
   url?: Maybe<Scalars["String"]>;
 };
 
-/** [ALPHA] Payload returned by semantic search. */
+/** [INTERNAL] Payload returned by semantic search. */
 export type SemanticSearchPayload = {
   __typename?: "SemanticSearchPayload";
   enabled: Scalars["Boolean"];
   results: Array<SemanticSearchResult>;
 };
 
-/** [ALPHA] A semantic search result reference. */
+/** [INTERNAL] A semantic search result reference. */
 export type SemanticSearchResult = Node & {
   __typename?: "SemanticSearchResult";
   /** The document related to the semantic search result. */
@@ -16779,7 +16780,7 @@ export type SemanticSearchResult = Node & {
   type: SemanticSearchResultType;
 };
 
-/** [ALPHA] The type of the semantic search result. */
+/** [INTERNAL] The type of the semantic search result. */
 export enum SemanticSearchResultType {
   Document = "document",
   Initiative = "initiative",
@@ -20654,11 +20655,8 @@ export type ApiKeyFragment = { __typename: "ApiKey" } & Pick<
 
 export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
   AgentActivity,
-  "updatedAt" | "archivedAt" | "createdAt" | "id"
-> & {
-    agentContext: { __typename?: "AgentContext" } & Pick<AgentContext, "id">;
-    sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
-  };
+  "sourceCommentId" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+> & { agentContext: { __typename?: "AgentContext" } & Pick<AgentContext, "id"> };
 
 export type EmailIntakeAddressFragment = { __typename: "EmailIntakeAddress" } & Pick<
   EmailIntakeAddress,
@@ -21289,12 +21287,12 @@ export type ArchiveResponseFragment = { __typename: "ArchiveResponse" } & Pick<
 
 export type AgentActivityPromptContentFragment = { __typename: "AgentActivityPromptContent" } & Pick<
   AgentActivityPromptContent,
-  "body" | "sourceCommentId" | "type"
+  "body" | "type"
 >;
 
 export type AgentActivityResponseContentFragment = { __typename: "AgentActivityResponseContent" } & Pick<
   AgentActivityResponseContent,
-  "sourceCommentId" | "type"
+  "body" | "type"
 >;
 
 export type AgentActivityActionContentFragment = { __typename: "AgentActivityActionContent" } & Pick<
@@ -32379,7 +32377,6 @@ export const AgentActivityPromptContentFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "body" } },
-          { kind: "Field", name: { kind: "Name", value: "sourceCommentId" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
         ],
       },
@@ -32397,7 +32394,7 @@ export const AgentActivityResponseContentFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "sourceCommentId" } },
+          { kind: "Field", name: { kind: "Name", value: "body" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
         ],
       },
@@ -35298,14 +35295,7 @@ export const AgentActivityFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "sourceComment" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
+          { kind: "Field", name: { kind: "Name", value: "sourceCommentId" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
