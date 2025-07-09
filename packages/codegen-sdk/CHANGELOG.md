@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.0.3
+
+### Patch Changes
+
+- bff712d: chore(deps): update dependency patch versions
+
 ## 3.0.2
 
 ### Patch Changes
