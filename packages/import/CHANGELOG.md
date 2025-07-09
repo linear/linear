@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.2.21
+
+### Patch Changes
+
+- bff712d: chore(deps): update dependency patch versions
+- Updated dependencies [bff712d]
+- Updated dependencies [57e6456]
+  - @linear/sdk@47.0.0
+
 ## 2.2.20
 
 ### Patch Changes
