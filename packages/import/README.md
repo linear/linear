@@ -24,6 +24,17 @@ Run interactive importer:
 linear-import
 ```
 
+## Docker Integration
+
+You can also run the importer using Docker without installing it locally:
+
+```
+docker-compose run --build --rm linear-import
+```
+
+This will build and start a Docker container that runs the linear-import tool. The current directory will be mounted inside the container, 
+allowing access to any export files you need to import.
+
 ## Importers
 
 It's recommended to only import open issues to keep your Linear account more manageable. Note that creation and modification dates on issues will not carry over.
