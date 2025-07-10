@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.0.4
+
+### Patch Changes
+
+- 34ab0d7: chore(deps): update dependency patch versions
+
 ## 3.0.3
 
 ### Patch Changes
