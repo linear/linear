@@ -58,6 +58,10 @@ type AgentActivity implements Node {
   """
   id: ID!
   """
+  The comment that this activity is linked to.
+  """
+  sourceComment: Comment
+  """
   The comment ID this activity is linked to.
   """
   sourceCommentId: String
@@ -113,7 +117,8 @@ input AgentActivityCreateInput {
   """
   agentContextId: String!
   """
-  The content payload of the agent activity.
+  The content payload of the agent activity. This object is not strictly typed.
+  See https://linear.app/developers/agents for typing details.
   """
   content: JSONObject!
   """
@@ -6498,6 +6503,10 @@ type EmailIntakeAddress implements Node {
 
 input EmailIntakeAddressCreateInput {
   """
+  Whether customer requests are enabled.
+  """
+  customerRequestsEnabled: Boolean
+  """
   The email address used to forward emails to the intake address.
   """
   forwardingEmailAddress: String
@@ -7336,6 +7345,10 @@ type Favorite implements Node {
   """
   projectTeam: Team
   """
+  The favorited pull request.
+  """
+  pullRequest: PullRequest
+  """
   The favorited roadmap.
   """
   roadmap: Roadmap
@@ -7445,6 +7458,10 @@ input FavoriteCreateInput {
   The tab of the project to favorite.
   """
   projectTab: ProjectTab
+  """
+  The identifier of the pull request to favorite.
+  """
+  pullRequestId: String
   """
   The identifier of the roadmap to favorite.
   """
@@ -11671,6 +11688,10 @@ input IssueCreateInput {
   The cycle associated with the issue.
   """
   cycleId: String
+  """
+  [Internal] The identifier of the agent user to delegate the issue to.
+  """
+  delegateId: String
   """
   The issue description in markdown format.
   """
@@ -32847,6 +32868,39 @@ type User implements Node {
     orderBy: PaginationOrderBy
   ): IssueConnection!
   """
+  [Internal] Issues delegated to this user.
+  """
+  delegatedIssues(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned issues.
+    """
+    filter: IssueFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueConnection!
+  """
   A short description of the user, either its title or bio.
   """
   description: String
@@ -32968,39 +33022,6 @@ type User implements Node {
   A date at which the user current status should be cleared.
   """
   statusUntilAt: DateTime
-  """
-  Issues delegated to an agent by the user.
-  """
-  supervisedIssues(
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    Filter returned issues.
-    """
-    filter: IssueFilter
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): IssueConnection!
   """
   Memberships associated with the user. For easier access of the same data, use `teams` query.
   """

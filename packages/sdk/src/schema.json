@@ -223,6 +223,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "sourceComment",
+            "description": "The comment that this activity is linked to.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Comment",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -459,7 +471,7 @@
           },
           {
             "name": "content",
-            "description": "The content payload of the agent activity.",
+            "description": "The content payload of the agent activity. This object is not strictly typed.\nSee https://linear.app/developers/agents for typing details.",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -23145,6 +23157,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "customerRequestsEnabled",
+            "description": "Whether customer requests are enabled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -26169,6 +26193,18 @@
             "deprecationReason": null
           },
           {
+            "name": "pullRequest",
+            "description": "The favorited pull request.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PullRequest",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "url",
             "description": "URL of the favorited entity. Folders return 'null' value.",
             "args": [],
@@ -26568,6 +26604,18 @@
           {
             "name": "dashboardId",
             "description": "The identifier of the dashboard to favorite.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pullRequestId",
+            "description": "The identifier of the pull request to favorite.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -41485,6 +41533,18 @@
           {
             "name": "assigneeId",
             "description": "The identifier of the user to assign the issue to.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "delegateId",
+            "description": "[Internal] The identifier of the agent user to delegate the issue to.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -116859,8 +116919,8 @@
             "deprecationReason": null
           },
           {
-            "name": "supervisedIssues",
-            "description": "Issues delegated to an agent by the user.",
+            "name": "delegatedIssues",
+            "description": "[Internal] Issues delegated to this user.",
             "args": [
               {
                 "name": "filter",

@@ -215,6 +215,7 @@ export class ActorBot extends Request {
  */
 export class AgentActivity extends Request {
   private _agentContext: L.AgentActivityFragment["agentContext"];
+  private _sourceComment?: L.AgentActivityFragment["sourceComment"];
 
   public constructor(request: LinearRequest, data: L.AgentActivityFragment) {
     super(request);
@@ -224,6 +225,7 @@ export class AgentActivity extends Request {
     this.sourceCommentId = data.sourceCommentId ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this._agentContext = data.agentContext;
+    this._sourceComment = data.sourceComment ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -246,6 +248,10 @@ export class AgentActivity extends Request {
   /** The ID of agent context this activity belongs to. */
   public get agentContextId(): string | undefined {
     return this._agentContext?.id;
+  }
+  /** The comment that this activity is linked to. */
+  public get sourceComment(): LinearFetch<Comment> | undefined {
+    return this._sourceComment?.id ? new CommentQuery(this._request).fetch({ id: this._sourceComment?.id }) : undefined;
   }
 
   /** Creates an agent activity. */
@@ -16452,10 +16458,6 @@ export class User extends Request {
   /** The user's drafts */
   public drafts(variables?: Omit<L.User_DraftsQueryVariables, "id">) {
     return new User_DraftsQuery(this._request, this.id, variables).fetch(variables);
-  }
-  /** Issues delegated to an agent by the user. */
-  public supervisedIssues(variables?: Omit<L.User_SupervisedIssuesQueryVariables, "id">) {
-    return new User_SupervisedIssuesQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Memberships associated with the user. For easier access of the same data, use `teams` query. */
   public teamMemberships(variables?: Omit<L.User_TeamMembershipsQueryVariables, "id">) {
@@ -34482,59 +34484,6 @@ export class User_DraftsQuery extends Request {
 }
 
 /**
- * A fetchable User_SupervisedIssues Query
- *
- * @param request - function to call the graphql client
- * @param id - required id to pass to user
- * @param variables - variables without 'id' to pass into the User_SupervisedIssuesQuery
- */
-export class User_SupervisedIssuesQuery extends Request {
-  private _id: string;
-  private _variables?: Omit<L.User_SupervisedIssuesQueryVariables, "id">;
-
-  public constructor(
-    request: LinearRequest,
-    id: string,
-    variables?: Omit<L.User_SupervisedIssuesQueryVariables, "id">
-  ) {
-    super(request);
-    this._id = id;
-    this._variables = variables;
-  }
-
-  /**
-   * Call the User_SupervisedIssues query and return a IssueConnection
-   *
-   * @param variables - variables without 'id' to pass into the User_SupervisedIssuesQuery
-   * @returns parsed response from User_SupervisedIssuesQuery
-   */
-  public async fetch(variables?: Omit<L.User_SupervisedIssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
-    const response = await this._request<L.User_SupervisedIssuesQuery, L.User_SupervisedIssuesQueryVariables>(
-      L.User_SupervisedIssuesDocument,
-      {
-        id: this._id,
-        ...this._variables,
-        ...variables,
-      }
-    );
-    const data = response.user.supervisedIssues;
-
-    return new IssueConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...this._variables,
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
  * A fetchable User_TeamMemberships Query
  *
  * @param request - function to call the graphql client
@@ -35448,49 +35397,6 @@ export class Viewer_DraftsQuery extends Request {
     const data = response.viewer.drafts;
 
     return new DraftConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...this._variables,
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable Viewer_SupervisedIssues Query
- *
- * @param request - function to call the graphql client
- * @param variables - variables to pass into the Viewer_SupervisedIssuesQuery
- */
-export class Viewer_SupervisedIssuesQuery extends Request {
-  private _variables?: L.Viewer_SupervisedIssuesQueryVariables;
-
-  public constructor(request: LinearRequest, variables?: L.Viewer_SupervisedIssuesQueryVariables) {
-    super(request);
-
-    this._variables = variables;
-  }
-
-  /**
-   * Call the Viewer_SupervisedIssues query and return a IssueConnection
-   *
-   * @param variables - variables to pass into the Viewer_SupervisedIssuesQuery
-   * @returns parsed response from Viewer_SupervisedIssuesQuery
-   */
-  public async fetch(variables?: L.Viewer_SupervisedIssuesQueryVariables): LinearFetch<IssueConnection> {
-    const response = await this._request<L.Viewer_SupervisedIssuesQuery, L.Viewer_SupervisedIssuesQueryVariables>(
-      L.Viewer_SupervisedIssuesDocument,
-      variables
-    );
-    const data = response.viewer.supervisedIssues;
-
-    return new IssueConnection(
       this._request,
       connection =>
         this.fetch(

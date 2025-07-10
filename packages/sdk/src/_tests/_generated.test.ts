@@ -328,6 +328,16 @@ describe("generated", () => {
         console.warn("codegen-doc:print: No AgentActivity found - cannot test agentActivity.agentContext query");
       }
     });
+
+    /** Test the agentActivity.sourceComment query for L.Comment */
+    it("agentActivity.sourceComment", async () => {
+      if (_agentActivity) {
+        const agentActivity_sourceComment: L.Comment | undefined = await _agentActivity.sourceComment;
+        expect(agentActivity_sourceComment instanceof L.Comment);
+      } else {
+        console.warn("codegen-doc:print: No AgentActivity found - cannot test agentActivity.sourceComment query");
+      }
+    });
   });
 
   /** Test all AgentContext queries */
@@ -5191,16 +5201,6 @@ describe("generated", () => {
       }
     });
 
-    /** Test the user connection query for the Issue */
-    it("user.supervisedIssues", async () => {
-      if (_user) {
-        const supervisedIssues: L.IssueConnection | undefined = await _user.supervisedIssues();
-        expect(supervisedIssues instanceof L.IssueConnection);
-      } else {
-        console.warn("codegen-doc:print: No user found - cannot test _user.supervisedIssues query");
-      }
-    });
-
     /** Test the user connection query for the TeamMembership */
     it("user.teamMemberships", async () => {
       if (_user) {
@@ -5280,16 +5280,6 @@ describe("generated", () => {
         expect(drafts instanceof L.DraftConnection);
       } else {
         console.warn("codegen-doc:print: No viewer found - cannot test _viewer.drafts query");
-      }
-    });
-
-    /** Test the viewer connection query for the Issue */
-    it("viewer.supervisedIssues", async () => {
-      if (_viewer) {
-        const supervisedIssues: L.IssueConnection | undefined = await _viewer.supervisedIssues();
-        expect(supervisedIssues instanceof L.IssueConnection);
-      } else {
-        console.warn("codegen-doc:print: No viewer found - cannot test _viewer.supervisedIssues query");
       }
     });
 
