@@ -138,11 +138,9 @@ Following fields are supported:
 - `Time Estimate` - Issue estimate
 
 <!-- AUTO-GENERATED-CONTENT:START (TEXT_SECTION:id=license&src=../../README.md) -->
-
 ## License
 
 <br/>
 
 Licensed under the [MIT License](./LICENSE).
-
 <!-- AUTO-GENERATED-CONTENT:END -->
