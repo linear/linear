@@ -5309,13 +5309,13 @@ fragment AgentContextEventWebhookPayload on AgentContextEventWebhookPayload {
   appUserId
   # ID of the organization for which the webhook belongs to.
   organizationId
+  # The agent activity that was created.
+  agentActivity {
+    ...AgentActivityWebhookPayload
+  }
   # The agent context that the event belongs to.
   agentContext {
     ...AgentContextWebhookPayload
-  }
-  # The comment that was created.
-  comment {
-    ...CommentWebhookPayload
   }
   # The time the payload was created.
   createdAt
@@ -5323,6 +5323,23 @@ fragment AgentContextEventWebhookPayload on AgentContextEventWebhookPayload {
   action
   # The type of resource.
   type
+}
+
+# Payload for an agent activity webhook.
+fragment AgentActivityWebhookPayload on AgentActivityWebhookPayload {
+  __typename
+  # The ID of the agent context that this activity belongs to.
+  agentContextId
+  # The ID of the entity.
+  id
+  # The content of the agent activity.
+  content
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
 }
 
 # Payload for an agent context webhook.

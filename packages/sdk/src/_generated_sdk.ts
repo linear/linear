@@ -424,6 +424,34 @@ export class AgentActivityResponseContent extends Request {
   public type: L.AgentActivityType;
 }
 /**
+ * Payload for an agent activity webhook.
+ *
+ * @param data - L.AgentActivityWebhookPayloadFragment response data
+ */
+export class AgentActivityWebhookPayload {
+  public constructor(data: L.AgentActivityWebhookPayloadFragment) {
+    this.agentContextId = data.agentContextId;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.content = data.content;
+    this.createdAt = data.createdAt;
+    this.id = data.id;
+    this.updatedAt = data.updatedAt;
+  }
+
+  /** The ID of the agent context that this activity belongs to. */
+  public agentContextId: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The content of the agent activity. */
+  public content: L.Scalars["JSONObject"];
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+}
+/**
  * A context for agent activities and state management.
  *
  * @param request - function to call the graphql client
@@ -558,8 +586,8 @@ export class AgentContextEventWebhookPayload {
     this.oauthClientId = data.oauthClientId;
     this.organizationId = data.organizationId;
     this.type = data.type;
+    this.agentActivity = data.agentActivity ? new AgentActivityWebhookPayload(data.agentActivity) : undefined;
     this.agentContext = new AgentContextWebhookPayload(data.agentContext);
-    this.comment = data.comment ? new CommentWebhookPayload(data.comment) : undefined;
   }
 
   /** The type of action that triggered the webhook. */
@@ -574,10 +602,10 @@ export class AgentContextEventWebhookPayload {
   public organizationId: string;
   /** The type of resource. */
   public type: string;
+  /** The agent activity that was created. */
+  public agentActivity?: AgentActivityWebhookPayload;
   /** The agent context that the event belongs to. */
   public agentContext: AgentContextWebhookPayload;
-  /** The comment that was created. */
-  public comment?: CommentWebhookPayload;
 }
 /**
  * AgentContextPayload model
