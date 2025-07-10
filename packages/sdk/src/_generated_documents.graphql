@@ -2755,6 +2755,10 @@ fragment AgentActivity on AgentActivity {
   }
   # The comment ID this activity is linked to.
   sourceCommentId
+  # The comment that this activity is linked to.
+  sourceComment {
+    id
+  }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -13532,39 +13536,6 @@ query user_drafts(
     }
   }
 }
-# Issues delegated to an agent by the user.
-query user_supervisedIssues(
-  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
-  $id: String!
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # Filter returned issues.
-  $filter: IssueFilter
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  user(id: $id) {
-    supervisedIssues(
-      after: $after
-      before: $before
-      filter: $filter
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...IssueConnection
-    }
-  }
-}
 # Memberships associated with the user. For easier access of the same data, use `teams` query.
 query user_teamMemberships(
   # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
@@ -14060,37 +14031,6 @@ query viewer_drafts(
       orderBy: $orderBy
     ) {
       ...DraftConnection
-    }
-  }
-}
-# Issues delegated to an agent by the user.
-query viewer_supervisedIssues(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # Filter returned issues.
-  $filter: IssueFilter
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  viewer {
-    supervisedIssues(
-      after: $after
-      before: $before
-      filter: $filter
-      first: $first
-      includeArchived: $includeArchived
-      last: $last
-      orderBy: $orderBy
-    ) {
-      ...IssueConnection
     }
   }
 }

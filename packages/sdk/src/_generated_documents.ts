@@ -73,6 +73,8 @@ export type AgentActivity = Node & {
   createdAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** The comment that this activity is linked to. */
+  sourceComment?: Maybe<Comment>;
   /** The comment ID this activity is linked to. */
   sourceCommentId?: Maybe<Scalars["String"]>;
   /**
@@ -114,7 +116,10 @@ export type AgentActivityContent =
 export type AgentActivityCreateInput = {
   /** The agent context this activity belongs to. */
   agentContextId: Scalars["String"];
-  /** The content payload of the agent activity. */
+  /**
+   * The content payload of the agent activity. This object is not strictly typed.
+   * See https://linear.app/developers/agents for typing details.
+   */
   content: Scalars["JSONObject"];
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
@@ -3757,6 +3762,8 @@ export type EmailIntakeAddress = Node & {
 };
 
 export type EmailIntakeAddressCreateInput = {
+  /** Whether customer requests are enabled. */
+  customerRequestsEnabled?: Maybe<Scalars["Boolean"]>;
   /** The email address used to forward emails to the intake address. */
   forwardingEmailAddress?: Maybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
@@ -4254,6 +4261,8 @@ export type Favorite = Node & {
   projectTab?: Maybe<ProjectTab>;
   /** [DEPRECATED] The favorited team of the project. */
   projectTeam?: Maybe<Team>;
+  /** The favorited pull request. */
+  pullRequest?: Maybe<PullRequest>;
   /** The favorited roadmap. */
   roadmap?: Maybe<Roadmap>;
   /** The order of the item in the favorites list. */
@@ -4327,6 +4336,8 @@ export type FavoriteCreateInput = {
   projectLabelId?: Maybe<Scalars["String"]>;
   /** The tab of the project to favorite. */
   projectTab?: Maybe<ProjectTab>;
+  /** The identifier of the pull request to favorite. */
+  pullRequestId?: Maybe<Scalars["String"]>;
   /** The identifier of the roadmap to favorite. */
   roadmapId?: Maybe<Scalars["String"]>;
   /** The position of the item in the favorites list. */
@@ -6707,6 +6718,8 @@ export type IssueCreateInput = {
   createdAt?: Maybe<Scalars["DateTime"]>;
   /** The cycle associated with the issue. */
   cycleId?: Maybe<Scalars["String"]>;
+  /** [Internal] The identifier of the agent user to delegate the issue to. */
+  delegateId?: Maybe<Scalars["String"]>;
   /** The issue description in markdown format. */
   description?: Maybe<Scalars["String"]>;
   /** [Internal] The issue description as a Prosemirror document. */
@@ -18319,6 +18332,8 @@ export type User = Node & {
   createdIssueCount: Scalars["Int"];
   /** Issues created by the user. */
   createdIssues: IssueConnection;
+  /** [Internal] Issues delegated to this user. */
+  delegatedIssues: IssueConnection;
   /** A short description of the user, either its title or bio. */
   description?: Maybe<Scalars["String"]>;
   /** Reason why is the account disabled. */
@@ -18358,8 +18373,6 @@ export type User = Node & {
   statusLabel?: Maybe<Scalars["String"]>;
   /** A date at which the user current status should be cleared. */
   statusUntilAt?: Maybe<Scalars["DateTime"]>;
-  /** Issues delegated to an agent by the user. */
-  supervisedIssues: IssueConnection;
   /** Memberships associated with the user. For easier access of the same data, use `teams` query. */
   teamMemberships: TeamMembershipConnection;
   /** Teams the user is part of. */
@@ -18398,6 +18411,17 @@ export type UserCreatedIssuesArgs = {
 };
 
 /** A user that has access to the the resources of an organization. */
+export type UserDelegatedIssuesArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<IssueFilter>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** A user that has access to the the resources of an organization. */
 export type UserDraftsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
@@ -18411,17 +18435,6 @@ export type UserDraftsArgs = {
 export type UserIssueDraftsArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-};
-
-/** A user that has access to the the resources of an organization. */
-export type UserSupervisedIssuesArgs = {
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  filter?: Maybe<IssueFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -20656,7 +20669,10 @@ export type ApiKeyFragment = { __typename: "ApiKey" } & Pick<
 export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
   AgentActivity,
   "sourceCommentId" | "updatedAt" | "archivedAt" | "createdAt" | "id"
-> & { agentContext: { __typename?: "AgentContext" } & Pick<AgentContext, "id"> };
+> & {
+    agentContext: { __typename?: "AgentContext" } & Pick<AgentContext, "id">;
+    sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+  };
 
 export type EmailIntakeAddressFragment = { __typename: "EmailIntakeAddress" } & Pick<
   EmailIntakeAddress,
@@ -26677,21 +26693,6 @@ export type User_DraftsQuery = { __typename?: "Query" } & {
   user: { __typename?: "User" } & { drafts: { __typename?: "DraftConnection" } & DraftConnectionFragment };
 };
 
-export type User_SupervisedIssuesQueryVariables = Exact<{
-  id: Scalars["String"];
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  filter?: Maybe<IssueFilter>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type User_SupervisedIssuesQuery = { __typename?: "Query" } & {
-  user: { __typename?: "User" } & { supervisedIssues: { __typename?: "IssueConnection" } & IssueConnectionFragment };
-};
-
 export type User_TeamMembershipsQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
@@ -27167,20 +27168,6 @@ export type Viewer_DraftsQueryVariables = Exact<{
 
 export type Viewer_DraftsQuery = { __typename?: "Query" } & {
   viewer: { __typename?: "User" } & { drafts: { __typename?: "DraftConnection" } & DraftConnectionFragment };
-};
-
-export type Viewer_SupervisedIssuesQueryVariables = Exact<{
-  after?: Maybe<Scalars["String"]>;
-  before?: Maybe<Scalars["String"]>;
-  filter?: Maybe<IssueFilter>;
-  first?: Maybe<Scalars["Int"]>;
-  includeArchived?: Maybe<Scalars["Boolean"]>;
-  last?: Maybe<Scalars["Int"]>;
-  orderBy?: Maybe<PaginationOrderBy>;
-}>;
-
-export type Viewer_SupervisedIssuesQuery = { __typename?: "Query" } & {
-  viewer: { __typename?: "User" } & { supervisedIssues: { __typename?: "IssueConnection" } & IssueConnectionFragment };
 };
 
 export type Viewer_TeamMembershipsQueryVariables = Exact<{
@@ -35296,6 +35283,14 @@ export const AgentActivityFragmentDoc = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "sourceCommentId" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "sourceComment" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
@@ -62442,130 +62437,6 @@ export const User_DraftsDocument = {
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<User_DraftsQuery, User_DraftsQueryVariables>;
-export const User_SupervisedIssuesDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "user_supervisedIssues" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "user" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "supervisedIssues" },
-                  arguments: [
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "after" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "before" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "filter" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "first" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "includeArchived" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "last" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "orderBy" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-                    },
-                  ],
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueConnectionFragmentDoc.definitions,
-    ...IssueFragmentDoc.definitions,
-    ...ReactionFragmentDoc.definitions,
-    ...ActorBotFragmentDoc.definitions,
-    ...ExternalEntityInfoFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<User_SupervisedIssuesQuery, User_SupervisedIssuesQueryVariables>;
 export const User_TeamMembershipsDocument = {
   kind: "Document",
   definitions: [
@@ -64728,118 +64599,6 @@ export const Viewer_DraftsDocument = {
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Viewer_DraftsQuery, Viewer_DraftsQueryVariables>;
-export const Viewer_SupervisedIssuesDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "viewer_supervisedIssues" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "IssueFilter" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "viewer" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "supervisedIssues" },
-                  arguments: [
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "after" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "before" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "filter" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "first" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "includeArchived" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "last" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "orderBy" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-                    },
-                  ],
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueConnection" } }],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueConnectionFragmentDoc.definitions,
-    ...IssueFragmentDoc.definitions,
-    ...ReactionFragmentDoc.definitions,
-    ...ActorBotFragmentDoc.definitions,
-    ...ExternalEntityInfoFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<Viewer_SupervisedIssuesQuery, Viewer_SupervisedIssuesQueryVariables>;
 export const Viewer_TeamMembershipsDocument = {
   kind: "Document",
   definitions: [
