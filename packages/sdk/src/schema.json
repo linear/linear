@@ -223,6 +223,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "sourceComment",
+            "description": "The comment that this activity is linked to.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Comment",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -459,7 +471,7 @@
           },
           {
             "name": "content",
-            "description": "The content payload of the agent activity.",
+            "description": "The content payload of the agent activity. This object is not strictly typed.\nSee https://linear.app/developers/agents for typing details.",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -860,6 +872,109 @@
             "deprecationReason": null
           }
         ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AgentActivityWebhookPayload",
+        "description": "Payload for an agent activity webhook.",
+        "fields": [
+          {
+            "name": "agentContextId",
+            "description": "The ID of the agent context that this activity belongs to.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "archivedAt",
+            "description": "The time at which the entity was archived.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "content",
+            "description": "The content of the agent activity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": "The ID of the entity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "The time at which the entity was updated.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
         "possibleTypes": null
       },
       {
@@ -1429,6 +1544,18 @@
             "deprecationReason": null
           },
           {
+            "name": "agentActivity",
+            "description": "The agent activity that was created.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AgentActivityWebhookPayload",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "agentContext",
             "description": "The agent context that the event belongs to.",
             "args": [],
@@ -1456,18 +1583,6 @@
                 "name": "String",
                 "ofType": null
               }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "comment",
-            "description": "The comment that was created.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "CommentWebhookPayload",
-              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -19105,6 +19220,11 @@
         "possibleTypes": [
           {
             "kind": "OBJECT",
+            "name": "AgentActivityWebhookPayload",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "AgentContextWebhookPayload",
             "ofType": null
           },
@@ -23145,6 +23265,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "customerRequestsEnabled",
+            "description": "Whether customer requests are enabled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -26169,6 +26301,18 @@
             "deprecationReason": null
           },
           {
+            "name": "pullRequest",
+            "description": "The favorited pull request.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PullRequest",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "url",
             "description": "URL of the favorited entity. Folders return 'null' value.",
             "args": [],
@@ -26568,6 +26712,18 @@
           {
             "name": "dashboardId",
             "description": "The identifier of the dashboard to favorite.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pullRequestId",
+            "description": "The identifier of the pull request to favorite.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -41495,6 +41651,18 @@
             "deprecationReason": null
           },
           {
+            "name": "delegateId",
+            "description": "[Internal] The identifier of the agent user to delegate the issue to.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "parentId",
             "description": "The identifier of the parent issue.",
             "type": {
@@ -41832,6 +42000,18 @@
             "type": {
               "kind": "ENUM",
               "name": "SLADayCountType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "useDefaultTemplate",
+            "description": "Whether to use the default template for the team. When set to true, the default template of this team based on user's membership will be applied.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -51871,6 +52051,30 @@
           {
             "name": "cycleId",
             "description": "The ID of the cycle that the issue belongs to.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "delegate",
+            "description": "[Internal] The user that the issue is delegated to.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "UserChildWebhookPayload",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "delegateId",
+            "description": "[Internal] The ID of the user that the issue is delegated to.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -116859,8 +117063,8 @@
             "deprecationReason": null
           },
           {
-            "name": "supervisedIssues",
-            "description": "Issues delegated to an agent by the user.",
+            "name": "delegatedIssues",
+            "description": "[Internal] Issues delegated to this user.",
             "args": [
               {
                 "name": "filter",
