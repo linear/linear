@@ -200,8 +200,8 @@ export enum AgentActivityType {
 /** Payload for an agent activity webhook. */
 export type AgentActivityWebhookPayload = {
   __typename?: "AgentActivityWebhookPayload";
-  /** The ID of the agent context that this activity belongs to. */
-  agentContextId: Scalars["String"];
+  /** The ID of the agent session that this activity belongs to. */
+  agentSessionId: Scalars["String"];
   /** The time at which the entity was archived. */
   archivedAt?: Maybe<Scalars["String"]>;
   /** The content of the agent activity. */
@@ -289,27 +289,6 @@ export type AgentContextEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: AgentContext;
-};
-
-/** Payload for agent context webhook events. */
-export type AgentContextEventWebhookPayload = {
-  __typename?: "AgentContextEventWebhookPayload";
-  /** The type of action that triggered the webhook. */
-  action: Scalars["String"];
-  /** The agent activity that was created. */
-  agentActivity?: Maybe<AgentActivityWebhookPayload>;
-  /** The agent context that the event belongs to. */
-  agentContext: AgentContextWebhookPayload;
-  /** ID of the app user the agent context belongs to. */
-  appUserId: Scalars["String"];
-  /** The time the payload was created. */
-  createdAt: Scalars["DateTime"];
-  /** ID of the OAuth client the app user is tied to. */
-  oauthClientId: Scalars["String"];
-  /** ID of the organization for which the webhook belongs to. */
-  organizationId: Scalars["String"];
-  /** The type of resource. */
-  type: Scalars["String"];
 };
 
 export type AgentContextPayload = {
@@ -434,6 +413,27 @@ export type AgentSessionEdge = {
   node: AgentSession;
 };
 
+/** Payload for agent session webhook events. */
+export type AgentSessionEventWebhookPayload = {
+  __typename?: "AgentSessionEventWebhookPayload";
+  /** The type of action that triggered the webhook. */
+  action: Scalars["String"];
+  /** The agent activity that was created. */
+  agentActivity?: Maybe<AgentActivityWebhookPayload>;
+  /** The agent session that the event belongs to. */
+  agentSession: AgentSessionWebhookPayload;
+  /** ID of the app user the agent session belongs to. */
+  appUserId: Scalars["String"];
+  /** The time the payload was created. */
+  createdAt: Scalars["DateTime"];
+  /** ID of the OAuth client the app user is tied to. */
+  oauthClientId: Scalars["String"];
+  /** ID of the organization for which the webhook belongs to. */
+  organizationId: Scalars["String"];
+  /** The type of resource. */
+  type: Scalars["String"];
+};
+
 /** The status of an agent session. */
 export enum AgentSessionStatus {
   Active = "active",
@@ -447,6 +447,47 @@ export enum AgentSessionStatus {
 export enum AgentSessionType {
   CommentThread = "commentThread",
 }
+
+/** Payload for an agent session webhook. */
+export type AgentSessionWebhookPayload = {
+  __typename?: "AgentSessionWebhookPayload";
+  /** The ID of the agent that the agent session belongs to. */
+  appUserId: Scalars["String"];
+  /** The time at which the entity was archived. */
+  archivedAt?: Maybe<Scalars["String"]>;
+  /** The comment this agent session is associated with. */
+  comment?: Maybe<CommentChildWebhookPayload>;
+  /** The ID of the comment this agent session is associated with. */
+  commentId?: Maybe<Scalars["String"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["String"];
+  /** The user that created the agent session. */
+  creator: UserChildWebhookPayload;
+  /** The ID of the user that created the agent session. */
+  creatorId: Scalars["String"];
+  /** The time the agent session ended. */
+  endedAt?: Maybe<Scalars["String"]>;
+  /** The ID of the entity. */
+  id: Scalars["String"];
+  /** The issue this agent session is associated with. */
+  issue?: Maybe<IssueWithDescriptionChildWebhookPayload>;
+  /** The ID of the issue this agent session is associated with. */
+  issueId?: Maybe<Scalars["String"]>;
+  /** The ID of the organization that the agent session belongs to. */
+  organizationId: Scalars["String"];
+  /** Metadata about the external source that created this agent session. */
+  sourceMetadata?: Maybe<Scalars["JSONObject"]>;
+  /** The time the agent session started working. */
+  startedAt?: Maybe<Scalars["String"]>;
+  /** The current status of the agent session. */
+  status: Scalars["String"];
+  /** A summary of the activities in this session. */
+  summary?: Maybe<Scalars["String"]>;
+  /** The type of the agent session. */
+  type: Scalars["String"];
+  /** The time at which the entity was updated. */
+  updatedAt: Scalars["String"];
+};
 
 export type AirbyteConfigurationInput = {
   /** Linear export API key. */
@@ -3203,7 +3244,7 @@ export type Dashboard = Node & {
 /** Union type for all possible webhook entity data payloads */
 export type DataWebhookPayload =
   | AgentActivityWebhookPayload
-  | AgentContextWebhookPayload
+  | AgentSessionWebhookPayload
   | AttachmentWebhookPayload
   | AuditEntryWebhookPayload
   | CommentWebhookPayload
@@ -22033,21 +22074,46 @@ export type UserWebhookPayloadFragment = { __typename: "UserWebhookPayload" } & 
   | "app"
 >;
 
-export type AgentContextEventWebhookPayloadFragment = { __typename: "AgentContextEventWebhookPayload" } & Pick<
-  AgentContextEventWebhookPayload,
+export type AgentSessionEventWebhookPayloadFragment = { __typename: "AgentSessionEventWebhookPayload" } & Pick<
+  AgentSessionEventWebhookPayload,
   "oauthClientId" | "appUserId" | "organizationId" | "createdAt" | "action" | "type"
 > & {
     agentActivity?: Maybe<{ __typename?: "AgentActivityWebhookPayload" } & AgentActivityWebhookPayloadFragment>;
-    agentContext: { __typename?: "AgentContextWebhookPayload" } & AgentContextWebhookPayloadFragment;
+    agentSession: { __typename?: "AgentSessionWebhookPayload" } & AgentSessionWebhookPayloadFragment;
   };
 
 export type AgentActivityWebhookPayloadFragment = { __typename: "AgentActivityWebhookPayload" } & Pick<
   AgentActivityWebhookPayload,
-  "agentContextId" | "id" | "content" | "archivedAt" | "createdAt" | "updatedAt"
+  "agentSessionId" | "id" | "content" | "archivedAt" | "createdAt" | "updatedAt"
 >;
 
 export type AgentContextWebhookPayloadFragment = { __typename: "AgentContextWebhookPayload" } & Pick<
   AgentContextWebhookPayload,
+  | "summary"
+  | "sourceMetadata"
+  | "appUserId"
+  | "commentId"
+  | "id"
+  | "issueId"
+  | "organizationId"
+  | "creatorId"
+  | "status"
+  | "archivedAt"
+  | "createdAt"
+  | "updatedAt"
+  | "endedAt"
+  | "startedAt"
+  | "type"
+> & {
+    comment?: Maybe<{ __typename?: "CommentChildWebhookPayload" } & CommentChildWebhookPayloadFragment>;
+    issue?: Maybe<
+      { __typename?: "IssueWithDescriptionChildWebhookPayload" } & IssueWithDescriptionChildWebhookPayloadFragment
+    >;
+    creator: { __typename?: "UserChildWebhookPayload" } & UserChildWebhookPayloadFragment;
+  };
+
+export type AgentSessionWebhookPayloadFragment = { __typename: "AgentSessionWebhookPayload" } & Pick<
+  AgentSessionWebhookPayload,
   | "summary"
   | "sourceMetadata"
   | "appUserId"
@@ -33949,7 +34015,7 @@ export const AgentActivityWebhookPayloadFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "agentContextId" } },
+          { kind: "Field", name: { kind: "Name", value: "agentSessionId" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "content" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
@@ -33960,6 +34026,101 @@ export const AgentActivityWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AgentActivityWebhookPayloadFragment, unknown>;
+export const AgentSessionWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentSessionWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentSessionWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "summary" } },
+          { kind: "Field", name: { kind: "Name", value: "sourceMetadata" } },
+          { kind: "Field", name: { kind: "Name", value: "appUserId" } },
+          { kind: "Field", name: { kind: "Name", value: "commentId" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "issueId" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "creatorId" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "comment" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentChildWebhookPayload" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "status" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issue" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueWithDescriptionChildWebhookPayload" } },
+              ],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "endedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "startedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserChildWebhookPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentSessionWebhookPayloadFragment, unknown>;
+export const AgentSessionEventWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentSessionEventWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentSessionEventWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "oauthClientId" } },
+          { kind: "Field", name: { kind: "Name", value: "appUserId" } },
+          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "agentActivity" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivityWebhookPayload" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "agentSession" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AgentSessionWebhookPayload" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "action" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentSessionEventWebhookPayloadFragment, unknown>;
 export const AgentContextWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -34017,44 +34178,6 @@ export const AgentContextWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AgentContextWebhookPayloadFragment, unknown>;
-export const AgentContextEventWebhookPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AgentContextEventWebhookPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentContextEventWebhookPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "oauthClientId" } },
-          { kind: "Field", name: { kind: "Name", value: "appUserId" } },
-          { kind: "Field", name: { kind: "Name", value: "organizationId" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "agentActivity" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivityWebhookPayload" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "agentContext" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AgentContextWebhookPayload" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "action" } },
-          { kind: "Field", name: { kind: "Name", value: "type" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<AgentContextEventWebhookPayloadFragment, unknown>;
 export const AuditEntryWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [

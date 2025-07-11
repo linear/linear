@@ -5310,12 +5310,12 @@ fragment UserWebhookPayload on UserWebhookPayload {
   app
 }
 
-# Payload for agent context webhook events.
-fragment AgentContextEventWebhookPayload on AgentContextEventWebhookPayload {
+# Payload for agent session webhook events.
+fragment AgentSessionEventWebhookPayload on AgentSessionEventWebhookPayload {
   __typename
   # ID of the OAuth client the app user is tied to.
   oauthClientId
-  # ID of the app user the agent context belongs to.
+  # ID of the app user the agent session belongs to.
   appUserId
   # ID of the organization for which the webhook belongs to.
   organizationId
@@ -5323,9 +5323,9 @@ fragment AgentContextEventWebhookPayload on AgentContextEventWebhookPayload {
   agentActivity {
     ...AgentActivityWebhookPayload
   }
-  # The agent context that the event belongs to.
-  agentContext {
-    ...AgentContextWebhookPayload
+  # The agent session that the event belongs to.
+  agentSession {
+    ...AgentSessionWebhookPayload
   }
   # The time the payload was created.
   createdAt
@@ -5338,8 +5338,8 @@ fragment AgentContextEventWebhookPayload on AgentContextEventWebhookPayload {
 # Payload for an agent activity webhook.
 fragment AgentActivityWebhookPayload on AgentActivityWebhookPayload {
   __typename
-  # The ID of the agent context that this activity belongs to.
-  agentContextId
+  # The ID of the agent session that this activity belongs to.
+  agentSessionId
   # The ID of the entity.
   id
   # The content of the agent activity.
@@ -5394,6 +5394,53 @@ fragment AgentContextWebhookPayload on AgentContextWebhookPayload {
   # The type of the agent context.
   type
   # The user that created the agent context.
+  creator {
+    ...UserChildWebhookPayload
+  }
+}
+
+# Payload for an agent session webhook.
+fragment AgentSessionWebhookPayload on AgentSessionWebhookPayload {
+  __typename
+  # A summary of the activities in this session.
+  summary
+  # Metadata about the external source that created this agent session.
+  sourceMetadata
+  # The ID of the agent that the agent session belongs to.
+  appUserId
+  # The ID of the comment this agent session is associated with.
+  commentId
+  # The ID of the entity.
+  id
+  # The ID of the issue this agent session is associated with.
+  issueId
+  # The ID of the organization that the agent session belongs to.
+  organizationId
+  # The ID of the user that created the agent session.
+  creatorId
+  # The comment this agent session is associated with.
+  comment {
+    ...CommentChildWebhookPayload
+  }
+  # The current status of the agent session.
+  status
+  # The issue this agent session is associated with.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The time the agent session ended.
+  endedAt
+  # The time the agent session started working.
+  startedAt
+  # The type of the agent session.
+  type
+  # The user that created the agent session.
   creator {
     ...UserChildWebhookPayload
   }

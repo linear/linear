@@ -237,9 +237,9 @@ Payload for an agent activity webhook.
 """
 type AgentActivityWebhookPayload {
   """
-  The ID of the agent context that this activity belongs to.
+  The ID of the agent session that this activity belongs to.
   """
-  agentContextId: String!
+  agentSessionId: String!
   """
   The time at which the entity was archived.
   """
@@ -393,44 +393,6 @@ type AgentContextEdge {
   """
   cursor: String!
   node: AgentContext!
-}
-
-"""
-Payload for agent context webhook events.
-"""
-type AgentContextEventWebhookPayload {
-  """
-  The type of action that triggered the webhook.
-  """
-  action: String!
-  """
-  The agent activity that was created.
-  """
-  agentActivity: AgentActivityWebhookPayload
-  """
-  The agent context that the event belongs to.
-  """
-  agentContext: AgentContextWebhookPayload!
-  """
-  ID of the app user the agent context belongs to.
-  """
-  appUserId: String!
-  """
-  The time the payload was created.
-  """
-  createdAt: DateTime!
-  """
-  ID of the OAuth client the app user is tied to.
-  """
-  oauthClientId: String!
-  """
-  ID of the organization for which the webhook belongs to.
-  """
-  organizationId: String!
-  """
-  The type of resource.
-  """
-  type: String!
 }
 
 type AgentContextPayload {
@@ -648,6 +610,44 @@ type AgentSessionEdge {
 }
 
 """
+Payload for agent session webhook events.
+"""
+type AgentSessionEventWebhookPayload {
+  """
+  The type of action that triggered the webhook.
+  """
+  action: String!
+  """
+  The agent activity that was created.
+  """
+  agentActivity: AgentActivityWebhookPayload
+  """
+  The agent session that the event belongs to.
+  """
+  agentSession: AgentSessionWebhookPayload!
+  """
+  ID of the app user the agent session belongs to.
+  """
+  appUserId: String!
+  """
+  The time the payload was created.
+  """
+  createdAt: DateTime!
+  """
+  ID of the OAuth client the app user is tied to.
+  """
+  oauthClientId: String!
+  """
+  ID of the organization for which the webhook belongs to.
+  """
+  organizationId: String!
+  """
+  The type of resource.
+  """
+  type: String!
+}
+
+"""
 The status of an agent session.
 """
 enum AgentSessionStatus {
@@ -663,6 +663,84 @@ The type of an agent session.
 """
 enum AgentSessionType {
   commentThread
+}
+
+"""
+Payload for an agent session webhook.
+"""
+type AgentSessionWebhookPayload {
+  """
+  The ID of the agent that the agent session belongs to.
+  """
+  appUserId: String!
+  """
+  The time at which the entity was archived.
+  """
+  archivedAt: String
+  """
+  The comment this agent session is associated with.
+  """
+  comment: CommentChildWebhookPayload
+  """
+  The ID of the comment this agent session is associated with.
+  """
+  commentId: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: String!
+  """
+  The user that created the agent session.
+  """
+  creator: UserChildWebhookPayload!
+  """
+  The ID of the user that created the agent session.
+  """
+  creatorId: String!
+  """
+  The time the agent session ended.
+  """
+  endedAt: String
+  """
+  The ID of the entity.
+  """
+  id: String!
+  """
+  The issue this agent session is associated with.
+  """
+  issue: IssueWithDescriptionChildWebhookPayload
+  """
+  The ID of the issue this agent session is associated with.
+  """
+  issueId: String
+  """
+  The ID of the organization that the agent session belongs to.
+  """
+  organizationId: String!
+  """
+  Metadata about the external source that created this agent session.
+  """
+  sourceMetadata: JSONObject
+  """
+  The time the agent session started working.
+  """
+  startedAt: String
+  """
+  The current status of the agent session.
+  """
+  status: String!
+  """
+  A summary of the activities in this session.
+  """
+  summary: String
+  """
+  The type of the agent session.
+  """
+  type: String!
+  """
+  The time at which the entity was updated.
+  """
+  updatedAt: String!
 }
 
 input AirbyteConfigurationInput {
@@ -5520,7 +5598,7 @@ Union type for all possible webhook entity data payloads
 """
 union DataWebhookPayload =
   | AgentActivityWebhookPayload
-  | AgentContextWebhookPayload
+  | AgentSessionWebhookPayload
   | AttachmentWebhookPayload
   | AuditEntryWebhookPayload
   | CommentWebhookPayload

@@ -441,7 +441,7 @@ export class AgentActivityResponseContent extends Request {
  */
 export class AgentActivityWebhookPayload {
   public constructor(data: L.AgentActivityWebhookPayloadFragment) {
-    this.agentContextId = data.agentContextId;
+    this.agentSessionId = data.agentSessionId;
     this.archivedAt = data.archivedAt ?? undefined;
     this.content = data.content;
     this.createdAt = data.createdAt;
@@ -449,8 +449,8 @@ export class AgentActivityWebhookPayload {
     this.updatedAt = data.updatedAt;
   }
 
-  /** The ID of the agent context that this activity belongs to. */
-  public agentContextId: string;
+  /** The ID of the agent session that this activity belongs to. */
+  public agentSessionId: string;
   /** The time at which the entity was archived. */
   public archivedAt?: string;
   /** The content of the agent activity. */
@@ -583,40 +583,6 @@ export class AgentContextConnection extends Connection<AgentContext> {
       new PageInfo(request, data.pageInfo)
     );
   }
-}
-/**
- * Payload for agent context webhook events.
- *
- * @param data - L.AgentContextEventWebhookPayloadFragment response data
- */
-export class AgentContextEventWebhookPayload {
-  public constructor(data: L.AgentContextEventWebhookPayloadFragment) {
-    this.action = data.action;
-    this.appUserId = data.appUserId;
-    this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.oauthClientId = data.oauthClientId;
-    this.organizationId = data.organizationId;
-    this.type = data.type;
-    this.agentActivity = data.agentActivity ? new AgentActivityWebhookPayload(data.agentActivity) : undefined;
-    this.agentContext = new AgentContextWebhookPayload(data.agentContext);
-  }
-
-  /** The type of action that triggered the webhook. */
-  public action: string;
-  /** ID of the app user the agent context belongs to. */
-  public appUserId: string;
-  /** The time the payload was created. */
-  public createdAt: Date;
-  /** ID of the OAuth client the app user is tied to. */
-  public oauthClientId: string;
-  /** ID of the organization for which the webhook belongs to. */
-  public organizationId: string;
-  /** The type of resource. */
-  public type: string;
-  /** The agent activity that was created. */
-  public agentActivity?: AgentActivityWebhookPayload;
-  /** The agent context that the event belongs to. */
-  public agentContext: AgentContextWebhookPayload;
 }
 /**
  * AgentContextPayload model
@@ -823,6 +789,104 @@ export class AgentSessionConnection extends Connection<AgentSession> {
       new PageInfo(request, data.pageInfo)
     );
   }
+}
+/**
+ * Payload for agent session webhook events.
+ *
+ * @param data - L.AgentSessionEventWebhookPayloadFragment response data
+ */
+export class AgentSessionEventWebhookPayload {
+  public constructor(data: L.AgentSessionEventWebhookPayloadFragment) {
+    this.action = data.action;
+    this.appUserId = data.appUserId;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.oauthClientId = data.oauthClientId;
+    this.organizationId = data.organizationId;
+    this.type = data.type;
+    this.agentActivity = data.agentActivity ? new AgentActivityWebhookPayload(data.agentActivity) : undefined;
+    this.agentSession = new AgentSessionWebhookPayload(data.agentSession);
+  }
+
+  /** The type of action that triggered the webhook. */
+  public action: string;
+  /** ID of the app user the agent session belongs to. */
+  public appUserId: string;
+  /** The time the payload was created. */
+  public createdAt: Date;
+  /** ID of the OAuth client the app user is tied to. */
+  public oauthClientId: string;
+  /** ID of the organization for which the webhook belongs to. */
+  public organizationId: string;
+  /** The type of resource. */
+  public type: string;
+  /** The agent activity that was created. */
+  public agentActivity?: AgentActivityWebhookPayload;
+  /** The agent session that the event belongs to. */
+  public agentSession: AgentSessionWebhookPayload;
+}
+/**
+ * Payload for an agent session webhook.
+ *
+ * @param data - L.AgentSessionWebhookPayloadFragment response data
+ */
+export class AgentSessionWebhookPayload {
+  public constructor(data: L.AgentSessionWebhookPayloadFragment) {
+    this.appUserId = data.appUserId;
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.commentId = data.commentId ?? undefined;
+    this.createdAt = data.createdAt;
+    this.creatorId = data.creatorId;
+    this.endedAt = data.endedAt ?? undefined;
+    this.id = data.id;
+    this.issueId = data.issueId ?? undefined;
+    this.organizationId = data.organizationId;
+    this.sourceMetadata = data.sourceMetadata ?? undefined;
+    this.startedAt = data.startedAt ?? undefined;
+    this.status = data.status;
+    this.summary = data.summary ?? undefined;
+    this.type = data.type;
+    this.updatedAt = data.updatedAt;
+    this.comment = data.comment ? new CommentChildWebhookPayload(data.comment) : undefined;
+    this.creator = new UserChildWebhookPayload(data.creator);
+    this.issue = data.issue ? new IssueWithDescriptionChildWebhookPayload(data.issue) : undefined;
+  }
+
+  /** The ID of the agent that the agent session belongs to. */
+  public appUserId: string;
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The ID of the comment this agent session is associated with. */
+  public commentId?: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The ID of the user that created the agent session. */
+  public creatorId: string;
+  /** The time the agent session ended. */
+  public endedAt?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** The ID of the issue this agent session is associated with. */
+  public issueId?: string;
+  /** The ID of the organization that the agent session belongs to. */
+  public organizationId: string;
+  /** Metadata about the external source that created this agent session. */
+  public sourceMetadata?: L.Scalars["JSONObject"];
+  /** The time the agent session started working. */
+  public startedAt?: string;
+  /** The current status of the agent session. */
+  public status: string;
+  /** A summary of the activities in this session. */
+  public summary?: string;
+  /** The type of the agent session. */
+  public type: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
+  /** The comment this agent session is associated with. */
+  public comment?: CommentChildWebhookPayload;
+  /** The user that created the agent session. */
+  public creator: UserChildWebhookPayload;
+  /** The issue this agent session is associated with. */
+  public issue?: IssueWithDescriptionChildWebhookPayload;
 }
 /**
  * An API key. Grants access to the user's resources.

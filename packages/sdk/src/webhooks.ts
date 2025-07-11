@@ -20,7 +20,7 @@ import {
   InitiativeWebhookPayload,
   IssueSlaWebhookPayload,
   OAuthAppWebhookPayload,
-  AgentContextEventWebhookPayload,
+  AgentSessionEventWebhookPayload,
 } from "./_generated_sdk";
 import {
   AppUserNotificationWebhookPayloadWithNotification,
@@ -77,7 +77,7 @@ export class LinearWebhooks {
     | OAuthAppWebhookPayload
     | AppUserNotificationWebhookPayloadWithNotification
     | AppUserTeamAccessChangedWebhookPayload
-    | AgentContextEventWebhookPayload {
+    | AgentSessionEventWebhookPayload {
     const verified = this.verify(rawBody, signature, timestamp);
     if (!verified) {
       throw new Error("Invalid webhook signature");
@@ -96,8 +96,8 @@ export class LinearWebhooks {
     if (parsedBody.type === "PermissionChange") {
       return parsedBody as AppUserTeamAccessChangedWebhookPayload;
     }
-    if (parsedBody.type === "AgentContextEvent") {
-      return parsedBody as AgentContextEventWebhookPayload;
+    if (parsedBody.type === "AgentSessionEvent") {
+      return parsedBody as AgentSessionEventWebhookPayload;
     }
     const entityWebhookPayload = parsedBody as EntityWebhookPayloadWithEntityData;
     switch (entityWebhookPayload.type) {
