@@ -214,7 +214,8 @@ export class ActorBot extends Request {
  * @param data - L.AgentActivityFragment response data
  */
 export class AgentActivity extends Request {
-  private _agentContext: L.AgentActivityFragment["agentContext"];
+  private _agentContext?: L.AgentActivityFragment["agentContext"];
+  private _agentSession: L.AgentActivityFragment["agentSession"];
   private _sourceComment?: L.AgentActivityFragment["sourceComment"];
 
   public constructor(request: LinearRequest, data: L.AgentActivityFragment) {
@@ -222,9 +223,9 @@ export class AgentActivity extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
-    this.sourceCommentId = data.sourceCommentId ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this._agentContext = data.agentContext;
+    this._agentContext = data.agentContext ?? undefined;
+    this._agentSession = data.agentSession;
     this._sourceComment = data.sourceComment ?? undefined;
   }
 
@@ -234,8 +235,6 @@ export class AgentActivity extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** The comment ID this activity is linked to. */
-  public sourceCommentId?: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -243,15 +242,27 @@ export class AgentActivity extends Request {
   public updatedAt: Date;
   /** The agent context this activity belongs to. */
   public get agentContext(): LinearFetch<AgentContext> | undefined {
-    return new AgentContextQuery(this._request).fetch(this._agentContext.id);
+    return this._agentContext?.id ? new AgentContextQuery(this._request).fetch(this._agentContext?.id) : undefined;
   }
   /** The ID of agent context this activity belongs to. */
   public get agentContextId(): string | undefined {
     return this._agentContext?.id;
   }
-  /** The comment that this activity is linked to. */
+  /** The agent session this activity belongs to. */
+  public get agentSession(): LinearFetch<AgentSession> | undefined {
+    return new AgentSessionQuery(this._request).fetch(this._agentSession.id);
+  }
+  /** The ID of agent session this activity belongs to. */
+  public get agentSessionId(): string | undefined {
+    return this._agentSession?.id;
+  }
+  /** The comment this activity is linked to. */
   public get sourceComment(): LinearFetch<Comment> | undefined {
     return this._sourceComment?.id ? new CommentQuery(this._request).fetch({ id: this._sourceComment?.id }) : undefined;
+  }
+  /** The ID of comment this activity is linked to. */
+  public get sourceCommentId(): string | undefined {
+    return this._sourceComment?.id;
   }
 
   /** Creates an agent activity. */
@@ -452,7 +463,7 @@ export class AgentActivityWebhookPayload {
   public updatedAt: string;
 }
 /**
- * A context for agent activities and state management.
+ * [DEPRECATED] A context for agent activities and state management.
  *
  * @param request - function to call the graphql client
  * @param data - L.AgentContextFragment response data
@@ -507,9 +518,9 @@ export class AgentContext extends Request {
   /** External links associated with this agent context. */
   public links: EntityExternalLink[];
   /** The current status of the agent context. */
-  public status: L.AgentContextStatus;
+  public status: L.AgentSessionStatus;
   /** The type of the agent context. */
-  public type: L.AgentContextType;
+  public type: L.AgentSessionType;
   /** The agent user that is associated with this agent context. */
   public get appUser(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._appUser.id);
@@ -699,6 +710,119 @@ export class AgentContextWebhookPayload {
   public creator: UserChildWebhookPayload;
   /** The issue this agent context is associated with. */
   public issue?: IssueWithDescriptionChildWebhookPayload;
+}
+/**
+ * A session for agent activities and state management.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentSessionFragment response data
+ */
+export class AgentSession extends Request {
+  private _appUser: L.AgentSessionFragment["appUser"];
+  private _comment?: L.AgentSessionFragment["comment"];
+  private _creator?: L.AgentSessionFragment["creator"];
+  private _issue?: L.AgentSessionFragment["issue"];
+
+  public constructor(request: LinearRequest, data: L.AgentSessionFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.endedAt = parseDate(data.endedAt) ?? undefined;
+    this.id = data.id;
+    this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
+    this.startedAt = parseDate(data.startedAt) ?? undefined;
+    this.summary = data.summary ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.activities = data.activities.map(node => new AgentActivity(request, node));
+    this.links = data.links.map(node => new EntityExternalLink(request, node));
+    this.status = data.status;
+    this.type = data.type;
+    this._appUser = data.appUser;
+    this._comment = data.comment ?? undefined;
+    this._creator = data.creator ?? undefined;
+    this._issue = data.issue ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The time the agent session ended. */
+  public endedAt?: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Metadata about the external source that created this agent session. */
+  public sourceMetadata?: Record<string, unknown>;
+  /** The time the agent session started. */
+  public startedAt?: Date;
+  /** A summary of the activities in this session. */
+  public summary?: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** Activities associated with this agent session. */
+  public activities: AgentActivity[];
+  /** External links associated with this agent session. */
+  public links: EntityExternalLink[];
+  /** The current status of the agent session. */
+  public status: L.AgentSessionStatus;
+  /** The type of the agent session. */
+  public type: L.AgentSessionType;
+  /** The agent user that is associated with this agent session. */
+  public get appUser(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._appUser.id);
+  }
+  /** The ID of agent user that is associated with this agent session. */
+  public get appUserId(): string | undefined {
+    return this._appUser?.id;
+  }
+  /** The comment this agent session is associated with. */
+  public get comment(): LinearFetch<Comment> | undefined {
+    return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
+  }
+  /** The ID of comment this agent session is associated with. */
+  public get commentId(): string | undefined {
+    return this._comment?.id;
+  }
+  /** The user that created this agent session. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The ID of user that created this agent session. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
+  }
+  /** The issue this agent session is associated with. */
+  public get issue(): LinearFetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** The ID of issue this agent session is associated with. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
+  }
+}
+/**
+ * AgentSessionConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this AgentSessionConnection model
+ * @param data - AgentSessionConnection response data
+ */
+export class AgentSessionConnection extends Connection<AgentSession> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<AgentSession> | undefined>,
+    data: L.AgentSessionConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new AgentSession(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
 }
 /**
  * An API key. Grants access to the user's resources.
@@ -6118,6 +6242,7 @@ export class Initiative extends Request {
     this.updateRemindersHour = data.updateRemindersHour ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
+    this.documentContent = data.documentContent ? new DocumentContent(request, data.documentContent) : undefined;
     this.frequencyResolution = data.frequencyResolution;
     this.health = data.health ?? undefined;
     this.status = data.status;
@@ -6173,6 +6298,8 @@ export class Initiative extends Request {
   public updatedAt: Date;
   /** Initiative URL. */
   public url: string;
+  /** The content of the initiative description. */
+  public documentContent?: DocumentContent;
   /** The resolution of the reminder frequency. */
   public frequencyResolution: L.FrequencyResolutionType;
   /** The health of the initiative. */
@@ -6230,6 +6357,10 @@ export class Initiative extends Request {
   /** The ID of parent initiative associated with the initiative. */
   public get parentInitiativeId(): string | undefined {
     return this._parentInitiative?.id;
+  }
+  /** Documents associated with the initiative. */
+  public documents(variables?: Omit<L.Initiative_DocumentsQueryVariables, "id">) {
+    return new Initiative_DocumentsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** History entries associated with the initiative. */
   public history(variables?: Omit<L.Initiative_HistoryQueryVariables, "id">) {
@@ -7729,6 +7860,7 @@ export class Issue extends Request {
   private _assignee?: L.IssueFragment["assignee"];
   private _creator?: L.IssueFragment["creator"];
   private _cycle?: L.IssueFragment["cycle"];
+  private _delegate?: L.IssueFragment["delegate"];
   private _externalUserCreator?: L.IssueFragment["externalUserCreator"];
   private _favorite?: L.IssueFragment["favorite"];
   private _lastAppliedTemplate?: L.IssueFragment["lastAppliedTemplate"];
@@ -7789,6 +7921,7 @@ export class Issue extends Request {
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
     this._cycle = data.cycle ?? undefined;
+    this._delegate = data.delegate ?? undefined;
     this._externalUserCreator = data.externalUserCreator ?? undefined;
     this._favorite = data.favorite ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
@@ -7914,6 +8047,14 @@ export class Issue extends Request {
   /** The ID of cycle that the issue is associated with. */
   public get cycleId(): string | undefined {
     return this._cycle?.id;
+  }
+  /** The app user that is delegated to work on this issue. */
+  public get delegate(): LinearFetch<User> | undefined {
+    return this._delegate?.id ? new UserQuery(this._request).fetch(this._delegate?.id) : undefined;
+  }
+  /** The ID of app user that is delegated to work on this issue. */
+  public get delegateId(): string | undefined {
+    return this._delegate?.id;
   }
   /** The external user who created the issue. */
   public get externalUserCreator(): LinearFetch<ExternalUser> | undefined {
@@ -9493,6 +9634,7 @@ export class IssueSearchResult extends Request {
   private _assignee?: L.IssueSearchResultFragment["assignee"];
   private _creator?: L.IssueSearchResultFragment["creator"];
   private _cycle?: L.IssueSearchResultFragment["cycle"];
+  private _delegate?: L.IssueSearchResultFragment["delegate"];
   private _externalUserCreator?: L.IssueSearchResultFragment["externalUserCreator"];
   private _favorite?: L.IssueSearchResultFragment["favorite"];
   private _lastAppliedTemplate?: L.IssueSearchResultFragment["lastAppliedTemplate"];
@@ -9554,6 +9696,7 @@ export class IssueSearchResult extends Request {
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
     this._cycle = data.cycle ?? undefined;
+    this._delegate = data.delegate ?? undefined;
     this._externalUserCreator = data.externalUserCreator ?? undefined;
     this._favorite = data.favorite ?? undefined;
     this._lastAppliedTemplate = data.lastAppliedTemplate ?? undefined;
@@ -9681,6 +9824,14 @@ export class IssueSearchResult extends Request {
   /** The ID of cycle that the issue is associated with. */
   public get cycleId(): string | undefined {
     return this._cycle?.id;
+  }
+  /** The app user that is delegated to work on this issue. */
+  public get delegate(): LinearFetch<User> | undefined {
+    return this._delegate?.id ? new UserQuery(this._request).fetch(this._delegate?.id) : undefined;
+  }
+  /** The ID of app user that is delegated to work on this issue. */
+  public get delegateId(): string | undefined {
+    return this._delegate?.id;
   }
   /** The external user who created the issue. */
   public get externalUserCreator(): LinearFetch<ExternalUser> | undefined {
@@ -16483,6 +16634,10 @@ export class User extends Request {
   public createdIssues(variables?: Omit<L.User_CreatedIssuesQueryVariables, "id">) {
     return new User_CreatedIssuesQuery(this._request, this.id, variables).fetch(variables);
   }
+  /** Issues delegated to this user. */
+  public delegatedIssues(variables?: Omit<L.User_DelegatedIssuesQueryVariables, "id">) {
+    return new User_DelegatedIssuesQuery(this._request, this.id, variables).fetch(variables);
+  }
   /** The user's drafts */
   public drafts(variables?: Omit<L.User_DraftsQueryVariables, "id">) {
     return new User_DraftsQuery(this._request, this.id, variables).fetch(variables);
@@ -17571,6 +17726,69 @@ export class AgentContextsQuery extends Request {
     const data = response.agentContexts;
 
     return new AgentContextConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable AgentSession Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentSessionQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentSession query and return a AgentSession
+   *
+   * @param id - required id to pass to agentSession
+   * @returns parsed response from AgentSessionQuery
+   */
+  public async fetch(id: string): LinearFetch<AgentSession> {
+    const response = await this._request<L.AgentSessionQuery, L.AgentSessionQueryVariables>(L.AgentSessionDocument, {
+      id,
+    });
+    const data = response.agentSession;
+
+    return new AgentSession(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AgentSessions Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentSessionsQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentSessions query and return a AgentSessionConnection
+   *
+   * @param variables - variables to pass into the AgentSessionsQuery
+   * @returns parsed response from AgentSessionsQuery
+   */
+  public async fetch(variables?: L.AgentSessionsQueryVariables): LinearFetch<AgentSessionConnection> {
+    const response = await this._request<L.AgentSessionsQuery, L.AgentSessionsQueryVariables>(
+      L.AgentSessionsDocument,
+      variables
+    );
+    const data = response.agentSessions;
+
+    return new AgentSessionConnection(
       this._request,
       connection =>
         this.fetch(
@@ -30809,6 +31027,87 @@ export class Favorite_ChildrenQuery extends Request {
 }
 
 /**
+ * A fetchable Initiative_DocumentContent Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to initiative
+ */
+export class Initiative_DocumentContentQuery extends Request {
+  private _id: string;
+
+  public constructor(request: LinearRequest, id: string) {
+    super(request);
+    this._id = id;
+  }
+
+  /**
+   * Call the Initiative_DocumentContent query and return a DocumentContent
+   *
+   * @returns parsed response from Initiative_DocumentContentQuery
+   */
+  public async fetch(): LinearFetch<DocumentContent | undefined> {
+    const response = await this._request<L.Initiative_DocumentContentQuery, L.Initiative_DocumentContentQueryVariables>(
+      L.Initiative_DocumentContentDocument,
+      {
+        id: this._id,
+      }
+    );
+    const data = response.initiative.documentContent;
+
+    return data ? new DocumentContent(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable Initiative_Documents Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to initiative
+ * @param variables - variables without 'id' to pass into the Initiative_DocumentsQuery
+ */
+export class Initiative_DocumentsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Initiative_DocumentsQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.Initiative_DocumentsQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Initiative_Documents query and return a DocumentConnection
+   *
+   * @param variables - variables without 'id' to pass into the Initiative_DocumentsQuery
+   * @returns parsed response from Initiative_DocumentsQuery
+   */
+  public async fetch(variables?: Omit<L.Initiative_DocumentsQueryVariables, "id">): LinearFetch<DocumentConnection> {
+    const response = await this._request<L.Initiative_DocumentsQuery, L.Initiative_DocumentsQueryVariables>(
+      L.Initiative_DocumentsDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.initiative.documents;
+
+    return new DocumentConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Initiative_History Query
  *
  * @param request - function to call the graphql client
@@ -34466,6 +34765,55 @@ export class User_CreatedIssuesQuery extends Request {
 }
 
 /**
+ * A fetchable User_DelegatedIssues Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to user
+ * @param variables - variables without 'id' to pass into the User_DelegatedIssuesQuery
+ */
+export class User_DelegatedIssuesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.User_DelegatedIssuesQueryVariables, "id">;
+
+  public constructor(request: LinearRequest, id: string, variables?: Omit<L.User_DelegatedIssuesQueryVariables, "id">) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the User_DelegatedIssues query and return a IssueConnection
+   *
+   * @param variables - variables without 'id' to pass into the User_DelegatedIssuesQuery
+   * @returns parsed response from User_DelegatedIssuesQuery
+   */
+  public async fetch(variables?: Omit<L.User_DelegatedIssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
+    const response = await this._request<L.User_DelegatedIssuesQuery, L.User_DelegatedIssuesQueryVariables>(
+      L.User_DelegatedIssuesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.user.delegatedIssues;
+
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable User_Drafts Query
  *
  * @param request - function to call the graphql client
@@ -35397,6 +35745,49 @@ export class Viewer_CreatedIssuesQuery extends Request {
 }
 
 /**
+ * A fetchable Viewer_DelegatedIssues Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Viewer_DelegatedIssuesQuery
+ */
+export class Viewer_DelegatedIssuesQuery extends Request {
+  private _variables?: L.Viewer_DelegatedIssuesQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.Viewer_DelegatedIssuesQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Viewer_DelegatedIssues query and return a IssueConnection
+   *
+   * @param variables - variables to pass into the Viewer_DelegatedIssuesQuery
+   * @returns parsed response from Viewer_DelegatedIssuesQuery
+   */
+  public async fetch(variables?: L.Viewer_DelegatedIssuesQueryVariables): LinearFetch<IssueConnection> {
+    const response = await this._request<L.Viewer_DelegatedIssuesQuery, L.Viewer_DelegatedIssuesQueryVariables>(
+      L.Viewer_DelegatedIssuesDocument,
+      variables
+    );
+    const data = response.viewer.delegatedIssues;
+
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Viewer_Drafts Query
  *
  * @param request - function to call the graphql client
@@ -35628,6 +36019,24 @@ export class LinearSdk extends Request {
    */
   public agentContexts(variables?: L.AgentContextsQueryVariables): LinearFetch<AgentContextConnection> {
     return new AgentContextsQuery(this._request).fetch(variables);
+  }
+  /**
+   * A specific agent session.
+   *
+   * @param id - required id to pass to agentSession
+   * @returns AgentSession
+   */
+  public agentSession(id: string): LinearFetch<AgentSession> {
+    return new AgentSessionQuery(this._request).fetch(id);
+  }
+  /**
+   * All agent sessions.
+   *
+   * @param variables - variables to pass into the AgentSessionsQuery
+   * @returns AgentSessionConnection
+   */
+  public agentSessions(variables?: L.AgentSessionsQueryVariables): LinearFetch<AgentSessionConnection> {
+    return new AgentSessionsQuery(this._request).fetch(variables);
   }
   /**
    * All API keys for the user.

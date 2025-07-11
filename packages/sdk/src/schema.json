@@ -185,11 +185,23 @@
             "description": "The agent context this activity belongs to.",
             "args": [],
             "type": {
+              "kind": "OBJECT",
+              "name": "AgentContext",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "agentSession",
+            "description": "The agent session this activity belongs to.",
+            "args": [],
+            "type": {
               "kind": "NON_NULL",
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "AgentContext",
+                "name": "AgentSession",
                 "ofType": null
               }
             },
@@ -213,20 +225,8 @@
             "deprecationReason": null
           },
           {
-            "name": "sourceCommentId",
-            "description": "The comment ID this activity is linked to.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "sourceComment",
-            "description": "The comment that this activity is linked to.",
+            "description": "The comment this activity is linked to.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -454,8 +454,8 @@
             "deprecationReason": null
           },
           {
-            "name": "agentContextId",
-            "description": "The agent context this activity belongs to.",
+            "name": "agentSessionId",
+            "description": "The agent session this activity belongs to.",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -980,7 +980,7 @@
       {
         "kind": "OBJECT",
         "name": "AgentContext",
-        "description": "A context for agent activities and state management.",
+        "description": "[DEPRECATED] A context for agent activities and state management.",
         "fields": [
           {
             "name": "id",
@@ -1103,7 +1103,7 @@
               "name": null,
               "ofType": {
                 "kind": "ENUM",
-                "name": "AgentContextStatus",
+                "name": "AgentSessionStatus",
                 "ofType": null
               }
             },
@@ -1143,7 +1143,7 @@
               "name": null,
               "ofType": {
                 "kind": "ENUM",
-                "name": "AgentContextType",
+                "name": "AgentSessionType",
                 "ofType": null
               }
             },
@@ -1434,7 +1434,7 @@
               "name": null,
               "ofType": {
                 "kind": "ENUM",
-                "name": "AgentContextType",
+                "name": "AgentSessionType",
                 "ofType": null
               }
             },
@@ -1717,58 +1717,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "ENUM",
-        "name": "AgentContextStatus",
-        "description": "The status of an agent context.",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "pending",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "active",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "complete",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "awaitingInput",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "AgentContextType",
-        "description": "The type of an agent context.",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "commentThread",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "possibleTypes": null
-      },
-      {
         "kind": "INPUT_OBJECT",
         "name": "AgentContextUpdateInput",
         "description": null,
@@ -1779,7 +1727,7 @@
             "description": "The current status of the agent context.",
             "type": {
               "kind": "ENUM",
-              "name": "AgentContextStatus",
+              "name": "AgentSessionStatus",
               "ofType": null
             },
             "defaultValue": null,
@@ -2064,6 +2012,512 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AgentSession",
+        "description": "A session for agent activities and state management.",
+        "fields": [
+          {
+            "name": "id",
+            "description": "The unique identifier of the entity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't\n    been updated after creation.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "archivedAt",
+            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "creator",
+            "description": "The user that created this agent session.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "appUser",
+            "description": "The agent user that is associated with this agent session.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "comment",
+            "description": "The comment this agent session is associated with.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Comment",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issue",
+            "description": "The issue this agent session is associated with.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Issue",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "status",
+            "description": "The current status of the agent session.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AgentSessionStatus",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "startedAt",
+            "description": "The time the agent session started.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "endedAt",
+            "description": "The time the agent session ended.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "The type of the agent session.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AgentSessionType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "activities",
+            "description": "Activities associated with this agent session.",
+            "args": [
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "AgentActivity",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "links",
+            "description": "External links associated with this agent session.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "EntityExternalLink",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "summary",
+            "description": "A summary of the activities in this session.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sourceMetadata",
+            "description": "Metadata about the external source that created this agent session.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Node",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AgentSessionConnection",
+        "description": null,
+        "fields": [
+          {
+            "name": "edges",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "AgentSessionEdge",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nodes",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "AgentSession",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pageInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AgentSessionEdge",
+        "description": null,
+        "fields": [
+          {
+            "name": "node",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AgentSession",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cursor",
+            "description": "Used in `before` and `after` args",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "AgentSessionStatus",
+        "description": "The status of an agent session.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "pending",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "active",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "complete",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awaitingInput",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "error",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "AgentSessionType",
+        "description": "The type of an agent session.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "commentThread",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
         "possibleTypes": null
       },
       {
@@ -30403,6 +30857,119 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "documentContent",
+            "description": "The content of the initiative description.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "DocumentContent",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documents",
+            "description": "Documents associated with the initiative.",
+            "args": [
+              {
+                "name": "filter",
+                "description": "Filter returned documents.",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "DocumentFilter",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DocumentConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -38085,18 +38652,6 @@
             "deprecationReason": null
           },
           {
-            "name": "documentContent",
-            "description": "[ALPHA] The document content representing this issue description.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "DocumentContent",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "labelIds",
             "description": "Id of the labels associated with this issue.",
             "args": [],
@@ -38270,7 +38825,7 @@
           },
           {
             "name": "delegate",
-            "description": "[Internal] The agent that is delegated to complete this issue.",
+            "description": "The app user that is delegated to work on this issue.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -39380,6 +39935,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentContent",
+            "description": "[ALPHA] The document content representing this issue description.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "DocumentContent",
               "ofType": null
             },
             "isDeprecated": false,
@@ -40520,7 +41087,7 @@
           },
           {
             "name": "delegate",
-            "description": "[Internal] Filters that the issues delegate must satisfy.",
+            "description": "Filters that the issue's delegate must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableUserFilter",
@@ -43030,7 +43597,7 @@
           },
           {
             "name": "delegate",
-            "description": "[Internal] Filters that the issues delegate must satisfy.",
+            "description": "Filters that the issue's delegate must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableUserFilter",
@@ -48322,18 +48889,6 @@
             "deprecationReason": null
           },
           {
-            "name": "documentContent",
-            "description": "[ALPHA] The document content representing this issue description.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "DocumentContent",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "labelIds",
             "description": "Id of the labels associated with this issue.",
             "args": [],
@@ -48507,7 +49062,7 @@
           },
           {
             "name": "delegate",
-            "description": "[Internal] The agent that is delegated to complete this issue.",
+            "description": "The app user that is delegated to work on this issue.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -49617,6 +50172,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentContent",
+            "description": "[ALPHA] The document content representing this issue description.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "DocumentContent",
               "ofType": null
             },
             "isDeprecated": false,
@@ -67348,6 +67915,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "AgentSession",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "ApiKey",
             "ofType": null
           },
@@ -71952,7 +72524,7 @@
           },
           {
             "name": "delegate",
-            "description": "[Internal] Filters that the issues delegate must satisfy.",
+            "description": "Filters that the issue's delegate must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableUserFilter",
@@ -80813,18 +81385,6 @@
             "deprecationReason": null
           },
           {
-            "name": "documentContent",
-            "description": "The content of the project description.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "DocumentContent",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "slugId",
             "description": "The project's unique URL slug.",
             "args": [],
@@ -82449,6 +83009,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentContent",
+            "description": "The content of the project description.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "DocumentContent",
               "ofType": null
             },
             "isDeprecated": false,
@@ -89251,18 +89823,6 @@
             "deprecationReason": null
           },
           {
-            "name": "documentContent",
-            "description": "The content of the project description.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "DocumentContent",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "slugId",
             "description": "The project's unique URL slug.",
             "args": [],
@@ -90887,6 +91447,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "documentContent",
+            "description": "The content of the project description.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "DocumentContent",
               "ofType": null
             },
             "isDeprecated": false,
@@ -96562,6 +97134,128 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "AgentContextConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "agentSession",
+            "description": "A specific agent session.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the agent session to retrieve.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AgentSession",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "agentSessions",
+            "description": "All agent sessions.",
+            "args": [
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AgentSessionConnection",
                 "ofType": null
               }
             },
@@ -117064,7 +117758,7 @@
           },
           {
             "name": "delegatedIssues",
-            "description": "[Internal] Issues delegated to this user.",
+            "description": "Issues delegated to this user.",
             "args": [
               {
                 "name": "filter",
