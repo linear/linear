@@ -329,6 +329,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the agentActivity.agentSession query for L.AgentSession */
+    it("agentActivity.agentSession", async () => {
+      if (_agentActivity) {
+        const agentActivity_agentSession: L.AgentSession | undefined = await _agentActivity.agentSession;
+        expect(agentActivity_agentSession instanceof L.AgentSession);
+      } else {
+        console.warn("codegen-doc:print: No AgentActivity found - cannot test agentActivity.agentSession query");
+      }
+    });
+
     /** Test the agentActivity.sourceComment query for L.Comment */
     it("agentActivity.sourceComment", async () => {
       if (_agentActivity) {
@@ -401,6 +411,71 @@ describe("generated", () => {
         expect(agentContext_issue instanceof L.Issue);
       } else {
         console.warn("codegen-doc:print: No AgentContext found - cannot test agentContext.issue query");
+      }
+    });
+  });
+
+  /** Test all AgentSession queries */
+  describe("AgentSessions", () => {
+    let _agentSession: L.AgentSession | undefined;
+    let _agentSession_id: string | undefined;
+
+    /** Test the root connection query for the AgentSession */
+    it("agentSessions", async () => {
+      const agentSessions: L.AgentSessionConnection | undefined = await client.agentSessions();
+      const agentSession = agentSessions?.nodes?.[0];
+      _agentSession_id = agentSession?.id;
+      expect(agentSessions instanceof L.AgentSessionConnection);
+    });
+
+    /** Test the root query for a single AgentSession */
+    it("agentSession", async () => {
+      if (_agentSession_id) {
+        const agentSession: L.AgentSession | undefined = await client.agentSession(_agentSession_id);
+        _agentSession = agentSession;
+        expect(agentSession instanceof L.AgentSession);
+      } else {
+        console.warn("codegen-doc:print: No first AgentSession found in connection - cannot test agentSession query");
+      }
+    });
+
+    /** Test the agentSession.appUser query for L.User */
+    it("agentSession.appUser", async () => {
+      if (_agentSession) {
+        const agentSession_appUser: L.User | undefined = await _agentSession.appUser;
+        expect(agentSession_appUser instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No AgentSession found - cannot test agentSession.appUser query");
+      }
+    });
+
+    /** Test the agentSession.comment query for L.Comment */
+    it("agentSession.comment", async () => {
+      if (_agentSession) {
+        const agentSession_comment: L.Comment | undefined = await _agentSession.comment;
+        expect(agentSession_comment instanceof L.Comment);
+      } else {
+        console.warn("codegen-doc:print: No AgentSession found - cannot test agentSession.comment query");
+      }
+    });
+
+    /** Test the agentSession.creator query for L.User */
+    it("agentSession.creator", async () => {
+      if (_agentSession) {
+        const agentSession_creator: L.User | undefined = await _agentSession.creator;
+        expect(agentSession_creator instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No AgentSession found - cannot test agentSession.creator query");
+      }
+    });
+
+    /** Test the agentSession.issue query for L.Issue */
+    it("agentSession.issue", async () => {
+      if (_agentSession) {
+        const agentSession_issue: L.Issue | undefined = await _agentSession.issue;
+        expect(agentSession_issue instanceof L.Issue);
+      } else {
+        console.warn("codegen-doc:print: No AgentSession found - cannot test agentSession.issue query");
       }
     });
   });
@@ -1855,6 +1930,26 @@ describe("generated", () => {
       }
     });
 
+    /** Test the initiative model query for Initiative_DocumentContent */
+    it("initiative.documentContent", async () => {
+      if (_initiative) {
+        const documentContent: L.DocumentContent | undefined = _initiative.documentContent;
+        expect(documentContent instanceof L.DocumentContent);
+      } else {
+        console.warn("codegen-doc:print: No initiative found - cannot test _initiative.documentContent query");
+      }
+    });
+
+    /** Test the initiative connection query for the Document */
+    it("initiative.documents", async () => {
+      if (_initiative) {
+        const documents: L.DocumentConnection | undefined = await _initiative.documents();
+        expect(documents instanceof L.DocumentConnection);
+      } else {
+        console.warn("codegen-doc:print: No initiative found - cannot test _initiative.documents query");
+      }
+    });
+
     /** Test the initiative connection query for the InitiativeHistory */
     it("initiative.history", async () => {
       if (_initiative) {
@@ -2257,6 +2352,16 @@ describe("generated", () => {
         expect(issue_cycle instanceof L.Cycle);
       } else {
         console.warn("codegen-doc:print: No Issue found - cannot test issue.cycle query");
+      }
+    });
+
+    /** Test the issue.delegate query for L.User */
+    it("issue.delegate", async () => {
+      if (_issue) {
+        const issue_delegate: L.User | undefined = await _issue.delegate;
+        expect(issue_delegate instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.delegate query");
       }
     });
 
@@ -2741,6 +2846,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue.delegate query for L.User */
+    it("issue.delegate", async () => {
+      if (_issue) {
+        const issue_delegate: L.User | undefined = await _issue.delegate;
+        expect(issue_delegate instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.delegate query");
+      }
+    });
+
     /** Test the issue.externalUserCreator query for L.ExternalUser */
     it("issue.externalUserCreator", async () => {
       if (_issue) {
@@ -3189,6 +3304,16 @@ describe("generated", () => {
         expect(issue_cycle instanceof L.Cycle);
       } else {
         console.warn("codegen-doc:print: No Issue found - cannot test issue.cycle query");
+      }
+    });
+
+    /** Test the issue.delegate query for L.User */
+    it("issue.delegate", async () => {
+      if (_issue) {
+        const issue_delegate: L.User | undefined = await _issue.delegate;
+        expect(issue_delegate instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.delegate query");
       }
     });
 
@@ -5191,6 +5316,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the user connection query for the Issue */
+    it("user.delegatedIssues", async () => {
+      if (_user) {
+        const delegatedIssues: L.IssueConnection | undefined = await _user.delegatedIssues();
+        expect(delegatedIssues instanceof L.IssueConnection);
+      } else {
+        console.warn("codegen-doc:print: No user found - cannot test _user.delegatedIssues query");
+      }
+    });
+
     /** Test the user connection query for the Draft */
     it("user.drafts", async () => {
       if (_user) {
@@ -5270,6 +5405,16 @@ describe("generated", () => {
         expect(createdIssues instanceof L.IssueConnection);
       } else {
         console.warn("codegen-doc:print: No viewer found - cannot test _viewer.createdIssues query");
+      }
+    });
+
+    /** Test the viewer connection query for the Issue */
+    it("viewer.delegatedIssues", async () => {
+      if (_viewer) {
+        const delegatedIssues: L.IssueConnection | undefined = await _viewer.delegatedIssues();
+        expect(delegatedIssues instanceof L.IssueConnection);
+      } else {
+        console.warn("codegen-doc:print: No viewer found - cannot test _viewer.delegatedIssues query");
       }
     });
 

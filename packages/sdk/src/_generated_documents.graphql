@@ -163,56 +163,6 @@ fragment SyncedExternalThread on SyncedExternalThread {
   id
 }
 
-# A context for agent activities and state management.
-fragment AgentContext on AgentContext {
-  __typename
-  # A summary of the activities in this context.
-  summary
-  # Activities associated with this agent context.
-  activities {
-    ...AgentActivity
-  }
-  # External links associated with this agent context.
-  links {
-    ...EntityExternalLink
-  }
-  # Metadata about the external source that created this agent context.
-  sourceMetadata
-  # The agent user that is associated with this agent context.
-  appUser {
-    id
-  }
-  # The comment this agent context is associated with.
-  comment {
-    id
-  }
-  # The current status of the agent context.
-  status
-  # The issue this agent context is associated with.
-  issue {
-    id
-  }
-  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The time the agent context ended.
-  endedAt
-  # The time the agent context started working.
-  startedAt
-  # The type of the agent context.
-  type
-  # The unique identifier of the entity.
-  id
-  # The user that created this agent context.
-  creator {
-    id
-  }
-}
-
 # A custom emoji.
 fragment Emoji on Emoji {
   __typename
@@ -2116,6 +2066,56 @@ fragment Roadmap on Roadmap {
   }
 }
 
+# A session for agent activities and state management.
+fragment AgentSession on AgentSession {
+  __typename
+  # A summary of the activities in this session.
+  summary
+  # Activities associated with this agent session.
+  activities {
+    ...AgentActivity
+  }
+  # External links associated with this agent session.
+  links {
+    ...EntityExternalLink
+  }
+  # Metadata about the external source that created this agent session.
+  sourceMetadata
+  # The agent user that is associated with this agent session.
+  appUser {
+    id
+  }
+  # The comment this agent session is associated with.
+  comment {
+    id
+  }
+  # The current status of the agent session.
+  status
+  # The issue this agent session is associated with.
+  issue {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time the agent session ended.
+  endedAt
+  # The time the agent session started.
+  startedAt
+  # The type of the agent session.
+  type
+  # The unique identifier of the entity.
+  id
+  # The user that created this agent session.
+  creator {
+    id
+  }
+}
+
 # A set of issues to be resolved in a specified amount of time.
 fragment Cycle on Cycle {
   __typename
@@ -2753,9 +2753,11 @@ fragment AgentActivity on AgentActivity {
   agentContext {
     id
   }
-  # The comment ID this activity is linked to.
-  sourceCommentId
-  # The comment that this activity is linked to.
+  # The agent session this activity belongs to.
+  agentSession {
+    id
+  }
+  # The comment this activity is linked to.
   sourceComment {
     id
   }
@@ -3067,6 +3069,10 @@ fragment Initiative on Initiative {
   integrationsSettings {
     id
   }
+  # The content of the initiative description.
+  documentContent {
+    ...DocumentContent
+  }
   # The day at which to prompt for updates.
   updateRemindersDay
   # The description of the initiative.
@@ -3328,6 +3334,10 @@ fragment Issue on Issue {
   customerTicketCount
   # Suggested branch name for the issue.
   branchName
+  # The app user that is delegated to work on this issue.
+  delegate {
+    id
+  }
   # The bot that created the issue, if applicable.
   botActor {
     ...ActorBot
@@ -6528,6 +6538,56 @@ fragment AuditEntry on AuditEntry {
   type
 }
 
+# [DEPRECATED] A context for agent activities and state management.
+fragment AgentContext on AgentContext {
+  __typename
+  # A summary of the activities in this context.
+  summary
+  # Activities associated with this agent context.
+  activities {
+    ...AgentActivity
+  }
+  # External links associated with this agent context.
+  links {
+    ...EntityExternalLink
+  }
+  # Metadata about the external source that created this agent context.
+  sourceMetadata
+  # The agent user that is associated with this agent context.
+  appUser {
+    id
+  }
+  # The comment this agent context is associated with.
+  comment {
+    id
+  }
+  # The current status of the agent context.
+  status
+  # The issue this agent context is associated with.
+  issue {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time the agent context ended.
+  endedAt
+  # The time the agent context started working.
+  startedAt
+  # The type of the agent context.
+  type
+  # The unique identifier of the entity.
+  id
+  # The user that created this agent context.
+  creator {
+    id
+  }
+}
+
 fragment AgentActivityConnection on AgentActivityConnection {
   __typename
   nodes {
@@ -6570,6 +6630,16 @@ fragment AgentContextPayload on AgentContextPayload {
   lastSyncId
   # Whether the operation was successful.
   success
+}
+
+fragment AgentSessionConnection on AgentSessionConnection {
+  __typename
+  nodes {
+    ...AgentSession
+  }
+  pageInfo {
+    ...PageInfo
+  }
 }
 
 fragment ApiKeyConnection on ApiKeyConnection {
@@ -7561,6 +7631,10 @@ fragment IssueSearchResult on IssueSearchResult {
   customerTicketCount
   # Suggested branch name for the issue.
   branchName
+  # The app user that is delegated to work on this issue.
+  delegate {
+    id
+  }
   # The bot that created the issue, if applicable.
   botActor {
     ...ActorBot
@@ -8806,6 +8880,41 @@ query agentContexts(
     orderBy: $orderBy
   ) {
     ...AgentContextConnection
+  }
+}
+# A specific agent session.
+query agentSession(
+  # The identifier of the agent session to retrieve.
+  $id: String!
+) {
+  agentSession(id: $id) {
+    ...AgentSession
+  }
+}
+# All agent sessions.
+query agentSessions(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  agentSessions(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...AgentSessionConnection
   }
 }
 # All API keys for the user.
@@ -10099,6 +10208,46 @@ query favorites(
 query initiative($id: String!) {
   initiative(id: $id) {
     ...Initiative
+  }
+}
+# The content of the initiative description.
+query initiative_documentContent($id: String!) {
+  initiative(id: $id) {
+    documentContent {
+      ...DocumentContent
+    }
+  }
+}
+# Documents associated with the initiative.
+query initiative_documents(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned documents.
+  $filter: DocumentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  initiative(id: $id) {
+    documents(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...DocumentConnection
+    }
   }
 }
 # History entries associated with the initiative.
@@ -13523,6 +13672,39 @@ query user_createdIssues(
     }
   }
 }
+# Issues delegated to this user.
+query user_delegatedIssues(
+  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  user(id: $id) {
+    delegatedIssues(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
 # The user's drafts
 query user_drafts(
   # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
@@ -14011,6 +14193,37 @@ query viewer_createdIssues(
 ) {
   viewer {
     createdIssues(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
+# Issues delegated to this user.
+query viewer_delegatedIssues(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  viewer {
+    delegatedIssues(
       after: $after
       before: $before
       filter: $filter

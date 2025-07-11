@@ -40,7 +40,11 @@ type AgentActivity implements Node {
   """
   The agent context this activity belongs to.
   """
-  agentContext: AgentContext!
+  agentContext: AgentContext
+  """
+  The agent session this activity belongs to.
+  """
+  agentSession: AgentSession!
   """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
@@ -58,13 +62,9 @@ type AgentActivity implements Node {
   """
   id: ID!
   """
-  The comment that this activity is linked to.
+  The comment this activity is linked to.
   """
   sourceComment: Comment
-  """
-  The comment ID this activity is linked to.
-  """
-  sourceCommentId: String
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -113,9 +113,9 @@ union AgentActivityContent =
 
 input AgentActivityCreateInput {
   """
-  The agent context this activity belongs to.
+  The agent session this activity belongs to.
   """
-  agentContextId: String!
+  agentSessionId: String!
   """
   The content payload of the agent activity. This object is not strictly typed.
   See https://linear.app/developers/agents for typing details.
@@ -263,7 +263,7 @@ type AgentActivityWebhookPayload {
 }
 
 """
-A context for agent activities and state management.
+[DEPRECATED] A context for agent activities and state management.
 """
 type AgentContext implements Node {
   """
@@ -342,7 +342,7 @@ type AgentContext implements Node {
   """
   The current status of the agent context.
   """
-  status: AgentContextStatus!
+  status: AgentSessionStatus!
   """
   A summary of the activities in this context.
   """
@@ -350,7 +350,7 @@ type AgentContext implements Node {
   """
   The type of the agent context.
   """
-  type: AgentContextType!
+  type: AgentSessionType!
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -384,7 +384,7 @@ input AgentContextCreateInput {
   """
   The type of the agent context.
   """
-  type: AgentContextType!
+  type: AgentSessionType!
 }
 
 type AgentContextEdge {
@@ -448,28 +448,11 @@ type AgentContextPayload {
   success: Boolean!
 }
 
-"""
-The status of an agent context.
-"""
-enum AgentContextStatus {
-  active
-  awaitingInput
-  complete
-  pending
-}
-
-"""
-The type of an agent context.
-"""
-enum AgentContextType {
-  commentThread
-}
-
 input AgentContextUpdateInput {
   """
   The current status of the agent context.
   """
-  status: AgentContextStatus
+  status: AgentSessionStatus
   """
   The summary of the agent context.
   """
@@ -552,6 +535,134 @@ type AgentContextWebhookPayload {
   The time at which the entity was updated.
   """
   updatedAt: String!
+}
+
+"""
+A session for agent activities and state management.
+"""
+type AgentSession implements Node {
+  """
+  Activities associated with this agent session.
+  """
+  activities(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): [AgentActivity!]!
+  """
+  The agent user that is associated with this agent session.
+  """
+  appUser: User!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The comment this agent session is associated with.
+  """
+  comment: Comment
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The user that created this agent session.
+  """
+  creator: User
+  """
+  The time the agent session ended.
+  """
+  endedAt: DateTime
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The issue this agent session is associated with.
+  """
+  issue: Issue
+  """
+  External links associated with this agent session.
+  """
+  links: [EntityExternalLink!]!
+  """
+  Metadata about the external source that created this agent session.
+  """
+  sourceMetadata: JSON
+  """
+  The time the agent session started.
+  """
+  startedAt: DateTime
+  """
+  The current status of the agent session.
+  """
+  status: AgentSessionStatus!
+  """
+  A summary of the activities in this session.
+  """
+  summary: String
+  """
+  The type of the agent session.
+  """
+  type: AgentSessionType!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type AgentSessionConnection {
+  edges: [AgentSessionEdge!]!
+  nodes: [AgentSession!]!
+  pageInfo: PageInfo!
+}
+
+type AgentSessionEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: AgentSession!
+}
+
+"""
+The status of an agent session.
+"""
+enum AgentSessionStatus {
+  active
+  awaitingInput
+  complete
+  error
+  pending
+}
+
+"""
+The type of an agent session.
+"""
+enum AgentSessionType {
+  commentThread
 }
 
 input AirbyteConfigurationInput {
@@ -8296,6 +8407,43 @@ type Initiative implements Node {
   """
   description: String
   """
+  The content of the initiative description.
+  """
+  documentContent: DocumentContent
+  """
+  Documents associated with the initiative.
+  """
+  documents(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned documents.
+    """
+    filter: DocumentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): DocumentConnection!
+  """
   [Internal] Facets associated with the initiative.
   """
   facets: [Facet!]!
@@ -10675,7 +10823,7 @@ type Issue implements Node {
   """
   cycle: Cycle
   """
-  [Internal] The agent that is delegated to complete this issue.
+  The app user that is delegated to work on this issue.
   """
   delegate: User
   """
@@ -11377,7 +11525,7 @@ input IssueCollectionFilter {
   """
   cycleTime: NullableDurationComparator
   """
-  [Internal] Filters that the issues delegate must satisfy.
+  Filters that the issue's delegate must satisfy.
   """
   delegate: NullableUserFilter
   """
@@ -12114,7 +12262,7 @@ input IssueFilter {
   """
   cycleTime: NullableDurationComparator
   """
-  [Internal] Filters that the issues delegate must satisfy.
+  Filters that the issue's delegate must satisfy.
   """
   delegate: NullableUserFilter
   """
@@ -13676,7 +13824,7 @@ type IssueSearchResult implements Node {
   """
   cycle: Cycle
   """
-  [Internal] The agent that is delegated to complete this issue.
+  The app user that is delegated to work on this issue.
   """
   delegate: User
   """
@@ -20107,7 +20255,7 @@ input NullableIssueFilter {
   """
   cycleTime: NullableDurationComparator
   """
-  [Internal] Filters that the issues delegate must satisfy.
+  Filters that the issue's delegate must satisfy.
   """
   delegate: NullableUserFilter
   """
@@ -27212,6 +27360,44 @@ type Query {
     orderBy: PaginationOrderBy
   ): AgentContextConnection!
   """
+  A specific agent session.
+  """
+  agentSession(
+    """
+    The identifier of the agent session to retrieve.
+    """
+    id: String!
+  ): AgentSession!
+  """
+  All agent sessions.
+  """
+  agentSessions(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AgentSessionConnection!
+  """
   All API keys for the user.
   """
   apiKeys(
@@ -32911,7 +33097,7 @@ type User implements Node {
     orderBy: PaginationOrderBy
   ): IssueConnection!
   """
-  [Internal] Issues delegated to this user.
+  Issues delegated to this user.
   """
   delegatedIssues(
     """
