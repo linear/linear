@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.5
+
+### Patch Changes
+
+- 19866f7: chore(deps): update dependency patch versions
+
 ## 3.1.4
 
 ### Patch Changes
