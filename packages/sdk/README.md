@@ -2,17 +2,17 @@
 <p align="center">
   <a href="https://linear.app" target="_blank" rel="noopener noreferrer">
     <img width="64" src="https://raw.githubusercontent.com/linear/linear/master/docs/logo.svg" alt="Linear logo">
-  </a> 
+  </a>
 </p>
 <h1 align="center">
   Linear API
 </h1>
 <h3 align="center">
-  The issue tracking tool you'll enjoy using
+  The purpose-built tool for planning and building products
 </h3>
 <p align="center">
-  Linear helps streamline software projects, sprints, tasks, and<br />
-  bug tracking. It's built for high-performance teams.
+  Streamline issues, projects, and product roadmaps<br/>
+  with the system for modern software development.
 </p>
 <p align="center">
   <a href="https://github.com/linear/linear/blob/master/LICENSE">
