@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.33
+
+### Patch Changes
+
+- ca2f367: chore(deps): update dependency patch versions
+
 ## 2.0.32
 
 ### Patch Changes
