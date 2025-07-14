@@ -2133,17 +2133,9 @@
               "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "AgentActivity",
-                    "ofType": null
-                  }
-                }
+                "kind": "OBJECT",
+                "name": "AgentActivityConnection",
+                "ofType": null
               }
             },
             "isDeprecated": false,
@@ -42482,7 +42474,7 @@
           },
           {
             "name": "delegateId",
-            "description": "[Internal] The identifier of the agent user to delegate the issue to.",
+            "description": "The identifier of the app user to delegate the issue to.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -46920,6 +46912,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isGroup",
+            "description": "Whether the label is a group.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -52354,7 +52358,7 @@
           },
           {
             "name": "delegateId",
-            "description": "[Internal] The identifier of the agent user to delegate the issue to.",
+            "description": "The identifier of the app user to delegate the issue to.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -86806,6 +86810,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isGroup",
+            "description": "Whether the label is a group.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,

@@ -531,7 +531,7 @@ type AgentSession implements Node {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
-  ): [AgentActivity!]!
+  ): AgentActivityConnection!
   """
   The agent user that is associated with this agent session.
   """
@@ -11946,7 +11946,7 @@ input IssueCreateInput {
   """
   cycleId: String
   """
-  [Internal] The identifier of the agent user to delegate the issue to.
+  The identifier of the app user to delegate the issue to.
   """
   delegateId: String
   """
@@ -13237,6 +13237,10 @@ input IssueLabelUpdateInput {
   The description of the label.
   """
   description: String
+  """
+  Whether the label is a group.
+  """
+  isGroup: Boolean
   """
   The name of the label.
   """
@@ -14760,7 +14764,7 @@ input IssueUpdateInput {
   """
   cycleId: String
   """
-  [Internal] The identifier of the agent user to delegate the issue to.
+  The identifier of the app user to delegate the issue to.
   """
   delegateId: String
   """
@@ -24417,6 +24421,10 @@ input ProjectLabelUpdateInput {
   The description of the label.
   """
   description: String
+  """
+  Whether the label is a group.
+  """
+  isGroup: Boolean
   """
   The name of the label.
   """

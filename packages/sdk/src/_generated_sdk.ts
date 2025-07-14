@@ -699,7 +699,6 @@ export class AgentSession extends Request {
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.summary = data.summary ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this.activities = data.activities.map(node => new AgentActivity(request, node));
     this.links = data.links.map(node => new EntityExternalLink(request, node));
     this.status = data.status;
     this.type = data.type;
@@ -728,8 +727,6 @@ export class AgentSession extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** Activities associated with this agent session. */
-  public activities: AgentActivity[];
   /** External links associated with this agent session. */
   public links: EntityExternalLink[];
   /** The current status of the agent session. */
@@ -767,6 +764,10 @@ export class AgentSession extends Request {
   /** The ID of issue this agent session is associated with. */
   public get issueId(): string | undefined {
     return this._issue?.id;
+  }
+  /** Activities associated with this agent session. */
+  public activities(variables?: Omit<L.AgentSession_ActivitiesQueryVariables, "id">) {
+    return new AgentSession_ActivitiesQuery(this._request, this.id, variables).fetch(variables);
   }
 }
 /**
@@ -29826,6 +29827,61 @@ export class UpdateWorkflowStateMutation extends Request {
     const data = response.workflowStateUpdate;
 
     return new WorkflowStatePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AgentSession_Activities Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to agentSession
+ * @param variables - variables without 'id' to pass into the AgentSession_ActivitiesQuery
+ */
+export class AgentSession_ActivitiesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.AgentSession_ActivitiesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.AgentSession_ActivitiesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the AgentSession_Activities query and return a AgentActivityConnection
+   *
+   * @param variables - variables without 'id' to pass into the AgentSession_ActivitiesQuery
+   * @returns parsed response from AgentSession_ActivitiesQuery
+   */
+  public async fetch(
+    variables?: Omit<L.AgentSession_ActivitiesQueryVariables, "id">
+  ): LinearFetch<AgentActivityConnection> {
+    const response = await this._request<L.AgentSession_ActivitiesQuery, L.AgentSession_ActivitiesQueryVariables>(
+      L.AgentSession_ActivitiesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.agentSession.activities;
+
+    return new AgentActivityConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 

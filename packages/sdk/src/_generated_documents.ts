@@ -353,7 +353,7 @@ export type AgentContextWebhookPayload = {
 export type AgentSession = Node & {
   __typename?: "AgentSession";
   /** Activities associated with this agent session. */
-  activities: Array<AgentActivity>;
+  activities: AgentActivityConnection;
   /** The agent user that is associated with this agent session. */
   appUser: User;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -6857,7 +6857,7 @@ export type IssueCreateInput = {
   createdAt?: Maybe<Scalars["DateTime"]>;
   /** The cycle associated with the issue. */
   cycleId?: Maybe<Scalars["String"]>;
-  /** [Internal] The identifier of the agent user to delegate the issue to. */
+  /** The identifier of the app user to delegate the issue to. */
   delegateId?: Maybe<Scalars["String"]>;
   /** The issue description in markdown format. */
   description?: Maybe<Scalars["String"]>;
@@ -7568,6 +7568,8 @@ export type IssueLabelUpdateInput = {
   color?: Maybe<Scalars["String"]>;
   /** The description of the label. */
   description?: Maybe<Scalars["String"]>;
+  /** Whether the label is a group. */
+  isGroup?: Maybe<Scalars["Boolean"]>;
   /** The name of the label. */
   name?: Maybe<Scalars["String"]>;
   /** The identifier of the parent label. */
@@ -8364,7 +8366,7 @@ export type IssueUpdateInput = {
   autoClosedByParentClosing?: Maybe<Scalars["Boolean"]>;
   /** The cycle associated with the issue. */
   cycleId?: Maybe<Scalars["String"]>;
-  /** [Internal] The identifier of the agent user to delegate the issue to. */
+  /** The identifier of the app user to delegate the issue to. */
   delegateId?: Maybe<Scalars["String"]>;
   /** The issue description in markdown format. */
   description?: Maybe<Scalars["String"]>;
@@ -13757,6 +13759,8 @@ export type ProjectLabelUpdateInput = {
   color?: Maybe<Scalars["String"]>;
   /** The description of the label. */
   description?: Maybe<Scalars["String"]>;
+  /** Whether the label is a group. */
+  isGroup?: Maybe<Scalars["Boolean"]>;
   /** The name of the label. */
   name?: Maybe<Scalars["String"]>;
   /** The identifier of the parent label. */
@@ -20583,7 +20587,6 @@ export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   | "type"
   | "id"
 > & {
-    activities: Array<{ __typename?: "AgentActivity" } & AgentActivityFragment>;
     links: Array<{ __typename?: "EntityExternalLink" } & EntityExternalLinkFragment>;
     appUser: { __typename?: "User" } & Pick<User, "id">;
     comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -24169,6 +24172,22 @@ export type AgentSessionQueryVariables = Exact<{
 
 export type AgentSessionQuery = { __typename?: "Query" } & {
   agentSession: { __typename?: "AgentSession" } & AgentSessionFragment;
+};
+
+export type AgentSession_ActivitiesQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
+  first?: Maybe<Scalars["Int"]>;
+  includeArchived?: Maybe<Scalars["Boolean"]>;
+  last?: Maybe<Scalars["Int"]>;
+  orderBy?: Maybe<PaginationOrderBy>;
+}>;
+
+export type AgentSession_ActivitiesQuery = { __typename?: "Query" } & {
+  agentSession: { __typename?: "AgentSession" } & {
+    activities: { __typename?: "AgentActivityConnection" } & AgentActivityConnectionFragment;
+  };
 };
 
 export type AgentSessionsQueryVariables = Exact<{
@@ -35951,14 +35970,6 @@ export const AgentSessionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "summary" } },
           {
             kind: "Field",
-            name: { kind: "Name", value: "activities" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivity" } }],
-            },
-          },
-          {
-            kind: "Field",
             name: { kind: "Name", value: "links" },
             selectionSet: {
               kind: "SelectionSet",
@@ -44508,10 +44519,120 @@ export const AgentSessionDocument = {
       },
     },
     ...AgentSessionFragmentDoc.definitions,
-    ...AgentActivityFragmentDoc.definitions,
     ...EntityExternalLinkFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AgentSessionQuery, AgentSessionQueryVariables>;
+export const AgentSession_ActivitiesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "agentSession_activities" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "agentSession" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "activities" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivityConnection" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...AgentActivityConnectionFragmentDoc.definitions,
+    ...AgentActivityFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<AgentSession_ActivitiesQuery, AgentSession_ActivitiesQueryVariables>;
 export const AgentSessionsDocument = {
   kind: "Document",
   definitions: [
@@ -44599,7 +44720,6 @@ export const AgentSessionsDocument = {
     },
     ...AgentSessionConnectionFragmentDoc.definitions,
     ...AgentSessionFragmentDoc.definitions,
-    ...AgentActivityFragmentDoc.definitions,
     ...EntityExternalLinkFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],

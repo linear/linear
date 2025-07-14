@@ -439,6 +439,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the agentSession connection query for the AgentActivity */
+    it("agentSession.activities", async () => {
+      if (_agentSession) {
+        const activities: L.AgentActivityConnection | undefined = await _agentSession.activities();
+        expect(activities instanceof L.AgentActivityConnection);
+      } else {
+        console.warn("codegen-doc:print: No agentSession found - cannot test _agentSession.activities query");
+      }
+    });
+
     /** Test the agentSession.appUser query for L.User */
     it("agentSession.appUser", async () => {
       if (_agentSession) {

@@ -2071,10 +2071,6 @@ fragment AgentSession on AgentSession {
   __typename
   # A summary of the activities in this session.
   summary
-  # Activities associated with this agent session.
-  activities {
-    ...AgentActivity
-  }
   # External links associated with this agent session.
   links {
     ...EntityExternalLink
@@ -8936,6 +8932,36 @@ query agentSession(
 ) {
   agentSession(id: $id) {
     ...AgentSession
+  }
+}
+# Activities associated with this agent session.
+query agentSession_activities(
+  # The identifier of the agent session to retrieve.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  agentSession(id: $id) {
+    activities(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...AgentActivityConnection
+    }
   }
 }
 # All agent sessions.
