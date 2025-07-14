@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.6
+
+### Patch Changes
+
+- ca2f367: chore(deps): update dependency patch versions
+
 ## 3.1.5
 
 ### Patch Changes

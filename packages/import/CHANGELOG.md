@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.2.25
+
+### Patch Changes
+
+- ca2f367: chore(deps): update dependency patch versions
+- Updated dependencies [ca2f367]
+- Updated dependencies [bf00d1f]
+  - @linear/sdk@51.0.0
+
 ## 2.2.24
 
 ### Patch Changes
