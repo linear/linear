@@ -767,7 +767,7 @@ export class AgentSession extends Request {
   }
   /** Activities associated with this agent session. */
   public activities(variables?: Omit<L.AgentSession_ActivitiesQueryVariables, "id">) {
-    return new AgentSession_ActivitiesQuery(this._request, this.id, variables).fetch(variables);
+    return new AgentSession_ActivitiesQuery(this._request, this.id, variables).fetch();
   }
 }
 /**
@@ -1892,7 +1892,7 @@ export class Comment extends Request {
   }
   /** The children of the comment. */
   public children(variables?: L.Comment_ChildrenQueryVariables) {
-    return new Comment_ChildrenQuery(this._request, variables).fetch(variables);
+    return new Comment_ChildrenQuery(this._request, variables).fetch();
   }
   /** Creates a new comment. */
   public create(input: L.CommentCreateInput) {
@@ -2275,11 +2275,11 @@ export class CustomView extends Request {
   }
   /** Issues associated with the custom view. */
   public issues(variables?: Omit<L.CustomView_IssuesQueryVariables, "id">) {
-    return new CustomView_IssuesQuery(this._request, this.id, variables).fetch(variables);
+    return new CustomView_IssuesQuery(this._request, this.id, variables).fetch();
   }
   /** Projects associated with the custom view. */
   public projects(variables?: Omit<L.CustomView_ProjectsQueryVariables, "id">) {
-    return new CustomView_ProjectsQuery(this._request, this.id, variables).fetch(variables);
+    return new CustomView_ProjectsQuery(this._request, this.id, variables).fetch();
   }
   /** Creates a new custom view. */
   public create(input: L.CustomViewCreateInput) {
@@ -3775,11 +3775,11 @@ export class Cycle extends Request {
   }
   /** Issues associated with the cycle. */
   public issues(variables?: Omit<L.Cycle_IssuesQueryVariables, "id">) {
-    return new Cycle_IssuesQuery(this._request, this.id, variables).fetch(variables);
+    return new Cycle_IssuesQuery(this._request, this.id, variables).fetch();
   }
   /** Issues that weren't completed when the cycle was closed. */
   public uncompletedIssuesUponClose(variables?: Omit<L.Cycle_UncompletedIssuesUponCloseQueryVariables, "id">) {
-    return new Cycle_UncompletedIssuesUponCloseQuery(this._request, this.id, variables).fetch(variables);
+    return new Cycle_UncompletedIssuesUponCloseQuery(this._request, this.id, variables).fetch();
   }
   /** Archives a cycle. */
   public archive() {
@@ -4227,7 +4227,7 @@ export class Document extends Request {
   }
   /** Comments associated with the document. */
   public comments(variables?: Omit<L.Document_CommentsQueryVariables, "id">) {
-    return new Document_CommentsQuery(this._request, this.id, variables).fetch(variables);
+    return new Document_CommentsQuery(this._request, this.id, variables).fetch();
   }
   /** Creates a new document. */
   public create(input: L.DocumentCreateInput) {
@@ -5850,7 +5850,7 @@ export class Favorite extends Request {
   }
   /** Children of the favorite. Only applies to favorites of type folder. */
   public children(variables?: Omit<L.Favorite_ChildrenQueryVariables, "id">) {
-    return new Favorite_ChildrenQuery(this._request, this.id, variables).fetch(variables);
+    return new Favorite_ChildrenQuery(this._request, this.id, variables).fetch();
   }
   /** Creates a new favorite (project, cycle etc). */
   public create(input: L.FavoriteCreateInput) {
@@ -6425,23 +6425,23 @@ export class Initiative extends Request {
   }
   /** Documents associated with the initiative. */
   public documents(variables?: Omit<L.Initiative_DocumentsQueryVariables, "id">) {
-    return new Initiative_DocumentsQuery(this._request, this.id, variables).fetch(variables);
+    return new Initiative_DocumentsQuery(this._request, this.id, variables).fetch();
   }
   /** History entries associated with the initiative. */
   public history(variables?: Omit<L.Initiative_HistoryQueryVariables, "id">) {
-    return new Initiative_HistoryQuery(this._request, this.id, variables).fetch(variables);
+    return new Initiative_HistoryQuery(this._request, this.id, variables).fetch();
   }
   /** Links associated with the initiative. */
   public links(variables?: Omit<L.Initiative_LinksQueryVariables, "id">) {
-    return new Initiative_LinksQuery(this._request, this.id, variables).fetch(variables);
+    return new Initiative_LinksQuery(this._request, this.id, variables).fetch();
   }
   /** Projects associated with the initiative. */
   public projects(variables?: Omit<L.Initiative_ProjectsQueryVariables, "id">) {
-    return new Initiative_ProjectsQuery(this._request, this.id, variables).fetch(variables);
+    return new Initiative_ProjectsQuery(this._request, this.id, variables).fetch();
   }
   /** Sub-initiatives associated with the initiative. */
   public subInitiatives(variables?: Omit<L.Initiative_SubInitiativesQueryVariables, "id">) {
-    return new Initiative_SubInitiativesQuery(this._request, this.id, variables).fetch(variables);
+    return new Initiative_SubInitiativesQuery(this._request, this.id, variables).fetch();
   }
   /** Archives a initiative. */
   public archive() {
@@ -7198,7 +7198,7 @@ export class InitiativeUpdate extends Request {
   }
   /** Comments associated with the initiative update. */
   public comments(variables?: Omit<L.InitiativeUpdate_CommentsQueryVariables, "id">) {
-    return new InitiativeUpdate_CommentsQuery(this._request, this.id, variables).fetch(variables);
+    return new InitiativeUpdate_CommentsQuery(this._request, this.id, variables).fetch();
   }
   /** Archives an initiative update. */
   public archive() {
@@ -8219,47 +8219,47 @@ export class Issue extends Request {
   }
   /** Attachments associated with the issue. */
   public attachments(variables?: Omit<L.Issue_AttachmentsQueryVariables, "id">) {
-    return new Issue_AttachmentsQuery(this._request, this.id, variables).fetch(variables);
+    return new Issue_AttachmentsQuery(this._request, this.id, variables).fetch();
   }
   /** Children of the issue. */
   public children(variables?: Omit<L.Issue_ChildrenQueryVariables, "id">) {
-    return new Issue_ChildrenQuery(this._request, this.id, variables).fetch(variables);
+    return new Issue_ChildrenQuery(this._request, this.id, variables).fetch();
   }
   /** Comments associated with the issue. */
   public comments(variables?: Omit<L.Issue_CommentsQueryVariables, "id">) {
-    return new Issue_CommentsQuery(this._request, this.id, variables).fetch(variables);
+    return new Issue_CommentsQuery(this._request, this.id, variables).fetch();
   }
   /** Attachments previously associated with the issue before being moved to another issue. */
   public formerAttachments(variables?: Omit<L.Issue_FormerAttachmentsQueryVariables, "id">) {
-    return new Issue_FormerAttachmentsQuery(this._request, this.id, variables).fetch(variables);
+    return new Issue_FormerAttachmentsQuery(this._request, this.id, variables).fetch();
   }
   /** Customer needs previously associated with the issue before being moved to another issue. */
   public formerNeeds(variables?: Omit<L.Issue_FormerNeedsQueryVariables, "id">) {
-    return new Issue_FormerNeedsQuery(this._request, this.id, variables).fetch(variables);
+    return new Issue_FormerNeedsQuery(this._request, this.id, variables).fetch();
   }
   /** History entries associated with the issue. */
   public history(variables?: Omit<L.Issue_HistoryQueryVariables, "id">) {
-    return new Issue_HistoryQuery(this._request, this.id, variables).fetch(variables);
+    return new Issue_HistoryQuery(this._request, this.id, variables).fetch();
   }
   /** Inverse relations associated with this issue. */
   public inverseRelations(variables?: Omit<L.Issue_InverseRelationsQueryVariables, "id">) {
-    return new Issue_InverseRelationsQuery(this._request, this.id, variables).fetch(variables);
+    return new Issue_InverseRelationsQuery(this._request, this.id, variables).fetch();
   }
   /** Labels associated with this issue. */
   public labels(variables?: Omit<L.Issue_LabelsQueryVariables, "id">) {
-    return new Issue_LabelsQuery(this._request, this.id, variables).fetch(variables);
+    return new Issue_LabelsQuery(this._request, this.id, variables).fetch();
   }
   /** Customer needs associated with the issue. */
   public needs(variables?: Omit<L.Issue_NeedsQueryVariables, "id">) {
-    return new Issue_NeedsQuery(this._request, this.id, variables).fetch(variables);
+    return new Issue_NeedsQuery(this._request, this.id, variables).fetch();
   }
   /** Relations associated with this issue. */
   public relations(variables?: Omit<L.Issue_RelationsQueryVariables, "id">) {
-    return new Issue_RelationsQuery(this._request, this.id, variables).fetch(variables);
+    return new Issue_RelationsQuery(this._request, this.id, variables).fetch();
   }
   /** Users who are subscribed to the issue. */
   public subscribers(variables?: Omit<L.Issue_SubscribersQueryVariables, "id">) {
-    return new Issue_SubscribersQuery(this._request, this.id, variables).fetch(variables);
+    return new Issue_SubscribersQuery(this._request, this.id, variables).fetch();
   }
   /** Archives an issue. */
   public archive(variables?: Omit<L.ArchiveIssueMutationVariables, "id">) {
@@ -9127,11 +9127,11 @@ export class IssueLabel extends Request {
   }
   /** Children of the label. */
   public children(variables?: Omit<L.IssueLabel_ChildrenQueryVariables, "id">) {
-    return new IssueLabel_ChildrenQuery(this._request, this.id, variables).fetch(variables);
+    return new IssueLabel_ChildrenQuery(this._request, this.id, variables).fetch();
   }
   /** Issues associated with the label. */
   public issues(variables?: Omit<L.IssueLabel_IssuesQueryVariables, "id">) {
-    return new IssueLabel_IssuesQuery(this._request, this.id, variables).fetch(variables);
+    return new IssueLabel_IssuesQuery(this._request, this.id, variables).fetch();
   }
   /** Creates a new label. */
   public create(input: L.IssueLabelCreateInput, variables?: Omit<L.CreateIssueLabelMutationVariables, "input">) {
@@ -11582,27 +11582,27 @@ export class Organization extends Request {
 
   /** Integrations associated with the organization. */
   public integrations(variables?: L.Organization_IntegrationsQueryVariables) {
-    return new Organization_IntegrationsQuery(this._request, variables).fetch(variables);
+    return new Organization_IntegrationsQuery(this._request, variables).fetch();
   }
   /** Labels associated with the organization. */
   public labels(variables?: L.Organization_LabelsQueryVariables) {
-    return new Organization_LabelsQuery(this._request, variables).fetch(variables);
+    return new Organization_LabelsQuery(this._request, variables).fetch();
   }
   /** Project labels associated with the organization. */
   public projectLabels(variables?: L.Organization_ProjectLabelsQueryVariables) {
-    return new Organization_ProjectLabelsQuery(this._request, variables).fetch(variables);
+    return new Organization_ProjectLabelsQuery(this._request, variables).fetch();
   }
   /** Teams associated with the organization. */
   public teams(variables?: L.Organization_TeamsQueryVariables) {
-    return new Organization_TeamsQuery(this._request, variables).fetch(variables);
+    return new Organization_TeamsQuery(this._request, variables).fetch();
   }
   /** Templates associated with the organization. */
   public templates(variables?: L.Organization_TemplatesQueryVariables) {
-    return new Organization_TemplatesQuery(this._request, variables).fetch(variables);
+    return new Organization_TemplatesQuery(this._request, variables).fetch();
   }
   /** Users associated with the organization. */
   public users(variables?: L.Organization_UsersQueryVariables) {
-    return new Organization_UsersQuery(this._request, variables).fetch(variables);
+    return new Organization_UsersQuery(this._request, variables).fetch();
   }
   /** Delete's an organization. Administrator privileges required. */
   public delete(input: L.DeleteOrganizationInput) {
@@ -12508,59 +12508,59 @@ export class Project extends Request {
   }
   /** Comments associated with the project overview. */
   public comments(variables?: Omit<L.Project_CommentsQueryVariables, "id">) {
-    return new Project_CommentsQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_CommentsQuery(this._request, this.id, variables).fetch();
   }
   /** Documents associated with the project. */
   public documents(variables?: Omit<L.Project_DocumentsQueryVariables, "id">) {
-    return new Project_DocumentsQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_DocumentsQuery(this._request, this.id, variables).fetch();
   }
   /** External links associated with the project. */
   public externalLinks(variables?: Omit<L.Project_ExternalLinksQueryVariables, "id">) {
-    return new Project_ExternalLinksQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_ExternalLinksQuery(this._request, this.id, variables).fetch();
   }
   /** History entries associated with the project. */
   public history(variables?: Omit<L.Project_HistoryQueryVariables, "id">) {
-    return new Project_HistoryQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_HistoryQuery(this._request, this.id, variables).fetch();
   }
   /** Initiatives that this project belongs to. */
   public initiatives(variables?: Omit<L.Project_InitiativesQueryVariables, "id">) {
-    return new Project_InitiativesQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_InitiativesQuery(this._request, this.id, variables).fetch();
   }
   /** Inverse relations associated with this project. */
   public inverseRelations(variables?: Omit<L.Project_InverseRelationsQueryVariables, "id">) {
-    return new Project_InverseRelationsQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_InverseRelationsQuery(this._request, this.id, variables).fetch();
   }
   /** Issues associated with the project. */
   public issues(variables?: Omit<L.Project_IssuesQueryVariables, "id">) {
-    return new Project_IssuesQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_IssuesQuery(this._request, this.id, variables).fetch();
   }
   /** Labels associated with this project. */
   public labels(variables?: Omit<L.Project_LabelsQueryVariables, "id">) {
-    return new Project_LabelsQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_LabelsQuery(this._request, this.id, variables).fetch();
   }
   /** Users that are members of the project. */
   public members(variables?: Omit<L.Project_MembersQueryVariables, "id">) {
-    return new Project_MembersQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_MembersQuery(this._request, this.id, variables).fetch();
   }
   /** Customer needs associated with the project. */
   public needs(variables?: Omit<L.Project_NeedsQueryVariables, "id">) {
-    return new Project_NeedsQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_NeedsQuery(this._request, this.id, variables).fetch();
   }
   /** Milestones associated with the project. */
   public projectMilestones(variables?: Omit<L.Project_ProjectMilestonesQueryVariables, "id">) {
-    return new Project_ProjectMilestonesQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_ProjectMilestonesQuery(this._request, this.id, variables).fetch();
   }
   /** Project updates associated with the project. */
   public projectUpdates(variables?: Omit<L.Project_ProjectUpdatesQueryVariables, "id">) {
-    return new Project_ProjectUpdatesQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_ProjectUpdatesQuery(this._request, this.id, variables).fetch();
   }
   /** Relations associated with this project. */
   public relations(variables?: Omit<L.Project_RelationsQueryVariables, "id">) {
-    return new Project_RelationsQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_RelationsQuery(this._request, this.id, variables).fetch();
   }
   /** Teams associated with this project. */
   public teams(variables?: Omit<L.Project_TeamsQueryVariables, "id">) {
-    return new Project_TeamsQuery(this._request, this.id, variables).fetch(variables);
+    return new Project_TeamsQuery(this._request, this.id, variables).fetch();
   }
   /** Archives a project. */
   public archive(variables?: Omit<L.ArchiveProjectMutationVariables, "id">) {
@@ -12799,11 +12799,11 @@ export class ProjectLabel extends Request {
   }
   /** Children of the label. */
   public children(variables?: Omit<L.ProjectLabel_ChildrenQueryVariables, "id">) {
-    return new ProjectLabel_ChildrenQuery(this._request, this.id, variables).fetch(variables);
+    return new ProjectLabel_ChildrenQuery(this._request, this.id, variables).fetch();
   }
   /** Projects associated with the label. */
   public projects(variables?: Omit<L.ProjectLabel_ProjectsQueryVariables, "id">) {
-    return new ProjectLabel_ProjectsQuery(this._request, this.id, variables).fetch(variables);
+    return new ProjectLabel_ProjectsQuery(this._request, this.id, variables).fetch();
   }
   /** Creates a new project label. */
   public create(input: L.ProjectLabelCreateInput) {
@@ -12928,7 +12928,7 @@ export class ProjectMilestone extends Request {
   }
   /** Issues associated with the project milestone. */
   public issues(variables?: Omit<L.ProjectMilestone_IssuesQueryVariables, "id">) {
-    return new ProjectMilestone_IssuesQuery(this._request, this.id, variables).fetch(variables);
+    return new ProjectMilestone_IssuesQuery(this._request, this.id, variables).fetch();
   }
   /** Creates a new project milestone. */
   public create(input: L.ProjectMilestoneCreateInput) {
@@ -14059,7 +14059,7 @@ export class ProjectUpdate extends Request {
   }
   /** Comments associated with the project update. */
   public comments(variables?: Omit<L.ProjectUpdate_CommentsQueryVariables, "id">) {
-    return new ProjectUpdate_CommentsQuery(this._request, this.id, variables).fetch(variables);
+    return new ProjectUpdate_CommentsQuery(this._request, this.id, variables).fetch();
   }
   /** Archives a project update. */
   public archive() {
@@ -14871,7 +14871,7 @@ export class Roadmap extends Request {
   }
   /** Projects associated with the roadmap. */
   public projects(variables?: Omit<L.Roadmap_ProjectsQueryVariables, "id">) {
-    return new Roadmap_ProjectsQuery(this._request, this.id, variables).fetch(variables);
+    return new Roadmap_ProjectsQuery(this._request, this.id, variables).fetch();
   }
   /** Archives a roadmap. */
   public archive() {
@@ -15687,43 +15687,43 @@ export class Team extends Request {
   }
   /** Cycles associated with the team. */
   public cycles(variables?: Omit<L.Team_CyclesQueryVariables, "id">) {
-    return new Team_CyclesQuery(this._request, this.id, variables).fetch(variables);
+    return new Team_CyclesQuery(this._request, this.id, variables).fetch();
   }
   /** The Git automation states for the team. */
   public gitAutomationStates(variables?: Omit<L.Team_GitAutomationStatesQueryVariables, "id">) {
-    return new Team_GitAutomationStatesQuery(this._request, this.id, variables).fetch(variables);
+    return new Team_GitAutomationStatesQuery(this._request, this.id, variables).fetch();
   }
   /** Issues associated with the team. */
   public issues(variables?: Omit<L.Team_IssuesQueryVariables, "id">) {
-    return new Team_IssuesQuery(this._request, this.id, variables).fetch(variables);
+    return new Team_IssuesQuery(this._request, this.id, variables).fetch();
   }
   /** Labels associated with the team. */
   public labels(variables?: Omit<L.Team_LabelsQueryVariables, "id">) {
-    return new Team_LabelsQuery(this._request, this.id, variables).fetch(variables);
+    return new Team_LabelsQuery(this._request, this.id, variables).fetch();
   }
   /** Users who are members of this team. */
   public members(variables?: Omit<L.Team_MembersQueryVariables, "id">) {
-    return new Team_MembersQuery(this._request, this.id, variables).fetch(variables);
+    return new Team_MembersQuery(this._request, this.id, variables).fetch();
   }
   /** Memberships associated with the team. For easier access of the same data, use `members` query. */
   public memberships(variables?: Omit<L.Team_MembershipsQueryVariables, "id">) {
-    return new Team_MembershipsQuery(this._request, this.id, variables).fetch(variables);
+    return new Team_MembershipsQuery(this._request, this.id, variables).fetch();
   }
   /** Projects associated with the team. */
   public projects(variables?: Omit<L.Team_ProjectsQueryVariables, "id">) {
-    return new Team_ProjectsQuery(this._request, this.id, variables).fetch(variables);
+    return new Team_ProjectsQuery(this._request, this.id, variables).fetch();
   }
   /** The states that define the workflow associated with the team. */
   public states(variables?: Omit<L.Team_StatesQueryVariables, "id">) {
-    return new Team_StatesQuery(this._request, this.id, variables).fetch(variables);
+    return new Team_StatesQuery(this._request, this.id, variables).fetch();
   }
   /** Templates associated with the team. */
   public templates(variables?: Omit<L.Team_TemplatesQueryVariables, "id">) {
-    return new Team_TemplatesQuery(this._request, this.id, variables).fetch(variables);
+    return new Team_TemplatesQuery(this._request, this.id, variables).fetch();
   }
   /** Webhooks associated with the team. */
   public webhooks(variables?: Omit<L.Team_WebhooksQueryVariables, "id">) {
-    return new Team_WebhooksQuery(this._request, this.id, variables).fetch(variables);
+    return new Team_WebhooksQuery(this._request, this.id, variables).fetch();
   }
   /** Creates a new team. The user who creates the team will automatically be added as a member to the newly created team. */
   public create(input: L.TeamCreateInput, variables?: Omit<L.CreateTeamMutationVariables, "input">) {
@@ -16693,27 +16693,27 @@ export class User extends Request {
   }
   /** Issues assigned to the user. */
   public assignedIssues(variables?: Omit<L.User_AssignedIssuesQueryVariables, "id">) {
-    return new User_AssignedIssuesQuery(this._request, this.id, variables).fetch(variables);
+    return new User_AssignedIssuesQuery(this._request, this.id, variables).fetch();
   }
   /** Issues created by the user. */
   public createdIssues(variables?: Omit<L.User_CreatedIssuesQueryVariables, "id">) {
-    return new User_CreatedIssuesQuery(this._request, this.id, variables).fetch(variables);
+    return new User_CreatedIssuesQuery(this._request, this.id, variables).fetch();
   }
   /** Issues delegated to this user. */
   public delegatedIssues(variables?: Omit<L.User_DelegatedIssuesQueryVariables, "id">) {
-    return new User_DelegatedIssuesQuery(this._request, this.id, variables).fetch(variables);
+    return new User_DelegatedIssuesQuery(this._request, this.id, variables).fetch();
   }
   /** The user's drafts */
   public drafts(variables?: Omit<L.User_DraftsQueryVariables, "id">) {
-    return new User_DraftsQuery(this._request, this.id, variables).fetch(variables);
+    return new User_DraftsQuery(this._request, this.id, variables).fetch();
   }
   /** Memberships associated with the user. For easier access of the same data, use `teams` query. */
   public teamMemberships(variables?: Omit<L.User_TeamMembershipsQueryVariables, "id">) {
-    return new User_TeamMembershipsQuery(this._request, this.id, variables).fetch(variables);
+    return new User_TeamMembershipsQuery(this._request, this.id, variables).fetch();
   }
   /** Teams the user is part of. */
   public teams(variables?: Omit<L.User_TeamsQueryVariables, "id">) {
-    return new User_TeamsQuery(this._request, this.id, variables).fetch(variables);
+    return new User_TeamsQuery(this._request, this.id, variables).fetch();
   }
   /** Suspends a user. Can only be called by an admin. */
   public suspend() {
@@ -17525,7 +17525,7 @@ export class WorkflowState extends Request {
   }
   /** Issues belonging in this state. */
   public issues(variables?: Omit<L.WorkflowState_IssuesQueryVariables, "id">) {
-    return new WorkflowState_IssuesQuery(this._request, this.id, variables).fetch(variables);
+    return new WorkflowState_IssuesQuery(this._request, this.id, variables).fetch();
   }
   /** Archives a state. Only states with issues that have all been archived can be archived. */
   public archive() {

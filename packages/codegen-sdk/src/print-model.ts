@@ -268,7 +268,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
               );
               const operationCall = `new ${operation.print.name}${operation.print.type}(${operationArgs}).${
                 Sdk.FETCH_NAME
-              }(${operation.optionalArgs.printOutput ?? ""})`;
+              }()`;
 
               return printLines([
                 printComment([field?.node.description?.value]),
