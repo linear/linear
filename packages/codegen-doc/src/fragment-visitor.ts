@@ -186,10 +186,7 @@ export class FragmentVisitor {
             const unionType = findUnion(this._context, node);
             if (unionType) {
               // Skip webhook payload union types as they are manually typed
-              if (
-                unionType.name.value.endsWith("WebhookPayload") ||
-                unionType.name.value.endsWith("WebhookPayloadFragment")
-              ) {
+              if (unionType.name.value.endsWith("WebhookPayload")) {
                 return null;
               }
 
