@@ -7,6 +7,7 @@ import {
   InterfaceTypeDefinitionNode,
   ObjectTypeDefinitionNode,
   ScalarTypeDefinitionNode,
+  UnionTypeDefinitionNode,
 } from "graphql";
 import { OperationType, PluginConfig, PluginContext } from "./types";
 import { nodeHasSkipComment } from "./utils";
@@ -24,6 +25,7 @@ export class ContextVisitor<Config extends PluginConfig> {
   private _mutations: FieldDefinitionNode[] = [];
   private _interfaceImplementations: { [interfaceName: string]: ObjectTypeDefinitionNode[] } = {};
   private _enums: EnumTypeDefinitionNode[] = [];
+  private _unions: UnionTypeDefinitionNode[] = [];
 
   /** Initialize the visitor */
   public constructor(schema: GraphQLSchema, config: Config) {
@@ -62,6 +64,7 @@ export class ContextVisitor<Config extends PluginConfig> {
           ])
       ),
       enums: this._enums,
+      unions: this._unions,
     };
   }
 
@@ -104,6 +107,14 @@ export class ContextVisitor<Config extends PluginConfig> {
     /** Record all enums types */
     enter: (node: EnumTypeDefinitionNode): EnumTypeDefinitionNode => {
       this._enums = [...this._enums, node];
+      return node;
+    },
+  };
+
+  public UnionTypeDefinition = {
+    /** Record all union types */
+    enter: (node: UnionTypeDefinitionNode): UnionTypeDefinitionNode => {
+      this._unions = [...this._unions, node];
       return node;
     },
   };

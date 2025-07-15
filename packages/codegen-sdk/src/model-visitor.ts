@@ -2,6 +2,7 @@ import {
   findEnum,
   findObject,
   findQuery,
+  findUnion,
   getObjectName,
   isConnection,
   isEdge,
@@ -41,6 +42,7 @@ import {
   SdkQueryField,
   SdkScalarField,
   SdkScalarListField,
+  SdkUnionField,
 } from "./types";
 
 /**
@@ -204,6 +206,19 @@ export class ModelVisitor {
             nonNull,
           };
         }
+
+        /** Identify union fields */
+        const unionField = findUnion(this._context, node);
+        if (unionField) {
+          return {
+            __typename: SdkModelFieldType.union,
+            node,
+            name,
+            type,
+            union: unionField,
+            nonNull,
+          };
+        }
       }
 
       /** Ignore the field */
@@ -235,6 +250,7 @@ function leaveObjectOrInterface(_node: ObjectTypeDefinitionNode | InterfaceTypeD
         connection: (fields?.filter(field => field.__typename === SdkModelFieldType.connection) ??
           []) as SdkConnectionField[],
         enum: (fields?.filter(field => field.__typename === SdkModelFieldType.enum) ?? []) as SdkEnumField[],
+        union: (fields?.filter(field => field.__typename === SdkModelFieldType.union) ?? []) as SdkUnionField[],
       },
     };
   } else {

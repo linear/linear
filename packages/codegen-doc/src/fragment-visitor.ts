@@ -17,6 +17,7 @@ import { findInterface, findObject, isConnection } from "./object";
 import { printGraphqlComment, printGraphqlDebug, printGraphqlDescription, printLines } from "./print";
 import { findQuery } from "./query";
 import { Fragment, Named, NamedFields, PluginContext } from "./types";
+import { findUnion, getUnionMemberTypes } from "./union";
 import { nonNullable, reduceTypeName } from "./utils";
 import { conflictsWithInterfaceDefinition } from "./interface";
 
@@ -180,6 +181,35 @@ export class FragmentVisitor {
                 ...${interfaceFragment.name.value}
               }`,
             ]);
+          } else {
+            /** Check if this is a union type field */
+            const unionType = findUnion(this._context, node);
+            if (unionType) {
+              // Skip webhook payload union types as they are manually typed
+              if (unionType.name.value.endsWith("WebhookPayload")) {
+                return null;
+              }
+
+              const memberTypes = getUnionMemberTypes(unionType);
+              const inlineFragments = memberTypes
+                .map(
+                  memberType => `            ... on ${memberType} {
+              ...${memberType}
+            }`
+                )
+                .join("\n");
+
+              if (inlineFragments) {
+                return printLines([
+                  description,
+                  printGraphqlDebug(_node),
+                  printGraphqlDebug(unionType),
+                  `${node.name} {
+${inlineFragments}
+          }`,
+                ]);
+              }
+            }
           }
         }
       }

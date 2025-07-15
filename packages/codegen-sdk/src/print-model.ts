@@ -133,6 +133,19 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
               printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}${field.nonNull ? "" : " ?? undefined"}`)
             )
           ),
+          printDebug("fields.union"),
+          printLines(
+            model.fields.union.map(field => {
+              if (field.type.endsWith("WebhookPayload")) {
+                // Skip webhook payload union types as they are manually typed
+                return undefined;
+              }
+              return printSet(
+                `this.${field.name}`,
+                `${Sdk.DATA_NAME}.${field.name}${field.nonNull ? "" : " ?? undefined"}`
+              );
+            })
+          ),
           printDebug("fields.query"),
           printLines(
             model.fields.query.map(field =>
@@ -178,6 +191,16 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
           model.fields.enum.map(field =>
             printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}`)
           )
+        ),
+        printDebug("fields.union"),
+        printLines(
+          model.fields.union.map(field => {
+            if (field.type.endsWith("WebhookPayload")) {
+              // Skip webhook payload union types as they are manually typed
+              return undefined;
+            }
+            return printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}`);
+          })
         ),
       ])}
       ${printLines([
