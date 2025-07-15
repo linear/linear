@@ -9,6 +9,7 @@ import {
   NameNode,
   NonNullTypeNode,
   ObjectTypeDefinitionNode,
+  UnionTypeDefinitionNode,
 } from "graphql";
 import { getRequiredArgs } from "./args";
 import { findEnum, isValidField } from "./field";
@@ -108,6 +109,31 @@ export class FragmentVisitor {
             ).join("\n")}
           }
         `,
+      ]);
+    },
+  };
+
+  /**
+   * Print wrapper fragment for union types so consumers can spread member fragments.
+   */
+  public UnionTypeDefinition = {
+    leave: (node: UnionTypeDefinitionNode): string | null => {
+      if (!node.types?.length) {
+        return null;
+      }
+
+      // Record placeholder for fragment lookup
+      const placeholder = { ...(node as unknown as NamedFields<ObjectTypeDefinitionNode>), fields: [] } as Fragment;
+      this._fragments = [...this._fragments, placeholder];
+
+      return printLines([
+        printGraphqlDescription(node.description?.value),
+        printGraphqlDebug(node),
+        `fragment ${node.name.value} on ${node.name.value} {`,
+        `  __typename`,
+        ...node.types.map(t => `  ... on ${t.name.value} {\n    ...${t.name.value}\n  }`),
+        `}`,
+        " ",
       ]);
     },
   };

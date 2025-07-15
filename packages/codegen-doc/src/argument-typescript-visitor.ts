@@ -45,11 +45,18 @@ export class ArgumentTypescriptVisitor {
     /** Print scalar name if present or attach namespace */
     leave: (_node: NamedTypeNode): string => {
       const node = _node as unknown as Named<NamedTypeNode>;
+      /** Handle union types */
+      const union = this._context.unions?.find(u => u.name.value === node.name);
+      if (union) {
+        const memberTypes = union.types?.map(t => printList([this._namespace, t.name.value], ".")) ?? [];
+        return memberTypes.join(" | ");
+      }
+
       if (this._context.scalars[node.name]) {
         return printTypescriptScalar(node.name, this._namespace);
-      } else {
-        return printList([this._namespace, node.name], ".");
       }
+
+      return printList([this._namespace, node.name], ".");
     },
   };
 

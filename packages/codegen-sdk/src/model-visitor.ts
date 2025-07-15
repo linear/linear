@@ -134,6 +134,17 @@ export class ModelVisitor {
           }
         }
 
+        /** Identify union fields (treated as scalar for assignment) */
+        if (this._context.unions.find(u => u.name.value === type)) {
+          return {
+            __typename: SdkModelFieldType.scalar,
+            node,
+            name,
+            type,
+            nonNull,
+          };
+        }
+
         /** Identify scalar fields */
         if (isScalarField(this._context, node)) {
           return {
