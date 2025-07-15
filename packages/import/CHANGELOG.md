@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.2.26
+
+### Patch Changes
+
+- 70dc0fb: chore(deps): update dependency patch versions
+- 6c6f54d: chore: update import readme about gitlab
+- Updated dependencies [70dc0fb]
+- Updated dependencies [33b8dba]
+  - @linear/sdk@51.1.0
+
 ## 2.2.25
 
 ### Patch Changes

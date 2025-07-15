@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.1.0
+
+### Minor Changes
+
+- 33b8dba: update codegen to support GraphQL union types
+
+### Patch Changes
+
+- 70dc0fb: chore(deps): update dependency patch versions
+
 ## 3.0.6
 
 ### Patch Changes
