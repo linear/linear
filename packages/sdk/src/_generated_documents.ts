@@ -20838,6 +20838,13 @@ export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
     agentContext?: Maybe<{ __typename?: "AgentContext" } & Pick<AgentContext, "id">>;
     agentSession: { __typename?: "AgentSession" } & Pick<AgentSession, "id">;
     sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+    content:
+      | ({ __typename?: "AgentActivityActionContent" } & AgentActivityActionContentFragment)
+      | ({ __typename?: "AgentActivityElicitationContent" } & AgentActivityElicitationContentFragment)
+      | ({ __typename?: "AgentActivityErrorContent" } & AgentActivityErrorContentFragment)
+      | ({ __typename?: "AgentActivityObservationContent" } & AgentActivityObservationContentFragment)
+      | ({ __typename?: "AgentActivityPromptContent" } & AgentActivityPromptContentFragment)
+      | ({ __typename?: "AgentActivityResponseContent" } & AgentActivityResponseContentFragment);
   };
 
 export type EmailIntakeAddressFragment = { __typename: "EmailIntakeAddress" } & Pick<
@@ -21559,7 +21566,13 @@ export type OtherNotificationWebhookPayloadFragment = { __typename: "OtherNotifi
 export type ExternalEntityInfoFragment = { __typename: "ExternalEntityInfo" } & Pick<
   ExternalEntityInfo,
   "id" | "service"
->;
+> & {
+    metadata?: Maybe<
+      | ({ __typename?: "ExternalEntityInfoGithubMetadata" } & ExternalEntityInfoGithubMetadataFragment)
+      | ({ __typename?: "ExternalEntityInfoJiraMetadata" } & ExternalEntityInfoJiraMetadataFragment)
+      | ({ __typename?: "ExternalEntitySlackMetadata" } & ExternalEntitySlackMetadataFragment)
+    >;
+  };
 
 export type AttachmentFragment = { __typename: "Attachment" } & Pick<
   Attachment,
@@ -32673,116 +32686,6 @@ export const IntegrationChildWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IntegrationChildWebhookPayloadFragment, unknown>;
-export const AgentActivityPromptContentFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AgentActivityPromptContent" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityPromptContent" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "body" } },
-          { kind: "Field", name: { kind: "Name", value: "type" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<AgentActivityPromptContentFragment, unknown>;
-export const AgentActivityResponseContentFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AgentActivityResponseContent" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityResponseContent" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "body" } },
-          { kind: "Field", name: { kind: "Name", value: "type" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<AgentActivityResponseContentFragment, unknown>;
-export const AgentActivityActionContentFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AgentActivityActionContent" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityActionContent" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "action" } },
-          { kind: "Field", name: { kind: "Name", value: "parameter" } },
-          { kind: "Field", name: { kind: "Name", value: "result" } },
-          { kind: "Field", name: { kind: "Name", value: "type" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<AgentActivityActionContentFragment, unknown>;
-export const AgentActivityElicitationContentFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AgentActivityElicitationContent" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityElicitationContent" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "body" } },
-          { kind: "Field", name: { kind: "Name", value: "type" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<AgentActivityElicitationContentFragment, unknown>;
-export const AgentActivityErrorContentFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AgentActivityErrorContent" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityErrorContent" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "body" } },
-          { kind: "Field", name: { kind: "Name", value: "type" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<AgentActivityErrorContentFragment, unknown>;
-export const AgentActivityObservationContentFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AgentActivityObservationContent" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityObservationContent" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "body" } },
-          { kind: "Field", name: { kind: "Name", value: "type" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<AgentActivityObservationContentFragment, unknown>;
 export const OrganizationDomainFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -33150,64 +33053,6 @@ export const OtherNotificationWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<OtherNotificationWebhookPayloadFragment, unknown>;
-export const ExternalEntityInfoGithubMetadataFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ExternalEntityInfoGithubMetadata" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ExternalEntityInfoGithubMetadata" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "number" } },
-          { kind: "Field", name: { kind: "Name", value: "owner" } },
-          { kind: "Field", name: { kind: "Name", value: "repo" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<ExternalEntityInfoGithubMetadataFragment, unknown>;
-export const ExternalEntityInfoJiraMetadataFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ExternalEntityInfoJiraMetadata" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ExternalEntityInfoJiraMetadata" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "issueTypeId" } },
-          { kind: "Field", name: { kind: "Name", value: "projectId" } },
-          { kind: "Field", name: { kind: "Name", value: "issueKey" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<ExternalEntityInfoJiraMetadataFragment, unknown>;
-export const ExternalEntitySlackMetadataFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ExternalEntitySlackMetadata" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ExternalEntitySlackMetadata" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "messageUrl" } },
-          { kind: "Field", name: { kind: "Name", value: "channelId" } },
-          { kind: "Field", name: { kind: "Name", value: "channelName" } },
-          { kind: "Field", name: { kind: "Name", value: "isFromSlack" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<ExternalEntitySlackMetadataFragment, unknown>;
 export const OAuthAppWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -35663,6 +35508,116 @@ export const IssueImportSyncCheckPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IssueImportSyncCheckPayloadFragment, unknown>;
+export const AgentActivityActionContentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentActivityActionContent" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityActionContent" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "action" } },
+          { kind: "Field", name: { kind: "Name", value: "parameter" } },
+          { kind: "Field", name: { kind: "Name", value: "result" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentActivityActionContentFragment, unknown>;
+export const AgentActivityElicitationContentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentActivityElicitationContent" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityElicitationContent" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "body" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentActivityElicitationContentFragment, unknown>;
+export const AgentActivityErrorContentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentActivityErrorContent" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityErrorContent" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "body" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentActivityErrorContentFragment, unknown>;
+export const AgentActivityObservationContentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentActivityObservationContent" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityObservationContent" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "body" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentActivityObservationContentFragment, unknown>;
+export const AgentActivityPromptContentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentActivityPromptContent" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityPromptContent" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "body" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentActivityPromptContentFragment, unknown>;
+export const AgentActivityResponseContentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentActivityResponseContent" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityResponseContent" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "body" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentActivityResponseContentFragment, unknown>;
 export const AgentActivityFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -35696,6 +35651,81 @@ export const AgentActivityFragmentDoc = {
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "content" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "InlineFragment",
+                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityActionContent" } },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivityActionContent" } },
+                    ],
+                  },
+                },
+                {
+                  kind: "InlineFragment",
+                  typeCondition: {
+                    kind: "NamedType",
+                    name: { kind: "Name", value: "AgentActivityElicitationContent" },
+                  },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivityElicitationContent" } },
+                    ],
+                  },
+                },
+                {
+                  kind: "InlineFragment",
+                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityErrorContent" } },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivityErrorContent" } },
+                    ],
+                  },
+                },
+                {
+                  kind: "InlineFragment",
+                  typeCondition: {
+                    kind: "NamedType",
+                    name: { kind: "Name", value: "AgentActivityObservationContent" },
+                  },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivityObservationContent" } },
+                    ],
+                  },
+                },
+                {
+                  kind: "InlineFragment",
+                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityPromptContent" } },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivityPromptContent" } },
+                    ],
+                  },
+                },
+                {
+                  kind: "InlineFragment",
+                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityResponseContent" } },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivityResponseContent" } },
+                    ],
+                  },
+                },
+              ],
             },
           },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
@@ -36691,6 +36721,64 @@ export const DocumentContentFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<DocumentContentFragment, unknown>;
+export const ExternalEntityInfoGithubMetadataFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ExternalEntityInfoGithubMetadata" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ExternalEntityInfoGithubMetadata" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "number" } },
+          { kind: "Field", name: { kind: "Name", value: "owner" } },
+          { kind: "Field", name: { kind: "Name", value: "repo" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ExternalEntityInfoGithubMetadataFragment, unknown>;
+export const ExternalEntityInfoJiraMetadataFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ExternalEntityInfoJiraMetadata" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ExternalEntityInfoJiraMetadata" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "issueTypeId" } },
+          { kind: "Field", name: { kind: "Name", value: "projectId" } },
+          { kind: "Field", name: { kind: "Name", value: "issueKey" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ExternalEntityInfoJiraMetadataFragment, unknown>;
+export const ExternalEntitySlackMetadataFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ExternalEntitySlackMetadata" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ExternalEntitySlackMetadata" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "messageUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "channelId" } },
+          { kind: "Field", name: { kind: "Name", value: "channelName" } },
+          { kind: "Field", name: { kind: "Name", value: "isFromSlack" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ExternalEntitySlackMetadataFragment, unknown>;
 export const ExternalEntityInfoFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -36702,6 +36790,48 @@ export const ExternalEntityInfoFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "metadata" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "InlineFragment",
+                  typeCondition: {
+                    kind: "NamedType",
+                    name: { kind: "Name", value: "ExternalEntityInfoGithubMetadata" },
+                  },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "ExternalEntityInfoGithubMetadata" } },
+                    ],
+                  },
+                },
+                {
+                  kind: "InlineFragment",
+                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ExternalEntityInfoJiraMetadata" } },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "ExternalEntityInfoJiraMetadata" } },
+                    ],
+                  },
+                },
+                {
+                  kind: "InlineFragment",
+                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ExternalEntitySlackMetadata" } },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "ExternalEntitySlackMetadata" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "service" } },
         ],
@@ -44310,6 +44440,12 @@ export const AgentActivitiesDocument = {
     },
     ...AgentActivityConnectionFragmentDoc.definitions,
     ...AgentActivityFragmentDoc.definitions,
+    ...AgentActivityActionContentFragmentDoc.definitions,
+    ...AgentActivityElicitationContentFragmentDoc.definitions,
+    ...AgentActivityErrorContentFragmentDoc.definitions,
+    ...AgentActivityObservationContentFragmentDoc.definitions,
+    ...AgentActivityPromptContentFragmentDoc.definitions,
+    ...AgentActivityResponseContentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AgentActivitiesQuery, AgentActivitiesQueryVariables>;
@@ -44349,6 +44485,12 @@ export const AgentActivityDocument = {
       },
     },
     ...AgentActivityFragmentDoc.definitions,
+    ...AgentActivityActionContentFragmentDoc.definitions,
+    ...AgentActivityElicitationContentFragmentDoc.definitions,
+    ...AgentActivityErrorContentFragmentDoc.definitions,
+    ...AgentActivityObservationContentFragmentDoc.definitions,
+    ...AgentActivityPromptContentFragmentDoc.definitions,
+    ...AgentActivityResponseContentFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AgentActivityQuery, AgentActivityQueryVariables>;
 export const AgentContextDocument = {
@@ -44388,6 +44530,12 @@ export const AgentContextDocument = {
     },
     ...AgentContextFragmentDoc.definitions,
     ...AgentActivityFragmentDoc.definitions,
+    ...AgentActivityActionContentFragmentDoc.definitions,
+    ...AgentActivityElicitationContentFragmentDoc.definitions,
+    ...AgentActivityErrorContentFragmentDoc.definitions,
+    ...AgentActivityObservationContentFragmentDoc.definitions,
+    ...AgentActivityPromptContentFragmentDoc.definitions,
+    ...AgentActivityResponseContentFragmentDoc.definitions,
     ...EntityExternalLinkFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AgentContextQuery, AgentContextQueryVariables>;
@@ -44479,6 +44627,12 @@ export const AgentContextsDocument = {
     ...AgentContextConnectionFragmentDoc.definitions,
     ...AgentContextFragmentDoc.definitions,
     ...AgentActivityFragmentDoc.definitions,
+    ...AgentActivityActionContentFragmentDoc.definitions,
+    ...AgentActivityElicitationContentFragmentDoc.definitions,
+    ...AgentActivityErrorContentFragmentDoc.definitions,
+    ...AgentActivityObservationContentFragmentDoc.definitions,
+    ...AgentActivityPromptContentFragmentDoc.definitions,
+    ...AgentActivityResponseContentFragmentDoc.definitions,
     ...EntityExternalLinkFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -44630,6 +44784,12 @@ export const AgentSession_ActivitiesDocument = {
     },
     ...AgentActivityConnectionFragmentDoc.definitions,
     ...AgentActivityFragmentDoc.definitions,
+    ...AgentActivityActionContentFragmentDoc.definitions,
+    ...AgentActivityElicitationContentFragmentDoc.definitions,
+    ...AgentActivityErrorContentFragmentDoc.definitions,
+    ...AgentActivityObservationContentFragmentDoc.definitions,
+    ...AgentActivityPromptContentFragmentDoc.definitions,
+    ...AgentActivityResponseContentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AgentSession_ActivitiesQuery, AgentSession_ActivitiesQueryVariables>;
@@ -45003,6 +45163,9 @@ export const AttachmentIssueDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentIssueQuery, AttachmentIssueQueryVariables>;
 export const AttachmentIssue_AttachmentsDocument = {
@@ -45294,6 +45457,9 @@ export const AttachmentIssue_ChildrenDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentIssue_ChildrenQuery, AttachmentIssue_ChildrenQueryVariables>;
@@ -45419,6 +45585,9 @@ export const AttachmentIssue_CommentsDocument = {
     ...ActorBotFragmentDoc.definitions,
     ...DocumentContentFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...SyncedExternalThreadFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -46800,6 +46969,9 @@ export const CommentDocument = {
     ...ActorBotFragmentDoc.definitions,
     ...DocumentContentFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...SyncedExternalThreadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CommentQuery, CommentQueryVariables>;
@@ -46992,6 +47164,9 @@ export const Comment_ChildrenDocument = {
     ...ActorBotFragmentDoc.definitions,
     ...DocumentContentFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...SyncedExternalThreadFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -47211,6 +47386,9 @@ export const CommentsDocument = {
     ...ActorBotFragmentDoc.definitions,
     ...DocumentContentFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...SyncedExternalThreadFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -47399,6 +47577,9 @@ export const CustomView_IssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CustomView_IssuesQuery, CustomView_IssuesQueryVariables>;
@@ -48693,6 +48874,9 @@ export const Cycle_IssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Cycle_IssuesQuery, Cycle_IssuesQueryVariables>;
@@ -48817,6 +49001,9 @@ export const Cycle_UncompletedIssuesUponCloseDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Cycle_UncompletedIssuesUponCloseQuery, Cycle_UncompletedIssuesUponCloseQueryVariables>;
@@ -49080,6 +49267,9 @@ export const Document_CommentsDocument = {
     ...ActorBotFragmentDoc.definitions,
     ...DocumentContentFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...SyncedExternalThreadFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -50983,6 +51173,9 @@ export const InitiativeUpdate_CommentsDocument = {
     ...ActorBotFragmentDoc.definitions,
     ...DocumentContentFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...SyncedExternalThreadFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -51592,6 +51785,9 @@ export const IssueDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueQuery, IssueQueryVariables>;
 export const Issue_AttachmentsDocument = {
@@ -51883,6 +52079,9 @@ export const Issue_ChildrenDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Issue_ChildrenQuery, Issue_ChildrenQueryVariables>;
@@ -52008,6 +52207,9 @@ export const Issue_CommentsDocument = {
     ...ActorBotFragmentDoc.definitions,
     ...DocumentContentFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...SyncedExternalThreadFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -53065,6 +53267,9 @@ export const IssueFigmaFileKeySearchDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueFigmaFileKeySearchQuery, IssueFigmaFileKeySearchQueryVariables>;
@@ -53560,6 +53765,9 @@ export const IssueLabel_IssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueLabel_IssuesQuery, IssueLabel_IssuesQueryVariables>;
@@ -53925,6 +54133,9 @@ export const IssueSearchDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueSearchQuery, IssueSearchQueryVariables>;
@@ -54013,6 +54224,9 @@ export const IssueVcsBranchSearchDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueVcsBranchSearchQuery, IssueVcsBranchSearchQueryVariables>;
 export const IssueVcsBranchSearch_AttachmentsDocument = {
@@ -54304,6 +54518,9 @@ export const IssueVcsBranchSearch_ChildrenDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueVcsBranchSearch_ChildrenQuery, IssueVcsBranchSearch_ChildrenQueryVariables>;
@@ -54429,6 +54646,9 @@ export const IssueVcsBranchSearch_CommentsDocument = {
     ...ActorBotFragmentDoc.definitions,
     ...DocumentContentFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...SyncedExternalThreadFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -55505,6 +55725,9 @@ export const IssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssuesQuery, IssuesQueryVariables>;
@@ -56831,6 +57054,9 @@ export const Project_CommentsDocument = {
     ...ActorBotFragmentDoc.definitions,
     ...DocumentContentFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...SyncedExternalThreadFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -57573,6 +57799,9 @@ export const Project_IssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_IssuesQuery, Project_IssuesQueryVariables>;
@@ -59061,6 +59290,9 @@ export const ProjectMilestone_IssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<ProjectMilestone_IssuesQuery, ProjectMilestone_IssuesQueryVariables>;
@@ -59582,6 +59814,9 @@ export const ProjectUpdate_CommentsDocument = {
     ...ActorBotFragmentDoc.definitions,
     ...DocumentContentFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...SyncedExternalThreadFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -60634,6 +60869,9 @@ export const SearchIssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<SearchIssuesQuery, SearchIssuesQueryVariables>;
@@ -61475,6 +61713,9 @@ export const Team_IssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Team_IssuesQuery, Team_IssuesQueryVariables>;
@@ -63141,6 +63382,9 @@ export const User_AssignedIssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<User_AssignedIssuesQuery, User_AssignedIssuesQueryVariables>;
@@ -63265,6 +63509,9 @@ export const User_CreatedIssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<User_CreatedIssuesQuery, User_CreatedIssuesQueryVariables>;
@@ -63389,6 +63636,9 @@ export const User_DelegatedIssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<User_DelegatedIssuesQuery, User_DelegatedIssuesQueryVariables>;
@@ -65451,6 +65701,9 @@ export const Viewer_AssignedIssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Viewer_AssignedIssuesQuery, Viewer_AssignedIssuesQueryVariables>;
@@ -65563,6 +65816,9 @@ export const Viewer_CreatedIssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Viewer_CreatedIssuesQuery, Viewer_CreatedIssuesQueryVariables>;
@@ -65675,6 +65931,9 @@ export const Viewer_DelegatedIssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Viewer_DelegatedIssuesQuery, Viewer_DelegatedIssuesQueryVariables>;
@@ -66272,6 +66531,9 @@ export const WorkflowState_IssuesDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<WorkflowState_IssuesQuery, WorkflowState_IssuesQueryVariables>;
@@ -73084,6 +73346,9 @@ export const CreateIssueBatchDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CreateIssueBatchMutation, CreateIssueBatchMutationVariables>;
 export const UpdateIssueBatchDocument = {
@@ -73142,6 +73407,9 @@ export const UpdateIssueBatchDocument = {
     ...ReactionFragmentDoc.definitions,
     ...ActorBotFragmentDoc.definitions,
     ...ExternalEntityInfoFragmentDoc.definitions,
+    ...ExternalEntityInfoGithubMetadataFragmentDoc.definitions,
+    ...ExternalEntityInfoJiraMetadataFragmentDoc.definitions,
+    ...ExternalEntitySlackMetadataFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateIssueBatchMutation, UpdateIssueBatchMutationVariables>;
 export const CreateIssueDocument = {

@@ -224,6 +224,7 @@ export class AgentActivity extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.content = data.content;
     this._agentContext = data.agentContext ?? undefined;
     this._agentSession = data.agentSession;
     this._sourceComment = data.sourceComment ?? undefined;
@@ -240,6 +241,8 @@ export class AgentActivity extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** The content of the activity */
+  public content: L.AgentActivityContent;
   /** The agent context this activity belongs to. */
   public get agentContext(): LinearFetch<AgentContext> | undefined {
     return this._agentContext?.id ? new AgentContextQuery(this._request).fetch(this._agentContext?.id) : undefined;
@@ -5399,12 +5402,15 @@ export class ExternalEntityInfo extends Request {
     super(request);
     this.id = data.id;
     this.service = data.service;
+    this.metadata = data.metadata ?? undefined;
   }
 
   /** The id of the external entity. */
   public id: string;
   /** The name of the service this entity is synced with. */
   public service: L.ExternalSyncService;
+  /** Metadata about the external entity. */
+  public metadata?: L.ExternalEntityInfoMetadata;
 }
 /**
  * Metadata about the external GitHub entity.

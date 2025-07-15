@@ -2757,6 +2757,27 @@ fragment AgentActivity on AgentActivity {
   sourceComment {
     id
   }
+  # The content of the activity
+  content {
+    ... on AgentActivityActionContent {
+      ...AgentActivityActionContent
+    }
+    ... on AgentActivityElicitationContent {
+      ...AgentActivityElicitationContent
+    }
+    ... on AgentActivityErrorContent {
+      ...AgentActivityErrorContent
+    }
+    ... on AgentActivityObservationContent {
+      ...AgentActivityObservationContent
+    }
+    ... on AgentActivityPromptContent {
+      ...AgentActivityPromptContent
+    }
+    ... on AgentActivityResponseContent {
+      ...AgentActivityResponseContent
+    }
+  }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -4427,6 +4448,18 @@ fragment OtherNotificationWebhookPayload on OtherNotificationWebhookPayload {
 # Information about an external entity.
 fragment ExternalEntityInfo on ExternalEntityInfo {
   __typename
+  # Metadata about the external entity.
+  metadata {
+    ... on ExternalEntityInfoGithubMetadata {
+      ...ExternalEntityInfoGithubMetadata
+    }
+    ... on ExternalEntityInfoJiraMetadata {
+      ...ExternalEntityInfoJiraMetadata
+    }
+    ... on ExternalEntitySlackMetadata {
+      ...ExternalEntitySlackMetadata
+    }
+  }
   # The id of the external entity.
   id
   # The name of the service this entity is synced with.
