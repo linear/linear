@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.35
+
+### Patch Changes
+
+- 91bbbdb: chore(deps): update dependency patch versions
+
 ## 2.0.34
 
 ### Patch Changes
