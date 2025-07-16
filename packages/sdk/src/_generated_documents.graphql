@@ -1791,6 +1791,14 @@ fragment IssueHistory on IssueHistory {
   actors {
     ...User
   }
+  # The app user from whom the issue delegation was transferred.
+  fromDelegate {
+    id
+  }
+  # The app user to whom the issue delegation was transferred.
+  toDelegate {
+    id
+  }
   # The bot that performed the action.
   botActor {
     ...ActorBot
@@ -2768,14 +2776,14 @@ fragment AgentActivity on AgentActivity {
     ... on AgentActivityErrorContent {
       ...AgentActivityErrorContent
     }
-    ... on AgentActivityObservationContent {
-      ...AgentActivityObservationContent
-    }
     ... on AgentActivityPromptContent {
       ...AgentActivityPromptContent
     }
     ... on AgentActivityResponseContent {
       ...AgentActivityResponseContent
+    }
+    ... on AgentActivityThoughtContent {
+      ...AgentActivityThoughtContent
     }
   }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -4256,6 +4264,15 @@ fragment AgentActivityResponseContent on AgentActivityResponseContent {
   type
 }
 
+# Content for a thought activity.
+fragment AgentActivityThoughtContent on AgentActivityThoughtContent {
+  __typename
+  # The thought content in Markdown format.
+  body
+  # The type of activity.
+  type
+}
+
 # Content for an action activity (tool call or action).
 fragment AgentActivityActionContent on AgentActivityActionContent {
   __typename
@@ -4282,15 +4299,6 @@ fragment AgentActivityElicitationContent on AgentActivityElicitationContent {
 fragment AgentActivityErrorContent on AgentActivityErrorContent {
   __typename
   # The error message in Markdown format.
-  body
-  # The type of activity.
-  type
-}
-
-# Content for an observation activity (chain of thought).
-fragment AgentActivityObservationContent on AgentActivityObservationContent {
-  __typename
-  # The observation content in Markdown format.
   body
   # The type of activity.
   type

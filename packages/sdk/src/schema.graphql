@@ -107,9 +107,9 @@ union AgentActivityContent =
   | AgentActivityActionContent
   | AgentActivityElicitationContent
   | AgentActivityErrorContent
-  | AgentActivityObservationContent
   | AgentActivityPromptContent
   | AgentActivityResponseContent
+  | AgentActivityThoughtContent
 
 input AgentActivityCreateInput {
   """
@@ -163,20 +163,6 @@ type AgentActivityErrorContent {
   type: AgentActivityType!
 }
 
-"""
-Content for an observation activity (chain of thought).
-"""
-type AgentActivityObservationContent {
-  """
-  The observation content in Markdown format.
-  """
-  body: String!
-  """
-  The type of activity.
-  """
-  type: AgentActivityType!
-}
-
 type AgentActivityPayload {
   """
   The agent activity that was created or updated.
@@ -221,15 +207,29 @@ type AgentActivityResponseContent {
 }
 
 """
+Content for a thought activity.
+"""
+type AgentActivityThoughtContent {
+  """
+  The thought content in Markdown format.
+  """
+  body: String!
+  """
+  The type of activity.
+  """
+  type: AgentActivityType!
+}
+
+"""
 The type of an agent activity.
 """
 enum AgentActivityType {
   action
   elicitation
   error
-  observation
   prompt
   response
+  thought
 }
 
 """
@@ -12593,6 +12593,10 @@ type IssueHistory implements Node {
   """
   fromCycleId: String
   """
+  The app user from whom the issue delegation was transferred.
+  """
+  fromDelegate: User
+  """
   What the due date was changed from.
   """
   fromDueDate: TimelessDate
@@ -12688,6 +12692,10 @@ type IssueHistory implements Node {
   The id of new cycle of the issue.
   """
   toCycleId: String
+  """
+  The app user to whom the issue delegation was transferred.
+  """
+  toDelegate: User
   """
   What the due date was changed to.
   """
@@ -34892,6 +34900,10 @@ input ZendeskSettingsInput {
   The subdomain of the Zendesk organization being connected.
   """
   subdomain: String!
+  """
+  [INTERNAL] Flag indicating if the integration supports OAuth refresh tokens
+  """
+  supportsOAuthRefresh: Boolean
   """
   The URL of the connected Zendesk organization.
   """

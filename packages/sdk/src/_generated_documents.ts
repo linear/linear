@@ -109,9 +109,9 @@ export type AgentActivityContent =
   | AgentActivityActionContent
   | AgentActivityElicitationContent
   | AgentActivityErrorContent
-  | AgentActivityObservationContent
   | AgentActivityPromptContent
-  | AgentActivityResponseContent;
+  | AgentActivityResponseContent
+  | AgentActivityThoughtContent;
 
 export type AgentActivityCreateInput = {
   /** The agent session this activity belongs to. */
@@ -150,15 +150,6 @@ export type AgentActivityErrorContent = {
   type: AgentActivityType;
 };
 
-/** Content for an observation activity (chain of thought). */
-export type AgentActivityObservationContent = {
-  __typename?: "AgentActivityObservationContent";
-  /** The observation content in Markdown format. */
-  body: Scalars["String"];
-  /** The type of activity. */
-  type: AgentActivityType;
-};
-
 export type AgentActivityPayload = {
   __typename?: "AgentActivityPayload";
   /** The agent activity that was created or updated. */
@@ -187,14 +178,23 @@ export type AgentActivityResponseContent = {
   type: AgentActivityType;
 };
 
+/** Content for a thought activity. */
+export type AgentActivityThoughtContent = {
+  __typename?: "AgentActivityThoughtContent";
+  /** The thought content in Markdown format. */
+  body: Scalars["String"];
+  /** The type of activity. */
+  type: AgentActivityType;
+};
+
 /** The type of an agent activity. */
 export enum AgentActivityType {
   Action = "action",
   Elicitation = "elicitation",
   Error = "error",
-  Observation = "observation",
   Prompt = "prompt",
   Response = "response",
+  Thought = "thought",
 }
 
 /** Payload for an agent activity webhook. */
@@ -7203,6 +7203,8 @@ export type IssueHistory = Node & {
   fromCycle?: Maybe<Cycle>;
   /** The id of previous cycle of the issue. */
   fromCycleId?: Maybe<Scalars["String"]>;
+  /** The app user from whom the issue delegation was transferred. */
+  fromDelegate?: Maybe<User>;
   /** What the due date was changed from. */
   fromDueDate?: Maybe<Scalars["TimelessDate"]>;
   /** What the estimate was changed from. */
@@ -7251,6 +7253,8 @@ export type IssueHistory = Node & {
   toCycle?: Maybe<Cycle>;
   /** The id of new cycle of the issue. */
   toCycleId?: Maybe<Scalars["String"]>;
+  /** The app user to whom the issue delegation was transferred. */
+  toDelegate?: Maybe<User>;
   /** What the due date was changed to. */
   toDueDate?: Maybe<Scalars["TimelessDate"]>;
   /** What the estimate was changed to. */
@@ -19531,6 +19535,8 @@ export type ZendeskSettingsInput = {
   sendNoteOnStatusChange?: Maybe<Scalars["Boolean"]>;
   /** The subdomain of the Zendesk organization being connected. */
   subdomain: Scalars["String"];
+  /** [INTERNAL] Flag indicating if the integration supports OAuth refresh tokens */
+  supportsOAuthRefresh?: Maybe<Scalars["Boolean"]>;
   /** The URL of the connected Zendesk organization. */
   url: Scalars["String"];
 };
@@ -20522,6 +20528,8 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
     actor?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     descriptionUpdatedBy?: Maybe<Array<{ __typename?: "User" } & UserFragment>>;
     actors?: Maybe<Array<{ __typename?: "User" } & UserFragment>>;
+    fromDelegate?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    toDelegate?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     fromCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     toCycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
@@ -20842,9 +20850,9 @@ export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
       | ({ __typename?: "AgentActivityActionContent" } & AgentActivityActionContentFragment)
       | ({ __typename?: "AgentActivityElicitationContent" } & AgentActivityElicitationContentFragment)
       | ({ __typename?: "AgentActivityErrorContent" } & AgentActivityErrorContentFragment)
-      | ({ __typename?: "AgentActivityObservationContent" } & AgentActivityObservationContentFragment)
       | ({ __typename?: "AgentActivityPromptContent" } & AgentActivityPromptContentFragment)
-      | ({ __typename?: "AgentActivityResponseContent" } & AgentActivityResponseContentFragment);
+      | ({ __typename?: "AgentActivityResponseContent" } & AgentActivityResponseContentFragment)
+      | ({ __typename?: "AgentActivityThoughtContent" } & AgentActivityThoughtContentFragment);
   };
 
 export type EmailIntakeAddressFragment = { __typename: "EmailIntakeAddress" } & Pick<
@@ -21486,6 +21494,11 @@ export type AgentActivityResponseContentFragment = { __typename: "AgentActivityR
   "body" | "type"
 >;
 
+export type AgentActivityThoughtContentFragment = { __typename: "AgentActivityThoughtContent" } & Pick<
+  AgentActivityThoughtContent,
+  "body" | "type"
+>;
+
 export type AgentActivityActionContentFragment = { __typename: "AgentActivityActionContent" } & Pick<
   AgentActivityActionContent,
   "action" | "parameter" | "result" | "type"
@@ -21498,11 +21511,6 @@ export type AgentActivityElicitationContentFragment = { __typename: "AgentActivi
 
 export type AgentActivityErrorContentFragment = { __typename: "AgentActivityErrorContent" } & Pick<
   AgentActivityErrorContent,
-  "body" | "type"
->;
-
-export type AgentActivityObservationContentFragment = { __typename: "AgentActivityObservationContent" } & Pick<
-  AgentActivityObservationContent,
   "body" | "type"
 >;
 
@@ -35564,24 +35572,6 @@ export const AgentActivityErrorContentFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AgentActivityErrorContentFragment, unknown>;
-export const AgentActivityObservationContentFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "AgentActivityObservationContent" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityObservationContent" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "body" } },
-          { kind: "Field", name: { kind: "Name", value: "type" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<AgentActivityObservationContentFragment, unknown>;
 export const AgentActivityPromptContentFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -35618,6 +35608,24 @@ export const AgentActivityResponseContentFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AgentActivityResponseContentFragment, unknown>;
+export const AgentActivityThoughtContentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentActivityThoughtContent" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityThoughtContent" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "body" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentActivityThoughtContentFragment, unknown>;
 export const AgentActivityFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -35694,19 +35702,6 @@ export const AgentActivityFragmentDoc = {
                 },
                 {
                   kind: "InlineFragment",
-                  typeCondition: {
-                    kind: "NamedType",
-                    name: { kind: "Name", value: "AgentActivityObservationContent" },
-                  },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivityObservationContent" } },
-                    ],
-                  },
-                },
-                {
-                  kind: "InlineFragment",
                   typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityPromptContent" } },
                   selectionSet: {
                     kind: "SelectionSet",
@@ -35722,6 +35717,16 @@ export const AgentActivityFragmentDoc = {
                     kind: "SelectionSet",
                     selections: [
                       { kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivityResponseContent" } },
+                    ],
+                  },
+                },
+                {
+                  kind: "InlineFragment",
+                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityThoughtContent" } },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivityThoughtContent" } },
                     ],
                   },
                 },
@@ -40327,6 +40332,22 @@ export const IssueHistoryFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "fromDelegate" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "toDelegate" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "botActor" },
             selectionSet: {
               kind: "SelectionSet",
@@ -44443,9 +44464,9 @@ export const AgentActivitiesDocument = {
     ...AgentActivityActionContentFragmentDoc.definitions,
     ...AgentActivityElicitationContentFragmentDoc.definitions,
     ...AgentActivityErrorContentFragmentDoc.definitions,
-    ...AgentActivityObservationContentFragmentDoc.definitions,
     ...AgentActivityPromptContentFragmentDoc.definitions,
     ...AgentActivityResponseContentFragmentDoc.definitions,
+    ...AgentActivityThoughtContentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AgentActivitiesQuery, AgentActivitiesQueryVariables>;
@@ -44488,9 +44509,9 @@ export const AgentActivityDocument = {
     ...AgentActivityActionContentFragmentDoc.definitions,
     ...AgentActivityElicitationContentFragmentDoc.definitions,
     ...AgentActivityErrorContentFragmentDoc.definitions,
-    ...AgentActivityObservationContentFragmentDoc.definitions,
     ...AgentActivityPromptContentFragmentDoc.definitions,
     ...AgentActivityResponseContentFragmentDoc.definitions,
+    ...AgentActivityThoughtContentFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AgentActivityQuery, AgentActivityQueryVariables>;
 export const AgentContextDocument = {
@@ -44533,9 +44554,9 @@ export const AgentContextDocument = {
     ...AgentActivityActionContentFragmentDoc.definitions,
     ...AgentActivityElicitationContentFragmentDoc.definitions,
     ...AgentActivityErrorContentFragmentDoc.definitions,
-    ...AgentActivityObservationContentFragmentDoc.definitions,
     ...AgentActivityPromptContentFragmentDoc.definitions,
     ...AgentActivityResponseContentFragmentDoc.definitions,
+    ...AgentActivityThoughtContentFragmentDoc.definitions,
     ...EntityExternalLinkFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AgentContextQuery, AgentContextQueryVariables>;
@@ -44630,9 +44651,9 @@ export const AgentContextsDocument = {
     ...AgentActivityActionContentFragmentDoc.definitions,
     ...AgentActivityElicitationContentFragmentDoc.definitions,
     ...AgentActivityErrorContentFragmentDoc.definitions,
-    ...AgentActivityObservationContentFragmentDoc.definitions,
     ...AgentActivityPromptContentFragmentDoc.definitions,
     ...AgentActivityResponseContentFragmentDoc.definitions,
+    ...AgentActivityThoughtContentFragmentDoc.definitions,
     ...EntityExternalLinkFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
@@ -44787,9 +44808,9 @@ export const AgentSession_ActivitiesDocument = {
     ...AgentActivityActionContentFragmentDoc.definitions,
     ...AgentActivityElicitationContentFragmentDoc.definitions,
     ...AgentActivityErrorContentFragmentDoc.definitions,
-    ...AgentActivityObservationContentFragmentDoc.definitions,
     ...AgentActivityPromptContentFragmentDoc.definitions,
     ...AgentActivityResponseContentFragmentDoc.definitions,
+    ...AgentActivityThoughtContentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AgentSession_ActivitiesQuery, AgentSession_ActivitiesQueryVariables>;
