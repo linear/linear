@@ -355,24 +355,6 @@ export class AgentActivityErrorContent extends Request {
   public type: L.AgentActivityType;
 }
 /**
- * Content for an observation activity (chain of thought).
- *
- * @param request - function to call the graphql client
- * @param data - L.AgentActivityObservationContentFragment response data
- */
-export class AgentActivityObservationContent extends Request {
-  public constructor(request: LinearRequest, data: L.AgentActivityObservationContentFragment) {
-    super(request);
-    this.body = data.body;
-    this.type = data.type;
-  }
-
-  /** The observation content in Markdown format. */
-  public body: string;
-  /** The type of activity. */
-  public type: L.AgentActivityType;
-}
-/**
  * AgentActivityPayload model
  *
  * @param request - function to call the graphql client
@@ -433,6 +415,24 @@ export class AgentActivityResponseContent extends Request {
   }
 
   /** The response content in Markdown format. */
+  public body: string;
+  /** The type of activity. */
+  public type: L.AgentActivityType;
+}
+/**
+ * Content for a thought activity.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentActivityThoughtContentFragment response data
+ */
+export class AgentActivityThoughtContent extends Request {
+  public constructor(request: LinearRequest, data: L.AgentActivityThoughtContentFragment) {
+    super(request);
+    this.body = data.body;
+    this.type = data.type;
+  }
+
+  /** The thought content in Markdown format. */
   public body: string;
   /** The type of activity. */
   public type: L.AgentActivityType;
@@ -8618,6 +8618,7 @@ export class IssueHistory extends Request {
   private _attachment?: L.IssueHistoryFragment["attachment"];
   private _fromAssignee?: L.IssueHistoryFragment["fromAssignee"];
   private _fromCycle?: L.IssueHistoryFragment["fromCycle"];
+  private _fromDelegate?: L.IssueHistoryFragment["fromDelegate"];
   private _fromParent?: L.IssueHistoryFragment["fromParent"];
   private _fromProject?: L.IssueHistoryFragment["fromProject"];
   private _fromState?: L.IssueHistoryFragment["fromState"];
@@ -8626,6 +8627,7 @@ export class IssueHistory extends Request {
   private _toAssignee?: L.IssueHistoryFragment["toAssignee"];
   private _toConvertedProject?: L.IssueHistoryFragment["toConvertedProject"];
   private _toCycle?: L.IssueHistoryFragment["toCycle"];
+  private _toDelegate?: L.IssueHistoryFragment["toDelegate"];
   private _toParent?: L.IssueHistoryFragment["toParent"];
   private _toProject?: L.IssueHistoryFragment["toProject"];
   private _toState?: L.IssueHistoryFragment["toState"];
@@ -8686,6 +8688,7 @@ export class IssueHistory extends Request {
     this._attachment = data.attachment ?? undefined;
     this._fromAssignee = data.fromAssignee ?? undefined;
     this._fromCycle = data.fromCycle ?? undefined;
+    this._fromDelegate = data.fromDelegate ?? undefined;
     this._fromParent = data.fromParent ?? undefined;
     this._fromProject = data.fromProject ?? undefined;
     this._fromState = data.fromState ?? undefined;
@@ -8694,6 +8697,7 @@ export class IssueHistory extends Request {
     this._toAssignee = data.toAssignee ?? undefined;
     this._toConvertedProject = data.toConvertedProject ?? undefined;
     this._toCycle = data.toCycle ?? undefined;
+    this._toDelegate = data.toDelegate ?? undefined;
     this._toParent = data.toParent ?? undefined;
     this._toProject = data.toProject ?? undefined;
     this._toState = data.toState ?? undefined;
@@ -8805,6 +8809,14 @@ export class IssueHistory extends Request {
   public get fromCycle(): LinearFetch<Cycle> | undefined {
     return this._fromCycle?.id ? new CycleQuery(this._request).fetch(this._fromCycle?.id) : undefined;
   }
+  /** The app user from whom the issue delegation was transferred. */
+  public get fromDelegate(): LinearFetch<User> | undefined {
+    return this._fromDelegate?.id ? new UserQuery(this._request).fetch(this._fromDelegate?.id) : undefined;
+  }
+  /** The ID of app user from whom the issue delegation was transferred. */
+  public get fromDelegateId(): string | undefined {
+    return this._fromDelegate?.id;
+  }
   /** The parent issue that the issue was moved from. */
   public get fromParent(): LinearFetch<Issue> | undefined {
     return this._fromParent?.id ? new IssueQuery(this._request).fetch(this._fromParent?.id) : undefined;
@@ -8842,6 +8854,14 @@ export class IssueHistory extends Request {
   /** The cycle that the issue was moved to. */
   public get toCycle(): LinearFetch<Cycle> | undefined {
     return this._toCycle?.id ? new CycleQuery(this._request).fetch(this._toCycle?.id) : undefined;
+  }
+  /** The app user to whom the issue delegation was transferred. */
+  public get toDelegate(): LinearFetch<User> | undefined {
+    return this._toDelegate?.id ? new UserQuery(this._request).fetch(this._toDelegate?.id) : undefined;
+  }
+  /** The ID of app user to whom the issue delegation was transferred. */
+  public get toDelegateId(): string | undefined {
+    return this._toDelegate?.id;
   }
   /** The parent issue that the issue was moved to. */
   public get toParent(): LinearFetch<Issue> | undefined {

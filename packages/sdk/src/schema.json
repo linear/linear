@@ -405,7 +405,7 @@
         "possibleTypes": [
           {
             "kind": "OBJECT",
-            "name": "AgentActivityObservationContent",
+            "name": "AgentActivityThoughtContent",
             "ofType": null
           },
           {
@@ -621,49 +621,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "AgentActivityObservationContent",
-        "description": "Content for an observation activity (chain of thought).",
-        "fields": [
-          {
-            "name": "type",
-            "description": "The type of activity.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "AgentActivityType",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "body",
-            "description": "The observation content in Markdown format.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "AgentActivityPayload",
         "description": null,
         "fields": [
@@ -828,6 +785,49 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "AgentActivityThoughtContent",
+        "description": "Content for a thought activity.",
+        "fields": [
+          {
+            "name": "type",
+            "description": "The type of activity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "AgentActivityType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "body",
+            "description": "The thought content in Markdown format.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "ENUM",
         "name": "AgentActivityType",
         "description": "The type of an agent activity.",
@@ -836,7 +836,7 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "observation",
+            "name": "thought",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -44958,6 +44958,30 @@
             "type": {
               "kind": "OBJECT",
               "name": "Project",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "fromDelegate",
+            "description": "The app user from whom the issue delegation was transferred.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "toDelegate",
+            "description": "The app user to whom the issue delegation was transferred.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
               "ofType": null
             },
             "isDeprecated": false,
@@ -124048,6 +124072,18 @@
           {
             "name": "canReadCustomers",
             "description": "[INTERNAL] Temporary flag indicating if the integration has the necessary scopes for Customers",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "supportsOAuthRefresh",
+            "description": "[INTERNAL] Flag indicating if the integration supports OAuth refresh tokens",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
