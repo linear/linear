@@ -118,6 +118,9 @@ Following fields are supported:
 - `Status` - Issue state (workflow)
 - `Assignee` - Issue assignee (user's full name)
 - `Labels` - Added as a label
+- `Estimate` - Issue estimate
+- `Created` - Issue creation date
+- `Completed` - Issue completion date (if has completed status)
 
 ### GitLab CSV
 
