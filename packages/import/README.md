@@ -118,6 +118,9 @@ Following fields are supported:
 - `Status` - Issue state (workflow)
 - `Assignee` - Issue assignee (user's full name)
 - `Labels` - Added as a label
+- `Estimate` - Issue estimate
+- `Created` - Issue creation date
+- `Completed` - Issue completion date (if has completed status)
 
 ### GitLab CSV
 
@@ -138,9 +141,11 @@ Following fields are supported:
 - `Time Estimate` - Issue estimate
 
 <!-- AUTO-GENERATED-CONTENT:START (TEXT_SECTION:id=license&src=../../README.md) -->
+
 ## License
 
 <br/>
 
 Licensed under the [MIT License](./LICENSE).
+
 <!-- AUTO-GENERATED-CONTENT:END -->
