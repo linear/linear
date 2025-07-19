@@ -656,6 +656,7 @@ enum AgentSessionStatus {
   complete
   error
   pending
+  stale
 }
 
 """
@@ -8424,6 +8425,73 @@ input IDComparator {
   Not-in-array constraint.
   """
   nin: [ID!]
+}
+
+"""
+An identity provider.
+"""
+type IdentityProvider implements Node {
+  """
+  [INTERNAL] SCIM admins group push settings.
+  """
+  adminsGroupPush: JSONObject
+  """
+  Allowed authentication providers, empty array means all are allowed.
+  """
+  allowedAuthServices: [String!]!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  [INTERNAL] SCIM guests group push settings.
+  """
+  guestsGroupPush: JSONObject
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The issuer's custom entity ID.
+  """
+  issuerEntityId: String
+  """
+  The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference.
+  """
+  priority: Float
+  """
+  Whether SAML authentication is enabled for organization.
+  """
+  samlEnabled: Boolean!
+  """
+  Whether SCIM provisioning is enabled for organization.
+  """
+  scimEnabled: Boolean!
+  """
+  Binding method for authentication call. Can be either `post` (default) or `redirect`.
+  """
+  ssoBinding: String
+  """
+  Sign in endpoint URL for the identity provider.
+  """
+  ssoEndpoint: String
+  """
+  The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
+  """
+  ssoSignAlgo: String
+  """
+  X.509 Signing Certificate in string form.
+  """
+  ssoSigningCert: String
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
 }
 
 type ImageUploadFromUrlPayload {
@@ -21774,6 +21842,10 @@ type OrganizationDomain implements Node {
   """
   id: ID!
   """
+  The identity provider the domain belongs to.
+  """
+  identityProvider: IdentityProvider
+  """
   Domain name.
   """
   name: String!
@@ -33289,9 +33361,17 @@ type User implements Node {
   """
   inviteHash: String! @deprecated(reason: "This hash is not in use anymore, this value will always be empty.")
   """
+  Whether the user is assignable.
+  """
+  isAssignable: Boolean!
+  """
   Whether the user is the currently authenticated user.
   """
   isMe: Boolean!
+  """
+  Whether the user is mentionable.
+  """
+  isMentionable: Boolean!
   """
   The user's issue drafts
   """
