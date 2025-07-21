@@ -5922,6 +5922,24 @@ export class FavoritePayload extends Request {
   }
 }
 /**
+ * FetchDataPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.FetchDataPayloadFragment response data
+ */
+export class FetchDataPayload extends Request {
+  public constructor(request: LinearRequest, data: L.FetchDataPayloadFragment) {
+    super(request);
+    this.data = data.data ?? undefined;
+    this.success = data.success;
+  }
+
+  /** The fetched data based on the natural language query. */
+  public data?: L.Scalars["JSONObject"];
+  /** Whether the fetch operation was successful. */
+  public success: boolean;
+}
+/**
  * FrontAttachmentPayload model
  *
  * @param request - function to call the graphql client

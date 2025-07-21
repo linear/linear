@@ -4593,6 +4593,14 @@ export enum FeedSummarySchedule {
   Weekly = "weekly",
 }
 
+export type FetchDataPayload = {
+  __typename?: "FetchDataPayload";
+  /** The fetched data based on the natural language query. */
+  data?: Maybe<Scalars["JSONObject"]>;
+  /** Whether the fetch operation was successful. */
+  success: Scalars["Boolean"];
+};
+
 /** By which resolution is frequency defined. */
 export enum FrequencyResolutionType {
   Daily = "daily",
@@ -15546,6 +15554,8 @@ export type Query = {
   favorite: Favorite;
   /** The user's favorites. */
   favorites: FavoriteConnection;
+  /** [Internal] Fetch an arbitrary set of data using natural language query. Be specific about what you want including properties for each entity, sort order, filters, limit and properties. */
+  fetchData: FetchDataPayload;
   /** One specific initiative. */
   initiative: Initiative;
   /** One specific initiative relation. */
@@ -16036,6 +16046,10 @@ export type QueryFavoritesArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+};
+
+export type QueryFetchDataArgs = {
+  query: Scalars["String"];
 };
 
 export type QueryInitiativeArgs = {
@@ -23082,6 +23096,8 @@ export type FavoritePayloadFragment = { __typename: "FavoritePayload" } & Pick<
   FavoritePayload,
   "lastSyncId" | "success"
 > & { favorite: { __typename?: "Favorite" } & Pick<Favorite, "id"> };
+
+export type FetchDataPayloadFragment = { __typename: "FetchDataPayload" } & Pick<FetchDataPayload, "data" | "success">;
 
 export type FrontAttachmentPayloadFragment = { __typename: "FrontAttachmentPayload" } & Pick<
   FrontAttachmentPayload,
@@ -38958,6 +38974,24 @@ export const FavoritePayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<FavoritePayloadFragment, unknown>;
+export const FetchDataPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "FetchDataPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FetchDataPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "data" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<FetchDataPayloadFragment, unknown>;
 export const FrontAttachmentPayloadFragmentDoc = {
   kind: "Document",
   definitions: [

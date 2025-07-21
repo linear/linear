@@ -7317,6 +7317,14 @@ fragment FavoritePayload on FavoritePayload {
   success
 }
 
+fragment FetchDataPayload on FetchDataPayload {
+  __typename
+  # The fetched data based on the natural language query.
+  data
+  # Whether the fetch operation was successful.
+  success
+}
+
 fragment FrontAttachmentPayload on FrontAttachmentPayload {
   __typename
   # The identifier of the last sync operation.
