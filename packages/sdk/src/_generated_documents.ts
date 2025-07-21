@@ -150,6 +150,26 @@ export type AgentActivityErrorContent = {
   type: AgentActivityType;
 };
 
+/** Agent activity filtering options. */
+export type AgentActivityFilter = {
+  /** Comparator for the agent session ID. */
+  agentSessionId?: Maybe<StringComparator>;
+  /** Compound filters, all of which need to be matched by the agent activity. */
+  and?: Maybe<Array<AgentActivityFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Compound filters, one of which need to be matched by the agent activity. */
+  or?: Maybe<Array<AgentActivityFilter>>;
+  /** Filters that the source comment must satisfy. */
+  sourceComment?: Maybe<NullableCommentFilter>;
+  /** Comparator for the agent activity's content type. */
+  type?: Maybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
 export type AgentActivityPayload = {
   __typename?: "AgentActivityPayload";
   /** The agent activity that was created or updated. */
@@ -393,6 +413,7 @@ export type AgentSession = Node & {
 export type AgentSessionActivitiesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<AgentActivityFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -441,6 +462,7 @@ export enum AgentSessionStatus {
   Complete = "complete",
   Error = "error",
   Pending = "pending",
+  Stale = "stale",
 }
 
 /** The type of an agent session. */
@@ -4594,6 +4616,8 @@ export type FrontSettingsInput = {
   automateTicketReopeningOnComment?: Maybe<Scalars["Boolean"]>;
   /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
   automateTicketReopeningOnCompletion?: Maybe<Scalars["Boolean"]>;
+  /** [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue. */
+  disableCustomerRequestsAutoCreation?: Maybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when someone comments on an issue. */
   sendNoteOnComment?: Maybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
@@ -4922,6 +4946,44 @@ export type IdComparator = {
   neq?: Maybe<Scalars["ID"]>;
   /** Not-in-array constraint. */
   nin?: Maybe<Array<Scalars["ID"]>>;
+};
+
+/** An identity provider. */
+export type IdentityProvider = Node & {
+  __typename?: "IdentityProvider";
+  /** [INTERNAL] SCIM admins group push settings. */
+  adminsGroupPush?: Maybe<Scalars["JSONObject"]>;
+  /** Allowed authentication providers, empty array means all are allowed. */
+  allowedAuthServices: Array<Scalars["String"]>;
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** [INTERNAL] SCIM guests group push settings. */
+  guestsGroupPush?: Maybe<Scalars["JSONObject"]>;
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The issuer's custom entity ID. */
+  issuerEntityId?: Maybe<Scalars["String"]>;
+  /** The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference. */
+  priority?: Maybe<Scalars["Float"]>;
+  /** Whether SAML authentication is enabled for organization. */
+  samlEnabled: Scalars["Boolean"];
+  /** Whether SCIM provisioning is enabled for organization. */
+  scimEnabled: Scalars["Boolean"];
+  /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
+  ssoBinding?: Maybe<Scalars["String"]>;
+  /** Sign in endpoint URL for the identity provider. */
+  ssoEndpoint?: Maybe<Scalars["String"]>;
+  /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
+  ssoSignAlgo?: Maybe<Scalars["String"]>;
+  /** X.509 Signing Certificate in string form. */
+  ssoSigningCert?: Maybe<Scalars["String"]>;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
 };
 
 export type ImageUploadFromUrlPayload = {
@@ -6265,6 +6327,8 @@ export type IntercomSettingsInput = {
   automateTicketReopeningOnComment?: Maybe<Scalars["Boolean"]>;
   /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
   automateTicketReopeningOnCompletion?: Maybe<Scalars["Boolean"]>;
+  /** [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue. */
+  disableCustomerRequestsAutoCreation?: Maybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when someone comments on an issue. */
   sendNoteOnComment?: Maybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
@@ -6932,6 +6996,8 @@ export type IssueDraft = Node & {
   creator: User;
   /** The cycle associated with the draft. */
   cycleId?: Maybe<Scalars["String"]>;
+  /** The app user delegated to work on the issue being drafted. */
+  delegateId?: Maybe<Scalars["String"]>;
   /** The draft's description in markdown format. */
   description?: Maybe<Scalars["String"]>;
   /** [Internal] The draft's description as a Prosemirror document. */
@@ -12274,6 +12340,8 @@ export type OrganizationDomain = Node & {
   disableOrganizationCreation?: Maybe<Scalars["Boolean"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** The identity provider the domain belongs to. */
+  identityProvider?: Maybe<IdentityProvider>;
   /** Domain name. */
   name: Scalars["String"];
   /**
@@ -15685,6 +15753,7 @@ export type QueryAdministrableTeamsArgs = {
 export type QueryAgentActivitiesArgs = {
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<AgentActivityFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -16925,6 +16994,8 @@ export type SalesforceSettingsInput = {
   automateTicketReopeningOnComment?: Maybe<Scalars["Boolean"]>;
   /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
   automateTicketReopeningOnCompletion?: Maybe<Scalars["Boolean"]>;
+  /** [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue. */
+  disableCustomerRequestsAutoCreation?: Maybe<Scalars["Boolean"]>;
   /** The Salesforce case status to use to reopen cases. */
   reopenCaseStatus?: Maybe<Scalars["String"]>;
   /** Whether to restrict visibility of the integration to issues that have been either created from Salesforce or linked to Salesforce. */
@@ -18527,8 +18598,12 @@ export type User = Node & {
    * @deprecated This hash is not in use anymore, this value will always be empty.
    */
   inviteHash: Scalars["String"];
+  /** Whether the user is assignable. */
+  isAssignable: Scalars["Boolean"];
   /** Whether the user is the currently authenticated user. */
   isMe: Scalars["Boolean"];
+  /** Whether the user is mentionable. */
+  isMentionable: Scalars["Boolean"];
   /** The user's issue drafts */
   issueDrafts: IssueDraftConnection;
   /** The last time the user was seen online. */
@@ -19529,6 +19604,8 @@ export type ZendeskSettingsInput = {
   botUserId?: Maybe<Scalars["String"]>;
   /** [INTERNAL] Temporary flag indicating if the integration has the necessary scopes for Customers */
   canReadCustomers?: Maybe<Scalars["Boolean"]>;
+  /** [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue. */
+  disableCustomerRequestsAutoCreation?: Maybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when someone comments on an issue. */
   sendNoteOnComment?: Maybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
@@ -20753,6 +20830,8 @@ export type UserFragment = { __typename: "User" } & Pick<
   | "guest"
   | "app"
   | "admin"
+  | "isAssignable"
+  | "isMentionable"
   | "isMe"
   | "calendarHash"
   | "inviteHash"
@@ -20892,6 +20971,23 @@ export type ProjectHistoryFragment = { __typename: "ProjectHistory" } & Pick<
   ProjectHistory,
   "entries" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { project: { __typename?: "Project" } & Pick<Project, "id"> };
+
+export type IdentityProviderFragment = { __typename: "IdentityProvider" } & Pick<
+  IdentityProvider,
+  | "allowedAuthServices"
+  | "ssoBinding"
+  | "ssoEndpoint"
+  | "priority"
+  | "ssoSignAlgo"
+  | "issuerEntityId"
+  | "updatedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
+  | "samlEnabled"
+  | "scimEnabled"
+  | "ssoSigningCert"
+>;
 
 export type IssueImportFragment = { __typename: "IssueImport" } & Pick<
   IssueImport,
@@ -21531,7 +21627,10 @@ export type OrganizationDomainFragment = { __typename: "OrganizationDomain" } & 
   | "id"
   | "authType"
   | "claimed"
-> & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
+> & {
+    identityProvider?: Maybe<{ __typename?: "IdentityProvider" } & IdentityProviderFragment>;
+    creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+  };
 
 export type AuthorizingUserFragment = { __typename: "AuthorizingUser" } & Pick<AuthorizingUser, "displayName" | "name">;
 
@@ -23360,6 +23459,8 @@ type Node_GitAutomationTargetBranch_Fragment = { __typename: "GitAutomationTarge
   "id"
 >;
 
+type Node_IdentityProvider_Fragment = { __typename: "IdentityProvider" } & Pick<IdentityProvider, "id">;
+
 type Node_Initiative_Fragment = { __typename: "Initiative" } & Pick<Initiative, "id">;
 
 type Node_InitiativeHistory_Fragment = { __typename: "InitiativeHistory" } & Pick<InitiativeHistory, "id">;
@@ -23538,6 +23639,7 @@ export type NodeFragment =
   | Node_FeedItem_Fragment
   | Node_GitAutomationState_Fragment
   | Node_GitAutomationTargetBranch_Fragment
+  | Node_IdentityProvider_Fragment
   | Node_Initiative_Fragment
   | Node_InitiativeHistory_Fragment
   | Node_InitiativeNotification_Fragment
@@ -24148,6 +24250,7 @@ export type AdministrableTeamsQuery = { __typename?: "Query" } & {
 export type AgentActivitiesQueryVariables = Exact<{
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<AgentActivityFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -24199,6 +24302,7 @@ export type AgentSession_ActivitiesQueryVariables = Exact<{
   id: Scalars["String"];
   after?: Maybe<Scalars["String"]>;
   before?: Maybe<Scalars["String"]>;
+  filter?: Maybe<AgentActivityFilter>;
   first?: Maybe<Scalars["Int"]>;
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
@@ -32694,6 +32798,35 @@ export const IntegrationChildWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IntegrationChildWebhookPayloadFragment, unknown>;
+export const IdentityProviderFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IdentityProvider" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IdentityProvider" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "allowedAuthServices" } },
+          { kind: "Field", name: { kind: "Name", value: "ssoBinding" } },
+          { kind: "Field", name: { kind: "Name", value: "ssoEndpoint" } },
+          { kind: "Field", name: { kind: "Name", value: "priority" } },
+          { kind: "Field", name: { kind: "Name", value: "ssoSignAlgo" } },
+          { kind: "Field", name: { kind: "Name", value: "issuerEntityId" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "samlEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "scimEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "ssoSigningCert" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<IdentityProviderFragment, unknown>;
 export const OrganizationDomainFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -32709,6 +32842,14 @@ export const OrganizationDomainFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "verificationEmail" } },
           { kind: "Field", name: { kind: "Name", value: "verified" } },
           { kind: "Field", name: { kind: "Name", value: "disableOrganizationCreation" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "identityProvider" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IdentityProvider" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
@@ -40189,6 +40330,8 @@ export const UserFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "guest" } },
           { kind: "Field", name: { kind: "Name", value: "app" } },
           { kind: "Field", name: { kind: "Name", value: "admin" } },
+          { kind: "Field", name: { kind: "Name", value: "isAssignable" } },
+          { kind: "Field", name: { kind: "Name", value: "isMentionable" } },
           { kind: "Field", name: { kind: "Name", value: "isMe" } },
           { kind: "Field", name: { kind: "Name", value: "calendarHash" } },
           { kind: "Field", name: { kind: "Name", value: "inviteHash" } },
@@ -44394,6 +44537,11 @@ export const AgentActivitiesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -44429,6 +44577,11 @@ export const AgentActivitiesDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "before" },
                 value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filter" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
               },
               {
                 kind: "Argument",
@@ -44722,6 +44875,11 @@ export const AgentSession_ActivitiesDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filter" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityFilter" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
         },
@@ -44770,6 +44928,11 @@ export const AgentSession_ActivitiesDocument = {
                       kind: "Argument",
                       name: { kind: "Name", value: "before" },
                       value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "filter" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "filter" } },
                     },
                     {
                       kind: "Argument",
