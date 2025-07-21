@@ -2532,6 +2532,10 @@ fragment User on User {
   app
   # Whether the user is an organization administrator.
   admin
+  # Whether the user is assignable.
+  isAssignable
+  # Whether the user is mentionable.
+  isMentionable
   # Whether the user is the currently authenticated user.
   isMe
   # [DEPRECATED] Hash for the user to be used in calendar URLs.
@@ -2912,6 +2916,38 @@ fragment ProjectHistory on ProjectHistory {
   createdAt
   # The unique identifier of the entity.
   id
+}
+
+# An identity provider.
+fragment IdentityProvider on IdentityProvider {
+  __typename
+  # Allowed authentication providers, empty array means all are allowed.
+  allowedAuthServices
+  # Binding method for authentication call. Can be either `post` (default) or `redirect`.
+  ssoBinding
+  # Sign in endpoint URL for the identity provider.
+  ssoEndpoint
+  # The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference.
+  priority
+  # The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
+  ssoSignAlgo
+  # The issuer's custom entity ID.
+  issuerEntityId
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # Whether SAML authentication is enabled for organization.
+  samlEnabled
+  # Whether SCIM provisioning is enabled for organization.
+  scimEnabled
+  # X.509 Signing Certificate in string form.
+  ssoSigningCert
 }
 
 # An import job for data from an external service.
@@ -4341,6 +4377,10 @@ fragment OrganizationDomain on OrganizationDomain {
   verified
   # Prevent users with this domain to create new workspaces.
   disableOrganizationCreation
+  # The identity provider the domain belongs to.
+  identityProvider {
+    ...IdentityProvider
+  }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -8902,6 +8942,8 @@ query agentActivities(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # Filter returned agent activities.
+  $filter: AgentActivityFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -8914,6 +8956,7 @@ query agentActivities(
   agentActivities(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
@@ -8983,6 +9026,8 @@ query agentSession_activities(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # Filter returned agent activities.
+  $filter: AgentActivityFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -8996,6 +9041,7 @@ query agentSession_activities(
     activities(
       after: $after
       before: $before
+      filter: $filter
       first: $first
       includeArchived: $includeArchived
       last: $last

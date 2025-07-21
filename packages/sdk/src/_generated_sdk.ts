@@ -6258,6 +6258,60 @@ export class GitLabIntegrationCreatePayload extends Request {
   }
 }
 /**
+ * An identity provider.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IdentityProviderFragment response data
+ */
+export class IdentityProvider extends Request {
+  public constructor(request: LinearRequest, data: L.IdentityProviderFragment) {
+    super(request);
+    this.allowedAuthServices = data.allowedAuthServices;
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.issuerEntityId = data.issuerEntityId ?? undefined;
+    this.priority = data.priority ?? undefined;
+    this.samlEnabled = data.samlEnabled;
+    this.scimEnabled = data.scimEnabled;
+    this.ssoBinding = data.ssoBinding ?? undefined;
+    this.ssoEndpoint = data.ssoEndpoint ?? undefined;
+    this.ssoSignAlgo = data.ssoSignAlgo ?? undefined;
+    this.ssoSigningCert = data.ssoSigningCert ?? undefined;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+  }
+
+  /** Allowed authentication providers, empty array means all are allowed. */
+  public allowedAuthServices: string[];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The issuer's custom entity ID. */
+  public issuerEntityId?: string;
+  /** The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference. */
+  public priority?: number;
+  /** Whether SAML authentication is enabled for organization. */
+  public samlEnabled: boolean;
+  /** Whether SCIM provisioning is enabled for organization. */
+  public scimEnabled: boolean;
+  /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
+  public ssoBinding?: string;
+  /** Sign in endpoint URL for the identity provider. */
+  public ssoEndpoint?: string;
+  /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
+  public ssoSignAlgo?: string;
+  /** X.509 Signing Certificate in string form. */
+  public ssoSigningCert?: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+}
+/**
  * ImageUploadFromUrlPayload model
  *
  * @param request - function to call the graphql client
@@ -11704,6 +11758,7 @@ export class OrganizationDomain extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.verificationEmail = data.verificationEmail ?? undefined;
     this.verified = data.verified;
+    this.identityProvider = data.identityProvider ? new IdentityProvider(request, data.identityProvider) : undefined;
     this.authType = data.authType;
     this._creator = data.creator ?? undefined;
   }
@@ -11729,6 +11784,8 @@ export class OrganizationDomain extends Request {
   public verificationEmail?: string;
   /** Is this domain verified. */
   public verified: boolean;
+  /** The identity provider the domain belongs to. */
+  public identityProvider?: IdentityProvider;
   /** What type of auth is the domain used for. */
   public authType: L.OrganizationDomainAuthType;
   /** The user who added the domain. */
@@ -16645,7 +16702,9 @@ export class User extends Request {
     this.id = data.id;
     this.initials = data.initials;
     this.inviteHash = data.inviteHash;
+    this.isAssignable = data.isAssignable;
     this.isMe = data.isMe;
+    this.isMentionable = data.isMentionable;
     this.lastSeen = parseDate(data.lastSeen) ?? undefined;
     this.name = data.name;
     this.statusEmoji = data.statusEmoji ?? undefined;
@@ -16692,8 +16751,12 @@ export class User extends Request {
   public initials: string;
   /** [DEPRECATED] Unique hash for the user to be used in invite URLs. */
   public inviteHash: string;
+  /** Whether the user is assignable. */
+  public isAssignable: boolean;
   /** Whether the user is the currently authenticated user. */
   public isMe: boolean;
+  /** Whether the user is mentionable. */
+  public isMentionable: boolean;
   /** The last time the user was seen online. */
   public lastSeen?: Date;
   /** The user's full name. */

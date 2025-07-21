@@ -163,6 +163,44 @@ type AgentActivityErrorContent {
   type: AgentActivityType!
 }
 
+"""
+Agent activity filtering options.
+"""
+input AgentActivityFilter {
+  """
+  Comparator for the agent session ID.
+  """
+  agentSessionId: StringComparator
+  """
+  Compound filters, all of which need to be matched by the agent activity.
+  """
+  and: [AgentActivityFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the agent activity.
+  """
+  or: [AgentActivityFilter!]
+  """
+  Filters that the source comment must satisfy.
+  """
+  sourceComment: NullableCommentFilter
+  """
+  Comparator for the agent activity's content type.
+  """
+  type: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 type AgentActivityPayload {
   """
   The agent activity that was created or updated.
@@ -516,6 +554,10 @@ type AgentSession implements Node {
     """
     before: String
     """
+    Filter returned agent activities.
+    """
+    filter: AgentActivityFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -656,6 +698,7 @@ enum AgentSessionStatus {
   complete
   error
   pending
+  stale
 }
 
 """
@@ -7891,6 +7934,10 @@ input FrontSettingsInput {
   """
   automateTicketReopeningOnCompletion: Boolean
   """
+  [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
+  """
+  disableCustomerRequestsAutoCreation: Boolean
+  """
   Whether an internal message should be added when someone comments on an issue.
   """
   sendNoteOnComment: Boolean
@@ -8424,6 +8471,73 @@ input IDComparator {
   Not-in-array constraint.
   """
   nin: [ID!]
+}
+
+"""
+An identity provider.
+"""
+type IdentityProvider implements Node {
+  """
+  [INTERNAL] SCIM admins group push settings.
+  """
+  adminsGroupPush: JSONObject
+  """
+  Allowed authentication providers, empty array means all are allowed.
+  """
+  allowedAuthServices: [String!]!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  [INTERNAL] SCIM guests group push settings.
+  """
+  guestsGroupPush: JSONObject
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The issuer's custom entity ID.
+  """
+  issuerEntityId: String
+  """
+  The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference.
+  """
+  priority: Float
+  """
+  Whether SAML authentication is enabled for organization.
+  """
+  samlEnabled: Boolean!
+  """
+  Whether SCIM provisioning is enabled for organization.
+  """
+  scimEnabled: Boolean!
+  """
+  Binding method for authentication call. Can be either `post` (default) or `redirect`.
+  """
+  ssoBinding: String
+  """
+  Sign in endpoint URL for the identity provider.
+  """
+  ssoEndpoint: String
+  """
+  The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
+  """
+  ssoSignAlgo: String
+  """
+  X.509 Signing Certificate in string form.
+  """
+  ssoSigningCert: String
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
 }
 
 type ImageUploadFromUrlPayload {
@@ -10720,6 +10834,10 @@ input IntercomSettingsInput {
   """
   automateTicketReopeningOnCompletion: Boolean
   """
+  [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
+  """
+  disableCustomerRequestsAutoCreation: Boolean
+  """
   Whether an internal message should be added when someone comments on an issue.
   """
   sendNoteOnComment: Boolean
@@ -12091,6 +12209,10 @@ type IssueDraft implements Node {
   The cycle associated with the draft.
   """
   cycleId: String
+  """
+  The app user delegated to work on the issue being drafted.
+  """
+  delegateId: String
   """
   The draft's description in markdown format.
   """
@@ -21774,6 +21896,10 @@ type OrganizationDomain implements Node {
   """
   id: ID!
   """
+  The identity provider the domain belongs to.
+  """
+  identityProvider: IdentityProvider
+  """
   Domain name.
   """
   name: String!
@@ -27390,6 +27516,10 @@ type Query {
     """
     before: String
     """
+    Filter returned agent activities.
+    """
+    filter: AgentActivityFilter
+    """
     The number of items to forward paginate (used with after). Defaults to 50.
     """
     first: Int
@@ -30350,6 +30480,10 @@ input SalesforceSettingsInput {
   """
   automateTicketReopeningOnCompletion: Boolean
   """
+  [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
+  """
+  disableCustomerRequestsAutoCreation: Boolean
+  """
   The Salesforce case status to use to reopen cases.
   """
   reopenCaseStatus: String
@@ -33289,9 +33423,17 @@ type User implements Node {
   """
   inviteHash: String! @deprecated(reason: "This hash is not in use anymore, this value will always be empty.")
   """
+  Whether the user is assignable.
+  """
+  isAssignable: Boolean!
+  """
   Whether the user is the currently authenticated user.
   """
   isMe: Boolean!
+  """
+  Whether the user is mentionable.
+  """
+  isMentionable: Boolean!
   """
   The user's issue drafts
   """
@@ -34888,6 +35030,10 @@ input ZendeskSettingsInput {
   [INTERNAL] Temporary flag indicating if the integration has the necessary scopes for Customers
   """
   canReadCustomers: Boolean
+  """
+  [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
+  """
+  disableCustomerRequestsAutoCreation: Boolean
   """
   Whether an internal message should be added when someone comments on an issue.
   """
