@@ -28197,6 +28197,45 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "FetchDataPayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "data",
+            "description": "The fetched data based on the natural language query.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "success",
+            "description": "Whether the fetch operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "ENUM",
         "name": "FrequencyResolutionType",
         "description": "By which resolution is frequency defined.",
@@ -100497,6 +100536,39 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "FavoriteConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "fetchData",
+            "description": "[Internal] Fetch an arbitrary set of data using natural language query. Be specific about what you want including properties for each entity, sort order, filters, limit and properties.",
+            "args": [
+              {
+                "name": "query",
+                "description": "Natural language query describing what data to fetch.\n    \n    Examples:\n    - \"All issues for the project with id 12345678-1234-1234-1234-123456789abc including comments\"\n    - \"The latest project update for each project that's a part of the initiative with id 12345678-1234-1234-1234-123456789abc, including it's sub-initiatives\"",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FetchDataPayload",
                 "ofType": null
               }
             },
