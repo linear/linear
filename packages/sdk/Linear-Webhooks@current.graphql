@@ -536,6 +536,15 @@ type CustomerNeedWebhookPayload {
 
 """Certain properties of a customer status."""
 type CustomerStatusChildWebhookPayload {
+  """The color of the customer status."""
+  color: String!
+
+  """The description of the customer status."""
+  description: String
+
+  """The display name of the customer status."""
+  displayName: String!
+
   """The ID of the customer status."""
   id: String!
 
@@ -543,13 +552,16 @@ type CustomerStatusChildWebhookPayload {
   name: String!
 
   """The type of the customer status."""
-  type: String!
+  type: String @deprecated(reason: "Customer statuses are no longer grouped by type.")
 }
 
 """Certain properties of a customer tier."""
 type CustomerTierChildWebhookPayload {
   """The color of the customer tier."""
   color: String!
+
+  """The description of the customer tier."""
+  description: String
 
   """The display name of the customer tier."""
   displayName: String!
@@ -1537,10 +1549,10 @@ type IssueWebhookPayload {
   """The ID of the cycle that the issue belongs to."""
   cycleId: String
 
-  """[Internal] The user that the issue is delegated to."""
+  """The app user that the issue is delegated to."""
   delegate: UserChildWebhookPayload
 
-  """[Internal] The ID of the user that the issue is delegated to."""
+  """The ID of the app user that the issue is delegated to."""
   delegateId: String
 
   """The description of the issue."""

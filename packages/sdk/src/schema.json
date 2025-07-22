@@ -15755,6 +15755,50 @@
         "description": "Certain properties of a customer status.",
         "fields": [
           {
+            "name": "color",
+            "description": "The color of the customer status.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": "The description of the customer status.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "displayName",
+            "description": "The display name of the customer status.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "id",
             "description": "The ID of the customer status.",
             "args": [],
@@ -15791,16 +15835,12 @@
             "description": "The type of the customer status.",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Customer statuses are no longer grouped by type."
           }
         ],
         "inputFields": null,
@@ -16518,6 +16558,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": "The description of the customer tier.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -53435,7 +53487,7 @@
           },
           {
             "name": "delegate",
-            "description": "[Internal] The user that the issue is delegated to.",
+            "description": "The app user that the issue is delegated to.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -53447,7 +53499,7 @@
           },
           {
             "name": "delegateId",
-            "description": "[Internal] The ID of the user that the issue is delegated to.",
+            "description": "The ID of the app user that the issue is delegated to.",
             "args": [],
             "type": {
               "kind": "SCALAR",

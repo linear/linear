@@ -3991,6 +3991,12 @@ fragment CustomerStatusChildWebhookPayload on CustomerStatusChildWebhookPayload 
   __typename
   # The ID of the customer status.
   id
+  # The color of the customer status.
+  color
+  # The description of the customer status.
+  description
+  # The display name of the customer status.
+  displayName
   # The name of the customer status.
   name
   # The type of the customer status.
@@ -4004,6 +4010,8 @@ fragment CustomerTierChildWebhookPayload on CustomerTierChildWebhookPayload {
   id
   # The color of the customer tier.
   color
+  # The description of the customer tier.
+  description
   # The display name of the customer tier.
   displayName
   # The name of the customer tier.
@@ -6004,6 +6012,8 @@ fragment IssueWebhookPayload on IssueWebhookPayload {
   integrationSourceType
   # Previous identifiers of the issue if it has been moved between teams.
   previousIdentifiers
+  # The ID of the app user that the issue is delegated to.
+  delegateId
   # The ID of the cycle that the issue belongs to.
   cycleId
   # The ID of the entity.
@@ -6034,6 +6044,10 @@ fragment IssueWebhookPayload on IssueWebhookPayload {
   subscriberIds
   # The URL of the issue.
   url
+  # The app user that the issue is delegated to.
+  delegate {
+    ...UserChildWebhookPayload
+  }
   # The bot actor data for this issue.
   botActor
   # The cycle that the issue belongs to.

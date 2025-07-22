@@ -2597,12 +2597,21 @@ export type CustomerStatus = Node & {
 /** Certain properties of a customer status. */
 export type CustomerStatusChildWebhookPayload = {
   __typename?: "CustomerStatusChildWebhookPayload";
+  /** The color of the customer status. */
+  color: Scalars["String"];
+  /** The description of the customer status. */
+  description?: Maybe<Scalars["String"]>;
+  /** The display name of the customer status. */
+  displayName: Scalars["String"];
   /** The ID of the customer status. */
   id: Scalars["String"];
   /** The name of the customer status. */
   name: Scalars["String"];
-  /** The type of the customer status. */
-  type: Scalars["String"];
+  /**
+   * The type of the customer status.
+   * @deprecated Customer statuses are no longer grouped by type.
+   */
+  type?: Maybe<Scalars["String"]>;
 };
 
 export type CustomerStatusConnection = {
@@ -2726,6 +2735,8 @@ export type CustomerTierChildWebhookPayload = {
   __typename?: "CustomerTierChildWebhookPayload";
   /** The color of the customer tier. */
   color: Scalars["String"];
+  /** The description of the customer tier. */
+  description?: Maybe<Scalars["String"]>;
   /** The display name of the customer tier. */
   displayName: Scalars["String"];
   /** The ID of the customer tier. */
@@ -8546,9 +8557,9 @@ export type IssueWebhookPayload = {
   cycle?: Maybe<CycleChildWebhookPayload>;
   /** The ID of the cycle that the issue belongs to. */
   cycleId?: Maybe<Scalars["String"]>;
-  /** [Internal] The user that the issue is delegated to. */
+  /** The app user that the issue is delegated to. */
   delegate?: Maybe<UserChildWebhookPayload>;
-  /** [Internal] The ID of the user that the issue is delegated to. */
+  /** The ID of the app user that the issue is delegated to. */
   delegateId?: Maybe<Scalars["String"]>;
   /** The description of the issue. */
   description?: Maybe<Scalars["String"]>;
@@ -21504,12 +21515,12 @@ export type CustomerNeedChildWebhookPayloadFragment = { __typename: "CustomerNee
 
 export type CustomerStatusChildWebhookPayloadFragment = { __typename: "CustomerStatusChildWebhookPayload" } & Pick<
   CustomerStatusChildWebhookPayload,
-  "id" | "name" | "type"
+  "id" | "color" | "description" | "displayName" | "name" | "type"
 >;
 
 export type CustomerTierChildWebhookPayloadFragment = { __typename: "CustomerTierChildWebhookPayload" } & Pick<
   CustomerTierChildWebhookPayload,
-  "id" | "color" | "displayName" | "name"
+  "id" | "color" | "description" | "displayName" | "name"
 >;
 
 export type CustomerChildWebhookPayloadFragment = { __typename: "CustomerChildWebhookPayload" } & Pick<
@@ -22531,6 +22542,7 @@ export type IssueWebhookPayloadFragment = { __typename: "IssueWebhookPayload" } 
   | "labelIds"
   | "integrationSourceType"
   | "previousIdentifiers"
+  | "delegateId"
   | "cycleId"
   | "id"
   | "externalUserCreatorId"
@@ -22581,6 +22593,7 @@ export type IssueWebhookPayloadFragment = { __typename: "IssueWebhookPayload" } 
   | "snoozedUntilAt"
   | "slaType"
 > & {
+    delegate?: Maybe<{ __typename?: "UserChildWebhookPayload" } & UserChildWebhookPayloadFragment>;
     cycle?: Maybe<{ __typename?: "CycleChildWebhookPayload" } & CycleChildWebhookPayloadFragment>;
     externalUserCreator?: Maybe<
       { __typename?: "ExternalUserChildWebhookPayload" } & ExternalUserChildWebhookPayloadFragment
@@ -33601,6 +33614,9 @@ export const CustomerStatusChildWebhookPayloadFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "color" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "displayName" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
         ],
@@ -33621,6 +33637,7 @@ export const CustomerTierChildWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "color" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "displayName" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
         ],
@@ -34974,6 +34991,7 @@ export const IssueWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "labelIds" } },
           { kind: "Field", name: { kind: "Name", value: "integrationSourceType" } },
           { kind: "Field", name: { kind: "Name", value: "previousIdentifiers" } },
+          { kind: "Field", name: { kind: "Name", value: "delegateId" } },
           { kind: "Field", name: { kind: "Name", value: "cycleId" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "externalUserCreatorId" } },
@@ -34989,6 +35007,14 @@ export const IssueWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "assigneeId" } },
           { kind: "Field", name: { kind: "Name", value: "subscriberIds" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "delegate" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserChildWebhookPayload" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "botActor" } },
           {
             kind: "Field",

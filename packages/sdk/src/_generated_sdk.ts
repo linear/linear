@@ -3448,17 +3448,26 @@ export class CustomerStatus extends Request {
  */
 export class CustomerStatusChildWebhookPayload {
   public constructor(data: L.CustomerStatusChildWebhookPayloadFragment) {
+    this.color = data.color;
+    this.description = data.description ?? undefined;
+    this.displayName = data.displayName;
     this.id = data.id;
     this.name = data.name;
-    this.type = data.type;
+    this.type = data.type ?? undefined;
   }
 
+  /** The color of the customer status. */
+  public color: string;
+  /** The description of the customer status. */
+  public description?: string;
+  /** The display name of the customer status. */
+  public displayName: string;
   /** The ID of the customer status. */
   public id: string;
   /** The name of the customer status. */
   public name: string;
   /** The type of the customer status. */
-  public type: string;
+  public type?: string;
 }
 /**
  * CustomerStatusConnection model
@@ -3573,6 +3582,7 @@ export class CustomerTier extends Request {
 export class CustomerTierChildWebhookPayload {
   public constructor(data: L.CustomerTierChildWebhookPayloadFragment) {
     this.color = data.color;
+    this.description = data.description ?? undefined;
     this.displayName = data.displayName;
     this.id = data.id;
     this.name = data.name;
@@ -3580,6 +3590,8 @@ export class CustomerTierChildWebhookPayload {
 
   /** The color of the customer tier. */
   public color: string;
+  /** The description of the customer tier. */
+  public description?: string;
   /** The display name of the customer tier. */
   public displayName: string;
   /** The ID of the customer tier. */
@@ -10397,6 +10409,7 @@ export class IssueWebhookPayload {
     this.createdAt = data.createdAt;
     this.creatorId = data.creatorId ?? undefined;
     this.cycleId = data.cycleId ?? undefined;
+    this.delegateId = data.delegateId ?? undefined;
     this.description = data.description ?? undefined;
     this.descriptionData = data.descriptionData ?? undefined;
     this.dueDate = data.dueDate ?? undefined;
@@ -10440,6 +10453,7 @@ export class IssueWebhookPayload {
     this.assignee = data.assignee ? new UserChildWebhookPayload(data.assignee) : undefined;
     this.creator = data.creator ? new UserChildWebhookPayload(data.creator) : undefined;
     this.cycle = data.cycle ? new CycleChildWebhookPayload(data.cycle) : undefined;
+    this.delegate = data.delegate ? new UserChildWebhookPayload(data.delegate) : undefined;
     this.externalUserCreator = data.externalUserCreator
       ? new ExternalUserChildWebhookPayload(data.externalUserCreator)
       : undefined;
@@ -10478,6 +10492,8 @@ export class IssueWebhookPayload {
   public creatorId?: string;
   /** The ID of the cycle that the issue belongs to. */
   public cycleId?: string;
+  /** The ID of the app user that the issue is delegated to. */
+  public delegateId?: string;
   /** The description of the issue. */
   public description?: string;
   /** The description data of the issue. */
@@ -10566,6 +10582,8 @@ export class IssueWebhookPayload {
   public creator?: UserChildWebhookPayload;
   /** The cycle that the issue belongs to. */
   public cycle?: CycleChildWebhookPayload;
+  /** The app user that the issue is delegated to. */
+  public delegate?: UserChildWebhookPayload;
   /** The external user that created the issue. */
   public externalUserCreator?: ExternalUserChildWebhookPayload;
   /** The project that the issue belongs to. */
