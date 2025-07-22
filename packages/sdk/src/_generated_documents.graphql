@@ -2079,12 +2079,10 @@ fragment AgentSession on AgentSession {
   __typename
   # A summary of the activities in this session.
   summary
-  # External links associated with this agent session.
-  links {
-    ...EntityExternalLink
-  }
   # Metadata about the external source that created this agent session.
   sourceMetadata
+  # The URL of an external agent-hosted page associated with this session.
+  externalLink
   # The agent user that is associated with this agent session.
   appUser {
     id
@@ -3993,6 +3991,12 @@ fragment CustomerStatusChildWebhookPayload on CustomerStatusChildWebhookPayload 
   __typename
   # The ID of the customer status.
   id
+  # The color of the customer status.
+  color
+  # The description of the customer status.
+  description
+  # The display name of the customer status.
+  displayName
   # The name of the customer status.
   name
   # The type of the customer status.
@@ -4006,6 +4010,8 @@ fragment CustomerTierChildWebhookPayload on CustomerTierChildWebhookPayload {
   id
   # The color of the customer tier.
   color
+  # The description of the customer tier.
+  description
   # The display name of the customer tier.
   displayName
   # The name of the customer tier.
@@ -6006,6 +6012,8 @@ fragment IssueWebhookPayload on IssueWebhookPayload {
   integrationSourceType
   # Previous identifiers of the issue if it has been moved between teams.
   previousIdentifiers
+  # The ID of the app user that the issue is delegated to.
+  delegateId
   # The ID of the cycle that the issue belongs to.
   cycleId
   # The ID of the entity.
@@ -6036,6 +6044,10 @@ fragment IssueWebhookPayload on IssueWebhookPayload {
   subscriberIds
   # The URL of the issue.
   url
+  # The app user that the issue is delegated to.
+  delegate {
+    ...UserChildWebhookPayload
+  }
   # The bot actor data for this issue.
   botActor
   # The cycle that the issue belongs to.
@@ -6764,6 +6776,18 @@ fragment AgentSessionConnection on AgentSessionConnection {
   pageInfo {
     ...PageInfo
   }
+}
+
+fragment AgentSessionPayload on AgentSessionPayload {
+  __typename
+  # The agent session that was created or updated.
+  agentSession {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
 }
 
 fragment ApiKeyConnection on ApiKeyConnection {
@@ -14620,6 +14644,18 @@ mutation updateAgentContext(
 ) {
   agentContextUpdate(id: $id, input: $input) {
     ...AgentContextPayload
+  }
+}
+# Updates the externalUrl of an agent session, which is an agent-hosted page associated with this
+# session.
+mutation agentSessionUpdateExternalUrl(
+  # The identifier of the agent session to update.
+  $id: String!
+  # The agent session object to update.
+  $input: AgentSessionUpdateExternalUrlInput!
+) {
+  agentSessionUpdateExternalUrl(id: $id, input: $input) {
+    ...AgentSessionPayload
   }
 }
 # Creates an integration api key for Airbyte to connect with Linear.

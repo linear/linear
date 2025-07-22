@@ -697,12 +697,12 @@ export class AgentSession extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.endedAt = parseDate(data.endedAt) ?? undefined;
+    this.externalLink = data.externalLink ?? undefined;
     this.id = data.id;
     this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.summary = data.summary ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this.links = data.links.map(node => new EntityExternalLink(request, node));
     this.status = data.status;
     this.type = data.type;
     this._appUser = data.appUser;
@@ -717,6 +717,8 @@ export class AgentSession extends Request {
   public createdAt: Date;
   /** The time the agent session ended. */
   public endedAt?: Date;
+  /** The URL of an external agent-hosted page associated with this session. */
+  public externalLink?: string;
   /** The unique identifier of the entity. */
   public id: string;
   /** Metadata about the external source that created this agent session. */
@@ -730,8 +732,6 @@ export class AgentSession extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** External links associated with this agent session. */
-  public links: EntityExternalLink[];
   /** The current status of the agent session. */
   public status: L.AgentSessionStatus;
   /** The type of the agent session. */
@@ -827,6 +827,35 @@ export class AgentSessionEventWebhookPayload {
   public agentActivity?: AgentActivityWebhookPayload;
   /** The agent session that the event belongs to. */
   public agentSession: AgentSessionWebhookPayload;
+}
+/**
+ * AgentSessionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentSessionPayloadFragment response data
+ */
+export class AgentSessionPayload extends Request {
+  private _agentSession: L.AgentSessionPayloadFragment["agentSession"];
+
+  public constructor(request: LinearRequest, data: L.AgentSessionPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._agentSession = data.agentSession;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The agent session that was created or updated. */
+  public get agentSession(): LinearFetch<AgentSession> | undefined {
+    return new AgentSessionQuery(this._request).fetch(this._agentSession.id);
+  }
+  /** The ID of agent session that was created or updated. */
+  public get agentSessionId(): string | undefined {
+    return this._agentSession?.id;
+  }
 }
 /**
  * Payload for an agent session webhook.
@@ -3419,17 +3448,26 @@ export class CustomerStatus extends Request {
  */
 export class CustomerStatusChildWebhookPayload {
   public constructor(data: L.CustomerStatusChildWebhookPayloadFragment) {
+    this.color = data.color;
+    this.description = data.description ?? undefined;
+    this.displayName = data.displayName;
     this.id = data.id;
     this.name = data.name;
-    this.type = data.type;
+    this.type = data.type ?? undefined;
   }
 
+  /** The color of the customer status. */
+  public color: string;
+  /** The description of the customer status. */
+  public description?: string;
+  /** The display name of the customer status. */
+  public displayName: string;
   /** The ID of the customer status. */
   public id: string;
   /** The name of the customer status. */
   public name: string;
   /** The type of the customer status. */
-  public type: string;
+  public type?: string;
 }
 /**
  * CustomerStatusConnection model
@@ -3544,6 +3582,7 @@ export class CustomerTier extends Request {
 export class CustomerTierChildWebhookPayload {
   public constructor(data: L.CustomerTierChildWebhookPayloadFragment) {
     this.color = data.color;
+    this.description = data.description ?? undefined;
     this.displayName = data.displayName;
     this.id = data.id;
     this.name = data.name;
@@ -3551,6 +3590,8 @@ export class CustomerTierChildWebhookPayload {
 
   /** The color of the customer tier. */
   public color: string;
+  /** The description of the customer tier. */
+  public description?: string;
   /** The display name of the customer tier. */
   public displayName: string;
   /** The ID of the customer tier. */
@@ -10368,6 +10409,7 @@ export class IssueWebhookPayload {
     this.createdAt = data.createdAt;
     this.creatorId = data.creatorId ?? undefined;
     this.cycleId = data.cycleId ?? undefined;
+    this.delegateId = data.delegateId ?? undefined;
     this.description = data.description ?? undefined;
     this.descriptionData = data.descriptionData ?? undefined;
     this.dueDate = data.dueDate ?? undefined;
@@ -10411,6 +10453,7 @@ export class IssueWebhookPayload {
     this.assignee = data.assignee ? new UserChildWebhookPayload(data.assignee) : undefined;
     this.creator = data.creator ? new UserChildWebhookPayload(data.creator) : undefined;
     this.cycle = data.cycle ? new CycleChildWebhookPayload(data.cycle) : undefined;
+    this.delegate = data.delegate ? new UserChildWebhookPayload(data.delegate) : undefined;
     this.externalUserCreator = data.externalUserCreator
       ? new ExternalUserChildWebhookPayload(data.externalUserCreator)
       : undefined;
@@ -10449,6 +10492,8 @@ export class IssueWebhookPayload {
   public creatorId?: string;
   /** The ID of the cycle that the issue belongs to. */
   public cycleId?: string;
+  /** The ID of the app user that the issue is delegated to. */
+  public delegateId?: string;
   /** The description of the issue. */
   public description?: string;
   /** The description data of the issue. */
@@ -10537,6 +10582,8 @@ export class IssueWebhookPayload {
   public creator?: UserChildWebhookPayload;
   /** The cycle that the issue belongs to. */
   public cycle?: CycleChildWebhookPayload;
+  /** The app user that the issue is delegated to. */
+  public delegate?: UserChildWebhookPayload;
   /** The external user that created the issue. */
   public externalUserCreator?: ExternalUserChildWebhookPayload;
   /** The project that the issue belongs to. */
@@ -21786,6 +21833,37 @@ export class UpdateAgentContextMutation extends Request {
     const data = response.agentContextUpdate;
 
     return new AgentContextPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AgentSessionUpdateExternalUrl Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentSessionUpdateExternalUrlMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentSessionUpdateExternalUrl mutation and return a AgentSessionPayload
+   *
+   * @param id - required id to pass to agentSessionUpdateExternalUrl
+   * @param input - required input to pass to agentSessionUpdateExternalUrl
+   * @returns parsed response from AgentSessionUpdateExternalUrlMutation
+   */
+  public async fetch(id: string, input: L.AgentSessionUpdateExternalUrlInput): LinearFetch<AgentSessionPayload> {
+    const response = await this._request<
+      L.AgentSessionUpdateExternalUrlMutation,
+      L.AgentSessionUpdateExternalUrlMutationVariables
+    >(L.AgentSessionUpdateExternalUrlDocument, {
+      id,
+      input,
+    });
+    const data = response.agentSessionUpdateExternalUrl;
+
+    return new AgentSessionPayload(this._request, data);
   }
 }
 
@@ -37425,6 +37503,19 @@ export class LinearSdk extends Request {
    */
   public updateAgentContext(id: string, input: L.AgentContextUpdateInput): LinearFetch<AgentContextPayload> {
     return new UpdateAgentContextMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Updates the externalUrl of an agent session, which is an agent-hosted page associated with this session.
+   *
+   * @param id - required id to pass to agentSessionUpdateExternalUrl
+   * @param input - required input to pass to agentSessionUpdateExternalUrl
+   * @returns AgentSessionPayload
+   */
+  public agentSessionUpdateExternalUrl(
+    id: string,
+    input: L.AgentSessionUpdateExternalUrlInput
+  ): LinearFetch<AgentSessionPayload> {
+    return new AgentSessionUpdateExternalUrlMutation(this._request).fetch(id, input);
   }
   /**
    * Creates an integration api key for Airbyte to connect with Linear.

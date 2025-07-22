@@ -386,12 +386,12 @@ export type AgentSession = Node & {
   creator?: Maybe<User>;
   /** The time the agent session ended. */
   endedAt?: Maybe<Scalars["DateTime"]>;
+  /** The URL of an external agent-hosted page associated with this session. */
+  externalLink?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The issue this agent session is associated with. */
   issue?: Maybe<Issue>;
-  /** External links associated with this agent session. */
-  links: Array<EntityExternalLink>;
   /** Metadata about the external source that created this agent session. */
   sourceMetadata?: Maybe<Scalars["JSON"]>;
   /** The time the agent session started. */
@@ -455,6 +455,16 @@ export type AgentSessionEventWebhookPayload = {
   type: Scalars["String"];
 };
 
+export type AgentSessionPayload = {
+  __typename?: "AgentSessionPayload";
+  /** The agent session that was created or updated. */
+  agentSession: AgentSession;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
 /** The status of an agent session. */
 export enum AgentSessionStatus {
   Active = "active",
@@ -469,6 +479,11 @@ export enum AgentSessionStatus {
 export enum AgentSessionType {
   CommentThread = "commentThread",
 }
+
+export type AgentSessionUpdateExternalUrlInput = {
+  /** The URL of an external agent-hosted page associated with this session. */
+  externalLink?: Maybe<Scalars["String"]>;
+};
 
 /** Payload for an agent session webhook. */
 export type AgentSessionWebhookPayload = {
@@ -2582,12 +2597,21 @@ export type CustomerStatus = Node & {
 /** Certain properties of a customer status. */
 export type CustomerStatusChildWebhookPayload = {
   __typename?: "CustomerStatusChildWebhookPayload";
+  /** The color of the customer status. */
+  color: Scalars["String"];
+  /** The description of the customer status. */
+  description?: Maybe<Scalars["String"]>;
+  /** The display name of the customer status. */
+  displayName: Scalars["String"];
   /** The ID of the customer status. */
   id: Scalars["String"];
   /** The name of the customer status. */
   name: Scalars["String"];
-  /** The type of the customer status. */
-  type: Scalars["String"];
+  /**
+   * The type of the customer status.
+   * @deprecated Customer statuses are no longer grouped by type.
+   */
+  type?: Maybe<Scalars["String"]>;
 };
 
 export type CustomerStatusConnection = {
@@ -2711,6 +2735,8 @@ export type CustomerTierChildWebhookPayload = {
   __typename?: "CustomerTierChildWebhookPayload";
   /** The color of the customer tier. */
   color: Scalars["String"];
+  /** The description of the customer tier. */
+  description?: Maybe<Scalars["String"]>;
   /** The display name of the customer tier. */
   displayName: Scalars["String"];
   /** The ID of the customer tier. */
@@ -8531,9 +8557,9 @@ export type IssueWebhookPayload = {
   cycle?: Maybe<CycleChildWebhookPayload>;
   /** The ID of the cycle that the issue belongs to. */
   cycleId?: Maybe<Scalars["String"]>;
-  /** [Internal] The user that the issue is delegated to. */
+  /** The app user that the issue is delegated to. */
   delegate?: Maybe<UserChildWebhookPayload>;
-  /** [Internal] The ID of the user that the issue is delegated to. */
+  /** The ID of the app user that the issue is delegated to. */
   delegateId?: Maybe<Scalars["String"]>;
   /** The description of the issue. */
   description?: Maybe<Scalars["String"]>;
@@ -8876,6 +8902,8 @@ export type Mutation = {
   agentContextCreate: AgentContextPayload;
   /** Updates an agent context. */
   agentContextUpdate: AgentContextPayload;
+  /** Updates the externalUrl of an agent session, which is an agent-hosted page associated with this session. */
+  agentSessionUpdateExternalUrl: AgentSessionPayload;
   /** Creates an integration api key for Airbyte to connect with Linear. */
   airbyteIntegrationConnect: IntegrationPayload;
   /** [INTERNAL] Creates a new API key. */
@@ -9521,6 +9549,11 @@ export type MutationAgentContextCreateArgs = {
 export type MutationAgentContextUpdateArgs = {
   id: Scalars["String"];
   input: AgentContextUpdateInput;
+};
+
+export type MutationAgentSessionUpdateExternalUrlArgs = {
+  id: Scalars["String"];
+  input: AgentSessionUpdateExternalUrlInput;
 };
 
 export type MutationAirbyteIntegrationConnectArgs = {
@@ -20677,6 +20710,7 @@ export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   AgentSession,
   | "summary"
   | "sourceMetadata"
+  | "externalLink"
   | "status"
   | "updatedAt"
   | "archivedAt"
@@ -20686,7 +20720,6 @@ export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   | "type"
   | "id"
 > & {
-    links: Array<{ __typename?: "EntityExternalLink" } & EntityExternalLinkFragment>;
     appUser: { __typename?: "User" } & Pick<User, "id">;
     comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
@@ -21482,12 +21515,12 @@ export type CustomerNeedChildWebhookPayloadFragment = { __typename: "CustomerNee
 
 export type CustomerStatusChildWebhookPayloadFragment = { __typename: "CustomerStatusChildWebhookPayload" } & Pick<
   CustomerStatusChildWebhookPayload,
-  "id" | "name" | "type"
+  "id" | "color" | "description" | "displayName" | "name" | "type"
 >;
 
 export type CustomerTierChildWebhookPayloadFragment = { __typename: "CustomerTierChildWebhookPayload" } & Pick<
   CustomerTierChildWebhookPayload,
-  "id" | "color" | "displayName" | "name"
+  "id" | "color" | "description" | "displayName" | "name"
 >;
 
 export type CustomerChildWebhookPayloadFragment = { __typename: "CustomerChildWebhookPayload" } & Pick<
@@ -22509,6 +22542,7 @@ export type IssueWebhookPayloadFragment = { __typename: "IssueWebhookPayload" } 
   | "labelIds"
   | "integrationSourceType"
   | "previousIdentifiers"
+  | "delegateId"
   | "cycleId"
   | "id"
   | "externalUserCreatorId"
@@ -22559,6 +22593,7 @@ export type IssueWebhookPayloadFragment = { __typename: "IssueWebhookPayload" } 
   | "snoozedUntilAt"
   | "slaType"
 > & {
+    delegate?: Maybe<{ __typename?: "UserChildWebhookPayload" } & UserChildWebhookPayloadFragment>;
     cycle?: Maybe<{ __typename?: "CycleChildWebhookPayload" } & CycleChildWebhookPayloadFragment>;
     externalUserCreator?: Maybe<
       { __typename?: "ExternalUserChildWebhookPayload" } & ExternalUserChildWebhookPayloadFragment
@@ -22841,6 +22876,11 @@ export type AgentSessionConnectionFragment = { __typename: "AgentSessionConnecti
   nodes: Array<{ __typename?: "AgentSession" } & AgentSessionFragment>;
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
+
+export type AgentSessionPayloadFragment = { __typename: "AgentSessionPayload" } & Pick<
+  AgentSessionPayload,
+  "lastSyncId" | "success"
+> & { agentSession: { __typename?: "AgentSession" } & Pick<AgentSession, "id"> };
 
 export type ApiKeyConnectionFragment = { __typename: "ApiKeyConnection" } & {
   nodes: Array<{ __typename?: "ApiKey" } & ApiKeyFragment>;
@@ -27742,6 +27782,15 @@ export type UpdateAgentContextMutationVariables = Exact<{
 
 export type UpdateAgentContextMutation = { __typename?: "Mutation" } & {
   agentContextUpdate: { __typename?: "AgentContextPayload" } & AgentContextPayloadFragment;
+};
+
+export type AgentSessionUpdateExternalUrlMutationVariables = Exact<{
+  id: Scalars["String"];
+  input: AgentSessionUpdateExternalUrlInput;
+}>;
+
+export type AgentSessionUpdateExternalUrlMutation = { __typename?: "Mutation" } & {
+  agentSessionUpdateExternalUrl: { __typename?: "AgentSessionPayload" } & AgentSessionPayloadFragment;
 };
 
 export type AirbyteIntegrationConnectMutationVariables = Exact<{
@@ -33565,6 +33614,9 @@ export const CustomerStatusChildWebhookPayloadFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "color" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "displayName" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
         ],
@@ -33585,6 +33637,7 @@ export const CustomerTierChildWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "color" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "displayName" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
         ],
@@ -34938,6 +34991,7 @@ export const IssueWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "labelIds" } },
           { kind: "Field", name: { kind: "Name", value: "integrationSourceType" } },
           { kind: "Field", name: { kind: "Name", value: "previousIdentifiers" } },
+          { kind: "Field", name: { kind: "Name", value: "delegateId" } },
           { kind: "Field", name: { kind: "Name", value: "cycleId" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "externalUserCreatorId" } },
@@ -34953,6 +35007,14 @@ export const IssueWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "assigneeId" } },
           { kind: "Field", name: { kind: "Name", value: "subscriberIds" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "delegate" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserChildWebhookPayload" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "botActor" } },
           {
             kind: "Field",
@@ -36160,15 +36222,8 @@ export const AgentSessionFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "summary" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "links" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "EntityExternalLink" } }],
-            },
-          },
           { kind: "Field", name: { kind: "Name", value: "sourceMetadata" } },
+          { kind: "Field", name: { kind: "Name", value: "externalLink" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "appUser" },
@@ -36246,6 +36301,32 @@ export const AgentSessionConnectionFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AgentSessionConnectionFragment, unknown>;
+export const AgentSessionPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AgentSessionPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AgentSessionPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "agentSession" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AgentSessionPayloadFragment, unknown>;
 export const ApiKeyFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -44881,7 +44962,6 @@ export const AgentSessionDocument = {
       },
     },
     ...AgentSessionFragmentDoc.definitions,
-    ...EntityExternalLinkFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AgentSessionQuery, AgentSessionQueryVariables>;
 export const AgentSession_ActivitiesDocument = {
@@ -45098,7 +45178,6 @@ export const AgentSessionsDocument = {
     },
     ...AgentSessionConnectionFragmentDoc.definitions,
     ...AgentSessionFragmentDoc.definitions,
-    ...EntityExternalLinkFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AgentSessionsQuery, AgentSessionsQueryVariables>;
@@ -66988,6 +67067,57 @@ export const UpdateAgentContextDocument = {
     ...AgentContextPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateAgentContextMutation, UpdateAgentContextMutationVariables>;
+export const AgentSessionUpdateExternalUrlDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "agentSessionUpdateExternalUrl" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "AgentSessionUpdateExternalUrlInput" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "agentSessionUpdateExternalUrl" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AgentSessionPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...AgentSessionPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<AgentSessionUpdateExternalUrlMutation, AgentSessionUpdateExternalUrlMutationVariables>;
 export const AirbyteIntegrationConnectDocument = {
   kind: "Document",
   definitions: [

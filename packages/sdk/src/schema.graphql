@@ -599,6 +599,10 @@ type AgentSession implements Node {
   """
   endedAt: DateTime
   """
+  The URL of an external agent-hosted page associated with this session.
+  """
+  externalLink: String
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -606,10 +610,6 @@ type AgentSession implements Node {
   The issue this agent session is associated with.
   """
   issue: Issue
-  """
-  External links associated with this agent session.
-  """
-  links: [EntityExternalLink!]!
   """
   Metadata about the external source that created this agent session.
   """
@@ -689,6 +689,21 @@ type AgentSessionEventWebhookPayload {
   type: String!
 }
 
+type AgentSessionPayload {
+  """
+  The agent session that was created or updated.
+  """
+  agentSession: AgentSession!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 """
 The status of an agent session.
 """
@@ -706,6 +721,13 @@ The type of an agent session.
 """
 enum AgentSessionType {
   commentThread
+}
+
+input AgentSessionUpdateExternalUrlInput {
+  """
+  The URL of an external agent-hosted page associated with this session.
+  """
+  externalLink: String
 }
 
 """
@@ -4428,6 +4450,18 @@ Certain properties of a customer status.
 """
 type CustomerStatusChildWebhookPayload {
   """
+  The color of the customer status.
+  """
+  color: String!
+  """
+  The description of the customer status.
+  """
+  description: String
+  """
+  The display name of the customer status.
+  """
+  displayName: String!
+  """
   The ID of the customer status.
   """
   id: String!
@@ -4438,7 +4472,7 @@ type CustomerStatusChildWebhookPayload {
   """
   The type of the customer status.
   """
-  type: String!
+  type: String @deprecated(reason: "Customer statuses are no longer grouped by type.")
 }
 
 type CustomerStatusConnection {
@@ -4639,6 +4673,10 @@ type CustomerTierChildWebhookPayload {
   The color of the customer tier.
   """
   color: String!
+  """
+  The description of the customer tier.
+  """
+  description: String
   """
   The display name of the customer tier.
   """
@@ -15075,11 +15113,11 @@ type IssueWebhookPayload {
   """
   cycleId: String
   """
-  [Internal] The user that the issue is delegated to.
+  The app user that the issue is delegated to.
   """
   delegate: UserChildWebhookPayload
   """
-  [Internal] The ID of the user that the issue is delegated to.
+  The ID of the app user that the issue is delegated to.
   """
   delegateId: String
   """
@@ -15723,6 +15761,19 @@ type Mutation {
     """
     input: AgentContextUpdateInput!
   ): AgentContextPayload!
+  """
+  Updates the externalUrl of an agent session, which is an agent-hosted page associated with this session.
+  """
+  agentSessionUpdateExternalUrl(
+    """
+    The identifier of the agent session to update.
+    """
+    id: String!
+    """
+    The agent session object to update.
+    """
+    input: AgentSessionUpdateExternalUrlInput!
+  ): AgentSessionPayload!
   """
   Creates an integration api key for Airbyte to connect with Linear.
   """
