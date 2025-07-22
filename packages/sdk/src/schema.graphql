@@ -599,6 +599,10 @@ type AgentSession implements Node {
   """
   endedAt: DateTime
   """
+  The URL of an external agent-hosted page associated with this session.
+  """
+  externalLink: String
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -606,10 +610,6 @@ type AgentSession implements Node {
   The issue this agent session is associated with.
   """
   issue: Issue
-  """
-  External links associated with this agent session.
-  """
-  links: [EntityExternalLink!]!
   """
   Metadata about the external source that created this agent session.
   """
@@ -689,6 +689,21 @@ type AgentSessionEventWebhookPayload {
   type: String!
 }
 
+type AgentSessionPayload {
+  """
+  The agent session that was created or updated.
+  """
+  agentSession: AgentSession!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 """
 The status of an agent session.
 """
@@ -706,6 +721,13 @@ The type of an agent session.
 """
 enum AgentSessionType {
   commentThread
+}
+
+input AgentSessionUpdateExternalUrlInput {
+  """
+  The URL of an external agent-hosted page associated with this session.
+  """
+  externalLink: String
 }
 
 """
@@ -15723,6 +15745,19 @@ type Mutation {
     """
     input: AgentContextUpdateInput!
   ): AgentContextPayload!
+  """
+  Updates the externalUrl of an agent session, which is an agent-hosted page associated with this session.
+  """
+  agentSessionUpdateExternalUrl(
+    """
+    The identifier of the agent session to update.
+    """
+    id: String!
+    """
+    The agent session object to update.
+    """
+    input: AgentSessionUpdateExternalUrlInput!
+  ): AgentSessionPayload!
   """
   Creates an integration api key for Airbyte to connect with Linear.
   """

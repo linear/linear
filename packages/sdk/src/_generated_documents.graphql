@@ -2079,12 +2079,10 @@ fragment AgentSession on AgentSession {
   __typename
   # A summary of the activities in this session.
   summary
-  # External links associated with this agent session.
-  links {
-    ...EntityExternalLink
-  }
   # Metadata about the external source that created this agent session.
   sourceMetadata
+  # The URL of an external agent-hosted page associated with this session.
+  externalLink
   # The agent user that is associated with this agent session.
   appUser {
     id
@@ -6764,6 +6762,18 @@ fragment AgentSessionConnection on AgentSessionConnection {
   pageInfo {
     ...PageInfo
   }
+}
+
+fragment AgentSessionPayload on AgentSessionPayload {
+  __typename
+  # The agent session that was created or updated.
+  agentSession {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
 }
 
 fragment ApiKeyConnection on ApiKeyConnection {
@@ -14620,6 +14630,18 @@ mutation updateAgentContext(
 ) {
   agentContextUpdate(id: $id, input: $input) {
     ...AgentContextPayload
+  }
+}
+# Updates the externalUrl of an agent session, which is an agent-hosted page associated with this
+# session.
+mutation agentSessionUpdateExternalUrl(
+  # The identifier of the agent session to update.
+  $id: String!
+  # The agent session object to update.
+  $input: AgentSessionUpdateExternalUrlInput!
+) {
+  agentSessionUpdateExternalUrl(id: $id, input: $input) {
+    ...AgentSessionPayload
   }
 }
 # Creates an integration api key for Airbyte to connect with Linear.

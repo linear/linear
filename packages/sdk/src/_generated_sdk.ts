@@ -697,12 +697,12 @@ export class AgentSession extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.endedAt = parseDate(data.endedAt) ?? undefined;
+    this.externalLink = data.externalLink ?? undefined;
     this.id = data.id;
     this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
     this.startedAt = parseDate(data.startedAt) ?? undefined;
     this.summary = data.summary ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this.links = data.links.map(node => new EntityExternalLink(request, node));
     this.status = data.status;
     this.type = data.type;
     this._appUser = data.appUser;
@@ -717,6 +717,8 @@ export class AgentSession extends Request {
   public createdAt: Date;
   /** The time the agent session ended. */
   public endedAt?: Date;
+  /** The URL of an external agent-hosted page associated with this session. */
+  public externalLink?: string;
   /** The unique identifier of the entity. */
   public id: string;
   /** Metadata about the external source that created this agent session. */
@@ -730,8 +732,6 @@ export class AgentSession extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
-  /** External links associated with this agent session. */
-  public links: EntityExternalLink[];
   /** The current status of the agent session. */
   public status: L.AgentSessionStatus;
   /** The type of the agent session. */
@@ -827,6 +827,35 @@ export class AgentSessionEventWebhookPayload {
   public agentActivity?: AgentActivityWebhookPayload;
   /** The agent session that the event belongs to. */
   public agentSession: AgentSessionWebhookPayload;
+}
+/**
+ * AgentSessionPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentSessionPayloadFragment response data
+ */
+export class AgentSessionPayload extends Request {
+  private _agentSession: L.AgentSessionPayloadFragment["agentSession"];
+
+  public constructor(request: LinearRequest, data: L.AgentSessionPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+    this._agentSession = data.agentSession;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+  /** The agent session that was created or updated. */
+  public get agentSession(): LinearFetch<AgentSession> | undefined {
+    return new AgentSessionQuery(this._request).fetch(this._agentSession.id);
+  }
+  /** The ID of agent session that was created or updated. */
+  public get agentSessionId(): string | undefined {
+    return this._agentSession?.id;
+  }
 }
 /**
  * Payload for an agent session webhook.
@@ -21790,6 +21819,37 @@ export class UpdateAgentContextMutation extends Request {
 }
 
 /**
+ * A fetchable AgentSessionUpdateExternalUrl Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentSessionUpdateExternalUrlMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentSessionUpdateExternalUrl mutation and return a AgentSessionPayload
+   *
+   * @param id - required id to pass to agentSessionUpdateExternalUrl
+   * @param input - required input to pass to agentSessionUpdateExternalUrl
+   * @returns parsed response from AgentSessionUpdateExternalUrlMutation
+   */
+  public async fetch(id: string, input: L.AgentSessionUpdateExternalUrlInput): LinearFetch<AgentSessionPayload> {
+    const response = await this._request<
+      L.AgentSessionUpdateExternalUrlMutation,
+      L.AgentSessionUpdateExternalUrlMutationVariables
+    >(L.AgentSessionUpdateExternalUrlDocument, {
+      id,
+      input,
+    });
+    const data = response.agentSessionUpdateExternalUrl;
+
+    return new AgentSessionPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable AirbyteIntegrationConnect Mutation
  *
  * @param request - function to call the graphql client
@@ -37425,6 +37485,19 @@ export class LinearSdk extends Request {
    */
   public updateAgentContext(id: string, input: L.AgentContextUpdateInput): LinearFetch<AgentContextPayload> {
     return new UpdateAgentContextMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Updates the externalUrl of an agent session, which is an agent-hosted page associated with this session.
+   *
+   * @param id - required id to pass to agentSessionUpdateExternalUrl
+   * @param input - required input to pass to agentSessionUpdateExternalUrl
+   * @returns AgentSessionPayload
+   */
+  public agentSessionUpdateExternalUrl(
+    id: string,
+    input: L.AgentSessionUpdateExternalUrlInput
+  ): LinearFetch<AgentSessionPayload> {
+    return new AgentSessionUpdateExternalUrlMutation(this._request).fetch(id, input);
   }
   /**
    * Creates an integration api key for Airbyte to connect with Linear.
