@@ -320,6 +320,8 @@ fragment CustomerNeedNotification on CustomerNeedNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The customer need related to the notification.
   customerNeed {
     id
@@ -481,6 +483,8 @@ fragment CustomerNotification on CustomerNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The customer related to the notification.
   customer {
     id
@@ -732,6 +736,8 @@ fragment DocumentNotification on DocumentNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The external user that caused the notification.
   externalUserActor {
     id
@@ -1275,6 +1281,8 @@ fragment Notification on Notification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The external user that caused the notification.
   externalUserActor {
     id
@@ -1360,6 +1368,8 @@ fragment PostNotification on PostNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The external user that caused the notification.
   externalUserActor {
     id
@@ -1471,6 +1481,8 @@ fragment ProjectNotification on ProjectNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The comment related to the notification.
   comment {
     id
@@ -1696,6 +1708,8 @@ fragment PullRequestNotification on PullRequestNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The external user that caused the notification.
   externalUserActor {
     id
@@ -2755,6 +2769,8 @@ fragment ApiKey on ApiKey {
 # An activity within an agent context.
 fragment AgentActivity on AgentActivity {
   __typename
+  # Metadata about the external source that created this agent activity.
+  sourceMetadata
   # The agent context this activity belongs to.
   agentContext {
     id
@@ -2919,8 +2935,6 @@ fragment ProjectHistory on ProjectHistory {
 # An identity provider.
 fragment IdentityProvider on IdentityProvider {
   __typename
-  # Allowed authentication providers, empty array means all are allowed.
-  allowedAuthServices
   # Binding method for authentication call. Can be either `post` (default) or `redirect`.
   ssoBinding
   # Sign in endpoint URL for the identity provider.
@@ -2944,6 +2958,8 @@ fragment IdentityProvider on IdentityProvider {
   samlEnabled
   # Whether SCIM provisioning is enabled for organization.
   scimEnabled
+  # Whether the identity provider is the default identity provider migrated from organization level settings.
+  defaultMigrated
   # X.509 Signing Certificate in string form.
   ssoSigningCert
 }
@@ -3061,6 +3077,8 @@ fragment InitiativeNotification on InitiativeNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The comment related to the notification.
   comment {
     id
@@ -3314,6 +3332,8 @@ fragment IssueNotification on IssueNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The comment related to the notification.
   comment {
     id
@@ -3393,7 +3413,7 @@ fragment Issue on Issue {
   customerTicketCount
   # Suggested branch name for the issue.
   branchName
-  # The app user that is delegated to work on this issue.
+  # The agent user that is delegated to work on this issue.
   delegate {
     id
   }
@@ -3539,6 +3559,8 @@ fragment OauthClientApprovalNotification on OauthClientApprovalNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The external user that caused the notification.
   externalUserActor {
     id
@@ -7787,7 +7809,7 @@ fragment IssueSearchResult on IssueSearchResult {
   customerTicketCount
   # Suggested branch name for the issue.
   branchName
-  # The app user that is delegated to work on this issue.
+  # The agent user that is delegated to work on this issue.
   delegate {
     id
   }
@@ -7973,6 +7995,7 @@ fragment IssueSuggestionMetadata on IssueSuggestionMetadata {
   __typename
   classification
   evalLogId
+  rank
   reasons
   score
 }
@@ -14324,8 +14347,11 @@ query users(
   }
 }
 # Verify that we received the correct response from the GitHub Enterprise Server.
-query verifyGitHubEnterpriseServerInstallation {
-  verifyGitHubEnterpriseServerInstallation {
+query verifyGitHubEnterpriseServerInstallation(
+  # The integration ID.
+  $integrationId: String!
+) {
+  verifyGitHubEnterpriseServerInstallation(integrationId: $integrationId) {
     ...GitHubEnterpriseServerInstallVerificationPayload
   }
 }
@@ -15820,8 +15846,10 @@ mutation integrationAsksConnectChannel(
 mutation deleteIntegration(
   # The identifier of the integration to delete.
   $id: String!
+  # Whether to skip deleting the installation on the external service side.
+  $skipInstallationDeletion: Boolean
 ) {
-  integrationDelete(id: $id) {
+  integrationDelete(id: $id, skipInstallationDeletion: $skipInstallationDeletion) {
     ...DeletePayload
   }
 }
@@ -15863,7 +15891,7 @@ mutation integrationGitHubEnterpriseServerConnect(
   # The base URL of the GitHub Enterprise Server installation.
   $githubUrl: String!
   # The name of GitHub organization.
-  $organizationName: String
+  $organizationName: String!
 ) {
   integrationGitHubEnterpriseServerConnect(githubUrl: $githubUrl, organizationName: $organizationName) {
     ...GitHubEnterpriseServerPayload
@@ -15888,10 +15916,12 @@ mutation createIntegrationGithubCommit {
 mutation integrationGithubConnect(
   # The GitHub grant code that's exchanged for OAuth tokens.
   $code: String!
+  # Whether the integration should have code access
+  $codeAccess: Boolean
   # The GitHub data to connect with.
   $installationId: String!
 ) {
-  integrationGithubConnect(code: $code, installationId: $installationId) {
+  integrationGithubConnect(code: $code, codeAccess: $codeAccess, installationId: $installationId) {
     ...IntegrationPayload
   }
 }

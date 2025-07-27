@@ -5382,7 +5382,7 @@ describe("generated", () => {
     /** Test the root model query for VerifyGitHubEnterpriseServerInstallation */
     it("verifyGitHubEnterpriseServerInstallation", async () => {
       const verifyGitHubEnterpriseServerInstallation: L.GitHubEnterpriseServerInstallVerificationPayload | undefined =
-        await client.verifyGitHubEnterpriseServerInstallation;
+        await client.verifyGitHubEnterpriseServerInstallation("mock-integrationId");
       expect(verifyGitHubEnterpriseServerInstallation instanceof L.GitHubEnterpriseServerInstallVerificationPayload);
     });
   });

@@ -77,6 +77,8 @@ export type AgentActivity = Node & {
   id: Scalars["ID"];
   /** The comment this activity is linked to. */
   sourceComment?: Maybe<Comment>;
+  /** Metadata about the external source that created this agent activity. */
+  sourceMetadata?: Maybe<Scalars["JSON"]>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -2266,6 +2268,8 @@ export type CustomerNeedNotification = Entity &
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The bot that caused the notification. */
     botActor?: Maybe<ActorBot>;
+    /** The category of the notification. */
+    category: NotificationCategory;
     /** The time at which the entity was created. */
     createdAt: Scalars["DateTime"];
     /** The customer need related to the notification. */
@@ -2423,6 +2427,8 @@ export type CustomerNotification = Entity &
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The bot that caused the notification. */
     botActor?: Maybe<ActorBot>;
+    /** The category of the notification. */
+    category: NotificationCategory;
     /** The time at which the entity was created. */
     createdAt: Scalars["DateTime"];
     /** The customer related to the notification. */
@@ -3610,6 +3616,8 @@ export type DocumentNotification = Entity &
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The bot that caused the notification. */
     botActor?: Maybe<ActorBot>;
+    /** The category of the notification. */
+    category: NotificationCategory;
     /** Related comment ID. Null if the notification is not related to a comment. */
     commentId?: Maybe<Scalars["String"]>;
     /** The time at which the entity was created. */
@@ -4650,6 +4658,10 @@ export type FrontSettingsInput = {
   automateTicketReopeningOnComment?: Maybe<Scalars["Boolean"]>;
   /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
   automateTicketReopeningOnCompletion?: Maybe<Scalars["Boolean"]>;
+  /** Whether a ticket should be automatically reopened when its linked Linear project is cancelled. */
+  automateTicketReopeningOnProjectCancellation?: Maybe<Scalars["Boolean"]>;
+  /** Whether a ticket should be automatically reopened when its linked Linear project is completed. */
+  automateTicketReopeningOnProjectCompletion?: Maybe<Scalars["Boolean"]>;
   /** [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue. */
   disableCustomerRequestsAutoCreation?: Maybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when someone comments on an issue. */
@@ -4852,6 +4864,8 @@ export type GitHubImportSettingsInput = {
 };
 
 export type GitHubPersonalSettingsInput = {
+  /** Whether the integration has code access */
+  codeAccess?: Maybe<Scalars["Boolean"]>;
   /** The GitHub user's name. */
   login: Scalars["String"];
 };
@@ -4881,6 +4895,8 @@ export type GitHubRepoMappingInput = {
 };
 
 export type GitHubSettingsInput = {
+  /** Whether the integration has code access */
+  codeAccess?: Maybe<Scalars["Boolean"]>;
   /** The avatar URL for the GitHub organization. */
   orgAvatarUrl?: Maybe<Scalars["String"]>;
   /** The GitHub organization's name. */
@@ -4987,12 +5003,12 @@ export type IdentityProvider = Node & {
   __typename?: "IdentityProvider";
   /** [INTERNAL] SCIM admins group push settings. */
   adminsGroupPush?: Maybe<Scalars["JSONObject"]>;
-  /** Allowed authentication providers, empty array means all are allowed. */
-  allowedAuthServices: Array<Scalars["String"]>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** Whether the identity provider is the default identity provider migrated from organization level settings. */
+  defaultMigrated: Scalars["Boolean"];
   /** [INTERNAL] SCIM guests group push settings. */
   guestsGroupPush?: Maybe<Scalars["JSONObject"]>;
   /** The unique identifier of the entity. */
@@ -5396,6 +5412,8 @@ export type InitiativeNotification = Entity &
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The bot that caused the notification. */
     botActor?: Maybe<ActorBot>;
+    /** The category of the notification. */
+    category: NotificationCategory;
     /** The comment related to the notification. */
     comment?: Maybe<Comment>;
     /** Related comment ID. Null if the notification is not related to a comment. */
@@ -6361,6 +6379,10 @@ export type IntercomSettingsInput = {
   automateTicketReopeningOnComment?: Maybe<Scalars["Boolean"]>;
   /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
   automateTicketReopeningOnCompletion?: Maybe<Scalars["Boolean"]>;
+  /** Whether a ticket should be automatically reopened when its linked Linear project is cancelled. */
+  automateTicketReopeningOnProjectCancellation?: Maybe<Scalars["Boolean"]>;
+  /** Whether a ticket should be automatically reopened when its linked Linear project is completed. */
+  automateTicketReopeningOnProjectCompletion?: Maybe<Scalars["Boolean"]>;
   /** [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue. */
   disableCustomerRequestsAutoCreation?: Maybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when someone comments on an issue. */
@@ -6415,7 +6437,7 @@ export type Issue = Node & {
   customerTicketCount: Scalars["Int"];
   /** The cycle that the issue is associated with. */
   cycle?: Maybe<Cycle>;
-  /** The app user that is delegated to work on this issue. */
+  /** The agent user that is delegated to work on this issue. */
   delegate?: Maybe<User>;
   /** The issue's description in markdown format. */
   description?: Maybe<Scalars["String"]>;
@@ -6775,11 +6797,13 @@ export type IssueCollectionFilter = {
   creator?: Maybe<NullableUserFilter>;
   /** Count of customers */
   customerCount?: Maybe<NumberComparator>;
+  /** Count of important customers */
+  customerImportantCount?: Maybe<NumberComparator>;
   /** Filters that the issues cycle must satisfy. */
   cycle?: Maybe<NullableCycleFilter>;
   /** [Internal] Cycle time (started -> completed) comparator. */
   cycleTime?: Maybe<NullableDurationComparator>;
-  /** Filters that the issue's delegate must satisfy. */
+  /** Filters that the issue's delegated agent must satisfy. */
   delegate?: Maybe<NullableUserFilter>;
   /** Comparator for the issues description. */
   description?: Maybe<NullableStringComparator>;
@@ -6955,7 +6979,7 @@ export type IssueCreateInput = {
   createdAt?: Maybe<Scalars["DateTime"]>;
   /** The cycle associated with the issue. */
   cycleId?: Maybe<Scalars["String"]>;
-  /** The identifier of the app user to delegate the issue to. */
+  /** The identifier of the agent user to delegate the issue to. */
   delegateId?: Maybe<Scalars["String"]>;
   /** The issue description in markdown format. */
   description?: Maybe<Scalars["String"]>;
@@ -7030,7 +7054,7 @@ export type IssueDraft = Node & {
   creator: User;
   /** The cycle associated with the draft. */
   cycleId?: Maybe<Scalars["String"]>;
-  /** The app user delegated to work on the issue being drafted. */
+  /** The agent user delegated to work on the issue being drafted. */
   delegateId?: Maybe<Scalars["String"]>;
   /** The draft's description in markdown format. */
   description?: Maybe<Scalars["String"]>;
@@ -7165,11 +7189,13 @@ export type IssueFilter = {
   creator?: Maybe<NullableUserFilter>;
   /** Count of customers */
   customerCount?: Maybe<NumberComparator>;
+  /** Count of important customers */
+  customerImportantCount?: Maybe<NumberComparator>;
   /** Filters that the issues cycle must satisfy. */
   cycle?: Maybe<NullableCycleFilter>;
   /** [Internal] Cycle time (started -> completed) comparator. */
   cycleTime?: Maybe<NullableDurationComparator>;
-  /** Filters that the issue's delegate must satisfy. */
+  /** Filters that the issue's delegated agent must satisfy. */
   delegate?: Maybe<NullableUserFilter>;
   /** Comparator for the issues description. */
   description?: Maybe<NullableStringComparator>;
@@ -7788,6 +7814,8 @@ export type IssueNotification = Entity &
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The bot that caused the notification. */
     botActor?: Maybe<ActorBot>;
+    /** The category of the notification. */
+    category: NotificationCategory;
     /** The comment related to the notification. */
     comment?: Maybe<Comment>;
     /** Related comment ID. Null if the notification is not related to a comment. */
@@ -8009,7 +8037,7 @@ export type IssueSearchResult = Node & {
   customerTicketCount: Scalars["Int"];
   /** The cycle that the issue is associated with. */
   cycle?: Maybe<Cycle>;
-  /** The app user that is delegated to work on this issue. */
+  /** The agent user that is delegated to work on this issue. */
   delegate?: Maybe<User>;
   /** The issue's description in markdown format. */
   description?: Maybe<Scalars["String"]>;
@@ -8404,6 +8432,7 @@ export type IssueSuggestionMetadata = {
   __typename?: "IssueSuggestionMetadata";
   classification?: Maybe<Scalars["String"]>;
   evalLogId?: Maybe<Scalars["String"]>;
+  rank?: Maybe<Scalars["Float"]>;
   reasons?: Maybe<Array<Scalars["String"]>>;
   score?: Maybe<Scalars["Float"]>;
 };
@@ -8470,7 +8499,7 @@ export type IssueUpdateInput = {
   autoClosedByParentClosing?: Maybe<Scalars["Boolean"]>;
   /** The cycle associated with the issue. */
   cycleId?: Maybe<Scalars["String"]>;
-  /** The identifier of the app user to delegate the issue to. */
+  /** The identifier of the agent user to delegate the issue to. */
   delegateId?: Maybe<Scalars["String"]>;
   /** The issue description in markdown format. */
   description?: Maybe<Scalars["String"]>;
@@ -10063,6 +10092,7 @@ export type MutationIntegrationCustomerDataAttributesRefreshArgs = {
 
 export type MutationIntegrationDeleteArgs = {
   id: Scalars["String"];
+  skipInstallationDeletion?: Maybe<Scalars["Boolean"]>;
 };
 
 export type MutationIntegrationDiscordArgs = {
@@ -10082,7 +10112,7 @@ export type MutationIntegrationFrontArgs = {
 
 export type MutationIntegrationGitHubEnterpriseServerConnectArgs = {
   githubUrl: Scalars["String"];
-  organizationName?: Maybe<Scalars["String"]>;
+  organizationName: Scalars["String"];
 };
 
 export type MutationIntegrationGitHubPersonalArgs = {
@@ -10091,6 +10121,7 @@ export type MutationIntegrationGitHubPersonalArgs = {
 
 export type MutationIntegrationGithubConnectArgs = {
   code: Scalars["String"];
+  codeAccess?: Maybe<Scalars["Boolean"]>;
   installationId: Scalars["String"];
 };
 
@@ -10975,6 +11006,8 @@ export type Notification = {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The bot that caused the notification. */
   botActor?: Maybe<ActorBot>;
+  /** The category of the notification. */
+  category: NotificationCategory;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /**
@@ -11629,11 +11662,13 @@ export type NullableIssueFilter = {
   creator?: Maybe<NullableUserFilter>;
   /** Count of customers */
   customerCount?: Maybe<NumberComparator>;
+  /** Count of important customers */
+  customerImportantCount?: Maybe<NumberComparator>;
   /** Filters that the issues cycle must satisfy. */
   cycle?: Maybe<NullableCycleFilter>;
   /** [Internal] Cycle time (started -> completed) comparator. */
   cycleTime?: Maybe<NullableDurationComparator>;
-  /** Filters that the issue's delegate must satisfy. */
+  /** Filters that the issue's delegated agent must satisfy. */
   delegate?: Maybe<NullableUserFilter>;
   /** Comparator for the issues description. */
   description?: Maybe<NullableStringComparator>;
@@ -11757,6 +11792,8 @@ export type NullableProjectFilter = {
   creator?: Maybe<UserFilter>;
   /** Count of customers */
   customerCount?: Maybe<NumberComparator>;
+  /** Count of important customers */
+  customerImportantCount?: Maybe<NumberComparator>;
   /** Comparator for filtering projects which are blocked. */
   hasBlockedByRelations?: Maybe<RelationExistsComparator>;
   /** Comparator for filtering projects which are blocking. */
@@ -12092,6 +12129,8 @@ export type OauthClientApprovalNotification = Entity &
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The bot that caused the notification. */
     botActor?: Maybe<ActorBot>;
+    /** The category of the notification. */
+    category: NotificationCategory;
     /** The time at which the entity was created. */
     createdAt: Scalars["DateTime"];
     /**
@@ -12414,6 +12453,8 @@ export type OrganizationDomainCreateInput = {
   authType?: Maybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
+  /** The identity provider to which to add the domain. */
+  identityProviderId?: Maybe<Scalars["String"]>;
   /** The domain name to add. */
   name: Scalars["String"];
   /** The email address to which to send the verification code. */
@@ -12992,6 +13033,8 @@ export type PostNotification = Entity &
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The bot that caused the notification. */
     botActor?: Maybe<ActorBot>;
+    /** The category of the notification. */
+    category: NotificationCategory;
     /** Related comment ID. Null if the notification is not related to a comment. */
     commentId?: Maybe<Scalars["String"]>;
     /** The time at which the entity was created. */
@@ -13453,6 +13496,8 @@ export type ProjectCollectionFilter = {
   creator?: Maybe<UserFilter>;
   /** Count of customers */
   customerCount?: Maybe<NumberComparator>;
+  /** Count of important customers */
+  customerImportantCount?: Maybe<NumberComparator>;
   /** Filters that needs to be matched by all projects. */
   every?: Maybe<ProjectFilter>;
   /** Comparator for filtering projects which are blocked. */
@@ -13606,6 +13651,8 @@ export type ProjectFilter = {
   creator?: Maybe<UserFilter>;
   /** Count of customers */
   customerCount?: Maybe<NumberComparator>;
+  /** Count of important customers */
+  customerImportantCount?: Maybe<NumberComparator>;
   /** Comparator for filtering projects which are blocked. */
   hasBlockedByRelations?: Maybe<RelationExistsComparator>;
   /** Comparator for filtering projects which are blocking. */
@@ -14148,6 +14195,8 @@ export type ProjectNotification = Entity &
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The bot that caused the notification. */
     botActor?: Maybe<ActorBot>;
+    /** The category of the notification. */
+    category: NotificationCategory;
     /** The comment related to the notification. */
     comment?: Maybe<Comment>;
     /** Related comment ID. Null if the notification is not related to a comment. */
@@ -15349,6 +15398,8 @@ export type PullRequestNotification = Entity &
     archivedAt?: Maybe<Scalars["DateTime"]>;
     /** The bot that caused the notification. */
     botActor?: Maybe<ActorBot>;
+    /** The category of the notification. */
+    category: NotificationCategory;
     /** Related comment ID. Null if the notification is not related to a comment. */
     commentId?: Maybe<Scalars["String"]>;
     /** The time at which the entity was created. */
@@ -16575,6 +16626,10 @@ export type QueryUsersArgs = {
   orderBy?: Maybe<PaginationOrderBy>;
 };
 
+export type QueryVerifyGitHubEnterpriseServerInstallationArgs = {
+  integrationId: Scalars["String"];
+};
+
 export type QueryWebhookArgs = {
   id: Scalars["String"];
 };
@@ -17041,6 +17096,10 @@ export type SalesforceSettingsInput = {
   automateTicketReopeningOnComment?: Maybe<Scalars["Boolean"]>;
   /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
   automateTicketReopeningOnCompletion?: Maybe<Scalars["Boolean"]>;
+  /** Whether a ticket should be automatically reopened when its linked Linear project is cancelled. */
+  automateTicketReopeningOnProjectCancellation?: Maybe<Scalars["Boolean"]>;
+  /** Whether a ticket should be automatically reopened when its linked Linear project is completed. */
+  automateTicketReopeningOnProjectCompletion?: Maybe<Scalars["Boolean"]>;
   /** [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue. */
   disableCustomerRequestsAutoCreation?: Maybe<Scalars["Boolean"]>;
   /** The Salesforce case status to use to reopen cases. */
@@ -19647,6 +19706,10 @@ export type ZendeskSettingsInput = {
   automateTicketReopeningOnComment?: Maybe<Scalars["Boolean"]>;
   /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
   automateTicketReopeningOnCompletion?: Maybe<Scalars["Boolean"]>;
+  /** Whether a ticket should be automatically reopened when its linked Linear project is cancelled. */
+  automateTicketReopeningOnProjectCancellation?: Maybe<Scalars["Boolean"]>;
+  /** Whether a ticket should be automatically reopened when its linked Linear project is completed. */
+  automateTicketReopeningOnProjectCompletion?: Maybe<Scalars["Boolean"]>;
   /** The ID of the Linear bot user. */
   botUserId?: Maybe<Scalars["String"]>;
   /** [INTERNAL] Temporary flag indicating if the integration has the necessary scopes for Customers */
@@ -19883,6 +19946,7 @@ export type CustomerNeedNotificationFragment = { __typename: "CustomerNeedNotifi
   CustomerNeedNotification,
   | "type"
   | "customerNeedId"
+  | "category"
   | "updatedAt"
   | "emailedAt"
   | "readAt"
@@ -19940,6 +20004,7 @@ export type CustomerNotificationFragment = { __typename: "CustomerNotification" 
   CustomerNotification,
   | "type"
   | "customerId"
+  | "category"
   | "updatedAt"
   | "emailedAt"
   | "readAt"
@@ -20038,6 +20103,7 @@ export type DocumentNotificationFragment = { __typename: "DocumentNotification" 
   | "commentId"
   | "documentId"
   | "parentCommentId"
+  | "category"
   | "updatedAt"
   | "emailedAt"
   | "readAt"
@@ -20330,7 +20396,16 @@ export type ProjectMilestoneFragment = { __typename: "ProjectMilestone" } & Pick
 
 type Notification_CustomerNeedNotification_Fragment = { __typename: "CustomerNeedNotification" } & Pick<
   CustomerNeedNotification,
-  "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
+  | "type"
+  | "category"
+  | "updatedAt"
+  | "emailedAt"
+  | "readAt"
+  | "unsnoozedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "snoozedUntilAt"
+  | "id"
 > & {
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
@@ -20340,7 +20415,16 @@ type Notification_CustomerNeedNotification_Fragment = { __typename: "CustomerNee
 
 type Notification_CustomerNotification_Fragment = { __typename: "CustomerNotification" } & Pick<
   CustomerNotification,
-  "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
+  | "type"
+  | "category"
+  | "updatedAt"
+  | "emailedAt"
+  | "readAt"
+  | "unsnoozedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "snoozedUntilAt"
+  | "id"
 > & {
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
@@ -20350,7 +20434,16 @@ type Notification_CustomerNotification_Fragment = { __typename: "CustomerNotific
 
 type Notification_DocumentNotification_Fragment = { __typename: "DocumentNotification" } & Pick<
   DocumentNotification,
-  "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
+  | "type"
+  | "category"
+  | "updatedAt"
+  | "emailedAt"
+  | "readAt"
+  | "unsnoozedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "snoozedUntilAt"
+  | "id"
 > & {
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
@@ -20360,7 +20453,16 @@ type Notification_DocumentNotification_Fragment = { __typename: "DocumentNotific
 
 type Notification_InitiativeNotification_Fragment = { __typename: "InitiativeNotification" } & Pick<
   InitiativeNotification,
-  "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
+  | "type"
+  | "category"
+  | "updatedAt"
+  | "emailedAt"
+  | "readAt"
+  | "unsnoozedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "snoozedUntilAt"
+  | "id"
 > & {
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
@@ -20370,7 +20472,16 @@ type Notification_InitiativeNotification_Fragment = { __typename: "InitiativeNot
 
 type Notification_IssueNotification_Fragment = { __typename: "IssueNotification" } & Pick<
   IssueNotification,
-  "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
+  | "type"
+  | "category"
+  | "updatedAt"
+  | "emailedAt"
+  | "readAt"
+  | "unsnoozedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "snoozedUntilAt"
+  | "id"
 > & {
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
@@ -20380,7 +20491,16 @@ type Notification_IssueNotification_Fragment = { __typename: "IssueNotification"
 
 type Notification_OauthClientApprovalNotification_Fragment = { __typename: "OauthClientApprovalNotification" } & Pick<
   OauthClientApprovalNotification,
-  "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
+  | "type"
+  | "category"
+  | "updatedAt"
+  | "emailedAt"
+  | "readAt"
+  | "unsnoozedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "snoozedUntilAt"
+  | "id"
 > & {
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
@@ -20390,7 +20510,16 @@ type Notification_OauthClientApprovalNotification_Fragment = { __typename: "Oaut
 
 type Notification_PostNotification_Fragment = { __typename: "PostNotification" } & Pick<
   PostNotification,
-  "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
+  | "type"
+  | "category"
+  | "updatedAt"
+  | "emailedAt"
+  | "readAt"
+  | "unsnoozedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "snoozedUntilAt"
+  | "id"
 > & {
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
@@ -20400,7 +20529,16 @@ type Notification_PostNotification_Fragment = { __typename: "PostNotification" }
 
 type Notification_ProjectNotification_Fragment = { __typename: "ProjectNotification" } & Pick<
   ProjectNotification,
-  "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
+  | "type"
+  | "category"
+  | "updatedAt"
+  | "emailedAt"
+  | "readAt"
+  | "unsnoozedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "snoozedUntilAt"
+  | "id"
 > & {
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
@@ -20410,7 +20548,16 @@ type Notification_ProjectNotification_Fragment = { __typename: "ProjectNotificat
 
 type Notification_PullRequestNotification_Fragment = { __typename: "PullRequestNotification" } & Pick<
   PullRequestNotification,
-  "type" | "updatedAt" | "emailedAt" | "readAt" | "unsnoozedAt" | "archivedAt" | "createdAt" | "snoozedUntilAt" | "id"
+  | "type"
+  | "category"
+  | "updatedAt"
+  | "emailedAt"
+  | "readAt"
+  | "unsnoozedAt"
+  | "archivedAt"
+  | "createdAt"
+  | "snoozedUntilAt"
+  | "id"
 > & {
     botActor?: Maybe<{ __typename?: "ActorBot" } & ActorBotFragment>;
     externalUserActor?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
@@ -20436,6 +20583,7 @@ export type PostNotificationFragment = { __typename: "PostNotification" } & Pick
   | "commentId"
   | "parentCommentId"
   | "postId"
+  | "category"
   | "updatedAt"
   | "emailedAt"
   | "readAt"
@@ -20482,6 +20630,7 @@ export type ProjectNotificationFragment = { __typename: "ProjectNotification" } 
   | "projectId"
   | "projectMilestoneId"
   | "projectUpdateId"
+  | "category"
   | "updatedAt"
   | "emailedAt"
   | "readAt"
@@ -20581,6 +20730,7 @@ export type PullRequestNotificationFragment = { __typename: "PullRequestNotifica
   | "commentId"
   | "parentCommentId"
   | "pullRequestId"
+  | "category"
   | "updatedAt"
   | "emailedAt"
   | "readAt"
@@ -20967,7 +21117,7 @@ export type ApiKeyFragment = { __typename: "ApiKey" } & Pick<
 
 export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
   AgentActivity,
-  "updatedAt" | "archivedAt" | "createdAt" | "id"
+  "sourceMetadata" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & {
     agentContext?: Maybe<{ __typename?: "AgentContext" } & Pick<AgentContext, "id">>;
     agentSession: { __typename?: "AgentSession" } & Pick<AgentSession, "id">;
@@ -21021,7 +21171,6 @@ export type ProjectHistoryFragment = { __typename: "ProjectHistory" } & Pick<
 
 export type IdentityProviderFragment = { __typename: "IdentityProvider" } & Pick<
   IdentityProvider,
-  | "allowedAuthServices"
   | "ssoBinding"
   | "ssoEndpoint"
   | "priority"
@@ -21033,6 +21182,7 @@ export type IdentityProviderFragment = { __typename: "IdentityProvider" } & Pick
   | "id"
   | "samlEnabled"
   | "scimEnabled"
+  | "defaultMigrated"
   | "ssoSigningCert"
 >;
 
@@ -21085,6 +21235,7 @@ export type InitiativeNotificationFragment = { __typename: "InitiativeNotificati
   | "initiativeId"
   | "initiativeUpdateId"
   | "parentCommentId"
+  | "category"
   | "updatedAt"
   | "emailedAt"
   | "readAt"
@@ -21192,6 +21343,7 @@ export type IssueNotificationFragment = { __typename: "IssueNotification" } & Pi
   | "commentId"
   | "issueId"
   | "parentCommentId"
+  | "category"
   | "updatedAt"
   | "emailedAt"
   | "readAt"
@@ -21306,6 +21458,7 @@ export type OauthClientApprovalNotificationFragment = { __typename: "OauthClient
   OauthClientApprovalNotification,
   | "type"
   | "oauthClientApprovalId"
+  | "category"
   | "updatedAt"
   | "emailedAt"
   | "readAt"
@@ -23425,7 +23578,7 @@ export type IssueSuggestionConnectionFragment = { __typename: "IssueSuggestionCo
 
 export type IssueSuggestionMetadataFragment = { __typename: "IssueSuggestionMetadata" } & Pick<
   IssueSuggestionMetadata,
-  "classification" | "evalLogId" | "reasons" | "score"
+  "classification" | "evalLogId" | "rank" | "reasons" | "score"
 >;
 
 export type IssueTitleSuggestionFromCustomerRequestPayloadFragment = {
@@ -27605,7 +27758,9 @@ export type UsersQuery = { __typename?: "Query" } & {
   users: { __typename?: "UserConnection" } & UserConnectionFragment;
 };
 
-export type VerifyGitHubEnterpriseServerInstallationQueryVariables = Exact<{ [key: string]: never }>;
+export type VerifyGitHubEnterpriseServerInstallationQueryVariables = Exact<{
+  integrationId: Scalars["String"];
+}>;
 
 export type VerifyGitHubEnterpriseServerInstallationQuery = { __typename?: "Query" } & {
   verifyGitHubEnterpriseServerInstallation: {
@@ -28677,6 +28832,7 @@ export type IntegrationAsksConnectChannelMutation = { __typename?: "Mutation" } 
 
 export type DeleteIntegrationMutationVariables = Exact<{
   id: Scalars["String"];
+  skipInstallationDeletion?: Maybe<Scalars["Boolean"]>;
 }>;
 
 export type DeleteIntegrationMutation = { __typename?: "Mutation" } & {
@@ -28712,7 +28868,7 @@ export type IntegrationFrontMutation = { __typename?: "Mutation" } & {
 
 export type IntegrationGitHubEnterpriseServerConnectMutationVariables = Exact<{
   githubUrl: Scalars["String"];
-  organizationName?: Maybe<Scalars["String"]>;
+  organizationName: Scalars["String"];
 }>;
 
 export type IntegrationGitHubEnterpriseServerConnectMutation = { __typename?: "Mutation" } & {
@@ -28739,6 +28895,7 @@ export type CreateIntegrationGithubCommitMutation = { __typename?: "Mutation" } 
 
 export type IntegrationGithubConnectMutationVariables = Exact<{
   code: Scalars["String"];
+  codeAccess?: Maybe<Scalars["Boolean"]>;
   installationId: Scalars["String"];
 }>;
 
@@ -30747,6 +30904,7 @@ export const CustomerNeedNotificationFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "category" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "customerNeed" },
@@ -30829,6 +30987,7 @@ export const CustomerNotificationFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "category" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "customer" },
@@ -30898,6 +31057,7 @@ export const DocumentNotificationFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "category" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "externalUserActor" },
@@ -30960,6 +31120,7 @@ export const InitiativeNotificationFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "category" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "comment" },
@@ -31156,6 +31317,7 @@ export const IssueNotificationFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "category" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "comment" },
@@ -31289,6 +31451,7 @@ export const OauthClientApprovalNotificationFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "category" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "externalUserActor" },
@@ -31350,6 +31513,7 @@ export const PostNotificationFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "category" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "externalUserActor" },
@@ -31413,6 +31577,7 @@ export const ProjectNotificationFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "category" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "comment" },
@@ -31514,6 +31679,7 @@ export const PullRequestNotificationFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "category" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "externalUserActor" },
@@ -31571,6 +31737,7 @@ export const NotificationFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ActorBot" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "category" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "externalUserActor" },
@@ -32874,7 +33041,6 @@ export const IdentityProviderFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "allowedAuthServices" } },
           { kind: "Field", name: { kind: "Name", value: "ssoBinding" } },
           { kind: "Field", name: { kind: "Name", value: "ssoEndpoint" } },
           { kind: "Field", name: { kind: "Name", value: "priority" } },
@@ -32886,6 +33052,7 @@ export const IdentityProviderFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "samlEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "scimEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "defaultMigrated" } },
           { kind: "Field", name: { kind: "Name", value: "ssoSigningCert" } },
         ],
       },
@@ -35856,6 +36023,7 @@ export const AgentActivityFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "sourceMetadata" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "agentContext" },
@@ -41355,6 +41523,7 @@ export const IssueSuggestionMetadataFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "classification" } },
           { kind: "Field", name: { kind: "Name", value: "evalLogId" } },
+          { kind: "Field", name: { kind: "Name", value: "rank" } },
           { kind: "Field", name: { kind: "Name", value: "reasons" } },
           { kind: "Field", name: { kind: "Name", value: "score" } },
         ],
@@ -65840,12 +66009,26 @@ export const VerifyGitHubEnterpriseServerInstallationDocument = {
       kind: "OperationDefinition",
       operation: "query",
       name: { kind: "Name", value: "verifyGitHubEnterpriseServerInstallation" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "integrationId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
             name: { kind: "Name", value: "verifyGitHubEnterpriseServerInstallation" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "integrationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "integrationId" } },
+              },
+            ],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -71948,6 +72131,11 @@ export const DeleteIntegrationDocument = {
           variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "skipInstallationDeletion" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
       ],
       selectionSet: {
         kind: "SelectionSet",
@@ -71960,6 +72148,11 @@ export const DeleteIntegrationDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "id" },
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "skipInstallationDeletion" },
+                value: { kind: "Variable", name: { kind: "Name", value: "skipInstallationDeletion" } },
               },
             ],
             selectionSet: {
@@ -72133,7 +72326,7 @@ export const IntegrationGitHubEnterpriseServerConnectDocument = {
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "organizationName" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
       ],
       selectionSet: {
@@ -72245,6 +72438,11 @@ export const IntegrationGithubConnectDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "codeAccess" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "installationId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
         },
@@ -72260,6 +72458,11 @@ export const IntegrationGithubConnectDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "code" },
                 value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "codeAccess" },
+                value: { kind: "Variable", name: { kind: "Name", value: "codeAccess" } },
               },
               {
                 kind: "Argument",

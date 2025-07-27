@@ -235,6 +235,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "sourceMetadata",
+            "description": "Metadata about the external source that created this agent activity.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -13889,6 +13901,22 @@
             "deprecationReason": null
           },
           {
+            "name": "category",
+            "description": "The category of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "NotificationCategory",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "url",
             "description": "[Internal] URL to the target of the notification.",
             "args": [],
@@ -14835,6 +14863,22 @@
               "kind": "SCALAR",
               "name": "DateTime",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "category",
+            "description": "The category of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "NotificationCategory",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -22185,6 +22229,22 @@
             "deprecationReason": null
           },
           {
+            "name": "category",
+            "description": "The category of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "NotificationCategory",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "url",
             "description": "[Internal] URL to the target of the notification.",
             "args": [],
@@ -28516,6 +28576,30 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "automateTicketReopeningOnProjectCompletion",
+            "description": "Whether a ticket should be automatically reopened when its linked Linear project is completed.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "automateTicketReopeningOnProjectCancellation",
+            "description": "Whether a ticket should be automatically reopened when its linked Linear project is cancelled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -29703,6 +29787,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "codeAccess",
+            "description": "Whether the integration has code access",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -29959,6 +30055,18 @@
             "type": {
               "kind": "ENUM",
               "name": "GithubOrgType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "codeAccess",
+            "description": "Whether the integration has code access",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -30526,6 +30634,22 @@
             "deprecationReason": null
           },
           {
+            "name": "defaultMigrated",
+            "description": "Whether the identity provider is the default identity provider migrated from organization level settings.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "samlEnabled",
             "description": "Whether SAML authentication is enabled for organization.",
             "args": [],
@@ -30597,30 +30721,6 @@
               "kind": "SCALAR",
               "name": "String",
               "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "allowedAuthServices",
-            "description": "Allowed authentication providers, empty array means all are allowed.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                }
-              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -33171,6 +33271,22 @@
               "kind": "SCALAR",
               "name": "DateTime",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "category",
+            "description": "The category of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "NotificationCategory",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -39042,6 +39158,30 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "automateTicketReopeningOnProjectCompletion",
+            "description": "Whether a ticket should be automatically reopened when its linked Linear project is completed.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "automateTicketReopeningOnProjectCancellation",
+            "description": "Whether a ticket should be automatically reopened when its linked Linear project is cancelled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -39635,7 +39775,7 @@
           },
           {
             "name": "delegate",
-            "description": "The app user that is delegated to work on this issue.",
+            "description": "The agent user that is delegated to work on this issue.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -41897,7 +42037,7 @@
           },
           {
             "name": "delegate",
-            "description": "Filters that the issue's delegate must satisfy.",
+            "description": "Filters that the issue's delegated agent must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableUserFilter",
@@ -42258,6 +42398,18 @@
           {
             "name": "customerCount",
             "description": "Count of customers",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NumberComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "customerImportantCount",
+            "description": "Count of important customers",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NumberComparator",
@@ -43029,7 +43181,7 @@
           },
           {
             "name": "delegateId",
-            "description": "The identifier of the app user to delegate the issue to.",
+            "description": "The identifier of the agent user to delegate the issue to.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -43639,7 +43791,7 @@
           },
           {
             "name": "delegateId",
-            "description": "The app user delegated to work on the issue being drafted.",
+            "description": "The agent user delegated to work on the issue being drafted.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -44419,7 +44571,7 @@
           },
           {
             "name": "delegate",
-            "description": "Filters that the issue's delegate must satisfy.",
+            "description": "Filters that the issue's delegated agent must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableUserFilter",
@@ -44780,6 +44932,18 @@
           {
             "name": "customerCount",
             "description": "Count of customers",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NumberComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "customerImportantCount",
+            "description": "Count of important customers",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NumberComparator",
@@ -48329,6 +48493,22 @@
             "deprecationReason": null
           },
           {
+            "name": "category",
+            "description": "The category of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "NotificationCategory",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "url",
             "description": "[Internal] URL to the target of the notification.",
             "args": [],
@@ -49920,7 +50100,7 @@
           },
           {
             "name": "delegate",
-            "description": "The app user that is delegated to work on this issue.",
+            "description": "The agent user that is delegated to work on this issue.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -52568,6 +52748,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "rank",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -52949,7 +53141,7 @@
           },
           {
             "name": "delegateId",
-            "description": "The identifier of the app user to delegate the issue to.",
+            "description": "The identifier of the agent user to delegate the issue to.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -61676,6 +61868,18 @@
             "description": "Connects the organization with the GitHub App.",
             "args": [
               {
+                "name": "codeAccess",
+                "description": "Whether the integration should have code access",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": "false",
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "code",
                 "description": "The GitHub grant code that's exchanged for OAuth tokens.",
                 "type": {
@@ -61810,9 +62014,13 @@
                 "name": "organizationName",
                 "description": "The name of GitHub organization.",
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -63719,6 +63927,18 @@
             "name": "integrationDelete",
             "description": "Deletes an integration.",
             "args": [
+              {
+                "name": "skipInstallationDeletion",
+                "description": "Whether to skip deleting the installation on the external service side.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "id",
                 "description": "The identifier of the integration to delete.",
@@ -69452,6 +69672,22 @@
             "deprecationReason": null
           },
           {
+            "name": "category",
+            "description": "The category of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "NotificationCategory",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "url",
             "description": "[Internal] URL to the target of the notification.",
             "args": [],
@@ -73436,7 +73672,7 @@
           },
           {
             "name": "delegate",
-            "description": "Filters that the issue's delegate must satisfy.",
+            "description": "Filters that the issue's delegated agent must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableUserFilter",
@@ -73797,6 +74033,18 @@
           {
             "name": "customerCount",
             "description": "Count of customers",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NumberComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "customerImportantCount",
+            "description": "Count of important customers",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NumberComparator",
@@ -74487,6 +74735,18 @@
           {
             "name": "customerCount",
             "description": "Count of customers",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NumberComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "customerImportantCount",
+            "description": "Count of important customers",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NumberComparator",
@@ -76259,6 +76519,22 @@
               "kind": "SCALAR",
               "name": "DateTime",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "category",
+            "description": "The category of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "NotificationCategory",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -78278,6 +78554,18 @@
           {
             "name": "id",
             "description": "The identifier in UUID v4 format. If none is provided, the backend will generate one.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "identityProviderId",
+            "description": "The identity provider to which to add the domain.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -81817,6 +82105,22 @@
             "deprecationReason": null
           },
           {
+            "name": "category",
+            "description": "The category of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "NotificationCategory",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "url",
             "description": "[Internal] URL to the target of the notification.",
             "args": [],
@@ -85118,6 +85422,18 @@
             "deprecationReason": null
           },
           {
+            "name": "customerImportantCount",
+            "description": "Count of important customers",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NumberComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "and",
             "description": "Compound filters, all of which need to be matched by the project.",
             "type": {
@@ -86075,6 +86391,18 @@
           {
             "name": "customerCount",
             "description": "Count of customers",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NumberComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "customerImportantCount",
+            "description": "Count of important customers",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NumberComparator",
@@ -89211,6 +89539,22 @@
               "kind": "SCALAR",
               "name": "DateTime",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "category",
+            "description": "The category of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "NotificationCategory",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -97145,6 +97489,22 @@
               "kind": "SCALAR",
               "name": "DateTime",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "category",
+            "description": "The category of the notification.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "NotificationCategory",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -105580,7 +105940,24 @@
           {
             "name": "verifyGitHubEnterpriseServerInstallation",
             "description": "Verify that we received the correct response from the GitHub Enterprise Server.",
-            "args": [],
+            "args": [
+              {
+                "name": "integrationId",
+                "description": "The integration ID.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -108613,6 +108990,30 @@
           {
             "name": "disableCustomerRequestsAutoCreation",
             "description": "[ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "automateTicketReopeningOnProjectCompletion",
+            "description": "Whether a ticket should be automatically reopened when its linked Linear project is completed.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "automateTicketReopeningOnProjectCancellation",
+            "description": "Whether a ticket should be automatically reopened when its linked Linear project is cancelled.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -124750,6 +125151,30 @@
           {
             "name": "disableCustomerRequestsAutoCreation",
             "description": "[ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "automateTicketReopeningOnProjectCompletion",
+            "description": "Whether a ticket should be automatically reopened when its linked Linear project is completed.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "automateTicketReopeningOnProjectCancellation",
+            "description": "Whether a ticket should be automatically reopened when its linked Linear project is cancelled.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
