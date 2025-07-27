@@ -223,6 +223,7 @@ export class AgentActivity extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.content = data.content;
     this._agentContext = data.agentContext ?? undefined;
@@ -236,6 +237,8 @@ export class AgentActivity extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Metadata about the external source that created this agent activity. */
+  public sourceMetadata?: Record<string, unknown>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -2926,6 +2929,7 @@ export class CustomerNeedNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._customerNeed = data.customerNeed;
     this._externalUserActor = data.externalUserActor ?? undefined;
@@ -2962,6 +2966,8 @@ export class CustomerNeedNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -3159,6 +3165,7 @@ export class CustomerNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._customer = data.customer;
     this._externalUserActor = data.externalUserActor ?? undefined;
@@ -3193,6 +3200,8 @@ export class CustomerNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -4542,6 +4551,7 @@ export class DocumentNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
     this._user = data.user;
@@ -4581,6 +4591,8 @@ export class DocumentNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -6325,9 +6337,9 @@ export class GitLabIntegrationCreatePayload extends Request {
 export class IdentityProvider extends Request {
   public constructor(request: LinearRequest, data: L.IdentityProviderFragment) {
     super(request);
-    this.allowedAuthServices = data.allowedAuthServices;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.defaultMigrated = data.defaultMigrated;
     this.id = data.id;
     this.issuerEntityId = data.issuerEntityId ?? undefined;
     this.priority = data.priority ?? undefined;
@@ -6340,12 +6352,12 @@ export class IdentityProvider extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
   }
 
-  /** Allowed authentication providers, empty array means all are allowed. */
-  public allowedAuthServices: string[];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** Whether the identity provider is the default identity provider migrated from organization level settings. */
+  public defaultMigrated: boolean;
   /** The unique identifier of the entity. */
   public id: string;
   /** The issuer's custom entity ID. */
@@ -6747,6 +6759,7 @@ export class InitiativeNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._comment = data.comment ?? undefined;
     this._document = data.document ?? undefined;
@@ -6793,6 +6806,8 @@ export class InitiativeNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -7686,8 +7701,8 @@ export class Integration extends Request {
     return new ArchiveIntegrationMutation(this._request).fetch(this.id);
   }
   /** Deletes an integration. */
-  public delete() {
-    return new DeleteIntegrationMutation(this._request).fetch(this.id);
+  public delete(variables?: Omit<L.DeleteIntegrationMutationVariables, "id">) {
+    return new DeleteIntegrationMutation(this._request).fetch(this.id, variables);
   }
 }
 /**
@@ -8232,11 +8247,11 @@ export class Issue extends Request {
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The app user that is delegated to work on this issue. */
+  /** The agent user that is delegated to work on this issue. */
   public get delegate(): LinearFetch<User> | undefined {
     return this._delegate?.id ? new UserQuery(this._request).fetch(this._delegate?.id) : undefined;
   }
-  /** The ID of app user that is delegated to work on this issue. */
+  /** The ID of agent user that is delegated to work on this issue. */
   public get delegateId(): string | undefined {
     return this._delegate?.id;
   }
@@ -9535,6 +9550,7 @@ export class IssueNotification extends Request {
     this.subscriptions = data.subscriptions
       ? data.subscriptions.map(node => new NotificationSubscription(request, node))
       : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._comment = data.comment ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
@@ -9580,6 +9596,8 @@ export class IssueNotification extends Request {
   public subscriptions?: NotificationSubscription[];
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -10029,11 +10047,11 @@ export class IssueSearchResult extends Request {
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The app user that is delegated to work on this issue. */
+  /** The agent user that is delegated to work on this issue. */
   public get delegate(): LinearFetch<User> | undefined {
     return this._delegate?.id ? new UserQuery(this._request).fetch(this._delegate?.id) : undefined;
   }
-  /** The ID of app user that is delegated to work on this issue. */
+  /** The ID of agent user that is delegated to work on this issue. */
   public get delegateId(): string | undefined {
     return this._delegate?.id;
   }
@@ -10319,12 +10337,14 @@ export class IssueSuggestionMetadata extends Request {
     super(request);
     this.classification = data.classification ?? undefined;
     this.evalLogId = data.evalLogId ?? undefined;
+    this.rank = data.rank ?? undefined;
     this.reasons = data.reasons ?? undefined;
     this.score = data.score ?? undefined;
   }
 
   public classification?: string;
   public evalLogId?: string;
+  public rank?: number;
   public reasons?: string[];
   public score?: number;
 }
@@ -10809,6 +10829,7 @@ export class Notification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
     this._user = data.user;
@@ -10840,6 +10861,8 @@ export class Notification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -11507,6 +11530,7 @@ export class OauthClientApprovalNotification extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this.oauthClientApproval = new OauthClientApproval(request, data.oauthClientApproval);
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
     this._user = data.user;
@@ -11542,6 +11566,8 @@ export class OauthClientApprovalNotification extends Request {
   public botActor?: ActorBot;
   /** The OAuth client approval request related to the notification. */
   public oauthClientApproval: OauthClientApproval;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -12354,6 +12380,7 @@ export class PostNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
     this._user = data.user;
@@ -12393,6 +12420,8 @@ export class PostNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -13269,6 +13298,7 @@ export class ProjectNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._comment = data.comment ?? undefined;
     this._document = data.document ?? undefined;
@@ -13317,6 +13347,8 @@ export class ProjectNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -14580,6 +14612,7 @@ export class PullRequestNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
     this._user = data.user;
@@ -14619,6 +14652,8 @@ export class PullRequestNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -21588,13 +21623,16 @@ export class VerifyGitHubEnterpriseServerInstallationQuery extends Request {
   /**
    * Call the VerifyGitHubEnterpriseServerInstallation query and return a GitHubEnterpriseServerInstallVerificationPayload
    *
+   * @param integrationId - required integrationId to pass to verifyGitHubEnterpriseServerInstallation
    * @returns parsed response from VerifyGitHubEnterpriseServerInstallationQuery
    */
-  public async fetch(): LinearFetch<GitHubEnterpriseServerInstallVerificationPayload> {
+  public async fetch(integrationId: string): LinearFetch<GitHubEnterpriseServerInstallVerificationPayload> {
     const response = await this._request<
       L.VerifyGitHubEnterpriseServerInstallationQuery,
       L.VerifyGitHubEnterpriseServerInstallationQueryVariables
-    >(L.VerifyGitHubEnterpriseServerInstallationDocument, {});
+    >(L.VerifyGitHubEnterpriseServerInstallationDocument, {
+      integrationId,
+    });
     const data = response.verifyGitHubEnterpriseServerInstallation;
 
     return new GitHubEnterpriseServerInstallVerificationPayload(this._request, data);
@@ -24870,13 +24908,18 @@ export class DeleteIntegrationMutation extends Request {
    * Call the DeleteIntegration mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteIntegration
+   * @param variables - variables without 'id' to pass into the DeleteIntegrationMutation
    * @returns parsed response from DeleteIntegrationMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(
+    id: string,
+    variables?: Omit<L.DeleteIntegrationMutationVariables, "id">
+  ): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteIntegrationMutation, L.DeleteIntegrationMutationVariables>(
       L.DeleteIntegrationDocument,
       {
         id,
+        ...variables,
       }
     );
     const data = response.integrationDelete;
@@ -24992,19 +25035,16 @@ export class IntegrationGitHubEnterpriseServerConnectMutation extends Request {
    * Call the IntegrationGitHubEnterpriseServerConnect mutation and return a GitHubEnterpriseServerPayload
    *
    * @param githubUrl - required githubUrl to pass to integrationGitHubEnterpriseServerConnect
-   * @param variables - variables without 'githubUrl' to pass into the IntegrationGitHubEnterpriseServerConnectMutation
+   * @param organizationName - required organizationName to pass to integrationGitHubEnterpriseServerConnect
    * @returns parsed response from IntegrationGitHubEnterpriseServerConnectMutation
    */
-  public async fetch(
-    githubUrl: string,
-    variables?: Omit<L.IntegrationGitHubEnterpriseServerConnectMutationVariables, "githubUrl">
-  ): LinearFetch<GitHubEnterpriseServerPayload> {
+  public async fetch(githubUrl: string, organizationName: string): LinearFetch<GitHubEnterpriseServerPayload> {
     const response = await this._request<
       L.IntegrationGitHubEnterpriseServerConnectMutation,
       L.IntegrationGitHubEnterpriseServerConnectMutationVariables
     >(L.IntegrationGitHubEnterpriseServerConnectDocument, {
       githubUrl,
-      ...variables,
+      organizationName,
     });
     const data = response.integrationGitHubEnterpriseServerConnect;
 
@@ -25082,15 +25122,21 @@ export class IntegrationGithubConnectMutation extends Request {
    *
    * @param code - required code to pass to integrationGithubConnect
    * @param installationId - required installationId to pass to integrationGithubConnect
+   * @param variables - variables without 'code', 'installationId' to pass into the IntegrationGithubConnectMutation
    * @returns parsed response from IntegrationGithubConnectMutation
    */
-  public async fetch(code: string, installationId: string): LinearFetch<IntegrationPayload> {
+  public async fetch(
+    code: string,
+    installationId: string,
+    variables?: Omit<L.IntegrationGithubConnectMutationVariables, "code" | "installationId">
+  ): LinearFetch<IntegrationPayload> {
     const response = await this._request<
       L.IntegrationGithubConnectMutation,
       L.IntegrationGithubConnectMutationVariables
     >(L.IntegrationGithubConnectDocument, {
       code,
       installationId,
+      ...variables,
     });
     const data = response.integrationGithubConnect;
 
@@ -37427,10 +37473,13 @@ export class LinearSdk extends Request {
   /**
    * Verify that we received the correct response from the GitHub Enterprise Server.
    *
+   * @param integrationId - required integrationId to pass to verifyGitHubEnterpriseServerInstallation
    * @returns GitHubEnterpriseServerInstallVerificationPayload
    */
-  public get verifyGitHubEnterpriseServerInstallation(): LinearFetch<GitHubEnterpriseServerInstallVerificationPayload> {
-    return new VerifyGitHubEnterpriseServerInstallationQuery(this._request).fetch();
+  public verifyGitHubEnterpriseServerInstallation(
+    integrationId: string
+  ): LinearFetch<GitHubEnterpriseServerInstallVerificationPayload> {
+    return new VerifyGitHubEnterpriseServerInstallationQuery(this._request).fetch(integrationId);
   }
   /**
    * The currently authenticated user.
@@ -38559,10 +38608,14 @@ export class LinearSdk extends Request {
    * Deletes an integration.
    *
    * @param id - required id to pass to deleteIntegration
+   * @param variables - variables without 'id' to pass into the DeleteIntegrationMutation
    * @returns DeletePayload
    */
-  public deleteIntegration(id: string): LinearFetch<DeletePayload> {
-    return new DeleteIntegrationMutation(this._request).fetch(id);
+  public deleteIntegration(
+    id: string,
+    variables?: Omit<L.DeleteIntegrationMutationVariables, "id">
+  ): LinearFetch<DeletePayload> {
+    return new DeleteIntegrationMutation(this._request).fetch(id, variables);
   }
   /**
    * Integrates the organization with Discord.
@@ -38598,14 +38651,14 @@ export class LinearSdk extends Request {
    * Connects the organization with a GitHub Enterprise Server.
    *
    * @param githubUrl - required githubUrl to pass to integrationGitHubEnterpriseServerConnect
-   * @param variables - variables without 'githubUrl' to pass into the IntegrationGitHubEnterpriseServerConnectMutation
+   * @param organizationName - required organizationName to pass to integrationGitHubEnterpriseServerConnect
    * @returns GitHubEnterpriseServerPayload
    */
   public integrationGitHubEnterpriseServerConnect(
     githubUrl: string,
-    variables?: Omit<L.IntegrationGitHubEnterpriseServerConnectMutationVariables, "githubUrl">
+    organizationName: string
   ): LinearFetch<GitHubEnterpriseServerPayload> {
-    return new IntegrationGitHubEnterpriseServerConnectMutation(this._request).fetch(githubUrl, variables);
+    return new IntegrationGitHubEnterpriseServerConnectMutation(this._request).fetch(githubUrl, organizationName);
   }
   /**
    * Connect your GitHub account to Linear.
@@ -38629,10 +38682,15 @@ export class LinearSdk extends Request {
    *
    * @param code - required code to pass to integrationGithubConnect
    * @param installationId - required installationId to pass to integrationGithubConnect
+   * @param variables - variables without 'code', 'installationId' to pass into the IntegrationGithubConnectMutation
    * @returns IntegrationPayload
    */
-  public integrationGithubConnect(code: string, installationId: string): LinearFetch<IntegrationPayload> {
-    return new IntegrationGithubConnectMutation(this._request).fetch(code, installationId);
+  public integrationGithubConnect(
+    code: string,
+    installationId: string,
+    variables?: Omit<L.IntegrationGithubConnectMutationVariables, "code" | "installationId">
+  ): LinearFetch<IntegrationPayload> {
+    return new IntegrationGithubConnectMutation(this._request).fetch(code, installationId, variables);
   }
   /**
    * Connects the organization with the GitHub Import App.

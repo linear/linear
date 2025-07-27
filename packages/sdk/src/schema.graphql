@@ -66,6 +66,10 @@ type AgentActivity implements Node {
   """
   sourceComment: Comment
   """
+  Metadata about the external source that created this agent activity.
+  """
+  sourceMetadata: JSON
+  """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
@@ -3876,6 +3880,10 @@ type CustomerNeedNotification implements Entity & Node & Notification {
   """
   botActor: ActorBot
   """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -4154,6 +4162,10 @@ type CustomerNotification implements Entity & Node & Notification {
   The bot that caused the notification.
   """
   botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
   """
   The time at which the entity was created.
   """
@@ -6225,6 +6237,10 @@ type DocumentNotification implements Entity & Node & Notification {
   """
   botActor: ActorBot
   """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
   Related comment ID. Null if the notification is not related to a comment.
   """
   commentId: String
@@ -7983,6 +7999,14 @@ input FrontSettingsInput {
   """
   automateTicketReopeningOnCompletion: Boolean
   """
+  Whether a ticket should be automatically reopened when its linked Linear project is cancelled.
+  """
+  automateTicketReopeningOnProjectCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear project is completed.
+  """
+  automateTicketReopeningOnProjectCompletion: Boolean
+  """
   [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
   """
   disableCustomerRequestsAutoCreation: Boolean
@@ -8304,6 +8328,10 @@ input GitHubImportSettingsInput {
 
 input GitHubPersonalSettingsInput {
   """
+  Whether the integration has code access
+  """
+  codeAccess: Boolean
+  """
   The GitHub user's name.
   """
   login: String!
@@ -8352,6 +8380,10 @@ input GitHubRepoMappingInput {
 }
 
 input GitHubSettingsInput {
+  """
+  Whether the integration has code access
+  """
+  codeAccess: Boolean
   """
   The avatar URL for the GitHub organization.
   """
@@ -8531,10 +8563,6 @@ type IdentityProvider implements Node {
   """
   adminsGroupPush: JSONObject
   """
-  Allowed authentication providers, empty array means all are allowed.
-  """
-  allowedAuthServices: [String!]!
-  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -8542,6 +8570,10 @@ type IdentityProvider implements Node {
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  """
+  Whether the identity provider is the default identity provider migrated from organization level settings.
+  """
+  defaultMigrated: Boolean!
   """
   [INTERNAL] SCIM guests group push settings.
   """
@@ -9294,6 +9326,10 @@ type InitiativeNotification implements Entity & Node & Notification {
   The bot that caused the notification.
   """
   botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
   """
   The comment related to the notification.
   """
@@ -10883,6 +10919,14 @@ input IntercomSettingsInput {
   """
   automateTicketReopeningOnCompletion: Boolean
   """
+  Whether a ticket should be automatically reopened when its linked Linear project is cancelled.
+  """
+  automateTicketReopeningOnProjectCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear project is completed.
+  """
+  automateTicketReopeningOnProjectCompletion: Boolean
+  """
   [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
   """
   disableCustomerRequestsAutoCreation: Boolean
@@ -11068,7 +11112,7 @@ type Issue implements Node {
   """
   cycle: Cycle
   """
-  The app user that is delegated to work on this issue.
+  The agent user that is delegated to work on this issue.
   """
   delegate: User
   """
@@ -11762,6 +11806,10 @@ input IssueCollectionFilter {
   """
   customerCount: NumberComparator
   """
+  Count of important customers
+  """
+  customerImportantCount: NumberComparator
+  """
   Filters that the issues cycle must satisfy.
   """
   cycle: NullableCycleFilter
@@ -11770,7 +11818,7 @@ input IssueCollectionFilter {
   """
   cycleTime: NullableDurationComparator
   """
-  Filters that the issue's delegate must satisfy.
+  Filters that the issue's delegated agent must satisfy.
   """
   delegate: NullableUserFilter
   """
@@ -12113,7 +12161,7 @@ input IssueCreateInput {
   """
   cycleId: String
   """
-  The identifier of the app user to delegate the issue to.
+  The identifier of the agent user to delegate the issue to.
   """
   delegateId: String
   """
@@ -12259,7 +12307,7 @@ type IssueDraft implements Node {
   """
   cycleId: String
   """
-  The app user delegated to work on the issue being drafted.
+  The agent user delegated to work on the issue being drafted.
   """
   delegateId: String
   """
@@ -12503,6 +12551,10 @@ input IssueFilter {
   """
   customerCount: NumberComparator
   """
+  Count of important customers
+  """
+  customerImportantCount: NumberComparator
+  """
   Filters that the issues cycle must satisfy.
   """
   cycle: NullableCycleFilter
@@ -12511,7 +12563,7 @@ input IssueFilter {
   """
   cycleTime: NullableDurationComparator
   """
-  Filters that the issue's delegate must satisfy.
+  Filters that the issue's delegated agent must satisfy.
   """
   delegate: NullableUserFilter
   """
@@ -13639,6 +13691,10 @@ type IssueNotification implements Entity & Node & Notification {
   """
   botActor: ActorBot
   """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
   The comment related to the notification.
   """
   comment: Comment
@@ -14085,7 +14141,7 @@ type IssueSearchResult implements Node {
   """
   cycle: Cycle
   """
-  The app user that is delegated to work on this issue.
+  The agent user that is delegated to work on this issue.
   """
   delegate: User
   """
@@ -14835,6 +14891,7 @@ type IssueSuggestionEdge {
 type IssueSuggestionMetadata {
   classification: String
   evalLogId: String
+  rank: Float
   reasons: [String!]
   score: Float
 }
@@ -14943,7 +15000,7 @@ input IssueUpdateInput {
   """
   cycleId: String
   """
-  The identifier of the app user to delegate the issue to.
+  The identifier of the agent user to delegate the issue to.
   """
   delegateId: String
   """
@@ -17080,6 +17137,10 @@ type Mutation {
     The identifier of the integration to delete.
     """
     id: String!
+    """
+    Whether to skip deleting the installation on the external service side.
+    """
+    skipInstallationDeletion: Boolean
   ): DeletePayload!
   """
   Integrates the organization with Discord.
@@ -17131,7 +17192,7 @@ type Mutation {
     """
     The name of GitHub organization.
     """
-    organizationName: String
+    organizationName: String!
   ): GitHubEnterpriseServerPayload!
   """
   Connect your GitHub account to Linear.
@@ -17154,6 +17215,10 @@ type Mutation {
     The GitHub grant code that's exchanged for OAuth tokens.
     """
     code: String!
+    """
+    Whether the integration should have code access
+    """
+    codeAccess: Boolean = false
     """
     The GitHub data to connect with.
     """
@@ -19386,6 +19451,10 @@ interface Notification implements Entity & Node {
   """
   botActor: ActorBot
   """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -20521,6 +20590,10 @@ input NullableIssueFilter {
   """
   customerCount: NumberComparator
   """
+  Count of important customers
+  """
+  customerImportantCount: NumberComparator
+  """
   Filters that the issues cycle must satisfy.
   """
   cycle: NullableCycleFilter
@@ -20529,7 +20602,7 @@ input NullableIssueFilter {
   """
   cycleTime: NullableDurationComparator
   """
-  Filters that the issue's delegate must satisfy.
+  Filters that the issue's delegated agent must satisfy.
   """
   delegate: NullableUserFilter
   """
@@ -20772,6 +20845,10 @@ input NullableProjectFilter {
   Count of customers
   """
   customerCount: NumberComparator
+  """
+  Count of important customers
+  """
+  customerImportantCount: NumberComparator
   """
   Comparator for filtering projects which are blocked.
   """
@@ -21401,6 +21478,10 @@ type OauthClientApprovalNotification implements Entity & Node & Notification {
   """
   botActor: ActorBot
   """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -22007,6 +22088,10 @@ input OrganizationDomainCreateInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  The identity provider to which to add the domain.
+  """
+  identityProviderId: String
   """
   The domain name to add.
   """
@@ -22917,6 +23002,10 @@ type PostNotification implements Entity & Node & Notification {
   The bot that caused the notification.
   """
   botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
   """
   Related comment ID. Null if the notification is not related to a comment.
   """
@@ -23854,6 +23943,10 @@ input ProjectCollectionFilter {
   """
   customerCount: NumberComparator
   """
+  Count of important customers
+  """
+  customerImportantCount: NumberComparator
+  """
   Filters that needs to be matched by all projects.
   """
   every: ProjectFilter
@@ -24138,6 +24231,10 @@ input ProjectFilter {
   Count of customers
   """
   customerCount: NumberComparator
+  """
+  Count of important customers
+  """
+  customerImportantCount: NumberComparator
   """
   Comparator for filtering projects which are blocked.
   """
@@ -25092,6 +25189,10 @@ type ProjectNotification implements Entity & Node & Notification {
   The bot that caused the notification.
   """
   botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
   """
   The comment related to the notification.
   """
@@ -27343,6 +27444,10 @@ type PullRequestNotification implements Entity & Node & Notification {
   The bot that caused the notification.
   """
   botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
   """
   Related comment ID. Null if the notification is not related to a comment.
   """
@@ -29710,7 +29815,12 @@ type Query {
   """
   Verify that we received the correct response from the GitHub Enterprise Server.
   """
-  verifyGitHubEnterpriseServerInstallation: GitHubEnterpriseServerInstallVerificationPayload!
+  verifyGitHubEnterpriseServerInstallation(
+    """
+    The integration ID.
+    """
+    integrationId: String!
+  ): GitHubEnterpriseServerInstallVerificationPayload!
   """
   The currently authenticated user.
   """
@@ -30554,6 +30664,14 @@ input SalesforceSettingsInput {
   Whether a ticket should be automatically reopened when its linked Linear issue is completed.
   """
   automateTicketReopeningOnCompletion: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear project is cancelled.
+  """
+  automateTicketReopeningOnProjectCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear project is completed.
+  """
+  automateTicketReopeningOnProjectCompletion: Boolean
   """
   [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
   """
@@ -35097,6 +35215,14 @@ input ZendeskSettingsInput {
   Whether a ticket should be automatically reopened when its linked Linear issue is completed.
   """
   automateTicketReopeningOnCompletion: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear project is cancelled.
+  """
+  automateTicketReopeningOnProjectCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear project is completed.
+  """
+  automateTicketReopeningOnProjectCompletion: Boolean
   """
   The ID of the Linear bot user.
   """
