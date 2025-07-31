@@ -38,10 +38,6 @@ An activity within an agent context.
 """
 type AgentActivity implements Node {
   """
-  The agent context this activity belongs to.
-  """
-  agentContext: AgentContext
-  """
   The agent session this activity belongs to.
   """
   agentSession: AgentSession!
@@ -65,6 +61,10 @@ type AgentActivity implements Node {
   The comment this activity is linked to.
   """
   sourceComment: Comment
+  """
+  Metadata about the external source that created this agent activity.
+  """
+  sourceMetadata: JSON
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -125,6 +125,25 @@ input AgentActivityCreateInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+}
+
+input AgentActivityCreatePromptInput {
+  """
+  The agent session this activity belongs to.
+  """
+  agentSessionId: String!
+  """
+  The content payload of the prompt agent activity.
+  """
+  content: JSONObject!
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The comment that contains the content of this activity.
+  """
+  sourceCommentId: String!
 }
 
 type AgentActivityEdge {
@@ -301,243 +320,6 @@ type AgentActivityWebhookPayload {
 }
 
 """
-[DEPRECATED] A context for agent activities and state management.
-"""
-type AgentContext implements Node {
-  """
-  Activities associated with this agent context.
-  """
-  activities(
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): [AgentActivity!]!
-  """
-  The agent user that is associated with this agent context.
-  """
-  appUser: User!
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The comment this agent context is associated with.
-  """
-  comment: Comment
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The user that created this agent context.
-  """
-  creator: User
-  """
-  The time the agent context ended.
-  """
-  endedAt: DateTime
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The issue this agent context is associated with.
-  """
-  issue: Issue
-  """
-  External links associated with this agent context.
-  """
-  links: [EntityExternalLink!]!
-  """
-  Metadata about the external source that created this agent context.
-  """
-  sourceMetadata: JSON
-  """
-  The time the agent context started working.
-  """
-  startedAt: DateTime
-  """
-  The current status of the agent context.
-  """
-  status: AgentSessionStatus!
-  """
-  A summary of the activities in this context.
-  """
-  summary: String
-  """
-  The type of the agent context.
-  """
-  type: AgentSessionType!
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
-type AgentContextConnection {
-  edges: [AgentContextEdge!]!
-  nodes: [AgentContext!]!
-  pageInfo: PageInfo!
-}
-
-input AgentContextCreateInput {
-  """
-  The comment this agent context is associated with.
-  """
-  commentId: String!
-  """
-  The user who created this agent context.
-  """
-  creatorId: String!
-  """
-  The identifier in UUID v4 format. If none is provided, the backend will generate one.
-  """
-  id: String
-  """
-  URL to the external source where this agent context was created (e.g., Slack thread, GitHub comment).
-  """
-  sourceUrl: String!
-  """
-  The type of the agent context.
-  """
-  type: AgentSessionType!
-}
-
-type AgentContextEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: AgentContext!
-}
-
-type AgentContextPayload {
-  """
-  The agent context that was created or updated.
-  """
-  agentContext: AgentContext!
-  """
-  The identifier of the last sync operation.
-  """
-  lastSyncId: Float!
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-input AgentContextUpdateInput {
-  """
-  The current status of the agent context.
-  """
-  status: AgentSessionStatus
-  """
-  The summary of the agent context.
-  """
-  summary: String
-}
-
-"""
-Payload for an agent context webhook.
-"""
-type AgentContextWebhookPayload {
-  """
-  The ID of the agent that the agent context belongs to.
-  """
-  appUserId: String!
-  """
-  The time at which the entity was archived.
-  """
-  archivedAt: String
-  """
-  The comment this agent context is associated with.
-  """
-  comment: CommentChildWebhookPayload
-  """
-  The ID of the comment this agent context is associated with.
-  """
-  commentId: String
-  """
-  The time at which the entity was created.
-  """
-  createdAt: String!
-  """
-  The user that created the agent context.
-  """
-  creator: UserChildWebhookPayload!
-  """
-  The ID of the user that created the agent context.
-  """
-  creatorId: String!
-  """
-  The time the agent context ended.
-  """
-  endedAt: String
-  """
-  The ID of the entity.
-  """
-  id: String!
-  """
-  The issue this agent context is associated with.
-  """
-  issue: IssueWithDescriptionChildWebhookPayload
-  """
-  The ID of the issue this agent context is associated with.
-  """
-  issueId: String
-  """
-  The ID of the organization that the agent context belongs to.
-  """
-  organizationId: String!
-  """
-  Metadata about the external source that created this agent context.
-  """
-  sourceMetadata: JSONObject
-  """
-  The time the agent context started working.
-  """
-  startedAt: String
-  """
-  The current status of the agent context.
-  """
-  status: String!
-  """
-  A summary of the activities in this context.
-  """
-  summary: String
-  """
-  The type of the agent context.
-  """
-  type: String!
-  """
-  The time at which the entity was updated.
-  """
-  updatedAt: String!
-}
-
-"""
 A session for agent activities and state management.
 """
 type AgentSession implements Node {
@@ -683,6 +465,10 @@ type AgentSessionEventWebhookPayload {
   ID of the organization for which the webhook belongs to.
   """
   organizationId: String!
+  """
+  The previous comments in the thread before this agent was mentioned and the session was initiated, if any.
+  """
+  previousComments: [CommentChildWebhookPayload!]
   """
   The type of resource.
   """
@@ -2748,6 +2534,43 @@ type CustomView implements Node {
   """
   id: ID!
   """
+  The filter applied to initiatives in the custom view.
+  """
+  initiativeFilterData: JSONObject
+  """
+  Initiatives associated with the custom view.
+  """
+  initiatives(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned initiatives.
+    """
+    filter: InitiativeFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): InitiativeConnection!
+  """
   Issues associated with the custom view.
   """
   issues(
@@ -2952,6 +2775,10 @@ input CustomViewCreateInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  [ALPHA] The initiative filter applied to issues in the custom view.
+  """
+  initiativeFilterData: InitiativeFilter
   """
   The id of the initiative associated with the custom view.
   """
@@ -3234,6 +3061,10 @@ input CustomViewUpdateInput {
   The icon of the custom view.
   """
   icon: String
+  """
+  [ALPHA] The initiative filter applied to issues in the custom view.
+  """
+  initiativeFilterData: InitiativeFilter
   """
   [Internal] The id of the initiative associated with the custom view.
   """
@@ -3876,6 +3707,10 @@ type CustomerNeedNotification implements Entity & Node & Notification {
   """
   botActor: ActorBot
   """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -4154,6 +3989,10 @@ type CustomerNotification implements Entity & Node & Notification {
   The bot that caused the notification.
   """
   botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
   """
   The time at which the entity was created.
   """
@@ -6225,6 +6064,10 @@ type DocumentNotification implements Entity & Node & Notification {
   """
   botActor: ActorBot
   """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
   Related comment ID. Null if the notification is not related to a comment.
   """
   commentId: String
@@ -6683,6 +6526,10 @@ type Draft implements Node {
   The project update for which this is a draft comment.
   """
   projectUpdate: ProjectUpdate
+  """
+  The team for which this is a draft post.
+  """
+  team: Team
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -7650,10 +7497,6 @@ type Favorite implements Node {
   """
   pullRequest: PullRequest
   """
-  The favorited roadmap.
-  """
-  roadmap: Roadmap
-  """
   The order of the item in the favorites list.
   """
   sortOrder: Float!
@@ -7763,10 +7606,6 @@ input FavoriteCreateInput {
   The identifier of the pull request to favorite.
   """
   pullRequestId: String
-  """
-  The identifier of the roadmap to favorite.
-  """
-  roadmapId: String
   """
   The position of the item in the favorites list.
   """
@@ -7982,6 +7821,14 @@ input FrontSettingsInput {
   Whether a ticket should be automatically reopened when its linked Linear issue is completed.
   """
   automateTicketReopeningOnCompletion: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear project is cancelled.
+  """
+  automateTicketReopeningOnProjectCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear project is completed.
+  """
+  automateTicketReopeningOnProjectCompletion: Boolean
   """
   [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
   """
@@ -8353,6 +8200,10 @@ input GitHubRepoMappingInput {
 
 input GitHubSettingsInput {
   """
+  Whether the integration has code access
+  """
+  codeAccess: Boolean
+  """
   The avatar URL for the GitHub organization.
   """
   orgAvatarUrl: String
@@ -8531,10 +8382,6 @@ type IdentityProvider implements Node {
   """
   adminsGroupPush: JSONObject
   """
-  Allowed authentication providers, empty array means all are allowed.
-  """
-  allowedAuthServices: [String!]!
-  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -8542,6 +8389,10 @@ type IdentityProvider implements Node {
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  """
+  Whether the identity provider is the default identity provider migrated from organization level settings.
+  """
+  defaultMigrated: Boolean!
   """
   [INTERNAL] SCIM guests group push settings.
   """
@@ -9294,6 +9145,10 @@ type InitiativeNotification implements Entity & Node & Notification {
   The bot that caused the notification.
   """
   botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
   """
   The comment related to the notification.
   """
@@ -10493,6 +10348,7 @@ enum IntegrationService {
   figmaPlugin
   front
   github
+  githubCodeAccessPersonal
   githubCommit
   githubEnterpriseServer
   githubImport
@@ -10530,6 +10386,7 @@ input IntegrationSettingsInput {
   gitHubImport: GitHubImportSettingsInput
   gitHubPersonal: GitHubPersonalSettingsInput
   gitLab: GitLabSettingsInput
+  githubCodeAccessPersonal: GitHubPersonalSettingsInput
   googleSheets: GoogleSheetsSettingsInput
   intercom: IntercomSettingsInput
   jira: JiraSettingsInput
@@ -10883,6 +10740,14 @@ input IntercomSettingsInput {
   """
   automateTicketReopeningOnCompletion: Boolean
   """
+  Whether a ticket should be automatically reopened when its linked Linear project is cancelled.
+  """
+  automateTicketReopeningOnProjectCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear project is completed.
+  """
+  automateTicketReopeningOnProjectCompletion: Boolean
+  """
   [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
   """
   disableCustomerRequestsAutoCreation: Boolean
@@ -11068,7 +10933,7 @@ type Issue implements Node {
   """
   cycle: Cycle
   """
-  The app user that is delegated to work on this issue.
+  The agent user that is delegated to work on this issue.
   """
   delegate: User
   """
@@ -11762,6 +11627,10 @@ input IssueCollectionFilter {
   """
   customerCount: NumberComparator
   """
+  Count of important customers
+  """
+  customerImportantCount: NumberComparator
+  """
   Filters that the issues cycle must satisfy.
   """
   cycle: NullableCycleFilter
@@ -11770,7 +11639,7 @@ input IssueCollectionFilter {
   """
   cycleTime: NullableDurationComparator
   """
-  Filters that the issue's delegate must satisfy.
+  Filters that the issue's delegated agent must satisfy.
   """
   delegate: NullableUserFilter
   """
@@ -12113,7 +11982,7 @@ input IssueCreateInput {
   """
   cycleId: String
   """
-  The identifier of the app user to delegate the issue to.
+  The identifier of the agent user to delegate the issue to.
   """
   delegateId: String
   """
@@ -12259,7 +12128,7 @@ type IssueDraft implements Node {
   """
   cycleId: String
   """
-  The app user delegated to work on the issue being drafted.
+  The agent user delegated to work on the issue being drafted.
   """
   delegateId: String
   """
@@ -12503,6 +12372,10 @@ input IssueFilter {
   """
   customerCount: NumberComparator
   """
+  Count of important customers
+  """
+  customerImportantCount: NumberComparator
+  """
   Filters that the issues cycle must satisfy.
   """
   cycle: NullableCycleFilter
@@ -12511,7 +12384,7 @@ input IssueFilter {
   """
   cycleTime: NullableDurationComparator
   """
-  Filters that the issue's delegate must satisfy.
+  Filters that the issue's delegated agent must satisfy.
   """
   delegate: NullableUserFilter
   """
@@ -13392,6 +13265,24 @@ input IssueLabelFilter {
   updatedAt: DateComparator
 }
 
+input IssueLabelMoveToTeamLabelsInput {
+  """
+  The identifier of the workspace label to convert.
+  """
+  id: String!
+}
+
+type IssueLabelMoveToTeamLabelsPayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 type IssueLabelPayload {
   """
   The label that was created or updated.
@@ -13638,6 +13529,10 @@ type IssueNotification implements Entity & Node & Notification {
   The bot that caused the notification.
   """
   botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
   """
   The comment related to the notification.
   """
@@ -14085,7 +13980,7 @@ type IssueSearchResult implements Node {
   """
   cycle: Cycle
   """
-  The app user that is delegated to work on this issue.
+  The agent user that is delegated to work on this issue.
   """
   delegate: User
   """
@@ -14835,6 +14730,7 @@ type IssueSuggestionEdge {
 type IssueSuggestionMetadata {
   classification: String
   evalLogId: String
+  rank: Float
   reasons: [String!]
   score: Float
 }
@@ -14943,7 +14839,7 @@ input IssueUpdateInput {
   """
   cycleId: String
   """
-  The identifier of the app user to delegate the issue to.
+  The identifier of the agent user to delegate the issue to.
   """
   delegateId: String
   """
@@ -15113,11 +15009,11 @@ type IssueWebhookPayload {
   """
   cycleId: String
   """
-  The app user that the issue is delegated to.
+  The agent user that the issue is delegated to.
   """
   delegate: UserChildWebhookPayload
   """
-  The ID of the app user that the issue is delegated to.
+  The ID of the agent user that the issue is delegated to.
   """
   delegateId: String
   """
@@ -15586,6 +15482,17 @@ input LabelSort {
   order: PaginationSortOrder
 }
 
+input LabelsMergeInput {
+  """
+  The identifiers of the labels to merge.
+  """
+  fromLabelIds: [String!]!
+  """
+  The identifier of the target label.
+  """
+  toLabelId: String!
+}
+
 input LaunchDarklySettingsInput {
   """
   The environment of the LaunchDarkly integration.
@@ -15740,27 +15647,14 @@ type Mutation {
     input: AgentActivityCreateInput!
   ): AgentActivityPayload!
   """
-  Creates an agent context.
+  Creates a prompt agent activity from Linear user input.
   """
-  agentContextCreate(
+  agentActivityCreatePrompt(
     """
-    The agent context object to create.
+    The prompt agent activity object to create.
     """
-    input: AgentContextCreateInput!
-  ): AgentContextPayload!
-  """
-  Updates an agent context.
-  """
-  agentContextUpdate(
-    """
-    The identifier of the agent context to update.
-    """
-    id: String!
-    """
-    The agent context object to update.
-    """
-    input: AgentContextUpdateInput!
-  ): AgentContextPayload!
+    input: AgentActivityCreatePromptInput!
+  ): AgentActivityPayload!
   """
   Updates the externalUrl of an agent session, which is an agent-hosted page associated with this session.
   """
@@ -17080,6 +16974,10 @@ type Mutation {
     The identifier of the integration to delete.
     """
     id: String!
+    """
+    Whether to skip deleting the installation on the external service side.
+    """
+    skipInstallationDeletion: Boolean
   ): DeletePayload!
   """
   Integrates the organization with Discord.
@@ -17131,7 +17029,7 @@ type Mutation {
     """
     The name of GitHub organization.
     """
-    organizationName: String
+    organizationName: String!
   ): GitHubEnterpriseServerPayload!
   """
   Connect your GitHub account to Linear.
@@ -17141,6 +17039,10 @@ type Mutation {
     The GitHub OAuth code.
     """
     code: String!
+    """
+    Whether to connect with code access.
+    """
+    codeAccess: Boolean
   ): IntegrationPayload!
   """
   Generates a webhook for the GitHub commit integration.
@@ -17154,6 +17056,10 @@ type Mutation {
     The GitHub grant code that's exchanged for OAuth tokens.
     """
     code: String!
+    """
+    Whether the integration should have code access
+    """
+    codeAccess: Boolean = false
     """
     The GitHub data to connect with.
     """
@@ -17962,6 +17868,15 @@ type Mutation {
     id: String!
   ): DeletePayload!
   """
+  Converts a workspace label to team labels for teams that have issues using the workspace label.
+  """
+  issueLabelMoveToTeamLabels(
+    """
+    The workspace label to move to teams.
+    """
+    input: IssueLabelMoveToTeamLabelsInput!
+  ): IssueLabelMoveToTeamLabelsPayload!
+  """
   Updates an label.
   """
   issueLabelUpdate(
@@ -17977,6 +17892,15 @@ type Mutation {
     Whether to replace all team-specific labels with the same name with this updated workspace label (default: false).
     """
     replaceTeamLabels: Boolean
+  ): IssueLabelPayload!
+  """
+  Merges multiple issue labels into a single label.
+  """
+  issueLabelsMerge(
+    """
+    The merge input.
+    """
+    input: LabelsMergeInput!
   ): IssueLabelPayload!
   """
   Creates a new issue relation.
@@ -18506,6 +18430,15 @@ type Mutation {
     A partial label object to update.
     """
     input: ProjectLabelUpdateInput!
+  ): ProjectLabelPayload!
+  """
+  Merges multiple project labels into a single label.
+  """
+  projectLabelsMerge(
+    """
+    The merge input.
+    """
+    input: LabelsMergeInput!
   ): ProjectLabelPayload!
   """
   Creates a new project milestone.
@@ -19385,6 +19318,10 @@ interface Notification implements Entity & Node {
   The bot that caused the notification.
   """
   botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
   """
   The time at which the entity was created.
   """
@@ -20521,6 +20458,10 @@ input NullableIssueFilter {
   """
   customerCount: NumberComparator
   """
+  Count of important customers
+  """
+  customerImportantCount: NumberComparator
+  """
   Filters that the issues cycle must satisfy.
   """
   cycle: NullableCycleFilter
@@ -20529,7 +20470,7 @@ input NullableIssueFilter {
   """
   cycleTime: NullableDurationComparator
   """
-  Filters that the issue's delegate must satisfy.
+  Filters that the issue's delegated agent must satisfy.
   """
   delegate: NullableUserFilter
   """
@@ -20772,6 +20713,10 @@ input NullableProjectFilter {
   Count of customers
   """
   customerCount: NumberComparator
+  """
+  Count of important customers
+  """
+  customerImportantCount: NumberComparator
   """
   Comparator for filtering projects which are blocked.
   """
@@ -21401,6 +21346,10 @@ type OauthClientApprovalNotification implements Entity & Node & Notification {
   """
   botActor: ActorBot
   """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -22007,6 +21956,10 @@ input OrganizationDomainCreateInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  The identity provider to which to add the domain.
+  """
+  identityProviderId: String
   """
   The domain name to add.
   """
@@ -22917,6 +22870,10 @@ type PostNotification implements Entity & Node & Notification {
   The bot that caused the notification.
   """
   botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
   """
   Related comment ID. Null if the notification is not related to a comment.
   """
@@ -23854,6 +23811,10 @@ input ProjectCollectionFilter {
   """
   customerCount: NumberComparator
   """
+  Count of important customers
+  """
+  customerImportantCount: NumberComparator
+  """
   Filters that needs to be matched by all projects.
   """
   every: ProjectFilter
@@ -24138,6 +24099,10 @@ input ProjectFilter {
   Count of customers
   """
   customerCount: NumberComparator
+  """
+  Count of important customers
+  """
+  customerImportantCount: NumberComparator
   """
   Comparator for filtering projects which are blocked.
   """
@@ -25092,6 +25057,10 @@ type ProjectNotification implements Entity & Node & Notification {
   The bot that caused the notification.
   """
   botActor: ActorBot
+  """
+  The category of the notification.
+  """
+  category: NotificationCategory!
   """
   The comment related to the notification.
   """
@@ -27344,6 +27313,10 @@ type PullRequestNotification implements Entity & Node & Notification {
   """
   botActor: ActorBot
   """
+  The category of the notification.
+  """
+  category: NotificationCategory!
+  """
   Related comment ID. Null if the notification is not related to a comment.
   """
   commentId: String
@@ -27607,44 +27580,6 @@ type Query {
     """
     id: String!
   ): AgentActivity!
-  """
-  A specific agent context.
-  """
-  agentContext(
-    """
-    The identifier of the agent context to retrieve.
-    """
-    id: String!
-  ): AgentContext!
-  """
-  All agent contexts.
-  """
-  agentContexts(
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): AgentContextConnection!
   """
   A specific agent session.
   """
@@ -29260,9 +29195,7 @@ type Query {
   One specific roadmapToProject.
   """
   roadmapToProject(id: String!): RoadmapToProject!
-  """
-  Custom views for the user.
-  """
+    @deprecated(reason: "RoadmapToProject is deprecated, use InitiativeToProject instead.")
   roadmapToProjects(
     """
     A cursor to be used with first for forward pagination
@@ -29288,7 +29221,7 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
-  ): RoadmapToProjectConnection!
+  ): RoadmapToProjectConnection! @deprecated(reason: "RoadmapToProject is deprecated, use InitiativeToProject instead.")
   """
   All roadmaps in the workspace.
   """
@@ -29710,7 +29643,12 @@ type Query {
   """
   Verify that we received the correct response from the GitHub Enterprise Server.
   """
-  verifyGitHubEnterpriseServerInstallation: GitHubEnterpriseServerInstallVerificationPayload!
+  verifyGitHubEnterpriseServerInstallation(
+    """
+    The integration ID.
+    """
+    integrationId: String!
+  ): GitHubEnterpriseServerInstallVerificationPayload!
   """
   The currently authenticated user.
   """
@@ -30152,7 +30090,7 @@ input RevenueSort {
 }
 
 """
-A roadmap for projects.
+[Deprecated] A roadmap for projects.
 """
 type Roadmap implements Node {
   """
@@ -30406,7 +30344,7 @@ type RoadmapPayload {
 }
 
 """
-Join table between projects and roadmaps.
+[Deprecated] Join table between projects and roadmaps.
 """
 type RoadmapToProject implements Node {
   """
@@ -30554,6 +30492,14 @@ input SalesforceSettingsInput {
   Whether a ticket should be automatically reopened when its linked Linear issue is completed.
   """
   automateTicketReopeningOnCompletion: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear project is cancelled.
+  """
+  automateTicketReopeningOnProjectCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear project is completed.
+  """
+  automateTicketReopeningOnProjectCompletion: Boolean
   """
   [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
   """
@@ -35097,6 +35043,14 @@ input ZendeskSettingsInput {
   Whether a ticket should be automatically reopened when its linked Linear issue is completed.
   """
   automateTicketReopeningOnCompletion: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear project is cancelled.
+  """
+  automateTicketReopeningOnProjectCancellation: Boolean
+  """
+  Whether a ticket should be automatically reopened when its linked Linear project is completed.
+  """
+  automateTicketReopeningOnProjectCompletion: Boolean
   """
   The ID of the Linear bot user.
   """
