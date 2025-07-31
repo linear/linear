@@ -214,7 +214,6 @@ export class ActorBot extends Request {
  * @param data - L.AgentActivityFragment response data
  */
 export class AgentActivity extends Request {
-  private _agentContext?: L.AgentActivityFragment["agentContext"];
   private _agentSession: L.AgentActivityFragment["agentSession"];
   private _sourceComment?: L.AgentActivityFragment["sourceComment"];
 
@@ -223,9 +222,9 @@ export class AgentActivity extends Request {
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
+    this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.content = data.content;
-    this._agentContext = data.agentContext ?? undefined;
     this._agentSession = data.agentSession;
     this._sourceComment = data.sourceComment ?? undefined;
   }
@@ -236,6 +235,8 @@ export class AgentActivity extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Metadata about the external source that created this agent activity. */
+  public sourceMetadata?: Record<string, unknown>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -243,14 +244,6 @@ export class AgentActivity extends Request {
   public updatedAt: Date;
   /** The content of the activity */
   public content: L.AgentActivityContent;
-  /** The agent context this activity belongs to. */
-  public get agentContext(): LinearFetch<AgentContext> | undefined {
-    return this._agentContext?.id ? new AgentContextQuery(this._request).fetch(this._agentContext?.id) : undefined;
-  }
-  /** The ID of agent context this activity belongs to. */
-  public get agentContextId(): string | undefined {
-    return this._agentContext?.id;
-  }
   /** The agent session this activity belongs to. */
   public get agentSession(): LinearFetch<AgentSession> | undefined {
     return new AgentSessionQuery(this._request).fetch(this._agentSession.id);
@@ -466,221 +459,6 @@ export class AgentActivityWebhookPayload {
   public updatedAt: string;
 }
 /**
- * [DEPRECATED] A context for agent activities and state management.
- *
- * @param request - function to call the graphql client
- * @param data - L.AgentContextFragment response data
- */
-export class AgentContext extends Request {
-  private _appUser: L.AgentContextFragment["appUser"];
-  private _comment?: L.AgentContextFragment["comment"];
-  private _creator?: L.AgentContextFragment["creator"];
-  private _issue?: L.AgentContextFragment["issue"];
-
-  public constructor(request: LinearRequest, data: L.AgentContextFragment) {
-    super(request);
-    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.endedAt = parseDate(data.endedAt) ?? undefined;
-    this.id = data.id;
-    this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
-    this.startedAt = parseDate(data.startedAt) ?? undefined;
-    this.summary = data.summary ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-    this.activities = data.activities.map(node => new AgentActivity(request, node));
-    this.links = data.links.map(node => new EntityExternalLink(request, node));
-    this.status = data.status;
-    this.type = data.type;
-    this._appUser = data.appUser;
-    this._comment = data.comment ?? undefined;
-    this._creator = data.creator ?? undefined;
-    this._issue = data.issue ?? undefined;
-  }
-
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
-  /** The time at which the entity was created. */
-  public createdAt: Date;
-  /** The time the agent context ended. */
-  public endedAt?: Date;
-  /** The unique identifier of the entity. */
-  public id: string;
-  /** Metadata about the external source that created this agent context. */
-  public sourceMetadata?: Record<string, unknown>;
-  /** The time the agent context started working. */
-  public startedAt?: Date;
-  /** A summary of the activities in this context. */
-  public summary?: string;
-  /**
-   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  public updatedAt: Date;
-  /** Activities associated with this agent context. */
-  public activities: AgentActivity[];
-  /** External links associated with this agent context. */
-  public links: EntityExternalLink[];
-  /** The current status of the agent context. */
-  public status: L.AgentSessionStatus;
-  /** The type of the agent context. */
-  public type: L.AgentSessionType;
-  /** The agent user that is associated with this agent context. */
-  public get appUser(): LinearFetch<User> | undefined {
-    return new UserQuery(this._request).fetch(this._appUser.id);
-  }
-  /** The ID of agent user that is associated with this agent context. */
-  public get appUserId(): string | undefined {
-    return this._appUser?.id;
-  }
-  /** The comment this agent context is associated with. */
-  public get comment(): LinearFetch<Comment> | undefined {
-    return this._comment?.id ? new CommentQuery(this._request).fetch({ id: this._comment?.id }) : undefined;
-  }
-  /** The ID of comment this agent context is associated with. */
-  public get commentId(): string | undefined {
-    return this._comment?.id;
-  }
-  /** The user that created this agent context. */
-  public get creator(): LinearFetch<User> | undefined {
-    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
-  }
-  /** The ID of user that created this agent context. */
-  public get creatorId(): string | undefined {
-    return this._creator?.id;
-  }
-  /** The issue this agent context is associated with. */
-  public get issue(): LinearFetch<Issue> | undefined {
-    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
-  }
-  /** The ID of issue this agent context is associated with. */
-  public get issueId(): string | undefined {
-    return this._issue?.id;
-  }
-
-  /** Creates an agent context. */
-  public create(input: L.AgentContextCreateInput) {
-    return new CreateAgentContextMutation(this._request).fetch(input);
-  }
-  /** Updates an agent context. */
-  public update(input: L.AgentContextUpdateInput) {
-    return new UpdateAgentContextMutation(this._request).fetch(this.id, input);
-  }
-}
-/**
- * AgentContextConnection model
- *
- * @param request - function to call the graphql client
- * @param fetch - function to trigger a refetch of this AgentContextConnection model
- * @param data - AgentContextConnection response data
- */
-export class AgentContextConnection extends Connection<AgentContext> {
-  public constructor(
-    request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<AgentContext> | undefined>,
-    data: L.AgentContextConnectionFragment
-  ) {
-    super(
-      request,
-      fetch,
-      data.nodes.map(node => new AgentContext(request, node)),
-      new PageInfo(request, data.pageInfo)
-    );
-  }
-}
-/**
- * AgentContextPayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.AgentContextPayloadFragment response data
- */
-export class AgentContextPayload extends Request {
-  private _agentContext: L.AgentContextPayloadFragment["agentContext"];
-
-  public constructor(request: LinearRequest, data: L.AgentContextPayloadFragment) {
-    super(request);
-    this.lastSyncId = data.lastSyncId;
-    this.success = data.success;
-    this._agentContext = data.agentContext;
-  }
-
-  /** The identifier of the last sync operation. */
-  public lastSyncId: number;
-  /** Whether the operation was successful. */
-  public success: boolean;
-  /** The agent context that was created or updated. */
-  public get agentContext(): LinearFetch<AgentContext> | undefined {
-    return new AgentContextQuery(this._request).fetch(this._agentContext.id);
-  }
-  /** The ID of agent context that was created or updated. */
-  public get agentContextId(): string | undefined {
-    return this._agentContext?.id;
-  }
-}
-/**
- * Payload for an agent context webhook.
- *
- * @param data - L.AgentContextWebhookPayloadFragment response data
- */
-export class AgentContextWebhookPayload {
-  public constructor(data: L.AgentContextWebhookPayloadFragment) {
-    this.appUserId = data.appUserId;
-    this.archivedAt = data.archivedAt ?? undefined;
-    this.commentId = data.commentId ?? undefined;
-    this.createdAt = data.createdAt;
-    this.creatorId = data.creatorId;
-    this.endedAt = data.endedAt ?? undefined;
-    this.id = data.id;
-    this.issueId = data.issueId ?? undefined;
-    this.organizationId = data.organizationId;
-    this.sourceMetadata = data.sourceMetadata ?? undefined;
-    this.startedAt = data.startedAt ?? undefined;
-    this.status = data.status;
-    this.summary = data.summary ?? undefined;
-    this.type = data.type;
-    this.updatedAt = data.updatedAt;
-    this.comment = data.comment ? new CommentChildWebhookPayload(data.comment) : undefined;
-    this.creator = new UserChildWebhookPayload(data.creator);
-    this.issue = data.issue ? new IssueWithDescriptionChildWebhookPayload(data.issue) : undefined;
-  }
-
-  /** The ID of the agent that the agent context belongs to. */
-  public appUserId: string;
-  /** The time at which the entity was archived. */
-  public archivedAt?: string;
-  /** The ID of the comment this agent context is associated with. */
-  public commentId?: string;
-  /** The time at which the entity was created. */
-  public createdAt: string;
-  /** The ID of the user that created the agent context. */
-  public creatorId: string;
-  /** The time the agent context ended. */
-  public endedAt?: string;
-  /** The ID of the entity. */
-  public id: string;
-  /** The ID of the issue this agent context is associated with. */
-  public issueId?: string;
-  /** The ID of the organization that the agent context belongs to. */
-  public organizationId: string;
-  /** Metadata about the external source that created this agent context. */
-  public sourceMetadata?: L.Scalars["JSONObject"];
-  /** The time the agent context started working. */
-  public startedAt?: string;
-  /** The current status of the agent context. */
-  public status: string;
-  /** A summary of the activities in this context. */
-  public summary?: string;
-  /** The type of the agent context. */
-  public type: string;
-  /** The time at which the entity was updated. */
-  public updatedAt: string;
-  /** The comment this agent context is associated with. */
-  public comment?: CommentChildWebhookPayload;
-  /** The user that created the agent context. */
-  public creator: UserChildWebhookPayload;
-  /** The issue this agent context is associated with. */
-  public issue?: IssueWithDescriptionChildWebhookPayload;
-}
-/**
  * A session for agent activities and state management.
  *
  * @param request - function to call the graphql client
@@ -809,6 +587,9 @@ export class AgentSessionEventWebhookPayload {
     this.type = data.type;
     this.agentActivity = data.agentActivity ? new AgentActivityWebhookPayload(data.agentActivity) : undefined;
     this.agentSession = new AgentSessionWebhookPayload(data.agentSession);
+    this.previousComments = data.previousComments
+      ? data.previousComments.map(node => new CommentChildWebhookPayload(node))
+      : undefined;
   }
 
   /** The type of action that triggered the webhook. */
@@ -823,6 +604,8 @@ export class AgentSessionEventWebhookPayload {
   public organizationId: string;
   /** The type of resource. */
   public type: string;
+  /** The previous comments in the thread before this agent was mentioned and the session was initiated, if any. */
+  public previousComments?: CommentChildWebhookPayload[];
   /** The agent activity that was created. */
   public agentActivity?: AgentActivityWebhookPayload;
   /** The agent session that the event belongs to. */
@@ -2209,6 +1992,7 @@ export class CustomView extends Request {
     this.filters = data.filters;
     this.icon = data.icon ?? undefined;
     this.id = data.id;
+    this.initiativeFilterData = data.initiativeFilterData ?? undefined;
     this.modelName = data.modelName;
     this.name = data.name;
     this.projectFilterData = data.projectFilterData ?? undefined;
@@ -2248,6 +2032,8 @@ export class CustomView extends Request {
   public icon?: string;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The filter applied to initiatives in the custom view. */
+  public initiativeFilterData?: L.Scalars["JSONObject"];
   /** The model name of the custom view. */
   public modelName: string;
   /** The name of the custom view. */
@@ -2304,6 +2090,10 @@ export class CustomView extends Request {
   /** The ID of user who last updated the custom view. */
   public get updatedById(): string | undefined {
     return this._updatedBy?.id;
+  }
+  /** Initiatives associated with the custom view. */
+  public initiatives(variables?: Omit<L.CustomView_InitiativesQueryVariables, "id">) {
+    return new CustomView_InitiativesQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Issues associated with the custom view. */
   public issues(variables?: Omit<L.CustomView_IssuesQueryVariables, "id">) {
@@ -2926,6 +2716,7 @@ export class CustomerNeedNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._customerNeed = data.customerNeed;
     this._externalUserActor = data.externalUserActor ?? undefined;
@@ -2962,6 +2753,8 @@ export class CustomerNeedNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -3159,6 +2952,7 @@ export class CustomerNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._customer = data.customer;
     this._externalUserActor = data.externalUserActor ?? undefined;
@@ -3193,6 +2987,8 @@ export class CustomerNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -4542,6 +4338,7 @@ export class DocumentNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
     this._user = data.user;
@@ -4581,6 +4378,8 @@ export class DocumentNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -4856,6 +4655,7 @@ export class Draft extends Request {
   private _parentComment?: L.DraftFragment["parentComment"];
   private _project?: L.DraftFragment["project"];
   private _projectUpdate?: L.DraftFragment["projectUpdate"];
+  private _team?: L.DraftFragment["team"];
   private _user: L.DraftFragment["user"];
 
   public constructor(request: LinearRequest, data: L.DraftFragment) {
@@ -4874,6 +4674,7 @@ export class Draft extends Request {
     this._parentComment = data.parentComment ?? undefined;
     this._project = data.project ?? undefined;
     this._projectUpdate = data.projectUpdate ?? undefined;
+    this._team = data.team ?? undefined;
     this._user = data.user;
   }
 
@@ -4953,6 +4754,14 @@ export class Draft extends Request {
   /** The ID of project update for which this is a draft comment. */
   public get projectUpdateId(): string | undefined {
     return this._projectUpdate?.id;
+  }
+  /** The team for which this is a draft post. */
+  public get team(): LinearFetch<Team> | undefined {
+    return this._team?.id ? new TeamQuery(this._request).fetch(this._team?.id) : undefined;
+  }
+  /** The ID of team for which this is a draft post. */
+  public get teamId(): string | undefined {
+    return this._team?.id;
   }
   /** The user who created the draft. */
   public get user(): LinearFetch<User> | undefined {
@@ -5717,7 +5526,6 @@ export class Favorite extends Request {
   private _project?: L.FavoriteFragment["project"];
   private _projectLabel?: L.FavoriteFragment["projectLabel"];
   private _projectTeam?: L.FavoriteFragment["projectTeam"];
-  private _roadmap?: L.FavoriteFragment["roadmap"];
   private _user?: L.FavoriteFragment["user"];
 
   public constructor(request: LinearRequest, data: L.FavoriteFragment) {
@@ -5746,7 +5554,6 @@ export class Favorite extends Request {
     this._project = data.project ?? undefined;
     this._projectLabel = data.projectLabel ?? undefined;
     this._projectTeam = data.projectTeam ?? undefined;
-    this._roadmap = data.roadmap ?? undefined;
     this._user = data.user ?? undefined;
   }
 
@@ -5878,14 +5685,6 @@ export class Favorite extends Request {
   /** The ID of [deprecated] the favorited team of the project. */
   public get projectTeamId(): string | undefined {
     return this._projectTeam?.id;
-  }
-  /** The favorited roadmap. */
-  public get roadmap(): LinearFetch<Roadmap> | undefined {
-    return this._roadmap?.id ? new RoadmapQuery(this._request).fetch(this._roadmap?.id) : undefined;
-  }
-  /** The ID of favorited roadmap. */
-  public get roadmapId(): string | undefined {
-    return this._roadmap?.id;
   }
   /** The favorited user. */
   public get user(): LinearFetch<User> | undefined {
@@ -6325,9 +6124,9 @@ export class GitLabIntegrationCreatePayload extends Request {
 export class IdentityProvider extends Request {
   public constructor(request: LinearRequest, data: L.IdentityProviderFragment) {
     super(request);
-    this.allowedAuthServices = data.allowedAuthServices;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.defaultMigrated = data.defaultMigrated;
     this.id = data.id;
     this.issuerEntityId = data.issuerEntityId ?? undefined;
     this.priority = data.priority ?? undefined;
@@ -6340,12 +6139,12 @@ export class IdentityProvider extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
   }
 
-  /** Allowed authentication providers, empty array means all are allowed. */
-  public allowedAuthServices: string[];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** Whether the identity provider is the default identity provider migrated from organization level settings. */
+  public defaultMigrated: boolean;
   /** The unique identifier of the entity. */
   public id: string;
   /** The issuer's custom entity ID. */
@@ -6747,6 +6546,7 @@ export class InitiativeNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._comment = data.comment ?? undefined;
     this._document = data.document ?? undefined;
@@ -6793,6 +6593,8 @@ export class InitiativeNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -7686,8 +7488,8 @@ export class Integration extends Request {
     return new ArchiveIntegrationMutation(this._request).fetch(this.id);
   }
   /** Deletes an integration. */
-  public delete() {
-    return new DeleteIntegrationMutation(this._request).fetch(this.id);
+  public delete(variables?: Omit<L.DeleteIntegrationMutationVariables, "id">) {
+    return new DeleteIntegrationMutation(this._request).fetch(this.id, variables);
   }
 }
 /**
@@ -8232,11 +8034,11 @@ export class Issue extends Request {
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The app user that is delegated to work on this issue. */
+  /** The agent user that is delegated to work on this issue. */
   public get delegate(): LinearFetch<User> | undefined {
     return this._delegate?.id ? new UserQuery(this._request).fetch(this._delegate?.id) : undefined;
   }
-  /** The ID of app user that is delegated to work on this issue. */
+  /** The ID of agent user that is delegated to work on this issue. */
   public get delegateId(): string | undefined {
     return this._delegate?.id;
   }
@@ -9329,6 +9131,24 @@ export class IssueLabelConnection extends Connection<IssueLabel> {
   }
 }
 /**
+ * IssueLabelMoveToTeamLabelsPayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueLabelMoveToTeamLabelsPayloadFragment response data
+ */
+export class IssueLabelMoveToTeamLabelsPayload extends Request {
+  public constructor(request: LinearRequest, data: L.IssueLabelMoveToTeamLabelsPayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
  * IssueLabelPayload model
  *
  * @param request - function to call the graphql client
@@ -9535,6 +9355,7 @@ export class IssueNotification extends Request {
     this.subscriptions = data.subscriptions
       ? data.subscriptions.map(node => new NotificationSubscription(request, node))
       : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._comment = data.comment ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
@@ -9580,6 +9401,8 @@ export class IssueNotification extends Request {
   public subscriptions?: NotificationSubscription[];
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -10029,11 +9852,11 @@ export class IssueSearchResult extends Request {
   public get cycleId(): string | undefined {
     return this._cycle?.id;
   }
-  /** The app user that is delegated to work on this issue. */
+  /** The agent user that is delegated to work on this issue. */
   public get delegate(): LinearFetch<User> | undefined {
     return this._delegate?.id ? new UserQuery(this._request).fetch(this._delegate?.id) : undefined;
   }
-  /** The ID of app user that is delegated to work on this issue. */
+  /** The ID of agent user that is delegated to work on this issue. */
   public get delegateId(): string | undefined {
     return this._delegate?.id;
   }
@@ -10319,12 +10142,14 @@ export class IssueSuggestionMetadata extends Request {
     super(request);
     this.classification = data.classification ?? undefined;
     this.evalLogId = data.evalLogId ?? undefined;
+    this.rank = data.rank ?? undefined;
     this.reasons = data.reasons ?? undefined;
     this.score = data.score ?? undefined;
   }
 
   public classification?: string;
   public evalLogId?: string;
+  public rank?: number;
   public reasons?: string[];
   public score?: number;
 }
@@ -10492,7 +10317,7 @@ export class IssueWebhookPayload {
   public creatorId?: string;
   /** The ID of the cycle that the issue belongs to. */
   public cycleId?: string;
-  /** The ID of the app user that the issue is delegated to. */
+  /** The ID of the agent user that the issue is delegated to. */
   public delegateId?: string;
   /** The description of the issue. */
   public description?: string;
@@ -10582,7 +10407,7 @@ export class IssueWebhookPayload {
   public creator?: UserChildWebhookPayload;
   /** The cycle that the issue belongs to. */
   public cycle?: CycleChildWebhookPayload;
-  /** The app user that the issue is delegated to. */
+  /** The agent user that the issue is delegated to. */
   public delegate?: UserChildWebhookPayload;
   /** The external user that created the issue. */
   public externalUserCreator?: ExternalUserChildWebhookPayload;
@@ -10809,6 +10634,7 @@ export class Notification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
     this._user = data.user;
@@ -10840,6 +10666,8 @@ export class Notification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -11507,6 +11335,7 @@ export class OauthClientApprovalNotification extends Request {
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
     this.oauthClientApproval = new OauthClientApproval(request, data.oauthClientApproval);
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
     this._user = data.user;
@@ -11542,6 +11371,8 @@ export class OauthClientApprovalNotification extends Request {
   public botActor?: ActorBot;
   /** The OAuth client approval request related to the notification. */
   public oauthClientApproval: OauthClientApproval;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -12354,6 +12185,7 @@ export class PostNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
     this._user = data.user;
@@ -12393,6 +12225,8 @@ export class PostNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -13269,6 +13103,7 @@ export class ProjectNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._comment = data.comment ?? undefined;
     this._document = data.document ?? undefined;
@@ -13317,6 +13152,8 @@ export class ProjectNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -14580,6 +14417,7 @@ export class PullRequestNotification extends Request {
     this.unsnoozedAt = parseDate(data.unsnoozedAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.botActor = data.botActor ? new ActorBot(request, data.botActor) : undefined;
+    this.category = data.category;
     this._actor = data.actor ?? undefined;
     this._externalUserActor = data.externalUserActor ?? undefined;
     this._user = data.user;
@@ -14619,6 +14457,8 @@ export class PullRequestNotification extends Request {
   public updatedAt: Date;
   /** The bot that caused the notification. */
   public botActor?: ActorBot;
+  /** The category of the notification. */
+  public category: L.NotificationCategory;
   /** The user that caused the notification. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -14949,7 +14789,7 @@ export class ReactionWebhookPayload {
   public user?: UserChildWebhookPayload;
 }
 /**
- * A roadmap for projects.
+ * [Deprecated] A roadmap for projects.
  *
  * @param request - function to call the graphql client
  * @param data - L.RoadmapFragment response data
@@ -15122,7 +14962,7 @@ export class RoadmapPayload extends Request {
   }
 }
 /**
- * Join table between projects and roadmaps.
+ * [Deprecated] Join table between projects and roadmaps.
  *
  * @param request - function to call the graphql client
  * @param data - L.RoadmapToProjectFragment response data
@@ -17892,69 +17732,6 @@ export class AgentActivityQuery extends Request {
     const data = response.agentActivity;
 
     return new AgentActivity(this._request, data);
-  }
-}
-
-/**
- * A fetchable AgentContext Query
- *
- * @param request - function to call the graphql client
- */
-export class AgentContextQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AgentContext query and return a AgentContext
-   *
-   * @param id - required id to pass to agentContext
-   * @returns parsed response from AgentContextQuery
-   */
-  public async fetch(id: string): LinearFetch<AgentContext> {
-    const response = await this._request<L.AgentContextQuery, L.AgentContextQueryVariables>(L.AgentContextDocument, {
-      id,
-    });
-    const data = response.agentContext;
-
-    return new AgentContext(this._request, data);
-  }
-}
-
-/**
- * A fetchable AgentContexts Query
- *
- * @param request - function to call the graphql client
- */
-export class AgentContextsQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AgentContexts query and return a AgentContextConnection
-   *
-   * @param variables - variables to pass into the AgentContextsQuery
-   * @returns parsed response from AgentContextsQuery
-   */
-  public async fetch(variables?: L.AgentContextsQueryVariables): LinearFetch<AgentContextConnection> {
-    const response = await this._request<L.AgentContextsQuery, L.AgentContextsQueryVariables>(
-      L.AgentContextsDocument,
-      variables
-    );
-    const data = response.agentContexts;
-
-    return new AgentContextConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
   }
 }
 
@@ -21588,13 +21365,16 @@ export class VerifyGitHubEnterpriseServerInstallationQuery extends Request {
   /**
    * Call the VerifyGitHubEnterpriseServerInstallation query and return a GitHubEnterpriseServerInstallVerificationPayload
    *
+   * @param integrationId - required integrationId to pass to verifyGitHubEnterpriseServerInstallation
    * @returns parsed response from VerifyGitHubEnterpriseServerInstallationQuery
    */
-  public async fetch(): LinearFetch<GitHubEnterpriseServerInstallVerificationPayload> {
+  public async fetch(integrationId: string): LinearFetch<GitHubEnterpriseServerInstallVerificationPayload> {
     const response = await this._request<
       L.VerifyGitHubEnterpriseServerInstallationQuery,
       L.VerifyGitHubEnterpriseServerInstallationQueryVariables
-    >(L.VerifyGitHubEnterpriseServerInstallationDocument, {});
+    >(L.VerifyGitHubEnterpriseServerInstallationDocument, {
+      integrationId,
+    });
     const data = response.verifyGitHubEnterpriseServerInstallation;
 
     return new GitHubEnterpriseServerInstallVerificationPayload(this._request, data);
@@ -21777,62 +21557,31 @@ export class CreateAgentActivityMutation extends Request {
 }
 
 /**
- * A fetchable CreateAgentContext Mutation
+ * A fetchable AgentActivityCreatePrompt Mutation
  *
  * @param request - function to call the graphql client
  */
-export class CreateAgentContextMutation extends Request {
+export class AgentActivityCreatePromptMutation extends Request {
   public constructor(request: LinearRequest) {
     super(request);
   }
 
   /**
-   * Call the CreateAgentContext mutation and return a AgentContextPayload
+   * Call the AgentActivityCreatePrompt mutation and return a AgentActivityPayload
    *
-   * @param input - required input to pass to createAgentContext
-   * @returns parsed response from CreateAgentContextMutation
+   * @param input - required input to pass to agentActivityCreatePrompt
+   * @returns parsed response from AgentActivityCreatePromptMutation
    */
-  public async fetch(input: L.AgentContextCreateInput): LinearFetch<AgentContextPayload> {
-    const response = await this._request<L.CreateAgentContextMutation, L.CreateAgentContextMutationVariables>(
-      L.CreateAgentContextDocument,
-      {
-        input,
-      }
-    );
-    const data = response.agentContextCreate;
+  public async fetch(input: L.AgentActivityCreatePromptInput): LinearFetch<AgentActivityPayload> {
+    const response = await this._request<
+      L.AgentActivityCreatePromptMutation,
+      L.AgentActivityCreatePromptMutationVariables
+    >(L.AgentActivityCreatePromptDocument, {
+      input,
+    });
+    const data = response.agentActivityCreatePrompt;
 
-    return new AgentContextPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable UpdateAgentContext Mutation
- *
- * @param request - function to call the graphql client
- */
-export class UpdateAgentContextMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the UpdateAgentContext mutation and return a AgentContextPayload
-   *
-   * @param id - required id to pass to updateAgentContext
-   * @param input - required input to pass to updateAgentContext
-   * @returns parsed response from UpdateAgentContextMutation
-   */
-  public async fetch(id: string, input: L.AgentContextUpdateInput): LinearFetch<AgentContextPayload> {
-    const response = await this._request<L.UpdateAgentContextMutation, L.UpdateAgentContextMutationVariables>(
-      L.UpdateAgentContextDocument,
-      {
-        id,
-        input,
-      }
-    );
-    const data = response.agentContextUpdate;
-
-    return new AgentContextPayload(this._request, data);
+    return new AgentActivityPayload(this._request, data);
   }
 }
 
@@ -24870,13 +24619,18 @@ export class DeleteIntegrationMutation extends Request {
    * Call the DeleteIntegration mutation and return a DeletePayload
    *
    * @param id - required id to pass to deleteIntegration
+   * @param variables - variables without 'id' to pass into the DeleteIntegrationMutation
    * @returns parsed response from DeleteIntegrationMutation
    */
-  public async fetch(id: string): LinearFetch<DeletePayload> {
+  public async fetch(
+    id: string,
+    variables?: Omit<L.DeleteIntegrationMutationVariables, "id">
+  ): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteIntegrationMutation, L.DeleteIntegrationMutationVariables>(
       L.DeleteIntegrationDocument,
       {
         id,
+        ...variables,
       }
     );
     const data = response.integrationDelete;
@@ -24992,19 +24746,16 @@ export class IntegrationGitHubEnterpriseServerConnectMutation extends Request {
    * Call the IntegrationGitHubEnterpriseServerConnect mutation and return a GitHubEnterpriseServerPayload
    *
    * @param githubUrl - required githubUrl to pass to integrationGitHubEnterpriseServerConnect
-   * @param variables - variables without 'githubUrl' to pass into the IntegrationGitHubEnterpriseServerConnectMutation
+   * @param organizationName - required organizationName to pass to integrationGitHubEnterpriseServerConnect
    * @returns parsed response from IntegrationGitHubEnterpriseServerConnectMutation
    */
-  public async fetch(
-    githubUrl: string,
-    variables?: Omit<L.IntegrationGitHubEnterpriseServerConnectMutationVariables, "githubUrl">
-  ): LinearFetch<GitHubEnterpriseServerPayload> {
+  public async fetch(githubUrl: string, organizationName: string): LinearFetch<GitHubEnterpriseServerPayload> {
     const response = await this._request<
       L.IntegrationGitHubEnterpriseServerConnectMutation,
       L.IntegrationGitHubEnterpriseServerConnectMutationVariables
     >(L.IntegrationGitHubEnterpriseServerConnectDocument, {
       githubUrl,
-      ...variables,
+      organizationName,
     });
     const data = response.integrationGitHubEnterpriseServerConnect;
 
@@ -25026,14 +24777,19 @@ export class IntegrationGitHubPersonalMutation extends Request {
    * Call the IntegrationGitHubPersonal mutation and return a IntegrationPayload
    *
    * @param code - required code to pass to integrationGitHubPersonal
+   * @param variables - variables without 'code' to pass into the IntegrationGitHubPersonalMutation
    * @returns parsed response from IntegrationGitHubPersonalMutation
    */
-  public async fetch(code: string): LinearFetch<IntegrationPayload> {
+  public async fetch(
+    code: string,
+    variables?: Omit<L.IntegrationGitHubPersonalMutationVariables, "code">
+  ): LinearFetch<IntegrationPayload> {
     const response = await this._request<
       L.IntegrationGitHubPersonalMutation,
       L.IntegrationGitHubPersonalMutationVariables
     >(L.IntegrationGitHubPersonalDocument, {
       code,
+      ...variables,
     });
     const data = response.integrationGitHubPersonal;
 
@@ -25082,15 +24838,21 @@ export class IntegrationGithubConnectMutation extends Request {
    *
    * @param code - required code to pass to integrationGithubConnect
    * @param installationId - required installationId to pass to integrationGithubConnect
+   * @param variables - variables without 'code', 'installationId' to pass into the IntegrationGithubConnectMutation
    * @returns parsed response from IntegrationGithubConnectMutation
    */
-  public async fetch(code: string, installationId: string): LinearFetch<IntegrationPayload> {
+  public async fetch(
+    code: string,
+    installationId: string,
+    variables?: Omit<L.IntegrationGithubConnectMutationVariables, "code" | "installationId">
+  ): LinearFetch<IntegrationPayload> {
     const response = await this._request<
       L.IntegrationGithubConnectMutation,
       L.IntegrationGithubConnectMutationVariables
     >(L.IntegrationGithubConnectDocument, {
       code,
       installationId,
+      ...variables,
     });
     const data = response.integrationGithubConnect;
 
@@ -26441,6 +26203,35 @@ export class DeleteIssueLabelMutation extends Request {
 }
 
 /**
+ * A fetchable IssueLabelMoveToTeamLabels Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueLabelMoveToTeamLabelsMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueLabelMoveToTeamLabels mutation and return a IssueLabelMoveToTeamLabelsPayload
+   *
+   * @param input - required input to pass to issueLabelMoveToTeamLabels
+   * @returns parsed response from IssueLabelMoveToTeamLabelsMutation
+   */
+  public async fetch(input: L.IssueLabelMoveToTeamLabelsInput): LinearFetch<IssueLabelMoveToTeamLabelsPayload> {
+    const response = await this._request<
+      L.IssueLabelMoveToTeamLabelsMutation,
+      L.IssueLabelMoveToTeamLabelsMutationVariables
+    >(L.IssueLabelMoveToTeamLabelsDocument, {
+      input,
+    });
+    const data = response.issueLabelMoveToTeamLabels;
+
+    return new IssueLabelMoveToTeamLabelsPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UpdateIssueLabel Mutation
  *
  * @param request - function to call the graphql client
@@ -26472,6 +26263,35 @@ export class UpdateIssueLabelMutation extends Request {
       }
     );
     const data = response.issueLabelUpdate;
+
+    return new IssueLabelPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueLabelsMerge Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueLabelsMergeMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueLabelsMerge mutation and return a IssueLabelPayload
+   *
+   * @param input - required input to pass to issueLabelsMerge
+   * @returns parsed response from IssueLabelsMergeMutation
+   */
+  public async fetch(input: L.LabelsMergeInput): LinearFetch<IssueLabelPayload> {
+    const response = await this._request<L.IssueLabelsMergeMutation, L.IssueLabelsMergeMutationVariables>(
+      L.IssueLabelsMergeDocument,
+      {
+        input,
+      }
+    );
+    const data = response.issueLabelsMerge;
 
     return new IssueLabelPayload(this._request, data);
   }
@@ -27787,6 +27607,35 @@ export class UpdateProjectLabelMutation extends Request {
       }
     );
     const data = response.projectLabelUpdate;
+
+    return new ProjectLabelPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable ProjectLabelsMerge Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class ProjectLabelsMergeMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the ProjectLabelsMerge mutation and return a ProjectLabelPayload
+   *
+   * @param input - required input to pass to projectLabelsMerge
+   * @returns parsed response from ProjectLabelsMergeMutation
+   */
+  public async fetch(input: L.LabelsMergeInput): LinearFetch<ProjectLabelPayload> {
+    const response = await this._request<L.ProjectLabelsMergeMutation, L.ProjectLabelsMergeMutationVariables>(
+      L.ProjectLabelsMergeDocument,
+      {
+        input,
+      }
+    );
+    const data = response.projectLabelsMerge;
 
     return new ProjectLabelPayload(this._request, data);
   }
@@ -30839,6 +30688,61 @@ export class Comment_ExternalThreadQuery extends Request {
     const data = response.comment.externalThread;
 
     return data ? new SyncedExternalThread(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable CustomView_Initiatives Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to customView
+ * @param variables - variables without 'id' to pass into the CustomView_InitiativesQuery
+ */
+export class CustomView_InitiativesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.CustomView_InitiativesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.CustomView_InitiativesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the CustomView_Initiatives query and return a InitiativeConnection
+   *
+   * @param variables - variables without 'id' to pass into the CustomView_InitiativesQuery
+   * @returns parsed response from CustomView_InitiativesQuery
+   */
+  public async fetch(
+    variables?: Omit<L.CustomView_InitiativesQueryVariables, "id">
+  ): LinearFetch<InitiativeConnection> {
+    const response = await this._request<L.CustomView_InitiativesQuery, L.CustomView_InitiativesQueryVariables>(
+      L.CustomView_InitiativesDocument,
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
+    const data = response.customView.initiatives;
+
+    return new InitiativeConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
   }
 }
 
@@ -36308,24 +36212,6 @@ export class LinearSdk extends Request {
     return new AgentActivityQuery(this._request).fetch(id);
   }
   /**
-   * A specific agent context.
-   *
-   * @param id - required id to pass to agentContext
-   * @returns AgentContext
-   */
-  public agentContext(id: string): LinearFetch<AgentContext> {
-    return new AgentContextQuery(this._request).fetch(id);
-  }
-  /**
-   * All agent contexts.
-   *
-   * @param variables - variables to pass into the AgentContextsQuery
-   * @returns AgentContextConnection
-   */
-  public agentContexts(variables?: L.AgentContextsQueryVariables): LinearFetch<AgentContextConnection> {
-    return new AgentContextsQuery(this._request).fetch(variables);
-  }
-  /**
    * A specific agent session.
    *
    * @param id - required id to pass to agentSession
@@ -37229,7 +37115,7 @@ export class LinearSdk extends Request {
     return new RoadmapToProjectQuery(this._request).fetch(id);
   }
   /**
-   * Custom views for the user.
+   * Query roadmapToProjects for RoadmapToProjectConnection
    *
    * @param variables - variables to pass into the RoadmapToProjectsQuery
    * @returns RoadmapToProjectConnection
@@ -37427,10 +37313,13 @@ export class LinearSdk extends Request {
   /**
    * Verify that we received the correct response from the GitHub Enterprise Server.
    *
+   * @param integrationId - required integrationId to pass to verifyGitHubEnterpriseServerInstallation
    * @returns GitHubEnterpriseServerInstallVerificationPayload
    */
-  public get verifyGitHubEnterpriseServerInstallation(): LinearFetch<GitHubEnterpriseServerInstallVerificationPayload> {
-    return new VerifyGitHubEnterpriseServerInstallationQuery(this._request).fetch();
+  public verifyGitHubEnterpriseServerInstallation(
+    integrationId: string
+  ): LinearFetch<GitHubEnterpriseServerInstallVerificationPayload> {
+    return new VerifyGitHubEnterpriseServerInstallationQuery(this._request).fetch(integrationId);
   }
   /**
    * The currently authenticated user.
@@ -37486,23 +37375,13 @@ export class LinearSdk extends Request {
     return new CreateAgentActivityMutation(this._request).fetch(input);
   }
   /**
-   * Creates an agent context.
+   * Creates a prompt agent activity from Linear user input.
    *
-   * @param input - required input to pass to createAgentContext
-   * @returns AgentContextPayload
+   * @param input - required input to pass to agentActivityCreatePrompt
+   * @returns AgentActivityPayload
    */
-  public createAgentContext(input: L.AgentContextCreateInput): LinearFetch<AgentContextPayload> {
-    return new CreateAgentContextMutation(this._request).fetch(input);
-  }
-  /**
-   * Updates an agent context.
-   *
-   * @param id - required id to pass to updateAgentContext
-   * @param input - required input to pass to updateAgentContext
-   * @returns AgentContextPayload
-   */
-  public updateAgentContext(id: string, input: L.AgentContextUpdateInput): LinearFetch<AgentContextPayload> {
-    return new UpdateAgentContextMutation(this._request).fetch(id, input);
+  public agentActivityCreatePrompt(input: L.AgentActivityCreatePromptInput): LinearFetch<AgentActivityPayload> {
+    return new AgentActivityCreatePromptMutation(this._request).fetch(input);
   }
   /**
    * Updates the externalUrl of an agent session, which is an agent-hosted page associated with this session.
@@ -38559,10 +38438,14 @@ export class LinearSdk extends Request {
    * Deletes an integration.
    *
    * @param id - required id to pass to deleteIntegration
+   * @param variables - variables without 'id' to pass into the DeleteIntegrationMutation
    * @returns DeletePayload
    */
-  public deleteIntegration(id: string): LinearFetch<DeletePayload> {
-    return new DeleteIntegrationMutation(this._request).fetch(id);
+  public deleteIntegration(
+    id: string,
+    variables?: Omit<L.DeleteIntegrationMutationVariables, "id">
+  ): LinearFetch<DeletePayload> {
+    return new DeleteIntegrationMutation(this._request).fetch(id, variables);
   }
   /**
    * Integrates the organization with Discord.
@@ -38598,23 +38481,27 @@ export class LinearSdk extends Request {
    * Connects the organization with a GitHub Enterprise Server.
    *
    * @param githubUrl - required githubUrl to pass to integrationGitHubEnterpriseServerConnect
-   * @param variables - variables without 'githubUrl' to pass into the IntegrationGitHubEnterpriseServerConnectMutation
+   * @param organizationName - required organizationName to pass to integrationGitHubEnterpriseServerConnect
    * @returns GitHubEnterpriseServerPayload
    */
   public integrationGitHubEnterpriseServerConnect(
     githubUrl: string,
-    variables?: Omit<L.IntegrationGitHubEnterpriseServerConnectMutationVariables, "githubUrl">
+    organizationName: string
   ): LinearFetch<GitHubEnterpriseServerPayload> {
-    return new IntegrationGitHubEnterpriseServerConnectMutation(this._request).fetch(githubUrl, variables);
+    return new IntegrationGitHubEnterpriseServerConnectMutation(this._request).fetch(githubUrl, organizationName);
   }
   /**
    * Connect your GitHub account to Linear.
    *
    * @param code - required code to pass to integrationGitHubPersonal
+   * @param variables - variables without 'code' to pass into the IntegrationGitHubPersonalMutation
    * @returns IntegrationPayload
    */
-  public integrationGitHubPersonal(code: string): LinearFetch<IntegrationPayload> {
-    return new IntegrationGitHubPersonalMutation(this._request).fetch(code);
+  public integrationGitHubPersonal(
+    code: string,
+    variables?: Omit<L.IntegrationGitHubPersonalMutationVariables, "code">
+  ): LinearFetch<IntegrationPayload> {
+    return new IntegrationGitHubPersonalMutation(this._request).fetch(code, variables);
   }
   /**
    * Generates a webhook for the GitHub commit integration.
@@ -38629,10 +38516,15 @@ export class LinearSdk extends Request {
    *
    * @param code - required code to pass to integrationGithubConnect
    * @param installationId - required installationId to pass to integrationGithubConnect
+   * @param variables - variables without 'code', 'installationId' to pass into the IntegrationGithubConnectMutation
    * @returns IntegrationPayload
    */
-  public integrationGithubConnect(code: string, installationId: string): LinearFetch<IntegrationPayload> {
-    return new IntegrationGithubConnectMutation(this._request).fetch(code, installationId);
+  public integrationGithubConnect(
+    code: string,
+    installationId: string,
+    variables?: Omit<L.IntegrationGithubConnectMutationVariables, "code" | "installationId">
+  ): LinearFetch<IntegrationPayload> {
+    return new IntegrationGithubConnectMutation(this._request).fetch(code, installationId, variables);
   }
   /**
    * Connects the organization with the GitHub Import App.
@@ -39137,6 +39029,17 @@ export class LinearSdk extends Request {
     return new DeleteIssueLabelMutation(this._request).fetch(id);
   }
   /**
+   * Converts a workspace label to team labels for teams that have issues using the workspace label.
+   *
+   * @param input - required input to pass to issueLabelMoveToTeamLabels
+   * @returns IssueLabelMoveToTeamLabelsPayload
+   */
+  public issueLabelMoveToTeamLabels(
+    input: L.IssueLabelMoveToTeamLabelsInput
+  ): LinearFetch<IssueLabelMoveToTeamLabelsPayload> {
+    return new IssueLabelMoveToTeamLabelsMutation(this._request).fetch(input);
+  }
+  /**
    * Updates an label.
    *
    * @param id - required id to pass to updateIssueLabel
@@ -39150,6 +39053,15 @@ export class LinearSdk extends Request {
     variables?: Omit<L.UpdateIssueLabelMutationVariables, "id" | "input">
   ): LinearFetch<IssueLabelPayload> {
     return new UpdateIssueLabelMutation(this._request).fetch(id, input, variables);
+  }
+  /**
+   * Merges multiple issue labels into a single label.
+   *
+   * @param input - required input to pass to issueLabelsMerge
+   * @returns IssueLabelPayload
+   */
+  public issueLabelsMerge(input: L.LabelsMergeInput): LinearFetch<IssueLabelPayload> {
+    return new IssueLabelsMergeMutation(this._request).fetch(input);
   }
   /**
    * Creates a new issue relation.
@@ -39600,6 +39512,15 @@ export class LinearSdk extends Request {
    */
   public updateProjectLabel(id: string, input: L.ProjectLabelUpdateInput): LinearFetch<ProjectLabelPayload> {
     return new UpdateProjectLabelMutation(this._request).fetch(id, input);
+  }
+  /**
+   * Merges multiple project labels into a single label.
+   *
+   * @param input - required input to pass to projectLabelsMerge
+   * @returns ProjectLabelPayload
+   */
+  public projectLabelsMerge(input: L.LabelsMergeInput): LinearFetch<ProjectLabelPayload> {
+    return new ProjectLabelsMergeMutation(this._request).fetch(input);
   }
   /**
    * Creates a new project milestone.
