@@ -264,6 +264,8 @@ fragment CustomView on CustomView {
   description
   # The filter applied to feed items in the custom view.
   feedItemFilterData
+  # The filter applied to initiatives in the custom view.
+  initiativeFilterData
   # The filter applied to issues in the custom view.
   filterData
   # The filter applied to projects in the custom view.
@@ -320,6 +322,8 @@ fragment CustomerNeedNotification on CustomerNeedNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The customer need related to the notification.
   customerNeed {
     id
@@ -481,6 +485,8 @@ fragment CustomerNotification on CustomerNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The customer related to the notification.
   customer {
     id
@@ -732,6 +738,8 @@ fragment DocumentNotification on DocumentNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The external user that caused the notification.
   externalUserActor {
     id
@@ -891,6 +899,10 @@ fragment Draft on Draft {
   }
   # The project update for which this is a draft comment.
   projectUpdate {
+    id
+  }
+  # The team for which this is a draft post.
+  team {
     id
   }
   # The text content as a Prosemirror document.
@@ -1275,6 +1287,8 @@ fragment Notification on Notification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The external user that caused the notification.
   externalUserActor {
     id
@@ -1360,6 +1374,8 @@ fragment PostNotification on PostNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The external user that caused the notification.
   externalUserActor {
     id
@@ -1471,6 +1487,8 @@ fragment ProjectNotification on ProjectNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The comment related to the notification.
   comment {
     id
@@ -1696,6 +1714,8 @@ fragment PullRequestNotification on PullRequestNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The external user that caused the notification.
   externalUserActor {
     id
@@ -2038,40 +2058,6 @@ fragment InitiativeRelation on InitiativeRelation {
   createdAt
   # The unique identifier of the entity.
   id
-}
-
-# A roadmap for projects.
-fragment Roadmap on Roadmap {
-  __typename
-  # The canonical url for the roadmap.
-  url
-  # The description of the roadmap.
-  description
-  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The name of the roadmap.
-  name
-  # The roadmap's color.
-  color
-  # The roadmap's unique URL slug.
-  slugId
-  # The sort order of the roadmap within the organization.
-  sortOrder
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The unique identifier of the entity.
-  id
-  # The user who created the roadmap.
-  creator {
-    id
-  }
-  # The user who owns the roadmap.
-  owner {
-    id
-  }
 }
 
 # A session for agent activities and state management.
@@ -2755,10 +2741,8 @@ fragment ApiKey on ApiKey {
 # An activity within an agent context.
 fragment AgentActivity on AgentActivity {
   __typename
-  # The agent context this activity belongs to.
-  agentContext {
-    id
-  }
+  # Metadata about the external source that created this agent activity.
+  sourceMetadata
   # The agent session this activity belongs to.
   agentSession {
     id
@@ -2919,8 +2903,6 @@ fragment ProjectHistory on ProjectHistory {
 # An identity provider.
 fragment IdentityProvider on IdentityProvider {
   __typename
-  # Allowed authentication providers, empty array means all are allowed.
-  allowedAuthServices
   # Binding method for authentication call. Can be either `post` (default) or `redirect`.
   ssoBinding
   # Sign in endpoint URL for the identity provider.
@@ -2944,6 +2926,8 @@ fragment IdentityProvider on IdentityProvider {
   samlEnabled
   # Whether SCIM provisioning is enabled for organization.
   scimEnabled
+  # Whether the identity provider is the default identity provider migrated from organization level settings.
+  defaultMigrated
   # X.509 Signing Certificate in string form.
   ssoSigningCert
 }
@@ -3061,6 +3045,8 @@ fragment InitiativeNotification on InitiativeNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The comment related to the notification.
   comment {
     id
@@ -3314,6 +3300,8 @@ fragment IssueNotification on IssueNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The comment related to the notification.
   comment {
     id
@@ -3393,7 +3381,7 @@ fragment Issue on Issue {
   customerTicketCount
   # Suggested branch name for the issue.
   branchName
-  # The app user that is delegated to work on this issue.
+  # The agent user that is delegated to work on this issue.
   delegate {
     id
   }
@@ -3539,6 +3527,8 @@ fragment OauthClientApprovalNotification on OauthClientApprovalNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The external user that caused the notification.
   externalUserActor {
     id
@@ -4590,30 +4580,6 @@ fragment InitiativeToProject on InitiativeToProject {
     id
   }
   # The sort order of the project within the initiative.
-  sortOrder
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The unique identifier of the entity.
-  id
-}
-
-# Join table between projects and roadmaps.
-fragment RoadmapToProject on RoadmapToProject {
-  __typename
-  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The project that the roadmap is associated with.
-  project {
-    id
-  }
-  # The roadmap that the project is associated with.
-  roadmap {
-    id
-  }
-  # The sort order of the project within the roadmap.
   sortOrder
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
@@ -6554,10 +6520,6 @@ fragment Favorite on Favorite {
   project {
     id
   }
-  # The favorited roadmap.
-  roadmap {
-    id
-  }
   # The favorited user.
   user {
     id
@@ -6674,54 +6636,62 @@ fragment AuditEntry on AuditEntry {
   type
 }
 
-# [DEPRECATED] A context for agent activities and state management.
-fragment AgentContext on AgentContext {
+# [Deprecated] A roadmap for projects.
+fragment Roadmap on Roadmap {
   __typename
-  # A summary of the activities in this context.
-  summary
-  # Activities associated with this agent context.
-  activities {
-    ...AgentActivity
-  }
-  # External links associated with this agent context.
-  links {
-    ...EntityExternalLink
-  }
-  # Metadata about the external source that created this agent context.
-  sourceMetadata
-  # The agent user that is associated with this agent context.
-  appUser {
-    id
-  }
-  # The comment this agent context is associated with.
-  comment {
-    id
-  }
-  # The current status of the agent context.
-  status
-  # The issue this agent context is associated with.
-  issue {
-    id
-  }
+  # The canonical url for the roadmap.
+  url
+  # The description of the roadmap.
+  description
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The name of the roadmap.
+  name
+  # The roadmap's color.
+  color
+  # The roadmap's unique URL slug.
+  slugId
+  # The sort order of the roadmap within the organization.
+  sortOrder
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
   createdAt
-  # The time the agent context ended.
-  endedAt
-  # The time the agent context started working.
-  startedAt
-  # The type of the agent context.
-  type
   # The unique identifier of the entity.
   id
-  # The user that created this agent context.
+  # The user who created the roadmap.
   creator {
     id
   }
+  # The user who owns the roadmap.
+  owner {
+    id
+  }
+}
+
+# [Deprecated] Join table between projects and roadmaps.
+fragment RoadmapToProject on RoadmapToProject {
+  __typename
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The project that the roadmap is associated with.
+  project {
+    id
+  }
+  # The roadmap that the project is associated with.
+  roadmap {
+    id
+  }
+  # The sort order of the project within the roadmap.
+  sortOrder
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
 }
 
 fragment AgentActivityConnection on AgentActivityConnection {
@@ -6738,28 +6708,6 @@ fragment AgentActivityPayload on AgentActivityPayload {
   __typename
   # The agent activity that was created or updated.
   agentActivity {
-    id
-  }
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
-fragment AgentContextConnection on AgentContextConnection {
-  __typename
-  nodes {
-    ...AgentContext
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-fragment AgentContextPayload on AgentContextPayload {
-  __typename
-  # The agent context that was created or updated.
-  agentContext {
     id
   }
   # The identifier of the last sync operation.
@@ -7689,6 +7637,14 @@ fragment IssueLabelConnection on IssueLabelConnection {
   }
 }
 
+fragment IssueLabelMoveToTeamLabelsPayload on IssueLabelMoveToTeamLabelsPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
 fragment IssueLabelPayload on IssueLabelPayload {
   __typename
   # The identifier of the last sync operation.
@@ -7787,7 +7743,7 @@ fragment IssueSearchResult on IssueSearchResult {
   customerTicketCount
   # Suggested branch name for the issue.
   branchName
-  # The app user that is delegated to work on this issue.
+  # The agent user that is delegated to work on this issue.
   delegate {
     id
   }
@@ -7973,6 +7929,7 @@ fragment IssueSuggestionMetadata on IssueSuggestionMetadata {
   __typename
   classification
   evalLogId
+  rank
   reasons
   score
 }
@@ -9006,41 +8963,6 @@ query agentActivity(
     ...AgentActivity
   }
 }
-# A specific agent context.
-query agentContext(
-  # The identifier of the agent context to retrieve.
-  $id: String!
-) {
-  agentContext(id: $id) {
-    ...AgentContext
-  }
-}
-# All agent contexts.
-query agentContexts(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  agentContexts(
-    after: $after
-    before: $before
-    first: $first
-    includeArchived: $includeArchived
-    last: $last
-    orderBy: $orderBy
-  ) {
-    ...AgentContextConnection
-  }
-}
 # A specific agent session.
 query agentSession(
   # The identifier of the agent session to retrieve.
@@ -9768,6 +9690,38 @@ query comments(
 query customView($id: String!) {
   customView(id: $id) {
     ...CustomView
+  }
+}
+# Initiatives associated with the custom view.
+query customView_initiatives(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned initiatives.
+  $filter: InitiativeFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  customView(id: $id) {
+    initiatives(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...InitiativeConnection
+    }
   }
 }
 # Issues associated with the custom view.
@@ -13008,7 +12962,6 @@ query roadmapToProject($id: String!) {
     ...RoadmapToProject
   }
 }
-# Custom views for the user.
 query roadmapToProjects(
   # A cursor to be used with first for forward pagination
   $after: String
@@ -14324,8 +14277,11 @@ query users(
   }
 }
 # Verify that we received the correct response from the GitHub Enterprise Server.
-query verifyGitHubEnterpriseServerInstallation {
-  verifyGitHubEnterpriseServerInstallation {
+query verifyGitHubEnterpriseServerInstallation(
+  # The integration ID.
+  $integrationId: String!
+) {
+  verifyGitHubEnterpriseServerInstallation(integrationId: $integrationId) {
     ...GitHubEnterpriseServerInstallVerificationPayload
   }
 }
@@ -14626,24 +14582,13 @@ mutation createAgentActivity(
     ...AgentActivityPayload
   }
 }
-# Creates an agent context.
-mutation createAgentContext(
-  # The agent context object to create.
-  $input: AgentContextCreateInput!
+# Creates a prompt agent activity from Linear user input.
+mutation agentActivityCreatePrompt(
+  # The prompt agent activity object to create.
+  $input: AgentActivityCreatePromptInput!
 ) {
-  agentContextCreate(input: $input) {
-    ...AgentContextPayload
-  }
-}
-# Updates an agent context.
-mutation updateAgentContext(
-  # The identifier of the agent context to update.
-  $id: String!
-  # The agent context object to update.
-  $input: AgentContextUpdateInput!
-) {
-  agentContextUpdate(id: $id, input: $input) {
-    ...AgentContextPayload
+  agentActivityCreatePrompt(input: $input) {
+    ...AgentActivityPayload
   }
 }
 # Updates the externalUrl of an agent session, which is an agent-hosted page associated with this
@@ -15820,8 +15765,10 @@ mutation integrationAsksConnectChannel(
 mutation deleteIntegration(
   # The identifier of the integration to delete.
   $id: String!
+  # Whether to skip deleting the installation on the external service side.
+  $skipInstallationDeletion: Boolean
 ) {
-  integrationDelete(id: $id) {
+  integrationDelete(id: $id, skipInstallationDeletion: $skipInstallationDeletion) {
     ...DeletePayload
   }
 }
@@ -15863,7 +15810,7 @@ mutation integrationGitHubEnterpriseServerConnect(
   # The base URL of the GitHub Enterprise Server installation.
   $githubUrl: String!
   # The name of GitHub organization.
-  $organizationName: String
+  $organizationName: String!
 ) {
   integrationGitHubEnterpriseServerConnect(githubUrl: $githubUrl, organizationName: $organizationName) {
     ...GitHubEnterpriseServerPayload
@@ -15873,8 +15820,10 @@ mutation integrationGitHubEnterpriseServerConnect(
 mutation integrationGitHubPersonal(
   # The GitHub OAuth code.
   $code: String!
+  # Whether to connect with code access.
+  $codeAccess: Boolean
 ) {
-  integrationGitHubPersonal(code: $code) {
+  integrationGitHubPersonal(code: $code, codeAccess: $codeAccess) {
     ...IntegrationPayload
   }
 }
@@ -15888,10 +15837,12 @@ mutation createIntegrationGithubCommit {
 mutation integrationGithubConnect(
   # The GitHub grant code that's exchanged for OAuth tokens.
   $code: String!
+  # Whether the integration should have code access
+  $codeAccess: Boolean
   # The GitHub data to connect with.
   $installationId: String!
 ) {
-  integrationGithubConnect(code: $code, installationId: $installationId) {
+  integrationGithubConnect(code: $code, codeAccess: $codeAccess, installationId: $installationId) {
     ...IntegrationPayload
   }
 }
@@ -16442,6 +16393,15 @@ mutation deleteIssueLabel(
     ...DeletePayload
   }
 }
+# Converts a workspace label to team labels for teams that have issues using the workspace label.
+mutation issueLabelMoveToTeamLabels(
+  # The workspace label to move to teams.
+  $input: IssueLabelMoveToTeamLabelsInput!
+) {
+  issueLabelMoveToTeamLabels(input: $input) {
+    ...IssueLabelMoveToTeamLabelsPayload
+  }
+}
 # Updates an label.
 mutation updateIssueLabel(
   # The identifier of the label to update.
@@ -16452,6 +16412,15 @@ mutation updateIssueLabel(
   $replaceTeamLabels: Boolean
 ) {
   issueLabelUpdate(id: $id, input: $input, replaceTeamLabels: $replaceTeamLabels) {
+    ...IssueLabelPayload
+  }
+}
+# Merges multiple issue labels into a single label.
+mutation issueLabelsMerge(
+  # The merge input.
+  $input: LabelsMergeInput!
+) {
+  issueLabelsMerge(input: $input) {
     ...IssueLabelPayload
   }
 }
@@ -16879,6 +16848,15 @@ mutation updateProjectLabel(
   $input: ProjectLabelUpdateInput!
 ) {
   projectLabelUpdate(id: $id, input: $input) {
+    ...ProjectLabelPayload
+  }
+}
+# Merges multiple project labels into a single label.
+mutation projectLabelsMerge(
+  # The merge input.
+  $input: LabelsMergeInput!
+) {
+  projectLabelsMerge(input: $input) {
     ...ProjectLabelPayload
   }
 }

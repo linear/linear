@@ -319,16 +319,6 @@ describe("generated", () => {
       }
     });
 
-    /** Test the agentActivity.agentContext query for L.AgentContext */
-    it("agentActivity.agentContext", async () => {
-      if (_agentActivity) {
-        const agentActivity_agentContext: L.AgentContext | undefined = await _agentActivity.agentContext;
-        expect(agentActivity_agentContext instanceof L.AgentContext);
-      } else {
-        console.warn("codegen-doc:print: No AgentActivity found - cannot test agentActivity.agentContext query");
-      }
-    });
-
     /** Test the agentActivity.agentSession query for L.AgentSession */
     it("agentActivity.agentSession", async () => {
       if (_agentActivity) {
@@ -346,71 +336,6 @@ describe("generated", () => {
         expect(agentActivity_sourceComment instanceof L.Comment);
       } else {
         console.warn("codegen-doc:print: No AgentActivity found - cannot test agentActivity.sourceComment query");
-      }
-    });
-  });
-
-  /** Test all AgentContext queries */
-  describe("AgentContexts", () => {
-    let _agentContext: L.AgentContext | undefined;
-    let _agentContext_id: string | undefined;
-
-    /** Test the root connection query for the AgentContext */
-    it("agentContexts", async () => {
-      const agentContexts: L.AgentContextConnection | undefined = await client.agentContexts();
-      const agentContext = agentContexts?.nodes?.[0];
-      _agentContext_id = agentContext?.id;
-      expect(agentContexts instanceof L.AgentContextConnection);
-    });
-
-    /** Test the root query for a single AgentContext */
-    it("agentContext", async () => {
-      if (_agentContext_id) {
-        const agentContext: L.AgentContext | undefined = await client.agentContext(_agentContext_id);
-        _agentContext = agentContext;
-        expect(agentContext instanceof L.AgentContext);
-      } else {
-        console.warn("codegen-doc:print: No first AgentContext found in connection - cannot test agentContext query");
-      }
-    });
-
-    /** Test the agentContext.appUser query for L.User */
-    it("agentContext.appUser", async () => {
-      if (_agentContext) {
-        const agentContext_appUser: L.User | undefined = await _agentContext.appUser;
-        expect(agentContext_appUser instanceof L.User);
-      } else {
-        console.warn("codegen-doc:print: No AgentContext found - cannot test agentContext.appUser query");
-      }
-    });
-
-    /** Test the agentContext.comment query for L.Comment */
-    it("agentContext.comment", async () => {
-      if (_agentContext) {
-        const agentContext_comment: L.Comment | undefined = await _agentContext.comment;
-        expect(agentContext_comment instanceof L.Comment);
-      } else {
-        console.warn("codegen-doc:print: No AgentContext found - cannot test agentContext.comment query");
-      }
-    });
-
-    /** Test the agentContext.creator query for L.User */
-    it("agentContext.creator", async () => {
-      if (_agentContext) {
-        const agentContext_creator: L.User | undefined = await _agentContext.creator;
-        expect(agentContext_creator instanceof L.User);
-      } else {
-        console.warn("codegen-doc:print: No AgentContext found - cannot test agentContext.creator query");
-      }
-    });
-
-    /** Test the agentContext.issue query for L.Issue */
-    it("agentContext.issue", async () => {
-      if (_agentContext) {
-        const agentContext_issue: L.Issue | undefined = await _agentContext.issue;
-        expect(agentContext_issue instanceof L.Issue);
-      } else {
-        console.warn("codegen-doc:print: No AgentContext found - cannot test agentContext.issue query");
       }
     });
   });
@@ -996,6 +921,16 @@ describe("generated", () => {
         expect(customView instanceof L.CustomView);
       } else {
         console.warn("codegen-doc:print: No first CustomView found in connection - cannot test customView query");
+      }
+    });
+
+    /** Test the customView connection query for the Initiative */
+    it("customView.initiatives", async () => {
+      if (_customView) {
+        const initiatives: L.InitiativeConnection | undefined = await _customView.initiatives();
+        expect(initiatives instanceof L.InitiativeConnection);
+      } else {
+        console.warn("codegen-doc:print: No customView found - cannot test _customView.initiatives query");
       }
     });
 
@@ -1776,16 +1711,6 @@ describe("generated", () => {
         expect(favorite_projectTeam instanceof L.Team);
       } else {
         console.warn("codegen-doc:print: No Favorite found - cannot test favorite.projectTeam query");
-      }
-    });
-
-    /** Test the favorite.roadmap query for L.Roadmap */
-    it("favorite.roadmap", async () => {
-      if (_favorite) {
-        const favorite_roadmap: L.Roadmap | undefined = await _favorite.roadmap;
-        expect(favorite_roadmap instanceof L.Roadmap);
-      } else {
-        console.warn("codegen-doc:print: No Favorite found - cannot test favorite.roadmap query");
       }
     });
 
@@ -5382,7 +5307,7 @@ describe("generated", () => {
     /** Test the root model query for VerifyGitHubEnterpriseServerInstallation */
     it("verifyGitHubEnterpriseServerInstallation", async () => {
       const verifyGitHubEnterpriseServerInstallation: L.GitHubEnterpriseServerInstallVerificationPayload | undefined =
-        await client.verifyGitHubEnterpriseServerInstallation;
+        await client.verifyGitHubEnterpriseServerInstallation("mock-integrationId");
       expect(verifyGitHubEnterpriseServerInstallation instanceof L.GitHubEnterpriseServerInstallVerificationPayload);
     });
   });
