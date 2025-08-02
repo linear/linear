@@ -73,6 +73,8 @@ export type AgentActivity = Node & {
   createdAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
+  signal?: Maybe<AgentActivitySignal>;
   /** The comment this activity is linked to. */
   sourceComment?: Maybe<Comment>;
   /** Metadata about the external source that created this agent activity. */
@@ -208,6 +210,11 @@ export type AgentActivityResponseContent = {
   /** The type of activity. */
   type: AgentActivityType;
 };
+
+/** A modifier that provides additional instructions on how the activity should be interpreted. */
+export enum AgentActivitySignal {
+  Stop = "stop",
+}
 
 /** Content for a thought activity. */
 export type AgentActivityThoughtContent = {
@@ -1542,7 +1549,7 @@ export type CustomView = Node & {
   /** Whether the custom view is shared with everyone in the organization. */
   shared: Scalars["Boolean"];
   /** The custom view's unique URL slug. */
-  slugId?: Maybe<Scalars["String"]>;
+  slugId: Scalars["String"];
   /** The team associated with the custom view. */
   team?: Maybe<Team>;
   /**
@@ -3390,8 +3397,6 @@ export type DocumentContent = Node & {
   initiative?: Maybe<Initiative>;
   /** The issue that the content is associated with. */
   issue?: Maybe<Issue>;
-  /** [ALPHA] The meeting that the content is associated with. */
-  meeting?: Maybe<Meeting>;
   /** The project that the content is associated with. */
   project?: Maybe<Project>;
   /** The project milestone that the content is associated with. */
@@ -3817,6 +3822,16 @@ export type EmailIntakeAddress = Node & {
   forwardingEmailAddress?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** The auto-reply message for issue canceled. If not set, the default reply will be used. */
+  issueCanceledAutoReply?: Maybe<Scalars["String"]>;
+  /** Whether the auto-reply for issue canceled is enabled. */
+  issueCanceledAutoReplyEnabled: Scalars["Boolean"];
+  /** The auto-reply message for issue completed. If not set, the default reply will be used. */
+  issueCompletedAutoReply?: Maybe<Scalars["String"]>;
+  /** Whether the auto-reply for issue completed is enabled. */
+  issueCompletedAutoReplyEnabled: Scalars["Boolean"];
+  /** The auto-reply message for issue created. If not set, the default reply will be used. */
+  issueCreatedAutoReply?: Maybe<Scalars["String"]>;
   /** The organization that the email address is associated with. */
   organization: Organization;
   /** Whether email replies are enabled. */
@@ -3836,6 +3851,8 @@ export type EmailIntakeAddress = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+  /** Whether the commenter's name is included in the email replies. */
+  useUserNamesInReplies: Scalars["Boolean"];
 };
 
 export type EmailIntakeAddressCreateInput = {
@@ -3845,6 +3862,16 @@ export type EmailIntakeAddressCreateInput = {
   forwardingEmailAddress?: Maybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
+  /** The auto-reply message for issue canceled. */
+  issueCanceledAutoReply?: Maybe<Scalars["String"]>;
+  /** Whether the issue canceled auto-reply is enabled. */
+  issueCanceledAutoReplyEnabled?: Maybe<Scalars["Boolean"]>;
+  /** The auto-reply message for issue completed. */
+  issueCompletedAutoReply?: Maybe<Scalars["String"]>;
+  /** Whether the issue completed auto-reply is enabled. */
+  issueCompletedAutoReplyEnabled?: Maybe<Scalars["Boolean"]>;
+  /** The auto-reply message for issue created. */
+  issueCreatedAutoReply?: Maybe<Scalars["String"]>;
   /** Whether email replies are enabled. */
   repliesEnabled?: Maybe<Scalars["Boolean"]>;
   /** The name to be used for outgoing emails. */
@@ -3855,6 +3882,8 @@ export type EmailIntakeAddressCreateInput = {
   templateId?: Maybe<Scalars["String"]>;
   /** The type of the email address. If not provided, the backend will default to team or template. */
   type?: Maybe<EmailIntakeAddressType>;
+  /** Whether the commenter's name is included in the email replies. */
+  useUserNamesInReplies?: Maybe<Scalars["Boolean"]>;
 };
 
 export type EmailIntakeAddressPayload = {
@@ -3881,6 +3910,16 @@ export type EmailIntakeAddressUpdateInput = {
   enabled?: Maybe<Scalars["Boolean"]>;
   /** The email address used to forward emails to the intake address. */
   forwardingEmailAddress?: Maybe<Scalars["String"]>;
+  /** Custom auto-reply message for issue canceled. */
+  issueCanceledAutoReply?: Maybe<Scalars["String"]>;
+  /** Whether the issue canceled auto-reply is enabled. */
+  issueCanceledAutoReplyEnabled?: Maybe<Scalars["Boolean"]>;
+  /** Custom auto-reply message for issue completed. */
+  issueCompletedAutoReply?: Maybe<Scalars["String"]>;
+  /** Whether the issue completed auto-reply is enabled. */
+  issueCompletedAutoReplyEnabled?: Maybe<Scalars["Boolean"]>;
+  /** The auto-reply message for issue created. */
+  issueCreatedAutoReply?: Maybe<Scalars["String"]>;
   /** Whether email replies are enabled. */
   repliesEnabled?: Maybe<Scalars["Boolean"]>;
   /** The name to be used for outgoing emails. */
@@ -3889,6 +3928,8 @@ export type EmailIntakeAddressUpdateInput = {
   teamId?: Maybe<Scalars["String"]>;
   /** The identifier of the template this email address will intake issues for. */
   templateId?: Maybe<Scalars["String"]>;
+  /** Whether the commenter's name is included in the email replies. */
+  useUserNamesInReplies?: Maybe<Scalars["Boolean"]>;
 };
 
 export type EmailUnsubscribeInput = {
@@ -5108,6 +5149,8 @@ export type InitiativeChildWebhookPayload = {
 
 /** Initiative collection filtering options. */
 export type InitiativeCollectionFilter = {
+  /** Comparator for the initiative activity type. */
+  activityType?: Maybe<StringComparator>;
   /** Filters that the initiative must be an ancestor of. */
   ancestors?: Maybe<InitiativeCollectionFilter>;
   /** Compound filters, all of which need to be matched by the initiative. */
@@ -5115,7 +5158,7 @@ export type InitiativeCollectionFilter = {
   /** Comparator for the created at date. */
   createdAt?: Maybe<DateComparator>;
   /** Filters that the initiative creator must satisfy. */
-  creator?: Maybe<UserFilter>;
+  creator?: Maybe<NullableUserFilter>;
   /** Filters that needs to be matched by all initiatives. */
   every?: Maybe<InitiativeFilter>;
   /** Comparator for the initiative health: onTrack, atRisk, offTrack */
@@ -5131,13 +5174,17 @@ export type InitiativeCollectionFilter = {
   /** Compound filters, one of which need to be matched by the initiative. */
   or?: Maybe<Array<InitiativeCollectionFilter>>;
   /** Filters that the initiative owner must satisfy. */
-  owner?: Maybe<UserFilter>;
+  owner?: Maybe<NullableUserFilter>;
   /** Comparator for the initiative slug ID. */
   slugId?: Maybe<StringComparator>;
   /** Filters that needs to be matched by some initiatives. */
   some?: Maybe<InitiativeFilter>;
   /** Comparator for the initiative status: Planned, Active, Completed */
   status?: Maybe<StringComparator>;
+  /** Comparator for the initiative target date. */
+  targetDate?: Maybe<NullableDateComparator>;
+  /** Filters that the initiative teams must satisfy. */
+  teams?: Maybe<TeamCollectionFilter>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -5192,6 +5239,8 @@ export type InitiativeEdge = {
 
 /** Initiative filtering options. */
 export type InitiativeFilter = {
+  /** Comparator for the initiative activity type. */
+  activityType?: Maybe<StringComparator>;
   /** Filters that the initiative must be an ancestor of. */
   ancestors?: Maybe<InitiativeCollectionFilter>;
   /** Compound filters, all of which need to be matched by the initiative. */
@@ -5199,7 +5248,7 @@ export type InitiativeFilter = {
   /** Comparator for the created at date. */
   createdAt?: Maybe<DateComparator>;
   /** Filters that the initiative creator must satisfy. */
-  creator?: Maybe<UserFilter>;
+  creator?: Maybe<NullableUserFilter>;
   /** Comparator for the initiative health: onTrack, atRisk, offTrack */
   health?: Maybe<StringComparator>;
   /** Comparator for the initiative health (with age): onTrack, atRisk, offTrack, outdated, noUpdate */
@@ -5211,11 +5260,15 @@ export type InitiativeFilter = {
   /** Compound filters, one of which need to be matched by the initiative. */
   or?: Maybe<Array<InitiativeFilter>>;
   /** Filters that the initiative owner must satisfy. */
-  owner?: Maybe<UserFilter>;
+  owner?: Maybe<NullableUserFilter>;
   /** Comparator for the initiative slug ID. */
   slugId?: Maybe<StringComparator>;
   /** Comparator for the initiative status: Planned, Active, Completed */
   status?: Maybe<StringComparator>;
+  /** Comparator for the initiative target date. */
+  targetDate?: Maybe<NullableDateComparator>;
+  /** Filters that the initiative teams must satisfy. */
+  teams?: Maybe<TeamCollectionFilter>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -6054,7 +6107,6 @@ export type IntegrationSettingsInput = {
   gitHubImport?: Maybe<GitHubImportSettingsInput>;
   gitHubPersonal?: Maybe<GitHubPersonalSettingsInput>;
   gitLab?: Maybe<GitLabSettingsInput>;
-  githubCodeAccessPersonal?: Maybe<GitHubPersonalSettingsInput>;
   googleSheets?: Maybe<GoogleSheetsSettingsInput>;
   intercom?: Maybe<IntercomSettingsInput>;
   jira?: Maybe<JiraSettingsInput>;
@@ -8780,52 +8832,6 @@ export type ManualSort = {
   nulls?: Maybe<PaginationNulls>;
   /** The order for the individual sort */
   order?: Maybe<PaginationSortOrder>;
-};
-
-/** [Internal] A meeting that can be attached to different entities. */
-export type Meeting = Node & {
-  __typename?: "Meeting";
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The color of the icon. */
-  color?: Maybe<Scalars["String"]>;
-  /** The time at which the entity was created. */
-  createdAt: Scalars["DateTime"];
-  /** The user who created the meeting. */
-  creator?: Maybe<User>;
-  /** The time at which the meeting is set to end. */
-  endsAt?: Maybe<Scalars["DateTime"]>;
-  /** The time at which the meeting was hidden. Null if the entity has not been hidden. */
-  hiddenAt?: Maybe<Scalars["DateTime"]>;
-  /** The icon of the meeting. */
-  icon?: Maybe<Scalars["String"]>;
-  /** The unique identifier of the entity. */
-  id: Scalars["ID"];
-  /** [Internal] The initiative that the meeting is associated with. */
-  initiative?: Maybe<Initiative>;
-  /** The location of the meeting. */
-  location?: Maybe<Scalars["String"]>;
-  /** The meeting link of the meeting. */
-  meetingLink?: Maybe<Scalars["String"]>;
-  /** The project that the meeting is associated with. */
-  project?: Maybe<Project>;
-  /** Link to a recording of the meeting. */
-  recordingLink?: Maybe<Scalars["String"]>;
-  /** The order of the item in the resources list. */
-  sortOrder: Scalars["Float"];
-  /** The time at which the meeting is set to start. */
-  startsAt?: Maybe<Scalars["DateTime"]>;
-  /** The meeting title. */
-  title: Scalars["String"];
-  /** A flag that indicates whether the meeting is in the trash bin. */
-  trashed?: Maybe<Scalars["Boolean"]>;
-  /**
-   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  updatedAt: Scalars["DateTime"];
-  /** The user who last updated the meeting. */
-  updatedBy?: Maybe<User>;
 };
 
 /** Issue project milestone options. */
@@ -17011,6 +17017,8 @@ export type SalesforceSettingsInput = {
   automateTicketReopeningOnProjectCancellation?: Maybe<Scalars["Boolean"]>;
   /** Whether a ticket should be automatically reopened when its linked Linear project is completed. */
   automateTicketReopeningOnProjectCompletion?: Maybe<Scalars["Boolean"]>;
+  /** The Salesforce team to use when a template doesn't specify a team. */
+  defaultTeam?: Maybe<Scalars["String"]>;
   /** [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue. */
   disableCustomerRequestsAutoCreation?: Maybe<Scalars["Boolean"]>;
   /** The Salesforce case status to use to reopen cases. */
@@ -19175,8 +19183,6 @@ export type ViewPreferencesCreateInput = {
   projectId?: Maybe<Scalars["String"]>;
   /** The project label these view preferences are associated with. */
   projectLabelId?: Maybe<Scalars["String"]>;
-  /** The roadmap these view preferences are associated with. */
-  roadmapId?: Maybe<Scalars["String"]>;
   /** The team these view preferences are associated with. */
   teamId?: Maybe<Scalars["String"]>;
   /** The type of view preferences (either user or organization level preferences). */
@@ -19228,7 +19234,6 @@ export enum ViewType {
   Backlog = "backlog",
   Board = "board",
   CompletedCycle = "completedCycle",
-  CustomRoadmap = "customRoadmap",
   CustomView = "customView",
   CustomViews = "customViews",
   Customer = "customer",
@@ -21025,7 +21030,7 @@ export type ApiKeyFragment = { __typename: "ApiKey" } & Pick<
 
 export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
   AgentActivity,
-  "sourceMetadata" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+  "signal" | "sourceMetadata" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & {
     agentSession: { __typename?: "AgentSession" } & Pick<AgentSession, "id">;
     sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -21040,6 +21045,9 @@ export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
 
 export type EmailIntakeAddressFragment = { __typename: "EmailIntakeAddress" } & Pick<
   EmailIntakeAddress,
+  | "issueCanceledAutoReply"
+  | "issueCompletedAutoReply"
+  | "issueCreatedAutoReply"
   | "forwardingEmailAddress"
   | "updatedAt"
   | "senderName"
@@ -21050,6 +21058,9 @@ export type EmailIntakeAddressFragment = { __typename: "EmailIntakeAddress" } & 
   | "address"
   | "repliesEnabled"
   | "customerRequestsEnabled"
+  | "issueCanceledAutoReplyEnabled"
+  | "issueCompletedAutoReplyEnabled"
+  | "useUserNamesInReplies"
   | "enabled"
 > & {
     sesDomainIdentity?: Maybe<{ __typename?: "SesDomainIdentity" } & SesDomainIdentityFragment>;
@@ -23578,8 +23589,6 @@ type Node_LabelNotificationSubscription_Fragment = { __typename: "LabelNotificat
   "id"
 >;
 
-type Node_Meeting_Fragment = { __typename: "Meeting" } & Pick<Meeting, "id">;
-
 type Node_OauthClientApproval_Fragment = { __typename: "OauthClientApproval" } & Pick<OauthClientApproval, "id">;
 
 type Node_OauthClientApprovalNotification_Fragment = { __typename: "OauthClientApprovalNotification" } & Pick<
@@ -23727,7 +23736,6 @@ export type NodeFragment =
   | Node_IssueSearchResult_Fragment
   | Node_IssueSuggestion_Fragment
   | Node_LabelNotificationSubscription_Fragment
-  | Node_Meeting_Fragment
   | Node_OauthClientApproval_Fragment
   | Node_OauthClientApprovalNotification_Fragment
   | Node_Organization_Fragment
@@ -32495,6 +32503,9 @@ export const EmailIntakeAddressFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SesDomainIdentity" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "issueCanceledAutoReply" } },
+          { kind: "Field", name: { kind: "Name", value: "issueCompletedAutoReply" } },
+          { kind: "Field", name: { kind: "Name", value: "issueCreatedAutoReply" } },
           { kind: "Field", name: { kind: "Name", value: "forwardingEmailAddress" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "senderName" } },
@@ -32529,6 +32540,9 @@ export const EmailIntakeAddressFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "address" } },
           { kind: "Field", name: { kind: "Name", value: "repliesEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "customerRequestsEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "issueCanceledAutoReplyEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "issueCompletedAutoReplyEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "useUserNamesInReplies" } },
           { kind: "Field", name: { kind: "Name", value: "enabled" } },
         ],
       },
@@ -35846,6 +35860,7 @@ export const AgentActivityFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "signal" } },
           { kind: "Field", name: { kind: "Name", value: "sourceMetadata" } },
           {
             kind: "Field",
