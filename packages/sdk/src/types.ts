@@ -95,3 +95,8 @@ export interface LinearErrorRaw {
   /** Error information for the response */
   response?: LinearRawResponse<unknown>;
 }
+
+/**
+ * @deprecated These types have been moved to `@linear/sdk/webhooks`. Import from there instead.
+ */
+export * from "./deprecated-types";

@@ -133,3 +133,8 @@ export class LinearWebhookClient {
     return parsedBody as LinearWebhookPayload;
   }
 }
+
+/**
+ * @deprecated LinearWebhooks has been renamed: use LinearWebhookClient instead. This alias will be removed in a future version.
+ */
+export const LinearWebhooks = LinearWebhookClient;
