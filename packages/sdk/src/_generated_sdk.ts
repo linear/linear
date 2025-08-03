@@ -224,6 +224,7 @@ export class AgentActivity extends Request {
     this.id = data.id;
     this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.signal = data.signal ?? undefined;
     this.content = data.content;
     this._agentSession = data.agentSession;
     this._sourceComment = data.sourceComment ?? undefined;
@@ -242,6 +243,8 @@ export class AgentActivity extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
+  public signal?: L.AgentActivitySignal;
   /** The content of the activity */
   public content: L.AgentActivityContent;
   /** The agent session this activity belongs to. */
@@ -1997,7 +2000,7 @@ export class CustomView extends Request {
     this.name = data.name;
     this.projectFilterData = data.projectFilterData ?? undefined;
     this.shared = data.shared;
-    this.slugId = data.slugId ?? undefined;
+    this.slugId = data.slugId;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.organizationViewPreferences = data.organizationViewPreferences
       ? new ViewPreferences(request, data.organizationViewPreferences)
@@ -2043,7 +2046,7 @@ export class CustomView extends Request {
   /** Whether the custom view is shared with everyone in the organization. */
   public shared: boolean;
   /** The custom view's unique URL slug. */
-  public slugId?: string;
+  public slugId: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -4813,9 +4816,15 @@ export class EmailIntakeAddress extends Request {
     this.enabled = data.enabled;
     this.forwardingEmailAddress = data.forwardingEmailAddress ?? undefined;
     this.id = data.id;
+    this.issueCanceledAutoReply = data.issueCanceledAutoReply ?? undefined;
+    this.issueCanceledAutoReplyEnabled = data.issueCanceledAutoReplyEnabled;
+    this.issueCompletedAutoReply = data.issueCompletedAutoReply ?? undefined;
+    this.issueCompletedAutoReplyEnabled = data.issueCompletedAutoReplyEnabled;
+    this.issueCreatedAutoReply = data.issueCreatedAutoReply ?? undefined;
     this.repliesEnabled = data.repliesEnabled;
     this.senderName = data.senderName ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.useUserNamesInReplies = data.useUserNamesInReplies;
     this.sesDomainIdentity = data.sesDomainIdentity
       ? new SesDomainIdentity(request, data.sesDomainIdentity)
       : undefined;
@@ -4839,6 +4848,16 @@ export class EmailIntakeAddress extends Request {
   public forwardingEmailAddress?: string;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The auto-reply message for issue canceled. If not set, the default reply will be used. */
+  public issueCanceledAutoReply?: string;
+  /** Whether the auto-reply for issue canceled is enabled. */
+  public issueCanceledAutoReplyEnabled: boolean;
+  /** The auto-reply message for issue completed. If not set, the default reply will be used. */
+  public issueCompletedAutoReply?: string;
+  /** Whether the auto-reply for issue completed is enabled. */
+  public issueCompletedAutoReplyEnabled: boolean;
+  /** The auto-reply message for issue created. If not set, the default reply will be used. */
+  public issueCreatedAutoReply?: string;
   /** Whether email replies are enabled. */
   public repliesEnabled: boolean;
   /** The name to be used for outgoing emails. */
@@ -4848,6 +4867,8 @@ export class EmailIntakeAddress extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** Whether the commenter's name is included in the email replies. */
+  public useUserNamesInReplies: boolean;
   /** The SES domain identity that the email address is associated with. */
   public sesDomainIdentity?: SesDomainIdentity;
   /** The type of the email address. */

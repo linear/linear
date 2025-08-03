@@ -2741,6 +2741,8 @@ fragment ApiKey on ApiKey {
 # An activity within an agent context.
 fragment AgentActivity on AgentActivity {
   __typename
+  # An optional modifier that provides additional instructions on how the activity should be interpreted.
+  signal
   # Metadata about the external source that created this agent activity.
   sourceMetadata
   # The agent session this activity belongs to.
@@ -2790,6 +2792,12 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   sesDomainIdentity {
     ...SesDomainIdentity
   }
+  # The auto-reply message for issue canceled. If not set, the default reply will be used.
+  issueCanceledAutoReply
+  # The auto-reply message for issue completed. If not set, the default reply will be used.
+  issueCompletedAutoReply
+  # The auto-reply message for issue created. If not set, the default reply will be used.
+  issueCreatedAutoReply
   # The email address used to forward emails to the intake address.
   forwardingEmailAddress
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -2823,6 +2831,12 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   repliesEnabled
   # Whether issues created from that email address will be turned into customer requests.
   customerRequestsEnabled
+  # Whether the auto-reply for issue canceled is enabled.
+  issueCanceledAutoReplyEnabled
+  # Whether the auto-reply for issue completed is enabled.
+  issueCompletedAutoReplyEnabled
+  # Whether the commenter's name is included in the email replies.
+  useUserNamesInReplies
   # Whether the email address is enabled.
   enabled
 }

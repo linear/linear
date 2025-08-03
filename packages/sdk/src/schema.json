@@ -235,6 +235,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "signal",
+            "description": "An optional modifier that provides additional instructions on how the activity should be interpreted.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "AgentActivitySignal",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -976,6 +988,23 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "AgentActivitySignal",
+        "description": "A modifier that provides additional instructions on how the activity should be interpreted.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "stop",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
         "possibleTypes": null
       },
       {
@@ -9270,9 +9299,13 @@
             "description": "The custom view's unique URL slug.",
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -20778,18 +20811,6 @@
             "deprecationReason": null
           },
           {
-            "name": "meeting",
-            "description": "[ALPHA] The meeting that the content is associated with.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "Meeting",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "restoredAt",
             "description": "The time at which the document content was restored from a previous version.",
             "args": [],
@@ -23453,6 +23474,22 @@
             "deprecationReason": null
           },
           {
+            "name": "useUserNamesInReplies",
+            "description": "Whether the commenter's name is included in the email replies.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "template",
             "description": "The template that the email address is associated with.",
             "args": [],
@@ -23528,6 +23565,74 @@
                 "name": "Boolean",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCreatedAutoReply",
+            "description": "The auto-reply message for issue created. If not set, the default reply will be used.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCompletedAutoReplyEnabled",
+            "description": "Whether the auto-reply for issue completed is enabled.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCompletedAutoReply",
+            "description": "The auto-reply message for issue completed. If not set, the default reply will be used.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCanceledAutoReplyEnabled",
+            "description": "Whether the auto-reply for issue canceled is enabled.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCanceledAutoReply",
+            "description": "The auto-reply message for issue canceled. If not set, the default reply will be used.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -23628,6 +23733,78 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "useUserNamesInReplies",
+            "description": "Whether the commenter's name is included in the email replies.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCreatedAutoReply",
+            "description": "The auto-reply message for issue created.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCompletedAutoReplyEnabled",
+            "description": "Whether the issue completed auto-reply is enabled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCompletedAutoReply",
+            "description": "The auto-reply message for issue completed.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCanceledAutoReplyEnabled",
+            "description": "Whether the issue canceled auto-reply is enabled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCanceledAutoReply",
+            "description": "The auto-reply message for issue canceled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null,
@@ -23782,18 +23959,6 @@
             "deprecationReason": null
           },
           {
-            "name": "repliesEnabled",
-            "description": "Whether email replies are enabled.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "teamId",
             "description": "The identifier or key of the team this email address will intake issues for.",
             "type": {
@@ -23808,6 +23973,90 @@
           {
             "name": "templateId",
             "description": "The identifier of the template this email address will intake issues for.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "repliesEnabled",
+            "description": "Whether email replies are enabled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "useUserNamesInReplies",
+            "description": "Whether the commenter's name is included in the email replies.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCreatedAutoReply",
+            "description": "The auto-reply message for issue created.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCompletedAutoReplyEnabled",
+            "description": "Whether the issue completed auto-reply is enabled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCompletedAutoReply",
+            "description": "Custom auto-reply message for issue completed.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCanceledAutoReplyEnabled",
+            "description": "Whether the issue canceled auto-reply is enabled.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCanceledAutoReply",
+            "description": "Custom auto-reply message for issue canceled.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -31368,6 +31617,18 @@
             "deprecationReason": null
           },
           {
+            "name": "creator",
+            "description": "Filters that the initiative creator must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableUserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "status",
             "description": "Comparator for the initiative status: Planned, Active, Completed",
             "type": {
@@ -31380,11 +31641,11 @@
             "deprecationReason": null
           },
           {
-            "name": "creator",
-            "description": "Filters that the initiative creator must satisfy.",
+            "name": "teams",
+            "description": "Filters that the initiative teams must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "UserFilter",
+              "name": "TeamCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -31396,7 +31657,19 @@
             "description": "Filters that the initiative owner must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "UserFilter",
+              "name": "NullableUserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "targetDate",
+            "description": "Comparator for the initiative target date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -31418,6 +31691,18 @@
           {
             "name": "healthWithAge",
             "description": "Comparator for the initiative health (with age): onTrack, atRisk, offTrack, outdated, noUpdate",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "activityType",
+            "description": "Comparator for the initiative activity type.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "StringComparator",
@@ -31887,6 +32172,18 @@
             "deprecationReason": null
           },
           {
+            "name": "creator",
+            "description": "Filters that the initiative creator must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableUserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "status",
             "description": "Comparator for the initiative status: Planned, Active, Completed",
             "type": {
@@ -31899,11 +32196,11 @@
             "deprecationReason": null
           },
           {
-            "name": "creator",
-            "description": "Filters that the initiative creator must satisfy.",
+            "name": "teams",
+            "description": "Filters that the initiative teams must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "UserFilter",
+              "name": "TeamCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -31915,7 +32212,19 @@
             "description": "Filters that the initiative owner must satisfy.",
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "UserFilter",
+              "name": "NullableUserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "targetDate",
+            "description": "Comparator for the initiative target date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableDateComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -31937,6 +32246,18 @@
           {
             "name": "healthWithAge",
             "description": "Comparator for the initiative health (with age): onTrack, atRisk, offTrack, outdated, noUpdate",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "activityType",
+            "description": "Comparator for the initiative activity type.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "StringComparator",
@@ -37130,18 +37451,6 @@
           },
           {
             "name": "gitHubPersonal",
-            "description": null,
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "GitHubPersonalSettingsInput",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "githubCodeAccessPersonal",
             "description": null,
             "type": {
               "kind": "INPUT_OBJECT",
@@ -54896,271 +55205,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "OBJECT",
-        "name": "Meeting",
-        "description": "[Internal] A meeting that can be attached to different entities.",
-        "fields": [
-          {
-            "name": "id",
-            "description": "The unique identifier of the entity.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "createdAt",
-            "description": "The time at which the entity was created.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "DateTime",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "updatedAt",
-            "description": "The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't\n    been updated after creation.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "DateTime",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "archivedAt",
-            "description": "The time at which the entity was archived. Null if the entity has not been archived.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "DateTime",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "title",
-            "description": "The meeting title.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "location",
-            "description": "The location of the meeting.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "meetingLink",
-            "description": "The meeting link of the meeting.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "recordingLink",
-            "description": "Link to a recording of the meeting.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "icon",
-            "description": "The icon of the meeting.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "color",
-            "description": "The color of the icon.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "creator",
-            "description": "The user who created the meeting.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "User",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "updatedBy",
-            "description": "The user who last updated the meeting.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "User",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "project",
-            "description": "The project that the meeting is associated with.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "Project",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "initiative",
-            "description": "[Internal] The initiative that the meeting is associated with.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "Initiative",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "startsAt",
-            "description": "The time at which the meeting is set to start.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "DateTime",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "endsAt",
-            "description": "The time at which the meeting is set to end.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "DateTime",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "hiddenAt",
-            "description": "The time at which the meeting was hidden. Null if the entity has not been hidden.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "DateTime",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "trashed",
-            "description": "A flag that indicates whether the meeting is in the trash bin.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sortOrder",
-            "description": "The order of the item in the resources list.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [
-          {
-            "kind": "INTERFACE",
-            "name": "Node",
-            "ofType": null
-          }
-        ],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
         "kind": "INPUT_OBJECT",
         "name": "MilestoneSort",
         "description": "Issue project milestone options.",
@@ -68794,11 +68838,6 @@
           {
             "kind": "OBJECT",
             "name": "LabelNotificationSubscription",
-            "ofType": null
-          },
-          {
-            "kind": "OBJECT",
-            "name": "Meeting",
             "ofType": null
           },
           {
@@ -108444,6 +108483,18 @@
             "defaultValue": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "defaultTeam",
+            "description": "The Salesforce team to use when a template doesn't specify a team.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "interfaces": null,
@@ -121744,18 +121795,6 @@
             "deprecationReason": null
           },
           {
-            "name": "roadmapId",
-            "description": "The roadmap these view preferences are associated with.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "initiativeId",
             "description": "[Internal] The initiative these view preferences are associated with.",
             "type": {
@@ -122119,12 +122158,6 @@
             "deprecationReason": null
           },
           {
-            "name": "roadmapAll",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "initiative",
             "description": null,
             "isDeprecated": false,
@@ -122293,7 +122326,7 @@
             "deprecationReason": null
           },
           {
-            "name": "customRoadmap",
+            "name": "roadmapAll",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

@@ -58,6 +58,10 @@ type AgentActivity implements Node {
   """
   id: ID!
   """
+  An optional modifier that provides additional instructions on how the activity should be interpreted.
+  """
+  signal: AgentActivitySignal
+  """
   The comment this activity is linked to.
   """
   sourceComment: Comment
@@ -261,6 +265,13 @@ type AgentActivityResponseContent {
   The type of activity.
   """
   type: AgentActivityType!
+}
+
+"""
+A modifier that provides additional instructions on how the activity should be interpreted.
+"""
+enum AgentActivitySignal {
+  stop
 }
 
 """
@@ -2683,7 +2694,7 @@ type CustomView implements Node {
   """
   The custom view's unique URL slug.
   """
-  slugId: String
+  slugId: String!
   """
   The team associated with the custom view.
   """
@@ -5860,10 +5871,6 @@ type DocumentContent implements Node {
   """
   issue: Issue
   """
-  [ALPHA] The meeting that the content is associated with.
-  """
-  meeting: Meeting
-  """
   The project that the content is associated with.
   """
   project: Project
@@ -6615,6 +6622,26 @@ type EmailIntakeAddress implements Node {
   """
   id: ID!
   """
+  The auto-reply message for issue canceled. If not set, the default reply will be used.
+  """
+  issueCanceledAutoReply: String
+  """
+  Whether the auto-reply for issue canceled is enabled.
+  """
+  issueCanceledAutoReplyEnabled: Boolean!
+  """
+  The auto-reply message for issue completed. If not set, the default reply will be used.
+  """
+  issueCompletedAutoReply: String
+  """
+  Whether the auto-reply for issue completed is enabled.
+  """
+  issueCompletedAutoReplyEnabled: Boolean!
+  """
+  The auto-reply message for issue created. If not set, the default reply will be used.
+  """
+  issueCreatedAutoReply: String
+  """
   The organization that the email address is associated with.
   """
   organization: Organization!
@@ -6647,6 +6674,10 @@ type EmailIntakeAddress implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  Whether the commenter's name is included in the email replies.
+  """
+  useUserNamesInReplies: Boolean!
 }
 
 input EmailIntakeAddressCreateInput {
@@ -6662,6 +6693,26 @@ input EmailIntakeAddressCreateInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  The auto-reply message for issue canceled.
+  """
+  issueCanceledAutoReply: String
+  """
+  Whether the issue canceled auto-reply is enabled.
+  """
+  issueCanceledAutoReplyEnabled: Boolean
+  """
+  The auto-reply message for issue completed.
+  """
+  issueCompletedAutoReply: String
+  """
+  Whether the issue completed auto-reply is enabled.
+  """
+  issueCompletedAutoReplyEnabled: Boolean
+  """
+  The auto-reply message for issue created.
+  """
+  issueCreatedAutoReply: String
   """
   Whether email replies are enabled.
   """
@@ -6682,6 +6733,10 @@ input EmailIntakeAddressCreateInput {
   The type of the email address. If not provided, the backend will default to team or template.
   """
   type: EmailIntakeAddressType
+  """
+  Whether the commenter's name is included in the email replies.
+  """
+  useUserNamesInReplies: Boolean
 }
 
 type EmailIntakeAddressPayload {
@@ -6722,6 +6777,26 @@ input EmailIntakeAddressUpdateInput {
   """
   forwardingEmailAddress: String
   """
+  Custom auto-reply message for issue canceled.
+  """
+  issueCanceledAutoReply: String
+  """
+  Whether the issue canceled auto-reply is enabled.
+  """
+  issueCanceledAutoReplyEnabled: Boolean
+  """
+  Custom auto-reply message for issue completed.
+  """
+  issueCompletedAutoReply: String
+  """
+  Whether the issue completed auto-reply is enabled.
+  """
+  issueCompletedAutoReplyEnabled: Boolean
+  """
+  The auto-reply message for issue created.
+  """
+  issueCreatedAutoReply: String
+  """
   Whether email replies are enabled.
   """
   repliesEnabled: Boolean
@@ -6737,6 +6812,10 @@ input EmailIntakeAddressUpdateInput {
   The identifier of the template this email address will intake issues for.
   """
   templateId: String
+  """
+  Whether the commenter's name is included in the email replies.
+  """
+  useUserNamesInReplies: Boolean
 }
 
 input EmailUnsubscribeInput {
@@ -8815,6 +8894,10 @@ Initiative collection filtering options.
 """
 input InitiativeCollectionFilter {
   """
+  Comparator for the initiative activity type.
+  """
+  activityType: StringComparator
+  """
   Filters that the initiative must be an ancestor of.
   """
   ancestors: InitiativeCollectionFilter
@@ -8829,7 +8912,7 @@ input InitiativeCollectionFilter {
   """
   Filters that the initiative creator must satisfy.
   """
-  creator: UserFilter
+  creator: NullableUserFilter
   """
   Filters that needs to be matched by all initiatives.
   """
@@ -8861,7 +8944,7 @@ input InitiativeCollectionFilter {
   """
   Filters that the initiative owner must satisfy.
   """
-  owner: UserFilter
+  owner: NullableUserFilter
   """
   Comparator for the initiative slug ID.
   """
@@ -8874,6 +8957,14 @@ input InitiativeCollectionFilter {
   Comparator for the initiative status: Planned, Active, Completed
   """
   status: StringComparator
+  """
+  Comparator for the initiative target date.
+  """
+  targetDate: NullableDateComparator
+  """
+  Filters that the initiative teams must satisfy.
+  """
+  teams: TeamCollectionFilter
   """
   Comparator for the updated at date.
   """
@@ -8963,6 +9054,10 @@ Initiative filtering options.
 """
 input InitiativeFilter {
   """
+  Comparator for the initiative activity type.
+  """
+  activityType: StringComparator
+  """
   Filters that the initiative must be an ancestor of.
   """
   ancestors: InitiativeCollectionFilter
@@ -8977,7 +9072,7 @@ input InitiativeFilter {
   """
   Filters that the initiative creator must satisfy.
   """
-  creator: UserFilter
+  creator: NullableUserFilter
   """
   Comparator for the initiative health: onTrack, atRisk, offTrack
   """
@@ -9001,7 +9096,7 @@ input InitiativeFilter {
   """
   Filters that the initiative owner must satisfy.
   """
-  owner: UserFilter
+  owner: NullableUserFilter
   """
   Comparator for the initiative slug ID.
   """
@@ -9010,6 +9105,14 @@ input InitiativeFilter {
   Comparator for the initiative status: Planned, Active, Completed
   """
   status: StringComparator
+  """
+  Comparator for the initiative target date.
+  """
+  targetDate: NullableDateComparator
+  """
+  Filters that the initiative teams must satisfy.
+  """
+  teams: TeamCollectionFilter
   """
   Comparator for the updated at date.
   """
@@ -10386,7 +10489,6 @@ input IntegrationSettingsInput {
   gitHubImport: GitHubImportSettingsInput
   gitHubPersonal: GitHubPersonalSettingsInput
   gitLab: GitLabSettingsInput
-  githubCodeAccessPersonal: GitHubPersonalSettingsInput
   googleSheets: GoogleSheetsSettingsInput
   intercom: IntercomSettingsInput
   jira: JiraSettingsInput
@@ -15537,89 +15639,6 @@ input ManualSort {
   The order for the individual sort
   """
   order: PaginationSortOrder
-}
-
-"""
-[Internal] A meeting that can be attached to different entities.
-"""
-type Meeting implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The color of the icon.
-  """
-  color: String
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The user who created the meeting.
-  """
-  creator: User
-  """
-  The time at which the meeting is set to end.
-  """
-  endsAt: DateTime
-  """
-  The time at which the meeting was hidden. Null if the entity has not been hidden.
-  """
-  hiddenAt: DateTime
-  """
-  The icon of the meeting.
-  """
-  icon: String
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  [Internal] The initiative that the meeting is associated with.
-  """
-  initiative: Initiative
-  """
-  The location of the meeting.
-  """
-  location: String
-  """
-  The meeting link of the meeting.
-  """
-  meetingLink: String
-  """
-  The project that the meeting is associated with.
-  """
-  project: Project
-  """
-  Link to a recording of the meeting.
-  """
-  recordingLink: String
-  """
-  The order of the item in the resources list.
-  """
-  sortOrder: Float!
-  """
-  The time at which the meeting is set to start.
-  """
-  startsAt: DateTime
-  """
-  The meeting title.
-  """
-  title: String!
-  """
-  A flag that indicates whether the meeting is in the trash bin.
-  """
-  trashed: Boolean
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-  """
-  The user who last updated the meeting.
-  """
-  updatedBy: User
 }
 
 """
@@ -30501,6 +30520,10 @@ input SalesforceSettingsInput {
   """
   automateTicketReopeningOnProjectCompletion: Boolean
   """
+  The Salesforce team to use when a template doesn't specify a team.
+  """
+  defaultTeam: String
+  """
   [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
   """
   disableCustomerRequestsAutoCreation: Boolean
@@ -34326,10 +34349,6 @@ input ViewPreferencesCreateInput {
   """
   projectLabelId: String
   """
-  The roadmap these view preferences are associated with.
-  """
-  roadmapId: String
-  """
   The team these view preferences are associated with.
   """
   teamId: String
@@ -34406,7 +34425,6 @@ enum ViewType {
   backlog
   board
   completedCycle
-  customRoadmap
   customView
   customViews
   customer
