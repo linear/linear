@@ -1,4 +1,4 @@
-import { LINEAR_WEBHOOK_TS_FIELD, LinearWebhooks } from "../webhooks";
+import { LinearWebhooks, LINEAR_WEBHOOK_TS_FIELD } from "../webhooks";
 import crypto from "crypto";
 
 describe("webhooks", () => {
