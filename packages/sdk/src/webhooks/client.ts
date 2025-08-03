@@ -1,35 +1,5 @@
 import crypto from "crypto";
-import {
-  AttachmentWebhookPayload,
-  AuditEntryWebhookPayload,
-  CommentWebhookPayload,
-  CustomerNeedWebhookPayload,
-  CustomerWebhookPayload,
-  CycleWebhookPayload,
-  DocumentWebhookPayload,
-  InitiativeUpdateWebhookPayload,
-  IssueLabelWebhookPayload,
-  IssueWebhookPayload,
-  ProjectUpdateWebhookPayload,
-  ProjectWebhookPayload,
-  ReactionWebhookPayload,
-  UserWebhookPayload,
-} from "../_generated_documents";
-import {
-  AppUserTeamAccessChangedWebhookPayload,
-  InitiativeWebhookPayload,
-  IssueSlaWebhookPayload,
-  OAuthAppWebhookPayload,
-  AgentSessionEventWebhookPayload,
-} from "../_generated_sdk";
-import {
-  LinearWebhookPayload,
-  LinearWebhookEventHandler,
-  LinearWebhookHandler,
-  AppUserNotificationWebhookPayloadWithNotification,
-  EntityWebhookPayloadWithEntityData,
-  EntityWebhookPayloadWithUnknownEntityData,
-} from "./types";
+import { LinearWebhookPayload, LinearWebhookEventHandler, LinearWebhookHandler, LinearWebhookEventType } from "./types";
 
 export const LINEAR_WEBHOOK_SIGNATURE_HEADER = "linear-signature";
 export const LINEAR_WEBHOOK_TS_FIELD = "webhookTimestamp";
@@ -46,7 +16,7 @@ export class LinearWebhookClient {
    * Returns `(request: Request) => Promise<Response>`
    */
   public createHandler(): LinearWebhookHandler {
-    const eventHandlers = new Map<string, LinearWebhookEventHandler[]>();
+    const eventHandlers = new Map<string, LinearWebhookEventHandler<LinearWebhookPayload>[]>();
 
     const handler = async (request: Request): Promise<Response> => {
       try {
@@ -82,16 +52,22 @@ export class LinearWebhookClient {
       }
     };
 
-    handler.on = function (eventType: string, eventHandler: LinearWebhookEventHandler): void {
+    handler.on = function <T extends LinearWebhookEventType>(
+      eventType: T,
+      eventHandler: LinearWebhookEventHandler<Extract<LinearWebhookPayload, { type: T }>>
+    ): void {
       const handlers = eventHandlers.get(eventType) || [];
-      handlers.push(eventHandler);
+      handlers.push(eventHandler as LinearWebhookEventHandler<LinearWebhookPayload>);
       eventHandlers.set(eventType, handlers);
     };
 
-    handler.off = function (eventType: string, eventHandler: LinearWebhookEventHandler): void {
+    handler.off = function <T extends LinearWebhookEventType>(
+      eventType: T,
+      eventHandler: LinearWebhookEventHandler<Extract<LinearWebhookPayload, { type: T }>>
+    ): void {
       const handlers = eventHandlers.get(eventType);
       if (handlers) {
-        const index = handlers.indexOf(eventHandler);
+        const index = handlers.indexOf(eventHandler as LinearWebhookEventHandler<LinearWebhookPayload>);
         if (index > -1) {
           handlers.splice(index, 1);
           if (handlers.length === 0) {
@@ -147,132 +123,13 @@ export class LinearWebhookClient {
    * @param signature The signature to verify
    * @param timestamp The `webhookTimestamp` field from the request parsed body
    */
-  public parseData(
-    rawBody: Buffer,
-    signature: string,
-    timestamp?: number
-  ):
-    | EntityWebhookPayloadWithEntityData
-    | EntityWebhookPayloadWithUnknownEntityData
-    | IssueSlaWebhookPayload
-    | OAuthAppWebhookPayload
-    | AppUserNotificationWebhookPayloadWithNotification
-    | AppUserTeamAccessChangedWebhookPayload
-    | AgentSessionEventWebhookPayload {
+  public parseData(rawBody: Buffer, signature: string, timestamp?: number): LinearWebhookPayload {
     const verified = this.verify(rawBody, signature, timestamp);
     if (!verified) {
       throw new Error("Invalid webhook signature");
     }
 
     const parsedBody = JSON.parse(rawBody.toString());
-
-    // Handle special webhook types
-    if (parsedBody.type === "IssueSLA") {
-      return parsedBody as IssueSlaWebhookPayload;
-    }
-    if (parsedBody.type === "OAuthApp") {
-      return parsedBody as OAuthAppWebhookPayload;
-    }
-    if (parsedBody.type === "AppUserNotification") {
-      return parsedBody as AppUserNotificationWebhookPayloadWithNotification;
-    }
-    if (parsedBody.type === "PermissionChange") {
-      return parsedBody as AppUserTeamAccessChangedWebhookPayload;
-    }
-    if (parsedBody.type === "AgentSessionEvent") {
-      return parsedBody as AgentSessionEventWebhookPayload;
-    }
-
-    // Handle entity webhook payloads
-    const entityWebhookPayload = parsedBody as EntityWebhookPayloadWithEntityData;
-    return this.parseEntityWebhookPayload(entityWebhookPayload);
-  }
-
-  /**
-   * Parse entity webhook payload based on type
-   * @param payload The entity webhook payload to parse
-   */
-  private parseEntityWebhookPayload(
-    payload: EntityWebhookPayloadWithEntityData
-  ): EntityWebhookPayloadWithEntityData | EntityWebhookPayloadWithUnknownEntityData {
-    switch (payload.type) {
-      case "Attachment":
-        return {
-          ...payload,
-          data: payload.data as AttachmentWebhookPayload,
-        };
-      case "AuditEntry":
-        return {
-          ...payload,
-          data: payload.data as AuditEntryWebhookPayload,
-        };
-      case "Comment":
-        return {
-          ...payload,
-          data: payload.data as CommentWebhookPayload,
-        };
-      case "Customer":
-        return {
-          ...payload,
-          data: payload.data as CustomerWebhookPayload,
-        };
-      case "CustomerNeed":
-        return {
-          ...payload,
-          data: payload.data as CustomerNeedWebhookPayload,
-        };
-      case "Cycle":
-        return {
-          ...payload,
-          data: payload.data as CycleWebhookPayload,
-        };
-      case "Document":
-        return {
-          ...payload,
-          data: payload.data as DocumentWebhookPayload,
-        };
-      case "Initiative":
-        return {
-          ...payload,
-          data: payload.data as InitiativeWebhookPayload,
-        };
-      case "InitiativeUpdate":
-        return {
-          ...payload,
-          data: payload.data as InitiativeUpdateWebhookPayload,
-        };
-      case "Issue":
-        return {
-          ...payload,
-          data: payload.data as IssueWebhookPayload,
-        };
-      case "IssueLabel":
-        return {
-          ...payload,
-          data: payload.data as IssueLabelWebhookPayload,
-        };
-      case "Project":
-        return {
-          ...payload,
-          data: payload.data as ProjectWebhookPayload,
-        };
-      case "ProjectUpdate":
-        return {
-          ...payload,
-          data: payload.data as ProjectUpdateWebhookPayload,
-        };
-      case "Reaction":
-        return {
-          ...payload,
-          data: payload.data as ReactionWebhookPayload,
-        };
-      case "User":
-        return {
-          ...payload,
-          data: payload.data as UserWebhookPayload,
-        };
-      default:
-        return payload as EntityWebhookPayloadWithUnknownEntityData;
-    }
+    return parsedBody as LinearWebhookPayload;
   }
 }

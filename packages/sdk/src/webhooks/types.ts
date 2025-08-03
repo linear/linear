@@ -24,6 +24,10 @@ import {
   AgentSessionEventWebhookPayload,
 } from "../_generated_documents";
 
+/**
+ * Union type representing all possible Linear webhook payloads.
+ * This includes entity webhooks, special webhooks, and notification webhooks.
+ */
 export type LinearWebhookPayload =
   | EntityWebhookPayloadWithEntityData
   | EntityWebhookPayloadWithUnknownEntityData
@@ -33,24 +37,102 @@ export type LinearWebhookPayload =
   | AppUserTeamAccessChangedWebhookPayload
   | AgentSessionEventWebhookPayload;
 
-export type LinearWebhookEventType = LinearWebhookPayload["type"];
+/**
+ * All possible Linear webhook event types.
+ */
+export type LinearWebhookEventType =
+  | "Attachment"
+  | "AuditEntry"
+  | "Comment"
+  | "Customer"
+  | "CustomerNeed"
+  | "Cycle"
+  | "Document"
+  | "Initiative"
+  | "InitiativeUpdate"
+  | "Issue"
+  | "IssueLabel"
+  | "Project"
+  | "ProjectUpdate"
+  | "Reaction"
+  | "User"
+  | "IssueSLA"
+  | "OAuthApp"
+  | "AppUserNotification"
+  | "PermissionChange"
+  | "AgentSessionEvent";
 
+/**
+ * Maps webhook event types to their corresponding payload types
+ */
+export type LinearWebhookEventTypeMap = {
+  Attachment: EntityWebhookPayloadWithAttachmentData;
+  AuditEntry: EntityWebhookPayloadWithAuditEntryData;
+  Comment: EntityWebhookPayloadWithCommentData;
+  Customer: EntityWebhookPayloadWithCustomerData;
+  CustomerNeed: EntityWebhookPayloadWithCustomerNeedData;
+  Cycle: EntityWebhookPayloadWithCycleData;
+  Document: EntityWebhookPayloadWithDocumentData;
+  Initiative: EntityWebhookPayloadWithInitiativeData;
+  InitiativeUpdate: EntityWebhookPayloadWithInitiativeUpdateData;
+  Issue: EntityWebhookPayloadWithIssueData;
+  IssueLabel: EntityWebhookPayloadWithIssueLabelData;
+  Project: EntityWebhookPayloadWithProjectData;
+  ProjectUpdate: EntityWebhookPayloadWithProjectUpdateData;
+  Reaction: EntityWebhookPayloadWithReactionData;
+  User: EntityWebhookPayloadWithUserData;
+  IssueSLA: IssueSlaWebhookPayload;
+  OAuthApp: OAuthAppWebhookPayload;
+  AppUserNotification: AppUserNotificationWebhookPayloadWithNotification;
+  PermissionChange: AppUserTeamAccessChangedWebhookPayload;
+  AgentSessionEvent: AgentSessionEventWebhookPayload;
+};
+
+/**
+ * Event handler function for webhook events.
+ * @template T - The specific webhook payload type
+ * @param payload - The webhook payload data
+ * @returns void or Promise<void>
+ */
 export type LinearWebhookEventHandler<T extends LinearWebhookPayload = LinearWebhookPayload> = (
   payload: T
 ) => void | Promise<void>;
 
+/**
+ * Webhook handler interface that provides event registration capabilities.
+ * This interface extends the Request handler with event listener methods.
+ */
 export interface LinearWebhookHandler {
+  /** Handles incoming webhook requests */
   (request: Request): Promise<Response>;
+  /**
+   * Registers an event handler for webhook events.
+   *
+   * @template T - The specific event type (when not using wildcard)
+   * @param eventType - The event type to listen for, or `*` for all events
+   * @param handler - The handler function to call when the event occurs
+   */
   on<T extends LinearWebhookEventType>(
     eventType: T,
-    handler: LinearWebhookEventHandler<Extract<LinearWebhookPayload, { type: T }>>
+    handler: LinearWebhookEventHandler<LinearWebhookEventTypeMap[T]>
   ): void;
   on(eventType: "*", handler: LinearWebhookEventHandler<LinearWebhookPayload>): void;
+  /**
+   * Removes an event handler for webhook events.
+   *
+   * @template T - The specific event type (when not using wildcard)
+   * @param eventType - The event type to remove the handler from, or `*` for wildcard handler
+   * @param handler - The handler function to remove
+   */
   off<T extends LinearWebhookEventType>(
     eventType: T,
-    handler: LinearWebhookEventHandler<Extract<LinearWebhookPayload, { type: T }>>
+    handler: LinearWebhookEventHandler<LinearWebhookEventTypeMap[T]>
   ): void;
   off(eventType: "*", handler: LinearWebhookEventHandler<LinearWebhookPayload>): void;
+  /**
+   * Removes all event handlers for a specific event type, or all handlers if no event type is specified.
+   * @param eventType - Optional event type to remove handlers for
+   */
   removeAllListeners(eventType?: string): void;
 }
 
