@@ -99,4 +99,23 @@ export interface LinearErrorRaw {
 /**
  * @deprecated These types have been moved to `@linear/sdk/webhooks`. Import from there instead.
  */
-export * from "./deprecated-types";
+export type {
+  AppUserNotificationWebhookPayloadWithNotification,
+  EntityWebhookPayloadWithUnknownEntityData,
+  EntityWebhookPayloadWithEntityData,
+  EntityWebhookPayloadWithAttachmentData,
+  EntityWebhookPayloadWithAuditEntryData,
+  EntityWebhookPayloadWithCommentData,
+  EntityWebhookPayloadWithCustomerData,
+  EntityWebhookPayloadWithCustomerNeedData,
+  EntityWebhookPayloadWithCycleData,
+  EntityWebhookPayloadWithDocumentData,
+  EntityWebhookPayloadWithInitiativeData,
+  EntityWebhookPayloadWithInitiativeUpdateData,
+  EntityWebhookPayloadWithIssueData,
+  EntityWebhookPayloadWithIssueLabelData,
+  EntityWebhookPayloadWithProjectData,
+  EntityWebhookPayloadWithProjectUpdateData,
+  EntityWebhookPayloadWithReactionData,
+  EntityWebhookPayloadWithUserData,
+} from "./webhooks/types";
