@@ -8,6 +8,10 @@ export const LINEAR_WEBHOOK_TS_FIELD = "webhookTimestamp";
  * Client for handling Linear webhook requests with helpers.
  */
 export class LinearWebhookClient {
+  /**
+   * Creates a new LinearWebhookClient instance
+   * @param secret The webhook signing secret. See https://linear.app/developers/webhooks#securing-webhooks.
+   */
   public constructor(private secret: string) {}
 
   /**
