@@ -8,25 +8,14 @@
   "module": "dist/index-es.min.js",
   "unpkg": "dist/index-umd.min.js",
   "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index-es.min.js",
-      "require": "./dist/index-cjs.min.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./webhooks": {
-      "import": "./dist/webhooks/index-es.min.js",
-      "require": "./dist/webhooks/index-cjs.min.js",
-      "types": "./dist/webhooks/index.d.ts"
-    }
-  },
   "repository": "https://github.com/linear/linear",
   "engines": {
     "node": ">=12.x",
     "yarn": "1.x"
   },
   "files": [
-    "dist"
+    "dist",
+    "webhooks"
   ],
   "scripts": {
     "build:clean": "npx rimraf -G dist .rollup-cache tsconfig.tsbuildinfo",
