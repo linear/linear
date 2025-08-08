@@ -338,6 +338,16 @@ describe("generated", () => {
         console.warn("codegen-doc:print: No AgentActivity found - cannot test agentActivity.sourceComment query");
       }
     });
+
+    /** Test the agentActivity.user query for L.User */
+    it("agentActivity.user", async () => {
+      if (_agentActivity) {
+        const agentActivity_user: L.User | undefined = await _agentActivity.user;
+        expect(agentActivity_user instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No AgentActivity found - cannot test agentActivity.user query");
+      }
+    });
   });
 
   /** Test all AgentSession queries */
@@ -1088,6 +1098,16 @@ describe("generated", () => {
         expect(customerNeed instanceof L.CustomerNeed);
       } else {
         console.warn("codegen-doc:print: No first CustomerNeed found in connection - cannot test customerNeed query");
+      }
+    });
+
+    /** Test the customerNeed model query for CustomerNeed_ProjectAttachment */
+    it("customerNeed.projectAttachment", async () => {
+      if (_customerNeed) {
+        const projectAttachment: L.ProjectAttachment | undefined = _customerNeed.projectAttachment;
+        expect(projectAttachment instanceof L.ProjectAttachment);
+      } else {
+        console.warn("codegen-doc:print: No customerNeed found - cannot test _customerNeed.projectAttachment query");
       }
     });
 

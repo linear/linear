@@ -84,6 +84,8 @@ export type AgentActivity = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+  /** The user who created this agent activity. */
+  user: User;
 };
 
 /** Content for an action activity (tool call or action). */
@@ -125,8 +127,11 @@ export type AgentActivityCreateInput = {
   content: Scalars["JSONObject"];
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
+  /** [Internal] An optional modifier that provides additional instructions on how the activity should be interpreted. */
+  signal?: Maybe<AgentActivitySignal>;
 };
 
+/** [Internal] Input for creating prompt-type agent activities (created by users). */
 export type AgentActivityCreatePromptInput = {
   /** The agent session this activity belongs to. */
   agentSessionId: Scalars["String"];
@@ -134,8 +139,10 @@ export type AgentActivityCreatePromptInput = {
   content: Scalars["JSONObject"];
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
+  /** [Internal] An optional modifier that provides additional instructions on how the activity should be interpreted. */
+  signal?: Maybe<AgentActivitySignal>;
   /** The comment that contains the content of this activity. */
-  sourceCommentId: Scalars["String"];
+  sourceCommentId?: Maybe<Scalars["String"]>;
 };
 
 export type AgentActivityEdge = {
@@ -427,6 +434,8 @@ export type ApiKey = Node & {
   id: Scalars["ID"];
   /** The label of the API key. */
   label: Scalars["String"];
+  /** When the API key was last used. */
+  lastActiveAt?: Maybe<Scalars["DateTime"]>;
   /** Organization the API key belongs to. */
   organization: Organization;
   /** The sync groups that this API key requests access to. If null, the API key has access to all sync groups the user has access to. The final set of sync groups is computed as the intersection of these requested groups with the user's base sync groups. */
@@ -5582,6 +5591,7 @@ export enum InitiativeStatus {
 export enum InitiativeTab {
   Overview = "overview",
   Projects = "projects",
+  Updates = "updates",
 }
 
 /** Initiative target date sorting options. */
@@ -6128,6 +6138,14 @@ export type IntegrationSettingsInput = {
   zendesk?: Maybe<ZendeskSettingsInput>;
 };
 
+export type IntegrationSlackWorkspaceNamePayload = {
+  __typename?: "IntegrationSlackWorkspaceNamePayload";
+  /** The current name of the Slack workspace. */
+  name: Scalars["String"];
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
 /** Join table between templates and integrations. */
 export type IntegrationTemplate = Node & {
   __typename?: "IntegrationTemplate";
@@ -6474,7 +6492,7 @@ export type Issue = Node & {
   subIssueSortOrder?: Maybe<Scalars["Float"]>;
   /** Users who are subscribed to the issue. */
   subscribers: UserConnection;
-  /** [Internal] Product intelligence suggestions for the issue. */
+  /** [Internal] Product Intelligence suggestions for the issue. */
   suggestions: IssueSuggestionConnection;
   /** [Internal] The time at which the most recent suggestions for this issue were generated. */
   suggestionsGeneratedAt?: Maybe<Scalars["DateTime"]>;
@@ -8089,7 +8107,7 @@ export type IssueSearchResult = Node & {
   subIssueSortOrder?: Maybe<Scalars["Float"]>;
   /** Users who are subscribed to the issue. */
   subscribers: UserConnection;
-  /** [Internal] Product intelligence suggestions for the issue. */
+  /** [Internal] Product Intelligence suggestions for the issue. */
   suggestions: IssueSuggestionConnection;
   /** [Internal] The time at which the most recent suggestions for this issue were generated. */
   suggestionsGeneratedAt?: Maybe<Scalars["DateTime"]>;
@@ -8846,7 +8864,7 @@ export type Mutation = {
   __typename?: "Mutation";
   /** Creates an agent activity. */
   agentActivityCreate: AgentActivityPayload;
-  /** Creates a prompt agent activity from Linear user input. */
+  /** [Internal] Creates a prompt agent activity from Linear user input. */
   agentActivityCreatePrompt: AgentActivityPayload;
   /** Updates the externalUrl of an agent session, which is an agent-hosted page associated with this session. */
   agentSessionUpdateExternalUrl: AgentSessionPayload;
@@ -9135,6 +9153,8 @@ export type Mutation = {
   integrationSlackImportEmojis: IntegrationPayload;
   /** [Internal] Slack integration for initiative notifications. */
   integrationSlackInitiativePost: SlackChannelConnectPayload;
+  /** Updates the Slack team's name in Linear for an existing Slack or Asks integration. */
+  integrationSlackOrAsksUpdateSlackTeamName: IntegrationSlackWorkspaceNamePayload;
   /** [Internal] Slack integration for organization level initiative update notifications. */
   integrationSlackOrgInitiativeUpdatesPost: SlackChannelConnectPayload;
   /** Slack integration for organization level project update notifications. */
@@ -10161,6 +10181,10 @@ export type MutationIntegrationSlackInitiativePostArgs = {
   code: Scalars["String"];
   initiativeId: Scalars["String"];
   redirectUri: Scalars["String"];
+};
+
+export type MutationIntegrationSlackOrAsksUpdateSlackTeamNameArgs = {
+  integrationId: Scalars["String"];
 };
 
 export type MutationIntegrationSlackOrgInitiativeUpdatesPostArgs = {
@@ -13366,7 +13390,7 @@ export type ProjectArchivePayload = ArchivePayload & {
   success: Scalars["Boolean"];
 };
 
-/** [INTERNAL] Project attachment */
+/** Project attachment */
 export type ProjectAttachment = Node & {
   __typename?: "ProjectAttachment";
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -14865,6 +14889,7 @@ export enum ProjectTab {
   Customers = "customers",
   Documents = "documents",
   Issues = "issues",
+  Updates = "updates",
 }
 
 /** An update associated with a project. */
@@ -15293,6 +15318,8 @@ export type PullRequest = Node & {
   createdAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** Merge settings for this pull request. */
+  mergeSettings?: Maybe<PullRequestMergeSettings>;
   /** The number of the pull request in the version control system. */
   number: Scalars["Float"];
   /** The source branch of the pull request. */
@@ -15310,6 +15337,32 @@ export type PullRequest = Node & {
   updatedAt: Scalars["DateTime"];
   /** The URL of the pull request in the version control system. */
   url: Scalars["String"];
+};
+
+/** The method used to merge a pull request. */
+export enum PullRequestMergeMethod {
+  Merge = "MERGE",
+  Rebase = "REBASE",
+  Squash = "SQUASH",
+}
+
+/** [Internal] Merge settings for a pull request */
+export type PullRequestMergeSettings = {
+  __typename?: "PullRequestMergeSettings";
+  /** Whether auto-merge is allowed for the PR's repository. */
+  autoMergeAllowed: Scalars["Boolean"];
+  /** Whether the branch will be deleted when the pull request is merged. */
+  deleteBranchOnMerge: Scalars["Boolean"];
+  /** Whether merge queue is enabled for this repository. */
+  isMergeQueueEnabled: Scalars["Boolean"];
+  /** Whether merge commits are allowed for pull requests PR's repository. */
+  mergeCommitAllowed: Scalars["Boolean"];
+  /** The method used to merge a pull request. */
+  mergeQueueMergeMethod?: Maybe<PullRequestMergeMethod>;
+  /** Whether rebase merge is allowed for pull requests PR's repository. */
+  rebaseMergeAllowed: Scalars["Boolean"];
+  /** Whether squash merge is allowed for this pull request's repository. */
+  squashMergeAllowed: Scalars["Boolean"];
 };
 
 /** A pull request related notification. */
@@ -16541,6 +16594,7 @@ export type QueryUsersArgs = {
   includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  sort?: Maybe<Array<UserSortInput>>;
 };
 
 export type QueryVerifyGitHubEnterpriseServerInstallationArgs = {
@@ -18831,6 +18885,14 @@ export enum UserContextViewType {
   Assigned = "assigned",
 }
 
+/** User display name sorting options. */
+export type UserDisplayNameSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
+};
+
 export type UserEdge = {
   __typename?: "UserEdge";
   /** Used in `before` and `after` args */
@@ -18927,6 +18989,14 @@ export enum UserFlagUpdateOperation {
   Incr = "incr",
   Lock = "lock",
 }
+
+/** User name sorting options. */
+export type UserNameSort = {
+  /** Whether nulls should be sorted first or last */
+  nulls?: Maybe<PaginationNulls>;
+  /** The order for the individual sort */
+  order?: Maybe<PaginationSortOrder>;
+};
 
 /** A user notification subscription. */
 export type UserNotificationSubscription = Entity &
@@ -19086,6 +19156,14 @@ export type UserSettingsUpdateInput = {
   subscribedToPrivacyLegalUpdates?: Maybe<Scalars["Boolean"]>;
   /** [Internal] The user's usage warning history. */
   usageWarningHistory?: Maybe<Scalars["JSONObject"]>;
+};
+
+/** User sorting options. */
+export type UserSortInput = {
+  /** Sort by user display name */
+  displayName?: Maybe<UserDisplayNameSort>;
+  /** Sort by user name */
+  name?: Maybe<UserNameSort>;
 };
 
 export type UserUpdateInput = {
@@ -19892,6 +19970,7 @@ export type CustomerNeedFragment = { __typename: "CustomerNeed" } & Pick<
     customer?: Maybe<{ __typename?: "Customer" } & Pick<Customer, "id">>;
     originalIssue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+    projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & ProjectAttachmentFragment>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
   };
 
@@ -21025,7 +21104,7 @@ export type WebhookFragment = { __typename: "Webhook" } & Pick<
 
 export type ApiKeyFragment = { __typename: "ApiKey" } & Pick<
   ApiKey,
-  "scope" | "label" | "updatedAt" | "requestedSyncGroups" | "archivedAt" | "createdAt" | "id"
+  "scope" | "label" | "updatedAt" | "requestedSyncGroups" | "archivedAt" | "createdAt" | "id" | "lastActiveAt"
 >;
 
 export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
@@ -21041,6 +21120,7 @@ export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
       | ({ __typename?: "AgentActivityPromptContent" } & AgentActivityPromptContentFragment)
       | ({ __typename?: "AgentActivityResponseContent" } & AgentActivityResponseContentFragment)
       | ({ __typename?: "AgentActivityThoughtContent" } & AgentActivityThoughtContentFragment);
+    user: { __typename?: "User" } & Pick<User, "id">;
   };
 
 export type EmailIntakeAddressFragment = { __typename: "EmailIntakeAddress" } & Pick<
@@ -22683,6 +22763,11 @@ export type IssueSlaWebhookPayloadFragment = { __typename: "IssueSlaWebhookPaylo
   "organizationId" | "createdAt" | "action" | "type" | "url"
 > & { issueData: { __typename?: "IssueWebhookPayload" } & IssueWebhookPayloadFragment };
 
+export type ProjectAttachmentFragment = { __typename: "ProjectAttachment" } & Pick<
+  ProjectAttachment,
+  "sourceType" | "metadata" | "source" | "subtitle" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "title" | "url"
+> & { creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
+
 export type UserAuthorizedApplicationFragment = { __typename: "UserAuthorizedApplication" } & Pick<
   UserAuthorizedApplication,
   | "name"
@@ -23262,6 +23347,10 @@ export type IntegrationRequestPayloadFragment = { __typename: "IntegrationReques
   IntegrationRequestPayload,
   "success"
 >;
+
+export type IntegrationSlackWorkspaceNamePayloadFragment = {
+  __typename: "IntegrationSlackWorkspaceNamePayload";
+} & Pick<IntegrationSlackWorkspaceNamePayload, "name" | "success">;
 
 export type IntegrationTemplateConnectionFragment = { __typename: "IntegrationTemplateConnection" } & {
   nodes: Array<{ __typename?: "IntegrationTemplate" } & IntegrationTemplateFragment>;
@@ -24910,6 +24999,17 @@ export type CustomerNeedQueryVariables = Exact<{
 
 export type CustomerNeedQuery = { __typename?: "Query" } & {
   customerNeed: { __typename?: "CustomerNeed" } & CustomerNeedFragment;
+};
+
+export type CustomerNeed_ProjectAttachmentQueryVariables = Exact<{
+  hash?: Maybe<Scalars["String"]>;
+  id?: Maybe<Scalars["String"]>;
+}>;
+
+export type CustomerNeed_ProjectAttachmentQuery = { __typename?: "Query" } & {
+  customerNeed: { __typename?: "CustomerNeed" } & {
+    projectAttachment?: Maybe<{ __typename?: "ProjectAttachment" } & ProjectAttachmentFragment>;
+  };
 };
 
 export type CustomerNeedsQueryVariables = Exact<{
@@ -27614,6 +27714,7 @@ export type UsersQueryVariables = Exact<{
   includeDisabled?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+  sort?: Maybe<Array<UserSortInput> | UserSortInput>;
 }>;
 
 export type UsersQuery = { __typename?: "Query" } & {
@@ -27782,14 +27883,6 @@ export type CreateAgentActivityMutationVariables = Exact<{
 
 export type CreateAgentActivityMutation = { __typename?: "Mutation" } & {
   agentActivityCreate: { __typename?: "AgentActivityPayload" } & AgentActivityPayloadFragment;
-};
-
-export type AgentActivityCreatePromptMutationVariables = Exact<{
-  input: AgentActivityCreatePromptInput;
-}>;
-
-export type AgentActivityCreatePromptMutation = { __typename?: "Mutation" } & {
-  agentActivityCreatePrompt: { __typename?: "AgentActivityPayload" } & AgentActivityPayloadFragment;
 };
 
 export type AgentSessionUpdateExternalUrlMutationVariables = Exact<{
@@ -28906,6 +28999,16 @@ export type IntegrationSlackImportEmojisMutationVariables = Exact<{
 
 export type IntegrationSlackImportEmojisMutation = { __typename?: "Mutation" } & {
   integrationSlackImportEmojis: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
+export type IntegrationSlackOrAsksUpdateSlackTeamNameMutationVariables = Exact<{
+  integrationId: Scalars["String"];
+}>;
+
+export type IntegrationSlackOrAsksUpdateSlackTeamNameMutation = { __typename?: "Mutation" } & {
+  integrationSlackOrAsksUpdateSlackTeamName: {
+    __typename?: "IntegrationSlackWorkspaceNamePayload";
+  } & IntegrationSlackWorkspaceNamePayloadFragment;
 };
 
 export type IntegrationSlackOrgProjectUpdatesPostMutationVariables = Exact<{
@@ -35954,6 +36057,14 @@ export const AgentActivityFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "user" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
         ],
       },
     },
@@ -36172,6 +36283,7 @@ export const ApiKeyFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "lastActiveAt" } },
         ],
       },
     },
@@ -37513,6 +37625,40 @@ export const CustomerConnectionFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<CustomerConnectionFragment, unknown>;
+export const ProjectAttachmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectAttachment" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectAttachment" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "sourceType" } },
+          { kind: "Field", name: { kind: "Name", value: "metadata" } },
+          { kind: "Field", name: { kind: "Name", value: "source" } },
+          { kind: "Field", name: { kind: "Name", value: "subtitle" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "title" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ProjectAttachmentFragment, unknown>;
 export const CustomerNeedFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -37575,6 +37721,14 @@ export const CustomerNeedFragmentDoc = {
           },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "body" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectAttachment" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectAttachment" } }],
+            },
+          },
           {
             kind: "Field",
             name: { kind: "Name", value: "project" },
@@ -39862,6 +40016,24 @@ export const IntegrationRequestPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IntegrationRequestPayloadFragment, unknown>;
+export const IntegrationSlackWorkspaceNamePayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IntegrationSlackWorkspaceNamePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationSlackWorkspaceNamePayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<IntegrationSlackWorkspaceNamePayloadFragment, unknown>;
 export const IntegrationTemplateFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -45870,6 +46042,7 @@ export const AttachmentIssue_FormerNeedsDocument = {
     },
     ...CustomerNeedConnectionFragmentDoc.definitions,
     ...CustomerNeedFragmentDoc.definitions,
+    ...ProjectAttachmentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentIssue_FormerNeedsQuery, AttachmentIssue_FormerNeedsQueryVariables>;
@@ -46339,6 +46512,7 @@ export const AttachmentIssue_NeedsDocument = {
     },
     ...CustomerNeedConnectionFragmentDoc.definitions,
     ...CustomerNeedFragmentDoc.definitions,
+    ...ProjectAttachmentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AttachmentIssue_NeedsQuery, AttachmentIssue_NeedsQueryVariables>;
@@ -48402,8 +48576,66 @@ export const CustomerNeedDocument = {
       },
     },
     ...CustomerNeedFragmentDoc.definitions,
+    ...ProjectAttachmentFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CustomerNeedQuery, CustomerNeedQueryVariables>;
+export const CustomerNeed_ProjectAttachmentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "customerNeed_projectAttachment" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "hash" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "customerNeed" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "hash" },
+                value: { kind: "Variable", name: { kind: "Name", value: "hash" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "projectAttachment" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectAttachment" } }],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectAttachmentFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<CustomerNeed_ProjectAttachmentQuery, CustomerNeed_ProjectAttachmentQueryVariables>;
 export const CustomerNeedsDocument = {
   kind: "Document",
   definitions: [
@@ -48501,6 +48733,7 @@ export const CustomerNeedsDocument = {
     },
     ...CustomerNeedConnectionFragmentDoc.definitions,
     ...CustomerNeedFragmentDoc.definitions,
+    ...ProjectAttachmentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CustomerNeedsQuery, CustomerNeedsQueryVariables>;
@@ -52614,6 +52847,7 @@ export const Issue_FormerNeedsDocument = {
     },
     ...CustomerNeedConnectionFragmentDoc.definitions,
     ...CustomerNeedFragmentDoc.definitions,
+    ...ProjectAttachmentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Issue_FormerNeedsQuery, Issue_FormerNeedsQueryVariables>;
@@ -53083,6 +53317,7 @@ export const Issue_NeedsDocument = {
     },
     ...CustomerNeedConnectionFragmentDoc.definitions,
     ...CustomerNeedFragmentDoc.definitions,
+    ...ProjectAttachmentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Issue_NeedsQuery, Issue_NeedsQueryVariables>;
@@ -55056,6 +55291,7 @@ export const IssueVcsBranchSearch_FormerNeedsDocument = {
     },
     ...CustomerNeedConnectionFragmentDoc.definitions,
     ...CustomerNeedFragmentDoc.definitions,
+    ...ProjectAttachmentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueVcsBranchSearch_FormerNeedsQuery, IssueVcsBranchSearch_FormerNeedsQueryVariables>;
@@ -55528,6 +55764,7 @@ export const IssueVcsBranchSearch_NeedsDocument = {
     },
     ...CustomerNeedConnectionFragmentDoc.definitions,
     ...CustomerNeedFragmentDoc.definitions,
+    ...ProjectAttachmentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IssueVcsBranchSearch_NeedsQuery, IssueVcsBranchSearch_NeedsQueryVariables>;
@@ -58336,6 +58573,7 @@ export const Project_NeedsDocument = {
     },
     ...CustomerNeedConnectionFragmentDoc.definitions,
     ...CustomerNeedFragmentDoc.definitions,
+    ...ProjectAttachmentFragmentDoc.definitions,
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Project_NeedsQuery, Project_NeedsQueryVariables>;
@@ -65635,6 +65873,14 @@ export const UsersDocument = {
           variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
         },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "sort" } },
+          type: {
+            kind: "ListType",
+            type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "UserSortInput" } } },
+          },
+        },
       ],
       selectionSet: {
         kind: "SelectionSet",
@@ -65682,6 +65928,11 @@ export const UsersDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "orderBy" },
                 value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "sort" },
+                value: { kind: "Variable", name: { kind: "Name", value: "sort" } },
               },
             ],
             selectionSet: {
@@ -66853,47 +67104,6 @@ export const CreateAgentActivityDocument = {
     ...AgentActivityPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<CreateAgentActivityMutation, CreateAgentActivityMutationVariables>;
-export const AgentActivityCreatePromptDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "agentActivityCreatePrompt" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "AgentActivityCreatePromptInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "agentActivityCreatePrompt" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AgentActivityPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...AgentActivityPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<AgentActivityCreatePromptMutation, AgentActivityCreatePromptMutationVariables>;
 export const AgentSessionUpdateExternalUrlDocument = {
   kind: "Document",
   definitions: [
@@ -69182,6 +69392,7 @@ export const UpdateCustomerNeedDocument = {
     },
     ...CustomerNeedUpdatePayloadFragmentDoc.definitions,
     ...CustomerNeedFragmentDoc.definitions,
+    ...ProjectAttachmentFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateCustomerNeedMutation, UpdateCustomerNeedMutationVariables>;
 export const CreateCustomerStatusDocument = {
@@ -72938,6 +73149,49 @@ export const IntegrationSlackImportEmojisDocument = {
     ...IntegrationPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationSlackImportEmojisMutation, IntegrationSlackImportEmojisMutationVariables>;
+export const IntegrationSlackOrAsksUpdateSlackTeamNameDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationSlackOrAsksUpdateSlackTeamName" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "integrationId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationSlackOrAsksUpdateSlackTeamName" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "integrationId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "integrationId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationSlackWorkspaceNamePayload" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationSlackWorkspaceNamePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<
+  IntegrationSlackOrAsksUpdateSlackTeamNameMutation,
+  IntegrationSlackOrAsksUpdateSlackTeamNameMutationVariables
+>;
 export const IntegrationSlackOrgProjectUpdatesPostDocument = {
   kind: "Document",
   definitions: [

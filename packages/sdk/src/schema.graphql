@@ -74,6 +74,10 @@ type AgentActivity implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  The user who created this agent activity.
+  """
+  user: User!
 }
 
 """
@@ -129,8 +133,15 @@ input AgentActivityCreateInput {
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
+  """
+  [Internal] An optional modifier that provides additional instructions on how the activity should be interpreted.
+  """
+  signal: AgentActivitySignal
 }
 
+"""
+[Internal] Input for creating prompt-type agent activities (created by users).
+"""
 input AgentActivityCreatePromptInput {
   """
   The agent session this activity belongs to.
@@ -145,9 +156,13 @@ input AgentActivityCreatePromptInput {
   """
   id: String
   """
+  [Internal] An optional modifier that provides additional instructions on how the activity should be interpreted.
+  """
+  signal: AgentActivitySignal
+  """
   The comment that contains the content of this activity.
   """
-  sourceCommentId: String!
+  sourceCommentId: String
 }
 
 type AgentActivityEdge {
@@ -632,6 +647,10 @@ type ApiKey implements Node {
   The label of the API key.
   """
   label: String!
+  """
+  When the API key was last used.
+  """
+  lastActiveAt: DateTime
   """
   Organization the API key belongs to.
   """
@@ -9626,6 +9645,7 @@ Different tabs available inside an initiative.
 enum InitiativeTab {
   overview
   projects
+  updates
 }
 
 """
@@ -10508,6 +10528,17 @@ input IntegrationSettingsInput {
   slackPost: SlackPostSettingsInput
   slackProjectPost: SlackPostSettingsInput
   zendesk: ZendeskSettingsInput
+}
+
+type IntegrationSlackWorkspaceNamePayload {
+  """
+  The current name of the Slack workspace.
+  """
+  name: String!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 """
@@ -11468,7 +11499,7 @@ type Issue implements Node {
     orderBy: PaginationOrderBy
   ): UserConnection!
   """
-  [Internal] Product intelligence suggestions for the issue.
+  [Internal] Product Intelligence suggestions for the issue.
   """
   suggestions(
     """
@@ -14519,7 +14550,7 @@ type IssueSearchResult implements Node {
     orderBy: PaginationOrderBy
   ): UserConnection!
   """
-  [Internal] Product intelligence suggestions for the issue.
+  [Internal] Product Intelligence suggestions for the issue.
   """
   suggestions(
     """
@@ -15666,7 +15697,7 @@ type Mutation {
     input: AgentActivityCreateInput!
   ): AgentActivityPayload!
   """
-  Creates a prompt agent activity from Linear user input.
+  [Internal] Creates a prompt agent activity from Linear user input.
   """
   agentActivityCreatePrompt(
     """
@@ -17409,6 +17440,15 @@ type Mutation {
     """
     redirectUri: String!
   ): SlackChannelConnectPayload!
+  """
+  Updates the Slack team's name in Linear for an existing Slack or Asks integration.
+  """
+  integrationSlackOrAsksUpdateSlackTeamName(
+    """
+    The integration ID.
+    """
+    integrationId: String!
+  ): IntegrationSlackWorkspaceNamePayload!
   """
   [Internal] Slack integration for organization level initiative update notifications.
   """
@@ -23721,7 +23761,7 @@ type ProjectArchivePayload implements ArchivePayload {
 }
 
 """
-[INTERNAL] Project attachment
+Project attachment
 """
 type ProjectAttachment implements Node {
   """
@@ -26490,6 +26530,7 @@ enum ProjectTab {
   customers
   documents
   issues
+  updates
 }
 
 """
@@ -27273,6 +27314,10 @@ type PullRequest implements Node {
   """
   id: ID!
   """
+  Merge settings for this pull request.
+  """
+  mergeSettings: PullRequestMergeSettings
+  """
   The number of the pull request in the version control system.
   """
   number: Float!
@@ -27301,6 +27346,49 @@ type PullRequest implements Node {
   The URL of the pull request in the version control system.
   """
   url: String!
+}
+
+"""
+The method used to merge a pull request.
+"""
+enum PullRequestMergeMethod {
+  MERGE
+  REBASE
+  SQUASH
+}
+
+"""
+[Internal] Merge settings for a pull request
+"""
+type PullRequestMergeSettings {
+  """
+  Whether auto-merge is allowed for the PR's repository.
+  """
+  autoMergeAllowed: Boolean!
+  """
+  Whether the branch will be deleted when the pull request is merged.
+  """
+  deleteBranchOnMerge: Boolean!
+  """
+  Whether merge queue is enabled for this repository.
+  """
+  isMergeQueueEnabled: Boolean!
+  """
+  Whether merge commits are allowed for pull requests PR's repository.
+  """
+  mergeCommitAllowed: Boolean!
+  """
+  The method used to merge a pull request.
+  """
+  mergeQueueMergeMethod: PullRequestMergeMethod
+  """
+  Whether rebase merge is allowed for pull requests PR's repository.
+  """
+  rebaseMergeAllowed: Boolean!
+  """
+  Whether squash merge is allowed for this pull request's repository.
+  """
+  squashMergeAllowed: Boolean!
 }
 
 """
@@ -29658,6 +29746,10 @@ type Query {
     By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
     """
     orderBy: PaginationOrderBy
+    """
+    [INTERNAL] Sort returned users.
+    """
+    sort: [UserSortInput!]
   ): UserConnection!
   """
   Verify that we received the correct response from the GitHub Enterprise Server.
@@ -33779,6 +33871,20 @@ enum UserContextViewType {
   assigned
 }
 
+"""
+User display name sorting options.
+"""
+input UserDisplayNameSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
+}
+
 type UserEdge {
   """
   Used in `before` and `after` args
@@ -33909,6 +34015,20 @@ enum UserFlagUpdateOperation {
   decr
   incr
   lock
+}
+
+"""
+User name sorting options.
+"""
+input UserNameSort {
+  """
+  Whether nulls should be sorted first or last
+  """
+  nulls: PaginationNulls = last
+  """
+  The order for the individual sort
+  """
+  order: PaginationSortOrder
 }
 
 """
@@ -34173,6 +34293,20 @@ input UserSettingsUpdateInput {
   [Internal] The user's usage warning history.
   """
   usageWarningHistory: JSONObject
+}
+
+"""
+User sorting options.
+"""
+input UserSortInput {
+  """
+  Sort by user display name
+  """
+  displayName: UserDisplayNameSort
+  """
+  Sort by user name
+  """
+  name: UserNameSort
 }
 
 input UserUpdateInput {

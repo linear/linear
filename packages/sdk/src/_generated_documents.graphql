@@ -402,6 +402,10 @@ fragment CustomerNeed on CustomerNeed {
   updatedAt
   # The need content in markdown format.
   body
+  # The project attachment this need is referencing.
+  projectAttachment {
+    ...ProjectAttachment
+  }
   # The project this need is referencing.
   project {
     id
@@ -2736,6 +2740,8 @@ fragment ApiKey on ApiKey {
   createdAt
   # The unique identifier of the entity.
   id
+  # When the API key was last used.
+  lastActiveAt
 }
 
 # An activity within an agent context.
@@ -2783,6 +2789,10 @@ fragment AgentActivity on AgentActivity {
   createdAt
   # The unique identifier of the entity.
   id
+  # The user who created this agent activity.
+  user {
+    id
+  }
 }
 
 # An email address that can be used for submitting issues.
@@ -6180,6 +6190,36 @@ fragment IssueSlaWebhookPayload on IssueSlaWebhookPayload {
   url
 }
 
+# Project attachment
+fragment ProjectAttachment on ProjectAttachment {
+  __typename
+  # An accessor helper to source.type, defines the source type of the attachment.
+  sourceType
+  # Custom metadata related to the attachment.
+  metadata
+  # Information about the external source which created the attachment.
+  source
+  # Optional subtitle of the attachment
+  subtitle
+  # The creator of the attachment.
+  creator {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # Title of the attachment.
+  title
+  # URL of the attachment.
+  url
+}
+
 # Public information of the OAuth application, plus whether the application has been authorized for
 # the given scopes.
 fragment UserAuthorizedApplication on UserAuthorizedApplication {
@@ -7490,6 +7530,14 @@ fragment IntegrationPayload on IntegrationPayload {
 
 fragment IntegrationRequestPayload on IntegrationRequestPayload {
   __typename
+  # Whether the operation was successful.
+  success
+}
+
+fragment IntegrationSlackWorkspaceNamePayload on IntegrationSlackWorkspaceNamePayload {
+  __typename
+  # The current name of the Slack workspace.
+  name
   # Whether the operation was successful.
   success
 }
@@ -9871,6 +9919,19 @@ query customerNeed(
 ) {
   customerNeed(hash: $hash, id: $id) {
     ...CustomerNeed
+  }
+}
+# The project attachment this need is referencing.
+query customerNeed_projectAttachment(
+  # The hash of the need to retrieve.
+  $hash: String
+  # The identifier of the need to retrieve.
+  $id: String
+) {
+  customerNeed(hash: $hash, id: $id) {
+    projectAttachment {
+      ...ProjectAttachment
+    }
   }
 }
 # All customer needs.
@@ -14233,6 +14294,8 @@ query users(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned users.
+  $sort: [UserSortInput!]
 ) {
   users(
     after: $after
@@ -14243,6 +14306,7 @@ query users(
     includeDisabled: $includeDisabled
     last: $last
     orderBy: $orderBy
+    sort: $sort
   ) {
     ...UserConnection
   }
@@ -14550,15 +14614,6 @@ mutation createAgentActivity(
   $input: AgentActivityCreateInput!
 ) {
   agentActivityCreate(input: $input) {
-    ...AgentActivityPayload
-  }
-}
-# Creates a prompt agent activity from Linear user input.
-mutation agentActivityCreatePrompt(
-  # The prompt agent activity object to create.
-  $input: AgentActivityCreatePromptInput!
-) {
-  agentActivityCreatePrompt(input: $input) {
     ...AgentActivityPayload
   }
 }
@@ -15996,6 +16051,15 @@ mutation integrationSlackImportEmojis(
 ) {
   integrationSlackImportEmojis(code: $code, redirectUri: $redirectUri) {
     ...IntegrationPayload
+  }
+}
+# Updates the Slack team's name in Linear for an existing Slack or Asks integration.
+mutation integrationSlackOrAsksUpdateSlackTeamName(
+  # The integration ID.
+  $integrationId: String!
+) {
+  integrationSlackOrAsksUpdateSlackTeamName(integrationId: $integrationId) {
+    ...IntegrationSlackWorkspaceNamePayload
   }
 }
 # Slack integration for organization level project update notifications.
