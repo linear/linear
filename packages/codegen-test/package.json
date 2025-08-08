@@ -30,7 +30,7 @@
     "auto-bind": "^4.0.0",
     "graphql": "^15.4.0",
     "rollup": "^2.38.3",
-    "rollup-plugin-gzip": "^2.5.0",
+    "rollup-plugin-gzip": "^4.1.1",
     "rollup-plugin-terser": "^7.0.2"
   }
 }
