@@ -23,6 +23,7 @@ import {
   AppUserTeamAccessChangedWebhookPayload,
   AgentSessionEventWebhookPayload,
 } from "../_generated_documents";
+import type { IncomingMessage, ServerResponse } from "http";
 
 /**
  * Union type representing all possible Linear webhook payloads.
@@ -100,11 +101,13 @@ export type LinearWebhookEventHandler<T extends LinearWebhookPayload = LinearWeb
 
 /**
  * Webhook handler interface that provides event registration capabilities.
- * This interface extends the Request handler with event listener methods.
+ * This interface supports both Fetch API Request/Response and Node.js IncomingMessage/ServerResponse.
  */
 export interface LinearWebhookHandler {
-  /** Handles incoming webhook requests */
+  /** Handles incoming webhook requests (Fetch API) */
   (request: Request): Promise<Response>;
+  /** Handles incoming webhook requests (Node.js) */
+  (request: IncomingMessage, response: ServerResponse): Promise<void>;
   /**
    * Registers an event handler for webhook events.
    *
