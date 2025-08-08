@@ -1,5 +1,12 @@
 # Change Log
 
+## 55.2.0
+
+### Minor Changes
+
+- 1d04051: Update webhook schema
+- 553c88f: Support both fetch & node in handler
+
 ## 55.1.0
 
 ### Minor Changes
