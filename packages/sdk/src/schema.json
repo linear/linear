@@ -225,6 +225,22 @@
             "deprecationReason": null
           },
           {
+            "name": "user",
+            "description": "The user who created this agent activity.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "sourceMetadata",
             "description": "Metadata about the external source that created this agent activity.",
             "args": [],
@@ -482,6 +498,18 @@
             "deprecationReason": null
           },
           {
+            "name": "signal",
+            "description": "[Internal] An optional modifier that provides additional instructions on how the activity should be interpreted.",
+            "type": {
+              "kind": "ENUM",
+              "name": "AgentActivitySignal",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "content",
             "description": "The content payload of the agent activity. This object is not strictly typed.\nSee https://linear.app/developers/agents for typing details.",
             "type": {
@@ -505,7 +533,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "AgentActivityCreatePromptInput",
-        "description": null,
+        "description": "[Internal] Input for creating prompt-type agent activities (created by users).",
         "fields": null,
         "inputFields": [
           {
@@ -537,6 +565,18 @@
             "deprecationReason": null
           },
           {
+            "name": "signal",
+            "description": "[Internal] An optional modifier that provides additional instructions on how the activity should be interpreted.",
+            "type": {
+              "kind": "ENUM",
+              "name": "AgentActivitySignal",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "content",
             "description": "The content payload of the prompt agent activity.",
             "type": {
@@ -556,13 +596,9 @@
             "name": "sourceCommentId",
             "description": "The comment that contains the content of this activity.",
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -2374,6 +2410,18 @@
                 "name": "Organization",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "lastActiveAt",
+            "description": "When the API key was last used.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -34130,6 +34178,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "updates",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -37612,6 +37666,49 @@
       },
       {
         "kind": "OBJECT",
+        "name": "IntegrationSlackWorkspaceNamePayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "name",
+            "description": "The current name of the Slack workspace.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "IntegrationTemplate",
         "description": "Join table between templates and integrations.",
         "fields": [
@@ -40777,7 +40874,7 @@
           },
           {
             "name": "suggestions",
-            "description": "[Internal] Product intelligence suggestions for the issue.",
+            "description": "[Internal] Product Intelligence suggestions for the issue.",
             "args": [
               {
                 "name": "before",
@@ -51172,7 +51269,7 @@
           },
           {
             "name": "suggestions",
-            "description": "[Internal] Product intelligence suggestions for the issue.",
+            "description": "[Internal] Product Intelligence suggestions for the issue.",
             "args": [
               {
                 "name": "before",
@@ -62484,6 +62581,39 @@
             "deprecationReason": null
           },
           {
+            "name": "integrationSlackOrAsksUpdateSlackTeamName",
+            "description": "Updates the Slack team's name in Linear for an existing Slack or Asks integration.",
+            "args": [
+              {
+                "name": "integrationId",
+                "description": "The integration ID.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationSlackWorkspaceNamePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationSlackPersonal",
             "description": "Integrates your personal notifications with Slack.",
             "args": [
@@ -68477,7 +68607,7 @@
           },
           {
             "name": "agentActivityCreatePrompt",
-            "description": "Creates a prompt agent activity from Linear user input.",
+            "description": "[Internal] Creates a prompt agent activity from Linear user input.",
             "args": [
               {
                 "name": "input",
@@ -84277,7 +84407,7 @@
       {
         "kind": "OBJECT",
         "name": "ProjectAttachment",
-        "description": "[INTERNAL] Project attachment",
+        "description": "Project attachment",
         "fields": [
           {
             "name": "id",
@@ -93917,6 +94047,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "updates",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -96810,6 +96946,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "mergeSettings",
+            "description": "Merge settings for this pull request.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PullRequestMergeSettings",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -96820,6 +96968,154 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "PullRequestMergeMethod",
+        "description": "The method used to merge a pull request.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "MERGE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "REBASE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SQUASH",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PullRequestMergeSettings",
+        "description": "[Internal] Merge settings for a pull request",
+        "fields": [
+          {
+            "name": "isMergeQueueEnabled",
+            "description": "Whether merge queue is enabled for this repository.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "squashMergeAllowed",
+            "description": "Whether squash merge is allowed for this pull request's repository.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "autoMergeAllowed",
+            "description": "Whether auto-merge is allowed for the PR's repository.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rebaseMergeAllowed",
+            "description": "Whether rebase merge is allowed for pull requests PR's repository.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "mergeCommitAllowed",
+            "description": "Whether merge commits are allowed for pull requests PR's repository.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "deleteBranchOnMerge",
+            "description": "Whether the branch will be deleted when the pull request is merged.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "mergeQueueMergeMethod",
+            "description": "The method used to merge a pull request.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "PullRequestMergeMethod",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -105332,6 +105628,26 @@
                   "kind": "ENUM",
                   "name": "PaginationOrderBy",
                   "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "sort",
+                "description": "[INTERNAL] Sort returned users.",
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "UserSortInput",
+                      "ofType": null
+                    }
+                  }
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
@@ -119712,6 +120028,41 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "UserDisplayNameSort",
+        "description": "User display name sorting options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "nulls",
+            "description": "Whether nulls should be sorted first or last",
+            "type": {
+              "kind": "ENUM",
+              "name": "PaginationNulls",
+              "ofType": null
+            },
+            "defaultValue": "last",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "order",
+            "description": "The order for the individual sort",
+            "type": {
+              "kind": "ENUM",
+              "name": "PaginationSortOrder",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "UserEdge",
         "description": null,
@@ -120269,6 +120620,41 @@
             "deprecationReason": null
           }
         ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "UserNameSort",
+        "description": "User name sorting options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "nulls",
+            "description": "Whether nulls should be sorted first or last",
+            "type": {
+              "kind": "ENUM",
+              "name": "PaginationNulls",
+              "ofType": null
+            },
+            "defaultValue": "last",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "order",
+            "description": "The order for the individual sort",
+            "type": {
+              "kind": "ENUM",
+              "name": "PaginationSortOrder",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
         "possibleTypes": null
       },
       {
@@ -121202,6 +121588,41 @@
             "type": {
               "kind": "ENUM",
               "name": "FeedSummarySchedule",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "UserSortInput",
+        "description": "User sorting options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "name",
+            "description": "Sort by user name",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "UserNameSort",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "displayName",
+            "description": "Sort by user display name",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "UserDisplayNameSort",
               "ofType": null
             },
             "defaultValue": null,

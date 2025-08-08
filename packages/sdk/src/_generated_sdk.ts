@@ -216,6 +216,7 @@ export class ActorBot extends Request {
 export class AgentActivity extends Request {
   private _agentSession: L.AgentActivityFragment["agentSession"];
   private _sourceComment?: L.AgentActivityFragment["sourceComment"];
+  private _user: L.AgentActivityFragment["user"];
 
   public constructor(request: LinearRequest, data: L.AgentActivityFragment) {
     super(request);
@@ -228,6 +229,7 @@ export class AgentActivity extends Request {
     this.content = data.content;
     this._agentSession = data.agentSession;
     this._sourceComment = data.sourceComment ?? undefined;
+    this._user = data.user;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -262,6 +264,14 @@ export class AgentActivity extends Request {
   /** The ID of comment this activity is linked to. */
   public get sourceCommentId(): string | undefined {
     return this._sourceComment?.id;
+  }
+  /** The user who created this agent activity. */
+  public get user(): LinearFetch<User> | undefined {
+    return new UserQuery(this._request).fetch(this._user.id);
+  }
+  /** The ID of user who created this agent activity. */
+  public get userId(): string | undefined {
+    return this._user?.id;
   }
 
   /** Creates an agent activity. */
@@ -720,6 +730,7 @@ export class ApiKey extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.id = data.id;
     this.label = data.label;
+    this.lastActiveAt = parseDate(data.lastActiveAt) ?? undefined;
     this.requestedSyncGroups = data.requestedSyncGroups ?? undefined;
     this.scope = data.scope ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -733,6 +744,8 @@ export class ApiKey extends Request {
   public id: string;
   /** The label of the API key. */
   public label: string;
+  /** When the API key was last used. */
+  public lastActiveAt?: Date;
   /** The sync groups that this API key requests access to. If null, the API key has access to all sync groups the user has access to. The final set of sync groups is computed as the intersection of these requested groups with the user's base sync groups. */
   public requestedSyncGroups?: string[];
   /** Scopes associated with the API key. */
@@ -2513,6 +2526,9 @@ export class CustomerNeed extends Request {
     this.priority = data.priority;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url ?? undefined;
+    this.projectAttachment = data.projectAttachment
+      ? new ProjectAttachment(request, data.projectAttachment)
+      : undefined;
     this._attachment = data.attachment ?? undefined;
     this._comment = data.comment ?? undefined;
     this._creator = data.creator ?? undefined;
@@ -2539,6 +2555,8 @@ export class CustomerNeed extends Request {
   public updatedAt: Date;
   /** The URL of the underlying attachment, if any */
   public url?: string;
+  /** The project attachment this need is referencing. */
+  public projectAttachment?: ProjectAttachment;
   /** The attachment this need is referencing. */
   public get attachment(): LinearFetch<Attachment> | undefined {
     return this._attachment?.id ? new AttachmentQuery(this._request).fetch(this._attachment?.id) : undefined;
@@ -7613,6 +7631,24 @@ export class IntegrationRequestPayload extends Request {
   public success: boolean;
 }
 /**
+ * IntegrationSlackWorkspaceNamePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IntegrationSlackWorkspaceNamePayloadFragment response data
+ */
+export class IntegrationSlackWorkspaceNamePayload extends Request {
+  public constructor(request: LinearRequest, data: L.IntegrationSlackWorkspaceNamePayloadFragment) {
+    super(request);
+    this.name = data.name;
+    this.success = data.success;
+  }
+
+  /** The current name of the Slack workspace. */
+  public name: string;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
  * Join table between templates and integrations.
  *
  * @param request - function to call the graphql client
@@ -12613,6 +12649,62 @@ export class ProjectArchivePayload extends Request {
   /** The ID of archived/unarchived entity. null if entity was deleted. */
   public get entityId(): string | undefined {
     return this._entity?.id;
+  }
+}
+/**
+ * Project attachment
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ProjectAttachmentFragment response data
+ */
+export class ProjectAttachment extends Request {
+  private _creator?: L.ProjectAttachmentFragment["creator"];
+
+  public constructor(request: LinearRequest, data: L.ProjectAttachmentFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.metadata = data.metadata;
+    this.source = data.source ?? undefined;
+    this.sourceType = data.sourceType ?? undefined;
+    this.subtitle = data.subtitle ?? undefined;
+    this.title = data.title;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
+    this._creator = data.creator ?? undefined;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** Custom metadata related to the attachment. */
+  public metadata: L.Scalars["JSONObject"];
+  /** Information about the external source which created the attachment. */
+  public source?: L.Scalars["JSONObject"];
+  /** An accessor helper to source.type, defines the source type of the attachment. */
+  public sourceType?: string;
+  /** Optional subtitle of the attachment */
+  public subtitle?: string;
+  /** Title of the attachment. */
+  public title: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** URL of the attachment. */
+  public url: string;
+  /** The creator of the attachment. */
+  public get creator(): LinearFetch<User> | undefined {
+    return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
+  }
+  /** The ID of creator of the attachment. */
+  public get creatorId(): string | undefined {
+    return this._creator?.id;
   }
 }
 /**
@@ -21578,35 +21670,6 @@ export class CreateAgentActivityMutation extends Request {
 }
 
 /**
- * A fetchable AgentActivityCreatePrompt Mutation
- *
- * @param request - function to call the graphql client
- */
-export class AgentActivityCreatePromptMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the AgentActivityCreatePrompt mutation and return a AgentActivityPayload
-   *
-   * @param input - required input to pass to agentActivityCreatePrompt
-   * @returns parsed response from AgentActivityCreatePromptMutation
-   */
-  public async fetch(input: L.AgentActivityCreatePromptInput): LinearFetch<AgentActivityPayload> {
-    const response = await this._request<
-      L.AgentActivityCreatePromptMutation,
-      L.AgentActivityCreatePromptMutationVariables
-    >(L.AgentActivityCreatePromptDocument, {
-      input,
-    });
-    const data = response.agentActivityCreatePrompt;
-
-    return new AgentActivityPayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable AgentSessionUpdateExternalUrl Mutation
  *
  * @param request - function to call the graphql client
@@ -25403,6 +25466,35 @@ export class IntegrationSlackImportEmojisMutation extends Request {
     const data = response.integrationSlackImportEmojis;
 
     return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationSlackOrAsksUpdateSlackTeamName Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationSlackOrAsksUpdateSlackTeamNameMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationSlackOrAsksUpdateSlackTeamName mutation and return a IntegrationSlackWorkspaceNamePayload
+   *
+   * @param integrationId - required integrationId to pass to integrationSlackOrAsksUpdateSlackTeamName
+   * @returns parsed response from IntegrationSlackOrAsksUpdateSlackTeamNameMutation
+   */
+  public async fetch(integrationId: string): LinearFetch<IntegrationSlackWorkspaceNamePayload> {
+    const response = await this._request<
+      L.IntegrationSlackOrAsksUpdateSlackTeamNameMutation,
+      L.IntegrationSlackOrAsksUpdateSlackTeamNameMutationVariables
+    >(L.IntegrationSlackOrAsksUpdateSlackTeamNameDocument, {
+      integrationId,
+    });
+    const data = response.integrationSlackOrAsksUpdateSlackTeamName;
+
+    return new IntegrationSlackWorkspaceNamePayload(this._request, data);
   }
 }
 
@@ -31022,6 +31114,40 @@ export class CustomView_UserViewPreferences_PreferencesQuery extends Request {
     const data = response.customView.userViewPreferences?.preferences;
 
     return data ? new ViewPreferencesValues(this._request, data) : undefined;
+  }
+}
+
+/**
+ * A fetchable CustomerNeed_ProjectAttachment Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the CustomerNeed_ProjectAttachmentQuery
+ */
+export class CustomerNeed_ProjectAttachmentQuery extends Request {
+  private _variables?: L.CustomerNeed_ProjectAttachmentQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.CustomerNeed_ProjectAttachmentQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the CustomerNeed_ProjectAttachment query and return a ProjectAttachment
+   *
+   * @param variables - variables to pass into the CustomerNeed_ProjectAttachmentQuery
+   * @returns parsed response from CustomerNeed_ProjectAttachmentQuery
+   */
+  public async fetch(
+    variables?: L.CustomerNeed_ProjectAttachmentQueryVariables
+  ): LinearFetch<ProjectAttachment | undefined> {
+    const response = await this._request<
+      L.CustomerNeed_ProjectAttachmentQuery,
+      L.CustomerNeed_ProjectAttachmentQueryVariables
+    >(L.CustomerNeed_ProjectAttachmentDocument, variables);
+    const data = response.customerNeed.projectAttachment;
+
+    return data ? new ProjectAttachment(this._request, data) : undefined;
   }
 }
 
@@ -37396,15 +37522,6 @@ export class LinearSdk extends Request {
     return new CreateAgentActivityMutation(this._request).fetch(input);
   }
   /**
-   * Creates a prompt agent activity from Linear user input.
-   *
-   * @param input - required input to pass to agentActivityCreatePrompt
-   * @returns AgentActivityPayload
-   */
-  public agentActivityCreatePrompt(input: L.AgentActivityCreatePromptInput): LinearFetch<AgentActivityPayload> {
-    return new AgentActivityCreatePromptMutation(this._request).fetch(input);
-  }
-  /**
    * Updates the externalUrl of an agent session, which is an agent-hosted page associated with this session.
    *
    * @param id - required id to pass to agentSessionUpdateExternalUrl
@@ -38735,6 +38852,17 @@ export class LinearSdk extends Request {
    */
   public integrationSlackImportEmojis(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
     return new IntegrationSlackImportEmojisMutation(this._request).fetch(code, redirectUri);
+  }
+  /**
+   * Updates the Slack team's name in Linear for an existing Slack or Asks integration.
+   *
+   * @param integrationId - required integrationId to pass to integrationSlackOrAsksUpdateSlackTeamName
+   * @returns IntegrationSlackWorkspaceNamePayload
+   */
+  public integrationSlackOrAsksUpdateSlackTeamName(
+    integrationId: string
+  ): LinearFetch<IntegrationSlackWorkspaceNamePayload> {
+    return new IntegrationSlackOrAsksUpdateSlackTeamNameMutation(this._request).fetch(integrationId);
   }
   /**
    * Slack integration for organization level project update notifications.
