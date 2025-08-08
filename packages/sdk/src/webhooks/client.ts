@@ -6,7 +6,7 @@ export const LINEAR_WEBHOOK_SIGNATURE_HEADER = "linear-signature";
 export const LINEAR_WEBHOOK_TS_FIELD = "webhookTimestamp";
 
 /**
- * Internal abstraction that normalizes request/response behavior across
+ * Internal abstraction that adapts request/response behavior across
  * Fetch API and Node.js HTTP runtimes.
  *
  * Not exported on purpose: this is an implementation detail of
@@ -16,7 +16,7 @@ export const LINEAR_WEBHOOK_TS_FIELD = "webhookTimestamp";
  * - `readRawBody` defers reading/streaming the raw body until invoked.
  * - `send` unifies writing responses in both environments.
  */
-interface NormalizedEnv {
+interface HttpAdapter {
   method: string;
   signature: string | null;
   readRawBody: () => Promise<Buffer>;
@@ -46,32 +46,32 @@ export class LinearWebhookClient {
       requestOrMessage: Request | IncomingMessage,
       response?: ServerResponse
     ): Promise<Response | void> => {
-      const env = this.getEnv(requestOrMessage, response);
+      const adapter = this.getHttpAdapter(requestOrMessage, response);
 
       try {
-        if (env.method !== "POST") {
-          return env.send(405, "Method not allowed");
+        if (adapter.method !== "POST") {
+          return adapter.send(405, "Method not allowed");
         }
 
-        const signature = env.signature;
+        const signature = adapter.signature;
         if (!signature) {
-          return env.send(400, "Missing webhook signature");
+          return adapter.send(400, "Missing webhook signature");
         }
 
-        const rawBody = await env.readRawBody();
+        const rawBody = await adapter.readRawBody();
 
         let parsedPayload: LinearWebhookPayload;
         try {
           parsedPayload = this.parseVerifiedPayload(rawBody, signature);
         } catch {
-          return env.send(400, "Invalid webhook");
+          return adapter.send(400, "Invalid webhook");
         }
 
         const allHandlers = this.collectHandlers(eventHandlers, parsedPayload.type);
         await Promise.all(allHandlers.map(h => h(parsedPayload)));
-        return env.send(200, "OK");
+        return adapter.send(200, "OK");
       } catch {
-        return env.send(500, "Internal server error");
+        return adapter.send(500, "Internal server error");
       }
     };
 
@@ -128,13 +128,13 @@ export class LinearWebhookClient {
   }
 
   /**
-   * Creates a normalized environment for Fetch-based runtimes.
+   * Creates an HTTP adapter for Fetch-based runtimes.
    * The body is not read until `readRawBody` is invoked.
    *
    * @param request - Fetch API `Request`
    * @returns Helpers to read input and send responses in a unified way
    */
-  private createFetchEnv(request: Request): NormalizedEnv {
+  private createFetchAdapter(request: Request): HttpAdapter {
     return {
       method: request.method,
       signature: request.headers.get(LINEAR_WEBHOOK_SIGNATURE_HEADER),
@@ -144,14 +144,14 @@ export class LinearWebhookClient {
   }
 
   /**
-   * Creates a normalized environment for Node.js HTTP runtimes.
+   * Creates an HTTP adapter for Node.js HTTP runtimes.
    * The body stream is consumed when `readRawBody` is invoked.
    *
    * @param incomingMessage - Node.js `IncomingMessage`
    * @param res - Node.js `ServerResponse` used to write the response
    * @returns Helpers to read input and send responses in a unified way
    */
-  private createNodeEnv(incomingMessage: IncomingMessage, res: ServerResponse): NormalizedEnv {
+  private createNodeAdapter(incomingMessage: IncomingMessage, res: ServerResponse): HttpAdapter {
     const headerValue = incomingMessage.headers[LINEAR_WEBHOOK_SIGNATURE_HEADER];
     const signature = Array.isArray(headerValue) ? (headerValue[0] ?? null) : ((headerValue ?? null) as string | null);
     return {
@@ -172,17 +172,17 @@ export class LinearWebhookClient {
   }
 
   /**
-   * Selects and constructs the appropriate normalized environment for the
+   * Selects and constructs the appropriate HTTP adapter for the
    * provided request type (Fetch or Node.js HTTP).
    *
    * @param requestOrMessage - A Fetch `Request` or Node.js `IncomingMessage`
    * @param response - Node.js `ServerResponse` (required for Node path)
-   * @returns A normalized environment with unified IO helpers
+   * @returns An HTTP adapter with unified IO helpers
    */
-  private getEnv(requestOrMessage: Request | IncomingMessage, response?: ServerResponse): NormalizedEnv {
+  private getHttpAdapter(requestOrMessage: Request | IncomingMessage, response?: ServerResponse): HttpAdapter {
     return this.isFetchRequest(requestOrMessage)
-      ? this.createFetchEnv(requestOrMessage)
-      : this.createNodeEnv(requestOrMessage as IncomingMessage, response as ServerResponse);
+      ? this.createFetchAdapter(requestOrMessage)
+      : this.createNodeAdapter(requestOrMessage as IncomingMessage, response as ServerResponse);
   }
 
   /**
