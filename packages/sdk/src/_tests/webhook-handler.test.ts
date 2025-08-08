@@ -1,9 +1,9 @@
-import { LinearWebhookClient, LINEAR_WEBHOOK_SIGNATURE_HEADER } from "../webhooks";
-import http from "http";
 import crypto from "crypto";
-import getPort from "get-port";
 import express from "express";
+import getPort from "get-port";
+import http from "http";
 import { Response } from "node-fetch";
+import { LinearWebhookClient, LINEAR_WEBHOOK_SIGNATURE_HEADER } from "../webhooks";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).Response = Response;
 
@@ -71,13 +71,13 @@ describe("webhooks handlers", () => {
   });
 });
 
-export function createSignedBody(secret: string, payload: Record<string, unknown>): SignedBody {
+function createSignedBody(secret: string, payload: Record<string, unknown>): SignedBody {
   const body = Buffer.from(JSON.stringify(payload));
   const signature = crypto.createHmac("sha256", secret).update(body).digest("hex");
   return { body, signature };
 }
 
-export async function httpPost(
+async function httpPost(
   port: number,
   path: string,
   headers: Record<string, string>,
@@ -104,12 +104,7 @@ export async function httpPost(
   });
 }
 
-export function makePayload(overrides: Record<string, unknown> = {}): Record<string, unknown> {
-  const base = { type: "Comment", webhookTimestamp: Date.now(), action: "create", data: { id: "1" } };
-  return { ...base, ...overrides };
-}
-
-export const samplePayload = {
+const samplePayload = {
   action: "create",
   actor: {
     id: "87e5416f-db4e-4065-8a8b-ed02bb899c66",

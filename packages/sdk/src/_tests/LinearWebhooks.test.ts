@@ -1,10 +1,10 @@
-import { LinearWebhookClient, LINEAR_WEBHOOK_TS_FIELD } from "../webhooks";
 import crypto from "crypto";
+import { LinearWebhookClient, LINEAR_WEBHOOK_TS_FIELD } from "../webhooks";
 
 describe("webhooks", () => {
   let parsedBody = {};
   let rawBody: Buffer;
-  let requestBody = {};
+  let requestBody: Record<string, unknown> = {};
 
   beforeEach(() => {
     requestBody = {
@@ -50,7 +50,7 @@ describe("webhooks", () => {
   });
 
   it("correct signature, correct timestamp should pass verification", async () => {
-    requestBody["webhookTimestamp"] = new Date().getTime();
+    requestBody.webhookTimestamp = new Date().getTime();
     rawBody = Buffer.from(JSON.stringify(requestBody));
     parsedBody = JSON.parse(rawBody.toString());
 

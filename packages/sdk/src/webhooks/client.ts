@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import type { IncomingMessage, ServerResponse } from "http";
-import { LinearWebhookPayload, LinearWebhookEventHandler, LinearWebhookHandler, LinearWebhookEventType } from "./types";
+import { LinearWebhookEventHandler, LinearWebhookEventType, LinearWebhookHandler, LinearWebhookPayload } from "./types";
 
 export const LINEAR_WEBHOOK_SIGNATURE_HEADER = "linear-signature";
 export const LINEAR_WEBHOOK_TS_FIELD = "webhookTimestamp";
@@ -119,8 +119,12 @@ export class LinearWebhookClient {
    * @returns True if `value` is a Fetch API `Request`
    */
   private isFetchRequest(value: unknown): value is Request {
-    const candidate = value as { arrayBuffer?: unknown } | null | undefined;
-    return typeof candidate?.arrayBuffer === "function";
+    return (
+      typeof value === "object" &&
+      value !== null &&
+      "arrayBuffer" in value &&
+      typeof Reflect.get(value, "arrayBuffer") === "function"
+    );
   }
 
   /**
