@@ -10,14 +10,12 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index-es.min.js",
-      "require": "./dist/index-cjs.min.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index-cjs.min.js"
     },
     "./webhooks": {
-      "import": "./dist/webhooks/index-es.min.js",
-      "require": "./dist/webhooks/index-cjs.min.js",
-      "types": "./dist/webhooks/index.d.ts"
+      "types": "./dist/webhooks/index.d.ts",
+      "default": "./dist/webhooks/index-cjs.min.js"
     }
   },
   "repository": "https://github.com/linear/linear",
@@ -26,7 +24,8 @@
     "yarn": "1.x"
   },
   "files": [
-    "dist"
+    "dist",
+    "webhooks"
   ],
   "scripts": {
     "build:clean": "npx rimraf -G dist .rollup-cache tsconfig.tsbuildinfo",
