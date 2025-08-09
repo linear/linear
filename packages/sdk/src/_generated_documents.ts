@@ -255,8 +255,12 @@ export type AgentActivityWebhookPayload = {
   createdAt: Scalars["String"];
   /** The ID of the entity. */
   id: Scalars["String"];
+  /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
+  signal?: Maybe<Scalars["String"]>;
   /** The time at which the entity was updated. */
   updatedAt: Scalars["String"];
+  /** The ID of the user who created this agent activity. */
+  userId?: Maybe<Scalars["String"]>;
 };
 
 /** A session for agent activities and state management. */
@@ -22398,7 +22402,7 @@ export type AgentSessionEventWebhookPayloadFragment = { __typename: "AgentSessio
 
 export type AgentActivityWebhookPayloadFragment = { __typename: "AgentActivityWebhookPayload" } & Pick<
   AgentActivityWebhookPayload,
-  "agentSessionId" | "id" | "content" | "archivedAt" | "createdAt" | "updatedAt"
+  "signal" | "agentSessionId" | "id" | "userId" | "content" | "archivedAt" | "createdAt" | "updatedAt"
 >;
 
 export type AgentSessionWebhookPayloadFragment = { __typename: "AgentSessionWebhookPayload" } & Pick<
@@ -34253,8 +34257,10 @@ export const AgentActivityWebhookPayloadFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "signal" } },
           { kind: "Field", name: { kind: "Name", value: "agentSessionId" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "userId" } },
           { kind: "Field", name: { kind: "Name", value: "content" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },

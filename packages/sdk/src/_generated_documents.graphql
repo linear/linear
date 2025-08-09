@@ -5415,10 +5415,14 @@ fragment AgentSessionEventWebhookPayload on AgentSessionEventWebhookPayload {
 # Payload for an agent activity webhook.
 fragment AgentActivityWebhookPayload on AgentActivityWebhookPayload {
   __typename
+  # An optional modifier that provides additional instructions on how the activity should be interpreted.
+  signal
   # The ID of the agent session that this activity belongs to.
   agentSessionId
   # The ID of the entity.
   id
+  # The ID of the user who created this agent activity.
+  userId
   # The content of the agent activity.
   content
   # The time at which the entity was archived.
