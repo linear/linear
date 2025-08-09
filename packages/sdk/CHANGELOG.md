@@ -1,5 +1,14 @@
 # Change Log
 
+## 55.2.1
+
+### Patch Changes
+
+- dd59709: chore(deps): update dependency patch versions
+- 70ccd6f: feat(schema): [non_breaking] Field 'signal' was added to object type 'AgentActivityWebhookPayload' (AgentActivityWebhookPayload.signal)
+
+  feat(schema): [non_breaking] Field 'userId' was added to object type 'AgentActivityWebhookPayload' (AgentActivityWebhookPayload.userId)
+
 ## 55.2.0
 
 ### Minor Changes
