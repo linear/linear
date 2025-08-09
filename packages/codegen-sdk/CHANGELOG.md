@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.1.7
+
+### Patch Changes
+
+- dd59709: chore(deps): update dependency patch versions
+
 ## 3.1.6
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.41
+
+### Patch Changes
+
+- dd59709: chore(deps): update dependency patch versions
+
 ## 2.0.40
 
 ### Patch Changes
