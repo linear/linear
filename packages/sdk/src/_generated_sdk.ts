@@ -455,7 +455,9 @@ export class AgentActivityWebhookPayload {
     this.content = data.content;
     this.createdAt = data.createdAt;
     this.id = data.id;
+    this.signal = data.signal ?? undefined;
     this.updatedAt = data.updatedAt;
+    this.userId = data.userId ?? undefined;
   }
 
   /** The ID of the agent session that this activity belongs to. */
@@ -468,8 +470,12 @@ export class AgentActivityWebhookPayload {
   public createdAt: string;
   /** The ID of the entity. */
   public id: string;
+  /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
+  public signal?: string;
   /** The time at which the entity was updated. */
   public updatedAt: string;
+  /** The ID of the user who created this agent activity. */
+  public userId?: string;
 }
 /**
  * A session for agent activities and state management.

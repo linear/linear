@@ -340,9 +340,17 @@ type AgentActivityWebhookPayload {
   """
   id: String!
   """
+  An optional modifier that provides additional instructions on how the activity should be interpreted.
+  """
+  signal: String
+  """
   The time at which the entity was updated.
   """
   updatedAt: String!
+  """
+  The ID of the user who created this agent activity.
+  """
+  userId: String
 }
 
 """
