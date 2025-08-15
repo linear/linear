@@ -1,5 +1,8 @@
+import type { IncomingMessage, ServerResponse } from "http";
 import {
+  AgentSessionEventWebhookPayload as AgentSessionEventWebhookPayloadType,
   AppUserNotificationWebhookPayload,
+  AppUserTeamAccessChangedWebhookPayload as AppUserTeamAccessChangedWebhookPayloadType,
   AttachmentWebhookPayload,
   AuditEntryWebhookPayload,
   CommentWebhookPayload,
@@ -8,27 +11,20 @@ import {
   CycleWebhookPayload,
   DataWebhookPayload,
   DocumentWebhookPayload,
+  EntityWebhookPayload,
   InitiativeUpdateWebhookPayload,
   InitiativeWebhookPayload,
   IssueLabelWebhookPayload,
+  IssueSlaWebhookPayload as IssueSlaWebhookPayloadType,
   IssueWebhookPayload,
   NotificationWebhookPayload,
+  OAuthAppWebhookPayload as OAuthAppWebhookPayloadType,
   ProjectUpdateWebhookPayload,
   ProjectWebhookPayload,
   ReactionWebhookPayload,
   UserWebhookPayload,
-  EntityWebhookPayload,
-  IssueSlaWebhookPayload,
-  OAuthAppWebhookPayload,
-  AppUserTeamAccessChangedWebhookPayload,
-  AgentSessionEventWebhookPayload,
 } from "../_generated_documents";
-import type { IncomingMessage, ServerResponse } from "http";
 
-/**
- * Union type representing all possible Linear webhook payloads.
- * This includes entity webhooks, special webhooks, and notification webhooks.
- */
 export type LinearWebhookPayload =
   | EntityWebhookPayloadWithEntityData
   | EntityWebhookPayloadWithUnknownEntityData
@@ -144,6 +140,7 @@ export interface LinearWebhookHandler {
  */
 export interface AppUserNotificationWebhookPayloadWithNotification extends AppUserNotificationWebhookPayload {
   notification: NotificationWebhookPayload;
+  type: "AppUserNotification";
 }
 
 /**
@@ -291,4 +288,32 @@ export type EntityWebhookPayloadWithReactionData = Omit<EntityWebhookPayload, "t
 export type EntityWebhookPayloadWithUserData = Omit<EntityWebhookPayload, "type"> & {
   data: UserWebhookPayload;
   type: "User";
+};
+
+/**
+ * A webhook payload for an Agent Session Event webhook.
+ */
+export type AgentSessionEventWebhookPayload = Omit<AgentSessionEventWebhookPayloadType, "type"> & {
+  type: "AgentSessionEvent";
+};
+
+/**
+ * A webhook payload for an Issue SLA webhook with a narrowed `type`.
+ */
+export type IssueSlaWebhookPayload = Omit<IssueSlaWebhookPayloadType, "type"> & {
+  type: "IssueSLA";
+};
+
+/**
+ * A webhook payload for an OAuth App webhook with a narrowed `type`.
+ */
+export type OAuthAppWebhookPayload = Omit<OAuthAppWebhookPayloadType, "type"> & {
+  type: "OAuthApp";
+};
+
+/**
+ * A webhook payload for an App User Team Access Changed webhook with a narrowed `type`.
+ */
+export type AppUserTeamAccessChangedWebhookPayload = Omit<AppUserTeamAccessChangedWebhookPayloadType, "type"> & {
+  type: "PermissionChange";
 };
