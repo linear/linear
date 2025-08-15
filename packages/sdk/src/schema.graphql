@@ -134,7 +134,7 @@ input AgentActivityCreateInput {
   """
   id: String
   """
-  [Internal] An optional modifier that provides additional instructions on how the activity should be interpreted.
+  An optional modifier that provides additional instructions on how the activity should be interpreted.
   """
   signal: AgentActivitySignal
 }
@@ -156,7 +156,7 @@ input AgentActivityCreatePromptInput {
   """
   id: String
   """
-  [Internal] An optional modifier that provides additional instructions on how the activity should be interpreted.
+  An optional modifier that provides additional instructions on how the activity should be interpreted.
   """
   signal: AgentActivitySignal
   """
@@ -286,6 +286,7 @@ type AgentActivityResponseContent {
 A modifier that provides additional instructions on how the activity should be interpreted.
 """
 enum AgentActivitySignal {
+  continue
   stop
 }
 
@@ -6505,6 +6506,10 @@ A general purpose draft. Used for comments, project updates, etc.
 """
 type Draft implements Node {
   """
+  [INTERNAL] Allows for multiple drafts per entity (currently constrained to Pull Requests).
+  """
+  anchor: String
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -7885,6 +7890,14 @@ type FetchDataPayload {
   The fetched data based on the natural language query.
   """
   data: JSONObject
+  """
+  The filters used to fetch the data.
+  """
+  filters: JSONObject
+  """
+  The GraphQL query used to fetch the data.
+  """
+  query: String
   """
   Whether the fetch operation was successful.
   """
@@ -10927,6 +10940,14 @@ type Issue implements Node {
   """
   archivedAt: DateTime
   """
+  The external user who requested creation of the Asks issue on behalf of the creator.
+  """
+  asksExternalUserRequester: ExternalUser
+  """
+  The internal user who requested creation of the Asks issue on behalf of the creator.
+  """
+  asksRequester: User
+  """
   The user to whom the issue is assigned to.
   """
   assignee: User
@@ -11540,10 +11561,6 @@ type Issue implements Node {
   """
   suggestionsGeneratedAt: DateTime
   """
-  [DEPRECATED] [Internal] The user who has delegated this issue to be completed by an agent.
-  """
-  supervisor: User
-  """
   The external services the issue is synced with.
   """
   syncedWith: [ExternalEntityInfo!]
@@ -11872,7 +11889,7 @@ input IssueCollectionFilter {
   """
   parent: NullableIssueFilter
   """
-  Comparator for the issues priority.
+  Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
   """
   priority: NullableNumberComparator
   """
@@ -11927,6 +11944,10 @@ input IssueCollectionFilter {
   Filters that issue subscribers must satisfy.
   """
   subscribers: UserCollectionFilter
+  """
+  [Internal] Filters that the issue's suggestions must satisfy.
+  """
+  suggestions: IssueSuggestionCollectionFilter
   """
   Filters that the issues team must satisfy.
   """
@@ -12609,7 +12630,7 @@ input IssueFilter {
   """
   parent: NullableIssueFilter
   """
-  Comparator for the issues priority.
+  Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
   """
   priority: NullableNumberComparator
   """
@@ -12660,6 +12681,10 @@ input IssueFilter {
   Filters that issue subscribers must satisfy.
   """
   subscribers: UserCollectionFilter
+  """
+  [Internal] Filters that the issue's suggestions must satisfy.
+  """
+  suggestions: IssueSuggestionCollectionFilter
   """
   Filters that the issues team must satisfy.
   """
@@ -13974,6 +13999,14 @@ type IssueSearchResult implements Node {
   """
   archivedAt: DateTime
   """
+  The external user who requested creation of the Asks issue on behalf of the creator.
+  """
+  asksExternalUserRequester: ExternalUser
+  """
+  The internal user who requested creation of the Asks issue on behalf of the creator.
+  """
+  asksRequester: User
+  """
   The user to whom the issue is assigned to.
   """
   assignee: User
@@ -14591,10 +14624,6 @@ type IssueSearchResult implements Node {
   """
   suggestionsGeneratedAt: DateTime
   """
-  [DEPRECATED] [Internal] The user who has delegated this issue to be completed by an agent.
-  """
-  supervisor: User
-  """
   The external services the issue is synced with.
   """
   syncedWith: [ExternalEntityInfo!]
@@ -14854,6 +14883,68 @@ type IssueSuggestion implements Node {
   updatedAt: DateTime!
 }
 
+"""
+IssueSuggestion collection filtering options.
+"""
+input IssueSuggestionCollectionFilter {
+  """
+  Compound filters, all of which need to be matched by the suggestion.
+  """
+  and: [IssueSuggestionCollectionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Filters that needs to be matched by all suggestions.
+  """
+  every: IssueSuggestionFilter
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Comparator for the collection length.
+  """
+  length: NumberComparator
+  """
+  Compound filters, one of which need to be matched by the suggestion.
+  """
+  or: [IssueSuggestionCollectionFilter!]
+  """
+  Filters that needs to be matched by some suggestions.
+  """
+  some: IssueSuggestionFilter
+  """
+  Comparator for the suggestion state.
+  """
+  state: StringComparator
+  """
+  Filters that the suggested label must satisfy.
+  """
+  suggestedLabel: IssueLabelFilter
+  """
+  Filters that the suggested project must satisfy.
+  """
+  suggestedProject: NullableProjectFilter
+  """
+  Filters that the suggested team must satisfy.
+  """
+  suggestedTeam: NullableTeamFilter
+  """
+  Filters that the suggested user must satisfy.
+  """
+  suggestedUser: NullableUserFilter
+  """
+  Comparator for the suggestion type.
+  """
+  type: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
+}
+
 type IssueSuggestionConnection {
   edges: [IssueSuggestionEdge!]!
   nodes: [IssueSuggestion!]!
@@ -14866,6 +14957,56 @@ type IssueSuggestionEdge {
   """
   cursor: String!
   node: IssueSuggestion!
+}
+
+"""
+IssueSuggestion filtering options.
+"""
+input IssueSuggestionFilter {
+  """
+  Compound filters, all of which need to be matched by the suggestion.
+  """
+  and: [IssueSuggestionFilter!]
+  """
+  Comparator for the created at date.
+  """
+  createdAt: DateComparator
+  """
+  Comparator for the identifier.
+  """
+  id: IDComparator
+  """
+  Compound filters, one of which need to be matched by the suggestion.
+  """
+  or: [IssueSuggestionFilter!]
+  """
+  Comparator for the suggestion state.
+  """
+  state: StringComparator
+  """
+  Filters that the suggested label must satisfy.
+  """
+  suggestedLabel: IssueLabelFilter
+  """
+  Filters that the suggested project must satisfy.
+  """
+  suggestedProject: NullableProjectFilter
+  """
+  Filters that the suggested team must satisfy.
+  """
+  suggestedTeam: NullableTeamFilter
+  """
+  Filters that the suggested user must satisfy.
+  """
+  suggestedUser: NullableUserFilter
+  """
+  Comparator for the suggestion type.
+  """
+  type: StringComparator
+  """
+  Comparator for the updated at date.
+  """
+  updatedAt: DateComparator
 }
 
 type IssueSuggestionMetadata {
@@ -20625,7 +20766,7 @@ input NullableIssueFilter {
   """
   parent: NullableIssueFilter
   """
-  Comparator for the issues priority.
+  Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
   """
   priority: NullableNumberComparator
   """
@@ -20676,6 +20817,10 @@ input NullableIssueFilter {
   Filters that issue subscribers must satisfy.
   """
   subscribers: UserCollectionFilter
+  """
+  [Internal] Filters that the issue's suggestions must satisfy.
+  """
+  suggestions: IssueSuggestionCollectionFilter
   """
   Filters that the issues team must satisfy.
   """
@@ -21108,6 +21253,10 @@ input NullableTeamFilter {
   Filters that the teams parent must satisfy.
   """
   parent: NullableTeamFilter
+  """
+  Comparator for the team privacy.
+  """
+  private: BooleanComparator
   """
   Comparator for the updated at date.
   """
@@ -32399,6 +32548,10 @@ input TeamFilter {
   """
   parent: NullableTeamFilter
   """
+  Comparator for the team privacy.
+  """
+  private: BooleanComparator
+  """
   Comparator for the updated at date.
   """
   updatedAt: DateComparator
@@ -35011,7 +35164,7 @@ input WorkflowStateFilter {
   """
   team: TeamFilter
   """
-  Comparator for the workflow state type.
+  Comparator for the workflow state type. Possible values are "triage", "backlog", "unstarted", "started", "completed", "canceled".
   """
   type: StringComparator
   """

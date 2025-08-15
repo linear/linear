@@ -127,7 +127,7 @@ export type AgentActivityCreateInput = {
   content: Scalars["JSONObject"];
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
-  /** [Internal] An optional modifier that provides additional instructions on how the activity should be interpreted. */
+  /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
   signal?: Maybe<AgentActivitySignal>;
 };
 
@@ -139,7 +139,7 @@ export type AgentActivityCreatePromptInput = {
   content: Scalars["JSONObject"];
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
-  /** [Internal] An optional modifier that provides additional instructions on how the activity should be interpreted. */
+  /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
   signal?: Maybe<AgentActivitySignal>;
   /** The comment that contains the content of this activity. */
   sourceCommentId?: Maybe<Scalars["String"]>;
@@ -220,6 +220,7 @@ export type AgentActivityResponseContent = {
 
 /** A modifier that provides additional instructions on how the activity should be interpreted. */
 export enum AgentActivitySignal {
+  Continue = "continue",
   Stop = "stop",
 }
 
@@ -3753,6 +3754,8 @@ export type DocumentWebhookPayload = {
 /** A general purpose draft. Used for comments, project updates, etc. */
 export type Draft = Node & {
   __typename?: "Draft";
+  /** [INTERNAL] Allows for multiple drafts per entity (currently constrained to Pull Requests). */
+  anchor?: Maybe<Scalars["String"]>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The text content as a Prosemirror document. */
@@ -4578,6 +4581,10 @@ export type FetchDataPayload = {
   __typename?: "FetchDataPayload";
   /** The fetched data based on the natural language query. */
   data?: Maybe<Scalars["JSONObject"]>;
+  /** The filters used to fetch the data. */
+  filters?: Maybe<Scalars["JSONObject"]>;
+  /** The GraphQL query used to fetch the data. */
+  query?: Maybe<Scalars["String"]>;
   /** Whether the fetch operation was successful. */
   success: Scalars["Boolean"];
 };
@@ -6371,6 +6378,10 @@ export type Issue = Node & {
   addedToTeamAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The external user who requested creation of the Asks issue on behalf of the creator. */
+  asksExternalUserRequester?: Maybe<ExternalUser>;
+  /** The internal user who requested creation of the Asks issue on behalf of the creator. */
+  asksRequester?: Maybe<User>;
   /** The user to whom the issue is assigned to. */
   assignee?: Maybe<User>;
   /** Attachments associated with the issue. */
@@ -6500,8 +6511,6 @@ export type Issue = Node & {
   suggestions: IssueSuggestionConnection;
   /** [Internal] The time at which the most recent suggestions for this issue were generated. */
   suggestionsGeneratedAt?: Maybe<Scalars["DateTime"]>;
-  /** [DEPRECATED] [Internal] The user who has delegated this issue to be completed by an agent. */
-  supervisor?: Maybe<User>;
   /** The external services the issue is synced with. */
   syncedWith?: Maybe<Array<ExternalEntityInfo>>;
   /** The team that the issue is associated with. */
@@ -6816,7 +6825,7 @@ export type IssueCollectionFilter = {
   or?: Maybe<Array<IssueCollectionFilter>>;
   /** Filters that the issue parent must satisfy. */
   parent?: Maybe<NullableIssueFilter>;
-  /** Comparator for the issues priority. */
+  /** Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
   priority?: Maybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: Maybe<NullableProjectFilter>;
@@ -6844,6 +6853,8 @@ export type IssueCollectionFilter = {
   state?: Maybe<WorkflowStateFilter>;
   /** Filters that issue subscribers must satisfy. */
   subscribers?: Maybe<UserCollectionFilter>;
+  /** [Internal] Filters that the issue's suggestions must satisfy. */
+  suggestions?: Maybe<IssueSuggestionCollectionFilter>;
   /** Filters that the issues team must satisfy. */
   team?: Maybe<TeamFilter>;
   /** Comparator for the issues title. */
@@ -7204,7 +7215,7 @@ export type IssueFilter = {
   or?: Maybe<Array<IssueFilter>>;
   /** Filters that the issue parent must satisfy. */
   parent?: Maybe<NullableIssueFilter>;
-  /** Comparator for the issues priority. */
+  /** Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
   priority?: Maybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: Maybe<NullableProjectFilter>;
@@ -7230,6 +7241,8 @@ export type IssueFilter = {
   state?: Maybe<WorkflowStateFilter>;
   /** Filters that issue subscribers must satisfy. */
   subscribers?: Maybe<UserCollectionFilter>;
+  /** [Internal] Filters that the issue's suggestions must satisfy. */
+  suggestions?: Maybe<IssueSuggestionCollectionFilter>;
   /** Filters that the issues team must satisfy. */
   team?: Maybe<TeamFilter>;
   /** Comparator for the issues title. */
@@ -7984,6 +7997,10 @@ export type IssueSearchResult = Node & {
   addedToTeamAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The external user who requested creation of the Asks issue on behalf of the creator. */
+  asksExternalUserRequester?: Maybe<ExternalUser>;
+  /** The internal user who requested creation of the Asks issue on behalf of the creator. */
+  asksRequester?: Maybe<User>;
   /** The user to whom the issue is assigned to. */
   assignee?: Maybe<User>;
   /** Attachments associated with the issue. */
@@ -8115,8 +8132,6 @@ export type IssueSearchResult = Node & {
   suggestions: IssueSuggestionConnection;
   /** [Internal] The time at which the most recent suggestions for this issue were generated. */
   suggestionsGeneratedAt?: Maybe<Scalars["DateTime"]>;
-  /** [DEPRECATED] [Internal] The user who has delegated this issue to be completed by an agent. */
-  supervisor?: Maybe<User>;
   /** The external services the issue is synced with. */
   syncedWith?: Maybe<Array<ExternalEntityInfo>>;
   /** The team that the issue is associated with. */
@@ -8394,6 +8409,38 @@ export type IssueSuggestion = Node & {
   updatedAt: Scalars["DateTime"];
 };
 
+/** IssueSuggestion collection filtering options. */
+export type IssueSuggestionCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the suggestion. */
+  and?: Maybe<Array<IssueSuggestionCollectionFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Filters that needs to be matched by all suggestions. */
+  every?: Maybe<IssueSuggestionFilter>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Comparator for the collection length. */
+  length?: Maybe<NumberComparator>;
+  /** Compound filters, one of which need to be matched by the suggestion. */
+  or?: Maybe<Array<IssueSuggestionCollectionFilter>>;
+  /** Filters that needs to be matched by some suggestions. */
+  some?: Maybe<IssueSuggestionFilter>;
+  /** Comparator for the suggestion state. */
+  state?: Maybe<StringComparator>;
+  /** Filters that the suggested label must satisfy. */
+  suggestedLabel?: Maybe<IssueLabelFilter>;
+  /** Filters that the suggested project must satisfy. */
+  suggestedProject?: Maybe<NullableProjectFilter>;
+  /** Filters that the suggested team must satisfy. */
+  suggestedTeam?: Maybe<NullableTeamFilter>;
+  /** Filters that the suggested user must satisfy. */
+  suggestedUser?: Maybe<NullableUserFilter>;
+  /** Comparator for the suggestion type. */
+  type?: Maybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
+};
+
 export type IssueSuggestionConnection = {
   __typename?: "IssueSuggestionConnection";
   edges: Array<IssueSuggestionEdge>;
@@ -8406,6 +8453,32 @@ export type IssueSuggestionEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: IssueSuggestion;
+};
+
+/** IssueSuggestion filtering options. */
+export type IssueSuggestionFilter = {
+  /** Compound filters, all of which need to be matched by the suggestion. */
+  and?: Maybe<Array<IssueSuggestionFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: Maybe<DateComparator>;
+  /** Comparator for the identifier. */
+  id?: Maybe<IdComparator>;
+  /** Compound filters, one of which need to be matched by the suggestion. */
+  or?: Maybe<Array<IssueSuggestionFilter>>;
+  /** Comparator for the suggestion state. */
+  state?: Maybe<StringComparator>;
+  /** Filters that the suggested label must satisfy. */
+  suggestedLabel?: Maybe<IssueLabelFilter>;
+  /** Filters that the suggested project must satisfy. */
+  suggestedProject?: Maybe<NullableProjectFilter>;
+  /** Filters that the suggested team must satisfy. */
+  suggestedTeam?: Maybe<NullableTeamFilter>;
+  /** Filters that the suggested user must satisfy. */
+  suggestedUser?: Maybe<NullableUserFilter>;
+  /** Comparator for the suggestion type. */
+  type?: Maybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: Maybe<DateComparator>;
 };
 
 export type IssueSuggestionMetadata = {
@@ -11671,7 +11744,7 @@ export type NullableIssueFilter = {
   or?: Maybe<Array<NullableIssueFilter>>;
   /** Filters that the issue parent must satisfy. */
   parent?: Maybe<NullableIssueFilter>;
-  /** Comparator for the issues priority. */
+  /** Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
   priority?: Maybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: Maybe<NullableProjectFilter>;
@@ -11697,6 +11770,8 @@ export type NullableIssueFilter = {
   state?: Maybe<WorkflowStateFilter>;
   /** Filters that issue subscribers must satisfy. */
   subscribers?: Maybe<UserCollectionFilter>;
+  /** [Internal] Filters that the issue's suggestions must satisfy. */
+  suggestions?: Maybe<IssueSuggestionCollectionFilter>;
   /** Filters that the issues team must satisfy. */
   team?: Maybe<TeamFilter>;
   /** Comparator for the issues title. */
@@ -11919,6 +11994,8 @@ export type NullableTeamFilter = {
   or?: Maybe<Array<NullableTeamFilter>>;
   /** Filters that the teams parent must satisfy. */
   parent?: Maybe<NullableTeamFilter>;
+  /** Comparator for the team privacy. */
+  private?: Maybe<BooleanComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -18053,6 +18130,8 @@ export type TeamFilter = {
   or?: Maybe<Array<TeamFilter>>;
   /** Filters that the teams parent must satisfy. */
   parent?: Maybe<NullableTeamFilter>;
+  /** Comparator for the team privacy. */
+  private?: Maybe<BooleanComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
 };
@@ -19595,7 +19674,7 @@ export type WorkflowStateFilter = {
   position?: Maybe<NumberComparator>;
   /** Filters that the workflow states team must satisfy. */
   team?: Maybe<TeamFilter>;
-  /** Comparator for the workflow state type. */
+  /** Comparator for the workflow state type. Possible values are "triage", "backlog", "unstarted", "started", "completed", "canceled". */
   type?: Maybe<StringComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: Maybe<DateComparator>;
@@ -21443,6 +21522,8 @@ export type IssueFragment = { __typename: "Issue" } & Pick<
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     syncedWith?: Maybe<Array<{ __typename?: "ExternalEntityInfo" } & ExternalEntityInfoFragment>>;
     externalUserCreator?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+    asksExternalUserRequester?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+    asksRequester?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     parent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -23246,7 +23327,10 @@ export type FavoritePayloadFragment = { __typename: "FavoritePayload" } & Pick<
   "lastSyncId" | "success"
 > & { favorite: { __typename?: "Favorite" } & Pick<Favorite, "id"> };
 
-export type FetchDataPayloadFragment = { __typename: "FetchDataPayload" } & Pick<FetchDataPayload, "data" | "success">;
+export type FetchDataPayloadFragment = { __typename: "FetchDataPayload" } & Pick<
+  FetchDataPayload,
+  "query" | "data" | "filters" | "success"
+>;
 
 export type FrontAttachmentPayloadFragment = { __typename: "FrontAttachmentPayload" } & Pick<
   FrontAttachmentPayload,
@@ -23500,6 +23584,8 @@ export type IssueSearchResultFragment = { __typename: "IssueSearchResult" } & Pi
     cycle?: Maybe<{ __typename?: "Cycle" } & Pick<Cycle, "id">>;
     syncedWith?: Maybe<Array<{ __typename?: "ExternalEntityInfo" } & ExternalEntityInfoFragment>>;
     externalUserCreator?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+    asksExternalUserRequester?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+    asksRequester?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     lastAppliedTemplate?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     parent?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
@@ -39093,7 +39179,9 @@ export const FetchDataPayloadFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "query" } },
           { kind: "Field", name: { kind: "Name", value: "data" } },
+          { kind: "Field", name: { kind: "Name", value: "filters" } },
           { kind: "Field", name: { kind: "Name", value: "success" } },
         ],
       },
@@ -40240,6 +40328,22 @@ export const IssueFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "asksExternalUserRequester" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "asksRequester" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
           { kind: "Field", name: { kind: "Name", value: "description" } },
           { kind: "Field", name: { kind: "Name", value: "title" } },
           { kind: "Field", name: { kind: "Name", value: "number" } },
@@ -41238,6 +41342,22 @@ export const IssueSearchResultFragmentDoc = {
           {
             kind: "Field",
             name: { kind: "Name", value: "externalUserCreator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "asksExternalUserRequester" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "asksRequester" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],

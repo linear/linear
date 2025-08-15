@@ -499,7 +499,7 @@
           },
           {
             "name": "signal",
-            "description": "[Internal] An optional modifier that provides additional instructions on how the activity should be interpreted.",
+            "description": "An optional modifier that provides additional instructions on how the activity should be interpreted.",
             "type": {
               "kind": "ENUM",
               "name": "AgentActivitySignal",
@@ -566,7 +566,7 @@
           },
           {
             "name": "signal",
-            "description": "[Internal] An optional modifier that provides additional instructions on how the activity should be interpreted.",
+            "description": "An optional modifier that provides additional instructions on how the activity should be interpreted.",
             "type": {
               "kind": "ENUM",
               "name": "AgentActivitySignal",
@@ -1036,6 +1036,12 @@
         "enumValues": [
           {
             "name": "stop",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "continue",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -23206,6 +23212,18 @@
             "deprecationReason": null
           },
           {
+            "name": "anchor",
+            "description": "[INTERNAL] Allows for multiple drafts per entity (currently constrained to Pull Requests).",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "team",
             "description": "The team for which this is a draft post.",
             "args": [],
@@ -28019,6 +28037,30 @@
           {
             "name": "data",
             "description": "The fetched data based on the natural language query.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "query",
+            "description": "The GraphQL query used to fetch the data.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "filters",
+            "description": "The filters used to fetch the data.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -39510,18 +39552,6 @@
             "deprecationReason": null
           },
           {
-            "name": "supervisor",
-            "description": "[DEPRECATED] [Internal] The user who has delegated this issue to be completed by an agent.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "User",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "delegate",
             "description": "The agent user that is delegated to work on this issue.",
             "args": [],
@@ -41073,6 +41103,30 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "asksRequester",
+            "description": "The internal user who requested creation of the Asks issue on behalf of the creator.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "asksExternalUserRequester",
+            "description": "The external user who requested creation of the Asks issue on behalf of the creator.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ExternalUser",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -41617,7 +41671,7 @@
           },
           {
             "name": "priority",
-            "description": "Comparator for the issues priority.",
+            "description": "Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableNumberComparator",
@@ -41921,6 +41975,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "CommentCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestions",
+            "description": "[Internal] Filters that the issue's suggestions must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueSuggestionCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -44151,7 +44217,7 @@
           },
           {
             "name": "priority",
-            "description": "Comparator for the issues priority.",
+            "description": "Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableNumberComparator",
@@ -44455,6 +44521,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "CommentCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestions",
+            "description": "[Internal] Filters that the issue's suggestions must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueSuggestionCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -49905,18 +49983,6 @@
             "deprecationReason": null
           },
           {
-            "name": "supervisor",
-            "description": "[DEPRECATED] [Internal] The user who has delegated this issue to be completed by an agent.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "User",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "delegate",
             "description": "The agent user that is delegated to work on this issue.",
             "args": [],
@@ -51470,6 +51536,30 @@
             "deprecationReason": null
           },
           {
+            "name": "asksRequester",
+            "description": "The internal user who requested creation of the Asks issue on behalf of the creator.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "asksExternalUserRequester",
+            "description": "The external user who requested creation of the Asks issue on behalf of the creator.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ExternalUser",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "metadata",
             "description": "Metadata related to search result.",
             "args": [],
@@ -52389,6 +52479,201 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "IssueSuggestionCollectionFilter",
+        "description": "IssueSuggestion collection filtering options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "Comparator for the identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "Comparator for the created at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "Comparator for the updated at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "Comparator for the suggestion type.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "state",
+            "description": "Comparator for the suggestion state.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestedUser",
+            "description": "Filters that the suggested user must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableUserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestedProject",
+            "description": "Filters that the suggested project must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableProjectFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestedTeam",
+            "description": "Filters that the suggested team must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableTeamFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestedLabel",
+            "description": "Filters that the suggested label must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueLabelFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "and",
+            "description": "Compound filters, all of which need to be matched by the suggestion.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "IssueSuggestionCollectionFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "or",
+            "description": "Compound filters, one of which need to be matched by the suggestion.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "IssueSuggestionCollectionFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "some",
+            "description": "Filters that needs to be matched by some suggestions.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueSuggestionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "every",
+            "description": "Filters that needs to be matched by all suggestions.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueSuggestionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "length",
+            "description": "Comparator for the collection length.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NumberComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "IssueSuggestionConnection",
         "description": null,
@@ -52503,6 +52788,165 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "IssueSuggestionFilter",
+        "description": "IssueSuggestion filtering options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "Comparator for the identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "Comparator for the created at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": "Comparator for the updated at date.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "type",
+            "description": "Comparator for the suggestion type.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "state",
+            "description": "Comparator for the suggestion state.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "StringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestedUser",
+            "description": "Filters that the suggested user must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableUserFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestedProject",
+            "description": "Filters that the suggested project must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableProjectFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestedTeam",
+            "description": "Filters that the suggested team must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableTeamFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestedLabel",
+            "description": "Filters that the suggested label must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueLabelFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "and",
+            "description": "Compound filters, all of which need to be matched by the suggestion.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "IssueSuggestionFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "or",
+            "description": "Compound filters, one of which need to be matched by the suggestion.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "IssueSuggestionFilter",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -73193,7 +73637,7 @@
           },
           {
             "name": "priority",
-            "description": "Comparator for the issues priority.",
+            "description": "Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableNumberComparator",
@@ -73497,6 +73941,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "CommentCollectionFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "suggestions",
+            "description": "[Internal] Filters that the issue's suggestions must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueSuggestionCollectionFilter",
               "ofType": null
             },
             "defaultValue": null,
@@ -75063,6 +75519,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableStringComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "private",
+            "description": "Comparator for the team privacy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "BooleanComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -114701,6 +115169,18 @@
             "deprecationReason": null
           },
           {
+            "name": "private",
+            "description": "Comparator for the team privacy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "BooleanComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "issues",
             "description": "Filters that the teams issues must satisfy.",
             "type": {
@@ -124261,7 +124741,7 @@
           },
           {
             "name": "type",
-            "description": "Comparator for the workflow state type.",
+            "description": "Comparator for the workflow state type. Possible values are \"triage\", \"backlog\", \"unstarted\", \"started\", \"completed\", \"canceled\".",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "StringComparator",

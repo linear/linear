@@ -5816,11 +5816,17 @@ export class FetchDataPayload extends Request {
   public constructor(request: LinearRequest, data: L.FetchDataPayloadFragment) {
     super(request);
     this.data = data.data ?? undefined;
+    this.filters = data.filters ?? undefined;
+    this.query = data.query ?? undefined;
     this.success = data.success;
   }
 
   /** The fetched data based on the natural language query. */
   public data?: L.Scalars["JSONObject"];
+  /** The filters used to fetch the data. */
+  public filters?: L.Scalars["JSONObject"];
+  /** The GraphQL query used to fetch the data. */
+  public query?: string;
   /** Whether the fetch operation was successful. */
   public success: boolean;
 }
@@ -7906,6 +7912,8 @@ export class IntegrationsSettingsPayload extends Request {
  * @param data - L.IssueFragment response data
  */
 export class Issue extends Request {
+  private _asksExternalUserRequester?: L.IssueFragment["asksExternalUserRequester"];
+  private _asksRequester?: L.IssueFragment["asksRequester"];
   private _assignee?: L.IssueFragment["assignee"];
   private _creator?: L.IssueFragment["creator"];
   private _cycle?: L.IssueFragment["cycle"];
@@ -7967,6 +7975,8 @@ export class Issue extends Request {
     this.reactions = data.reactions.map(node => new Reaction(request, node));
     this.syncedWith = data.syncedWith ? data.syncedWith.map(node => new ExternalEntityInfo(request, node)) : undefined;
     this.integrationSourceType = data.integrationSourceType ?? undefined;
+    this._asksExternalUserRequester = data.asksExternalUserRequester ?? undefined;
+    this._asksRequester = data.asksRequester ?? undefined;
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
     this._cycle = data.cycle ?? undefined;
@@ -8073,6 +8083,24 @@ export class Issue extends Request {
   public botActor?: ActorBot;
   /** Integration type that created this issue, if applicable. */
   public integrationSourceType?: L.IntegrationService;
+  /** The external user who requested creation of the Asks issue on behalf of the creator. */
+  public get asksExternalUserRequester(): LinearFetch<ExternalUser> | undefined {
+    return this._asksExternalUserRequester?.id
+      ? new ExternalUserQuery(this._request).fetch(this._asksExternalUserRequester?.id)
+      : undefined;
+  }
+  /** The ID of external user who requested creation of the asks issue on behalf of the creator. */
+  public get asksExternalUserRequesterId(): string | undefined {
+    return this._asksExternalUserRequester?.id;
+  }
+  /** The internal user who requested creation of the Asks issue on behalf of the creator. */
+  public get asksRequester(): LinearFetch<User> | undefined {
+    return this._asksRequester?.id ? new UserQuery(this._request).fetch(this._asksRequester?.id) : undefined;
+  }
+  /** The ID of internal user who requested creation of the asks issue on behalf of the creator. */
+  public get asksRequesterId(): string | undefined {
+    return this._asksRequester?.id;
+  }
   /** The user to whom the issue is assigned to. */
   public get assignee(): LinearFetch<User> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
@@ -9721,6 +9749,8 @@ export class IssueSearchPayload extends Request {
  * @param data - L.IssueSearchResultFragment response data
  */
 export class IssueSearchResult extends Request {
+  private _asksExternalUserRequester?: L.IssueSearchResultFragment["asksExternalUserRequester"];
+  private _asksRequester?: L.IssueSearchResultFragment["asksRequester"];
   private _assignee?: L.IssueSearchResultFragment["assignee"];
   private _creator?: L.IssueSearchResultFragment["creator"];
   private _cycle?: L.IssueSearchResultFragment["cycle"];
@@ -9783,6 +9813,8 @@ export class IssueSearchResult extends Request {
     this.reactions = data.reactions.map(node => new Reaction(request, node));
     this.syncedWith = data.syncedWith ? data.syncedWith.map(node => new ExternalEntityInfo(request, node)) : undefined;
     this.integrationSourceType = data.integrationSourceType ?? undefined;
+    this._asksExternalUserRequester = data.asksExternalUserRequester ?? undefined;
+    this._asksRequester = data.asksRequester ?? undefined;
     this._assignee = data.assignee ?? undefined;
     this._creator = data.creator ?? undefined;
     this._cycle = data.cycle ?? undefined;
@@ -9891,6 +9923,24 @@ export class IssueSearchResult extends Request {
   public botActor?: ActorBot;
   /** Integration type that created this issue, if applicable. */
   public integrationSourceType?: L.IntegrationService;
+  /** The external user who requested creation of the Asks issue on behalf of the creator. */
+  public get asksExternalUserRequester(): LinearFetch<ExternalUser> | undefined {
+    return this._asksExternalUserRequester?.id
+      ? new ExternalUserQuery(this._request).fetch(this._asksExternalUserRequester?.id)
+      : undefined;
+  }
+  /** The ID of external user who requested creation of the asks issue on behalf of the creator. */
+  public get asksExternalUserRequesterId(): string | undefined {
+    return this._asksExternalUserRequester?.id;
+  }
+  /** The internal user who requested creation of the Asks issue on behalf of the creator. */
+  public get asksRequester(): LinearFetch<User> | undefined {
+    return this._asksRequester?.id ? new UserQuery(this._request).fetch(this._asksRequester?.id) : undefined;
+  }
+  /** The ID of internal user who requested creation of the asks issue on behalf of the creator. */
+  public get asksRequesterId(): string | undefined {
+    return this._asksRequester?.id;
+  }
   /** The user to whom the issue is assigned to. */
   public get assignee(): LinearFetch<User> | undefined {
     return this._assignee?.id ? new UserQuery(this._request).fetch(this._assignee?.id) : undefined;
