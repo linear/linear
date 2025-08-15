@@ -3433,6 +3433,14 @@ fragment Issue on Issue {
   externalUserCreator {
     id
   }
+  # The external user who requested creation of the Asks issue on behalf of the creator.
+  asksExternalUserRequester {
+    id
+  }
+  # The internal user who requested creation of the Asks issue on behalf of the creator.
+  asksRequester {
+    id
+  }
   # The issue's description in markdown format.
   description
   # The issue's title.
@@ -7306,8 +7314,12 @@ fragment FavoritePayload on FavoritePayload {
 
 fragment FetchDataPayload on FetchDataPayload {
   __typename
+  # The GraphQL query used to fetch the data.
+  query
   # The fetched data based on the natural language query.
   data
+  # The filters used to fetch the data.
+  filters
   # Whether the fetch operation was successful.
   success
 }
@@ -7792,6 +7804,14 @@ fragment IssueSearchResult on IssueSearchResult {
   }
   # The external user who created the issue.
   externalUserCreator {
+    id
+  }
+  # The external user who requested creation of the Asks issue on behalf of the creator.
+  asksExternalUserRequester {
+    id
+  }
+  # The internal user who requested creation of the Asks issue on behalf of the creator.
+  asksRequester {
     id
   }
   # The issue's description in markdown format.

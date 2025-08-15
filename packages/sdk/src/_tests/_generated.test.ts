@@ -2280,6 +2280,26 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue.asksExternalUserRequester query for L.ExternalUser */
+    it("issue.asksExternalUserRequester", async () => {
+      if (_issue) {
+        const issue_asksExternalUserRequester: L.ExternalUser | undefined = await _issue.asksExternalUserRequester;
+        expect(issue_asksExternalUserRequester instanceof L.ExternalUser);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.asksExternalUserRequester query");
+      }
+    });
+
+    /** Test the issue.asksRequester query for L.User */
+    it("issue.asksRequester", async () => {
+      if (_issue) {
+        const issue_asksRequester: L.User | undefined = await _issue.asksRequester;
+        expect(issue_asksRequester instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.asksRequester query");
+      }
+    });
+
     /** Test the issue.assignee query for L.User */
     it("issue.assignee", async () => {
       if (_issue) {
@@ -2771,6 +2791,26 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issue.asksExternalUserRequester query for L.ExternalUser */
+    it("issue.asksExternalUserRequester", async () => {
+      if (_issue) {
+        const issue_asksExternalUserRequester: L.ExternalUser | undefined = await _issue.asksExternalUserRequester;
+        expect(issue_asksExternalUserRequester instanceof L.ExternalUser);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.asksExternalUserRequester query");
+      }
+    });
+
+    /** Test the issue.asksRequester query for L.User */
+    it("issue.asksRequester", async () => {
+      if (_issue) {
+        const issue_asksRequester: L.User | undefined = await _issue.asksRequester;
+        expect(issue_asksRequester instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.asksRequester query");
+      }
+    });
+
     /** Test the issue.assignee query for L.User */
     it("issue.assignee", async () => {
       if (_issue) {
@@ -3229,6 +3269,26 @@ describe("generated", () => {
         expect(subscribers instanceof L.UserConnection);
       } else {
         console.warn("codegen-doc:print: No issue found - cannot test _issue.subscribers query");
+      }
+    });
+
+    /** Test the issue.asksExternalUserRequester query for L.ExternalUser */
+    it("issue.asksExternalUserRequester", async () => {
+      if (_issue) {
+        const issue_asksExternalUserRequester: L.ExternalUser | undefined = await _issue.asksExternalUserRequester;
+        expect(issue_asksExternalUserRequester instanceof L.ExternalUser);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.asksExternalUserRequester query");
+      }
+    });
+
+    /** Test the issue.asksRequester query for L.User */
+    it("issue.asksRequester", async () => {
+      if (_issue) {
+        const issue_asksRequester: L.User | undefined = await _issue.asksRequester;
+        expect(issue_asksRequester instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No Issue found - cannot test issue.asksRequester query");
       }
     });
 
