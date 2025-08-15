@@ -25,6 +25,10 @@ import {
   UserWebhookPayload,
 } from "../_generated_documents";
 
+/**
+ * Union type representing all possible Linear webhook payloads.
+ * This includes entity webhooks, special webhooks, and notification webhooks.
+ */
 export type LinearWebhookPayload =
   | EntityWebhookPayloadWithEntityData
   | EntityWebhookPayloadWithUnknownEntityData
