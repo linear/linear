@@ -12,7 +12,7 @@
     },
   ],
   "extensions": {
-    "recommendations": ["dbaeumer.vscode-eslint", "christian-kohler.path-intellisense", "esbenp.prettier-vscode"],
+    "recommendations": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"],
   },
   "settings": {
     "editor.tabSize": 2,
@@ -26,8 +26,8 @@
     },
     "editor.rulers": [120],
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true,
-      "source.organizeImports": true,
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports": "explicit"
     },
     "files.exclude": {
       "**/.cache": true,
@@ -43,12 +43,6 @@
       "**/*.tsbuildinfo": true,
       "**/.size-snapshot.json": true,
     },
-    "gitlens.advanced.messages": {
-      "suppressShowKeyBindingsNotice": true,
-    },
-    "gitlens.hovers.currentLine.over": "line",
-    "gitlens.codeLens.enabled": false,
-    "gitlens.currentLine.enabled": false,
     "typescript.tsdk": "./node_modules/typescript/lib",
     "typescript.enablePromptUseWorkspaceTsdk": true,
     "cSpell.words": ["uuidv4"],
