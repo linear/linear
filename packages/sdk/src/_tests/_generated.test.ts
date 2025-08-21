@@ -819,6 +819,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the comment.agentSession query for L.AgentSession */
+    it("comment.agentSession", async () => {
+      if (_comment) {
+        const comment_agentSession: L.AgentSession | undefined = await _comment.agentSession;
+        expect(comment_agentSession instanceof L.AgentSession);
+      } else {
+        console.warn("codegen-doc:print: No Comment found - cannot test comment.agentSession query");
+      }
+    });
+
     /** Test the comment.externalUser query for L.ExternalUser */
     it("comment.externalUser", async () => {
       if (_comment) {

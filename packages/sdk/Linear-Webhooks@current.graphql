@@ -78,6 +78,11 @@ type AgentSessionEventWebhookPayload {
   createdAt: DateTime!
 
   """
+  Guidance to inform the agent's behavior, which comes from configuration at the level of the workspace, parent teams, and/or current team for this session. The nearest team-specific guidance should take highest precendence.
+  """
+  guidance: [GuidanceRuleWebhookPayload!]
+
+  """
   ID of the OAuth client the app user is tied to.
   """
   oauthClientId: String!
@@ -88,7 +93,7 @@ type AgentSessionEventWebhookPayload {
   organizationId: String!
 
   """
-  The previous comments in the thread before this agent was mentioned and the session was initiated, if any.
+  The previous comments in the thread before this agent was mentioned and the session was initiated, if any. Present only for `created` events where the session was initiated by mentioning the agent in a child comment of a thread.
   """
   previousComments: [CommentChildWebhookPayload!]
 
@@ -135,7 +140,7 @@ type AgentSessionWebhookPayload {
   """
   The ID of the user that created the agent session.
   """
-  creatorId: String!
+  creatorId: String
 
   """
   The time the agent session ended.
@@ -1333,6 +1338,26 @@ type ExternalUserChildWebhookPayload {
   The name of the external user.
   """
   name: String!
+}
+
+"""
+Union type for all possible guidance rule origins
+"""
+union GuidanceRuleOriginWebhookPayload = OrganizationOriginWebhookPayload | TeamOriginWebhookPayload
+
+"""
+Metadata for guidance that should be provided to an AI agent.
+"""
+type GuidanceRuleWebhookPayload {
+  """
+  The content of the guidance as markdown.
+  """
+  body: String!
+
+  """
+  Where the guidance was defined within the organization.
+  """
+  origin: GuidanceRuleOriginWebhookPayload!
 }
 
 """
@@ -2827,6 +2852,16 @@ type OauthClientChildWebhookPayload {
 }
 
 """
+Organization origin for guidance rules.
+"""
+type OrganizationOriginWebhookPayload {
+  """
+  The type of origin, always 'Organization'.
+  """
+  type: String!
+}
+
+"""
 A generic type of notification.
 """
 enum OtherNotificationType {
@@ -3541,6 +3576,51 @@ type TeamChildWebhookPayload {
   The name of the team.
   """
   name: String!
+}
+
+"""
+Team origin for guidance rules.
+"""
+type TeamOriginWebhookPayload {
+  """
+  The team that the guidance was defined in.
+  """
+  team: TeamWithParentWebhookPayload!
+
+  """
+  The type of origin, always 'Team'.
+  """
+  type: String!
+}
+
+"""
+Team properties including parent information for guidance rules.
+"""
+type TeamWithParentWebhookPayload {
+  """
+  The team's display name including parent team names if applicable.
+  """
+  displayName: String!
+
+  """
+  The ID of the team.
+  """
+  id: String!
+
+  """
+  The key of the team.
+  """
+  key: String!
+
+  """
+  The name of the team.
+  """
+  name: String!
+
+  """
+  The parent team's unique identifier, if any.
+  """
+  parentId: String
 }
 
 """

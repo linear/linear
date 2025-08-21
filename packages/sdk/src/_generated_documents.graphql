@@ -66,6 +66,10 @@ fragment ActorBot on ActorBot {
 # A comment associated with an issue.
 fragment Comment on Comment {
   __typename
+  # Agent session associated with this comment.
+  agentSession {
+    id
+  }
   # Comment's URL.
   url
   # Emoji reaction summary, grouped by emoji type.
@@ -1704,14 +1708,10 @@ fragment Project on Project {
 # A pull request related notification.
 fragment PullRequestNotification on PullRequestNotification {
   __typename
-  # Name of the reaction emoji related to the notification.
-  reactionEmoji
   # Notification type.
   type
-  # Related comment ID. Null if the notification is not related to a comment.
-  commentId
-  # Related parent comment ID. Null if the notification is not related to a comment.
-  parentCommentId
+  # Related pull request comment ID. Null if the notification is not related to a pull request comment.
+  pullRequestCommentId
   # Related pull request.
   pullRequestId
   # The bot that caused the notification.
@@ -3787,7 +3787,7 @@ fragment Team on Team {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The name of the team including it's parent team name if it has one.
+  # The name of the team including its parent team name if it has one.
   displayName
   # The team's color.
   color
@@ -4752,6 +4752,13 @@ fragment ExternalEntitySlackMetadata on ExternalEntitySlackMetadata {
   isFromSlack
 }
 
+# Metadata for guidance that should be provided to an AI agent.
+fragment GuidanceRuleWebhookPayload on GuidanceRuleWebhookPayload {
+  __typename
+  # The content of the guidance as markdown.
+  body
+}
+
 # Notification subscriptions for models.
 fragment NotificationSubscription on NotificationSubscription {
   __typename
@@ -4860,6 +4867,13 @@ fragment UploadFile on UploadFile {
     ...UploadFileHeader
   }
   metaData
+}
+
+# Organization origin for guidance rules.
+fragment OrganizationOriginWebhookPayload on OrganizationOriginWebhookPayload {
+  __typename
+  # The type of origin, always 'Organization'.
+  type
 }
 
 # Payload for OAuth app webhook events.
@@ -5394,6 +5408,10 @@ fragment UserWebhookPayload on UserWebhookPayload {
 # Payload for agent session webhook events.
 fragment AgentSessionEventWebhookPayload on AgentSessionEventWebhookPayload {
   __typename
+  # Guidance to inform the agent's behavior, which comes from configuration at the level of the workspace, parent teams, and/or current team for this session. The nearest team-specific guidance should take highest precendence.
+  guidance {
+    ...GuidanceRuleWebhookPayload
+  }
   # ID of the OAuth client the app user is tied to.
   oauthClientId
   # ID of the app user the agent session belongs to.
@@ -5408,7 +5426,7 @@ fragment AgentSessionEventWebhookPayload on AgentSessionEventWebhookPayload {
   agentSession {
     ...AgentSessionWebhookPayload
   }
-  # The previous comments in the thread before this agent was mentioned and the session was initiated, if any.
+  # The previous comments in the thread before this agent was mentioned and the session was initiated, if any. Present only for `created` events where the session was initiated by mentioning the agent in a child comment of a thread.
   previousComments {
     ...CommentChildWebhookPayload
   }
@@ -6333,6 +6351,32 @@ fragment SesDomainIdentity on SesDomainIdentity {
   }
   # Whether the domain is fully verified and can be used for sending emails.
   canSendFromCustomDomain
+}
+
+# Team origin for guidance rules.
+fragment TeamOriginWebhookPayload on TeamOriginWebhookPayload {
+  __typename
+  # The team that the guidance was defined in.
+  team {
+    ...TeamWithParentWebhookPayload
+  }
+  # The type of origin, always 'Team'.
+  type
+}
+
+# Team properties including parent information for guidance rules.
+fragment TeamWithParentWebhookPayload on TeamWithParentWebhookPayload {
+  __typename
+  # The ID of the team.
+  id
+  # The key of the team.
+  key
+  # The name of the team.
+  name
+  # The parent team's unique identifier, if any.
+  parentId
+  # The team's display name including parent team names if applicable.
+  displayName
 }
 
 # The configuration of all integrations for different entities.
@@ -7975,6 +8019,7 @@ fragment IssueSuggestionMetadata on IssueSuggestionMetadata {
   rank
   reasons
   score
+  variant
 }
 
 fragment IssueTitleSuggestionFromCustomerRequestPayload on IssueTitleSuggestionFromCustomerRequestPayload {
@@ -14639,6 +14684,24 @@ mutation createAgentActivity(
 ) {
   agentActivityCreate(input: $input) {
     ...AgentActivityPayload
+  }
+}
+# Creates a new agent session on a rootcomment.
+mutation agentSessionCreateOnComment(
+  # The agent session object to create.
+  $input: AgentSessionCreateOnComment!
+) {
+  agentSessionCreateOnComment(input: $input) {
+    ...AgentSessionPayload
+  }
+}
+# Creates a new agent session on an issue.
+mutation agentSessionCreateOnIssue(
+  # The agent session object to create.
+  $input: AgentSessionCreateOnIssue!
+) {
+  agentSessionCreateOnIssue(input: $input) {
+    ...AgentSessionPayload
   }
 }
 # Updates the externalUrl of an agent session, which is an agent-hosted page associated with this
