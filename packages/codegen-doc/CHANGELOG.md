@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.2.9
+
+### Patch Changes
+
+- ce51e20: chore(deps): update dependency patch versions
+
 ## 3.2.8
 
 ### Patch Changes
