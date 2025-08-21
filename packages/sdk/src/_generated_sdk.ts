@@ -606,6 +606,7 @@ export class AgentSessionEventWebhookPayload {
     this.type = data.type;
     this.agentActivity = data.agentActivity ? new AgentActivityWebhookPayload(data.agentActivity) : undefined;
     this.agentSession = new AgentSessionWebhookPayload(data.agentSession);
+    this.guidance = data.guidance ? data.guidance.map(node => new GuidanceRuleWebhookPayload(node)) : undefined;
     this.previousComments = data.previousComments
       ? data.previousComments.map(node => new CommentChildWebhookPayload(node))
       : undefined;
@@ -623,7 +624,9 @@ export class AgentSessionEventWebhookPayload {
   public organizationId: string;
   /** The type of resource. */
   public type: string;
-  /** The previous comments in the thread before this agent was mentioned and the session was initiated, if any. */
+  /** Guidance to inform the agent's behavior, which comes from configuration at the level of the workspace, parent teams, and/or current team for this session. The nearest team-specific guidance should take highest precendence. */
+  public guidance?: GuidanceRuleWebhookPayload[];
+  /** The previous comments in the thread before this agent was mentioned and the session was initiated, if any. Present only for `created` events where the session was initiated by mentioning the agent in a child comment of a thread. */
   public previousComments?: CommentChildWebhookPayload[];
   /** The agent activity that was created. */
   public agentActivity?: AgentActivityWebhookPayload;
@@ -670,7 +673,7 @@ export class AgentSessionWebhookPayload {
     this.archivedAt = data.archivedAt ?? undefined;
     this.commentId = data.commentId ?? undefined;
     this.createdAt = data.createdAt;
-    this.creatorId = data.creatorId;
+    this.creatorId = data.creatorId ?? undefined;
     this.endedAt = data.endedAt ?? undefined;
     this.id = data.id;
     this.issueId = data.issueId ?? undefined;
@@ -695,7 +698,7 @@ export class AgentSessionWebhookPayload {
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the user that created the agent session. */
-  public creatorId: string;
+  public creatorId?: string;
   /** The time the agent session ended. */
   public endedAt?: string;
   /** The ID of the entity. */
@@ -1590,6 +1593,7 @@ export class BaseWebhookPayload {
  * @param data - L.CommentFragment response data
  */
 export class Comment extends Request {
+  private _agentSession?: L.CommentFragment["agentSession"];
   private _externalUser?: L.CommentFragment["externalUser"];
   private _initiativeUpdate?: L.CommentFragment["initiativeUpdate"];
   private _issue?: L.CommentFragment["issue"];
@@ -1616,6 +1620,7 @@ export class Comment extends Request {
     this.externalThread = data.externalThread ? new SyncedExternalThread(request, data.externalThread) : undefined;
     this.reactions = data.reactions.map(node => new Reaction(request, node));
     this.syncedWith = data.syncedWith ? data.syncedWith.map(node => new ExternalEntityInfo(request, node)) : undefined;
+    this._agentSession = data.agentSession ?? undefined;
     this._externalUser = data.externalUser ?? undefined;
     this._initiativeUpdate = data.initiativeUpdate ?? undefined;
     this._issue = data.issue ?? undefined;
@@ -1659,6 +1664,14 @@ export class Comment extends Request {
   public documentContent?: DocumentContent;
   /** The external thread that the comment is synced with. */
   public externalThread?: SyncedExternalThread;
+  /** Agent session associated with this comment. */
+  public get agentSession(): LinearFetch<AgentSession> | undefined {
+    return this._agentSession?.id ? new AgentSessionQuery(this._request).fetch(this._agentSession?.id) : undefined;
+  }
+  /** The ID of agent session associated with this comment. */
+  public get agentSessionId(): string | undefined {
+    return this._agentSession?.id;
+  }
   /** The external user who wrote the comment. */
   public get externalUser(): LinearFetch<ExternalUser> | undefined {
     return this._externalUser?.id ? new ExternalUserQuery(this._request).fetch(this._externalUser?.id) : undefined;
@@ -6167,6 +6180,19 @@ export class GitLabIntegrationCreatePayload extends Request {
   }
 }
 /**
+ * Metadata for guidance that should be provided to an AI agent.
+ *
+ * @param data - L.GuidanceRuleWebhookPayloadFragment response data
+ */
+export class GuidanceRuleWebhookPayload {
+  public constructor(data: L.GuidanceRuleWebhookPayloadFragment) {
+    this.body = data.body;
+  }
+
+  /** The content of the guidance as markdown. */
+  public body: string;
+}
+/**
  * An identity provider.
  *
  * @param request - function to call the graphql client
@@ -10258,6 +10284,7 @@ export class IssueSuggestionMetadata extends Request {
     this.rank = data.rank ?? undefined;
     this.reasons = data.reasons ?? undefined;
     this.score = data.score ?? undefined;
+    this.variant = data.variant ?? undefined;
   }
 
   public classification?: string;
@@ -10265,6 +10292,7 @@ export class IssueSuggestionMetadata extends Request {
   public rank?: number;
   public reasons?: string[];
   public score?: number;
+  public variant?: string;
 }
 /**
  * IssueTitleSuggestionFromCustomerRequestPayload model
@@ -12048,6 +12076,19 @@ export class OrganizationMeta extends Request {
   public allowedAuthServices: string[];
   /** The region the organization is hosted in. */
   public region: string;
+}
+/**
+ * Organization origin for guidance rules.
+ *
+ * @param data - L.OrganizationOriginWebhookPayloadFragment response data
+ */
+export class OrganizationOriginWebhookPayload {
+  public constructor(data: L.OrganizationOriginWebhookPayloadFragment) {
+    this.type = data.type;
+  }
+
+  /** The type of origin, always 'Organization'. */
+  public type: string;
 }
 /**
  * OrganizationPayload model
@@ -14573,13 +14614,11 @@ export class PullRequestNotification extends Request {
   public constructor(request: LinearRequest, data: L.PullRequestNotificationFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.commentId = data.commentId ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.emailedAt = parseDate(data.emailedAt) ?? undefined;
     this.id = data.id;
-    this.parentCommentId = data.parentCommentId ?? undefined;
+    this.pullRequestCommentId = data.pullRequestCommentId ?? undefined;
     this.pullRequestId = data.pullRequestId;
-    this.reactionEmoji = data.reactionEmoji ?? undefined;
     this.readAt = parseDate(data.readAt) ?? undefined;
     this.snoozedUntilAt = parseDate(data.snoozedUntilAt) ?? undefined;
     this.type = data.type;
@@ -14594,8 +14633,6 @@ export class PullRequestNotification extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
-  /** Related comment ID. Null if the notification is not related to a comment. */
-  public commentId?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /**
@@ -14605,12 +14642,10 @@ export class PullRequestNotification extends Request {
   public emailedAt?: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Related parent comment ID. Null if the notification is not related to a comment. */
-  public parentCommentId?: string;
+  /** Related pull request comment ID. Null if the notification is not related to a pull request comment. */
+  public pullRequestCommentId?: string;
   /** Related pull request. */
   public pullRequestId: string;
-  /** Name of the reaction emoji related to the notification. */
-  public reactionEmoji?: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   public readAt?: Date;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
@@ -15651,7 +15686,7 @@ export class Team extends Request {
   public defaultTemplateForNonMembersId?: string;
   /** The team's description. */
   public description?: string;
-  /** The name of the team including it's parent team name if it has one. */
+  /** The name of the team including its parent team name if it has one. */
   public displayName: string;
   /** Whether to group recent issue history entries. */
   public groupIssueHistory: boolean;
@@ -16218,6 +16253,22 @@ export class TeamNotificationSubscription extends Request {
   }
 }
 /**
+ * Team origin for guidance rules.
+ *
+ * @param data - L.TeamOriginWebhookPayloadFragment response data
+ */
+export class TeamOriginWebhookPayload {
+  public constructor(data: L.TeamOriginWebhookPayloadFragment) {
+    this.type = data.type;
+    this.team = new TeamWithParentWebhookPayload(data.team);
+  }
+
+  /** The type of origin, always 'Team'. */
+  public type: string;
+  /** The team that the guidance was defined in. */
+  public team: TeamWithParentWebhookPayload;
+}
+/**
  * TeamPayload model
  *
  * @param request - function to call the graphql client
@@ -16245,6 +16296,31 @@ export class TeamPayload extends Request {
   public get teamId(): string | undefined {
     return this._team?.id;
   }
+}
+/**
+ * Team properties including parent information for guidance rules.
+ *
+ * @param data - L.TeamWithParentWebhookPayloadFragment response data
+ */
+export class TeamWithParentWebhookPayload {
+  public constructor(data: L.TeamWithParentWebhookPayloadFragment) {
+    this.displayName = data.displayName;
+    this.id = data.id;
+    this.key = data.key;
+    this.name = data.name;
+    this.parentId = data.parentId ?? undefined;
+  }
+
+  /** The team's display name including parent team names if applicable. */
+  public displayName: string;
+  /** The ID of the team. */
+  public id: string;
+  /** The key of the team. */
+  public key: string;
+  /** The name of the team. */
+  public name: string;
+  /** The parent team's unique identifier, if any. */
+  public parentId?: string;
 }
 /**
  * A template object used for creating entities faster.
@@ -21722,6 +21798,64 @@ export class CreateAgentActivityMutation extends Request {
     const data = response.agentActivityCreate;
 
     return new AgentActivityPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AgentSessionCreateOnComment Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentSessionCreateOnCommentMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentSessionCreateOnComment mutation and return a AgentSessionPayload
+   *
+   * @param input - required input to pass to agentSessionCreateOnComment
+   * @returns parsed response from AgentSessionCreateOnCommentMutation
+   */
+  public async fetch(input: L.AgentSessionCreateOnComment): LinearFetch<AgentSessionPayload> {
+    const response = await this._request<
+      L.AgentSessionCreateOnCommentMutation,
+      L.AgentSessionCreateOnCommentMutationVariables
+    >(L.AgentSessionCreateOnCommentDocument, {
+      input,
+    });
+    const data = response.agentSessionCreateOnComment;
+
+    return new AgentSessionPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AgentSessionCreateOnIssue Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AgentSessionCreateOnIssueMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AgentSessionCreateOnIssue mutation and return a AgentSessionPayload
+   *
+   * @param input - required input to pass to agentSessionCreateOnIssue
+   * @returns parsed response from AgentSessionCreateOnIssueMutation
+   */
+  public async fetch(input: L.AgentSessionCreateOnIssue): LinearFetch<AgentSessionPayload> {
+    const response = await this._request<
+      L.AgentSessionCreateOnIssueMutation,
+      L.AgentSessionCreateOnIssueMutationVariables
+    >(L.AgentSessionCreateOnIssueDocument, {
+      input,
+    });
+    const data = response.agentSessionCreateOnIssue;
+
+    return new AgentSessionPayload(this._request, data);
   }
 }
 
@@ -37576,6 +37710,24 @@ export class LinearSdk extends Request {
    */
   public createAgentActivity(input: L.AgentActivityCreateInput): LinearFetch<AgentActivityPayload> {
     return new CreateAgentActivityMutation(this._request).fetch(input);
+  }
+  /**
+   * Creates a new agent session on a rootcomment.
+   *
+   * @param input - required input to pass to agentSessionCreateOnComment
+   * @returns AgentSessionPayload
+   */
+  public agentSessionCreateOnComment(input: L.AgentSessionCreateOnComment): LinearFetch<AgentSessionPayload> {
+    return new AgentSessionCreateOnCommentMutation(this._request).fetch(input);
+  }
+  /**
+   * Creates a new agent session on an issue.
+   *
+   * @param input - required input to pass to agentSessionCreateOnIssue
+   * @returns AgentSessionPayload
+   */
+  public agentSessionCreateOnIssue(input: L.AgentSessionCreateOnIssue): LinearFetch<AgentSessionPayload> {
+    return new AgentSessionCreateOnIssueMutation(this._request).fetch(input);
   }
   /**
    * Updates the externalUrl of an agent session, which is an agent-hosted page associated with this session.
