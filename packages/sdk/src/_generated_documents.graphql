@@ -3598,6 +3598,8 @@ fragment Organization on Organization {
   __typename
   # Allowed authentication providers, empty array means all are allowed.
   allowedAuthServices
+  # Allowed file upload content types
+  allowedFileUploadContentTypes
   # Configuration settings for the Customers feature.
   customersConfiguration
   # Default schedule for how often feed summaries are generated.
@@ -7716,14 +7718,6 @@ fragment IssueLabelConnection on IssueLabelConnection {
   }
 }
 
-fragment IssueLabelMoveToTeamLabelsPayload on IssueLabelMoveToTeamLabelsPayload {
-  __typename
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
 fragment IssueLabelPayload on IssueLabelPayload {
   __typename
   # The identifier of the last sync operation.
@@ -8014,6 +8008,7 @@ fragment IssueSuggestionConnection on IssueSuggestionConnection {
 
 fragment IssueSuggestionMetadata on IssueSuggestionMetadata {
   __typename
+  appliedAutomationRuleId
   classification
   evalLogId
   rank
@@ -16515,15 +16510,6 @@ mutation deleteIssueLabel(
     ...DeletePayload
   }
 }
-# Converts a workspace label to team labels for teams that have issues using the workspace label.
-mutation issueLabelMoveToTeamLabels(
-  # The workspace label to move to teams.
-  $input: IssueLabelMoveToTeamLabelsInput!
-) {
-  issueLabelMoveToTeamLabels(input: $input) {
-    ...IssueLabelMoveToTeamLabelsPayload
-  }
-}
 # Updates an label.
 mutation updateIssueLabel(
   # The identifier of the label to update.
@@ -16534,15 +16520,6 @@ mutation updateIssueLabel(
   $replaceTeamLabels: Boolean
 ) {
   issueLabelUpdate(id: $id, input: $input, replaceTeamLabels: $replaceTeamLabels) {
-    ...IssueLabelPayload
-  }
-}
-# Merges multiple issue labels into a single label.
-mutation issueLabelsMerge(
-  # The merge input.
-  $input: LabelsMergeInput!
-) {
-  issueLabelsMerge(input: $input) {
     ...IssueLabelPayload
   }
 }
@@ -16970,15 +16947,6 @@ mutation updateProjectLabel(
   $input: ProjectLabelUpdateInput!
 ) {
   projectLabelUpdate(id: $id, input: $input) {
-    ...ProjectLabelPayload
-  }
-}
-# Merges multiple project labels into a single label.
-mutation projectLabelsMerge(
-  # The merge input.
-  $input: LabelsMergeInput!
-) {
-  projectLabelsMerge(input: $input) {
     ...ProjectLabelPayload
   }
 }
