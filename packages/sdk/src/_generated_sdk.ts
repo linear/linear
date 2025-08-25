@@ -685,7 +685,7 @@ export class AgentSessionWebhookPayload {
     this.type = data.type;
     this.updatedAt = data.updatedAt;
     this.comment = data.comment ? new CommentChildWebhookPayload(data.comment) : undefined;
-    this.creator = new UserChildWebhookPayload(data.creator);
+    this.creator = data.creator ? new UserChildWebhookPayload(data.creator) : undefined;
     this.issue = data.issue ? new IssueWithDescriptionChildWebhookPayload(data.issue) : undefined;
   }
 
@@ -722,7 +722,7 @@ export class AgentSessionWebhookPayload {
   /** The comment this agent session is associated with. */
   public comment?: CommentChildWebhookPayload;
   /** The user that created the agent session. */
-  public creator: UserChildWebhookPayload;
+  public creator?: UserChildWebhookPayload;
   /** The issue this agent session is associated with. */
   public issue?: IssueWithDescriptionChildWebhookPayload;
 }
@@ -9248,24 +9248,6 @@ export class IssueLabelConnection extends Connection<IssueLabel> {
   }
 }
 /**
- * IssueLabelMoveToTeamLabelsPayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.IssueLabelMoveToTeamLabelsPayloadFragment response data
- */
-export class IssueLabelMoveToTeamLabelsPayload extends Request {
-  public constructor(request: LinearRequest, data: L.IssueLabelMoveToTeamLabelsPayloadFragment) {
-    super(request);
-    this.lastSyncId = data.lastSyncId;
-    this.success = data.success;
-  }
-
-  /** The identifier of the last sync operation. */
-  public lastSyncId: number;
-  /** Whether the operation was successful. */
-  public success: boolean;
-}
-/**
  * IssueLabelPayload model
  *
  * @param request - function to call the graphql client
@@ -10279,6 +10261,7 @@ export class IssueSuggestionConnection extends Connection<IssueSuggestion> {
 export class IssueSuggestionMetadata extends Request {
   public constructor(request: LinearRequest, data: L.IssueSuggestionMetadataFragment) {
     super(request);
+    this.appliedAutomationRuleId = data.appliedAutomationRuleId ?? undefined;
     this.classification = data.classification ?? undefined;
     this.evalLogId = data.evalLogId ?? undefined;
     this.rank = data.rank ?? undefined;
@@ -10287,6 +10270,7 @@ export class IssueSuggestionMetadata extends Request {
     this.variant = data.variant ?? undefined;
   }
 
+  public appliedAutomationRuleId?: string;
   public classification?: string;
   public evalLogId?: string;
   public rank?: number;
@@ -11568,6 +11552,7 @@ export class Organization extends Request {
     super(request);
     this.allowMembersToInvite = data.allowMembersToInvite ?? undefined;
     this.allowedAuthServices = data.allowedAuthServices;
+    this.allowedFileUploadContentTypes = data.allowedFileUploadContentTypes ?? undefined;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.createdIssueCount = data.createdIssueCount;
@@ -11615,6 +11600,8 @@ export class Organization extends Request {
   public allowMembersToInvite?: boolean;
   /** Allowed authentication providers, empty array means all are allowed. */
   public allowedAuthServices: string[];
+  /** Allowed file upload content types */
+  public allowedFileUploadContentTypes?: string[];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */
@@ -26506,35 +26493,6 @@ export class DeleteIssueLabelMutation extends Request {
 }
 
 /**
- * A fetchable IssueLabelMoveToTeamLabels Mutation
- *
- * @param request - function to call the graphql client
- */
-export class IssueLabelMoveToTeamLabelsMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueLabelMoveToTeamLabels mutation and return a IssueLabelMoveToTeamLabelsPayload
-   *
-   * @param input - required input to pass to issueLabelMoveToTeamLabels
-   * @returns parsed response from IssueLabelMoveToTeamLabelsMutation
-   */
-  public async fetch(input: L.IssueLabelMoveToTeamLabelsInput): LinearFetch<IssueLabelMoveToTeamLabelsPayload> {
-    const response = await this._request<
-      L.IssueLabelMoveToTeamLabelsMutation,
-      L.IssueLabelMoveToTeamLabelsMutationVariables
-    >(L.IssueLabelMoveToTeamLabelsDocument, {
-      input,
-    });
-    const data = response.issueLabelMoveToTeamLabels;
-
-    return new IssueLabelMoveToTeamLabelsPayload(this._request, data);
-  }
-}
-
-/**
  * A fetchable UpdateIssueLabel Mutation
  *
  * @param request - function to call the graphql client
@@ -26566,35 +26524,6 @@ export class UpdateIssueLabelMutation extends Request {
       }
     );
     const data = response.issueLabelUpdate;
-
-    return new IssueLabelPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable IssueLabelsMerge Mutation
- *
- * @param request - function to call the graphql client
- */
-export class IssueLabelsMergeMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the IssueLabelsMerge mutation and return a IssueLabelPayload
-   *
-   * @param input - required input to pass to issueLabelsMerge
-   * @returns parsed response from IssueLabelsMergeMutation
-   */
-  public async fetch(input: L.LabelsMergeInput): LinearFetch<IssueLabelPayload> {
-    const response = await this._request<L.IssueLabelsMergeMutation, L.IssueLabelsMergeMutationVariables>(
-      L.IssueLabelsMergeDocument,
-      {
-        input,
-      }
-    );
-    const data = response.issueLabelsMerge;
 
     return new IssueLabelPayload(this._request, data);
   }
@@ -27910,35 +27839,6 @@ export class UpdateProjectLabelMutation extends Request {
       }
     );
     const data = response.projectLabelUpdate;
-
-    return new ProjectLabelPayload(this._request, data);
-  }
-}
-
-/**
- * A fetchable ProjectLabelsMerge Mutation
- *
- * @param request - function to call the graphql client
- */
-export class ProjectLabelsMergeMutation extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ProjectLabelsMerge mutation and return a ProjectLabelPayload
-   *
-   * @param input - required input to pass to projectLabelsMerge
-   * @returns parsed response from ProjectLabelsMergeMutation
-   */
-  public async fetch(input: L.LabelsMergeInput): LinearFetch<ProjectLabelPayload> {
-    const response = await this._request<L.ProjectLabelsMergeMutation, L.ProjectLabelsMergeMutationVariables>(
-      L.ProjectLabelsMergeDocument,
-      {
-        input,
-      }
-    );
-    const data = response.projectLabelsMerge;
 
     return new ProjectLabelPayload(this._request, data);
   }
@@ -39386,17 +39286,6 @@ export class LinearSdk extends Request {
     return new DeleteIssueLabelMutation(this._request).fetch(id);
   }
   /**
-   * Converts a workspace label to team labels for teams that have issues using the workspace label.
-   *
-   * @param input - required input to pass to issueLabelMoveToTeamLabels
-   * @returns IssueLabelMoveToTeamLabelsPayload
-   */
-  public issueLabelMoveToTeamLabels(
-    input: L.IssueLabelMoveToTeamLabelsInput
-  ): LinearFetch<IssueLabelMoveToTeamLabelsPayload> {
-    return new IssueLabelMoveToTeamLabelsMutation(this._request).fetch(input);
-  }
-  /**
    * Updates an label.
    *
    * @param id - required id to pass to updateIssueLabel
@@ -39410,15 +39299,6 @@ export class LinearSdk extends Request {
     variables?: Omit<L.UpdateIssueLabelMutationVariables, "id" | "input">
   ): LinearFetch<IssueLabelPayload> {
     return new UpdateIssueLabelMutation(this._request).fetch(id, input, variables);
-  }
-  /**
-   * Merges multiple issue labels into a single label.
-   *
-   * @param input - required input to pass to issueLabelsMerge
-   * @returns IssueLabelPayload
-   */
-  public issueLabelsMerge(input: L.LabelsMergeInput): LinearFetch<IssueLabelPayload> {
-    return new IssueLabelsMergeMutation(this._request).fetch(input);
   }
   /**
    * Creates a new issue relation.
@@ -39869,15 +39749,6 @@ export class LinearSdk extends Request {
    */
   public updateProjectLabel(id: string, input: L.ProjectLabelUpdateInput): LinearFetch<ProjectLabelPayload> {
     return new UpdateProjectLabelMutation(this._request).fetch(id, input);
-  }
-  /**
-   * Merges multiple project labels into a single label.
-   *
-   * @param input - required input to pass to projectLabelsMerge
-   * @returns ProjectLabelPayload
-   */
-  public projectLabelsMerge(input: L.LabelsMergeInput): LinearFetch<ProjectLabelPayload> {
-    return new ProjectLabelsMergeMutation(this._request).fetch(input);
   }
   /**
    * Creates a new project milestone.

@@ -604,7 +604,7 @@ type AgentSessionWebhookPayload {
   """
   The user that created the agent session.
   """
-  creator: UserChildWebhookPayload!
+  creator: UserChildWebhookPayload
   """
   The ID of the user that created the agent session.
   """
@@ -13509,24 +13509,6 @@ input IssueLabelFilter {
   updatedAt: DateComparator
 }
 
-input IssueLabelMoveToTeamLabelsInput {
-  """
-  The identifier of the workspace label to convert.
-  """
-  id: String!
-}
-
-type IssueLabelMoveToTeamLabelsPayload {
-  """
-  The identifier of the last sync operation.
-  """
-  lastSyncId: Float!
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
 type IssueLabelPayload {
   """
   The label that was created or updated.
@@ -15088,6 +15070,7 @@ input IssueSuggestionFilter {
 }
 
 type IssueSuggestionMetadata {
+  appliedAutomationRuleId: String
   classification: String
   evalLogId: String
   rank: Float
@@ -15841,17 +15824,6 @@ input LabelSort {
   The order for the individual sort
   """
   order: PaginationSortOrder
-}
-
-input LabelsMergeInput {
-  """
-  The identifiers of the labels to merge.
-  """
-  fromLabelIds: [String!]!
-  """
-  The identifier of the target label.
-  """
-  toLabelId: String!
 }
 
 input LaunchDarklySettingsInput {
@@ -18173,15 +18145,6 @@ type Mutation {
     id: String!
   ): DeletePayload!
   """
-  Converts a workspace label to team labels for teams that have issues using the workspace label.
-  """
-  issueLabelMoveToTeamLabels(
-    """
-    The workspace label to move to teams.
-    """
-    input: IssueLabelMoveToTeamLabelsInput!
-  ): IssueLabelMoveToTeamLabelsPayload!
-  """
   Updates an label.
   """
   issueLabelUpdate(
@@ -18197,15 +18160,6 @@ type Mutation {
     Whether to replace all team-specific labels with the same name with this updated workspace label (default: false).
     """
     replaceTeamLabels: Boolean
-  ): IssueLabelPayload!
-  """
-  Merges multiple issue labels into a single label.
-  """
-  issueLabelsMerge(
-    """
-    The merge input.
-    """
-    input: LabelsMergeInput!
   ): IssueLabelPayload!
   """
   Creates a new issue relation.
@@ -18735,15 +18689,6 @@ type Mutation {
     A partial label object to update.
     """
     input: ProjectLabelUpdateInput!
-  ): ProjectLabelPayload!
-  """
-  Merges multiple project labels into a single label.
-  """
-  projectLabelsMerge(
-    """
-    The merge input.
-    """
-    input: LabelsMergeInput!
   ): ProjectLabelPayload!
   """
   Creates a new project milestone.
@@ -21793,6 +21738,10 @@ type Organization implements Node {
   """
   allowedAuthServices: [String!]!
   """
+  Allowed file upload content types
+  """
+  allowedFileUploadContentTypes: [String!]
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -22626,6 +22575,10 @@ input OrganizationUpdateInput {
   List of services that are allowed to be used for login.
   """
   allowedAuthServices: [String!]
+  """
+  Allowed file upload content types.
+  """
+  allowedFileUploadContentTypes: [String!]
   """
   [INTERNAL] Configuration settings for the Customers feature.
   """

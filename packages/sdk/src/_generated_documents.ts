@@ -412,7 +412,7 @@ export type AgentSessionWebhookPayload = {
   /** The time at which the entity was created. */
   createdAt: Scalars["String"];
   /** The user that created the agent session. */
-  creator: UserChildWebhookPayload;
+  creator?: Maybe<UserChildWebhookPayload>;
   /** The ID of the user that created the agent session. */
   creatorId?: Maybe<Scalars["String"]>;
   /** The time the agent session ended. */
@@ -7708,19 +7708,6 @@ export type IssueLabelFilter = {
   updatedAt?: Maybe<DateComparator>;
 };
 
-export type IssueLabelMoveToTeamLabelsInput = {
-  /** The identifier of the workspace label to convert. */
-  id: Scalars["String"];
-};
-
-export type IssueLabelMoveToTeamLabelsPayload = {
-  __typename?: "IssueLabelMoveToTeamLabelsPayload";
-  /** The identifier of the last sync operation. */
-  lastSyncId: Scalars["Float"];
-  /** Whether the operation was successful. */
-  success: Scalars["Boolean"];
-};
-
 export type IssueLabelPayload = {
   __typename?: "IssueLabelPayload";
   /** The label that was created or updated. */
@@ -8528,6 +8515,7 @@ export type IssueSuggestionFilter = {
 
 export type IssueSuggestionMetadata = {
   __typename?: "IssueSuggestionMetadata";
+  appliedAutomationRuleId?: Maybe<Scalars["String"]>;
   classification?: Maybe<Scalars["String"]>;
   evalLogId?: Maybe<Scalars["String"]>;
   rank?: Maybe<Scalars["Float"]>;
@@ -8939,13 +8927,6 @@ export type LabelSort = {
   order?: Maybe<PaginationSortOrder>;
 };
 
-export type LabelsMergeInput = {
-  /** The identifiers of the labels to merge. */
-  fromLabelIds: Array<Scalars["String"]>;
-  /** The identifier of the target label. */
-  toLabelId: Scalars["String"];
-};
-
 export type LaunchDarklySettingsInput = {
   /** The environment of the LaunchDarkly integration. */
   environment: Scalars["String"];
@@ -9340,12 +9321,8 @@ export type Mutation = {
   issueLabelCreate: IssueLabelPayload;
   /** Deletes an issue label. */
   issueLabelDelete: DeletePayload;
-  /** Converts a workspace label to team labels for teams that have issues using the workspace label. */
-  issueLabelMoveToTeamLabels: IssueLabelMoveToTeamLabelsPayload;
   /** Updates an label. */
   issueLabelUpdate: IssueLabelPayload;
-  /** Merges multiple issue labels into a single label. */
-  issueLabelsMerge: IssueLabelPayload;
   /** Creates a new issue relation. */
   issueRelationCreate: IssueRelationPayload;
   /** Deletes an issue relation. */
@@ -9457,8 +9434,6 @@ export type Mutation = {
   projectLabelDelete: DeletePayload;
   /** Updates a project label. */
   projectLabelUpdate: ProjectLabelPayload;
-  /** Merges multiple project labels into a single label. */
-  projectLabelsMerge: ProjectLabelPayload;
   /** Creates a new project milestone. */
   projectMilestoneCreate: ProjectMilestonePayload;
   /** Deletes a project milestone. */
@@ -10492,18 +10467,10 @@ export type MutationIssueLabelDeleteArgs = {
   id: Scalars["String"];
 };
 
-export type MutationIssueLabelMoveToTeamLabelsArgs = {
-  input: IssueLabelMoveToTeamLabelsInput;
-};
-
 export type MutationIssueLabelUpdateArgs = {
   id: Scalars["String"];
   input: IssueLabelUpdateInput;
   replaceTeamLabels?: Maybe<Scalars["Boolean"]>;
-};
-
-export type MutationIssueLabelsMergeArgs = {
-  input: LabelsMergeInput;
 };
 
 export type MutationIssueRelationCreateArgs = {
@@ -10718,10 +10685,6 @@ export type MutationProjectLabelDeleteArgs = {
 export type MutationProjectLabelUpdateArgs = {
   id: Scalars["String"];
   input: ProjectLabelUpdateInput;
-};
-
-export type MutationProjectLabelsMergeArgs = {
-  input: LabelsMergeInput;
 };
 
 export type MutationProjectMilestoneCreateArgs = {
@@ -12303,6 +12266,8 @@ export type Organization = Node & {
   allowMembersToInvite?: Maybe<Scalars["Boolean"]>;
   /** Allowed authentication providers, empty array means all are allowed. */
   allowedAuthServices: Array<Scalars["String"]>;
+  /** Allowed file upload content types */
+  allowedFileUploadContentTypes?: Maybe<Array<Scalars["String"]>>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
@@ -12775,6 +12740,8 @@ export type OrganizationUpdateInput = {
   allowMembersToInvite?: Maybe<Scalars["Boolean"]>;
   /** List of services that are allowed to be used for login. */
   allowedAuthServices?: Maybe<Array<Scalars["String"]>>;
+  /** Allowed file upload content types. */
+  allowedFileUploadContentTypes?: Maybe<Array<Scalars["String"]>>;
   /** [INTERNAL] Configuration settings for the Customers feature. */
   customersConfiguration?: Maybe<Scalars["JSONObject"]>;
   /** [INTERNAL] Whether the organization is using customers. */
@@ -21669,6 +21636,7 @@ export type OauthClientApprovalNotificationFragment = { __typename: "OauthClient
 export type OrganizationFragment = { __typename: "Organization" } & Pick<
   Organization,
   | "allowedAuthServices"
+  | "allowedFileUploadContentTypes"
   | "customersConfiguration"
   | "defaultFeedSummarySchedule"
   | "gitBranchFormat"
@@ -22627,7 +22595,7 @@ export type AgentSessionWebhookPayloadFragment = { __typename: "AgentSessionWebh
     issue?: Maybe<
       { __typename?: "IssueWithDescriptionChildWebhookPayload" } & IssueWithDescriptionChildWebhookPayloadFragment
     >;
-    creator: { __typename?: "UserChildWebhookPayload" } & UserChildWebhookPayloadFragment;
+    creator?: Maybe<{ __typename?: "UserChildWebhookPayload" } & UserChildWebhookPayloadFragment>;
   };
 
 export type AttachmentWebhookPayloadFragment = { __typename: "AttachmentWebhookPayload" } & Pick<
@@ -23624,11 +23592,6 @@ export type IssueLabelConnectionFragment = { __typename: "IssueLabelConnection" 
   pageInfo: { __typename?: "PageInfo" } & PageInfoFragment;
 };
 
-export type IssueLabelMoveToTeamLabelsPayloadFragment = { __typename: "IssueLabelMoveToTeamLabelsPayload" } & Pick<
-  IssueLabelMoveToTeamLabelsPayload,
-  "lastSyncId" | "success"
->;
-
 export type IssueLabelPayloadFragment = { __typename: "IssueLabelPayload" } & Pick<
   IssueLabelPayload,
   "lastSyncId" | "success"
@@ -23758,7 +23721,7 @@ export type IssueSuggestionConnectionFragment = { __typename: "IssueSuggestionCo
 
 export type IssueSuggestionMetadataFragment = { __typename: "IssueSuggestionMetadata" } & Pick<
   IssueSuggestionMetadata,
-  "classification" | "evalLogId" | "rank" | "reasons" | "score" | "variant"
+  "appliedAutomationRuleId" | "classification" | "evalLogId" | "rank" | "reasons" | "score" | "variant"
 >;
 
 export type IssueTitleSuggestionFromCustomerRequestPayloadFragment = {
@@ -29498,16 +29461,6 @@ export type DeleteIssueLabelMutation = { __typename?: "Mutation" } & {
   issueLabelDelete: { __typename?: "DeletePayload" } & DeletePayloadFragment;
 };
 
-export type IssueLabelMoveToTeamLabelsMutationVariables = Exact<{
-  input: IssueLabelMoveToTeamLabelsInput;
-}>;
-
-export type IssueLabelMoveToTeamLabelsMutation = { __typename?: "Mutation" } & {
-  issueLabelMoveToTeamLabels: {
-    __typename?: "IssueLabelMoveToTeamLabelsPayload";
-  } & IssueLabelMoveToTeamLabelsPayloadFragment;
-};
-
 export type UpdateIssueLabelMutationVariables = Exact<{
   id: Scalars["String"];
   input: IssueLabelUpdateInput;
@@ -29516,14 +29469,6 @@ export type UpdateIssueLabelMutationVariables = Exact<{
 
 export type UpdateIssueLabelMutation = { __typename?: "Mutation" } & {
   issueLabelUpdate: { __typename?: "IssueLabelPayload" } & IssueLabelPayloadFragment;
-};
-
-export type IssueLabelsMergeMutationVariables = Exact<{
-  input: LabelsMergeInput;
-}>;
-
-export type IssueLabelsMergeMutation = { __typename?: "Mutation" } & {
-  issueLabelsMerge: { __typename?: "IssueLabelPayload" } & IssueLabelPayloadFragment;
 };
 
 export type CreateIssueRelationMutationVariables = Exact<{
@@ -29899,14 +29844,6 @@ export type UpdateProjectLabelMutationVariables = Exact<{
 
 export type UpdateProjectLabelMutation = { __typename?: "Mutation" } & {
   projectLabelUpdate: { __typename?: "ProjectLabelPayload" } & ProjectLabelPayloadFragment;
-};
-
-export type ProjectLabelsMergeMutationVariables = Exact<{
-  input: LabelsMergeInput;
-}>;
-
-export type ProjectLabelsMergeMutation = { __typename?: "Mutation" } & {
-  projectLabelsMerge: { __typename?: "ProjectLabelPayload" } & ProjectLabelPayloadFragment;
 };
 
 export type CreateProjectMilestoneMutationVariables = Exact<{
@@ -33076,6 +33013,7 @@ export const OrganizationFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "allowedAuthServices" } },
+          { kind: "Field", name: { kind: "Name", value: "allowedFileUploadContentTypes" } },
           { kind: "Field", name: { kind: "Name", value: "customersConfiguration" } },
           { kind: "Field", name: { kind: "Name", value: "defaultFeedSummarySchedule" } },
           { kind: "Field", name: { kind: "Name", value: "gitBranchFormat" } },
@@ -41323,24 +41261,6 @@ export const IssueLabelConnectionFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IssueLabelConnectionFragment, unknown>;
-export const IssueLabelMoveToTeamLabelsPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueLabelMoveToTeamLabelsPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelMoveToTeamLabelsPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
-          { kind: "Field", name: { kind: "Name", value: "success" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<IssueLabelMoveToTeamLabelsPayloadFragment, unknown>;
 export const IssueLabelPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -41775,6 +41695,7 @@ export const IssueSuggestionMetadataFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "appliedAutomationRuleId" } },
           { kind: "Field", name: { kind: "Name", value: "classification" } },
           { kind: "Field", name: { kind: "Name", value: "evalLogId" } },
           { kind: "Field", name: { kind: "Name", value: "rank" } },
@@ -75145,49 +75066,6 @@ export const DeleteIssueLabelDocument = {
     ...DeletePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DeleteIssueLabelMutation, DeleteIssueLabelMutationVariables>;
-export const IssueLabelMoveToTeamLabelsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "issueLabelMoveToTeamLabels" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "IssueLabelMoveToTeamLabelsInput" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueLabelMoveToTeamLabels" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelMoveToTeamLabelsPayload" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueLabelMoveToTeamLabelsPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IssueLabelMoveToTeamLabelsMutation, IssueLabelMoveToTeamLabelsMutationVariables>;
 export const UpdateIssueLabelDocument = {
   kind: "Document",
   definitions: [
@@ -75249,44 +75127,6 @@ export const UpdateIssueLabelDocument = {
     ...IssueLabelPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateIssueLabelMutation, UpdateIssueLabelMutationVariables>;
-export const IssueLabelsMergeDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "issueLabelsMerge" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "LabelsMergeInput" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "issueLabelsMerge" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueLabelPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...IssueLabelPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<IssueLabelsMergeMutation, IssueLabelsMergeMutationVariables>;
 export const CreateIssueRelationDocument = {
   kind: "Document",
   definitions: [
@@ -77293,44 +77133,6 @@ export const UpdateProjectLabelDocument = {
     ...ProjectLabelPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateProjectLabelMutation, UpdateProjectLabelMutationVariables>;
-export const ProjectLabelsMergeDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "projectLabelsMerge" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
-          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "LabelsMergeInput" } } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "projectLabelsMerge" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectLabelPayload" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ProjectLabelPayloadFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ProjectLabelsMergeMutation, ProjectLabelsMergeMutationVariables>;
 export const CreateProjectMilestoneDocument = {
   kind: "Document",
   definitions: [
