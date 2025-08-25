@@ -1,15 +1,22 @@
 overwrite: true
-schema: https://api.linear.app/graphql
+schema:
+  # Main GraphQL API schema
+  - https://api.linear.app/graphql
+
+  # Webhooks schema (https://studio.apollographql.com/public/Linear-Webhooks)
+  - apollo-engine:
+      engine:
+        apiKey: ''  # This field is required but can be left as an empty string since this is a public schema
+      graph: Linear-Webhooks
+      variant: current
 hooks:
   afterOneFileWrite:
     - prettier --write
 generates:
   src/schema.json:
-    schema: ./Linear-Webhooks@current.graphql
     plugins:
       - introspection
   src/schema.graphql:
-    schema: ./Linear-Webhooks@current.graphql
     plugins:
       - schema-ast
     config:
