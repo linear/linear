@@ -7,7 +7,7 @@ import * as inquirer from "inquirer";
 import { uniq } from "lodash";
 import ora from "ora";
 import { handleLabels } from "./helpers/labelManager";
-import { Comment, Importer, ImportResult } from "./types";
+import { Attachment, Comment, Importer, ImportResult } from "./types";
 import { replaceImagesInMarkdown } from "./utils/replaceImages";
 
 type Id = string;
@@ -280,20 +280,24 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
     const formattedDueDate = issue.dueDate ? format(issue.dueDate, "yyyy-MM-dd") : undefined;
 
     try {
-      const createdIssue = await createIssueWithRetries(client, {
-        teamId,
-        projectId: projectId as unknown as string,
-        title: issue.title,
-        description,
-        priority: issue.priority,
-        labelIds,
-        stateId,
-        assigneeId,
-        createdAt: issue.createdAt,
-        completedAt: issue.completedAt,
-        dueDate: formattedDueDate,
-        estimate: issue.estimate,
-      });
+      const createdIssue = await createIssueWithRetries(
+        client,
+        {
+          teamId,
+          projectId: projectId as unknown as string,
+          title: issue.title,
+          description,
+          priority: issue.priority,
+          labelIds,
+          stateId,
+          assigneeId,
+          createdAt: issue.createdAt,
+          completedAt: issue.completedAt,
+          dueDate: formattedDueDate,
+          estimate: issue.estimate,
+        },
+        issue.attachments
+      );
 
       if (issue.archived) {
         await (await createdIssue.issue)?.archive();
@@ -333,16 +337,85 @@ const buildComments = async (
 const createIssueWithRetries = async (
   client: LinearClient,
   input: Parameters<LinearClient["createIssue"]>[0],
+  attachments: Attachment[] = [],
   retries = 3
 ): ReturnType<LinearClient["createIssue"]> => {
+  const createAttachment = async (client: LinearClient, attachment: Attachment, issueId: string) => {
+    const sourceUrl = attachment.url;
+    const filenameFromUrl = (() => {
+      try {
+        const url = new URL(sourceUrl);
+        const pathname = url.pathname;
+        const last = pathname.split("/").filter(Boolean).pop();
+        return last || "attachment";
+      } catch {
+        return "attachment";
+      }
+    })();
+
+    const filename = attachment.name || filenameFromUrl;
+
+    const downloadResponse = await fetch(sourceUrl, {
+      headers: attachment.httpHeaders,
+    });
+    if (!downloadResponse.ok) {
+      const body = await downloadResponse.text().catch(() => "");
+      throw new Error(
+        `Failed to download attachment from URL (${downloadResponse.status}): ${sourceUrl}${body ? ` - ${body}` : ""}`
+      );
+    }
+
+    const arrayBuffer = await downloadResponse.arrayBuffer();
+    const fileBuffer = Buffer.from(arrayBuffer);
+    const contentType = downloadResponse.headers.get("content-type") || "application/octet-stream";
+
+    const uploadPayload = await client.fileUpload(contentType, filename, fileBuffer.length);
+    const uploadFile = uploadPayload.uploadFile;
+    if (!uploadFile) {
+      throw new Error("Upload payload missing uploadFile");
+    }
+
+    const headers: Record<string, string> = {};
+    for (const h of uploadFile.headers) {
+      headers[h.key] = h.value;
+    }
+    if (!headers["Content-Type"]) {
+      headers["Content-Type"] = uploadFile.contentType;
+    }
+
+    const uploadResponse = await fetch(uploadFile.uploadUrl, {
+      method: "PUT",
+      headers,
+      body: fileBuffer,
+    });
+    if (!uploadResponse.ok) {
+      const body = await uploadResponse.text().catch(() => "");
+      throw new Error(`Failed to upload file to Linear storage (${uploadResponse.status})${body ? ` - ${body}` : ""}`);
+    }
+
+    await client.createAttachment({
+      issueId,
+      title: filename,
+      url: uploadFile.assetUrl,
+    });
+  };
+
   try {
-    return await client.createIssue(input);
-  } catch (error) {
+    const createdIssuePayload = await client.createIssue(input);
+    const issue = await createdIssuePayload.issue;
+    const issueId = issue?.id;
+    console.log("attachments", attachments);
+    if (issueId && attachments && attachments.length > 0) {
+      await Promise.all(attachments.map(att => createAttachment(client, att, issueId)));
+    }
+
+    return createdIssuePayload;
+  } catch (error: any) {
     if (error.type === "Ratelimited" && retries > 0) {
       // Hard-coded to 1 minute for now; when we do LIN-17685, we can use the X-RateLimit-Endpoint-Requests-Remaining
       // header to find out how long to wait.
       await new Promise(resolve => setTimeout(resolve, 60000));
-      return createIssueWithRetries(client, input, retries - 1);
+      return createIssueWithRetries(client, input, attachments, retries - 1);
     } else {
       throw error;
     }

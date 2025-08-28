@@ -30,6 +30,17 @@ export interface Issue {
   archived?: boolean;
   /** Issue estimate */
   estimate?: number;
+  /** attachments */
+  attachments?: Attachment[];
+}
+
+export interface Attachment {
+  /** Attachment's URL */
+  url: string;
+  /** Attachment's name */
+  name: string;
+  /** Attachment's http headers */
+  httpHeaders?: Record<string, string>;
 }
 
 /** Issue comment */
