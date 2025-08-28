@@ -71,6 +71,8 @@ export type AgentActivity = Node & {
   content: AgentActivityContent;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** Whether the activity is ephemeral, and should disappear after the next agent activity. */
+  ephemeral: Scalars["Boolean"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
@@ -125,6 +127,8 @@ export type AgentActivityCreateInput = {
    * See https://linear.app/developers/agents for typing details.
    */
   content: Scalars["JSONObject"];
+  /** Whether the activity is ephemeral, and should disappear after the next activity. Defaults to false. */
+  ephemeral?: Maybe<Scalars["Boolean"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: Maybe<Scalars["String"]>;
   /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
@@ -938,6 +942,31 @@ export type AuditEntryWebhookPayload = {
   updatedAt: Scalars["String"];
 };
 
+/** An identity provider. */
+export type AuthIdentityProvider = {
+  __typename?: "AuthIdentityProvider";
+  /** Whether the identity provider is the default identity provider migrated from organization level settings. */
+  defaultMigrated: Scalars["Boolean"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The issuer's custom entity ID. */
+  issuerEntityId?: Maybe<Scalars["String"]>;
+  /** The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference. */
+  priority?: Maybe<Scalars["Float"]>;
+  /** Whether SAML authentication is enabled for organization. */
+  samlEnabled: Scalars["Boolean"];
+  /** Whether SCIM provisioning is enabled for organization. */
+  scimEnabled: Scalars["Boolean"];
+  /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
+  ssoBinding?: Maybe<Scalars["String"]>;
+  /** Sign in endpoint URL for the identity provider. */
+  ssoEndpoint?: Maybe<Scalars["String"]>;
+  /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
+  ssoSignAlgo?: Maybe<Scalars["String"]>;
+  /** X.509 Signing Certificate in string form. */
+  ssoSigningCert?: Maybe<Scalars["String"]>;
+};
+
 /** [INTERNAL] An OAuth userId/createdDate tuple */
 export type AuthMembership = {
   __typename?: "AuthMembership";
@@ -1020,6 +1049,8 @@ export type AuthUser = {
   /** The user's email address. */
   email: Scalars["String"];
   id: Scalars["ID"];
+  /** [INTERNAL] Identity provider the user is managed by. */
+  identityProvider?: Maybe<AuthIdentityProvider>;
   /** The user's full name. */
   name: Scalars["String"];
   /** Organization the user belongs to. */
@@ -4091,6 +4122,12 @@ export type Entity = {
   updatedAt: Scalars["DateTime"];
 };
 
+/** Union type for webhook actor payloads */
+export type EntityActorWebhookPayload =
+  | IntegrationActorWebhookPayload
+  | OauthClientActorWebhookPayload
+  | UserActorWebhookPayload;
+
 /** An external link for an entity like initiative, etc... */
 export type EntityExternalLink = Node & {
   __typename?: "EntityExternalLink";
@@ -4176,6 +4213,8 @@ export type EntityWebhookPayload = {
   __typename?: "EntityWebhookPayload";
   /** The type of action that triggered the webhook. */
   action: Scalars["String"];
+  /** The actor who triggered the action. */
+  actor?: Maybe<EntityActorWebhookPayload>;
   /** The time the payload was created. */
   createdAt: Scalars["DateTime"];
   /** The entity that was changed. */
@@ -4927,6 +4966,16 @@ export enum GithubOrgType {
   Organization = "organization",
   User = "user",
 }
+
+export type GongRecordingImportConfigInput = {
+  /** The team ID to create issues in for imported recordings. Set to null to disable import. */
+  teamId?: Maybe<Scalars["String"]>;
+};
+
+export type GongSettingsInput = {
+  /** Configuration for recording import. */
+  importConfig?: Maybe<GongRecordingImportConfigInput>;
+};
 
 export type GoogleSheetsExportSettings = {
   /** Whether the export is enabled. */
@@ -6067,6 +6116,17 @@ export type Integration = Node & {
   updatedAt: Scalars["DateTime"];
 };
 
+/** Integration actor payload for webhooks. */
+export type IntegrationActorWebhookPayload = {
+  __typename?: "IntegrationActorWebhookPayload";
+  /** The ID of the integration. */
+  id: Scalars["String"];
+  /** The service of the integration. */
+  service: Scalars["String"];
+  /** The type of actor. */
+  type: Scalars["String"];
+};
+
 /** Certain properties of an integration. */
 export type IntegrationChildWebhookPayload = {
   __typename?: "IntegrationChildWebhookPayload";
@@ -6141,6 +6201,7 @@ export enum IntegrationService {
   GithubImport = "githubImport",
   GithubPersonal = "githubPersonal",
   Gitlab = "gitlab",
+  Gong = "gong",
   GoogleCalendarPersonal = "googleCalendarPersonal",
   GoogleSheets = "googleSheets",
   Intercom = "intercom",
@@ -6173,6 +6234,7 @@ export type IntegrationSettingsInput = {
   gitHubImport?: Maybe<GitHubImportSettingsInput>;
   gitHubPersonal?: Maybe<GitHubPersonalSettingsInput>;
   gitLab?: Maybe<GitLabSettingsInput>;
+  gong?: Maybe<GongSettingsInput>;
   googleSheets?: Maybe<GoogleSheetsSettingsInput>;
   intercom?: Maybe<IntercomSettingsInput>;
   jira?: Maybe<JiraSettingsInput>;
@@ -9202,6 +9264,8 @@ export type Mutation = {
   integrationGithubImportRefresh: IntegrationPayload;
   /** Connects the organization with a GitLab Access Token. */
   integrationGitlabConnect: GitLabIntegrationCreatePayload;
+  /** Integrates the organization with Gong. */
+  integrationGong: IntegrationPayload;
   /** [Internal] Connects the Google Calendar to the user to this Linear account via OAuth2. */
   integrationGoogleCalendarPersonalConnect: IntegrationPayload;
   /** Integrates the organization with Google Sheets. */
@@ -10186,6 +10250,11 @@ export type MutationIntegrationGithubImportRefreshArgs = {
 export type MutationIntegrationGitlabConnectArgs = {
   accessToken: Scalars["String"];
   gitlabUrl: Scalars["String"];
+};
+
+export type MutationIntegrationGongArgs = {
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
 };
 
 export type MutationIntegrationGoogleCalendarPersonalConnectArgs = {
@@ -12138,6 +12207,17 @@ export enum OAuthClientApprovalStatus {
   Denied = "denied",
   Requested = "requested",
 }
+
+/** OAuth client actor payload for webhooks. */
+export type OauthClientActorWebhookPayload = {
+  __typename?: "OauthClientActorWebhookPayload";
+  /** The ID of the OAuth client. */
+  id: Scalars["String"];
+  /** The name of the OAuth client. */
+  name: Scalars["String"];
+  /** The type of actor. */
+  type: Scalars["String"];
+};
 
 /** Request to install OAuth clients on organizations and the response to the request. */
 export type OauthClientApproval = Node & {
@@ -18804,6 +18884,8 @@ export type User = Node & {
   avatarUrl?: Maybe<Scalars["String"]>;
   /** [DEPRECATED] Hash for the user to be used in calendar URLs. */
   calendarHash?: Maybe<Scalars["String"]>;
+  /** Whether this user can access any public team in the organization. */
+  canAccessAnyPublicTeam: Scalars["Boolean"];
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** Number of issues created. */
@@ -18828,6 +18910,8 @@ export type User = Node & {
   guest: Scalars["Boolean"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** [INTERNAL] Identity provider the user is managed by. */
+  identityProvider?: Maybe<IdentityProvider>;
   /** The initials of the user. */
   initials: Scalars["String"];
   /**
@@ -18942,6 +19026,23 @@ export type UserTeamsArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
+};
+
+/** User actor payload for webhooks. */
+export type UserActorWebhookPayload = {
+  __typename?: "UserActorWebhookPayload";
+  /** The avatar URL of the user. */
+  avatarUrl?: Maybe<Scalars["String"]>;
+  /** The email of the user. */
+  email: Scalars["String"];
+  /** The ID of the user. */
+  id: Scalars["String"];
+  /** The name of the user. */
+  name: Scalars["String"];
+  /** The type of actor. */
+  type: Scalars["String"];
+  /** The URL of the user. */
+  url: Scalars["String"];
 };
 
 export type UserAdminPayload = {
@@ -21180,6 +21281,7 @@ export type UserFragment = { __typename: "User" } & Pick<
   | "isAssignable"
   | "isMentionable"
   | "isMe"
+  | "canAccessAnyPublicTeam"
   | "calendarHash"
   | "inviteHash"
 >;
@@ -21267,7 +21369,7 @@ export type ApiKeyFragment = { __typename: "ApiKey" } & Pick<
 
 export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
   AgentActivity,
-  "signal" | "sourceMetadata" | "updatedAt" | "archivedAt" | "createdAt" | "id"
+  "signal" | "sourceMetadata" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "ephemeral"
 > & {
     agentSession: { __typename?: "AgentSession" } & Pick<AgentSession, "id">;
     sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -21324,6 +21426,20 @@ export type ProjectHistoryFragment = { __typename: "ProjectHistory" } & Pick<
   ProjectHistory,
   "entries" | "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { project: { __typename?: "Project" } & Pick<Project, "id"> };
+
+export type AuthIdentityProviderFragment = { __typename: "AuthIdentityProvider" } & Pick<
+  AuthIdentityProvider,
+  | "ssoBinding"
+  | "ssoEndpoint"
+  | "priority"
+  | "ssoSignAlgo"
+  | "issuerEntityId"
+  | "id"
+  | "samlEnabled"
+  | "scimEnabled"
+  | "defaultMigrated"
+  | "ssoSigningCert"
+>;
 
 export type IdentityProviderFragment = { __typename: "IdentityProvider" } & Pick<
   IdentityProvider,
@@ -22040,6 +22156,11 @@ export type ExternalEntityInfoFragment = { __typename: "ExternalEntityInfo" } & 
     >;
   };
 
+export type IntegrationActorWebhookPayloadFragment = { __typename: "IntegrationActorWebhookPayload" } & Pick<
+  IntegrationActorWebhookPayload,
+  "id" | "service" | "type"
+>;
+
 export type AttachmentFragment = { __typename: "Attachment" } & Pick<
   Attachment,
   | "sourceType"
@@ -22265,6 +22386,11 @@ export type NotificationSubscriptionFragment =
   | NotificationSubscription_ProjectNotificationSubscription_Fragment
   | NotificationSubscription_TeamNotificationSubscription_Fragment
   | NotificationSubscription_UserNotificationSubscription_Fragment;
+
+export type OauthClientActorWebhookPayloadFragment = { __typename: "OauthClientActorWebhookPayload" } & Pick<
+  OauthClientActorWebhookPayload,
+  "id" | "name" | "type"
+>;
 
 export type SlackChannelNameMappingFragment = { __typename: "SlackChannelNameMapping" } & Pick<
   SlackChannelNameMapping,
@@ -23075,6 +23201,11 @@ export type UserSettingsFragment = { __typename: "UserSettings" } & Pick<
 export type SlackAsksTeamSettingsFragment = { __typename: "SlackAsksTeamSettings" } & Pick<
   SlackAsksTeamSettings,
   "id" | "hasDefaultAsk"
+>;
+
+export type UserActorWebhookPayloadFragment = { __typename: "UserActorWebhookPayload" } & Pick<
+  UserActorWebhookPayload,
+  "id" | "url" | "avatarUrl" | "email" | "name" | "type"
 >;
 
 export type FavoriteFragment = { __typename: "Favorite" } & Pick<
@@ -29074,6 +29205,15 @@ export type IntegrationGitlabConnectMutation = { __typename?: "Mutation" } & {
   integrationGitlabConnect: { __typename?: "GitLabIntegrationCreatePayload" } & GitLabIntegrationCreatePayloadFragment;
 };
 
+export type IntegrationGongMutationVariables = Exact<{
+  code: Scalars["String"];
+  redirectUri: Scalars["String"];
+}>;
+
+export type IntegrationGongMutation = { __typename?: "Mutation" } & {
+  integrationGong: { __typename?: "IntegrationPayload" } & IntegrationPayloadFragment;
+};
+
 export type IntegrationGoogleSheetsMutationVariables = Exact<{
   code: Scalars["String"];
 }>;
@@ -32822,6 +32962,32 @@ export const EmailIntakeAddressFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<EmailIntakeAddressFragment, unknown>;
+export const AuthIdentityProviderFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AuthIdentityProvider" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "AuthIdentityProvider" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "ssoBinding" } },
+          { kind: "Field", name: { kind: "Name", value: "ssoEndpoint" } },
+          { kind: "Field", name: { kind: "Name", value: "priority" } },
+          { kind: "Field", name: { kind: "Name", value: "ssoSignAlgo" } },
+          { kind: "Field", name: { kind: "Name", value: "issuerEntityId" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "samlEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "scimEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "defaultMigrated" } },
+          { kind: "Field", name: { kind: "Name", value: "ssoSigningCert" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AuthIdentityProviderFragment, unknown>;
 export const InitiativeNotificationSubscriptionFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -33594,6 +33760,44 @@ export const OtherNotificationWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<OtherNotificationWebhookPayloadFragment, unknown>;
+export const IntegrationActorWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IntegrationActorWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IntegrationActorWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "service" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<IntegrationActorWebhookPayloadFragment, unknown>;
+export const OauthClientActorWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "OauthClientActorWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "OauthClientActorWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<OauthClientActorWebhookPayloadFragment, unknown>;
 export const OrganizationOriginWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -36066,6 +36270,28 @@ export const UserSettingsFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<UserSettingsFragment, unknown>;
+export const UserActorWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "UserActorWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "UserActorWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
+          { kind: "Field", name: { kind: "Name", value: "email" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UserActorWebhookPayloadFragment, unknown>;
 export const IssueImportJqlCheckPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -36326,6 +36552,7 @@ export const AgentActivityFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "ephemeral" } },
         ],
       },
     },
@@ -40774,6 +41001,7 @@ export const UserFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "isAssignable" } },
           { kind: "Field", name: { kind: "Name", value: "isMentionable" } },
           { kind: "Field", name: { kind: "Name", value: "isMe" } },
+          { kind: "Field", name: { kind: "Name", value: "canAccessAnyPublicTeam" } },
           { kind: "Field", name: { kind: "Name", value: "calendarHash" } },
           { kind: "Field", name: { kind: "Name", value: "inviteHash" } },
         ],
@@ -72849,6 +73077,54 @@ export const IntegrationGitlabConnectDocument = {
     ...GitLabIntegrationCreatePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<IntegrationGitlabConnectMutation, IntegrationGitlabConnectMutationVariables>;
+export const IntegrationGongDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "integrationGong" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "code" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "integrationGong" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "code" },
+                value: { kind: "Variable", name: { kind: "Name", value: "code" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "redirectUri" },
+                value: { kind: "Variable", name: { kind: "Name", value: "redirectUri" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IntegrationPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IntegrationPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IntegrationGongMutation, IntegrationGongMutationVariables>;
 export const IntegrationGoogleSheetsDocument = {
   kind: "Document",
   definitions: [

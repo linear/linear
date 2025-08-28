@@ -54,6 +54,10 @@ type AgentActivity implements Node {
   """
   createdAt: DateTime!
   """
+  Whether the activity is ephemeral, and should disappear after the next agent activity.
+  """
+  ephemeral: Boolean!
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -129,6 +133,10 @@ input AgentActivityCreateInput {
   See https://linear.app/developers/agents for typing details.
   """
   content: JSONObject!
+  """
+  Whether the activity is ephemeral, and should disappear after the next activity. Defaults to false.
+  """
+  ephemeral: Boolean
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -1504,6 +1512,52 @@ type AuditEntryWebhookPayload {
 }
 
 """
+An identity provider.
+"""
+type AuthIdentityProvider {
+  """
+  Whether the identity provider is the default identity provider migrated from organization level settings.
+  """
+  defaultMigrated: Boolean!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The issuer's custom entity ID.
+  """
+  issuerEntityId: String
+  """
+  The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference.
+  """
+  priority: Float
+  """
+  Whether SAML authentication is enabled for organization.
+  """
+  samlEnabled: Boolean!
+  """
+  Whether SCIM provisioning is enabled for organization.
+  """
+  scimEnabled: Boolean!
+  """
+  Binding method for authentication call. Can be either `post` (default) or `redirect`.
+  """
+  ssoBinding: String
+  """
+  Sign in endpoint URL for the identity provider.
+  """
+  ssoEndpoint: String
+  """
+  The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
+  """
+  ssoSignAlgo: String
+  """
+  X.509 Signing Certificate in string form.
+  """
+  ssoSigningCert: String
+}
+
+"""
 [INTERNAL] An OAuth userId/createdDate tuple
 """
 type AuthMembership {
@@ -1644,6 +1698,10 @@ type AuthUser {
   """
   email: String!
   id: ID!
+  """
+  [INTERNAL] Identity provider the user is managed by.
+  """
+  identityProvider: AuthIdentityProvider
   """
   The user's full name.
   """
@@ -7076,6 +7134,14 @@ interface Entity implements Node {
 }
 
 """
+Union type for webhook actor payloads
+"""
+union EntityActorWebhookPayload =
+  | IntegrationActorWebhookPayload
+  | OauthClientActorWebhookPayload
+  | UserActorWebhookPayload
+
+"""
 An external link for an entity like initiative, etc...
 """
 type EntityExternalLink implements Node {
@@ -7209,6 +7275,10 @@ type EntityWebhookPayload {
   The type of action that triggered the webhook.
   """
   action: String!
+  """
+  The actor who triggered the action.
+  """
+  actor: EntityActorWebhookPayload
   """
   The time the payload was created.
   """
@@ -8450,6 +8520,20 @@ enum GitLinkKind {
 enum GithubOrgType {
   organization
   user
+}
+
+input GongRecordingImportConfigInput {
+  """
+  The team ID to create issues in for imported recordings. Set to null to disable import.
+  """
+  teamId: String
+}
+
+input GongSettingsInput {
+  """
+  Configuration for recording import.
+  """
+  importConfig: GongRecordingImportConfigInput
 }
 
 input GoogleSheetsExportSettings {
@@ -10481,6 +10565,24 @@ type Integration implements Node {
 }
 
 """
+Integration actor payload for webhooks.
+"""
+type IntegrationActorWebhookPayload {
+  """
+  The ID of the integration.
+  """
+  id: String!
+  """
+  The service of the integration.
+  """
+  service: String!
+  """
+  The type of actor.
+  """
+  type: String!
+}
+
+"""
 Certain properties of an integration.
 """
 type IntegrationChildWebhookPayload {
@@ -10576,6 +10678,7 @@ enum IntegrationService {
   githubImport
   githubPersonal
   gitlab
+  gong
   googleCalendarPersonal
   googleSheets
   intercom
@@ -10608,6 +10711,7 @@ input IntegrationSettingsInput {
   gitHubImport: GitHubImportSettingsInput
   gitHubPersonal: GitHubPersonalSettingsInput
   gitLab: GitLabSettingsInput
+  gong: GongSettingsInput
   googleSheets: GoogleSheetsSettingsInput
   intercom: IntercomSettingsInput
   jira: JiraSettingsInput
@@ -17369,6 +17473,19 @@ type Mutation {
     gitlabUrl: String!
   ): GitLabIntegrationCreatePayload!
   """
+  Integrates the organization with Gong.
+  """
+  integrationGong(
+    """
+    The Gong OAuth code.
+    """
+    code: String!
+    """
+    The Gong OAuth redirect URI.
+    """
+    redirectUri: String!
+  ): IntegrationPayload!
+  """
   [Internal] Connects the Google Calendar to the user to this Linear account via OAuth2.
   """
   integrationGoogleCalendarPersonalConnect(
@@ -21522,6 +21639,24 @@ enum OAuthClientApprovalStatus {
   approved
   denied
   requested
+}
+
+"""
+OAuth client actor payload for webhooks.
+"""
+type OauthClientActorWebhookPayload {
+  """
+  The ID of the OAuth client.
+  """
+  id: String!
+  """
+  The name of the OAuth client.
+  """
+  name: String!
+  """
+  The type of actor.
+  """
+  type: String!
 }
 
 """
@@ -33715,6 +33850,10 @@ type User implements Node {
   """
   calendarHash: String
   """
+  Whether this user can access any public team in the organization.
+  """
+  canAccessAnyPublicTeam: Boolean!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -33845,6 +33984,10 @@ type User implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  [INTERNAL] Identity provider the user is managed by.
+  """
+  identityProvider: IdentityProvider
   """
   The initials of the user.
   """
@@ -33991,6 +34134,36 @@ type User implements Node {
   updatedAt: DateTime!
   """
   User's profile URL.
+  """
+  url: String!
+}
+
+"""
+User actor payload for webhooks.
+"""
+type UserActorWebhookPayload {
+  """
+  The avatar URL of the user.
+  """
+  avatarUrl: String
+  """
+  The email of the user.
+  """
+  email: String!
+  """
+  The ID of the user.
+  """
+  id: String!
+  """
+  The name of the user.
+  """
+  name: String!
+  """
+  The type of actor.
+  """
+  type: String!
+  """
+  The URL of the user.
   """
   url: String!
 }

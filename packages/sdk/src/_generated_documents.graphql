@@ -2526,6 +2526,8 @@ fragment User on User {
   isMentionable
   # Whether the user is the currently authenticated user.
   isMe
+  # Whether this user can access any public team in the organization.
+  canAccessAnyPublicTeam
   # [DEPRECATED] Hash for the user to be used in calendar URLs.
   calendarHash
   # [DEPRECATED] Unique hash for the user to be used in invite URLs.
@@ -2793,6 +2795,8 @@ fragment AgentActivity on AgentActivity {
   user {
     id
   }
+  # Whether the activity is ephemeral, and should disappear after the next agent activity.
+  ephemeral
 }
 
 # An email address that can be used for submitting issues.
@@ -2922,6 +2926,31 @@ fragment ProjectHistory on ProjectHistory {
   createdAt
   # The unique identifier of the entity.
   id
+}
+
+# An identity provider.
+fragment AuthIdentityProvider on AuthIdentityProvider {
+  __typename
+  # Binding method for authentication call. Can be either `post` (default) or `redirect`.
+  ssoBinding
+  # Sign in endpoint URL for the identity provider.
+  ssoEndpoint
+  # The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference.
+  priority
+  # The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
+  ssoSignAlgo
+  # The issuer's custom entity ID.
+  issuerEntityId
+  # The unique identifier of the entity.
+  id
+  # Whether SAML authentication is enabled for organization.
+  samlEnabled
+  # Whether SCIM provisioning is enabled for organization.
+  scimEnabled
+  # Whether the identity provider is the default identity provider migrated from organization level settings.
+  defaultMigrated
+  # X.509 Signing Certificate in string form.
+  ssoSigningCert
 }
 
 # An identity provider.
@@ -4544,6 +4573,17 @@ fragment ExternalEntityInfo on ExternalEntityInfo {
   service
 }
 
+# Integration actor payload for webhooks.
+fragment IntegrationActorWebhookPayload on IntegrationActorWebhookPayload {
+  __typename
+  # The ID of the integration.
+  id
+  # The service of the integration.
+  service
+  # The type of actor.
+  type
+}
+
 # Issue attachment (e.g. support ticket, pull request).
 fragment Attachment on Attachment {
   __typename
@@ -4815,6 +4855,17 @@ fragment NotificationSubscription on NotificationSubscription {
   }
   # Whether the subscription is active or not.
   active
+}
+
+# OAuth client actor payload for webhooks.
+fragment OauthClientActorWebhookPayload on OauthClientActorWebhookPayload {
+  __typename
+  # The ID of the OAuth client.
+  id
+  # The name of the OAuth client.
+  name
+  # The type of actor.
+  type
 }
 
 # Object for mapping Slack channel IDs to names and other settings.
@@ -6548,6 +6599,23 @@ fragment SlackAsksTeamSettings on SlackAsksTeamSettings {
   id
   # Whether the default Asks template is enabled in the given channel for this team.
   hasDefaultAsk
+}
+
+# User actor payload for webhooks.
+fragment UserActorWebhookPayload on UserActorWebhookPayload {
+  __typename
+  # The ID of the user.
+  id
+  # The URL of the user.
+  url
+  # The avatar URL of the user.
+  avatarUrl
+  # The email of the user.
+  email
+  # The name of the user.
+  name
+  # The type of actor.
+  type
 }
 
 # User favorites presented in the sidebar.
@@ -15983,6 +16051,17 @@ mutation integrationGitlabConnect(
 ) {
   integrationGitlabConnect(accessToken: $accessToken, gitlabUrl: $gitlabUrl) {
     ...GitLabIntegrationCreatePayload
+  }
+}
+# Integrates the organization with Gong.
+mutation integrationGong(
+  # The Gong OAuth code.
+  $code: String!
+  # The Gong OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationGong(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
   }
 }
 # Integrates the organization with Google Sheets.

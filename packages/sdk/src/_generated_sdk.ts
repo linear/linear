@@ -222,6 +222,7 @@ export class AgentActivity extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.ephemeral = data.ephemeral;
     this.id = data.id;
     this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -236,6 +237,8 @@ export class AgentActivity extends Request {
   public archivedAt?: Date;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** Whether the activity is ephemeral, and should disappear after the next agent activity. */
+  public ephemeral: boolean;
   /** The unique identifier of the entity. */
   public id: string;
   /** Metadata about the external source that created this agent activity. */
@@ -1349,6 +1352,48 @@ export class AuditEntryWebhookPayload {
   public type: string;
   /** The time at which the entity was updated. */
   public updatedAt: string;
+}
+/**
+ * An identity provider.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AuthIdentityProviderFragment response data
+ */
+export class AuthIdentityProvider extends Request {
+  public constructor(request: LinearRequest, data: L.AuthIdentityProviderFragment) {
+    super(request);
+    this.defaultMigrated = data.defaultMigrated;
+    this.id = data.id;
+    this.issuerEntityId = data.issuerEntityId ?? undefined;
+    this.priority = data.priority ?? undefined;
+    this.samlEnabled = data.samlEnabled;
+    this.scimEnabled = data.scimEnabled;
+    this.ssoBinding = data.ssoBinding ?? undefined;
+    this.ssoEndpoint = data.ssoEndpoint ?? undefined;
+    this.ssoSignAlgo = data.ssoSignAlgo ?? undefined;
+    this.ssoSigningCert = data.ssoSigningCert ?? undefined;
+  }
+
+  /** Whether the identity provider is the default identity provider migrated from organization level settings. */
+  public defaultMigrated: boolean;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The issuer's custom entity ID. */
+  public issuerEntityId?: string;
+  /** The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference. */
+  public priority?: number;
+  /** Whether SAML authentication is enabled for organization. */
+  public samlEnabled: boolean;
+  /** Whether SCIM provisioning is enabled for organization. */
+  public scimEnabled: boolean;
+  /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
+  public ssoBinding?: string;
+  /** Sign in endpoint URL for the identity provider. */
+  public ssoEndpoint?: string;
+  /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
+  public ssoSignAlgo?: string;
+  /** X.509 Signing Certificate in string form. */
+  public ssoSigningCert?: string;
 }
 /**
  * An organization. Organizations are root-level objects that contain users and teams.
@@ -7570,6 +7615,25 @@ export class Integration extends Request {
   }
 }
 /**
+ * Integration actor payload for webhooks.
+ *
+ * @param data - L.IntegrationActorWebhookPayloadFragment response data
+ */
+export class IntegrationActorWebhookPayload {
+  public constructor(data: L.IntegrationActorWebhookPayloadFragment) {
+    this.id = data.id;
+    this.service = data.service;
+    this.type = data.type;
+  }
+
+  /** The ID of the integration. */
+  public id: string;
+  /** The service of the integration. */
+  public service: string;
+  /** The type of actor. */
+  public type: string;
+}
+/**
  * Certain properties of an integration.
  *
  * @param data - L.IntegrationChildWebhookPayloadFragment response data
@@ -11385,6 +11449,25 @@ export class OAuthAppWebhookPayload {
   /** ID of the organization for which the webhook belongs to. */
   public organizationId: string;
   /** The type of resource. */
+  public type: string;
+}
+/**
+ * OAuth client actor payload for webhooks.
+ *
+ * @param data - L.OauthClientActorWebhookPayloadFragment response data
+ */
+export class OauthClientActorWebhookPayload {
+  public constructor(data: L.OauthClientActorWebhookPayloadFragment) {
+    this.id = data.id;
+    this.name = data.name;
+    this.type = data.type;
+  }
+
+  /** The ID of the OAuth client. */
+  public id: string;
+  /** The name of the OAuth client. */
+  public name: string;
+  /** The type of actor. */
   public type: string;
 }
 /**
@@ -16828,6 +16911,7 @@ export class User extends Request {
     this.avatarBackgroundColor = data.avatarBackgroundColor;
     this.avatarUrl = data.avatarUrl ?? undefined;
     this.calendarHash = data.calendarHash ?? undefined;
+    this.canAccessAnyPublicTeam = data.canAccessAnyPublicTeam;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.createdIssueCount = data.createdIssueCount;
     this.description = data.description ?? undefined;
@@ -16866,6 +16950,8 @@ export class User extends Request {
   public avatarUrl?: string;
   /** [DEPRECATED] Hash for the user to be used in calendar URLs. */
   public calendarHash?: string;
+  /** Whether this user can access any public team in the organization. */
+  public canAccessAnyPublicTeam: boolean;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Number of issues created. */
@@ -16953,6 +17039,34 @@ export class User extends Request {
   public update(input: L.UserUpdateInput) {
     return new UpdateUserMutation(this._request).fetch(this.id, input);
   }
+}
+/**
+ * User actor payload for webhooks.
+ *
+ * @param data - L.UserActorWebhookPayloadFragment response data
+ */
+export class UserActorWebhookPayload {
+  public constructor(data: L.UserActorWebhookPayloadFragment) {
+    this.avatarUrl = data.avatarUrl ?? undefined;
+    this.email = data.email;
+    this.id = data.id;
+    this.name = data.name;
+    this.type = data.type;
+    this.url = data.url;
+  }
+
+  /** The avatar URL of the user. */
+  public avatarUrl?: string;
+  /** The email of the user. */
+  public email: string;
+  /** The ID of the user. */
+  public id: string;
+  /** The name of the user. */
+  public name: string;
+  /** The type of actor. */
+  public type: string;
+  /** The URL of the user. */
+  public url: string;
 }
 /**
  * UserAdminPayload model
@@ -25209,6 +25323,37 @@ export class IntegrationGitlabConnectMutation extends Request {
     const data = response.integrationGitlabConnect;
 
     return new GitLabIntegrationCreatePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IntegrationGong Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IntegrationGongMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IntegrationGong mutation and return a IntegrationPayload
+   *
+   * @param code - required code to pass to integrationGong
+   * @param redirectUri - required redirectUri to pass to integrationGong
+   * @returns parsed response from IntegrationGongMutation
+   */
+  public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    const response = await this._request<L.IntegrationGongMutation, L.IntegrationGongMutationVariables>(
+      L.IntegrationGongDocument,
+      {
+        code,
+        redirectUri,
+      }
+    );
+    const data = response.integrationGong;
+
+    return new IntegrationPayload(this._request, data);
   }
 }
 
@@ -38800,6 +38945,16 @@ export class LinearSdk extends Request {
    */
   public integrationGitlabConnect(accessToken: string, gitlabUrl: string): LinearFetch<GitLabIntegrationCreatePayload> {
     return new IntegrationGitlabConnectMutation(this._request).fetch(accessToken, gitlabUrl);
+  }
+  /**
+   * Integrates the organization with Gong.
+   *
+   * @param code - required code to pass to integrationGong
+   * @param redirectUri - required redirectUri to pass to integrationGong
+   * @returns IntegrationPayload
+   */
+  public integrationGong(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
+    return new IntegrationGongMutation(this._request).fetch(code, redirectUri);
   }
   /**
    * Integrates the organization with Google Sheets.
