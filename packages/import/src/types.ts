@@ -39,7 +39,7 @@ export interface Attachment {
   url: string;
   /** Attachment's name */
   name: string;
-  /** Attachment's http headers */
+  /** Optional HTTP headers to be used when downloading the attachment */
   httpHeaders?: Record<string, string>;
 }
 

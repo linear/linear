@@ -2,4 +2,4 @@
 "@linear/import": patch
 ---
 
-test
+Updates the import to allow for migrating attachments from Trello to native Linear attachments.

@@ -340,7 +340,10 @@ const createIssueWithRetries = async (
   attachments: Attachment[] = [],
   retries = 3
 ): ReturnType<LinearClient["createIssue"]> => {
-  const createAttachment = async (client: LinearClient, attachment: Attachment, issueId: string) => {
+  const uploadAttachment = async (
+    client: LinearClient,
+    attachment: Attachment
+  ): Promise<{ sourceUrl: string; assetUrl: string; title: string }> => {
     const sourceUrl = attachment.url;
     const filenameFromUrl = (() => {
       try {
@@ -393,20 +396,49 @@ const createIssueWithRetries = async (
       throw new Error(`Failed to upload file to Linear storage (${uploadResponse.status})${body ? ` - ${body}` : ""}`);
     }
 
+    return { sourceUrl, assetUrl: uploadFile.assetUrl, title: filename };
+  };
+
+  const createLinearAttachment = async (
+    client: LinearClient,
+    issueId: string,
+    asset: { assetUrl: string; title: string }
+  ) => {
     await client.createAttachment({
       issueId,
-      title: filename,
-      url: uploadFile.assetUrl,
+      title: asset.title,
+      url: asset.assetUrl,
     });
   };
 
   try {
-    const createdIssuePayload = await client.createIssue(input);
+    // 1) Pre-upload attachments (if any)
+    const uploadedAssets =
+      attachments && attachments.length > 0
+        ? await Promise.all(attachments.map(att => uploadAttachment(client, att)))
+        : [];
+
+    // 2) Replace assets URLs in description with uploaded asset URLs
+    let updatedDescription = (input as any).description as string | undefined;
+    if (updatedDescription && uploadedAssets.length > 0) {
+      // Replace all occurrences of each source URL with the new asset URL
+      for (const { sourceUrl, assetUrl } of uploadedAssets) {
+        // Use global replacement without regex pitfalls
+        updatedDescription = updatedDescription.split(sourceUrl).join(assetUrl);
+      }
+    }
+
+    // 3) Create the issue with the updated description
+    const createdIssuePayload = await client.createIssue({
+      ...(input as any),
+      description: updatedDescription ?? (input as any).description,
+    });
+
+    // 4) Create Linear attachments pointing at the uploaded assets
     const issue = await createdIssuePayload.issue;
     const issueId = issue?.id;
-    console.log("attachments", attachments);
-    if (issueId && attachments && attachments.length > 0) {
-      await Promise.all(attachments.map(att => createAttachment(client, att, issueId)));
+    if (issueId && uploadedAssets.length > 0) {
+      await Promise.all(uploadedAssets.map(asset => createLinearAttachment(client, issueId, asset)));
     }
 
     return createdIssuePayload;
