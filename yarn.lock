@@ -10935,10 +10935,10 @@ rimraf@^4.4.1:
   dependencies:
     glob "^9.2.0"
 
-rollup-plugin-gzip@^2.5.0:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/rollup-plugin-gzip/-/rollup-plugin-gzip-2.5.1.tgz#afb962ecd3ebbc7dc3bc080612da789a5103f890"
-  integrity sha512-l9h3g0imsGvhjcSsxNRLHNW/gqRSSgaJLCKKWYeRclPHvDMDewmI43ZyiGJ3nc3+sZNy1pJnWzB3Bvm+tJI2jQ==
+rollup-plugin-gzip@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-gzip/-/rollup-plugin-gzip-4.1.1.tgz#a7a1539a537de7abde4d891f4f3b2cd894892f5b"
+  integrity sha512-yyhAAn4/bqo/EZlfpKqPu3+675u2KRYy3AVYeEPpU+ej+fEuhXA7lL1+UfmDw4MlH1593LQQOEQ8+1itw02L6A==
 
 rollup-plugin-inject-process-env@^1.3.1:
   version "1.3.1"
