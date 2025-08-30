@@ -5889,6 +5889,21 @@ export class FetchDataPayload extends Request {
   public success: boolean;
 }
 /**
+ * FileUploadDeletePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.FileUploadDeletePayloadFragment response data
+ */
+export class FileUploadDeletePayload extends Request {
+  public constructor(request: LinearRequest, data: L.FileUploadDeletePayloadFragment) {
+    super(request);
+    this.success = data.success;
+  }
+
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
  * FrontAttachmentPayload model
  *
  * @param request - function to call the graphql client
@@ -29889,6 +29904,35 @@ export class SuspendUserMutation extends Request {
 }
 
 /**
+ * A fetchable UserUnlinkFromIdentityProvider Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserUnlinkFromIdentityProviderMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserUnlinkFromIdentityProvider mutation and return a UserAdminPayload
+   *
+   * @param id - required id to pass to userUnlinkFromIdentityProvider
+   * @returns parsed response from UserUnlinkFromIdentityProviderMutation
+   */
+  public async fetch(id: string): LinearFetch<UserAdminPayload> {
+    const response = await this._request<
+      L.UserUnlinkFromIdentityProviderMutation,
+      L.UserUnlinkFromIdentityProviderMutationVariables
+    >(L.UserUnlinkFromIdentityProviderDocument, {
+      id,
+    });
+    const data = response.userUnlinkFromIdentityProvider;
+
+    return new UserAdminPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UnsuspendUser Mutation
  *
  * @param request - function to call the graphql client
@@ -40533,6 +40577,15 @@ export class LinearSdk extends Request {
    */
   public suspendUser(id: string): LinearFetch<UserAdminPayload> {
     return new SuspendUserMutation(this._request).fetch(id);
+  }
+  /**
+   * Unlinks a guest user from their identity provider. Can only be called by an admin when SCIM is enabled.
+   *
+   * @param id - required id to pass to userUnlinkFromIdentityProvider
+   * @returns UserAdminPayload
+   */
+  public userUnlinkFromIdentityProvider(id: string): LinearFetch<UserAdminPayload> {
+    return new UserUnlinkFromIdentityProviderMutation(this._request).fetch(id);
   }
   /**
    * Un-suspends a user. Can only be called by an admin.

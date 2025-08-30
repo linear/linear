@@ -4661,6 +4661,12 @@ export type FetchDataPayload = {
   success: Scalars["Boolean"];
 };
 
+export type FileUploadDeletePayload = {
+  __typename?: "FileUploadDeletePayload";
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
+};
+
 /** By which resolution is frequency defined. */
 export enum FrequencyResolutionType {
   Daily = "daily",
@@ -9188,6 +9194,8 @@ export type Mutation = {
   favoriteUpdate: FavoritePayload;
   /** XHR request payload to upload an images, video and other attachments directly to Linear's cloud storage. */
   fileUpload: UploadPayload;
+  /** [INTERNAL] Permanently delete an uploaded file by asset URL. This should be used as a last resort and will break comments and documents that reference the asset. */
+  fileUploadDangerouslyDelete: FileUploadDeletePayload;
   /** Creates a new automation state. */
   gitAutomationStateCreate: GitAutomationStatePayload;
   /** Archives an automation state. */
@@ -9652,6 +9660,8 @@ export type Mutation = {
   userSettingsUpdate: UserSettingsPayload;
   /** Suspends a user. Can only be called by an admin. */
   userSuspend: UserAdminPayload;
+  /** Unlinks a guest user from their identity provider. Can only be called by an admin when SCIM is enabled. */
+  userUnlinkFromIdentityProvider: UserAdminPayload;
   /** Un-suspends a user. Can only be called by an admin. */
   userUnsuspend: UserAdminPayload;
   /** Updates a user. Only available to organization admins and the user themselves. */
@@ -10082,6 +10092,10 @@ export type MutationFileUploadArgs = {
   makePublic?: Maybe<Scalars["Boolean"]>;
   metaData?: Maybe<Scalars["JSON"]>;
   size: Scalars["Int"];
+};
+
+export type MutationFileUploadDangerouslyDeleteArgs = {
+  assetUrl: Scalars["String"];
 };
 
 export type MutationGitAutomationStateCreateArgs = {
@@ -11050,6 +11064,10 @@ export type MutationUserSettingsUpdateArgs = {
 };
 
 export type MutationUserSuspendArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationUserUnlinkFromIdentityProviderArgs = {
   id: Scalars["String"];
 };
 
@@ -15735,11 +15753,6 @@ export type Query = {
   applicationInfo: Application;
   /** [INTERNAL] Get basic information for a list of applications. */
   applicationInfoByIds: Array<Application>;
-  /**
-   * [DEPRECATED] [INTERNAL] Get information for a list of applications with memberships
-   * @deprecated Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead.
-   */
-  applicationInfoWithMembershipsByIds: Array<WorkspaceAuthorizedApplication>;
   /** Get information for an application and whether a user has approved it for the given scopes. */
   applicationWithAuthorization: UserAuthorizedApplication;
   /** [Internal] All archived teams of the organization. */
@@ -16020,11 +16033,6 @@ export type Query = {
   workflowStates: WorkflowStateConnection;
   /** [INTERNAL] Get a specific non-internal authorized application (with limited fields) for a workspace */
   workspaceAuthorizedApplication: WorkspaceAuthorizedApplicationWithMemberships;
-  /**
-   * [DEPRECATED] [INTERNAL] Get non-internal authorized applications (with limited fields) for a workspace
-   * @deprecated Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead.
-   */
-  workspaceAuthorizedApplications: Array<WorkspaceAuthorizedApplication>;
   /** [INTERNAL] Get non-internal authorized applications for a workspace, including each application's app user. */
   workspaceAuthorizedApplicationsWithAppUser: Array<WorkspaceAuthorizedApplicationWithAppUser>;
 };
@@ -16081,10 +16089,6 @@ export type QueryApplicationInfoArgs = {
 
 export type QueryApplicationInfoByIdsArgs = {
   ids: Array<Scalars["String"]>;
-};
-
-export type QueryApplicationInfoWithMembershipsByIdsArgs = {
-  clientIds: Array<Scalars["String"]>;
 };
 
 export type QueryApplicationWithAuthorizationArgs = {
@@ -19888,33 +19892,6 @@ export type WorkflowStateUpdateInput = {
   position?: Maybe<Scalars["Float"]>;
 };
 
-/** [INTERNAL] Public information of the OAuth application, plus the userIds and scopes for those users. */
-export type WorkspaceAuthorizedApplication = {
-  __typename?: "WorkspaceAuthorizedApplication";
-  /** OAuth application's ID. */
-  appId: Scalars["String"];
-  /** OAuth application's client ID. */
-  clientId: Scalars["String"];
-  /** Description of the application. */
-  description?: Maybe<Scalars["String"]>;
-  /** Developer of the application. */
-  developer?: Maybe<Scalars["String"]>;
-  /** Developer URL of the application. */
-  developerUrl?: Maybe<Scalars["String"]>;
-  /** Image of the application. */
-  imageUrl?: Maybe<Scalars["String"]>;
-  /** UserIds and membership dates of everyone who has authorized the application with the set of scopes. */
-  memberships: Array<AuthMembership>;
-  /** Application name. */
-  name: Scalars["String"];
-  /** Scopes that are authorized for this application for a given user. */
-  scope: Array<Scalars["String"]>;
-  /** Total number of members that authorized the application. */
-  totalMembers: Scalars["Float"];
-  /** Whether or not webhooks are enabled for the application. */
-  webhooksEnabled: Scalars["Boolean"];
-};
-
 /** [INTERNAL] Public information of the OAuth application, plus the app user and aggregate membership count. */
 export type WorkspaceAuthorizedApplicationWithAppUser = {
   __typename?: "WorkspaceAuthorizedApplicationWithAppUser";
@@ -23558,6 +23535,11 @@ export type FavoritePayloadFragment = { __typename: "FavoritePayload" } & Pick<
 export type FetchDataPayloadFragment = { __typename: "FetchDataPayload" } & Pick<
   FetchDataPayload,
   "query" | "data" | "filters" | "success"
+>;
+
+export type FileUploadDeletePayloadFragment = { __typename: "FileUploadDeletePayload" } & Pick<
+  FileUploadDeletePayload,
+  "success"
 >;
 
 export type FrontAttachmentPayloadFragment = { __typename: "FrontAttachmentPayload" } & Pick<
@@ -30517,6 +30499,14 @@ export type SuspendUserMutationVariables = Exact<{
 
 export type SuspendUserMutation = { __typename?: "Mutation" } & {
   userSuspend: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
+};
+
+export type UserUnlinkFromIdentityProviderMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UserUnlinkFromIdentityProviderMutation = { __typename?: "Mutation" } & {
+  userUnlinkFromIdentityProvider: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
 };
 
 export type UnsuspendUserMutationVariables = Exact<{
@@ -39592,6 +39582,23 @@ export const FetchDataPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<FetchDataPayloadFragment, unknown>;
+export const FileUploadDeletePayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "FileUploadDeletePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FileUploadDeletePayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<FileUploadDeletePayloadFragment, unknown>;
 export const FrontAttachmentPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -80143,6 +80150,44 @@ export const SuspendUserDocument = {
     ...UserAdminPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<SuspendUserMutation, SuspendUserMutationVariables>;
+export const UserUnlinkFromIdentityProviderDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userUnlinkFromIdentityProvider" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userUnlinkFromIdentityProvider" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserAdminPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserUnlinkFromIdentityProviderMutation, UserUnlinkFromIdentityProviderMutationVariables>;
 export const UnsuspendUserDocument = {
   kind: "Document",
   definitions: [

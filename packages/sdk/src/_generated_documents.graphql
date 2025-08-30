@@ -7438,6 +7438,12 @@ fragment FetchDataPayload on FetchDataPayload {
   success
 }
 
+fragment FileUploadDeletePayload on FileUploadDeletePayload {
+  __typename
+  # Whether the operation was successful.
+  success
+}
+
 fragment FrontAttachmentPayload on FrontAttachmentPayload {
   __typename
   # The identifier of the last sync operation.
@@ -17645,6 +17651,16 @@ mutation suspendUser(
   $id: String!
 ) {
   userSuspend(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Unlinks a guest user from their identity provider. Can only be called by an admin when SCIM is
+# enabled.
+mutation userUnlinkFromIdentityProvider(
+  # The identifier of the guest user to unlink from their identity provider.
+  $id: String!
+) {
+  userUnlinkFromIdentityProvider(id: $id) {
     ...UserAdminPayload
   }
 }

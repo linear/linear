@@ -8033,6 +8033,13 @@ type FetchDataPayload {
   success: Boolean!
 }
 
+type FileUploadDeletePayload {
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
 """
 By which resolution is frequency defined.
 """
@@ -17056,6 +17063,15 @@ type Mutation {
     size: Int!
   ): UploadPayload!
   """
+  [INTERNAL] Permanently delete an uploaded file by asset URL. This should be used as a last resort and will break comments and documents that reference the asset.
+  """
+  fileUploadDangerouslyDelete(
+    """
+    The asset URL of the uploaded file to delete.
+    """
+    assetUrl: String!
+  ): FileUploadDeletePayload!
+  """
   Creates a new automation state.
   """
   gitAutomationStateCreate(
@@ -19516,6 +19532,15 @@ type Mutation {
   userSuspend(
     """
     The identifier of the user to suspend.
+    """
+    id: String!
+  ): UserAdminPayload!
+  """
+  Unlinks a guest user from their identity provider. Can only be called by an admin when SCIM is enabled.
+  """
+  userUnlinkFromIdentityProvider(
+    """
+    The identifier of the guest user to unlink from their identity provider.
     """
     id: String!
   ): UserAdminPayload!
@@ -28159,18 +28184,6 @@ type Query {
     ids: [String!]!
   ): [Application!]!
   """
-  [DEPRECATED] [INTERNAL] Get information for a list of applications with memberships
-  """
-  applicationInfoWithMembershipsByIds(
-    """
-    The client IDs to look up.
-    """
-    clientIds: [String!]!
-  ): [WorkspaceAuthorizedApplication!]!
-    @deprecated(
-      reason: "Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead."
-    )
-  """
   Get information for an application and whether a user has approved it for the given scopes.
   """
   applicationWithAuthorization(
@@ -30234,13 +30247,6 @@ type Query {
     """
     clientId: String!
   ): WorkspaceAuthorizedApplicationWithMemberships!
-  """
-  [DEPRECATED] [INTERNAL] Get non-internal authorized applications (with limited fields) for a workspace
-  """
-  workspaceAuthorizedApplications: [WorkspaceAuthorizedApplication!]!
-    @deprecated(
-      reason: "Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead."
-    )
   """
   [INTERNAL] Get non-internal authorized applications for a workspace, including each application's app user.
   """
@@ -35531,56 +35537,6 @@ input WorkflowStateUpdateInput {
   The position of the state.
   """
   position: Float
-}
-
-"""
-[INTERNAL] Public information of the OAuth application, plus the userIds and scopes for those users.
-"""
-type WorkspaceAuthorizedApplication {
-  """
-  OAuth application's ID.
-  """
-  appId: String!
-  """
-  OAuth application's client ID.
-  """
-  clientId: String!
-  """
-  Description of the application.
-  """
-  description: String
-  """
-  Developer of the application.
-  """
-  developer: String
-  """
-  Developer URL of the application.
-  """
-  developerUrl: String
-  """
-  Image of the application.
-  """
-  imageUrl: String
-  """
-  UserIds and membership dates of everyone who has authorized the application with the set of scopes.
-  """
-  memberships: [AuthMembership!]!
-  """
-  Application name.
-  """
-  name: String!
-  """
-  Scopes that are authorized for this application for a given user.
-  """
-  scope: [String!]!
-  """
-  Total number of members that authorized the application.
-  """
-  totalMembers: Float!
-  """
-  Whether or not webhooks are enabled for the application.
-  """
-  webhooksEnabled: Boolean!
 }
 
 """
