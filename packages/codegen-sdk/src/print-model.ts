@@ -35,6 +35,15 @@ function printModelField(field: SdkModelField, content: string): string {
 }
 
 /**
+ * Determine whether this is a webhook type.
+ * Must end with "WebhookPayload", but not be "WebhookPayload" itself since that is a model in the API and not a webhook
+ * type.
+ */
+function isWebhookPayloadType(model?: SdkModel): boolean {
+  return model ? model.name !== "WebhookPayload" && model.name.endsWith("WebhookPayload") : false;
+}
+
+/**
  * Print the exported return type for an sdk operation
  */
 function printModel(context: SdkPluginContext, model: SdkModel): string {
@@ -52,7 +61,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
   }
 
   const args = getArgList([
-    getRequestArg(),
+    isWebhookPayloadType(model) ? undefined : getRequestArg(),
     {
       name: Sdk.DATA_NAME,
       optional: false,
@@ -72,7 +81,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
   return printLines([
     printDebug(model),
     printComment([model.node.description?.value ?? `${model.name} model`, ...args.jsdoc]),
-    `export class ${model.name} extends ${Sdk.REQUEST_CLASS} {
+    `export class ${model.name}${isWebhookPayloadType(model) ? "" : ` extends ${Sdk.REQUEST_CLASS} `}{
       ${printLines([
         printDebug("fields.query"),
         printLines(
@@ -87,7 +96,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
 
       public constructor(${args.printInput}) {
         ${printLines([
-          `super(${Sdk.REQUEST_NAME})`,
+          isWebhookPayloadType(model) ? undefined : `super(${Sdk.REQUEST_NAME})`,
           printDebug("fields.scalar"),
           printLines(
             model.fields.scalar.map(field =>
@@ -103,7 +112,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
           printDebug("fields.object"),
           printLines(
             model.fields.object.map(field => {
-              const operationCall = `new ${field.object.name.value}(${Sdk.REQUEST_NAME}, ${Sdk.DATA_NAME}.${field.name})`;
+              const operationCall = `new ${field.object.name.value}(${isWebhookPayloadType(model) ? "" : `${Sdk.REQUEST_NAME}, `}${Sdk.DATA_NAME}.${field.name})`;
               return field.nonNull
                 ? printSet(`this.${field.name}`, operationCall)
                 : printTernary(printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}`), operationCall);
@@ -112,7 +121,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
           printDebug("fields.list"),
           printLines(
             model.fields.list.map(field => {
-              const operationCall = `${Sdk.DATA_NAME}.${field.name}.map(node => new ${field.listType}(${Sdk.REQUEST_NAME}, node))`;
+              const operationCall = `${Sdk.DATA_NAME}.${field.name}.map(node => new ${field.listType}(${isWebhookPayloadType(model) ? "" : `${Sdk.REQUEST_NAME}, `}node))`;
               return field.nonNull
                 ? printSet(`this.${field.name}`, operationCall)
                 : printTernary(printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}`), operationCall);
@@ -123,6 +132,19 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             model.fields.enum.map(field =>
               printSet(`this.${field.name}`, `${Sdk.DATA_NAME}.${field.name}${field.nonNull ? "" : " ?? undefined"}`)
             )
+          ),
+          printDebug("fields.union"),
+          printLines(
+            model.fields.union.map(field => {
+              if (field.type.endsWith("WebhookPayload")) {
+                // Skip webhook payload union types as they are manually typed
+                return undefined;
+              }
+              return printSet(
+                `this.${field.name}`,
+                `${Sdk.DATA_NAME}.${field.name}${field.nonNull ? "" : " ?? undefined"}`
+              );
+            })
           ),
           printDebug("fields.query"),
           printLines(
@@ -170,6 +192,16 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
             printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}`)
           )
         ),
+        printDebug("fields.union"),
+        printLines(
+          model.fields.union.map(field => {
+            if (field.type.endsWith("WebhookPayload")) {
+              // Skip webhook payload union types as they are manually typed
+              return undefined;
+            }
+            return printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}`);
+          })
+        ),
       ])}
       ${printLines([
         printDebug("fields.query"),
@@ -189,7 +221,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
               (field.args.every(arg => arg.optional) && !!field.args.find(arg => arg.name === "id"));
 
             if (shouldGeneratePrivateField) {
-              const operationCall = `new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}(${
+              const operationCall = `new ${fieldQueryName}(${isWebhookPayloadType(model) ? "" : `this._${Sdk.REQUEST_NAME}`}).${Sdk.FETCH_NAME}(${
                 optionalIdArg ? `{${optionalIdArg.name}: ${fieldQueryArgs[0]}}` : printList(fieldQueryArgs)
               })`;
               return printLines([
@@ -230,7 +262,7 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
                   `public get ${field.name}(): ${Sdk.FETCH_TYPE}<${typeName}${
                     reduceNonNullType(field.query.type) ? "" : " | undefined"
                   }> {
-                    return new ${fieldQueryName}(this._${Sdk.REQUEST_NAME}).${Sdk.FETCH_NAME}()
+                    return new ${fieldQueryName}(${isWebhookPayloadType(model) ? "" : `this._${Sdk.REQUEST_NAME}`}).${Sdk.FETCH_NAME}()
                   }`
                 ),
                 // ID getter is not needed here as there's no private field _${field.name} to get the id from

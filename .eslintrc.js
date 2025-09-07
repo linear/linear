@@ -105,6 +105,15 @@ module.exports = {
       rules: {
         "@typescript-eslint/explicit-module-boundary-types": "off",
         "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          {
+            vars: "all",
+            varsIgnorePattern: "^_",
+            args: "after-used",
+            ignoreRestSiblings: true,
+          },
+        ],
         "@typescript-eslint/array-type": "off",
         "@typescript-eslint/ban-types": "off",
         "@typescript-eslint/no-shadow": "off",

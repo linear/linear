@@ -1,15 +1,15 @@
 const fs = require("fs");
 const path = require("path");
 
-module.exports = function CODE_SECTION(content, options, config) {
+module.exports = function CODE_SECTION({ options, srcPath }) {
   let code;
   let syntax = options.syntax;
   if (!options.id || !options.src) {
     return false;
   }
 
-  const fileDir = path.dirname(config.originalPath);
-  const filePath = path.join(fileDir, options.src);
+  const fileDir = path.dirname(srcPath);
+  const filePath = path.resolve(fileDir, options.src);
 
   try {
     code = fs.readFileSync(filePath, "utf8", (err, contents) => {

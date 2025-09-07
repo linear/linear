@@ -56,6 +56,46 @@ export default [
     plugins: [...nodePlugins, ...minPlugins],
   },
   {
+    input: "src/webhooks/index.ts",
+    output: [
+      {
+        dir: "./",
+        entryFileNames: "dist/webhooks/index-cjs.min.js",
+        format: "cjs",
+        sourcemap: true,
+        exports: "named",
+      },
+      {
+        dir: "./",
+        entryFileNames: "dist/webhooks/index-es.min.js",
+        format: "es",
+        sourcemap: true,
+        exports: "named",
+      },
+    ],
+    plugins: [...nodePlugins, ...minPlugins],
+  },
+  {
+    input: "src/webhooks/index.ts",
+    output: [
+      {
+        dir: "./",
+        entryFileNames: "dist/webhooks/index-cjs.js",
+        format: "cjs",
+        sourcemap: true,
+        exports: "named",
+      },
+      {
+        dir: "./",
+        entryFileNames: "dist/webhooks/index-es.js",
+        format: "es",
+        sourcemap: true,
+        exports: "named",
+      },
+    ],
+    plugins: nodePlugins,
+  },
+  {
     input: "src/index.ts",
     output: [
       {
@@ -76,7 +116,7 @@ export default [
     plugins: nodePlugins,
   },
   {
-    input: "src/index.ts",
+    input: "src/index_umd.ts",
     output: [
       {
         dir: "./",
@@ -91,7 +131,7 @@ export default [
     plugins: [...browserPlugins, ...minPlugins],
   },
   {
-    input: "src/index.ts",
+    input: "src/index_umd.ts",
     output: [
       {
         dir: "./",

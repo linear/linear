@@ -1,10 +1,10 @@
-import { LINEAR_WEBHOOK_TS_FIELD, LinearWebhooks } from "../webhooks";
 import crypto from "crypto";
+import { LinearWebhookClient, LINEAR_WEBHOOK_TS_FIELD } from "../webhooks";
 
 describe("webhooks", () => {
   let parsedBody = {};
   let rawBody: Buffer;
-  let requestBody = {};
+  let requestBody: Record<string, unknown> = {};
 
   beforeEach(() => {
     requestBody = {
@@ -30,13 +30,13 @@ describe("webhooks", () => {
   });
 
   it("incorrect signature, should fail verification", async () => {
-    const webhook = new LinearWebhooks("SECRET");
+    const webhook = new LinearWebhookClient("SECRET");
     const signature = crypto.createHmac("sha256", "WRONG_SECRET").update(rawBody).digest("hex");
     expect(() => webhook.verify(rawBody, signature)).toThrowError("Invalid webhook signature");
   });
 
   it("correct signature, incorrect timestamp should fail verification", async () => {
-    const webhook = new LinearWebhooks("SECRET");
+    const webhook = new LinearWebhookClient("SECRET");
     const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
     expect(() => webhook.verify(rawBody, signature, parsedBody[LINEAR_WEBHOOK_TS_FIELD])).toThrowError(
       "Invalid webhook timestamp"
@@ -44,17 +44,17 @@ describe("webhooks", () => {
   });
 
   it("correct signature, no timestamp, should pass verification", async () => {
-    const webhook = new LinearWebhooks("SECRET");
+    const webhook = new LinearWebhookClient("SECRET");
     const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
     expect(() => webhook.verify(rawBody, signature)).toBeTruthy();
   });
 
   it("correct signature, correct timestamp should pass verification", async () => {
-    requestBody["webhookTimestamp"] = new Date().getTime();
+    requestBody.webhookTimestamp = new Date().getTime();
     rawBody = Buffer.from(JSON.stringify(requestBody));
     parsedBody = JSON.parse(rawBody.toString());
 
-    const webhook = new LinearWebhooks("SECRET");
+    const webhook = new LinearWebhookClient("SECRET");
     const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
     expect(() => webhook.verify(rawBody, signature, parsedBody[LINEAR_WEBHOOK_TS_FIELD])).toBeTruthy();
   });

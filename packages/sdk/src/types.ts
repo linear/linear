@@ -95,3 +95,27 @@ export interface LinearErrorRaw {
   /** Error information for the response */
   response?: LinearRawResponse<unknown>;
 }
+
+/**
+ * @deprecated These types have been moved to `@linear/sdk/webhooks`. Import from there instead.
+ */
+export type {
+  AppUserNotificationWebhookPayloadWithNotification,
+  EntityWebhookPayloadWithUnknownEntityData,
+  EntityWebhookPayloadWithEntityData,
+  EntityWebhookPayloadWithAttachmentData,
+  EntityWebhookPayloadWithAuditEntryData,
+  EntityWebhookPayloadWithCommentData,
+  EntityWebhookPayloadWithCustomerData,
+  EntityWebhookPayloadWithCustomerNeedData,
+  EntityWebhookPayloadWithCycleData,
+  EntityWebhookPayloadWithDocumentData,
+  EntityWebhookPayloadWithInitiativeData,
+  EntityWebhookPayloadWithInitiativeUpdateData,
+  EntityWebhookPayloadWithIssueData,
+  EntityWebhookPayloadWithIssueLabelData,
+  EntityWebhookPayloadWithProjectData,
+  EntityWebhookPayloadWithProjectUpdateData,
+  EntityWebhookPayloadWithReactionData,
+  EntityWebhookPayloadWithUserData,
+} from "./webhooks/types";

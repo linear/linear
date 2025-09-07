@@ -1,5 +1,1934 @@
 # Change Log
 
+## 58.1.0
+
+### Minor Changes
+
+- b94260a: feat(schema): [dangerous] Input field 'ephemeral' was added to input object type 'AgentActivityCreateInput' (AgentActivityCreateInput.ephemeral)
+
+  feat(schema): [dangerous] Enum value 'gong' was added to enum 'IntegrationService' (IntegrationService.gong)
+
+  feat(schema): [dangerous] Input field 'gong' was added to input object type 'IntegrationSettingsInput' (IntegrationSettingsInput.gong)
+
+  feat(schema): [non_breaking] Type 'AuthIdentityProvider' was added (AuthIdentityProvider)
+
+  feat(schema): [non_breaking] Type 'EntityActorWebhookPayload' was added (EntityActorWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'GongRecordingImportConfigInput' was added (GongRecordingImportConfigInput)
+
+  feat(schema): [non_breaking] Type 'GongSettingsInput' was added (GongSettingsInput)
+
+  feat(schema): [non_breaking] Type 'IntegrationActorWebhookPayload' was added (IntegrationActorWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'OauthClientActorWebhookPayload' was added (OauthClientActorWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'UserActorWebhookPayload' was added (UserActorWebhookPayload)
+
+  feat(schema): [non_breaking] Field 'ephemeral' was added to object type 'AgentActivity' (AgentActivity.ephemeral)
+
+  feat(schema): [non_breaking] Field 'identityProvider' was added to object type 'AuthUser' (AuthUser.identityProvider)
+
+  feat(schema): [non_breaking] Field 'actor' was added to object type 'EntityWebhookPayload' (EntityWebhookPayload.actor)
+
+  feat(schema): [non_breaking] Field 'integrationGong' was added to object type 'Mutation' (Mutation.integrationGong)
+
+  feat(schema): [non_breaking] Field 'canAccessAnyPublicTeam' was added to object type 'User' (User.canAccessAnyPublicTeam)
+
+  feat(schema): [non_breaking] Field 'identityProvider' was added to object type 'User' (User.identityProvider)
+
+### Patch Changes
+
+- 44816c9: chore(deps): update dependency patch versions
+
+## 58.0.0
+
+### Major Changes
+
+- b7d909b: feat(schema): [breaking] Type 'IssueLabelMoveToTeamLabelsInput' was removed (IssueLabelMoveToTeamLabelsInput)
+
+  feat(schema): [breaking] Type 'IssueLabelMoveToTeamLabelsPayload' was removed (IssueLabelMoveToTeamLabelsPayload)
+
+  feat(schema): [breaking] Type 'LabelsMergeInput' was removed (LabelsMergeInput)
+
+  feat(schema): [breaking] Field 'AgentSessionWebhookPayload.creator' changed type from 'UserChildWebhookPayload!' to 'UserChildWebhookPayload' (AgentSessionWebhookPayload.creator)
+
+  feat(schema): [breaking] Field 'issueLabelMoveToTeamLabels' was removed from object type 'Mutation' (Mutation.issueLabelMoveToTeamLabels)
+
+  feat(schema): [breaking] Field 'issueLabelsMerge' was removed from object type 'Mutation' (Mutation.issueLabelsMerge)
+
+  feat(schema): [breaking] Field 'projectLabelsMerge' was removed from object type 'Mutation' (Mutation.projectLabelsMerge)
+
+  feat(schema): [dangerous] Input field 'allowedFileUploadContentTypes' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.allowedFileUploadContentTypes)
+
+  feat(schema): [non_breaking] Field 'appliedAutomationRuleId' was added to object type 'IssueSuggestionMetadata' (IssueSuggestionMetadata.appliedAutomationRuleId)
+
+  feat(schema): [non_breaking] Field 'allowedFileUploadContentTypes' was added to object type 'Organization' (Organization.allowedFileUploadContentTypes)
+
+### Patch Changes
+
+- 3cb2b07: chore(deps): update dependency patch versions
+
+## 57.0.0
+
+### Major Changes
+
+- d6d3496: feat(schema): [breaking] Field 'AgentSessionWebhookPayload.creatorId' changed type from 'String!' to 'String' (AgentSessionWebhookPayload.creatorId)
+
+  feat(schema): [breaking] Field 'commentId' was removed from object type 'PullRequestNotification' (PullRequestNotification.commentId)
+
+  feat(schema): [breaking] Field 'parentCommentId' was removed from object type 'PullRequestNotification' (PullRequestNotification.parentCommentId)
+
+  feat(schema): [breaking] Field 'reactionEmoji' was removed from object type 'PullRequestNotification' (PullRequestNotification.reactionEmoji)
+
+  feat(schema): [dangerous] Enum value 'slackBotWelcomeMessageShown' was added to enum 'UserFlagType' (UserFlagType.slackBotWelcomeMessageShown)
+
+  feat(schema): [non_breaking] Type 'AgentSessionCreateOnComment' was added (AgentSessionCreateOnComment)
+
+  feat(schema): [non_breaking] Type 'AgentSessionCreateOnIssue' was added (AgentSessionCreateOnIssue)
+
+  feat(schema): [non_breaking] Type 'GuidanceRuleOriginWebhookPayload' was added (GuidanceRuleOriginWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'GuidanceRuleWebhookPayload' was added (GuidanceRuleWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'OrganizationOriginWebhookPayload' was added (OrganizationOriginWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'PullRequestCommit' was added (PullRequestCommit)
+
+  feat(schema): [non_breaking] Type 'TeamOriginWebhookPayload' was added (TeamOriginWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'TeamWithParentWebhookPayload' was added (TeamWithParentWebhookPayload)
+
+  feat(schema): [non_breaking] Field 'guidance' was added to object type 'AgentSessionEventWebhookPayload' (AgentSessionEventWebhookPayload.guidance)
+
+  feat(schema): [non_breaking] Field 'AgentSessionEventWebhookPayload.previousComments' description changed from 'The previous comments in the thread before this agent was mentioned and the session was initiated, if any.' to 'The previous comments in the thread before this agent was mentioned and the session was initiated, if any. Present only for `created` events where the session was initiated by mentioning the agent in a child comment of a thread.' (AgentSessionEventWebhookPayload.previousComments)
+
+  feat(schema): [non_breaking] Field 'agentSession' was added to object type 'Comment' (Comment.agentSession)
+
+  feat(schema): [non_breaking] Field 'agentSessions' was added to object type 'Comment' (Comment.agentSessions)
+
+  feat(schema): [non_breaking] Field 'Draft.isAutogenerated' is deprecated (Draft.isAutogenerated)
+
+  feat(schema): [non_breaking] Field 'Draft.isAutogenerated' has deprecation reason 'Use 'data.generationMetadata' instead' (Draft.isAutogenerated)
+
+  feat(schema): [non_breaking] Field 'variant' was added to object type 'IssueSuggestionMetadata' (IssueSuggestionMetadata.variant)
+
+  feat(schema): [non_breaking] Field 'agentSessionCreateOnComment' was added to object type 'Mutation' (Mutation.agentSessionCreateOnComment)
+
+  feat(schema): [non_breaking] Field 'agentSessionCreateOnIssue' was added to object type 'Mutation' (Mutation.agentSessionCreateOnIssue)
+
+  feat(schema): [non_breaking] Field 'commits' was added to object type 'PullRequest' (PullRequest.commits)
+
+  feat(schema): [non_breaking] Field 'pullRequestCommentId' was added to object type 'PullRequestNotification' (PullRequestNotification.pullRequestCommentId)
+
+  feat(schema): [non_breaking] Field 'Team.displayName' description changed from 'The name of the team including it's parent team name if it has one.' to 'The name of the team including its parent team name if it has one.' (Team.displayName)
+
+### Patch Changes
+
+- ce51e20: chore(deps): update dependency patch versions
+- d6d3496: Simplify types for webhook payloads by removing unneeded `Omit`s
+
+## 56.0.0
+
+### Major Changes
+
+- 7c51d32: feat(schema): [breaking] Field 'supervisor' was removed from object type 'Issue' (Issue.supervisor)
+
+  feat(schema): [breaking] Field 'supervisor' was removed from object type 'IssueSearchResult' (IssueSearchResult.supervisor)
+
+  feat(schema): [dangerous] Enum value 'continue' was added to enum 'AgentActivitySignal' (AgentActivitySignal.continue)
+
+  feat(schema): [dangerous] Input field 'suggestions' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.suggestions)
+
+  feat(schema): [dangerous] Input field 'suggestions' was added to input object type 'IssueFilter' (IssueFilter.suggestions)
+
+  feat(schema): [dangerous] Input field 'suggestions' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.suggestions)
+
+  feat(schema): [dangerous] Input field 'private' was added to input object type 'NullableTeamFilter' (NullableTeamFilter.private)
+
+  feat(schema): [dangerous] Input field 'private' was added to input object type 'TeamFilter' (TeamFilter.private)
+
+  feat(schema): [non_breaking] Type 'IssueSuggestionCollectionFilter' was added (IssueSuggestionCollectionFilter)
+
+  feat(schema): [non_breaking] Type 'IssueSuggestionFilter' was added (IssueSuggestionFilter)
+
+  feat(schema): [non_breaking] Input field 'AgentActivityCreateInput.signal' description changed from '[Internal] An optional modifier that provides additional instructions on how the activity should be interpreted.' to 'An optional modifier that provides additional instructions on how the activity should be interpreted.' (AgentActivityCreateInput.signal)
+
+  feat(schema): [non_breaking] Input field 'AgentActivityCreatePromptInput.signal' description changed from '[Internal] An optional modifier that provides additional instructions on how the activity should be interpreted.' to 'An optional modifier that provides additional instructions on how the activity should be interpreted.' (AgentActivityCreatePromptInput.signal)
+
+  feat(schema): [non_breaking] Field 'anchor' was added to object type 'Draft' (Draft.anchor)
+
+  feat(schema): [non_breaking] Field 'filters' was added to object type 'FetchDataPayload' (FetchDataPayload.filters)
+
+  feat(schema): [non_breaking] Field 'query' was added to object type 'FetchDataPayload' (FetchDataPayload.query)
+
+  feat(schema): [non_breaking] Field 'asksExternalUserRequester' was added to object type 'Issue' (Issue.asksExternalUserRequester)
+
+  feat(schema): [non_breaking] Field 'asksRequester' was added to object type 'Issue' (Issue.asksRequester)
+
+  feat(schema): [non_breaking] Input field 'IssueCollectionFilter.priority' description changed from 'Comparator for the issues priority.' to 'Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.' (IssueCollectionFilter.priority)
+
+  feat(schema): [non_breaking] Input field 'IssueFilter.priority' description changed from 'Comparator for the issues priority.' to 'Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.' (IssueFilter.priority)
+
+  feat(schema): [non_breaking] Field 'asksExternalUserRequester' was added to object type 'IssueSearchResult' (IssueSearchResult.asksExternalUserRequester)
+
+  feat(schema): [non_breaking] Field 'asksRequester' was added to object type 'IssueSearchResult' (IssueSearchResult.asksRequester)
+
+  feat(schema): [non_breaking] Input field 'NullableIssueFilter.priority' description changed from 'Comparator for the issues priority.' to 'Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.' (NullableIssueFilter.priority)
+
+  feat(schema): [non_breaking] Input field 'WorkflowStateFilter.type' description changed from 'Comparator for the workflow state type.' to 'Comparator for the workflow state type. Possible values are "triage", "backlog", "unstarted", "started", "completed", "canceled".' (WorkflowStateFilter.type)
+
+### Minor Changes
+
+- e7a8faa: Add missing type narrowing fields
+
+### Patch Changes
+
+- 38c80cd: chore(deps): update dependency patch versions
+
+## 55.2.1
+
+### Patch Changes
+
+- dd59709: chore(deps): update dependency patch versions
+- 70ccd6f: feat(schema): [non_breaking] Field 'signal' was added to object type 'AgentActivityWebhookPayload' (AgentActivityWebhookPayload.signal)
+
+  feat(schema): [non_breaking] Field 'userId' was added to object type 'AgentActivityWebhookPayload' (AgentActivityWebhookPayload.userId)
+
+## 55.2.0
+
+### Minor Changes
+
+- 1d04051: Update webhook schema
+- 553c88f: Support both fetch & node in handler
+
+## 55.1.0
+
+### Minor Changes
+
+- 913358f: feat(schema): [dangerous] Input field 'signal' was added to input object type 'AgentActivityCreateInput' (AgentActivityCreateInput.signal)
+
+  feat(schema): [dangerous] Input field 'signal' was added to input object type 'AgentActivityCreatePromptInput' (AgentActivityCreatePromptInput.signal)
+
+  feat(schema): [dangerous] Enum value 'updates' was added to enum 'InitiativeTab' (InitiativeTab.updates)
+
+  feat(schema): [dangerous] Enum value 'updates' was added to enum 'ProjectTab' (ProjectTab.updates)
+
+  feat(schema): [dangerous] Argument 'sort: [UserSortInput!]' added to field 'Query.users' (Query.users.sort)
+
+  feat(schema): [non_breaking] Type 'IntegrationSlackWorkspaceNamePayload' was added (IntegrationSlackWorkspaceNamePayload)
+
+  feat(schema): [non_breaking] Type 'PullRequestMergeMethod' was added (PullRequestMergeMethod)
+
+  feat(schema): [non_breaking] Type 'PullRequestMergeSettings' was added (PullRequestMergeSettings)
+
+  feat(schema): [non_breaking] Type 'UserDisplayNameSort' was added (UserDisplayNameSort)
+
+  feat(schema): [non_breaking] Type 'UserNameSort' was added (UserNameSort)
+
+  feat(schema): [non_breaking] Type 'UserSortInput' was added (UserSortInput)
+
+  feat(schema): [non_breaking] Field 'user' was added to object type 'AgentActivity' (AgentActivity.user)
+
+  feat(schema): [non_breaking] Input field 'AgentActivityCreatePromptInput.sourceCommentId' changed type from 'String!' to 'String' (AgentActivityCreatePromptInput.sourceCommentId)
+
+  feat(schema): [non_breaking] Object type 'AgentActivityCreatePromptInput' has description '[Internal] Input for creating prompt-type agent activities (created by users).' (AgentActivityCreatePromptInput)
+
+  feat(schema): [non_breaking] Field 'lastActiveAt' was added to object type 'ApiKey' (ApiKey.lastActiveAt)
+
+  feat(schema): [non_breaking] Field 'Issue.suggestions' description changed from '[Internal] Product intelligence suggestions for the issue.' to '[Internal] Product Intelligence suggestions for the issue.' (Issue.suggestions)
+
+  feat(schema): [non_breaking] Field 'IssueSearchResult.suggestions' description changed from '[Internal] Product intelligence suggestions for the issue.' to '[Internal] Product Intelligence suggestions for the issue.' (IssueSearchResult.suggestions)
+
+  feat(schema): [non_breaking] Field 'integrationSlackOrAsksUpdateSlackTeamName' was added to object type 'Mutation' (Mutation.integrationSlackOrAsksUpdateSlackTeamName)
+
+  feat(schema): [non_breaking] Field 'Mutation.agentActivityCreatePrompt' description changed from 'Creates a prompt agent activity from Linear user input.' to '[Internal] Creates a prompt agent activity from Linear user input.' (Mutation.agentActivityCreatePrompt)
+
+  feat(schema): [non_breaking] Description '[INTERNAL] Project attachment' on type 'ProjectAttachment' has changed to 'Project attachment' (ProjectAttachment)
+
+  feat(schema): [non_breaking] Field 'mergeSettings' was added to object type 'PullRequest' (PullRequest.mergeSettings)
+
+- 12c47d3: Fix import resolution from node ESM contexts
+
+### Patch Changes
+
+- 1c5ed69: chore(deps): update dependency patch versions
+
+## 55.0.0
+
+### Major Changes
+
+- 91cd76a: feat(schema): [breaking] Type 'Meeting' was removed (Meeting)
+
+  feat(schema): [breaking] Field 'meeting' was removed from object type 'DocumentContent' (DocumentContent.meeting)
+
+  feat(schema): [breaking] Input field 'InitiativeCollectionFilter.creator' changed type from 'UserFilter' to 'NullableUserFilter' (InitiativeCollectionFilter.creator)
+
+  feat(schema): [breaking] Input field 'InitiativeCollectionFilter.owner' changed type from 'UserFilter' to 'NullableUserFilter' (InitiativeCollectionFilter.owner)
+
+  feat(schema): [breaking] Input field 'InitiativeFilter.creator' changed type from 'UserFilter' to 'NullableUserFilter' (InitiativeFilter.creator)
+
+  feat(schema): [breaking] Input field 'InitiativeFilter.owner' changed type from 'UserFilter' to 'NullableUserFilter' (InitiativeFilter.owner)
+
+  feat(schema): [breaking] Input field 'githubCodeAccessPersonal' was removed from input object type 'IntegrationSettingsInput' (IntegrationSettingsInput.githubCodeAccessPersonal)
+
+  feat(schema): [breaking] Input field 'roadmapId' was removed from input object type 'ViewPreferencesCreateInput' (ViewPreferencesCreateInput.roadmapId)
+
+  feat(schema): [breaking] Enum value 'customRoadmap' was removed from enum 'ViewType' (ViewType.customRoadmap)
+
+  feat(schema): [dangerous] Input field 'issueCanceledAutoReply' was added to input object type 'EmailIntakeAddressCreateInput' (EmailIntakeAddressCreateInput.issueCanceledAutoReply)
+
+  feat(schema): [dangerous] Input field 'issueCanceledAutoReplyEnabled' was added to input object type 'EmailIntakeAddressCreateInput' (EmailIntakeAddressCreateInput.issueCanceledAutoReplyEnabled)
+
+  feat(schema): [dangerous] Input field 'issueCompletedAutoReply' was added to input object type 'EmailIntakeAddressCreateInput' (EmailIntakeAddressCreateInput.issueCompletedAutoReply)
+
+  feat(schema): [dangerous] Input field 'issueCompletedAutoReplyEnabled' was added to input object type 'EmailIntakeAddressCreateInput' (EmailIntakeAddressCreateInput.issueCompletedAutoReplyEnabled)
+
+  feat(schema): [dangerous] Input field 'issueCreatedAutoReply' was added to input object type 'EmailIntakeAddressCreateInput' (EmailIntakeAddressCreateInput.issueCreatedAutoReply)
+
+  feat(schema): [dangerous] Input field 'useUserNamesInReplies' was added to input object type 'EmailIntakeAddressCreateInput' (EmailIntakeAddressCreateInput.useUserNamesInReplies)
+
+  feat(schema): [dangerous] Input field 'issueCanceledAutoReply' was added to input object type 'EmailIntakeAddressUpdateInput' (EmailIntakeAddressUpdateInput.issueCanceledAutoReply)
+
+  feat(schema): [dangerous] Input field 'issueCanceledAutoReplyEnabled' was added to input object type 'EmailIntakeAddressUpdateInput' (EmailIntakeAddressUpdateInput.issueCanceledAutoReplyEnabled)
+
+  feat(schema): [dangerous] Input field 'issueCompletedAutoReply' was added to input object type 'EmailIntakeAddressUpdateInput' (EmailIntakeAddressUpdateInput.issueCompletedAutoReply)
+
+  feat(schema): [dangerous] Input field 'issueCompletedAutoReplyEnabled' was added to input object type 'EmailIntakeAddressUpdateInput' (EmailIntakeAddressUpdateInput.issueCompletedAutoReplyEnabled)
+
+  feat(schema): [dangerous] Input field 'issueCreatedAutoReply' was added to input object type 'EmailIntakeAddressUpdateInput' (EmailIntakeAddressUpdateInput.issueCreatedAutoReply)
+
+  feat(schema): [dangerous] Input field 'useUserNamesInReplies' was added to input object type 'EmailIntakeAddressUpdateInput' (EmailIntakeAddressUpdateInput.useUserNamesInReplies)
+
+  feat(schema): [dangerous] Input field 'activityType' was added to input object type 'InitiativeCollectionFilter' (InitiativeCollectionFilter.activityType)
+
+  feat(schema): [dangerous] Input field 'targetDate' was added to input object type 'InitiativeCollectionFilter' (InitiativeCollectionFilter.targetDate)
+
+  feat(schema): [dangerous] Input field 'teams' was added to input object type 'InitiativeCollectionFilter' (InitiativeCollectionFilter.teams)
+
+  feat(schema): [dangerous] Input field 'activityType' was added to input object type 'InitiativeFilter' (InitiativeFilter.activityType)
+
+  feat(schema): [dangerous] Input field 'targetDate' was added to input object type 'InitiativeFilter' (InitiativeFilter.targetDate)
+
+  feat(schema): [dangerous] Input field 'teams' was added to input object type 'InitiativeFilter' (InitiativeFilter.teams)
+
+  feat(schema): [dangerous] Input field 'defaultTeam' was added to input object type 'SalesforceSettingsInput' (SalesforceSettingsInput.defaultTeam)
+
+  feat(schema): [non_breaking] Type 'AgentActivitySignal' was added (AgentActivitySignal)
+
+  feat(schema): [non_breaking] Field 'signal' was added to object type 'AgentActivity' (AgentActivity.signal)
+
+  feat(schema): [non_breaking] Field 'CustomView.slugId' changed type from 'String' to 'String!' (CustomView.slugId)
+
+  feat(schema): [non_breaking] Field 'issueCanceledAutoReply' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.issueCanceledAutoReply)
+
+  feat(schema): [non_breaking] Field 'issueCanceledAutoReplyEnabled' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.issueCanceledAutoReplyEnabled)
+
+  feat(schema): [non_breaking] Field 'issueCompletedAutoReply' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.issueCompletedAutoReply)
+
+  feat(schema): [non_breaking] Field 'issueCompletedAutoReplyEnabled' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.issueCompletedAutoReplyEnabled)
+
+  feat(schema): [non_breaking] Field 'issueCreatedAutoReply' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.issueCreatedAutoReply)
+
+  feat(schema): [non_breaking] Field 'useUserNamesInReplies' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.useUserNamesInReplies)
+
+### Minor Changes
+
+- 3fcb764: chore(sdk): [non_breaking] refactor webhook-related types and helpers to seperate entrypoint `@linear/sdk/webhooks`
+
+  feat(sdk): [non breaking] created webhook handling helpers with event emitter (LIN-39501)
+
+### Patch Changes
+
+- 3556a81: chore(deps): update dependency patch versions
+
+## 54.0.0
+
+### Major Changes
+
+- a1cd050: feat(schema): [breaking] Type 'AgentContext' was removed (AgentContext)
+
+  feat(schema): [breaking] Type 'AgentContextConnection' was removed (AgentContextConnection)
+
+  feat(schema): [breaking] Type 'AgentContextCreateInput' was removed (AgentContextCreateInput)
+
+  feat(schema): [breaking] Type 'AgentContextEdge' was removed (AgentContextEdge)
+
+  feat(schema): [breaking] Type 'AgentContextPayload' was removed (AgentContextPayload)
+
+  feat(schema): [breaking] Type 'AgentContextUpdateInput' was removed (AgentContextUpdateInput)
+
+  feat(schema): [breaking] Type 'AgentContextWebhookPayload' was removed (AgentContextWebhookPayload)
+
+  feat(schema): [breaking] Field 'agentContext' was removed from object type 'AgentActivity' (AgentActivity.agentContext)
+
+  feat(schema): [breaking] Field 'roadmap' was removed from object type 'Favorite' (Favorite.roadmap)
+
+  feat(schema): [breaking] Input field 'roadmapId' was removed from input object type 'FavoriteCreateInput' (FavoriteCreateInput.roadmapId)
+
+  feat(schema): [breaking] Field 'allowedAuthServices' was removed from object type 'IdentityProvider' (IdentityProvider.allowedAuthServices)
+
+  feat(schema): [breaking] Field 'agentContextCreate' was removed from object type 'Mutation' (Mutation.agentContextCreate)
+
+  feat(schema): [breaking] Field 'agentContextUpdate' was removed from object type 'Mutation' (Mutation.agentContextUpdate)
+
+  feat(schema): [breaking] Type for argument 'organizationName' on field 'Mutation.integrationGitHubEnterpriseServerConnect' changed from 'String' to 'String!' (Mutation.integrationGitHubEnterpriseServerConnect.organizationName)
+
+  feat(schema): [breaking] Field 'agentContext' was removed from object type 'Query' (Query.agentContext)
+
+  feat(schema): [breaking] Field 'agentContexts' was removed from object type 'Query' (Query.agentContexts)
+
+  feat(schema): [breaking] Argument 'integrationId: String!' added to field 'Query.verifyGitHubEnterpriseServerInstallation' (Query.verifyGitHubEnterpriseServerInstallation.integrationId)
+
+  feat(schema): [dangerous] Input field 'initiativeFilterData' was added to input object type 'CustomViewCreateInput' (CustomViewCreateInput.initiativeFilterData)
+
+  feat(schema): [dangerous] Input field 'initiativeFilterData' was added to input object type 'CustomViewUpdateInput' (CustomViewUpdateInput.initiativeFilterData)
+
+  feat(schema): [dangerous] Input field 'automateTicketReopeningOnProjectCancellation' was added to input object type 'FrontSettingsInput' (FrontSettingsInput.automateTicketReopeningOnProjectCancellation)
+
+  feat(schema): [dangerous] Input field 'automateTicketReopeningOnProjectCompletion' was added to input object type 'FrontSettingsInput' (FrontSettingsInput.automateTicketReopeningOnProjectCompletion)
+
+  feat(schema): [dangerous] Input field 'codeAccess' was added to input object type 'GitHubSettingsInput' (GitHubSettingsInput.codeAccess)
+
+  feat(schema): [dangerous] Enum value 'githubCodeAccessPersonal' was added to enum 'IntegrationService' (IntegrationService.githubCodeAccessPersonal)
+
+  feat(schema): [dangerous] Input field 'githubCodeAccessPersonal' was added to input object type 'IntegrationSettingsInput' (IntegrationSettingsInput.githubCodeAccessPersonal)
+
+  feat(schema): [dangerous] Input field 'automateTicketReopeningOnProjectCancellation' was added to input object type 'IntercomSettingsInput' (IntercomSettingsInput.automateTicketReopeningOnProjectCancellation)
+
+  feat(schema): [dangerous] Input field 'automateTicketReopeningOnProjectCompletion' was added to input object type 'IntercomSettingsInput' (IntercomSettingsInput.automateTicketReopeningOnProjectCompletion)
+
+  feat(schema): [dangerous] Input field 'customerImportantCount' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.customerImportantCount)
+
+  feat(schema): [dangerous] Input field 'customerImportantCount' was added to input object type 'IssueFilter' (IssueFilter.customerImportantCount)
+
+  feat(schema): [dangerous] Argument 'skipInstallationDeletion: Boolean' added to field 'Mutation.integrationDelete' (Mutation.integrationDelete.skipInstallationDeletion)
+
+  feat(schema): [dangerous] Argument 'codeAccess: Boolean' added to field 'Mutation.integrationGitHubPersonal' (Mutation.integrationGitHubPersonal.codeAccess)
+
+  feat(schema): [dangerous] Argument 'codeAccess: Boolean' added to field 'Mutation.integrationGithubConnect' (Mutation.integrationGithubConnect.codeAccess)
+
+  feat(schema): [dangerous] Input field 'customerImportantCount' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.customerImportantCount)
+
+  feat(schema): [dangerous] Input field 'customerImportantCount' was added to input object type 'NullableProjectFilter' (NullableProjectFilter.customerImportantCount)
+
+  feat(schema): [dangerous] Input field 'identityProviderId' was added to input object type 'OrganizationDomainCreateInput' (OrganizationDomainCreateInput.identityProviderId)
+
+  feat(schema): [dangerous] Input field 'customerImportantCount' was added to input object type 'ProjectCollectionFilter' (ProjectCollectionFilter.customerImportantCount)
+
+  feat(schema): [dangerous] Input field 'customerImportantCount' was added to input object type 'ProjectFilter' (ProjectFilter.customerImportantCount)
+
+  feat(schema): [dangerous] Input field 'automateTicketReopeningOnProjectCancellation' was added to input object type 'SalesforceSettingsInput' (SalesforceSettingsInput.automateTicketReopeningOnProjectCancellation)
+
+  feat(schema): [dangerous] Input field 'automateTicketReopeningOnProjectCompletion' was added to input object type 'SalesforceSettingsInput' (SalesforceSettingsInput.automateTicketReopeningOnProjectCompletion)
+
+  feat(schema): [dangerous] Input field 'automateTicketReopeningOnProjectCancellation' was added to input object type 'ZendeskSettingsInput' (ZendeskSettingsInput.automateTicketReopeningOnProjectCancellation)
+
+  feat(schema): [dangerous] Input field 'automateTicketReopeningOnProjectCompletion' was added to input object type 'ZendeskSettingsInput' (ZendeskSettingsInput.automateTicketReopeningOnProjectCompletion)
+
+  feat(schema): [non_breaking] Type 'AgentActivityCreatePromptInput' was added (AgentActivityCreatePromptInput)
+
+  feat(schema): [non_breaking] Type 'IssueLabelMoveToTeamLabelsInput' was added (IssueLabelMoveToTeamLabelsInput)
+
+  feat(schema): [non_breaking] Type 'IssueLabelMoveToTeamLabelsPayload' was added (IssueLabelMoveToTeamLabelsPayload)
+
+  feat(schema): [non_breaking] Type 'LabelsMergeInput' was added (LabelsMergeInput)
+
+  feat(schema): [non_breaking] Field 'sourceMetadata' was added to object type 'AgentActivity' (AgentActivity.sourceMetadata)
+
+  feat(schema): [non_breaking] Field 'previousComments' was added to object type 'AgentSessionEventWebhookPayload' (AgentSessionEventWebhookPayload.previousComments)
+
+  feat(schema): [non_breaking] Field 'initiativeFilterData' was added to object type 'CustomView' (CustomView.initiativeFilterData)
+
+  feat(schema): [non_breaking] Field 'initiatives' was added to object type 'CustomView' (CustomView.initiatives)
+
+  feat(schema): [non_breaking] Field 'category' was added to object type 'CustomerNeedNotification' (CustomerNeedNotification.category)
+
+  feat(schema): [non_breaking] Field 'category' was added to object type 'CustomerNotification' (CustomerNotification.category)
+
+  feat(schema): [non_breaking] Field 'category' was added to object type 'DocumentNotification' (DocumentNotification.category)
+
+  feat(schema): [non_breaking] Field 'team' was added to object type 'Draft' (Draft.team)
+
+  feat(schema): [non_breaking] Field 'defaultMigrated' was added to object type 'IdentityProvider' (IdentityProvider.defaultMigrated)
+
+  feat(schema): [non_breaking] Field 'category' was added to object type 'InitiativeNotification' (InitiativeNotification.category)
+
+  feat(schema): [non_breaking] Field 'Issue.delegate' description changed from 'The app user that is delegated to work on this issue.' to 'The agent user that is delegated to work on this issue.' (Issue.delegate)
+
+  feat(schema): [non_breaking] Input field 'IssueCollectionFilter.delegate' description changed from 'Filters that the issue's delegate must satisfy.' to 'Filters that the issue's delegated agent must satisfy.' (IssueCollectionFilter.delegate)
+
+  feat(schema): [non_breaking] Input field 'IssueCreateInput.delegateId' description changed from 'The identifier of the app user to delegate the issue to.' to 'The identifier of the agent user to delegate the issue to.' (IssueCreateInput.delegateId)
+
+  feat(schema): [non_breaking] Field 'IssueDraft.delegateId' description changed from 'The app user delegated to work on the issue being drafted.' to 'The agent user delegated to work on the issue being drafted.' (IssueDraft.delegateId)
+
+  feat(schema): [non_breaking] Input field 'IssueFilter.delegate' description changed from 'Filters that the issue's delegate must satisfy.' to 'Filters that the issue's delegated agent must satisfy.' (IssueFilter.delegate)
+
+  feat(schema): [non_breaking] Field 'category' was added to object type 'IssueNotification' (IssueNotification.category)
+
+  feat(schema): [non_breaking] Field 'IssueSearchResult.delegate' description changed from 'The app user that is delegated to work on this issue.' to 'The agent user that is delegated to work on this issue.' (IssueSearchResult.delegate)
+
+  feat(schema): [non_breaking] Field 'rank' was added to object type 'IssueSuggestionMetadata' (IssueSuggestionMetadata.rank)
+
+  feat(schema): [non_breaking] Input field 'IssueUpdateInput.delegateId' description changed from 'The identifier of the app user to delegate the issue to.' to 'The identifier of the agent user to delegate the issue to.' (IssueUpdateInput.delegateId)
+
+  feat(schema): [non_breaking] Field 'IssueWebhookPayload.delegate' description changed from 'The app user that the issue is delegated to.' to 'The agent user that the issue is delegated to.' (IssueWebhookPayload.delegate)
+
+  feat(schema): [non_breaking] Field 'IssueWebhookPayload.delegateId' description changed from 'The ID of the app user that the issue is delegated to.' to 'The ID of the agent user that the issue is delegated to.' (IssueWebhookPayload.delegateId)
+
+  feat(schema): [non_breaking] Field 'agentActivityCreatePrompt' was added to object type 'Mutation' (Mutation.agentActivityCreatePrompt)
+
+  feat(schema): [non_breaking] Field 'issueLabelMoveToTeamLabels' was added to object type 'Mutation' (Mutation.issueLabelMoveToTeamLabels)
+
+  feat(schema): [non_breaking] Field 'issueLabelsMerge' was added to object type 'Mutation' (Mutation.issueLabelsMerge)
+
+  feat(schema): [non_breaking] Field 'projectLabelsMerge' was added to object type 'Mutation' (Mutation.projectLabelsMerge)
+
+  feat(schema): [non_breaking] Field 'category' was added to interface 'Notification' (Notification.category)
+
+  feat(schema): [non_breaking] Input field 'NullableIssueFilter.delegate' description changed from 'Filters that the issue's delegate must satisfy.' to 'Filters that the issue's delegated agent must satisfy.' (NullableIssueFilter.delegate)
+
+  feat(schema): [non_breaking] Field 'category' was added to object type 'OauthClientApprovalNotification' (OauthClientApprovalNotification.category)
+
+  feat(schema): [non_breaking] Field 'category' was added to object type 'PostNotification' (PostNotification.category)
+
+  feat(schema): [non_breaking] Field 'category' was added to object type 'ProjectNotification' (ProjectNotification.category)
+
+  feat(schema): [non_breaking] Field 'category' was added to object type 'PullRequestNotification' (PullRequestNotification.category)
+
+  feat(schema): [non_breaking] Field 'Query.roadmapToProject' is deprecated (Query.roadmapToProject)
+
+  feat(schema): [non_breaking] Field 'Query.roadmapToProject' has deprecation reason 'RoadmapToProject is deprecated, use InitiativeToProject instead.' (Query.roadmapToProject)
+
+  feat(schema): [non_breaking] Description was removed from field 'Query.roadmapToProjects' (Query.roadmapToProjects)
+
+  feat(schema): [non_breaking] Field 'Query.roadmapToProjects' is deprecated (Query.roadmapToProjects)
+
+  feat(schema): [non_breaking] Field 'Query.roadmapToProjects' has deprecation reason 'RoadmapToProject is deprecated, use InitiativeToProject instead.' (Query.roadmapToProjects)
+
+  feat(schema): [non_breaking] Description 'A roadmap for projects.' on type 'Roadmap' has changed to '[Deprecated] A roadmap for projects.' (Roadmap)
+
+  feat(schema): [non_breaking] Description 'Join table between projects and roadmaps.' on type 'RoadmapToProject' has changed to '[Deprecated] Join table between projects and roadmaps.' (RoadmapToProject)
+
+### Patch Changes
+
+- 107dd48: chore(deps): update dependency patch versions
+
+## 53.0.0
+
+### Major Changes
+
+- 4b6e659: feat(schema): [breaking] Field 'links' was removed from object type 'AgentSession' (AgentSession.links)
+
+  feat(schema): [breaking] Field 'CustomerStatusChildWebhookPayload.type' changed type from 'String!' to 'String' (CustomerStatusChildWebhookPayload.type)
+
+  feat(schema): [non_breaking] Type 'AgentSessionPayload' was added (AgentSessionPayload)
+
+  feat(schema): [non_breaking] Type 'AgentSessionUpdateExternalUrlInput' was added (AgentSessionUpdateExternalUrlInput)
+
+  feat(schema): [non_breaking] Field 'externalLink' was added to object type 'AgentSession' (AgentSession.externalLink)
+
+  feat(schema): [non_breaking] Field 'color' was added to object type 'CustomerStatusChildWebhookPayload' (CustomerStatusChildWebhookPayload.color)
+
+  feat(schema): [non_breaking] Field 'description' was added to object type 'CustomerStatusChildWebhookPayload' (CustomerStatusChildWebhookPayload.description)
+
+  feat(schema): [non_breaking] Field 'displayName' was added to object type 'CustomerStatusChildWebhookPayload' (CustomerStatusChildWebhookPayload.displayName)
+
+  feat(schema): [non_breaking] Field 'CustomerStatusChildWebhookPayload.type' is deprecated (CustomerStatusChildWebhookPayload.type)
+
+  feat(schema): [non_breaking] Field 'CustomerStatusChildWebhookPayload.type' has deprecation reason 'Customer statuses are no longer grouped by type.' (CustomerStatusChildWebhookPayload.type)
+
+  feat(schema): [non_breaking] Field 'description' was added to object type 'CustomerTierChildWebhookPayload' (CustomerTierChildWebhookPayload.description)
+
+  feat(schema): [non_breaking] Field 'IssueWebhookPayload.delegate' description changed from '[Internal] The user that the issue is delegated to.' to 'The app user that the issue is delegated to.' (IssueWebhookPayload.delegate)
+
+  feat(schema): [non_breaking] Field 'IssueWebhookPayload.delegateId' description changed from '[Internal] The ID of the user that the issue is delegated to.' to 'The ID of the app user that the issue is delegated to.' (IssueWebhookPayload.delegateId)
+
+  feat(schema): [non_breaking] Field 'agentSessionUpdateExternalUrl' was added to object type 'Mutation' (Mutation.agentSessionUpdateExternalUrl)
+
+- 4b6e659: feat(schema): [breaking] Field 'links' was removed from object type 'AgentSession' (AgentSession.links)
+
+  feat(schema): [non_breaking] Type 'AgentSessionPayload' was added (AgentSessionPayload)
+
+  feat(schema): [non_breaking] Type 'AgentSessionUpdateExternalUrlInput' was added (AgentSessionUpdateExternalUrlInput)
+
+  feat(schema): [non_breaking] Field 'externalLink' was added to object type 'AgentSession' (AgentSession.externalLink)
+
+  feat(schema): [non_breaking] Field 'agentSessionUpdateExternalUrl' was added to object type 'Mutation' (Mutation.agentSessionUpdateExternalUrl)
+
+### Patch Changes
+
+- d55dd52: chore(deps): update dependency patch versions
+
+## 52.1.0
+
+### Minor Changes
+
+- e7e9f8d: feat(schema): [dangerous] Argument 'filter: AgentActivityFilter' added to field 'AgentSession.activities' (AgentSession.activities.filter)
+
+  feat(schema): [dangerous] Enum value 'stale' was added to enum 'AgentSessionStatus' (AgentSessionStatus.stale)
+
+  feat(schema): [dangerous] Input field 'disableCustomerRequestsAutoCreation' was added to input object type 'FrontSettingsInput' (FrontSettingsInput.disableCustomerRequestsAutoCreation)
+
+  feat(schema): [dangerous] Input field 'disableCustomerRequestsAutoCreation' was added to input object type 'IntercomSettingsInput' (IntercomSettingsInput.disableCustomerRequestsAutoCreation)
+
+  feat(schema): [dangerous] Argument 'filter: AgentActivityFilter' added to field 'Query.agentActivities' (Query.agentActivities.filter)
+
+  feat(schema): [dangerous] Input field 'disableCustomerRequestsAutoCreation' was added to input object type 'SalesforceSettingsInput' (SalesforceSettingsInput.disableCustomerRequestsAutoCreation)
+
+  feat(schema): [dangerous] Input field 'disableCustomerRequestsAutoCreation' was added to input object type 'ZendeskSettingsInput' (ZendeskSettingsInput.disableCustomerRequestsAutoCreation)
+
+  feat(schema): [non_breaking] Type 'AgentActivityFilter' was added (AgentActivityFilter)
+
+  feat(schema): [non_breaking] Type 'IdentityProvider' was added (IdentityProvider)
+
+  feat(schema): [non_breaking] Field 'delegateId' was added to object type 'IssueDraft' (IssueDraft.delegateId)
+
+  feat(schema): [non_breaking] Field 'identityProvider' was added to object type 'OrganizationDomain' (OrganizationDomain.identityProvider)
+
+  feat(schema): [non_breaking] Field 'isAssignable' was added to object type 'User' (User.isAssignable)
+
+  feat(schema): [non_breaking] Field 'isMentionable' was added to object type 'User' (User.isMentionable)
+
+- 54b6ae3: Removed explicit including of DOM types
+
+### Patch Changes
+
+- 3679b4c: chore(deps): update dependency patch versions
+- e52c909: feat(schema): [non_breaking] Type 'FetchDataPayload' was added (FetchDataPayload)
+
+  feat(schema): [non_breaking] Field 'fetchData' was added to object type 'Query' (Query.fetchData)
+
+## 52.0.0
+
+### Major Changes
+
+- 29b5e22: feat(schema): [breaking] Type 'AgentActivityObservationContent' was removed (AgentActivityObservationContent)
+
+  feat(schema): [breaking] Member 'AgentActivityObservationContent' was removed from Union type 'AgentActivityContent' (AgentActivityContent)
+
+  feat(schema): [breaking] Enum value 'observation' was removed from enum 'AgentActivityType' (AgentActivityType.observation)
+
+  feat(schema): [dangerous] Member 'AgentActivityThoughtContent' was added to Union type 'AgentActivityContent' (AgentActivityContent)
+
+  feat(schema): [dangerous] Enum value 'thought' was added to enum 'AgentActivityType' (AgentActivityType.thought)
+
+  feat(schema): [dangerous] Input field 'supportsOAuthRefresh' was added to input object type 'ZendeskSettingsInput' (ZendeskSettingsInput.supportsOAuthRefresh)
+
+  feat(schema): [non_breaking] Type 'AgentActivityThoughtContent' was added (AgentActivityThoughtContent)
+
+  feat(schema): [non_breaking] Field 'fromDelegate' was added to object type 'IssueHistory' (IssueHistory.fromDelegate)
+
+  feat(schema): [non_breaking] Field 'toDelegate' was added to object type 'IssueHistory' (IssueHistory.toDelegate)
+
+### Patch Changes
+
+- 91bbbdb: chore(deps): update dependency patch versions
+
+## 51.1.0
+
+### Minor Changes
+
+- 33b8dba: update codegen to support GraphQL union types
+
+### Patch Changes
+
+- 70dc0fb: chore(deps): update dependency patch versions
+
+## 51.0.0
+
+### Major Changes
+
+- bf00d1f: feat(schema): [breaking] Field 'AgentSession.activities' changed type from '[AgentActivity!]!' to 'AgentActivityConnection!' (AgentSession.activities)
+
+  feat(schema): [dangerous] Input field 'isGroup' was added to input object type 'IssueLabelUpdateInput' (IssueLabelUpdateInput.isGroup)
+
+  feat(schema): [dangerous] Input field 'isGroup' was added to input object type 'ProjectLabelUpdateInput' (ProjectLabelUpdateInput.isGroup)
+
+  feat(schema): [non_breaking] Input field 'IssueCreateInput.delegateId' description changed from '[Internal] The identifier of the agent user to delegate the issue to.' to 'The identifier of the app user to delegate the issue to.' (IssueCreateInput.delegateId)
+
+  feat(schema): [non_breaking] Input field 'IssueUpdateInput.delegateId' description changed from '[Internal] The identifier of the agent user to delegate the issue to.' to 'The identifier of the app user to delegate the issue to.' (IssueUpdateInput.delegateId)
+
+### Patch Changes
+
+- ca2f367: chore(deps): update dependency patch versions
+
+## 50.0.0
+
+### Major Changes
+
+- 8e21093: feat(schema): [breaking] Type 'AgentContextEventWebhookPayload' was removed (AgentContextEventWebhookPayload)
+
+  feat(schema): [breaking] Field 'agentContextId' was removed from object type 'AgentActivityWebhookPayload' (AgentActivityWebhookPayload.agentContextId)
+
+  feat(schema): [breaking] Member 'AgentContextWebhookPayload' was removed from Union type 'DataWebhookPayload' (DataWebhookPayload)
+
+  feat(schema): [dangerous] Member 'AgentSessionWebhookPayload' was added to Union type 'DataWebhookPayload' (DataWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'AgentSessionEventWebhookPayload' was added (AgentSessionEventWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'AgentSessionWebhookPayload' was added (AgentSessionWebhookPayload)
+
+  feat(schema): [non_breaking] Field 'agentSessionId' was added to object type 'AgentActivityWebhookPayload' (AgentActivityWebhookPayload.agentSessionId)
+
+## 49.0.0
+
+### Major Changes
+
+- ec50c02: feat(schema): [breaking] Type 'AgentContextStatus' was removed (AgentContextStatus)
+
+  feat(schema): [breaking] Type 'AgentContextType' was removed (AgentContextType)
+
+  feat(schema): [breaking] Field 'sourceCommentId' was removed from object type 'AgentActivity' (AgentActivity.sourceCommentId)
+
+  feat(schema): [breaking] Field 'AgentActivity.agentContext' changed type from 'AgentContext!' to 'AgentContext' (AgentActivity.agentContext)
+
+  feat(schema): [breaking] Input field 'agentSessionId' was added to input object type 'AgentActivityCreateInput' (AgentActivityCreateInput.agentSessionId)
+
+  feat(schema): [breaking] Input field 'agentContextId' was removed from input object type 'AgentActivityCreateInput' (AgentActivityCreateInput.agentContextId)
+
+  feat(schema): [breaking] Field 'AgentContext.status' changed type from 'AgentContextStatus!' to 'AgentSessionStatus!' (AgentContext.status)
+
+  feat(schema): [breaking] Field 'AgentContext.type' changed type from 'AgentContextType!' to 'AgentSessionType!' (AgentContext.type)
+
+  feat(schema): [breaking] Input field 'AgentContextCreateInput.type' changed type from 'AgentContextType!' to 'AgentSessionType!' (AgentContextCreateInput.type)
+
+  feat(schema): [breaking] Input field 'AgentContextUpdateInput.status' changed type from 'AgentContextStatus' to 'AgentSessionStatus' (AgentContextUpdateInput.status)
+
+  feat(schema): [non_breaking] Type 'AgentSession' was added (AgentSession)
+
+  feat(schema): [non_breaking] Type 'AgentSessionConnection' was added (AgentSessionConnection)
+
+  feat(schema): [non_breaking] Type 'AgentSessionEdge' was added (AgentSessionEdge)
+
+  feat(schema): [non_breaking] Type 'AgentSessionStatus' was added (AgentSessionStatus)
+
+  feat(schema): [non_breaking] Type 'AgentSessionType' was added (AgentSessionType)
+
+  feat(schema): [non_breaking] Field 'agentSession' was added to object type 'AgentActivity' (AgentActivity.agentSession)
+
+  feat(schema): [non_breaking] Field 'AgentActivity.sourceComment' description changed from 'The comment that this activity is linked to.' to 'The comment this activity is linked to.' (AgentActivity.sourceComment)
+
+  feat(schema): [non_breaking] Description 'A context for agent activities and state management.' on type 'AgentContext' has changed to '[DEPRECATED] A context for agent activities and state management.' (AgentContext)
+
+  feat(schema): [non_breaking] Field 'documentContent' was added to object type 'Initiative' (Initiative.documentContent)
+
+  feat(schema): [non_breaking] Field 'documents' was added to object type 'Initiative' (Initiative.documents)
+
+  feat(schema): [non_breaking] Field 'Issue.delegate' description changed from '[Internal] The agent that is delegated to complete this issue.' to 'The app user that is delegated to work on this issue.' (Issue.delegate)
+
+  feat(schema): [non_breaking] Input field 'IssueCollectionFilter.delegate' description changed from '[Internal] Filters that the issues delegate must satisfy.' to 'Filters that the issue's delegate must satisfy.' (IssueCollectionFilter.delegate)
+
+  feat(schema): [non_breaking] Input field 'IssueFilter.delegate' description changed from '[Internal] Filters that the issues delegate must satisfy.' to 'Filters that the issue's delegate must satisfy.' (IssueFilter.delegate)
+
+  feat(schema): [non_breaking] Field 'IssueSearchResult.delegate' description changed from '[Internal] The agent that is delegated to complete this issue.' to 'The app user that is delegated to work on this issue.' (IssueSearchResult.delegate)
+
+  feat(schema): [non_breaking] Input field 'NullableIssueFilter.delegate' description changed from '[Internal] Filters that the issues delegate must satisfy.' to 'Filters that the issue's delegate must satisfy.' (NullableIssueFilter.delegate)
+
+  feat(schema): [non_breaking] Field 'agentSession' was added to object type 'Query' (Query.agentSession)
+
+  feat(schema): [non_breaking] Field 'agentSessions' was added to object type 'Query' (Query.agentSessions)
+
+  feat(schema): [non_breaking] Field 'User.delegatedIssues' description changed from '[Internal] Issues delegated to this user.' to 'Issues delegated to this user.' (User.delegatedIssues)
+
+### Patch Changes
+
+- 19866f7: chore(deps): update dependency patch versions
+
+## 48.0.0
+
+### Major Changes
+
+- 5b92b19: feat(schema): [breaking] Field 'supervisedIssues' was removed from object type 'User' (User.supervisedIssues)
+
+  feat(schema): [dangerous] Input field 'customerRequestsEnabled' was added to input object type 'EmailIntakeAddressCreateInput' (EmailIntakeAddressCreateInput.customerRequestsEnabled)
+
+  feat(schema): [dangerous] Input field 'pullRequestId' was added to input object type 'FavoriteCreateInput' (FavoriteCreateInput.pullRequestId)
+
+  feat(schema): [dangerous] Input field 'delegateId' was added to input object type 'IssueCreateInput' (IssueCreateInput.delegateId)
+
+  feat(schema): [non_breaking] Field 'sourceComment' was added to object type 'AgentActivity' (AgentActivity.sourceComment)
+
+  feat(schema): [non_breaking] Input field 'AgentActivityCreateInput.content' description changed from 'The content payload of the agent activity.' to 'The content payload of the agent activity. This object is not strictly typed.
+  See https://linear.app/developers/agents for typing details.' (AgentActivityCreateInput.content)
+
+  feat(schema): [non_breaking] Field 'pullRequest' was added to object type 'Favorite' (Favorite.pullRequest)
+
+  feat(schema): [non_breaking] Field 'delegatedIssues' was added to object type 'User' (User.delegatedIssues)
+
+- e25ae0f: feat(schema): [breaking] Field 'comment' was removed from object type 'AgentContextEventWebhookPayload' (AgentContextEventWebhookPayload.comment)
+
+  feat(schema): [breaking] Field 'supervisedIssues' was removed from object type 'User' (User.supervisedIssues)
+
+  feat(schema): [dangerous] Member 'AgentActivityWebhookPayload' was added to Union type 'DataWebhookPayload' (DataWebhookPayload)
+
+  feat(schema): [dangerous] Input field 'customerRequestsEnabled' was added to input object type 'EmailIntakeAddressCreateInput' (EmailIntakeAddressCreateInput.customerRequestsEnabled)
+
+  feat(schema): [dangerous] Input field 'pullRequestId' was added to input object type 'FavoriteCreateInput' (FavoriteCreateInput.pullRequestId)
+
+  feat(schema): [dangerous] Input field 'delegateId' was added to input object type 'IssueCreateInput' (IssueCreateInput.delegateId)
+
+  feat(schema): [dangerous] Input field 'useDefaultTemplate' was added to input object type 'IssueCreateInput' (IssueCreateInput.useDefaultTemplate)
+
+  feat(schema): [non_breaking] Type 'AgentActivityWebhookPayload' was added (AgentActivityWebhookPayload)
+
+  feat(schema): [non_breaking] Field 'sourceComment' was added to object type 'AgentActivity' (AgentActivity.sourceComment)
+
+  feat(schema): [non_breaking] Input field 'AgentActivityCreateInput.content' description changed from 'The content payload of the agent activity.' to 'The content payload of the agent activity. This object is not strictly typed.
+  See https://linear.app/developers/agents for typing details.' (AgentActivityCreateInput.content)
+
+  feat(schema): [non_breaking] Field 'agentActivity' was added to object type 'AgentContextEventWebhookPayload' (AgentContextEventWebhookPayload.agentActivity)
+
+  feat(schema): [non_breaking] Field 'pullRequest' was added to object type 'Favorite' (Favorite.pullRequest)
+
+  feat(schema): [non_breaking] Field 'delegate' was added to object type 'IssueWebhookPayload' (IssueWebhookPayload.delegate)
+
+  feat(schema): [non_breaking] Field 'delegateId' was added to object type 'IssueWebhookPayload' (IssueWebhookPayload.delegateId)
+
+  feat(schema): [non_breaking] Field 'delegatedIssues' was added to object type 'User' (User.delegatedIssues)
+
+### Minor Changes
+
+- e25ae0f: Updated schema
+
+### Patch Changes
+
+- 34ab0d7: chore(deps): update dependency patch versions
+
+## 47.0.0
+
+### Major Changes
+
+- 57e6456: feat(schema): [breaking] Field 'sourceComment' was removed from object type 'AgentActivity' (AgentActivity.sourceComment)
+
+  feat(schema): [breaking] Field 'sourceCommentId' was removed from object type 'AgentActivityPromptContent' (AgentActivityPromptContent.sourceCommentId)
+
+  feat(schema): [breaking] Field 'sourceCommentId' was removed from object type 'AgentActivityResponseContent' (AgentActivityResponseContent.sourceCommentId)
+
+  feat(schema): [non_breaking] Field 'sourceCommentId' was added to object type 'AgentActivity' (AgentActivity.sourceCommentId)
+
+  feat(schema): [non_breaking] Field 'AgentActivityPromptContent.body' changed type from 'String' to 'String!' (AgentActivityPromptContent.body)
+
+  feat(schema): [non_breaking] Field 'body' was added to object type 'AgentActivityResponseContent' (AgentActivityResponseContent.body)
+
+  feat(schema): [non_breaking] Field 'Query.semanticSearch' description changed from '[ALPHA] Search for various resources using natural language.' to '[INTERNAL] Search for various resources using natural language.' (Query.semanticSearch)
+
+  feat(schema): [non_breaking] Field 'Query.semanticSearch' is deprecated (Query.semanticSearch)
+
+  feat(schema): [non_breaking] Field 'Query.semanticSearch' has deprecation reason 'Use specific search endpoints like searchIssues, searchProjects, searchDocuments instead.' (Query.semanticSearch)
+
+  feat(schema): [non_breaking] Description '[ALPHA] Payload returned by semantic search.' on type 'SemanticSearchPayload' has changed to '[INTERNAL] Payload returned by semantic search.' (SemanticSearchPayload)
+
+  feat(schema): [non_breaking] Description '[ALPHA] A semantic search result reference.' on type 'SemanticSearchResult' has changed to '[INTERNAL] A semantic search result reference.' (SemanticSearchResult)
+
+  feat(schema): [non_breaking] Description '[ALPHA] The type of the semantic search result.' on type 'SemanticSearchResultType' has changed to '[INTERNAL] The type of the semantic search result.' (SemanticSearchResultType)
+
+### Patch Changes
+
+- bff712d: chore(deps): update dependency patch versions
+
+## 46.0.0
+
+### Major Changes
+
+- 9bfa9aa: feat(schema): [breaking] Type 'AgentActivityUserInputContent' was removed (AgentActivityUserInputContent)
+
+  feat(schema): [breaking] Member 'AgentActivityUserInputContent' was removed from Union type 'AgentActivityContent' (AgentActivityContent)
+
+  feat(schema): [breaking] Enum value 'userInput' was removed from enum 'AgentActivityType' (AgentActivityType.userInput)
+
+  feat(schema): [breaking] Field 'IssueImport.creatorId' changed type from 'String!' to 'String' (IssueImport.creatorId)
+
+  feat(schema): [dangerous] Member 'AgentActivityElicitationContent' was added to Union type 'AgentActivityContent' (AgentActivityContent)
+
+  feat(schema): [dangerous] Member 'AgentActivityPromptContent' was added to Union type 'AgentActivityContent' (AgentActivityContent)
+
+  feat(schema): [dangerous] Enum value 'elicitation' was added to enum 'AgentActivityType' (AgentActivityType.elicitation)
+
+  feat(schema): [dangerous] Enum value 'prompt' was added to enum 'AgentActivityType' (AgentActivityType.prompt)
+
+  feat(schema): [dangerous] Input field 'health' was added to input object type 'ProjectSortInput' (ProjectSortInput.health)
+
+  feat(schema): [dangerous] Input field 'lead' was added to input object type 'ProjectSortInput' (ProjectSortInput.lead)
+
+  feat(schema): [dangerous] Input field 'subscribedToGeneralMarketingCommunications' was added to input object type 'UserSettingsUpdateInput' (UserSettingsUpdateInput.subscribedToGeneralMarketingCommunications)
+
+  feat(schema): [non_breaking] Type 'AgentActivityElicitationContent' was added (AgentActivityElicitationContent)
+
+  feat(schema): [non_breaking] Type 'AgentActivityPromptContent' was added (AgentActivityPromptContent)
+
+  feat(schema): [non_breaking] Type 'ProjectHealthSort' was added (ProjectHealthSort)
+
+  feat(schema): [non_breaking] Type 'ProjectLeadSort' was added (ProjectLeadSort)
+
+  feat(schema): [non_breaking] Description '[ALPHA] Issue customer count sorting options.' on type 'CustomerCountSort' has changed to 'Issue customer count sorting options.' (CustomerCountSort)
+
+  feat(schema): [non_breaking] Description '[ALPHA] Issue customer important count sorting options.' on type 'CustomerImportantCountSort' has changed to 'Issue customer important count sorting options.' (CustomerImportantCountSort)
+
+  feat(schema): [non_breaking] Description '[ALPHA] Issue customer revenue sorting options.' on type 'CustomerRevenueSort' has changed to 'Issue customer revenue sorting options.' (CustomerRevenueSort)
+
+## 45.4.0
+
+### Minor Changes
+
+- 4034c23: Better types when parsing webhooks
+
+### Patch Changes
+
+- 56a0f2f: chore(deps): update dependency patch versions
+
+## 45.3.0
+
+### Minor Changes
+
+- 7759a2c: Fixed return type for webhook parsing function
+
+### Patch Changes
+
+- 28939d3: Prefer global fetch implementation over isomorphic-fetch if available
+
+## 45.2.0
+
+### Minor Changes
+
+- 6877af5: feat(schema): [dangerous] Member 'AgentContextWebhookPayload' was added to Union type 'DataWebhookPayload' (DataWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'AgentContextEventWebhookPayload' was added (AgentContextEventWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'AgentContextWebhookPayload' was added (AgentContextWebhookPayload)
+
+  feat(schema): [non_breaking] Field 'isActive' was added to object type 'Cycle' (Cycle.isActive)
+
+  feat(schema): [non_breaking] Field 'isFuture' was added to object type 'Cycle' (Cycle.isFuture)
+
+  feat(schema): [non_breaking] Field 'isNext' was added to object type 'Cycle' (Cycle.isNext)
+
+  feat(schema): [non_breaking] Field 'isPast' was added to object type 'Cycle' (Cycle.isPast)
+
+  feat(schema): [non_breaking] Field 'isPrevious' was added to object type 'Cycle' (Cycle.isPrevious)
+
+## 45.1.0
+
+### Minor Changes
+
+- 4bef21e: feat(schema): Types AgentContextEventWebhookPayload and AgentContextWebhookPayload were added
+
+## 45.0.0
+
+### Major Changes
+
+- 0e44078: feat(schema): [breaking] Field 'initiative' was removed from object type 'ProjectNotification' (ProjectNotification.initiative)
+
+  feat(schema): [breaking] Field 'initiativeUpdate' was removed from object type 'ProjectNotification' (ProjectNotification.initiativeUpdate)
+
+  feat(schema): [dangerous] Argument 'includeSubTeams: Boolean' added to field 'CustomView.issues' (CustomView.issues.includeSubTeams)
+
+  feat(schema): [dangerous] Argument 'includeSubTeams: Boolean' added to field 'CustomView.projects' (CustomView.projects.includeSubTeams)
+
+  feat(schema): [dangerous] Argument 'sort: [ProjectSortInput!]' added to field 'CustomView.projects' (CustomView.projects.sort)
+
+  feat(schema): [dangerous] Input field 'forwardingEmailAddress' was added to input object type 'EmailIntakeAddressCreateInput' (EmailIntakeAddressCreateInput.forwardingEmailAddress)
+
+  feat(schema): [dangerous] Input field 'repliesEnabled' was added to input object type 'EmailIntakeAddressCreateInput' (EmailIntakeAddressCreateInput.repliesEnabled)
+
+  feat(schema): [dangerous] Input field 'senderName' was added to input object type 'EmailIntakeAddressCreateInput' (EmailIntakeAddressCreateInput.senderName)
+
+  feat(schema): [dangerous] Input field 'type' was added to input object type 'EmailIntakeAddressCreateInput' (EmailIntakeAddressCreateInput.type)
+
+  feat(schema): [dangerous] Input field 'forwardingEmailAddress' was added to input object type 'EmailIntakeAddressUpdateInput' (EmailIntakeAddressUpdateInput.forwardingEmailAddress)
+
+  feat(schema): [dangerous] Input field 'senderName' was added to input object type 'EmailIntakeAddressUpdateInput' (EmailIntakeAddressUpdateInput.senderName)
+
+  feat(schema): [dangerous] Input field 'teamId' was added to input object type 'EmailIntakeAddressUpdateInput' (EmailIntakeAddressUpdateInput.teamId)
+
+  feat(schema): [dangerous] Input field 'templateId' was added to input object type 'EmailIntakeAddressUpdateInput' (EmailIntakeAddressUpdateInput.templateId)
+
+  feat(schema): [dangerous] Input field 'initiative' was added to input object type 'GoogleSheetsSettingsInput' (GoogleSheetsSettingsInput.initiative)
+
+  feat(schema): [dangerous] Argument 'sort: [ProjectSortInput!]' added to field 'Initiative.projects' (Initiative.projects.sort)
+
+  feat(schema): [dangerous] Argument 'sort: [InitiativeSortInput!]' added to field 'Initiative.subInitiatives' (Initiative.subInitiatives.sort)
+
+  feat(schema): [dangerous] Input field 'delegate' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.delegate)
+
+  feat(schema): [dangerous] Input field 'delegate' was added to input object type 'IssueFilter' (IssueFilter.delegate)
+
+  feat(schema): [dangerous] Input field 'delegate' was added to input object type 'IssueSortInput' (IssueSortInput.delegate)
+
+  feat(schema): [dangerous] Input field 'delegateId' was added to input object type 'IssueUpdateInput' (IssueUpdateInput.delegateId)
+
+  feat(schema): [dangerous] Enum value 'feed' was added to enum 'NotificationCategory' (NotificationCategory.feed)
+
+  feat(schema): [dangerous] Input field 'feed' was added to input object type 'NotificationCategoryPreferencesInput' (NotificationCategoryPreferencesInput.feed)
+
+  feat(schema): [dangerous] Input field 'delegate' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.delegate)
+
+  feat(schema): [dangerous] Input field 'restrictAgentInvocationToMembers' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.restrictAgentInvocationToMembers)
+
+  feat(schema): [dangerous] Argument 'filter: CustomViewFilter' added to field 'Query.customViews' (Query.customViews.filter)
+
+  feat(schema): [dangerous] Argument 'sort: [CustomViewSortInput!]' added to field 'Query.customViews' (Query.customViews.sort)
+
+  feat(schema): [dangerous] Argument 'sort: [InitiativeSortInput!]' added to field 'Query.initiatives' (Query.initiatives.sort)
+
+  feat(schema): [dangerous] Argument 'sort: [ProjectSortInput!]' added to field 'Query.projects' (Query.projects.sort)
+
+  feat(schema): [dangerous] Input field 'restrictVisibility' was added to input object type 'SalesforceSettingsInput' (SalesforceSettingsInput.restrictVisibility)
+
+  feat(schema): [dangerous] Argument 'sort: [ProjectSortInput!]' added to field 'Team.projects' (Team.projects.sort)
+
+  feat(schema): [non_breaking] Type 'AgentActivity' was added (AgentActivity)
+
+  feat(schema): [non_breaking] Type 'AgentActivityActionContent' was added (AgentActivityActionContent)
+
+  feat(schema): [non_breaking] Type 'AgentActivityConnection' was added (AgentActivityConnection)
+
+  feat(schema): [non_breaking] Type 'AgentActivityContent' was added (AgentActivityContent)
+
+  feat(schema): [non_breaking] Type 'AgentActivityCreateInput' was added (AgentActivityCreateInput)
+
+  feat(schema): [non_breaking] Type 'AgentActivityEdge' was added (AgentActivityEdge)
+
+  feat(schema): [non_breaking] Type 'AgentActivityErrorContent' was added (AgentActivityErrorContent)
+
+  feat(schema): [non_breaking] Type 'AgentActivityObservationContent' was added (AgentActivityObservationContent)
+
+  feat(schema): [non_breaking] Type 'AgentActivityPayload' was added (AgentActivityPayload)
+
+  feat(schema): [non_breaking] Type 'AgentActivityResponseContent' was added (AgentActivityResponseContent)
+
+  feat(schema): [non_breaking] Type 'AgentActivityType' was added (AgentActivityType)
+
+  feat(schema): [non_breaking] Type 'AgentActivityUserInputContent' was added (AgentActivityUserInputContent)
+
+  feat(schema): [non_breaking] Type 'AgentContext' was added (AgentContext)
+
+  feat(schema): [non_breaking] Type 'AgentContextConnection' was added (AgentContextConnection)
+
+  feat(schema): [non_breaking] Type 'AgentContextCreateInput' was added (AgentContextCreateInput)
+
+  feat(schema): [non_breaking] Type 'AgentContextEdge' was added (AgentContextEdge)
+
+  feat(schema): [non_breaking] Type 'AgentContextPayload' was added (AgentContextPayload)
+
+  feat(schema): [non_breaking] Type 'AgentContextStatus' was added (AgentContextStatus)
+
+  feat(schema): [non_breaking] Type 'AgentContextType' was added (AgentContextType)
+
+  feat(schema): [non_breaking] Type 'AgentContextUpdateInput' was added (AgentContextUpdateInput)
+
+  feat(schema): [non_breaking] Type 'CustomViewCreatedAtSort' was added (CustomViewCreatedAtSort)
+
+  feat(schema): [non_breaking] Type 'CustomViewFilter' was added (CustomViewFilter)
+
+  feat(schema): [non_breaking] Type 'CustomViewNameSort' was added (CustomViewNameSort)
+
+  feat(schema): [non_breaking] Type 'CustomViewSharedSort' was added (CustomViewSharedSort)
+
+  feat(schema): [non_breaking] Type 'CustomViewSortInput' was added (CustomViewSortInput)
+
+  feat(schema): [non_breaking] Type 'CustomViewUpdatedAtSort' was added (CustomViewUpdatedAtSort)
+
+  feat(schema): [non_breaking] Type 'CustomerNotification' was added (CustomerNotification)
+
+  feat(schema): [non_breaking] Type 'DelegateSort' was added (DelegateSort)
+
+  feat(schema): [non_breaking] Type 'EmailIntakeAddressType' was added (EmailIntakeAddressType)
+
+  feat(schema): [non_breaking] Type 'FeedItem' was added (FeedItem)
+
+  feat(schema): [non_breaking] Type 'FeedItemConnection' was added (FeedItemConnection)
+
+  feat(schema): [non_breaking] Type 'FeedItemEdge' was added (FeedItemEdge)
+
+  feat(schema): [non_breaking] Type 'InitiativeCreatedAtSort' was added (InitiativeCreatedAtSort)
+
+  feat(schema): [non_breaking] Type 'InitiativeHealthSort' was added (InitiativeHealthSort)
+
+  feat(schema): [non_breaking] Type 'InitiativeHealthUpdatedAtSort' was added (InitiativeHealthUpdatedAtSort)
+
+  feat(schema): [non_breaking] Type 'InitiativeManualSort' was added (InitiativeManualSort)
+
+  feat(schema): [non_breaking] Type 'InitiativeNameSort' was added (InitiativeNameSort)
+
+  feat(schema): [non_breaking] Type 'InitiativeOwnerSort' was added (InitiativeOwnerSort)
+
+  feat(schema): [non_breaking] Type 'InitiativeSortInput' was added (InitiativeSortInput)
+
+  feat(schema): [non_breaking] Type 'InitiativeTargetDateSort' was added (InitiativeTargetDateSort)
+
+  feat(schema): [non_breaking] Type 'InitiativeUpdatedAtSort' was added (InitiativeUpdatedAtSort)
+
+  feat(schema): [non_breaking] Type 'ProjectCreatedAtSort' was added (ProjectCreatedAtSort)
+
+  feat(schema): [non_breaking] Type 'ProjectLabelCreateInput' was added (ProjectLabelCreateInput)
+
+  feat(schema): [non_breaking] Type 'ProjectLabelPayload' was added (ProjectLabelPayload)
+
+  feat(schema): [non_breaking] Type 'ProjectLabelUpdateInput' was added (ProjectLabelUpdateInput)
+
+  feat(schema): [non_breaking] Type 'ProjectManualSort' was added (ProjectManualSort)
+
+  feat(schema): [non_breaking] Type 'ProjectNameSort' was added (ProjectNameSort)
+
+  feat(schema): [non_breaking] Type 'ProjectPrioritySort' was added (ProjectPrioritySort)
+
+  feat(schema): [non_breaking] Type 'ProjectSortInput' was added (ProjectSortInput)
+
+  feat(schema): [non_breaking] Type 'ProjectStatusSort' was added (ProjectStatusSort)
+
+  feat(schema): [non_breaking] Type 'ProjectUpdatedAtSort' was added (ProjectUpdatedAtSort)
+
+  feat(schema): [non_breaking] Type 'SesDomainIdentity' was added (SesDomainIdentity)
+
+  feat(schema): [non_breaking] Type 'SesDomainIdentityDnsRecord' was added (SesDomainIdentityDnsRecord)
+
+  feat(schema): [non_breaking] Type 'StartDateSort' was added (StartDateSort)
+
+  feat(schema): [non_breaking] Type 'TargetDateSort' was added (TargetDateSort)
+
+  feat(schema): [non_breaking] Type 'WorkspaceAuthorizedApplicationWithAppUser' was added (WorkspaceAuthorizedApplicationWithAppUser)
+
+  feat(schema): [non_breaking] Field 'facet' was added to object type 'CustomView' (CustomView.facet)
+
+  feat(schema): [non_breaking] Field 'updates' was added to object type 'CustomView' (CustomView.updates)
+
+  feat(schema): [non_breaking] Field 'customerNeed' was added to object type 'CustomerNeedNotification' (CustomerNeedNotification.customerNeed)
+
+  feat(schema): [non_breaking] Description '[Internal] A customer need related notification.' on type 'CustomerNeedNotification' has changed to 'A customer need related notification.' (CustomerNeedNotification)
+
+  feat(schema): [non_breaking] Field 'forwardingEmailAddress' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.forwardingEmailAddress)
+
+  feat(schema): [non_breaking] Field 'senderName' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.senderName)
+
+  feat(schema): [non_breaking] Field 'sesDomainIdentity' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.sesDomainIdentity)
+
+  feat(schema): [non_breaking] Field 'type' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.type)
+
+  feat(schema): [non_breaking] Input field 'EmailUnsubscribeInput.type' description changed from 'Email type to unsubscribed from.' to 'Email type to unsubscribe from.' (EmailUnsubscribeInput.type)
+
+  feat(schema): [non_breaking] Field 'Favorite.projectLabel' description changed from '[Internal] The favorited project label.' to 'The favorited project label.' (Favorite.projectLabel)
+
+  feat(schema): [non_breaking] Input field 'FavoriteCreateInput.projectLabelId' description changed from '[Internal] The identifier of the label to favorite.' to 'The identifier of the label to favorite.' (FavoriteCreateInput.projectLabelId)
+
+  feat(schema): [non_breaking] Input field 'FeedItemFilter.updateType' description changed from 'Comparator for the update type: initiative, project' to 'Comparator for the update type: initiative, project, team' (FeedItemFilter.updateType)
+
+  feat(schema): [non_breaking] Field 'parentInitiative' was added to object type 'Initiative' (Initiative.parentInitiative)
+
+  feat(schema): [non_breaking] Description for argument 'includeSubInitiatives' on field 'Initiative.projects' changed from '[ALPHA] Whether to include projects from sub-initiatives. Defaults to true.' to 'Whether to include projects from sub-initiatives. Defaults to true.' (Initiative.projects.includeSubInitiatives)
+
+  feat(schema): [non_breaking] Field 'Initiative.subInitiatives' description changed from '[ALPHA] Sub-initiatives associated with the initiative.' to 'Sub-initiatives associated with the initiative.' (Initiative.subInitiatives)
+
+  feat(schema): [non_breaking] Field 'comment' was added to object type 'InitiativeNotification' (InitiativeNotification.comment)
+
+  feat(schema): [non_breaking] Field 'document' was added to object type 'InitiativeNotification' (InitiativeNotification.document)
+
+  feat(schema): [non_breaking] Field 'initiative' was added to object type 'InitiativeNotification' (InitiativeNotification.initiative)
+
+  feat(schema): [non_breaking] Field 'initiativeUpdate' was added to object type 'InitiativeNotification' (InitiativeNotification.initiativeUpdate)
+
+  feat(schema): [non_breaking] Field 'parentComment' was added to object type 'InitiativeNotification' (InitiativeNotification.parentComment)
+
+  feat(schema): [non_breaking] Field 'delegate' was added to object type 'Issue' (Issue.delegate)
+
+  feat(schema): [non_breaking] Field 'supervisor' was added to object type 'Issue' (Issue.supervisor)
+
+  feat(schema): [non_breaking] Field 'lastAppliedAt' was added to object type 'IssueLabel' (IssueLabel.lastAppliedAt)
+
+  feat(schema): [non_breaking] Field 'delegate' was added to object type 'IssueSearchResult' (IssueSearchResult.delegate)
+
+  feat(schema): [non_breaking] Field 'supervisor' was added to object type 'IssueSearchResult' (IssueSearchResult.supervisor)
+
+  feat(schema): [non_breaking] Description 'A meeting that can be attached to different entities.' on type 'Meeting' has changed to '[Internal] A meeting that can be attached to different entities.' (Meeting)
+
+  feat(schema): [non_breaking] Field 'agentActivityCreate' was added to object type 'Mutation' (Mutation.agentActivityCreate)
+
+  feat(schema): [non_breaking] Field 'agentContextCreate' was added to object type 'Mutation' (Mutation.agentContextCreate)
+
+  feat(schema): [non_breaking] Field 'agentContextUpdate' was added to object type 'Mutation' (Mutation.agentContextUpdate)
+
+  feat(schema): [non_breaking] Field 'projectLabelCreate' was added to object type 'Mutation' (Mutation.projectLabelCreate)
+
+  feat(schema): [non_breaking] Field 'projectLabelDelete' was added to object type 'Mutation' (Mutation.projectLabelDelete)
+
+  feat(schema): [non_breaking] Field 'projectLabelUpdate' was added to object type 'Mutation' (Mutation.projectLabelUpdate)
+
+  feat(schema): [non_breaking] Field 'Mutation.projectAddLabel' description changed from '[Internal] Adds a label to a project.' to 'Adds a label to a project.' (Mutation.projectAddLabel)
+
+  feat(schema): [non_breaking] Field 'Mutation.projectRemoveLabel' description changed from '[Internal] Removes a label from a project.' to 'Removes a label from a project.' (Mutation.projectRemoveLabel)
+
+  feat(schema): [non_breaking] Field 'feed' was added to object type 'NotificationCategoryPreferences' (NotificationCategoryPreferences.feed)
+
+  feat(schema): [non_breaking] Input field 'NullableProjectFilter.labels' description changed from '[Internal] Filters that project labels must satisfy.' to 'Filters that project labels must satisfy.' (NullableProjectFilter.labels)
+
+  feat(schema): [non_breaking] Field 'Organization.projectLabels' description changed from '[Internal] Project labels associated with the organization.' to 'Project labels associated with the organization.' (Organization.projectLabels)
+
+  feat(schema): [non_breaking] Description '[Internal] A post related notification.' on type 'PostNotification' has changed to 'A post related notification.' (PostNotification)
+
+  feat(schema): [non_breaking] Field 'Project.labels' description changed from '[Internal] Labels associated with this project.' to 'Labels associated with this project.' (Project.labels)
+
+  feat(schema): [non_breaking] Input field 'ProjectCollectionFilter.labels' description changed from '[Internal] Filters that project labels must satisfy.' to 'Filters that project labels must satisfy.' (ProjectCollectionFilter.labels)
+
+  feat(schema): [non_breaking] Input field 'ProjectFilter.labels' description changed from '[Internal] Filters that project labels must satisfy.' to 'Filters that project labels must satisfy.' (ProjectFilter.labels)
+
+  feat(schema): [non_breaking] Field 'children' was added to object type 'ProjectLabel' (ProjectLabel.children)
+
+  feat(schema): [non_breaking] Field 'lastAppliedAt' was added to object type 'ProjectLabel' (ProjectLabel.lastAppliedAt)
+
+  feat(schema): [non_breaking] Field 'projects' was added to object type 'ProjectLabel' (ProjectLabel.projects)
+
+  feat(schema): [non_breaking] Description '[Internal] Labels that can be associated with projects.' on type 'ProjectLabel' has changed to 'Labels that can be associated with projects.' (ProjectLabel)
+
+  feat(schema): [non_breaking] Description '[Internal] Project label filtering options.' on type 'ProjectLabelFilter' has changed to 'Project label filtering options.' (ProjectLabelFilter)
+
+  feat(schema): [non_breaking] Field 'ProjectSearchResult.labels' description changed from '[Internal] Labels associated with this project.' to 'Labels associated with this project.' (ProjectSearchResult.labels)
+
+  feat(schema): [non_breaking] Input field 'ProjectUpdateInput.labelIds' description changed from '[Internal] The identifiers of the project labels associated with this project.' to 'The identifiers of the project labels associated with this project.' (ProjectUpdateInput.labelIds)
+
+  feat(schema): [non_breaking] Description '[Internal] A pull request related notification.' on type 'PullRequestNotification' has changed to 'A pull request related notification.' (PullRequestNotification)
+
+  feat(schema): [non_breaking] Field 'agentActivities' was added to object type 'Query' (Query.agentActivities)
+
+  feat(schema): [non_breaking] Field 'agentActivity' was added to object type 'Query' (Query.agentActivity)
+
+  feat(schema): [non_breaking] Field 'agentContext' was added to object type 'Query' (Query.agentContext)
+
+  feat(schema): [non_breaking] Field 'agentContexts' was added to object type 'Query' (Query.agentContexts)
+
+  feat(schema): [non_breaking] Field 'emailIntakeAddress' was added to object type 'Query' (Query.emailIntakeAddress)
+
+  feat(schema): [non_breaking] Field 'projectLabel' was added to object type 'Query' (Query.projectLabel)
+
+  feat(schema): [non_breaking] Field 'projectLabels' was added to object type 'Query' (Query.projectLabels)
+
+  feat(schema): [non_breaking] Field 'workspaceAuthorizedApplicationsWithAppUser' was added to object type 'Query' (Query.workspaceAuthorizedApplicationsWithAppUser)
+
+  feat(schema): [non_breaking] Field 'Query.applicationInfoWithMembershipsByIds' description changed from '[INTERNAL] Get information for a list of applications with memberships' to '[DEPRECATED] [INTERNAL] Get information for a list of applications with memberships' (Query.applicationInfoWithMembershipsByIds)
+
+  feat(schema): [non_breaking] Field 'Query.applicationInfoWithMembershipsByIds' is deprecated (Query.applicationInfoWithMembershipsByIds)
+
+  feat(schema): [non_breaking] Field 'Query.applicationInfoWithMembershipsByIds' has deprecation reason 'Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead.' (Query.applicationInfoWithMembershipsByIds)
+
+  feat(schema): [non_breaking] Field 'Query.workspaceAuthorizedApplications' description changed from '[INTERNAL] Get non-internal authorized applications (with limited fields) for a workspace' to '[DEPRECATED] [INTERNAL] Get non-internal authorized applications (with limited fields) for a workspace' (Query.workspaceAuthorizedApplications)
+
+  feat(schema): [non_breaking] Field 'Query.workspaceAuthorizedApplications' is deprecated (Query.workspaceAuthorizedApplications)
+
+  feat(schema): [non_breaking] Field 'Query.workspaceAuthorizedApplications' has deprecation reason 'Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead.' (Query.workspaceAuthorizedApplications)
+
+  feat(schema): [non_breaking] Field 'supervisedIssues' was added to object type 'User' (User.supervisedIssues)
+
+  feat(schema): [non_breaking] Input field 'ViewPreferencesCreateInput.projectLabelId' description changed from '[Internal] The project label these view preferences are associated with.' to 'The project label these view preferences are associated with.' (ViewPreferencesCreateInput.projectLabelId)
+
+### Patch Changes
+
+- 5231b52: chore(deps): update dependency patch versions
+
+## 44.1.0
+
+### Minor Changes
+
+- 879a047: Adds helper to parse webhook payloads
+
+## 44.0.0
+
+### Major Changes
+
+- 788127e: feat(schema): [breaking] Type 'BaseEntityWebhookPayload' was removed (BaseEntityWebhookPayload)
+
+  feat(schema): [breaking] Field 'AppUserNotificationWebhookPayload.createdAt' changed type from 'String!' to 'DateTime!' (AppUserNotificationWebhookPayload.createdAt)
+
+  feat(schema): [breaking] Field 'CommentWebhookPayload.documentContent' changed type from 'BaseEntityWebhookPayload' to 'DocumentContentChildWebhookPayload' (CommentWebhookPayload.documentContent)
+
+  feat(schema): [dangerous] Input field 'reopenCaseStatus' was added to input object type 'SalesforceSettingsInput' (SalesforceSettingsInput.reopenCaseStatus)
+
+  feat(schema): [non_breaking] Type 'AppUserTeamAccessChangedWebhookPayload' was added (AppUserTeamAccessChangedWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'AuditEntryWebhookPayload' was added (AuditEntryWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'BaseWebhookPayload' was added (BaseWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'CustomResourceWebhookPayload' was added (CustomResourceWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'DataWebhookPayload' was added (DataWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'DocumentContentChildWebhookPayload' was added (DocumentContentChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'DocumentWebhookPayload' was added (DocumentWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'EntityWebhookPayload' was added (EntityWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueSlaWebhookPayload' was added (IssueSlaWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'OAuthAppWebhookPayload' was added (OAuthAppWebhookPayload)
+
+  feat(schema): [non_breaking] Field 'AppUserNotificationWebhookPayload.action' description changed from 'The action of the notification.' to 'The type of action that triggered the webhook.' (AppUserNotificationWebhookPayload.action)
+
+  feat(schema): [non_breaking] Field 'AppUserNotificationWebhookPayload.appUserId' description changed from 'The app user id of the webhook.' to 'ID of the app user the notification is for.' (AppUserNotificationWebhookPayload.appUserId)
+
+  feat(schema): [non_breaking] Field 'AppUserNotificationWebhookPayload.createdAt' description changed from 'The timestamp the webhook was created at.' to 'The time the payload was created.' (AppUserNotificationWebhookPayload.createdAt)
+
+  feat(schema): [non_breaking] Field 'AppUserNotificationWebhookPayload.notification' description changed from 'The notification of the webhook.' to 'Details of the notification.' (AppUserNotificationWebhookPayload.notification)
+
+  feat(schema): [non_breaking] Field 'AppUserNotificationWebhookPayload.oauthClientId' description changed from 'The oauth client id of the webhook.' to 'ID of the OAuth client the app user is tied to.' (AppUserNotificationWebhookPayload.oauthClientId)
+
+  feat(schema): [non_breaking] Field 'AppUserNotificationWebhookPayload.organizationId' description changed from 'The organization id of the webhook.' to 'ID of the organization for which the webhook belongs to.' (AppUserNotificationWebhookPayload.organizationId)
+
+  feat(schema): [non_breaking] Field 'AppUserNotificationWebhookPayload.type' description changed from 'The type of the notification.' to 'The type of resource.' (AppUserNotificationWebhookPayload.type)
+
+  feat(schema): [non_breaking] Description 'Complete payload for an app user notification webhook.' on type 'AppUserNotificationWebhookPayload' has changed to 'Payload for app user notification webhook events.' (AppUserNotificationWebhookPayload)
+
+  feat(schema): [non_breaking] Field 'integrationSalesforceMetadataRefresh' was added to object type 'Mutation' (Mutation.integrationSalesforceMetadataRefresh)
+
+  feat(schema): [non_breaking] Field 'Query.\_dummy' changed type from 'String' to 'String!' (Query.\_dummy)
+
+### Minor Changes
+
+- 788127e: Add EntityWebhookPayload and CustomResourceWebhookPayload
+
+## 43.0.0
+
+### Major Changes
+
+- 3ea227f: feat(schema): [breaking] Field 'CycleChildWebhookPayload.name' changed type from 'String!' to 'String' (CycleChildWebhookPayload.name)
+
+  feat(schema): [breaking] Enum value 'issueCommentMention' was removed from enum 'OtherNotificationType' (OtherNotificationType.issueCommentMention)
+
+  feat(schema): [breaking] Enum value 'issueCommentReaction' was removed from enum 'OtherNotificationType' (OtherNotificationType.issueCommentReaction)
+
+  feat(schema): [breaking] Enum value 'issueEmojiReaction' was removed from enum 'OtherNotificationType' (OtherNotificationType.issueEmojiReaction)
+
+  feat(schema): [breaking] Enum value 'issueNewComment' was removed from enum 'OtherNotificationType' (OtherNotificationType.issueNewComment)
+
+  feat(schema): [breaking] Enum value 'issueStatusChangedDone' was removed from enum 'OtherNotificationType' (OtherNotificationType.issueStatusChangedDone)
+
+  feat(schema): [breaking] Enum value 'issueUnassignedFromYou' was removed from enum 'OtherNotificationType' (OtherNotificationType.issueUnassignedFromYou)
+
+  feat(schema): [dangerous] Input field 'displayName' was added to input object type 'CustomerStatusCreateInput' (CustomerStatusCreateInput.displayName)
+
+  feat(schema): [dangerous] Input field 'displayName' was added to input object type 'CustomerStatusUpdateInput' (CustomerStatusUpdateInput.displayName)
+
+  feat(schema): [dangerous] Member 'IssueCommentMentionNotificationWebhookPayload' was added to Union type 'NotificationWebhookPayload' (NotificationWebhookPayload)
+
+  feat(schema): [dangerous] Member 'IssueCommentReactionNotificationWebhookPayload' was added to Union type 'NotificationWebhookPayload' (NotificationWebhookPayload)
+
+  feat(schema): [dangerous] Member 'IssueEmojiReactionNotificationWebhookPayload' was added to Union type 'NotificationWebhookPayload' (NotificationWebhookPayload)
+
+  feat(schema): [dangerous] Member 'IssueNewCommentNotificationWebhookPayload' was added to Union type 'NotificationWebhookPayload' (NotificationWebhookPayload)
+
+  feat(schema): [dangerous] Member 'IssueStatusChangedNotificationWebhookPayload' was added to Union type 'NotificationWebhookPayload' (NotificationWebhookPayload)
+
+  feat(schema): [dangerous] Member 'IssueUnassignedFromYouNotificationWebhookPayload' was added to Union type 'NotificationWebhookPayload' (NotificationWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'CustomerChildWebhookPayload' was added (CustomerChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'CustomerNeedChildWebhookPayload' was added (CustomerNeedChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'CustomerNeedWebhookPayload' was added (CustomerNeedWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'CustomerWebhookPayload' was added (CustomerWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'CycleWebhookPayload' was added (CycleWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueCommentMentionNotificationType' was added (IssueCommentMentionNotificationType)
+
+  feat(schema): [non_breaking] Type 'IssueCommentMentionNotificationWebhookPayload' was added (IssueCommentMentionNotificationWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueCommentReactionNotificationType' was added (IssueCommentReactionNotificationType)
+
+  feat(schema): [non_breaking] Type 'IssueCommentReactionNotificationWebhookPayload' was added (IssueCommentReactionNotificationWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueEmojiReactionNotificationType' was added (IssueEmojiReactionNotificationType)
+
+  feat(schema): [non_breaking] Type 'IssueEmojiReactionNotificationWebhookPayload' was added (IssueEmojiReactionNotificationWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueNewCommentNotificationType' was added (IssueNewCommentNotificationType)
+
+  feat(schema): [non_breaking] Type 'IssueNewCommentNotificationWebhookPayload' was added (IssueNewCommentNotificationWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueStatusChangedNotificationType' was added (IssueStatusChangedNotificationType)
+
+  feat(schema): [non_breaking] Type 'IssueStatusChangedNotificationWebhookPayload' was added (IssueStatusChangedNotificationWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueUnassignedFromYouNotificationType' was added (IssueUnassignedFromYouNotificationType)
+
+  feat(schema): [non_breaking] Type 'IssueUnassignedFromYouNotificationWebhookPayload' was added (IssueUnassignedFromYouNotificationWebhookPayload)
+
+  feat(schema): [non_breaking] Field 'CustomerStatus.displayName' changed type from 'String' to 'String!' (CustomerStatus.displayName)
+
+  feat(schema): [non_breaking] Input field 'CustomerStatusCreateInput.name' changed type from 'String!' to 'String' (CustomerStatusCreateInput.name)
+
+  feat(schema): [non_breaking] Field 'externalUserActorId' was added to object type 'IssueAssignedToYouNotificationWebhookPayload' (IssueAssignedToYouNotificationWebhookPayload.externalUserActorId)
+
+  feat(schema): [non_breaking] Field 'externalUserActorId' was added to object type 'IssueMentionNotificationWebhookPayload' (IssueMentionNotificationWebhookPayload.externalUserActorId)
+
+  feat(schema): [non_breaking] Field 'externalUserActorId' was added to object type 'OtherNotificationWebhookPayload' (OtherNotificationWebhookPayload.externalUserActorId)
+
+### Minor Changes
+
+- 3ea227f: Adds additional webhook payloads
+
+## 42.0.0
+
+### Major Changes
+
+- 511faef: feat(schema): [dangerous] Input field 'null' was added to input object type 'IssueLabelCollectionFilter' (IssueLabelCollectionFilter.null)
+
+  feat(schema): [dangerous] Input field 'null' was added to input object type 'ProjectLabelCollectionFilter' (ProjectLabelCollectionFilter.null)
+
+  feat(schema): [non_breaking] Type 'AppUserNotificationWebhookPayload' was added (AppUserNotificationWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'AttachmentWebhookPayload' was added (AttachmentWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'BaseEntityWebhookPayload' was added (BaseEntityWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'CommentChildWebhookPayload' was added (CommentChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'CommentWebhookPayload' was added (CommentWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'CustomerStatusChildWebhookPayload' was added (CustomerStatusChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'CustomerTierChildWebhookPayload' was added (CustomerTierChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'CycleChildWebhookPayload' was added (CycleChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'DocumentChildWebhookPayload' was added (DocumentChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'ExternalUserChildWebhookPayload' was added (ExternalUserChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'InitiativeChildWebhookPayload' was added (InitiativeChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'InitiativeUpdateChildWebhookPayload' was added (InitiativeUpdateChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'InitiativeUpdateWebhookPayload' was added (InitiativeUpdateWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'InitiativeWebhookPayload' was added (InitiativeWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IntegrationChildWebhookPayload' was added (IntegrationChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueAssignedToYouNotificationType' was added (IssueAssignedToYouNotificationType)
+
+  feat(schema): [non_breaking] Type 'IssueAssignedToYouNotificationWebhookPayload' was added (IssueAssignedToYouNotificationWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueChildWebhookPayload' was added (IssueChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueLabelChildWebhookPayload' was added (IssueLabelChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueLabelWebhookPayload' was added (IssueLabelWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueMentionNotificationType' was added (IssueMentionNotificationType)
+
+  feat(schema): [non_breaking] Type 'IssueMentionNotificationWebhookPayload' was added (IssueMentionNotificationWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueWebhookPayload' was added (IssueWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'IssueWithDescriptionChildWebhookPayload' was added (IssueWithDescriptionChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'NotificationWebhookPayload' was added (NotificationWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'OauthClientChildWebhookPayload' was added (OauthClientChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'OtherNotificationType' was added (OtherNotificationType)
+
+  feat(schema): [non_breaking] Type 'OtherNotificationWebhookPayload' was added (OtherNotificationWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'ProjectChildWebhookPayload' was added (ProjectChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'ProjectMilestoneChildWebhookPayload' was added (ProjectMilestoneChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'ProjectStatusChildWebhookPayload' was added (ProjectStatusChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'ProjectUpdateChildWebhookPayload' was added (ProjectUpdateChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'ProjectUpdateWebhookPayload' was added (ProjectUpdateWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'ProjectWebhookPayload' was added (ProjectWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'ReactionWebhookPayload' was added (ReactionWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'TeamChildWebhookPayload' was added (TeamChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'UserChildWebhookPayload' was added (UserChildWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'UserWebhookPayload' was added (UserWebhookPayload)
+
+  feat(schema): [non_breaking] Type 'WorkflowStateChildWebhookPayload' was added (WorkflowStateChildWebhookPayload)
+
+  feat(schema): [non_breaking] Field '\_dummy' was added to object type 'Query' (Query.\_dummy)
+
+  feat(schema): [non_breaking] Field 'totalMembers' was added to object type 'WorkspaceAuthorizedApplicationWithMemberships' (WorkspaceAuthorizedApplicationWithMemberships.totalMembers)
+
+- 511faef: Introduces types for webhook data payloads
+
+### Patch Changes
+
+- edf2099: chore(deps): update dependency patch versions
+
+## 41.0.0
+
+### Major Changes
+
+- 3ffb7c3: feat(schema): [breaking] Field 'CustomerStatus.type' changed type from 'CustomerStatusType!' to 'CustomerStatusType' (CustomerStatus.type)
+
+  feat(schema): [breaking] Field 'layout' was removed from object type 'Dashboard' (Dashboard.layout)
+
+  feat(schema): [breaking] Field 'Mutation.customerNeedUpdate' changed type from 'CustomerNeedPayload!' to 'CustomerNeedUpdatePayload!' (Mutation.customerNeedUpdate)
+
+  feat(schema): [dangerous] Input field 'projectLabelId' was added to input object type 'FavoriteCreateInput' (FavoriteCreateInput.projectLabelId)
+
+  feat(schema): [dangerous] Argument 'includeSubInitiatives: Boolean' added to field 'Initiative.projects' (Initiative.projects.includeSubInitiatives)
+
+  feat(schema): [dangerous] Input field 'salesforce' was added to input object type 'IntegrationSettingsInput' (IntegrationSettingsInput.salesforce)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedAssignees' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.hasSuggestedAssignees)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedLabels' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.hasSuggestedLabels)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedProjects' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.hasSuggestedProjects)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedRelatedIssues' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.hasSuggestedRelatedIssues)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedSimilarIssues' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.hasSuggestedSimilarIssues)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedAssignees' was added to input object type 'IssueFilter' (IssueFilter.hasSuggestedAssignees)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedLabels' was added to input object type 'IssueFilter' (IssueFilter.hasSuggestedLabels)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedProjects' was added to input object type 'IssueFilter' (IssueFilter.hasSuggestedProjects)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedRelatedIssues' was added to input object type 'IssueFilter' (IssueFilter.hasSuggestedRelatedIssues)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedSimilarIssues' was added to input object type 'IssueFilter' (IssueFilter.hasSuggestedSimilarIssues)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedAssignees' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.hasSuggestedAssignees)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedLabels' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.hasSuggestedLabels)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedProjects' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.hasSuggestedProjects)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedRelatedIssues' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.hasSuggestedRelatedIssues)
+
+  feat(schema): [dangerous] Input field 'hasSuggestedSimilarIssues' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.hasSuggestedSimilarIssues)
+
+  feat(schema): [dangerous] Input field 'activityType' was added to input object type 'NullableProjectFilter' (NullableProjectFilter.activityType)
+
+  feat(schema): [dangerous] Input field 'aiTelemetryEnabled' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.aiTelemetryEnabled)
+
+  feat(schema): [dangerous] Input field 'personalApiKeysEnabled' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.personalApiKeysEnabled)
+
+  feat(schema): [dangerous] Input field 'restrictLabelManagementToAdmins' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.restrictLabelManagementToAdmins)
+
+  feat(schema): [dangerous] Input field 'activityType' was added to input object type 'ProjectCollectionFilter' (ProjectCollectionFilter.activityType)
+
+  feat(schema): [dangerous] Input field 'activityType' was added to input object type 'ProjectFilter' (ProjectFilter.activityType)
+
+  feat(schema): [dangerous] Input field 'inheritProductIntelligenceScope' was added to input object type 'TeamCreateInput' (TeamCreateInput.inheritProductIntelligenceScope)
+
+  feat(schema): [dangerous] Input field 'inheritProductIntelligenceScope' was added to input object type 'TeamUpdateInput' (TeamUpdateInput.inheritProductIntelligenceScope)
+
+  feat(schema): [dangerous] Enum value 'dashboards' was added to enum 'ViewType' (ViewType.dashboards)
+
+  feat(schema): [non_breaking] Type 'CustomerNeedUpdatePayload' was added (CustomerNeedUpdatePayload)
+
+  feat(schema): [non_breaking] Type 'CustomerStatusCreateInput' was added (CustomerStatusCreateInput)
+
+  feat(schema): [non_breaking] Type 'CustomerStatusPayload' was added (CustomerStatusPayload)
+
+  feat(schema): [non_breaking] Type 'CustomerStatusUpdateInput' was added (CustomerStatusUpdateInput)
+
+  feat(schema): [non_breaking] Type 'ExternalEntityInfo' was added (ExternalEntityInfo)
+
+  feat(schema): [non_breaking] Type 'ExternalEntityInfoGithubMetadata' was added (ExternalEntityInfoGithubMetadata)
+
+  feat(schema): [non_breaking] Type 'ExternalEntityInfoJiraMetadata' was added (ExternalEntityInfoJiraMetadata)
+
+  feat(schema): [non_breaking] Type 'ExternalEntityInfoMetadata' was added (ExternalEntityInfoMetadata)
+
+  feat(schema): [non_breaking] Type 'ExternalEntitySlackMetadata' was added (ExternalEntitySlackMetadata)
+
+  feat(schema): [non_breaking] Type 'ExternalSyncService' was added (ExternalSyncService)
+
+  feat(schema): [non_breaking] Type 'IntegrationCustomerDataAttributesRefreshInput' was added (IntegrationCustomerDataAttributesRefreshInput)
+
+  feat(schema): [non_breaking] Type 'IssueSuggestion' was added (IssueSuggestion)
+
+  feat(schema): [non_breaking] Type 'IssueSuggestionConnection' was added (IssueSuggestionConnection)
+
+  feat(schema): [non_breaking] Type 'IssueSuggestionEdge' was added (IssueSuggestionEdge)
+
+  feat(schema): [non_breaking] Type 'IssueSuggestionMetadata' was added (IssueSuggestionMetadata)
+
+  feat(schema): [non_breaking] Type 'IssueSuggestionState' was added (IssueSuggestionState)
+
+  feat(schema): [non_breaking] Type 'IssueSuggestionType' was added (IssueSuggestionType)
+
+  feat(schema): [non_breaking] Type 'SalesforceSettingsInput' was added (SalesforceSettingsInput)
+
+  feat(schema): [non_breaking] Field 'organization' was added to object type 'ApiKey' (ApiKey.organization)
+
+  feat(schema): [non_breaking] Field 'originalIssue' was added to object type 'Attachment' (Attachment.originalIssue)
+
+  feat(schema): [non_breaking] Field 'syncedWith' was added to object type 'Comment' (Comment.syncedWith)
+
+  feat(schema): [non_breaking] Input field 'CommentCreateInput.createAsUser' description changed from 'Create comment as a user with the provided name. This option is only available to OAuth applications creating comments in `actor=application` mode.' to 'Create comment as a user with the provided name. This option is only available to OAuth applications creating comments in `actor=app` mode.' (CommentCreateInput.createAsUser)
+
+  feat(schema): [non_breaking] Input field 'CommentCreateInput.displayIconUrl' description changed from 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.' to 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.' (CommentCreateInput.displayIconUrl)
+
+  feat(schema): [non_breaking] Field 'originalIssue' was added to object type 'CustomerNeed' (CustomerNeed.originalIssue)
+
+  feat(schema): [non_breaking] Input field 'CustomerNeedCreateInput.createAsUser' description changed from 'Create need as a user with the provided name. This option is only available to OAuth applications creating needs in `actor=application` mode.' to 'Create need as a user with the provided name. This option is only available to OAuth applications creating needs in `actor=app` mode.' (CustomerNeedCreateInput.createAsUser)
+
+  feat(schema): [non_breaking] Input field 'CustomerNeedCreateInput.displayIconUrl' description changed from 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating needs in `actor=application` mode.' to 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating needs in `actor=app` mode.' (CustomerNeedCreateInput.displayIconUrl)
+
+  feat(schema): [non_breaking] Field 'displayName' was added to object type 'CustomerStatus' (CustomerStatus.displayName)
+
+  feat(schema): [non_breaking] Field 'CustomerStatus.type' is deprecated (CustomerStatus.type)
+
+  feat(schema): [non_breaking] Field 'CustomerStatus.type' has deprecation reason 'Customer statuses are no longer grouped by type.' (CustomerStatus.type)
+
+  feat(schema): [non_breaking] Description 'A type of customer status.' on type 'CustomerStatusType' has changed to '[DEPRECATED] A type of customer status.' (CustomerStatusType)
+
+  feat(schema): [non_breaking] Field 'sortOrder' was added to object type 'Dashboard' (Dashboard.sortOrder)
+
+  feat(schema): [non_breaking] Field 'projectLabel' was added to object type 'Favorite' (Favorite.projectLabel)
+
+  feat(schema): [non_breaking] Field 'facets' was added to object type 'Initiative' (Initiative.facets)
+
+  feat(schema): [non_breaking] Field 'subInitiatives' was added to object type 'Initiative' (Initiative.subInitiatives)
+
+  feat(schema): [non_breaking] Field 'formerAttachments' was added to object type 'Issue' (Issue.formerAttachments)
+
+  feat(schema): [non_breaking] Field 'formerNeeds' was added to object type 'Issue' (Issue.formerNeeds)
+
+  feat(schema): [non_breaking] Field 'incomingSuggestions' was added to object type 'Issue' (Issue.incomingSuggestions)
+
+  feat(schema): [non_breaking] Field 'suggestions' was added to object type 'Issue' (Issue.suggestions)
+
+  feat(schema): [non_breaking] Field 'syncedWith' was added to object type 'Issue' (Issue.syncedWith)
+
+  feat(schema): [non_breaking] Input field 'IssueCreateInput.createAsUser' description changed from 'Create issue as a user with the provided name. This option is only available to OAuth applications creating issues in `actor=application` mode.' to 'Create issue as a user with the provided name. This option is only available to OAuth applications creating issues in `actor=app` mode.' (IssueCreateInput.createAsUser)
+
+  feat(schema): [non_breaking] Input field 'IssueCreateInput.displayIconUrl' description changed from 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.' to 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.' (IssueCreateInput.displayIconUrl)
+
+  feat(schema): [non_breaking] Field 'IssueLabel.isGroup' description changed from 'Whether this label is considered to be a group.' to 'Whether the label is a group.' (IssueLabel.isGroup)
+
+  feat(schema): [non_breaking] Field 'formerAttachments' was added to object type 'IssueSearchResult' (IssueSearchResult.formerAttachments)
+
+  feat(schema): [non_breaking] Field 'formerNeeds' was added to object type 'IssueSearchResult' (IssueSearchResult.formerNeeds)
+
+  feat(schema): [non_breaking] Field 'incomingSuggestions' was added to object type 'IssueSearchResult' (IssueSearchResult.incomingSuggestions)
+
+  feat(schema): [non_breaking] Field 'suggestions' was added to object type 'IssueSearchResult' (IssueSearchResult.suggestions)
+
+  feat(schema): [non_breaking] Field 'syncedWith' was added to object type 'IssueSearchResult' (IssueSearchResult.syncedWith)
+
+  feat(schema): [non_breaking] Field 'attachmentLinkSalesforce' was added to object type 'Mutation' (Mutation.attachmentLinkSalesforce)
+
+  feat(schema): [non_breaking] Field 'customerStatusCreate' was added to object type 'Mutation' (Mutation.customerStatusCreate)
+
+  feat(schema): [non_breaking] Field 'customerStatusDelete' was added to object type 'Mutation' (Mutation.customerStatusDelete)
+
+  feat(schema): [non_breaking] Field 'customerStatusUpdate' was added to object type 'Mutation' (Mutation.customerStatusUpdate)
+
+  feat(schema): [non_breaking] Field 'integrationCustomerDataAttributesRefresh' was added to object type 'Mutation' (Mutation.integrationCustomerDataAttributesRefresh)
+
+  feat(schema): [non_breaking] Field 'integrationSalesforce' was added to object type 'Mutation' (Mutation.integrationSalesforce)
+
+  feat(schema): [non_breaking] Description for argument 'createAsUser' on field 'Mutation.attachmentLinkDiscord' changed from 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.' to 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.' (Mutation.attachmentLinkDiscord.createAsUser)
+
+  feat(schema): [non_breaking] Description for argument 'displayIconUrl' on field 'Mutation.attachmentLinkDiscord' changed from 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.' to 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.' (Mutation.attachmentLinkDiscord.displayIconUrl)
+
+  feat(schema): [non_breaking] Description for argument 'createAsUser' on field 'Mutation.attachmentLinkFront' changed from 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.' to 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.' (Mutation.attachmentLinkFront.createAsUser)
+
+  feat(schema): [non_breaking] Description for argument 'displayIconUrl' on field 'Mutation.attachmentLinkFront' changed from 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.' to 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.' (Mutation.attachmentLinkFront.displayIconUrl)
+
+  feat(schema): [non_breaking] Description for argument 'createAsUser' on field 'Mutation.attachmentLinkGitHubIssue' changed from 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.' to 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.' (Mutation.attachmentLinkGitHubIssue.createAsUser)
+
+  feat(schema): [non_breaking] Description for argument 'displayIconUrl' on field 'Mutation.attachmentLinkGitHubIssue' changed from 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.' to 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.' (Mutation.attachmentLinkGitHubIssue.displayIconUrl)
+
+  feat(schema): [non_breaking] Description for argument 'createAsUser' on field 'Mutation.attachmentLinkGitHubPR' changed from 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.' to 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.' (Mutation.attachmentLinkGitHubPR.createAsUser)
+
+  feat(schema): [non_breaking] Description for argument 'displayIconUrl' on field 'Mutation.attachmentLinkGitHubPR' changed from 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.' to 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.' (Mutation.attachmentLinkGitHubPR.displayIconUrl)
+
+  feat(schema): [non_breaking] Description for argument 'createAsUser' on field 'Mutation.attachmentLinkGitLabMR' changed from 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.' to 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.' (Mutation.attachmentLinkGitLabMR.createAsUser)
+
+  feat(schema): [non_breaking] Description for argument 'displayIconUrl' on field 'Mutation.attachmentLinkGitLabMR' changed from 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.' to 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.' (Mutation.attachmentLinkGitLabMR.displayIconUrl)
+
+  feat(schema): [non_breaking] Description for argument 'createAsUser' on field 'Mutation.attachmentLinkIntercom' changed from 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.' to 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.' (Mutation.attachmentLinkIntercom.createAsUser)
+
+  feat(schema): [non_breaking] Description for argument 'displayIconUrl' on field 'Mutation.attachmentLinkIntercom' changed from 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.' to 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.' (Mutation.attachmentLinkIntercom.displayIconUrl)
+
+  feat(schema): [non_breaking] Description for argument 'createAsUser' on field 'Mutation.attachmentLinkJiraIssue' changed from 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.' to 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.' (Mutation.attachmentLinkJiraIssue.createAsUser)
+
+  feat(schema): [non_breaking] Description for argument 'displayIconUrl' on field 'Mutation.attachmentLinkJiraIssue' changed from 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.' to 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.' (Mutation.attachmentLinkJiraIssue.displayIconUrl)
+
+  feat(schema): [non_breaking] Description for argument 'createAsUser' on field 'Mutation.attachmentLinkSlack' changed from 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.' to 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.' (Mutation.attachmentLinkSlack.createAsUser)
+
+  feat(schema): [non_breaking] Description for argument 'displayIconUrl' on field 'Mutation.attachmentLinkSlack' changed from 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.' to 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.' (Mutation.attachmentLinkSlack.displayIconUrl)
+
+  feat(schema): [non_breaking] Description for argument 'createAsUser' on field 'Mutation.attachmentLinkURL' changed from 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.' to 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.' (Mutation.attachmentLinkURL.createAsUser)
+
+  feat(schema): [non_breaking] Description for argument 'displayIconUrl' on field 'Mutation.attachmentLinkURL' changed from 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.' to 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.' (Mutation.attachmentLinkURL.displayIconUrl)
+
+  feat(schema): [non_breaking] Description for argument 'createAsUser' on field 'Mutation.attachmentLinkZendesk' changed from 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.' to 'Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.' (Mutation.attachmentLinkZendesk.createAsUser)
+
+  feat(schema): [non_breaking] Description for argument 'displayIconUrl' on field 'Mutation.attachmentLinkZendesk' changed from 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.' to 'Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.' (Mutation.attachmentLinkZendesk.displayIconUrl)
+
+  feat(schema): [non_breaking] Field 'aiAddonEnabled' was added to object type 'Organization' (Organization.aiAddonEnabled)
+
+  feat(schema): [non_breaking] Field 'facets' was added to object type 'Organization' (Organization.facets)
+
+  feat(schema): [non_breaking] Field 'restrictLabelManagementToAdmins' was added to object type 'Organization' (Organization.restrictLabelManagementToAdmins)
+
+  feat(schema): [non_breaking] Field 'facets' was added to object type 'Project' (Project.facets)
+
+  feat(schema): [non_breaking] Field 'facets' was added to object type 'ProjectSearchResult' (ProjectSearchResult.facets)
+
+  feat(schema): [non_breaking] Field 'gitHubUserId' was added to object type 'User' (User.gitHubUserId)
+
+  feat(schema): [non_breaking] Field 'User.inviteHash' description changed from 'Unique hash for the user to be used in invite URLs.' to '[DEPRECATED] Unique hash for the user to be used in invite URLs.' (User.inviteHash)
+
+  feat(schema): [non_breaking] Field 'User.inviteHash' is deprecated (User.inviteHash)
+
+  feat(schema): [non_breaking] Field 'User.inviteHash' has deprecation reason 'This hash is not in use anymore, this value will always be empty.' (User.inviteHash)
+
+### Patch Changes
+
+- 1084f2a: chore(deps): update dependency patch versions
+
+## 40.0.0
+
+### Major Changes
+
+- 687ee7f: feat(schema): [breaking] Field 'ArchiveResponse.includesDependencies' changed type from 'Boolean!' to '[String!]!' (ArchiveResponse.includesDependencies)
+
+  feat(schema): [breaking] Field 'summaryText' was removed from object type 'Comment' (Comment.summaryText)
+
+  feat(schema): [breaking] Field 'project' was removed from object type 'Post' (Post.project)
+
+  feat(schema): [breaking] Argument 'snippetSize: Float' was removed from field 'Query.searchDocuments' (Query.searchDocuments.snippetSize)
+
+  feat(schema): [breaking] Argument 'snippetSize: Float' was removed from field 'Query.searchIssues' (Query.searchIssues.snippetSize)
+
+  feat(schema): [breaking] Argument 'snippetSize: Float' was removed from field 'Query.searchProjects' (Query.searchProjects.snippetSize)
+
+  feat(schema): [breaking] Field 'appUserEnabled' was removed from object type 'UserAuthorizedApplication' (UserAuthorizedApplication.appUserEnabled)
+
+  feat(schema): [dangerous] Input field 'feedItemFilterData' was added to input object type 'CustomViewCreateInput' (CustomViewCreateInput.feedItemFilterData)
+
+  feat(schema): [dangerous] Input field 'feedItemFilterData' was added to input object type 'CustomViewUpdateInput' (CustomViewUpdateInput.feedItemFilterData)
+
+  feat(schema): [dangerous] Input field 'mainSourceId' was added to input object type 'CustomerCreateInput' (CustomerCreateInput.mainSourceId)
+
+  feat(schema): [dangerous] Input field 'applyPriorityToRelatedNeeds' was added to input object type 'CustomerNeedUpdateInput' (CustomerNeedUpdateInput.applyPriorityToRelatedNeeds)
+
+  feat(schema): [dangerous] Input field 'mainSourceId' was added to input object type 'CustomerUpdateInput' (CustomerUpdateInput.mainSourceId)
+
+  feat(schema): [dangerous] Input field 'customerRequestsEnabled' was added to input object type 'EmailIntakeAddressUpdateInput' (EmailIntakeAddressUpdateInput.customerRequestsEnabled)
+
+  feat(schema): [dangerous] Input field 'repliesEnabled' was added to input object type 'EmailIntakeAddressUpdateInput' (EmailIntakeAddressUpdateInput.repliesEnabled)
+
+  feat(schema): [dangerous] Enum value 'feed' was added to enum 'FacetPageSource' (FacetPageSource.feed)
+
+  feat(schema): [dangerous] Input field 'issue' was added to input object type 'GoogleSheetsSettingsInput' (GoogleSheetsSettingsInput.issue)
+
+  feat(schema): [dangerous] Input field 'project' was added to input object type 'GoogleSheetsSettingsInput' (GoogleSheetsSettingsInput.project)
+
+  feat(schema): [dangerous] Input field 'ancestors' was added to input object type 'InitiativeCollectionFilter' (InitiativeCollectionFilter.ancestors)
+
+  feat(schema): [dangerous] Input field 'owner' was added to input object type 'InitiativeCollectionFilter' (InitiativeCollectionFilter.owner)
+
+  feat(schema): [dangerous] Input field 'ancestors' was added to input object type 'InitiativeFilter' (InitiativeFilter.ancestors)
+
+  feat(schema): [dangerous] Input field 'owner' was added to input object type 'InitiativeFilter' (InitiativeFilter.owner)
+
+  feat(schema): [dangerous] Input field 'ageTime' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.ageTime)
+
+  feat(schema): [dangerous] Input field 'cycleTime' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.cycleTime)
+
+  feat(schema): [dangerous] Input field 'leadTime' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.leadTime)
+
+  feat(schema): [dangerous] Input field 'triageTime' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.triageTime)
+
+  feat(schema): [dangerous] Input field 'slaStartedAt' was added to input object type 'IssueCreateInput' (IssueCreateInput.slaStartedAt)
+
+  feat(schema): [dangerous] Input field 'ageTime' was added to input object type 'IssueFilter' (IssueFilter.ageTime)
+
+  feat(schema): [dangerous] Input field 'cycleTime' was added to input object type 'IssueFilter' (IssueFilter.cycleTime)
+
+  feat(schema): [dangerous] Input field 'leadTime' was added to input object type 'IssueFilter' (IssueFilter.leadTime)
+
+  feat(schema): [dangerous] Input field 'triageTime' was added to input object type 'IssueFilter' (IssueFilter.triageTime)
+
+  feat(schema): [dangerous] Input field 'isGroup' was added to input object type 'IssueLabelCollectionFilter' (IssueLabelCollectionFilter.isGroup)
+
+  feat(schema): [dangerous] Input field 'isGroup' was added to input object type 'IssueLabelFilter' (IssueLabelFilter.isGroup)
+
+  feat(schema): [dangerous] Input field 'linkCount' was added to input object type 'IssueSortInput' (IssueSortInput.linkCount)
+
+  feat(schema): [dangerous] Input field 'rootIssue' was added to input object type 'IssueSortInput' (IssueSortInput.rootIssue)
+
+  feat(schema): [dangerous] Input field 'slaStartedAt' was added to input object type 'IssueUpdateInput' (IssueUpdateInput.slaStartedAt)
+
+  feat(schema): [dangerous] Input field 'label' was added to input object type 'JiraSettingsInput' (JiraSettingsInput.label)
+
+  feat(schema): [dangerous] Input field 'accessToken' was added to input object type 'JiraUpdateInput' (JiraUpdateInput.accessToken)
+
+  feat(schema): [dangerous] Input field 'email' was added to input object type 'JiraUpdateInput' (JiraUpdateInput.email)
+
+  feat(schema): [dangerous] Argument 'type: String' added to field 'Mutation.refreshGoogleSheetsData' (Mutation.refreshGoogleSheetsData.type)
+
+  feat(schema): [dangerous] Input field 'ageTime' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.ageTime)
+
+  feat(schema): [dangerous] Input field 'cycleTime' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.cycleTime)
+
+  feat(schema): [dangerous] Input field 'leadTime' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.leadTime)
+
+  feat(schema): [dangerous] Input field 'triageTime' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.triageTime)
+
+  feat(schema): [dangerous] Input field 'labels' was added to input object type 'NullableProjectFilter' (NullableProjectFilter.labels)
+
+  feat(schema): [dangerous] Input field 'aiAddonEnabled' was added to input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.aiAddonEnabled)
+
+  feat(schema): [dangerous] Input field 'labels' was added to input object type 'ProjectCollectionFilter' (ProjectCollectionFilter.labels)
+
+  feat(schema): [dangerous] Input field 'labelIds' was added to input object type 'ProjectCreateInput' (ProjectCreateInput.labelIds)
+
+  feat(schema): [dangerous] Input field 'labels' was added to input object type 'ProjectFilter' (ProjectFilter.labels)
+
+  feat(schema): [dangerous] Enum value 'customers' was added to enum 'ProjectTab' (ProjectTab.customers)
+
+  feat(schema): [dangerous] Input field 'labelIds' was added to input object type 'ProjectUpdateInput' (ProjectUpdateInput.labelIds)
+
+  feat(schema): [dangerous] Argument 'hash: String' added to field 'Query.customerNeed' (Query.customerNeed.hash)
+
+  feat(schema): [dangerous] Input field 'inheritWorkflowStatuses' was added to input object type 'TeamCreateInput' (TeamCreateInput.inheritWorkflowStatuses)
+
+  feat(schema): [dangerous] Input field 'productIntelligenceScope' was added to input object type 'TeamCreateInput' (TeamCreateInput.productIntelligenceScope)
+
+  feat(schema): [dangerous] Input field 'aiThreadSummariesEnabled' was added to input object type 'TeamUpdateInput' (TeamUpdateInput.aiThreadSummariesEnabled)
+
+  feat(schema): [dangerous] Input field 'productIntelligenceScope' was added to input object type 'TeamUpdateInput' (TeamUpdateInput.productIntelligenceScope)
+
+  feat(schema): [dangerous] Enum value 'commandMenuClearShortcutTip' was added to enum 'UserFlagType' (UserFlagType.commandMenuClearShortcutTip)
+
+  feat(schema): [dangerous] Input field 'projectLabelId' was added to input object type 'ViewPreferencesCreateInput' (ViewPreferencesCreateInput.projectLabelId)
+
+  feat(schema): [dangerous] Enum value 'projectLabel' was added to enum 'ViewType' (ViewType.projectLabel)
+
+  feat(schema): [dangerous] Input field 'closedIssuesOrderedByRecency' was added to input object type 'WorkflowStateSort' (WorkflowStateSort.closedIssuesOrderedByRecency)
+
+  feat(schema): [non_breaking] Type 'Duration' was added (Duration)
+
+  feat(schema): [non_breaking] Type 'FeedItemFilter' was added (FeedItemFilter)
+
+  feat(schema): [non_breaking] Type 'GoogleSheetsExportSettings' was added (GoogleSheetsExportSettings)
+
+  feat(schema): [non_breaking] Type 'LinkCountSort' was added (LinkCountSort)
+
+  feat(schema): [non_breaking] Type 'NullableDurationComparator' was added (NullableDurationComparator)
+
+  feat(schema): [non_breaking] Type 'ProductIntelligenceScope' was added (ProductIntelligenceScope)
+
+  feat(schema): [non_breaking] Type 'ProjectLabel' was added (ProjectLabel)
+
+  feat(schema): [non_breaking] Type 'ProjectLabelCollectionFilter' was added (ProjectLabelCollectionFilter)
+
+  feat(schema): [non_breaking] Type 'ProjectLabelConnection' was added (ProjectLabelConnection)
+
+  feat(schema): [non_breaking] Type 'ProjectLabelEdge' was added (ProjectLabelEdge)
+
+  feat(schema): [non_breaking] Type 'ProjectLabelFilter' was added (ProjectLabelFilter)
+
+  feat(schema): [non_breaking] Type 'RootIssueSort' was added (RootIssueSort)
+
+  feat(schema): [non_breaking] Field 'bodyData' was added to object type 'Attachment' (Attachment.bodyData)
+
+  feat(schema): [non_breaking] Field 'threadSummary' was added to object type 'Comment' (Comment.threadSummary)
+
+  feat(schema): [non_breaking] Field 'feedItemFilterData' was added to object type 'CustomView' (CustomView.feedItemFilterData)
+
+  feat(schema): [non_breaking] Field 'mainSourceId' was added to object type 'Customer' (Customer.mainSourceId)
+
+  feat(schema): [non_breaking] Field 'customerRequestsEnabled' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.customerRequestsEnabled)
+
+  feat(schema): [non_breaking] Field 'repliesEnabled' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.repliesEnabled)
+
+  feat(schema): [non_breaking] Input field 'EmailIntakeAddressUpdateInput.enabled' changed type from 'Boolean!' to 'Boolean' (EmailIntakeAddressUpdateInput.enabled)
+
+  feat(schema): [non_breaking] Field 'sourceFeedUser' was added to object type 'Facet' (Facet.sourceFeedUser)
+
+  feat(schema): [non_breaking] Input field 'GoogleSheetsSettingsInput.sheetId' has description '[Deprecated] The ID of the target sheet (tab) within the Google Sheet.' (GoogleSheetsSettingsInput.sheetId)
+
+  feat(schema): [non_breaking] Input field 'GoogleSheetsSettingsInput.sheetId' changed type from 'Float!' to 'Float' (GoogleSheetsSettingsInput.sheetId)
+
+  feat(schema): [non_breaking] Input field 'GoogleSheetsSettingsInput.spreadsheetId' has description '[Deprecated] The ID of the exported Google Sheet.' (GoogleSheetsSettingsInput.spreadsheetId)
+
+  feat(schema): [non_breaking] Input field 'GoogleSheetsSettingsInput.spreadsheetId' changed type from 'String!' to 'String' (GoogleSheetsSettingsInput.spreadsheetId)
+
+  feat(schema): [non_breaking] Input field 'GoogleSheetsSettingsInput.spreadsheetUrl' has description '[Deprecated] The URL of the exported Google Sheet.' (GoogleSheetsSettingsInput.spreadsheetUrl)
+
+  feat(schema): [non_breaking] Input field 'GoogleSheetsSettingsInput.spreadsheetUrl' changed type from 'String!' to 'String' (GoogleSheetsSettingsInput.spreadsheetUrl)
+
+  feat(schema): [non_breaking] Input field 'GoogleSheetsSettingsInput.updatedIssuesAt' has description '[Deprecated] The date of the most recent export.' (GoogleSheetsSettingsInput.updatedIssuesAt)
+
+  feat(schema): [non_breaking] Field 'suggestionsGeneratedAt' was added to object type 'Issue' (Issue.suggestionsGeneratedAt)
+
+  feat(schema): [non_breaking] Field 'suggestionsGeneratedAt' was added to object type 'IssueSearchResult' (IssueSearchResult.suggestionsGeneratedAt)
+
+  feat(schema): [non_breaking] Field 'projectAddLabel' was added to object type 'Mutation' (Mutation.projectAddLabel)
+
+  feat(schema): [non_breaking] Field 'projectRemoveLabel' was added to object type 'Mutation' (Mutation.projectRemoveLabel)
+
+  feat(schema): [non_breaking] Field 'Mutation.roadmapArchive' is deprecated (Mutation.roadmapArchive)
+
+  feat(schema): [non_breaking] Field 'Mutation.roadmapArchive' has deprecation reason 'Roadmaps are deprecated, use initiatives instead.' (Mutation.roadmapArchive)
+
+  feat(schema): [non_breaking] Field 'Mutation.roadmapCreate' is deprecated (Mutation.roadmapCreate)
+
+  feat(schema): [non_breaking] Field 'Mutation.roadmapCreate' has deprecation reason 'Roadmaps are deprecated, use initiatives instead.' (Mutation.roadmapCreate)
+
+  feat(schema): [non_breaking] Field 'Mutation.roadmapDelete' is deprecated (Mutation.roadmapDelete)
+
+  feat(schema): [non_breaking] Field 'Mutation.roadmapDelete' has deprecation reason 'Roadmaps are deprecated, use initiatives instead.' (Mutation.roadmapDelete)
+
+  feat(schema): [non_breaking] Field 'Mutation.roadmapUnarchive' is deprecated (Mutation.roadmapUnarchive)
+
+  feat(schema): [non_breaking] Field 'Mutation.roadmapUnarchive' has deprecation reason 'Roadmaps are deprecated, use initiatives instead.' (Mutation.roadmapUnarchive)
+
+  feat(schema): [non_breaking] Field 'Mutation.roadmapUpdate' is deprecated (Mutation.roadmapUpdate)
+
+  feat(schema): [non_breaking] Field 'Mutation.roadmapUpdate' has deprecation reason 'Roadmaps are deprecated, use initiatives instead.' (Mutation.roadmapUpdate)
+
+  feat(schema): [non_breaking] Field 'projectLabels' was added to object type 'Organization' (Organization.projectLabels)
+
+  feat(schema): [non_breaking] Field 'labels' was added to object type 'Project' (Project.labels)
+
+  feat(schema): [non_breaking] Field 'needs' was added to object type 'Project' (Project.needs)
+
+  feat(schema): [non_breaking] Field 'sourceType' was added to object type 'ProjectAttachment' (ProjectAttachment.sourceType)
+
+  feat(schema): [non_breaking] Field 'labels' was added to object type 'ProjectSearchResult' (ProjectSearchResult.labels)
+
+  feat(schema): [non_breaking] Field 'needs' was added to object type 'ProjectSearchResult' (ProjectSearchResult.needs)
+
+  feat(schema): [non_breaking] Description for argument 'id' on field 'Query.customerNeed' changed from 'undefined' to 'The identifier of the need to retrieve.' (Query.customerNeed.id)
+
+  feat(schema): [non_breaking] Type for argument 'id' on field 'Query.customerNeed' changed from 'String!' to 'String' (Query.customerNeed.id)
+
+  feat(schema): [non_breaking] Field 'Query.roadmap' is deprecated (Query.roadmap)
+
+  feat(schema): [non_breaking] Field 'Query.roadmap' has deprecation reason 'Roadmaps are deprecated, use initiatives instead.' (Query.roadmap)
+
+  feat(schema): [non_breaking] Field 'Query.roadmaps' is deprecated (Query.roadmaps)
+
+  feat(schema): [non_breaking] Field 'Query.roadmaps' has deprecation reason 'Roadmaps are deprecated, use initiatives instead.' (Query.roadmaps)
+
+  feat(schema): [non_breaking] Field 'aiThreadSummariesEnabled' was added to object type 'Team' (Team.aiThreadSummariesEnabled)
+
+### Patch Changes
+
+- 59123ce: chore(deps): update dependency patch versions
+- 426d39e: fix: do not package `LinearWebhooks` in UMD module
+
 ## 39.2.1
 
 ### Patch Changes

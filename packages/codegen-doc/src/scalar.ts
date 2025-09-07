@@ -22,6 +22,8 @@ export function printTypescriptScalar(name: string, namespace?: string): string 
       return Doc.SCALAR_JSON_TYPE;
     } else if (Doc.SCALAR_DATE_OR_STRING_NAMES.includes(name)) {
       return Doc.SCALAR_DATE_OR_STRING_TYPE;
+    } else if (Object.keys(Doc.SCALAR_NOTIFICATION_TYPE_MAP).includes(name)) {
+      return `"${Doc.SCALAR_NOTIFICATION_TYPE_MAP[name as keyof typeof Doc.SCALAR_NOTIFICATION_TYPE_MAP]}"`;
     } else {
       return `${printList([namespace, "Scalars"], ".")}['${name}']`;
     }

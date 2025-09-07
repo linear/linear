@@ -1,5 +1,131 @@
 # Change Log
 
+## 2.0.45
+
+### Patch Changes
+
+- 44816c9: chore(deps): update dependency patch versions
+
+## 2.0.44
+
+### Patch Changes
+
+- 3cb2b07: chore(deps): update dependency patch versions
+
+## 2.0.43
+
+### Patch Changes
+
+- ce51e20: chore(deps): update dependency patch versions
+
+## 2.0.42
+
+### Patch Changes
+
+- 38c80cd: chore(deps): update dependency patch versions
+
+## 2.0.41
+
+### Patch Changes
+
+- dd59709: chore(deps): update dependency patch versions
+
+## 2.0.40
+
+### Patch Changes
+
+- 1c5ed69: chore(deps): update dependency patch versions
+
+## 2.0.39
+
+### Patch Changes
+
+- 3556a81: chore(deps): update dependency patch versions
+
+## 2.0.38
+
+### Patch Changes
+
+- 107dd48: chore(deps): update dependency patch versions
+
+## 2.0.37
+
+### Patch Changes
+
+- d55dd52: chore(deps): update dependency patch versions
+
+## 2.0.36
+
+### Patch Changes
+
+- 3679b4c: chore(deps): update dependency patch versions
+
+## 2.0.35
+
+### Patch Changes
+
+- 91bbbdb: chore(deps): update dependency patch versions
+
+## 2.0.34
+
+### Patch Changes
+
+- 70dc0fb: chore(deps): update dependency patch versions
+
+## 2.0.33
+
+### Patch Changes
+
+- ca2f367: chore(deps): update dependency patch versions
+
+## 2.0.32
+
+### Patch Changes
+
+- 19866f7: chore(deps): update dependency patch versions
+
+## 2.0.31
+
+### Patch Changes
+
+- 34ab0d7: chore(deps): update dependency patch versions
+
+## 2.0.30
+
+### Patch Changes
+
+- bff712d: chore(deps): update dependency patch versions
+
+## 2.0.29
+
+### Patch Changes
+
+- 56a0f2f: chore(deps): update dependency patch versions
+
+## 2.0.28
+
+### Patch Changes
+
+- 5231b52: chore(deps): update dependency patch versions
+
+## 2.0.27
+
+### Patch Changes
+
+- edf2099: chore(deps): update dependency patch versions
+
+## 2.0.26
+
+### Patch Changes
+
+- 1084f2a: chore(deps): update dependency patch versions
+
+## 2.0.25
+
+### Patch Changes
+
+- 59123ce: chore(deps): update dependency patch versions
+
 ## 2.0.24
 
 ### Patch Changes

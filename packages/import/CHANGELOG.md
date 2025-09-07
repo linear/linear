@@ -1,5 +1,236 @@
 # Change Log
 
+## 2.2.37
+
+### Patch Changes
+
+- 44816c9: chore(deps): update dependency patch versions
+- Updated dependencies [44816c9]
+- Updated dependencies [b94260a]
+  - @linear/sdk@58.1.0
+
+## 2.2.36
+
+### Patch Changes
+
+- 3cb2b07: chore(deps): update dependency patch versions
+- Updated dependencies [3cb2b07]
+- Updated dependencies [b7d909b]
+  - @linear/sdk@58.0.0
+
+## 2.2.35
+
+### Patch Changes
+
+- ce51e20: chore(deps): update dependency patch versions
+- Updated dependencies [ce51e20]
+- Updated dependencies [d6d3496]
+- Updated dependencies [d6d3496]
+  - @linear/sdk@57.0.0
+
+## 2.2.34
+
+### Patch Changes
+
+- 38c80cd: chore(deps): update dependency patch versions
+- Updated dependencies [38c80cd]
+- Updated dependencies [7c51d32]
+- Updated dependencies [e7a8faa]
+  - @linear/sdk@56.0.0
+
+## 2.2.33
+
+### Patch Changes
+
+- dd59709: chore(deps): update dependency patch versions
+- Updated dependencies [dd59709]
+- Updated dependencies [70ccd6f]
+  - @linear/sdk@55.2.1
+
+## 2.2.32
+
+### Patch Changes
+
+- 1c5ed69: chore(deps): update dependency patch versions
+- Updated dependencies [1c5ed69]
+- Updated dependencies [913358f]
+- Updated dependencies [12c47d3]
+  - @linear/sdk@55.1.0
+
+## 2.2.31
+
+### Patch Changes
+
+- 3556a81: chore(deps): update dependency patch versions
+- Updated dependencies [3556a81]
+- Updated dependencies [91cd76a]
+- Updated dependencies [3fcb764]
+  - @linear/sdk@55.0.0
+
+## 2.2.30
+
+### Patch Changes
+
+- 107dd48: chore(deps): update dependency patch versions
+- Updated dependencies [107dd48]
+- Updated dependencies [a1cd050]
+  - @linear/sdk@54.0.0
+
+## 2.2.29
+
+### Patch Changes
+
+- d55dd52: chore(deps): update dependency patch versions
+- Updated dependencies [d55dd52]
+- Updated dependencies [4b6e659]
+- Updated dependencies [4b6e659]
+  - @linear/sdk@53.0.0
+
+## 2.2.28
+
+### Patch Changes
+
+- 3679b4c: chore(deps): update dependency patch versions
+- Updated dependencies [3679b4c]
+- Updated dependencies [e7e9f8d]
+- Updated dependencies [e52c909]
+- Updated dependencies [54b6ae3]
+  - @linear/sdk@52.1.0
+
+## 2.2.27
+
+### Patch Changes
+
+- 91bbbdb: chore(deps): update dependency patch versions
+- Updated dependencies [91bbbdb]
+- Updated dependencies [29b5e22]
+  - @linear/sdk@52.0.0
+
+## 2.2.26
+
+### Patch Changes
+
+- 70dc0fb: chore(deps): update dependency patch versions
+- 6c6f54d: chore: update import readme about gitlab
+- Updated dependencies [70dc0fb]
+- Updated dependencies [33b8dba]
+  - @linear/sdk@51.1.0
+
+## 2.2.25
+
+### Patch Changes
+
+- ca2f367: chore(deps): update dependency patch versions
+- Updated dependencies [ca2f367]
+- Updated dependencies [bf00d1f]
+  - @linear/sdk@51.0.0
+
+## 2.2.24
+
+### Patch Changes
+
+- Updated dependencies [8e21093]
+  - @linear/sdk@50.0.0
+
+## 2.2.23
+
+### Patch Changes
+
+- 19866f7: chore(deps): update dependency patch versions
+- Updated dependencies [19866f7]
+- Updated dependencies [ec50c02]
+  - @linear/sdk@49.0.0
+
+## 2.2.22
+
+### Patch Changes
+
+- 34ab0d7: chore(deps): update dependency patch versions
+- Updated dependencies [34ab0d7]
+- Updated dependencies [5b92b19]
+- Updated dependencies [e25ae0f]
+- Updated dependencies [e25ae0f]
+  - @linear/sdk@48.0.0
+
+## 2.2.21
+
+### Patch Changes
+
+- bff712d: chore(deps): update dependency patch versions
+- Updated dependencies [bff712d]
+- Updated dependencies [57e6456]
+  - @linear/sdk@47.0.0
+
+## 2.2.20
+
+### Patch Changes
+
+- Updated dependencies [9bfa9aa]
+  - @linear/sdk@46.0.0
+
+## 2.2.19
+
+### Patch Changes
+
+- 56a0f2f: chore(deps): update dependency patch versions
+- Updated dependencies [56a0f2f]
+- Updated dependencies [4034c23]
+  - @linear/sdk@45.4.0
+
+## 2.2.18
+
+### Patch Changes
+
+- 5231b52: chore(deps): update dependency patch versions
+- Updated dependencies [5231b52]
+- Updated dependencies [0e44078]
+  - @linear/sdk@45.0.0
+
+## 2.2.17
+
+### Patch Changes
+
+- Updated dependencies [788127e]
+- Updated dependencies [788127e]
+  - @linear/sdk@44.0.0
+
+## 2.2.16
+
+### Patch Changes
+
+- Updated dependencies [3ea227f]
+- Updated dependencies [3ea227f]
+  - @linear/sdk@43.0.0
+
+## 2.2.15
+
+### Patch Changes
+
+- edf2099: chore(deps): update dependency patch versions
+- Updated dependencies [edf2099]
+- Updated dependencies [511faef]
+- Updated dependencies [511faef]
+  - @linear/sdk@42.0.0
+
+## 2.2.14
+
+### Patch Changes
+
+- 1084f2a: chore(deps): update dependency patch versions
+- Updated dependencies [1084f2a]
+- Updated dependencies [3ffb7c3]
+  - @linear/sdk@41.0.0
+
+## 2.2.13
+
+### Patch Changes
+
+- 59123ce: chore(deps): update dependency patch versions
+- Updated dependencies [59123ce]
+- Updated dependencies [687ee7f]
+- Updated dependencies [426d39e]
+  - @linear/sdk@40.0.0
+
 ## 2.2.12
 
 ### Patch Changes

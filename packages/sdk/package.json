@@ -1,20 +1,31 @@
 {
   "name": "@linear/sdk",
   "description": "The Linear Client SDK for interacting with the Linear GraphQL API",
-  "version": "39.2.1",
+  "version": "58.1.0",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
   "module": "dist/index-es.min.js",
   "unpkg": "dist/index-umd.min.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index-cjs.min.js"
+    },
+    "./webhooks": {
+      "types": "./dist/webhooks/index.d.ts",
+      "default": "./dist/webhooks/index-cjs.min.js"
+    }
+  },
   "repository": "https://github.com/linear/linear",
   "engines": {
     "node": ">=12.x",
     "yarn": "1.x"
   },
   "files": [
-    "dist"
+    "dist",
+    "webhooks"
   ],
   "scripts": {
     "build:clean": "npx rimraf -G dist .rollup-cache tsconfig.tsbuildinfo",
@@ -49,17 +60,19 @@
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.2.0",
-    "@rollup/plugin-typescript": "^8.1.1",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@types/uuid": "^9.0.1",
     "dotenv": "^16.3.1",
     "execa": "^5.0.0",
     "get-port": "^5.1.1",
     "graphql-request": "^3.3.0",
     "replace-in-file": "^6.2.0",
     "rollup": "^2.38.3",
-    "rollup-plugin-gzip": "^2.5.0",
+    "rollup-plugin-gzip": "^4.1.1",
     "rollup-plugin-inject-process-env": "^1.3.1",
     "rollup-plugin-terser": "^7.0.2",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "uuid": "^9.0.1"
   },
   "publishConfig": {
     "access": "public"

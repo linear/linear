@@ -2,7 +2,7 @@
   "name": "@linear/codegen-test",
   "private": true,
   "description": "Plugin for generating jest tests for the Linear Client",
-  "version": "2.0.24",
+  "version": "2.0.45",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
@@ -26,11 +26,11 @@
     "@graphql-codegen/visitor-plugin-common": "^1.17.17",
     "@graphql-tools/graphql-file-loader": "^7.5.13",
     "@graphql-tools/load": "^7.8.8",
-    "@rollup/plugin-typescript": "^8.1.1",
+    "@rollup/plugin-typescript": "^12.1.4",
     "auto-bind": "^4.0.0",
     "graphql": "^15.4.0",
     "rollup": "^2.38.3",
-    "rollup-plugin-gzip": "^2.5.0",
+    "rollup-plugin-gzip": "^4.1.1",
     "rollup-plugin-terser": "^7.0.2"
   }
 }

@@ -15,6 +15,7 @@ export * from "./print-operation";
 export * from "./query";
 export * from "./scalar";
 export * from "./types";
+export * from "./union";
 export * from "./utils";
 export * from "./validate";
 export * from "./variable";

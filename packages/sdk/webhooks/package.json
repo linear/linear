@@ -1,0 +1,6 @@
+{
+  "name": "@linear/sdk/webhooks",
+  "private": true,
+  "types": "../dist/webhooks/index.d.ts",
+  "default": "../dist/webhooks/index-cjs.min.js"
+}

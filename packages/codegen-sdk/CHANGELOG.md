@@ -1,5 +1,139 @@
 # Change Log
 
+## 3.1.11
+
+### Patch Changes
+
+- 44816c9: chore(deps): update dependency patch versions
+
+## 3.1.10
+
+### Patch Changes
+
+- 3cb2b07: chore(deps): update dependency patch versions
+
+## 3.1.9
+
+### Patch Changes
+
+- ce51e20: chore(deps): update dependency patch versions
+
+## 3.1.8
+
+### Patch Changes
+
+- 38c80cd: chore(deps): update dependency patch versions
+
+## 3.1.7
+
+### Patch Changes
+
+- dd59709: chore(deps): update dependency patch versions
+
+## 3.1.6
+
+### Patch Changes
+
+- 1c5ed69: chore(deps): update dependency patch versions
+
+## 3.1.5
+
+### Patch Changes
+
+- 3556a81: chore(deps): update dependency patch versions
+
+## 3.1.4
+
+### Patch Changes
+
+- 107dd48: chore(deps): update dependency patch versions
+
+## 3.1.3
+
+### Patch Changes
+
+- d55dd52: chore(deps): update dependency patch versions
+
+## 3.1.2
+
+### Patch Changes
+
+- 3679b4c: chore(deps): update dependency patch versions
+
+## 3.1.1
+
+### Patch Changes
+
+- 91bbbdb: chore(deps): update dependency patch versions
+
+## 3.1.0
+
+### Minor Changes
+
+- 33b8dba: update codegen to support GraphQL union types
+
+### Patch Changes
+
+- 70dc0fb: chore(deps): update dependency patch versions
+
+## 3.0.6
+
+### Patch Changes
+
+- ca2f367: chore(deps): update dependency patch versions
+
+## 3.0.5
+
+### Patch Changes
+
+- 19866f7: chore(deps): update dependency patch versions
+
+## 3.0.4
+
+### Patch Changes
+
+- 34ab0d7: chore(deps): update dependency patch versions
+
+## 3.0.3
+
+### Patch Changes
+
+- bff712d: chore(deps): update dependency patch versions
+
+## 3.0.2
+
+### Patch Changes
+
+- 56a0f2f: chore(deps): update dependency patch versions
+
+## 3.0.1
+
+### Patch Changes
+
+- 5231b52: chore(deps): update dependency patch versions
+
+## 3.0.0
+
+### Major Changes
+
+- 511faef: Introduces types for webhook data payloads
+
+### Patch Changes
+
+- edf2099: chore(deps): update dependency patch versions
+
+## 2.3.3
+
+### Patch Changes
+
+- 1084f2a: chore(deps): update dependency patch versions
+
+## 2.3.2
+
+### Patch Changes
+
+- 59123ce: chore(deps): update dependency patch versions
+
 ## 2.3.1
 
 ### Patch Changes

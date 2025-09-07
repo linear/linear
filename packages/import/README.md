@@ -118,11 +118,27 @@ Following fields are supported:
 - `Status` - Issue state (workflow)
 - `Assignee` - Issue assignee (user's full name)
 - `Labels` - Added as a label
-## Todo
+- `Estimate` - Issue estimate
+- `Created` - Issue creation date
+- `Completed` - Issue completion date (if has completed status)
 
-- [x] Automatic image uploads
-- [ ] Assignees (pick from a list)
-- [ ] Created at (requires API change)
+### GitLab CSV
+
+GitLab issues can be imported into a Linear team from the CSV export file.
+Go to your project in GitLab. Select Plan > Issues from the left sidebar. Use filters if you want to narrow down the list. In the upper right, click Actions (⋮) > Export as CSV.
+
+Following fields are supported:
+
+- `Title` - Issue title
+- `Description` - Issue description
+- `State`: - Issue workflow state
+- `Labels` - Added as a label
+- `URL`: - Added as a link in the issue description
+- `Created At`: Issue creation date
+- `Due Date`: Issue due date
+- `Closed At`: Issue completion date
+- `Weight`: Issue priority;
+- `Time Estimate` - Issue estimate
 
 <!-- AUTO-GENERATED-CONTENT:START (TEXT_SECTION:id=license&src=../../README.md) -->
 ## License

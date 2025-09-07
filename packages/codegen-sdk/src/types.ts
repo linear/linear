@@ -130,6 +130,7 @@ export enum SdkModelFieldType {
   scalarList = "SdkScalarListField",
   connection = "SdkConnectionField",
   enum = "SdkEnumField",
+  union = "SdkUnionField",
 }
 
 /**
@@ -211,6 +212,15 @@ export interface SdkEnumField extends Omit<SdkScalarField, "__typename"> {
 }
 
 /**
+ * A field with union type
+ */
+export interface SdkUnionField extends Omit<SdkScalarField, "__typename"> {
+  __typename: SdkModelFieldType.union;
+  /** The union type matching this field */
+  union: import("graphql").UnionTypeDefinitionNode;
+}
+
+/**
  * One of the model field types
  */
 export type SdkModelField =
@@ -221,7 +231,8 @@ export type SdkModelField =
   | SdkListField
   | SdkScalarListField
   | SdkConnectionField
-  | SdkEnumField;
+  | SdkEnumField
+  | SdkUnionField;
 
 /**
  * The processed sdk model node
@@ -252,5 +263,6 @@ export interface SdkModel {
     scalarList: SdkScalarListField[];
     connection: SdkConnectionField[];
     enum: SdkEnumField[];
+    union: SdkUnionField[];
   };
 }

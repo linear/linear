@@ -1,3 +1,16 @@
+# A DNS record for a SES domain identity.
+fragment SesDomainIdentityDnsRecord on SesDomainIdentityDnsRecord {
+  __typename
+  # The content of the DNS record.
+  content
+  # The name of the DNS record.
+  name
+  # The type of the DNS record.
+  type
+  # Whether the DNS record is verified in the domain's DNS configuration.
+  isVerified
+}
+
 # A Git target branch for which there are automations (GitAutomationState).
 fragment GitAutomationTargetBranch on GitAutomationTargetBranch {
   __typename
@@ -53,6 +66,10 @@ fragment ActorBot on ActorBot {
 # A comment associated with an issue.
 fragment Comment on Comment {
   __typename
+  # Agent session associated with this comment.
+  agentSession {
+    id
+  }
   # Comment's URL.
   url
   # Emoji reaction summary, grouped by emoji type.
@@ -74,6 +91,10 @@ fragment Comment on Comment {
   # The document content that the comment is associated with.
   documentContent {
     ...DocumentContent
+  }
+  # The external services the comment is synced with.
+  syncedWith {
+    ...ExternalEntityInfo
   }
   # The external thread that the comment is synced with.
   externalThread {
@@ -245,6 +266,10 @@ fragment CustomView on CustomView {
   slugId
   # The description of the custom view.
   description
+  # The filter applied to feed items in the custom view.
+  feedItemFilterData
+  # The filter applied to initiatives in the custom view.
+  initiativeFilterData
   # The filter applied to issues in the custom view.
   filterData
   # The filter applied to projects in the custom view.
@@ -290,6 +315,63 @@ fragment CustomView on CustomView {
   shared
 }
 
+# A customer need related notification.
+fragment CustomerNeedNotification on CustomerNeedNotification {
+  __typename
+  # Notification type.
+  type
+  # Related customer need.
+  customerNeedId
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The category of the notification.
+  category
+  # The customer need related to the notification.
+  customerNeed {
+    id
+  }
+  # The external user that caused the notification.
+  externalUserActor {
+    id
+  }
+  # The issue related to the notification.
+  relatedIssue {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The project related to the notification.
+  relatedProject {
+    id
+  }
+  # The time at when an email reminder for this notification was sent to the user. Null, if no email
+  #     reminder has been sent.
+  emailedAt
+  # The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  readAt
+  # The time at which a notification was unsnoozed..
+  unsnoozedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification.
+  actor {
+    id
+  }
+  # The user that received the notification.
+  user {
+    id
+  }
+}
+
 # A customer need, expressed through a reference to an issue, project, or comment.
 fragment CustomerNeed on CustomerNeed {
   __typename
@@ -311,6 +393,10 @@ fragment CustomerNeed on CustomerNeed {
   customer {
     id
   }
+  # The issue this customer need was originally created on. Will be undefined if the customer need hasn't been moved.
+  originalIssue {
+    id
+  }
   # The issue this need is referencing.
   issue {
     id
@@ -320,6 +406,10 @@ fragment CustomerNeed on CustomerNeed {
   updatedAt
   # The need content in markdown format.
   body
+  # The project attachment this need is referencing.
+  projectAttachment {
+    ...ProjectAttachment
+  }
   # The project this need is referencing.
   project {
     id
@@ -392,6 +482,55 @@ fragment CustomerNotificationSubscription on CustomerNotificationSubscription {
   active
 }
 
+# A customer related notification.
+fragment CustomerNotification on CustomerNotification {
+  __typename
+  # Notification type.
+  type
+  # Related customer.
+  customerId
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The category of the notification.
+  category
+  # The customer related to the notification.
+  customer {
+    id
+  }
+  # The external user that caused the notification.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at when an email reminder for this notification was sent to the user. Null, if no email
+  #     reminder has been sent.
+  emailedAt
+  # The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  readAt
+  # The time at which a notification was unsnoozed..
+  unsnoozedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification.
+  actor {
+    id
+  }
+  # The user that received the notification.
+  user {
+    id
+  }
+}
+
 # A customer status.
 fragment CustomerStatus on CustomerStatus {
   __typename
@@ -399,6 +538,8 @@ fragment CustomerStatus on CustomerStatus {
   description
   # The UI color of the status as a HEX string.
   color
+  # The display name of the status.
+  displayName
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -445,6 +586,8 @@ fragment Customer on Customer {
   __typename
   # The ID of the Slack channel used to interact with the customer.
   slackChannelId
+  # The ID of the main source, when a customer has multiple sources. Must be one of externalIds.
+  mainSourceId
   # The annual revenue generated by the customer.
   revenue
   # The approximate number of needs of the customer.
@@ -603,6 +746,8 @@ fragment DocumentNotification on DocumentNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The external user that caused the notification.
   externalUserActor {
     id
@@ -696,6 +841,10 @@ fragment Facet on Facet {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The owning feed user.
+  sourceFeedUser {
+    id
+  }
   # The owning initiative.
   sourceInitiative {
     id
@@ -758,6 +907,10 @@ fragment Draft on Draft {
   }
   # The project update for which this is a draft comment.
   projectUpdate {
+    id
+  }
+  # The team for which this is a draft post.
+  team {
     id
   }
   # The text content as a Prosemirror document.
@@ -1099,54 +1252,6 @@ fragment LabelNotificationSubscription on LabelNotificationSubscription {
   active
 }
 
-# A meeting that can be attached to different entities.
-fragment Meeting on Meeting {
-  __typename
-  # A flag that indicates whether the meeting is in the trash bin.
-  trashed
-  # Link to a recording of the meeting.
-  recordingLink
-  # The color of the icon.
-  color
-  # The icon of the meeting.
-  icon
-  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The location of the meeting.
-  location
-  # The meeting link of the meeting.
-  meetingLink
-  # The meeting title.
-  title
-  # The order of the item in the resources list.
-  sortOrder
-  # The project that the meeting is associated with.
-  project {
-    id
-  }
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The time at which the meeting is set to end.
-  endsAt
-  # The time at which the meeting is set to start.
-  startsAt
-  # The time at which the meeting was hidden. Null if the entity has not been hidden.
-  hiddenAt
-  # The unique identifier of the entity.
-  id
-  # The user who created the meeting.
-  creator {
-    id
-  }
-  # The user who last updated the meeting.
-  updatedBy {
-    id
-  }
-}
-
 # A milestone for a project.
 fragment ProjectMilestone on ProjectMilestone {
   __typename
@@ -1190,6 +1295,8 @@ fragment Notification on Notification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The external user that caused the notification.
   externalUserActor {
     id
@@ -1221,6 +1328,14 @@ fragment Notification on Notification {
     id
   }
 
+  ... on CustomerNeedNotification {
+    ...CustomerNeedNotification
+  }
+
+  ... on CustomerNotification {
+    ...CustomerNotification
+  }
+
   ... on DocumentNotification {
     ...DocumentNotification
   }
@@ -1237,8 +1352,67 @@ fragment Notification on Notification {
     ...OauthClientApprovalNotification
   }
 
+  ... on PostNotification {
+    ...PostNotification
+  }
+
   ... on ProjectNotification {
     ...ProjectNotification
+  }
+
+  ... on PullRequestNotification {
+    ...PullRequestNotification
+  }
+}
+
+# A post related notification.
+fragment PostNotification on PostNotification {
+  __typename
+  # Name of the reaction emoji related to the notification.
+  reactionEmoji
+  # Notification type.
+  type
+  # Related comment ID. Null if the notification is not related to a comment.
+  commentId
+  # Related parent comment ID. Null if the notification is not related to a comment.
+  parentCommentId
+  # Related post ID.
+  postId
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The category of the notification.
+  category
+  # The external user that caused the notification.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at when an email reminder for this notification was sent to the user. Null, if no email
+  #     reminder has been sent.
+  emailedAt
+  # The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  readAt
+  # The time at which a notification was unsnoozed..
+  unsnoozedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification.
+  actor {
+    id
+  }
+  # The user that received the notification.
+  user {
+    id
   }
 }
 
@@ -1321,6 +1495,8 @@ fragment ProjectNotification on ProjectNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The comment related to the notification.
   comment {
     id
@@ -1331,14 +1507,6 @@ fragment ProjectNotification on ProjectNotification {
   }
   # The external user that caused the notification.
   externalUserActor {
-    id
-  }
-  # The initiative related to the notification.
-  initiative {
-    id
-  }
-  # The initiative update related to the notification.
-  initiativeUpdate {
     id
   }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -1537,6 +1705,53 @@ fragment Project on Project {
   state
 }
 
+# A pull request related notification.
+fragment PullRequestNotification on PullRequestNotification {
+  __typename
+  # Notification type.
+  type
+  # Related pull request comment ID. Null if the notification is not related to a pull request comment.
+  pullRequestCommentId
+  # Related pull request.
+  pullRequestId
+  # The bot that caused the notification.
+  botActor {
+    ...ActorBot
+  }
+  # The category of the notification.
+  category
+  # The external user that caused the notification.
+  externalUserActor {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at when an email reminder for this notification was sent to the user. Null, if no email
+  #     reminder has been sent.
+  emailedAt
+  # The time at when the user marked the notification as read. Null, if the the user hasn't read the notification
+  readAt
+  # The time at which a notification was unsnoozed..
+  unsnoozedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time until a notification will be snoozed. After that it will appear in the inbox again.
+  snoozedUntilAt
+  # The unique identifier of the entity.
+  id
+  # The user that caused the notification.
+  actor {
+    id
+  }
+  # The user that received the notification.
+  user {
+    id
+  }
+}
+
 # A reaction associated with a comment or a project update.
 fragment Reaction on Reaction {
   __typename
@@ -1599,6 +1814,14 @@ fragment IssueHistory on IssueHistory {
   # The actors that performed the actions. This field may be empty in the case of integrations or automations.
   actors {
     ...User
+  }
+  # The app user from whom the issue delegation was transferred.
+  fromDelegate {
+    id
+  }
+  # The app user to whom the issue delegation was transferred.
+  toDelegate {
+    id
   }
   # The bot that performed the action.
   botActor {
@@ -1841,36 +2064,46 @@ fragment InitiativeRelation on InitiativeRelation {
   id
 }
 
-# A roadmap for projects.
-fragment Roadmap on Roadmap {
+# A session for agent activities and state management.
+fragment AgentSession on AgentSession {
   __typename
-  # The canonical url for the roadmap.
-  url
-  # The description of the roadmap.
-  description
+  # A summary of the activities in this session.
+  summary
+  # Metadata about the external source that created this agent session.
+  sourceMetadata
+  # The URL of an external agent-hosted page associated with this session.
+  externalLink
+  # The agent user that is associated with this agent session.
+  appUser {
+    id
+  }
+  # The comment this agent session is associated with.
+  comment {
+    id
+  }
+  # The current status of the agent session.
+  status
+  # The issue this agent session is associated with.
+  issue {
+    id
+  }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The name of the roadmap.
-  name
-  # The roadmap's color.
-  color
-  # The roadmap's unique URL slug.
-  slugId
-  # The sort order of the roadmap within the organization.
-  sortOrder
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The time the agent session ended.
+  endedAt
+  # The time the agent session started.
+  startedAt
+  # The type of the agent session.
+  type
   # The unique identifier of the entity.
   id
-  # The user who created the roadmap.
+  # The user that created this agent session.
   creator {
-    id
-  }
-  # The user who owns the roadmap.
-  owner {
     id
   }
 }
@@ -1921,6 +2154,16 @@ fragment Cycle on Cycle {
   issueCountHistory
   # The unique identifier of the entity.
   id
+  # Whether the cycle is currently active.
+  isActive
+  # Whether the cycle is in the future.
+  isFuture
+  # Whether the cycle is in the past.
+  isPast
+  # Whether the cycle is the next cycle for the team.
+  isNext
+  # Whether the cycle is the previous cycle for the team.
+  isPrevious
 }
 
 # A state in a team workflow.
@@ -2259,14 +2502,14 @@ fragment User on User {
   createdAt
   # The unique identifier of the entity.
   id
+  # The user's GitHub user ID.
+  gitHubUserId
   # The user's display (nick) name. Unique within each organization.
   displayName
   # The user's email address.
   email
   # The user's full name.
   name
-  # Unique hash for the user to be used in invite URLs.
-  inviteHash
   # User's profile URL.
   url
   # Whether the user account is active or disabled (suspended).
@@ -2277,10 +2520,18 @@ fragment User on User {
   app
   # Whether the user is an organization administrator.
   admin
+  # Whether the user is assignable.
+  isAssignable
+  # Whether the user is mentionable.
+  isMentionable
   # Whether the user is the currently authenticated user.
   isMe
+  # Whether this user can access any public team in the organization.
+  canAccessAnyPublicTeam
   # [DEPRECATED] Hash for the user to be used in calendar URLs.
   calendarHash
+  # [DEPRECATED] Unique hash for the user to be used in invite URLs.
+  inviteHash
 }
 
 # A user's notification category preferences.
@@ -2288,6 +2539,10 @@ fragment NotificationCategoryPreferences on NotificationCategoryPreferences {
   __typename
   # The preferences for customer notifications.
   customers {
+    ...NotificationChannelPreferences
+  }
+  # The preferences for feed summary notifications.
+  feed {
     ...NotificationChannelPreferences
   }
   # The preferences for notifications about apps and integrations.
@@ -2487,14 +2742,83 @@ fragment ApiKey on ApiKey {
   createdAt
   # The unique identifier of the entity.
   id
+  # When the API key was last used.
+  lastActiveAt
+}
+
+# An activity within an agent context.
+fragment AgentActivity on AgentActivity {
+  __typename
+  # An optional modifier that provides additional instructions on how the activity should be interpreted.
+  signal
+  # Metadata about the external source that created this agent activity.
+  sourceMetadata
+  # The agent session this activity belongs to.
+  agentSession {
+    id
+  }
+  # The comment this activity is linked to.
+  sourceComment {
+    id
+  }
+  # The content of the activity
+  content {
+    ... on AgentActivityActionContent {
+      ...AgentActivityActionContent
+    }
+    ... on AgentActivityElicitationContent {
+      ...AgentActivityElicitationContent
+    }
+    ... on AgentActivityErrorContent {
+      ...AgentActivityErrorContent
+    }
+    ... on AgentActivityPromptContent {
+      ...AgentActivityPromptContent
+    }
+    ... on AgentActivityResponseContent {
+      ...AgentActivityResponseContent
+    }
+    ... on AgentActivityThoughtContent {
+      ...AgentActivityThoughtContent
+    }
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created this agent activity.
+  user {
+    id
+  }
+  # Whether the activity is ephemeral, and should disappear after the next agent activity.
+  ephemeral
 }
 
 # An email address that can be used for submitting issues.
 fragment EmailIntakeAddress on EmailIntakeAddress {
   __typename
+  # The SES domain identity that the email address is associated with.
+  sesDomainIdentity {
+    ...SesDomainIdentity
+  }
+  # The auto-reply message for issue canceled. If not set, the default reply will be used.
+  issueCanceledAutoReply
+  # The auto-reply message for issue completed. If not set, the default reply will be used.
+  issueCompletedAutoReply
+  # The auto-reply message for issue created. If not set, the default reply will be used.
+  issueCreatedAutoReply
+  # The email address used to forward emails to the intake address.
+  forwardingEmailAddress
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The name to be used for outgoing emails.
+  senderName
   # The team that the email address is associated with.
   team {
     id
@@ -2507,6 +2831,8 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The type of the email address.
+  type
   # The unique identifier of the entity.
   id
   # The user who created the email intake address.
@@ -2515,6 +2841,16 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   }
   # Unique email address user name (before @) used for incoming email.
   address
+  # Whether email replies are enabled.
+  repliesEnabled
+  # Whether issues created from that email address will be turned into customer requests.
+  customerRequestsEnabled
+  # Whether the auto-reply for issue canceled is enabled.
+  issueCanceledAutoReplyEnabled
+  # Whether the auto-reply for issue completed is enabled.
+  issueCompletedAutoReplyEnabled
+  # Whether the commenter's name is included in the email replies.
+  useUserNamesInReplies
   # Whether the email address is enabled.
   enabled
 }
@@ -2590,6 +2926,63 @@ fragment ProjectHistory on ProjectHistory {
   createdAt
   # The unique identifier of the entity.
   id
+}
+
+# An identity provider.
+fragment AuthIdentityProvider on AuthIdentityProvider {
+  __typename
+  # Binding method for authentication call. Can be either `post` (default) or `redirect`.
+  ssoBinding
+  # Sign in endpoint URL for the identity provider.
+  ssoEndpoint
+  # The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference.
+  priority
+  # The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
+  ssoSignAlgo
+  # The issuer's custom entity ID.
+  issuerEntityId
+  # The unique identifier of the entity.
+  id
+  # Whether SAML authentication is enabled for organization.
+  samlEnabled
+  # Whether SCIM provisioning is enabled for organization.
+  scimEnabled
+  # Whether the identity provider is the default identity provider migrated from organization level settings.
+  defaultMigrated
+  # X.509 Signing Certificate in string form.
+  ssoSigningCert
+}
+
+# An identity provider.
+fragment IdentityProvider on IdentityProvider {
+  __typename
+  # Binding method for authentication call. Can be either `post` (default) or `redirect`.
+  ssoBinding
+  # Sign in endpoint URL for the identity provider.
+  ssoEndpoint
+  # The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference.
+  priority
+  # The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`.
+  ssoSignAlgo
+  # The issuer's custom entity ID.
+  issuerEntityId
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # Whether SAML authentication is enabled for organization.
+  samlEnabled
+  # Whether SCIM provisioning is enabled for organization.
+  scimEnabled
+  # Whether the identity provider is the default identity provider migrated from organization level settings.
+  defaultMigrated
+  # X.509 Signing Certificate in string form.
+  ssoSigningCert
 }
 
 # An import job for data from an external service.
@@ -2705,13 +3098,35 @@ fragment InitiativeNotification on InitiativeNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
+  # The comment related to the notification.
+  comment {
+    id
+  }
+  # The document related to the notification.
+  document {
+    id
+  }
   # The external user that caused the notification.
   externalUserActor {
+    id
+  }
+  # The initiative related to the notification.
+  initiative {
+    id
+  }
+  # The initiative update related to the notification.
+  initiativeUpdate {
     id
   }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The parent comment related to the notification, if a notification is a reply comment notification.
+  parentComment {
+    id
+  }
   # The time at when an email reminder for this notification was sent to the user. Null, if no email
   #     reminder has been sent.
   emailedAt
@@ -2744,9 +3159,17 @@ fragment Initiative on Initiative {
   trashed
   # Initiative URL.
   url
+  # Parent initiative associated with the initiative.
+  parentInitiative {
+    id
+  }
   # Settings for all integrations associated with that initiative.
   integrationsSettings {
     id
+  }
+  # The content of the initiative description.
+  documentContent {
+    ...DocumentContent
   }
   # The day at which to prompt for updates.
   updateRemindersDay
@@ -2930,6 +3353,8 @@ fragment IssueNotification on IssueNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The comment related to the notification.
   comment {
     id
@@ -3009,6 +3434,10 @@ fragment Issue on Issue {
   customerTicketCount
   # Suggested branch name for the issue.
   branchName
+  # The agent user that is delegated to work on this issue.
+  delegate {
+    id
+  }
   # The bot that created the issue, if applicable.
   botActor {
     ...ActorBot
@@ -3025,8 +3454,20 @@ fragment Issue on Issue {
   dueDate
   # The estimate of the complexity of the issue..
   estimate
+  # The external services the issue is synced with.
+  syncedWith {
+    ...ExternalEntityInfo
+  }
   # The external user who created the issue.
   externalUserCreator {
+    id
+  }
+  # The external user who requested creation of the Asks issue on behalf of the creator.
+  asksExternalUserRequester {
+    id
+  }
+  # The internal user who requested creation of the Asks issue on behalf of the creator.
+  asksRequester {
     id
   }
   # The issue's description in markdown format.
@@ -3147,6 +3588,8 @@ fragment OauthClientApprovalNotification on OauthClientApprovalNotification {
   botActor {
     ...ActorBot
   }
+  # The category of the notification.
+  category
   # The external user that caused the notification.
   externalUserActor {
     id
@@ -3184,6 +3627,8 @@ fragment Organization on Organization {
   __typename
   # Allowed authentication providers, empty array means all are allowed.
   allowedAuthServices
+  # Allowed file upload content types
+  allowedFileUploadContentTypes
   # Configuration settings for the Customers feature.
   customersConfiguration
   # Default schedule for how often feed summaries are generated.
@@ -3265,6 +3710,8 @@ fragment Organization on Organization {
   customersEnabled
   # Whether the organization is using a roadmap.
   roadmapEnabled
+  # Whether workspace label creation, update, and deletion is restricted to admins.
+  restrictLabelManagementToAdmins
   # [DEPRECATED] The frequency at which to prompt for project updates.
   projectUpdatesReminderFrequency
   # [DEPRECATED] Which day count to use for SLA calculations.
@@ -3371,7 +3818,7 @@ fragment Team on Team {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The name of the team including it's parent team name if it has one.
+  # The name of the team including its parent team name if it has one.
   displayName
   # The team's color.
   color
@@ -3443,6 +3890,8 @@ fragment Team on Team {
   issueEstimationExtended
   # Whether to allow zeros in issues estimates.
   issueEstimationAllowZero
+  # Whether to enable resolved thread AI summaries.
+  aiThreadSummariesEnabled
   # Whether to group recent issue history entries.
   groupIssueHistory
   # Whether to send new issue comment notifications to Slack.
@@ -3547,6 +3996,338 @@ fragment AuthenticationSessionResponse on AuthenticationSessionResponse {
   id
 }
 
+# Base fields for all webhook payloads.
+fragment BaseWebhookPayload on BaseWebhookPayload {
+  __typename
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # The time the payload was created.
+  createdAt
+}
+
+# Certain properties of a comment.
+fragment CommentChildWebhookPayload on CommentChildWebhookPayload {
+  __typename
+  # The ID of the comment.
+  id
+  # The ID of the document content this comment belongs to.
+  documentContentId
+  # The ID of the initiative update this comment belongs to.
+  initiativeUpdateId
+  # The ID of the issue this comment belongs to.
+  issueId
+  # The ID of the project update this comment belongs to.
+  projectUpdateId
+  # The ID of the user who created this comment.
+  userId
+  # The body of the comment.
+  body
+}
+
+# Certain properties of a customer need.
+fragment CustomerNeedChildWebhookPayload on CustomerNeedChildWebhookPayload {
+  __typename
+  # The ID of the attachment this need is referencing.
+  attachmentId
+  # The ID of the customer need.
+  id
+  # The ID of the customer that this need is attached to.
+  customerId
+  # The ID of the issue this need is referencing.
+  issueId
+  # The ID of the project this need is referencing.
+  projectId
+}
+
+# Certain properties of a customer status.
+fragment CustomerStatusChildWebhookPayload on CustomerStatusChildWebhookPayload {
+  __typename
+  # The ID of the customer status.
+  id
+  # The color of the customer status.
+  color
+  # The description of the customer status.
+  description
+  # The display name of the customer status.
+  displayName
+  # The name of the customer status.
+  name
+  # The type of the customer status.
+  type
+}
+
+# Certain properties of a customer tier.
+fragment CustomerTierChildWebhookPayload on CustomerTierChildWebhookPayload {
+  __typename
+  # The ID of the customer tier.
+  id
+  # The color of the customer tier.
+  color
+  # The description of the customer tier.
+  description
+  # The display name of the customer tier.
+  displayName
+  # The name of the customer tier.
+  name
+}
+
+# Certain properties of a customer.
+fragment CustomerChildWebhookPayload on CustomerChildWebhookPayload {
+  __typename
+  # The ID of the customer.
+  id
+  # The domains associated with this customer.
+  domains
+  # The ids of the customers in external systems.
+  externalIds
+  # The name of the customer.
+  name
+}
+
+# Certain properties of a cycle.
+fragment CycleChildWebhookPayload on CycleChildWebhookPayload {
+  __typename
+  # The ID of the cycle.
+  id
+  # The end date of the cycle.
+  endsAt
+  # The name of the cycle.
+  name
+  # The number of the cycle.
+  number
+  # The start date of the cycle.
+  startsAt
+}
+
+# Certain properties of a document content.
+fragment DocumentContentChildWebhookPayload on DocumentContentChildWebhookPayload {
+  __typename
+  # The document this document content belongs to.
+  document {
+    ...DocumentChildWebhookPayload
+  }
+  # The project this document belongs to.
+  project {
+    ...ProjectChildWebhookPayload
+  }
+}
+
+# Certain properties of a document.
+fragment DocumentChildWebhookPayload on DocumentChildWebhookPayload {
+  __typename
+  # The ID of the document.
+  id
+  # The ID of the initiative this document belongs to.
+  initiativeId
+  # The ID of the project this document belongs to.
+  projectId
+  # The initiative this document belongs to.
+  initiative {
+    ...InitiativeChildWebhookPayload
+  }
+  # The project this document belongs to.
+  project {
+    ...ProjectChildWebhookPayload
+  }
+  # The title of the document.
+  title
+}
+
+# Certain properties of a project milestone.
+fragment ProjectMilestoneChildWebhookPayload on ProjectMilestoneChildWebhookPayload {
+  __typename
+  # The ID of the project milestone.
+  id
+  # The name of the project milestone.
+  name
+  # The target date of the project milestone.
+  targetDate
+}
+
+# Certain properties of a project status.
+fragment ProjectStatusChildWebhookPayload on ProjectStatusChildWebhookPayload {
+  __typename
+  # The ID of the project status.
+  id
+  # The color of the project status.
+  color
+  # The name of the project status.
+  name
+  # The type of the project status.
+  type
+}
+
+# Certain properties of a project update.
+fragment ProjectUpdateChildWebhookPayload on ProjectUpdateChildWebhookPayload {
+  __typename
+  # The ID of the project update.
+  id
+  # The ID of the user who wrote the project update.
+  userId
+  # The body of the project update.
+  body
+  # The project that the project update belongs to.
+  project {
+    ...ProjectChildWebhookPayload
+  }
+}
+
+# Certain properties of a project.
+fragment ProjectChildWebhookPayload on ProjectChildWebhookPayload {
+  __typename
+  # The ID of the project.
+  id
+  # The URL of the project.
+  url
+  # The name of the project.
+  name
+}
+
+# Certain properties of a team.
+fragment TeamChildWebhookPayload on TeamChildWebhookPayload {
+  __typename
+  # The ID of the team.
+  id
+  # The key of the team.
+  key
+  # The name of the team.
+  name
+}
+
+# Certain properties of a user.
+fragment UserChildWebhookPayload on UserChildWebhookPayload {
+  __typename
+  # The ID of the user.
+  id
+  # The URL of the user.
+  url
+  # The avatar URL of the user.
+  avatarUrl
+  # The email of the user.
+  email
+  # The name of the user.
+  name
+}
+
+# Certain properties of a workflow state.
+fragment WorkflowStateChildWebhookPayload on WorkflowStateChildWebhookPayload {
+  __typename
+  # The ID of the workflow state.
+  id
+  # The color of the workflow state.
+  color
+  # The name of the workflow state.
+  name
+  # The type of the workflow state.
+  type
+}
+
+# Certain properties of an OAuth client.
+fragment OauthClientChildWebhookPayload on OauthClientChildWebhookPayload {
+  __typename
+  # The ID of the OAuth client.
+  id
+  # The name of the OAuth client.
+  name
+}
+
+# Certain properties of an external user.
+fragment ExternalUserChildWebhookPayload on ExternalUserChildWebhookPayload {
+  __typename
+  # The ID of the external user.
+  id
+  # The email of the external user.
+  email
+  # The name of the external user.
+  name
+}
+
+# Certain properties of an initiative update.
+fragment InitiativeUpdateChildWebhookPayload on InitiativeUpdateChildWebhookPayload {
+  __typename
+  # The ID of the initiative update.
+  id
+  # The body of the initiative update.
+  bodyData
+  # The edited at timestamp of the initiative update.
+  editedAt
+  # The health of the initiative update.
+  health
+}
+
+# Certain properties of an initiative.
+fragment InitiativeChildWebhookPayload on InitiativeChildWebhookPayload {
+  __typename
+  # The ID of the initiative.
+  id
+  # The URL of the initiative.
+  url
+  # The name of the initiative.
+  name
+}
+
+# Certain properties of an integration.
+fragment IntegrationChildWebhookPayload on IntegrationChildWebhookPayload {
+  __typename
+  # The ID of the integration.
+  id
+  # The service of the integration.
+  service
+}
+
+# Certain properties of an issue label.
+fragment IssueLabelChildWebhookPayload on IssueLabelChildWebhookPayload {
+  __typename
+  # The ID of the issue label.
+  id
+  # The color of the issue label.
+  color
+  # The name of the issue label.
+  name
+  # The parent ID of the issue label.
+  parentId
+}
+
+# Certain properties of an issue, including its description.
+fragment IssueWithDescriptionChildWebhookPayload on IssueWithDescriptionChildWebhookPayload {
+  __typename
+  # The ID of the issue.
+  id
+  # The ID of the team that the issue belongs to.
+  team {
+    ...TeamChildWebhookPayload
+  }
+  # The ID of the team that the issue belongs to.
+  teamId
+  # The URL of the issue.
+  url
+  # The description of the issue.
+  description
+  # The identifier of the issue.
+  identifier
+  # The title of the issue.
+  title
+}
+
+# Certain properties of an issue.
+fragment IssueChildWebhookPayload on IssueChildWebhookPayload {
+  __typename
+  # The ID of the issue.
+  id
+  # The ID of the team that the issue belongs to.
+  team {
+    ...TeamChildWebhookPayload
+  }
+  # The ID of the team that the issue belongs to.
+  teamId
+  # The URL of the issue.
+  url
+  # The identifier of the issue.
+  identifier
+  # The title of the issue.
+  title
+}
+
 # Contains requested archived model objects.
 fragment ArchiveResponse on ArchiveResponse {
   __typename
@@ -3558,6 +4339,64 @@ fragment ArchiveResponse on ArchiveResponse {
   databaseVersion
   # Whether the dependencies for the model objects are included in the archive.
   includesDependencies
+}
+
+# Content for a prompt activity.
+fragment AgentActivityPromptContent on AgentActivityPromptContent {
+  __typename
+  # A message requesting additional information or action from user.
+  body
+  # The type of activity.
+  type
+}
+
+# Content for a response activity.
+fragment AgentActivityResponseContent on AgentActivityResponseContent {
+  __typename
+  # The response content in Markdown format.
+  body
+  # The type of activity.
+  type
+}
+
+# Content for a thought activity.
+fragment AgentActivityThoughtContent on AgentActivityThoughtContent {
+  __typename
+  # The thought content in Markdown format.
+  body
+  # The type of activity.
+  type
+}
+
+# Content for an action activity (tool call or action).
+fragment AgentActivityActionContent on AgentActivityActionContent {
+  __typename
+  # The action being performed.
+  action
+  # The parameters for the action, e.g. a file path, a keyword, etc.
+  parameter
+  # The result of the action in Markdown format.
+  result
+  # The type of activity.
+  type
+}
+
+# Content for an elicitation activity.
+fragment AgentActivityElicitationContent on AgentActivityElicitationContent {
+  __typename
+  # The elicitation message in Markdown format.
+  body
+  # The type of activity.
+  type
+}
+
+# Content for an error activity.
+fragment AgentActivityErrorContent on AgentActivityErrorContent {
+  __typename
+  # The error message in Markdown format.
+  body
+  # The type of activity.
+  type
 }
 
 # Defines the membership of a user to a team.
@@ -3597,6 +4436,10 @@ fragment OrganizationDomain on OrganizationDomain {
   verified
   # Prevent users with this domain to create new workspaces.
   disableOrganizationCreation
+  # The identity provider the domain belongs to.
+  identityProvider {
+    ...IdentityProvider
+  }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -3646,6 +4489,101 @@ fragment WebhookFailureEvent on WebhookFailureEvent {
   }
 }
 
+# Generic notification payload.
+fragment OtherNotificationWebhookPayload on OtherNotificationWebhookPayload {
+  __typename
+  # The ID of the actor who caused the notification.
+  actorId
+  # The ID of the comment this notification belongs to.
+  commentId
+  # The ID of the document this notification belongs to.
+  documentId
+  # The ID of the entity.
+  id
+  # The ID of the external user who caused the notification.
+  externalUserActorId
+  # The ID of the issue this notification belongs to.
+  issueId
+  # The ID of the parent comment this notification belongs to.
+  parentCommentId
+  # The ID of the project this notification belongs to.
+  projectId
+  # The ID of the project update this notification belongs to.
+  projectUpdateId
+  # The ID of the user who received the notification.
+  userId
+  # The actor who caused the notification.
+  actor {
+    ...UserChildWebhookPayload
+  }
+  # The comment this notification belongs to.
+  comment {
+    ...CommentChildWebhookPayload
+  }
+  # The document this notification belongs to.
+  document {
+    ...DocumentChildWebhookPayload
+  }
+  # The emoji of the reaction this notification is for.
+  reactionEmoji
+  # The issue this notification belongs to.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The parent comment this notification belongs to.
+  parentComment {
+    ...CommentChildWebhookPayload
+  }
+  # The project this notification belongs to.
+  project {
+    ...ProjectChildWebhookPayload
+  }
+  # The project update this notification belongs to.
+  projectUpdate {
+    ...ProjectUpdateChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The type of the notification.
+  type
+}
+
+# Information about an external entity.
+fragment ExternalEntityInfo on ExternalEntityInfo {
+  __typename
+  # Metadata about the external entity.
+  metadata {
+    ... on ExternalEntityInfoGithubMetadata {
+      ...ExternalEntityInfoGithubMetadata
+    }
+    ... on ExternalEntityInfoJiraMetadata {
+      ...ExternalEntityInfoJiraMetadata
+    }
+    ... on ExternalEntitySlackMetadata {
+      ...ExternalEntitySlackMetadata
+    }
+  }
+  # The id of the external entity.
+  id
+  # The name of the service this entity is synced with.
+  service
+}
+
+# Integration actor payload for webhooks.
+fragment IntegrationActorWebhookPayload on IntegrationActorWebhookPayload {
+  __typename
+  # The ID of the integration.
+  id
+  # The service of the integration.
+  service
+  # The type of actor.
+  type
+}
+
 # Issue attachment (e.g. support ticket, pull request).
 fragment Attachment on Attachment {
   __typename
@@ -3663,12 +4601,18 @@ fragment Attachment on Attachment {
   source
   # Location of the attachment which is also used as an identifier.
   url
+  # The body data of the attachment, if any.
+  bodyData
   # The creator of the attachment.
   creator {
     id
   }
   # The issue this attachment belongs to.
   issue {
+    id
+  }
+  # The issue this attachment was originally created on. Will be undefined if the attachment hasn't been moved.
+  originalIssue {
     id
   }
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -3719,30 +4663,6 @@ fragment InitiativeToProject on InitiativeToProject {
   id
 }
 
-# Join table between projects and roadmaps.
-fragment RoadmapToProject on RoadmapToProject {
-  __typename
-  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The project that the roadmap is associated with.
-  project {
-    id
-  }
-  # The roadmap that the project is associated with.
-  roadmap {
-    id
-  }
-  # The sort order of the project within the roadmap.
-  sortOrder
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The unique identifier of the entity.
-  id
-}
-
 # Join table between templates and integrations.
 fragment IntegrationTemplate on IntegrationTemplate {
   __typename
@@ -3770,6 +4690,8 @@ fragment IntegrationTemplate on IntegrationTemplate {
 # Labels that can be associated with issues.
 fragment IssueLabel on IssueLabel {
   __typename
+  # The date when the label was last applied to an issue or project.
+  lastAppliedAt
   # The label's color as a HEX string.
   color
   # The label's description.
@@ -3801,8 +4723,82 @@ fragment IssueLabel on IssueLabel {
   creator {
     id
   }
-  # Whether this label is considered to be a group.
+  # Whether the label is a group.
   isGroup
+}
+
+# Labels that can be associated with projects.
+fragment ProjectLabel on ProjectLabel {
+  __typename
+  # The date when the label was last applied to an issue or project.
+  lastAppliedAt
+  # The label's color as a HEX string.
+  color
+  # The label's description.
+  description
+  # The label's name.
+  name
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The parent label.
+  parent {
+    id
+  }
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the label.
+  creator {
+    id
+  }
+  # Whether the label is a group.
+  isGroup
+}
+
+# Metadata about the external GitHub entity.
+fragment ExternalEntityInfoGithubMetadata on ExternalEntityInfoGithubMetadata {
+  __typename
+  # The number of the issue.
+  number
+  # The owner of the repository.
+  owner
+  # The repository name.
+  repo
+}
+
+# Metadata about the external Jira entity.
+fragment ExternalEntityInfoJiraMetadata on ExternalEntityInfoJiraMetadata {
+  __typename
+  # The id of the Jira issue type.
+  issueTypeId
+  # The id of the Jira project.
+  projectId
+  # The key of the Jira issue.
+  issueKey
+}
+
+# Metadata about the external Slack entity.
+fragment ExternalEntitySlackMetadata on ExternalEntitySlackMetadata {
+  __typename
+  # The URL of the Slack message.
+  messageUrl
+  # The id of the Slack channel.
+  channelId
+  # The name of the Slack channel.
+  channelName
+  # Whether the entity originated from Slack (not Linear).
+  isFromSlack
+}
+
+# Metadata for guidance that should be provided to an AI agent.
+fragment GuidanceRuleWebhookPayload on GuidanceRuleWebhookPayload {
+  __typename
+  # The content of the guidance as markdown.
+  body
 }
 
 # Notification subscriptions for models.
@@ -3861,6 +4857,17 @@ fragment NotificationSubscription on NotificationSubscription {
   active
 }
 
+# OAuth client actor payload for webhooks.
+fragment OauthClientActorWebhookPayload on OauthClientActorWebhookPayload {
+  __typename
+  # The ID of the OAuth client.
+  id
+  # The name of the OAuth client.
+  name
+  # The type of actor.
+  type
+}
+
 # Object for mapping Slack channel IDs to names and other settings.
 fragment SlackChannelNameMapping on SlackChannelNameMapping {
   __typename
@@ -3915,6 +4922,1387 @@ fragment UploadFile on UploadFile {
   metaData
 }
 
+# Organization origin for guidance rules.
+fragment OrganizationOriginWebhookPayload on OrganizationOriginWebhookPayload {
+  __typename
+  # The type of origin, always 'Organization'.
+  type
+}
+
+# Payload for OAuth app webhook events.
+fragment OAuthAppWebhookPayload on OAuthAppWebhookPayload {
+  __typename
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # Id of the OAuth client that was revoked.
+  oauthClientId
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource.
+  type
+}
+
+# Payload for a comment webhook.
+fragment CommentWebhookPayload on CommentWebhookPayload {
+  __typename
+  # The ID of the comment that resolved this comment.
+  resolvingCommentId
+  # The ID of the document content this comment belongs to.
+  documentContentId
+  # The ID of the entity.
+  id
+  # The ID of the external user who created this comment.
+  externalUserId
+  # The ID of the initiative update this comment belongs to.
+  initiativeUpdateId
+  # The ID of the issue this comment belongs to.
+  issueId
+  # The ID of the parent comment.
+  parentId
+  # The ID of the post this comment belongs to.
+  postId
+  # The ID of the project update this comment belongs to.
+  projectUpdateId
+  # The ID of the user who created this comment.
+  userId
+  # The ID of the user who resolved this comment.
+  resolvingUserId
+  # The body of the comment.
+  body
+  # The bot actor data for this comment.
+  botActor
+  # The document content for this comment.
+  documentContent {
+    ...DocumentContentChildWebhookPayload
+  }
+  # The entity this comment is synced with.
+  syncedWith
+  # The external user who created this comment.
+  externalUser {
+    ...ExternalUserChildWebhookPayload
+  }
+  # The initiative update this comment belongs to.
+  initiativeUpdate {
+    ...InitiativeUpdateChildWebhookPayload
+  }
+  # The issue this comment belongs to.
+  issue {
+    ...IssueChildWebhookPayload
+  }
+  # The parent comment.
+  parent {
+    ...CommentChildWebhookPayload
+  }
+  # The project update this comment belongs to.
+  projectUpdate {
+    ...ProjectUpdateChildWebhookPayload
+  }
+  # The quoted text in this comment.
+  quotedText
+  # The reaction data for this comment.
+  reactionData
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The user who created this comment.
+  user {
+    ...UserChildWebhookPayload
+  }
+  # When the comment was last edited.
+  editedAt
+  # When the comment was resolved.
+  resolvedAt
+}
+
+# Payload for a customer need webhook.
+fragment CustomerNeedWebhookPayload on CustomerNeedWebhookPayload {
+  __typename
+  # The ID of the attachment this need is referencing.
+  attachmentId
+  # The ID of the comment this need is referencing.
+  commentId
+  # The ID of the creator of the customer need.
+  creatorId
+  # The ID of the customer that this need is attached to.
+  customerId
+  # The ID of the entity.
+  id
+  # The ID of the issue this need is referencing.
+  issueId
+  # The ID of the project attachment this need is referencing.
+  projectAttachmentId
+  # The ID of the project this need is referencing.
+  projectId
+  # The attachment this need is referencing.
+  attachment {
+    ...AttachmentWebhookPayload
+  }
+  # The body of the need in Markdown format.
+  body
+  # The customer that this need is attached to.
+  customer {
+    ...CustomerChildWebhookPayload
+  }
+  # The issue ID this customer need was originally created on. Will be undefined if the customer need hasn't been moved.
+  originalIssueId
+  # The issue this need is referencing.
+  issue {
+    ...IssueChildWebhookPayload
+  }
+  # The priority of the need.
+  priority
+  # The project this need is referencing.
+  project {
+    ...ProjectChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Payload for a customer webhook.
+fragment CustomerWebhookPayload on CustomerWebhookPayload {
+  __typename
+  # The ID of the Slack channel used to interact with the customer.
+  slackChannelId
+  # The ID of the customer status.
+  statusId
+  # The ID of the customer tier.
+  tierId
+  # The ID of the entity.
+  id
+  # The ID of the main source, when a customer has multiple sources. Must be one of externalIds.
+  mainSourceId
+  # The ID of the user who owns the customer.
+  ownerId
+  # The annual revenue generated by the customer.
+  revenue
+  # The approximate number of needs of the customer.
+  approximateNeedCount
+  # The customer status.
+  status {
+    ...CustomerStatusChildWebhookPayload
+  }
+  # The customer tier.
+  tier {
+    ...CustomerTierChildWebhookPayload
+  }
+  # The customer's logo URL.
+  logoUrl
+  # The customer's unique URL slug.
+  slugId
+  # The domains associated with this customer.
+  domains
+  # The ids of the customers in external systems.
+  externalIds
+  # The name of the customer.
+  name
+  # The size of the customer.
+  size
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Payload for a cycle webhook.
+fragment CycleWebhookPayload on CycleWebhookPayload {
+  __typename
+  # The ID of the cycle inherited from.
+  inheritedFromId
+  # The ID of the entity.
+  id
+  # The IDs of the uncompleted issues upon close.
+  uncompletedIssuesUponCloseIds
+  # The completion time of the cycle. If null, the cycle hasn't been completed.
+  completedAt
+  # The cycle's description.
+  description
+  # The end date of the cycle.
+  endsAt
+  # The name of the cycle.
+  name
+  # The number of completed estimation points after each day.
+  completedScopeHistory
+  # The number of completed issues in the cycle after each day.
+  completedIssueCountHistory
+  # The number of in progress estimation points after each day.
+  inProgressScopeHistory
+  # The number of the cycle.
+  number
+  # The start date of the cycle.
+  startsAt
+  # The team ID of the cycle.
+  teamId
+  # The time at which the cycle was automatically archived by the auto pruning process.
+  autoArchivedAt
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The total number of estimation points after each day.
+  scopeHistory
+  # The total number of issues in the cycle after each day.
+  issueCountHistory
+}
+
+# Payload for a document webhook.
+fragment DocumentWebhookPayload on DocumentWebhookPayload {
+  __typename
+  # A flag that indicates whether the document is in the trash bin.
+  trashed
+  # The ID of the entity.
+  id
+  # The ID of the initiative this document belongs to.
+  initiativeId
+  # The ID of the last template that was applied to this document.
+  lastAppliedTemplateId
+  # The ID of the project this document belongs to.
+  projectId
+  # The ID of the resource folder this document belongs to.
+  resourceFolderId
+  # The ID of the user who created the document.
+  creatorId
+  # The ID of the user who last updated the document.
+  updatedById
+  # The IDs of the users who are subscribed to this document.
+  subscriberIds
+  # The color of the document.
+  color
+  # The content of the document.
+  content
+  # The description of the document.
+  description
+  # The document's unique URL slug.
+  slugId
+  # The icon of the document.
+  icon
+  # The order of the item in the resources list.
+  sortOrder
+  # The time at which the document was hidden.
+  hiddenAt
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The title of the document.
+  title
+}
+
+# Payload for a project update webhook.
+fragment ProjectUpdateWebhookPayload on ProjectUpdateWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The URL of the project update.
+  url
+  # The body data of the project update.
+  bodyData
+  # The body of the project update.
+  body
+  # The edited at timestamp of the project update.
+  editedAt
+  # The health of the project update.
+  health
+  # The project id of the project update.
+  projectId
+  # The project that the project update belongs to.
+  project {
+    ...ProjectChildWebhookPayload
+  }
+  # The reaction data for this project update.
+  reactionData
+  # The slug id of the project update.
+  slugId
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The user id of the project update.
+  userId
+  # The user who wrote the project update.
+  user {
+    ...UserChildWebhookPayload
+  }
+}
+
+# Payload for a project webhook.
+fragment ProjectWebhookPayload on ProjectWebhookPayload {
+  __typename
+  # IDs of the labels associated with this project.
+  labelIds
+  # IDs of the members of the project.
+  memberIds
+  # IDs of the teams associated with this project.
+  teamIds
+  # The ID of the entity.
+  id
+  # The ID of the issue that was converted to the project.
+  convertedFromIssueId
+  # The ID of the last template that was applied to the project.
+  lastAppliedTemplateId
+  # The ID of the last update posted for this project.
+  lastUpdateId
+  # The ID of the project lead.
+  leadId
+  # The ID of the project status.
+  statusId
+  # The ID of the user who created the project.
+  creatorId
+  # The URL of the project.
+  url
+  # The auto archived at timestamp of the project.
+  autoArchivedAt
+  # The canceled at timestamp of the project.
+  canceledAt
+  # The completed at timestamp of the project.
+  completedAt
+  # The content of the project.
+  content
+  # The document content ID of the project.
+  documentContentId
+  # The estimated start date of the project.
+  startDate
+  # The health of the project.
+  health
+  # The icon of the project.
+  icon
+  # The initiatives associated with the project.
+  initiatives {
+    ...InitiativeChildWebhookPayload
+  }
+  # The milestones associated with the project.
+  milestones {
+    ...ProjectMilestoneChildWebhookPayload
+  }
+  # The number of completed estimation points after each week.
+  completedScopeHistory
+  # The number of completed issues in the project after each week.
+  completedIssueCountHistory
+  # The number of in progress estimation points after each week.
+  inProgressScopeHistory
+  # The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  priority
+  # The project lead.
+  lead {
+    ...UserChildWebhookPayload
+  }
+  # The project status.
+  status {
+    ...ProjectStatusChildWebhookPayload
+  }
+  # The project's color.
+  color
+  # The project's description.
+  description
+  # The project's name.
+  name
+  # The project's unique URL slug.
+  slugId
+  # The resolution of the project's estimated start date.
+  startDateResolution
+  # The resolution of the project's target date.
+  targetDateResolution
+  # The sort order for the project within the organization, when ordered by priority.
+  prioritySortOrder
+  # The sort order for the project within the organization.
+  sortOrder
+  # The target date of the project.
+  targetDate
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The time at which the project health was updated.
+  healthUpdatedAt
+  # The time at which the project update reminders were paused until.
+  projectUpdateRemindersPausedUntilAt
+  # The time at which the project was moved into started state.
+  startedAt
+  # The total number of estimation points after each week.
+  scopeHistory
+  # The total number of issues in the project after each week.
+  issueCountHistory
+  # The trashed status of the project.
+  trashed
+}
+
+# Payload for a reaction webhook.
+fragment ReactionWebhookPayload on ReactionWebhookPayload {
+  __typename
+  # Name of the reaction's emoji.
+  emoji
+  # The ID of the comment that the reaction is associated with.
+  commentId
+  # The ID of the entity.
+  id
+  # The ID of the external user that created the reaction.
+  externalUserId
+  # The ID of the initiative update that the reaction is associated with.
+  initiativeUpdateId
+  # The ID of the issue that the reaction is associated with.
+  issueId
+  # The ID of the post that the reaction is associated with.
+  postId
+  # The ID of the project update that the reaction is associated with.
+  projectUpdateId
+  # The ID of the user that created the reaction.
+  userId
+  # The comment the reaction is associated with.
+  comment {
+    ...CommentChildWebhookPayload
+  }
+  # The issue the reaction is associated with.
+  issue {
+    ...IssueChildWebhookPayload
+  }
+  # The project update the reaction is associated with.
+  projectUpdate {
+    ...ProjectUpdateChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The user that created the reaction.
+  user {
+    ...UserChildWebhookPayload
+  }
+}
+
+# Payload for a terminal issue status change notification.
+fragment IssueStatusChangedNotificationWebhookPayload on IssueStatusChangedNotificationWebhookPayload {
+  __typename
+  # A terminal issue status change notification type.
+  type
+  # The ID of the actor who caused the notification.
+  actorId
+  # The ID of the entity.
+  id
+  # The ID of the external user who caused the notification.
+  externalUserActorId
+  # The ID of the issue this notification belongs to.
+  issueId
+  # The ID of the user who received the notification.
+  userId
+  # The actor who caused the notification.
+  actor {
+    ...UserChildWebhookPayload
+  }
+  # The issue this notification belongs to.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Payload for a user webhook.
+fragment UserWebhookPayload on UserWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The URL of the user.
+  url
+  # The avatar URL of the user.
+  avatarUrl
+  # The description of the user.
+  description
+  # The display name of the user.
+  displayName
+  # The email of the user.
+  email
+  # The local timezone of the user.
+  timezone
+  # The name of the user.
+  name
+  # The reason the user is disabled.
+  disableReason
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # Whether the user is a guest.
+  guest
+  # Whether the user is active.
+  active
+  # Whether the user is an admin.
+  admin
+  # Whether the user is an app.
+  app
+}
+
+# Payload for agent session webhook events.
+fragment AgentSessionEventWebhookPayload on AgentSessionEventWebhookPayload {
+  __typename
+  # Guidance to inform the agent's behavior, which comes from configuration at the level of the workspace, parent teams, and/or current team for this session. The nearest team-specific guidance should take highest precendence.
+  guidance {
+    ...GuidanceRuleWebhookPayload
+  }
+  # ID of the OAuth client the app user is tied to.
+  oauthClientId
+  # ID of the app user the agent session belongs to.
+  appUserId
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # The agent activity that was created.
+  agentActivity {
+    ...AgentActivityWebhookPayload
+  }
+  # The agent session that the event belongs to.
+  agentSession {
+    ...AgentSessionWebhookPayload
+  }
+  # The previous comments in the thread before this agent was mentioned and the session was initiated, if any. Present only for `created` events where the session was initiated by mentioning the agent in a child comment of a thread.
+  previousComments {
+    ...CommentChildWebhookPayload
+  }
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource.
+  type
+}
+
+# Payload for an agent activity webhook.
+fragment AgentActivityWebhookPayload on AgentActivityWebhookPayload {
+  __typename
+  # An optional modifier that provides additional instructions on how the activity should be interpreted.
+  signal
+  # The ID of the agent session that this activity belongs to.
+  agentSessionId
+  # The ID of the entity.
+  id
+  # The ID of the user who created this agent activity.
+  userId
+  # The content of the agent activity.
+  content
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Payload for an agent session webhook.
+fragment AgentSessionWebhookPayload on AgentSessionWebhookPayload {
+  __typename
+  # A summary of the activities in this session.
+  summary
+  # Metadata about the external source that created this agent session.
+  sourceMetadata
+  # The ID of the agent that the agent session belongs to.
+  appUserId
+  # The ID of the comment this agent session is associated with.
+  commentId
+  # The ID of the entity.
+  id
+  # The ID of the issue this agent session is associated with.
+  issueId
+  # The ID of the organization that the agent session belongs to.
+  organizationId
+  # The ID of the user that created the agent session.
+  creatorId
+  # The comment this agent session is associated with.
+  comment {
+    ...CommentChildWebhookPayload
+  }
+  # The current status of the agent session.
+  status
+  # The issue this agent session is associated with.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The time the agent session ended.
+  endedAt
+  # The time the agent session started working.
+  startedAt
+  # The type of the agent session.
+  type
+  # The user that created the agent session.
+  creator {
+    ...UserChildWebhookPayload
+  }
+}
+
+# Payload for an attachment webhook.
+fragment AttachmentWebhookPayload on AttachmentWebhookPayload {
+  __typename
+  # Custom metadata related to the attachment.
+  metadata
+  # Information about the source which created the attachment.
+  source
+  # Optional subtitle of the attachment.
+  subtitle
+  # The ID of the creator of the attachment.
+  creatorId
+  # The ID of the entity.
+  id
+  # The ID of the issue this attachment belonged to originally.
+  originalIssueId
+  # The ID of the issue this attachment belongs to.
+  issueId
+  # The ID of the non-Linear user who created the attachment.
+  externalUserCreatorId
+  # The URL of the attachment.
+  url
+  # The source type of the attachment.
+  sourceType
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The title of the attachment.
+  title
+  # Whether attachments for the same source application should be grouped in the Linear UI.
+  groupBySource
+}
+
+# Payload for an audit entry webhook.
+fragment AuditEntryWebhookPayload on AuditEntryWebhookPayload {
+  __typename
+  # Additional information related to the request which performed the action.
+  requestInformation
+  # Additional metadata related to the audit entry.
+  metadata
+  # Country code of request resulting to audit entry.
+  countryCode
+  # IP from actor when entry was recorded.
+  ip
+  # The ID of the entity.
+  id
+  # The ID of the organization that the audit entry belongs to.
+  organizationId
+  # The ID of the user that caused the audit entry to be created.
+  actorId
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The type of the audit entry.
+  type
+}
+
+# Payload for an initiative update webhook.
+fragment InitiativeUpdateWebhookPayload on InitiativeUpdateWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The URL of the initiative update.
+  url
+  # The body data of the initiative update.
+  bodyData
+  # The body of the initiative update.
+  body
+  # The edited at timestamp of the initiative update.
+  editedAt
+  # The health of the initiative update.
+  health
+  # The initiative id of the initiative update.
+  initiativeId
+  # The initiative that the initiative update belongs to.
+  initiative {
+    ...InitiativeChildWebhookPayload
+  }
+  # The reaction data for this initiative update.
+  reactionData
+  # The slug id of the initiative update.
+  slugId
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The user id of the initiative update.
+  userId
+  # The user that created the initiative update.
+  user {
+    ...UserChildWebhookPayload
+  }
+}
+
+# Payload for an initiative webhook.
+fragment InitiativeWebhookPayload on InitiativeWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The ID of the last update for this initiative.
+  lastUpdateId
+  # The ID of the organization this initiative belongs to.
+  organizationId
+  # The ID of the user who created the initiative.
+  creatorId
+  # The ID of the user who owns the initiative.
+  ownerId
+  # The URL of the initiative.
+  url
+  # The color of the initiative.
+  color
+  # The current status of the initiative.
+  status
+  # The day of the week for update reminders.
+  updateRemindersDay
+  # The description of the initiative.
+  description
+  # The frequency of update reminders in weeks.
+  updateReminderFrequencyInWeeks
+  # The frequency of update reminders.
+  updateReminderFrequency
+  # The health status of the initiative.
+  health
+  # The hour of the day for update reminders.
+  updateRemindersHour
+  # The icon of the initiative.
+  icon
+  # The last update for this initiative.
+  lastUpdate {
+    ...InitiativeUpdateChildWebhookPayload
+  }
+  # The name of the initiative.
+  name
+  # The parent initiative associated with the initiative.
+  parentInitiative {
+    ...InitiativeChildWebhookPayload
+  }
+  # The projects associated with the initiative.
+  projects {
+    ...ProjectChildWebhookPayload
+  }
+  # The resolution of the target date.
+  targetDateResolution
+  # The resolution of the update reminder frequency.
+  frequencyResolution
+  # The sort order of the initiative within the organization.
+  sortOrder
+  # The sub-initiatives associated with the initiative.
+  subInitiatives {
+    ...InitiativeChildWebhookPayload
+  }
+  # The target date of the initiative.
+  targetDate
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The unique slug identifier of the initiative.
+  slugId
+  # The user who created the initiative.
+  creator {
+    ...UserChildWebhookPayload
+  }
+  # The user who owns the initiative.
+  owner {
+    ...UserChildWebhookPayload
+  }
+  # When the health status was last updated.
+  healthUpdatedAt
+  # When the initiative was completed.
+  completedAt
+  # When the initiative was started.
+  startedAt
+  # Whether the initiative is trashed.
+  trashed
+}
+
+# Payload for an issue assigned to you notification.
+fragment IssueAssignedToYouNotificationWebhookPayload on IssueAssignedToYouNotificationWebhookPayload {
+  __typename
+  # An issue assigned to you notification type.
+  type
+  # The ID of the actor who caused the notification.
+  actorId
+  # The ID of the entity.
+  id
+  # The ID of the external user who caused the notification.
+  externalUserActorId
+  # The ID of the issue this notification belongs to.
+  issueId
+  # The ID of the user who received the notification.
+  userId
+  # The actor who caused the notification.
+  actor {
+    ...UserChildWebhookPayload
+  }
+  # The issue this notification belongs to.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Payload for an issue comment mention notification.
+fragment IssueCommentMentionNotificationWebhookPayload on IssueCommentMentionNotificationWebhookPayload {
+  __typename
+  # An issue comment mention notification type.
+  type
+  # The ID of the actor who caused the notification.
+  actorId
+  # The ID of the comment this notification belongs to.
+  commentId
+  # The ID of the entity.
+  id
+  # The ID of the external user who caused the notification.
+  externalUserActorId
+  # The ID of the issue this notification belongs to.
+  issueId
+  # The ID of the parent comment for the comment this notification belongs to.
+  parentCommentId
+  # The ID of the user who received the notification.
+  userId
+  # The actor who caused the notification.
+  actor {
+    ...UserChildWebhookPayload
+  }
+  # The comment this notification belongs to.
+  comment {
+    ...CommentChildWebhookPayload
+  }
+  # The issue this notification belongs to.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The parent comment for the comment this notification belongs to.
+  parentComment {
+    ...CommentChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Payload for an issue comment reaction notification.
+fragment IssueCommentReactionNotificationWebhookPayload on IssueCommentReactionNotificationWebhookPayload {
+  __typename
+  # An issue comment reaction notification type.
+  type
+  # The ID of the actor who caused the notification.
+  actorId
+  # The ID of the comment this notification belongs to.
+  commentId
+  # The ID of the entity.
+  id
+  # The ID of the external user who caused the notification.
+  externalUserActorId
+  # The ID of the issue this notification belongs to.
+  issueId
+  # The ID of the parent comment for the comment this notification belongs to.
+  parentCommentId
+  # The ID of the user who received the notification.
+  userId
+  # The actor who caused the notification.
+  actor {
+    ...UserChildWebhookPayload
+  }
+  # The comment this notification belongs to.
+  comment {
+    ...CommentChildWebhookPayload
+  }
+  # The emoji of the reaction this notification is for.
+  reactionEmoji
+  # The issue this notification belongs to.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The parent comment for the comment this notification belongs to.
+  parentComment {
+    ...CommentChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Payload for an issue emoji reaction notification.
+fragment IssueEmojiReactionNotificationWebhookPayload on IssueEmojiReactionNotificationWebhookPayload {
+  __typename
+  # An issue emoji reaction notification type.
+  type
+  # The ID of the actor who caused the notification.
+  actorId
+  # The ID of the entity.
+  id
+  # The ID of the external user who caused the notification.
+  externalUserActorId
+  # The ID of the issue this notification belongs to.
+  issueId
+  # The ID of the user who received the notification.
+  userId
+  # The actor who caused the notification.
+  actor {
+    ...UserChildWebhookPayload
+  }
+  # The emoji of the reaction this notification is for.
+  reactionEmoji
+  # The issue this notification belongs to.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Payload for an issue label webhook.
+fragment IssueLabelWebhookPayload on IssueLabelWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The color of the issue label.
+  color
+  # The creator ID of the issue label.
+  creatorId
+  # The label's description.
+  description
+  # The name of the issue label.
+  name
+  # The original label inherited from.
+  inheritedFromId
+  # The parent ID of the issue label.
+  parentId
+  # The team ID of the issue label.
+  teamId
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # Whether the label is a group.
+  isGroup
+}
+
+# Payload for an issue mention notification.
+fragment IssueMentionNotificationWebhookPayload on IssueMentionNotificationWebhookPayload {
+  __typename
+  # An issue mention notification type.
+  type
+  # The ID of the actor who caused the notification.
+  actorId
+  # The ID of the entity.
+  id
+  # The ID of the external user who caused the notification.
+  externalUserActorId
+  # The ID of the issue this notification belongs to.
+  issueId
+  # The ID of the user who received the notification.
+  userId
+  # The actor who caused the notification.
+  actor {
+    ...UserChildWebhookPayload
+  }
+  # The issue this notification belongs to.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Payload for an issue new comment notification.
+fragment IssueNewCommentNotificationWebhookPayload on IssueNewCommentNotificationWebhookPayload {
+  __typename
+  # An issue new comment notification type.
+  type
+  # The ID of the actor who caused the notification.
+  actorId
+  # The ID of the comment this notification belongs to.
+  commentId
+  # The ID of the entity.
+  id
+  # The ID of the external user who caused the notification.
+  externalUserActorId
+  # The ID of the issue this notification belongs to.
+  issueId
+  # The ID of the parent comment for the comment this notification belongs to.
+  parentCommentId
+  # The ID of the user who received the notification.
+  userId
+  # The actor who caused the notification.
+  actor {
+    ...UserChildWebhookPayload
+  }
+  # The comment this notification belongs to.
+  comment {
+    ...CommentChildWebhookPayload
+  }
+  # The issue this notification belongs to.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The parent comment for the comment this notification belongs to.
+  parentComment {
+    ...CommentChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Payload for an issue unassignment notification.
+fragment IssueUnassignedFromYouNotificationWebhookPayload on IssueUnassignedFromYouNotificationWebhookPayload {
+  __typename
+  # An issue unassignment notification type.
+  type
+  # The ID of the actor who caused the notification.
+  actorId
+  # The ID of the entity.
+  id
+  # The ID of the external user who caused the notification.
+  externalUserActorId
+  # The ID of the issue this notification belongs to.
+  issueId
+  # The ID of the user who received the notification.
+  userId
+  # The actor who caused the notification.
+  actor {
+    ...UserChildWebhookPayload
+  }
+  # The issue this notification belongs to.
+  issue {
+    ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+}
+
+# Payload for an issue webhook.
+fragment IssueWebhookPayload on IssueWebhookPayload {
+  __typename
+  # A flag that indicates whether the issue is in the trash bin.
+  trashed
+  # Id of the labels associated with this issue.
+  labelIds
+  # Integration type that created this issue, if applicable.
+  integrationSourceType
+  # Previous identifiers of the issue if it has been moved between teams.
+  previousIdentifiers
+  # The ID of the agent user that the issue is delegated to.
+  delegateId
+  # The ID of the cycle that the issue belongs to.
+  cycleId
+  # The ID of the entity.
+  id
+  # The ID of the external user that created the issue.
+  externalUserCreatorId
+  # The ID of the issue's current workflow state.
+  stateId
+  # The ID of the last template that was applied to the issue.
+  lastAppliedTemplateId
+  # The ID of the parent issue.
+  parentId
+  # The ID of the project milestone that the issue belongs to.
+  projectMilestoneId
+  # The ID of the project that the issue belongs to.
+  projectId
+  # The ID of the recurring issue template that created the issue.
+  recurringIssueTemplateId
+  # The ID of the source comment that the issue was created from.
+  sourceCommentId
+  # The ID of the team that the issue belongs to.
+  teamId
+  # The ID of the user that created the issue.
+  creatorId
+  # The ID of the user that is assigned to the issue.
+  assigneeId
+  # The IDs of the users that are subscribed to the issue.
+  subscriberIds
+  # The URL of the issue.
+  url
+  # The agent user that the issue is delegated to.
+  delegate {
+    ...UserChildWebhookPayload
+  }
+  # The bot actor data for this issue.
+  botActor
+  # The cycle that the issue belongs to.
+  cycle {
+    ...CycleChildWebhookPayload
+  }
+  # The description data of the issue.
+  descriptionData
+  # The description of the issue.
+  description
+  # The due date of the issue.
+  dueDate
+  # The entity this issue is synced with.
+  syncedWith
+  # The estimate of the complexity of the issue..
+  estimate
+  # The external user that created the issue.
+  externalUserCreator {
+    ...ExternalUserChildWebhookPayload
+  }
+  # The identifier of the issue.
+  identifier
+  # The issue's current workflow state.
+  state {
+    ...WorkflowStateChildWebhookPayload
+  }
+  # The issue's title.
+  title
+  # The issue's unique number.
+  number
+  # The label of the issue's priority.
+  priorityLabel
+  # The labels associated with this issue.
+  labels {
+    ...IssueLabelChildWebhookPayload
+  }
+  # The order of the item in relation to other items in the organization, when ordered by priority.
+  prioritySortOrder
+  # The order of the item in relation to other items in the organization.
+  sortOrder
+  # The order of the item in the sub-issue list. Only set if the issue has a parent.
+  subIssueSortOrder
+  # The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+  priority
+  # The project milestone that the issue belongs to.
+  projectMilestone {
+    ...ProjectMilestoneChildWebhookPayload
+  }
+  # The project that the issue belongs to.
+  project {
+    ...ProjectChildWebhookPayload
+  }
+  # The reaction data for this issue.
+  reactionData
+  # The team that the issue belongs to.
+  team {
+    ...TeamChildWebhookPayload
+  }
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # The time at which the issue entered triage.
+  startedTriageAt
+  # The time at which the issue was added to a cycle.
+  addedToCycleAt
+  # The time at which the issue was added to a project.
+  addedToProjectAt
+  # The time at which the issue was added to a team.
+  addedToTeamAt
+  # The time at which the issue was auto-archived.
+  autoArchivedAt
+  # The time at which the issue was auto-closed.
+  autoClosedAt
+  # The time at which the issue was canceled.
+  canceledAt
+  # The time at which the issue was completed.
+  completedAt
+  # The time at which the issue was moved into started state.
+  startedAt
+  # The time at which the issue was triaged.
+  triagedAt
+  # The time at which the issue would breach its SLA.
+  slaBreachesAt
+  # The time at which the issue would enter SLA high risk.
+  slaHighRiskAt
+  # The time at which the issue would enter SLA medium risk.
+  slaMediumRiskAt
+  # The time at which the issue's SLA started.
+  slaStartedAt
+  # The time until an issue will be snoozed in Triage view.
+  snoozedUntilAt
+  # The type of SLA the issue is under.
+  slaType
+  # The user that created the issue.
+  creator {
+    ...UserChildWebhookPayload
+  }
+  # The user that is assigned to the issue.
+  assignee {
+    ...UserChildWebhookPayload
+  }
+}
+
+# Payload for app user notification webhook events.
+fragment AppUserNotificationWebhookPayload on AppUserNotificationWebhookPayload {
+  __typename
+  # ID of the OAuth client the app user is tied to.
+  oauthClientId
+  # ID of the app user the notification is for.
+  appUserId
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource.
+  type
+}
+
+# Payload for app user team access change webhook events.
+fragment AppUserTeamAccessChangedWebhookPayload on AppUserTeamAccessChangedWebhookPayload {
+  __typename
+  # ID of the OAuth client the app user is tied to.
+  oauthClientId
+  # ID of the app user the notification is for.
+  appUserId
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # IDs of the teams the app user was added to.
+  addedTeamIds
+  # IDs of the teams the app user was removed from.
+  removedTeamIds
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource.
+  type
+  # Whether the app user can access all public teams.
+  canAccessAllPublicTeams
+}
+
+# Payload for custom webhook resource events.
+fragment CustomResourceWebhookPayload on CustomResourceWebhookPayload {
+  __typename
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource.
+  type
+}
+
+# Payload for entity-related webhook events.
+fragment EntityWebhookPayload on EntityWebhookPayload {
+  __typename
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # In case of an update event, previous values of all updated properties.
+  updatedFrom
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource, i.e., the name of the entity.
+  type
+  # URL for the entity.
+  url
+}
+
+# Payload for issue SLA webhook events.
+fragment IssueSlaWebhookPayload on IssueSlaWebhookPayload {
+  __typename
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # The issue that the SLA event is about.
+  issueData {
+    ...IssueWebhookPayload
+  }
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource.
+  type
+  # URL for the issue.
+  url
+}
+
+# Project attachment
+fragment ProjectAttachment on ProjectAttachment {
+  __typename
+  # An accessor helper to source.type, defines the source type of the attachment.
+  sourceType
+  # Custom metadata related to the attachment.
+  metadata
+  # Information about the external source which created the attachment.
+  source
+  # Optional subtitle of the attachment
+  subtitle
+  # The creator of the attachment.
+  creator {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # Title of the attachment.
+  title
+  # URL of the attachment.
+  url
+}
+
 # Public information of the OAuth application, plus whether the application has been authorized for
 # the given scopes.
 fragment UserAuthorizedApplication on UserAuthorizedApplication {
@@ -3937,8 +6325,6 @@ fragment UserAuthorizedApplication on UserAuthorizedApplication {
   developerUrl
   # Whether or not webhooks are enabled for the application.
   webhooksEnabled
-  # Whether the application supports app users.
-  appUserEnabled
   # Whether the application was created by Linear.
   createdByLinear
   # Whether the user has authorized the application for the given scopes.
@@ -3990,6 +6376,60 @@ fragment OauthClientApproval on OauthClientApproval {
   id
   # The uuid of the OAuth client being requested for installation.
   oauthClientId
+}
+
+# SES domain identity used for sending emails from a custom domain.
+fragment SesDomainIdentity on SesDomainIdentity {
+  __typename
+  # The AWS region of the SES domain identity.
+  region
+  # The DNS records for the SES domain identity.
+  dnsRecords {
+    ...SesDomainIdentityDnsRecord
+  }
+  # The domain of the SES domain identity.
+  domain
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the SES domain identity.
+  creator {
+    id
+  }
+  # Whether the domain is fully verified and can be used for sending emails.
+  canSendFromCustomDomain
+}
+
+# Team origin for guidance rules.
+fragment TeamOriginWebhookPayload on TeamOriginWebhookPayload {
+  __typename
+  # The team that the guidance was defined in.
+  team {
+    ...TeamWithParentWebhookPayload
+  }
+  # The type of origin, always 'Team'.
+  type
+}
+
+# Team properties including parent information for guidance rules.
+fragment TeamWithParentWebhookPayload on TeamWithParentWebhookPayload {
+  __typename
+  # The ID of the team.
+  id
+  # The key of the team.
+  key
+  # The name of the team.
+  name
+  # The parent team's unique identifier, if any.
+  parentId
+  # The team's display name including parent team names if applicable.
+  displayName
 }
 
 # The configuration of all integrations for different entities.
@@ -4161,6 +6601,23 @@ fragment SlackAsksTeamSettings on SlackAsksTeamSettings {
   hasDefaultAsk
 }
 
+# User actor payload for webhooks.
+fragment UserActorWebhookPayload on UserActorWebhookPayload {
+  __typename
+  # The ID of the user.
+  id
+  # The URL of the user.
+  url
+  # The avatar URL of the user.
+  avatarUrl
+  # The email of the user.
+  email
+  # The name of the user.
+  name
+  # The type of actor.
+  type
+}
+
 # User favorites presented in the sidebar.
 fragment Favorite on Favorite {
   __typename
@@ -4192,12 +6649,12 @@ fragment Favorite on Favorite {
   label {
     id
   }
-  # The favorited project.
-  project {
+  # The favorited project label.
+  projectLabel {
     id
   }
-  # The favorited roadmap.
-  roadmap {
+  # The favorited project.
+  project {
     id
   }
   # The favorited user.
@@ -4314,6 +6771,108 @@ fragment AuditEntry on AuditEntry {
     id
   }
   type
+}
+
+# [Deprecated] A roadmap for projects.
+fragment Roadmap on Roadmap {
+  __typename
+  # The canonical url for the roadmap.
+  url
+  # The description of the roadmap.
+  description
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The name of the roadmap.
+  name
+  # The roadmap's color.
+  color
+  # The roadmap's unique URL slug.
+  slugId
+  # The sort order of the roadmap within the organization.
+  sortOrder
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  # The user who created the roadmap.
+  creator {
+    id
+  }
+  # The user who owns the roadmap.
+  owner {
+    id
+  }
+}
+
+# [Deprecated] Join table between projects and roadmaps.
+fragment RoadmapToProject on RoadmapToProject {
+  __typename
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The project that the roadmap is associated with.
+  project {
+    id
+  }
+  # The roadmap that the project is associated with.
+  roadmap {
+    id
+  }
+  # The sort order of the project within the roadmap.
+  sortOrder
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
+fragment AgentActivityConnection on AgentActivityConnection {
+  __typename
+  nodes {
+    ...AgentActivity
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment AgentActivityPayload on AgentActivityPayload {
+  __typename
+  # The agent activity that was created or updated.
+  agentActivity {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment AgentSessionConnection on AgentSessionConnection {
+  __typename
+  nodes {
+    ...AgentSession
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment AgentSessionPayload on AgentSessionPayload {
+  __typename
+  # The agent session that was created or updated.
+  agentSession {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
 }
 
 fragment ApiKeyConnection on ApiKeyConnection {
@@ -4546,6 +7105,22 @@ fragment CustomerNeedPayload on CustomerNeedPayload {
   success
 }
 
+fragment CustomerNeedUpdatePayload on CustomerNeedUpdatePayload {
+  __typename
+  # The customer need that was created or updated.
+  need {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The related customer needs that were updated.
+  updatedRelatedNeeds {
+    ...CustomerNeed
+  }
+  # Whether the operation was successful.
+  success
+}
+
 fragment CustomerPayload on CustomerPayload {
   __typename
   # The customer that was created or updated.
@@ -4566,6 +7141,18 @@ fragment CustomerStatusConnection on CustomerStatusConnection {
   pageInfo {
     ...PageInfo
   }
+}
+
+fragment CustomerStatusPayload on CustomerStatusPayload {
+  __typename
+  # The customer status that was created or updated.
+  status {
+    id
+  }
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
 }
 
 fragment CustomerTierConnection on CustomerTierConnection {
@@ -4741,7 +7328,7 @@ fragment EmailIntakeAddressPayload on EmailIntakeAddressPayload {
   __typename
   # The email address that was created or updated.
   emailIntakeAddress {
-    ...EmailIntakeAddress
+    id
   }
   # The identifier of the last sync operation.
   lastSyncId
@@ -4836,6 +7423,18 @@ fragment FavoritePayload on FavoritePayload {
     id
   }
   # Whether the operation was successful.
+  success
+}
+
+fragment FetchDataPayload on FetchDataPayload {
+  __typename
+  # The GraphQL query used to fetch the data.
+  query
+  # The fetched data based on the natural language query.
+  data
+  # The filters used to fetch the data.
+  filters
+  # Whether the fetch operation was successful.
   success
 }
 
@@ -5065,6 +7664,14 @@ fragment IntegrationRequestPayload on IntegrationRequestPayload {
   success
 }
 
+fragment IntegrationSlackWorkspaceNamePayload on IntegrationSlackWorkspaceNamePayload {
+  __typename
+  # The current name of the Slack workspace.
+  name
+  # Whether the operation was successful.
+  success
+}
+
 fragment IntegrationTemplateConnection on IntegrationTemplateConnection {
   __typename
   nodes {
@@ -5277,6 +7884,10 @@ fragment IssueSearchResult on IssueSearchResult {
   customerTicketCount
   # Suggested branch name for the issue.
   branchName
+  # The agent user that is delegated to work on this issue.
+  delegate {
+    id
+  }
   # The bot that created the issue, if applicable.
   botActor {
     ...ActorBot
@@ -5293,8 +7904,20 @@ fragment IssueSearchResult on IssueSearchResult {
   dueDate
   # The estimate of the complexity of the issue..
   estimate
+  # The external services the issue is synced with.
+  syncedWith {
+    ...ExternalEntityInfo
+  }
   # The external user who created the issue.
   externalUserCreator {
+    id
+  }
+  # The external user who requested creation of the Asks issue on behalf of the creator.
+  asksExternalUserRequester {
+    id
+  }
+  # The internal user who requested creation of the Asks issue on behalf of the creator.
+  asksRequester {
     id
   }
   # The issue's description in markdown format.
@@ -5398,6 +8021,68 @@ fragment IssueSearchResult on IssueSearchResult {
   state {
     id
   }
+}
+
+fragment IssueSuggestion on IssueSuggestion {
+  __typename
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+  issue {
+    id
+  }
+  issueId
+  metadata {
+    ...IssueSuggestionMetadata
+  }
+  state
+  stateChangedAt
+  suggestedIssue {
+    id
+  }
+  suggestedIssueId
+  suggestedLabel {
+    id
+  }
+  suggestedLabelId
+  suggestedProject {
+    id
+  }
+  suggestedTeam {
+    id
+  }
+  suggestedUser {
+    id
+  }
+  suggestedUserId
+  type
+}
+
+fragment IssueSuggestionConnection on IssueSuggestionConnection {
+  __typename
+  nodes {
+    ...IssueSuggestion
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment IssueSuggestionMetadata on IssueSuggestionMetadata {
+  __typename
+  appliedAutomationRuleId
+  classification
+  evalLogId
+  rank
+  reasons
+  score
+  variant
 }
 
 fragment IssueTitleSuggestionFromCustomerRequestPayload on IssueTitleSuggestionFromCustomerRequestPayload {
@@ -5628,6 +8313,28 @@ fragment ProjectHistoryConnection on ProjectHistoryConnection {
   pageInfo {
     ...PageInfo
   }
+}
+
+fragment ProjectLabelConnection on ProjectLabelConnection {
+  __typename
+  nodes {
+    ...ProjectLabel
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment ProjectLabelPayload on ProjectLabelPayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # The label that was created or updated.
+  projectLabel {
+    id
+  }
+  # Whether the operation was successful.
+  success
 }
 
 fragment ProjectMilestoneConnection on ProjectMilestoneConnection {
@@ -6369,6 +9076,112 @@ query administrableTeams(
     ...TeamConnection
   }
 }
+# All agent activities.
+query agentActivities(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned agent activities.
+  $filter: AgentActivityFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  agentActivities(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...AgentActivityConnection
+  }
+}
+# A specific agent activity.
+query agentActivity(
+  # The identifier of the agent activity to retrieve.
+  $id: String!
+) {
+  agentActivity(id: $id) {
+    ...AgentActivity
+  }
+}
+# A specific agent session.
+query agentSession(
+  # The identifier of the agent session to retrieve.
+  $id: String!
+) {
+  agentSession(id: $id) {
+    ...AgentSession
+  }
+}
+# Activities associated with this agent session.
+query agentSession_activities(
+  # The identifier of the agent session to retrieve.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned agent activities.
+  $filter: AgentActivityFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  agentSession(id: $id) {
+    activities(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...AgentActivityConnection
+    }
+  }
+}
+# All agent sessions.
+query agentSessions(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  agentSessions(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...AgentSessionConnection
+  }
+}
 # All API keys for the user.
 query apiKeys(
   # A cursor to be used with first for forward pagination
@@ -6542,6 +9355,72 @@ query attachmentIssue_comments(
       orderBy: $orderBy
     ) {
       ...CommentConnection
+    }
+  }
+}
+# Attachments previously associated with the issue before being moved to another issue.
+query attachmentIssue_formerAttachments(
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned attachments.
+  $filter: AttachmentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    formerAttachments(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...AttachmentConnection
+    }
+  }
+}
+# Customer needs previously associated with the issue before being moved to another issue.
+query attachmentIssue_formerNeeds(
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned needs.
+  $filter: CustomerNeedFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    formerNeeds(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CustomerNeedConnection
     }
   }
 }
@@ -6964,6 +9843,38 @@ query customView($id: String!) {
     ...CustomView
   }
 }
+# Initiatives associated with the custom view.
+query customView_initiatives(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned initiatives.
+  $filter: InitiativeFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  customView(id: $id) {
+    initiatives(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...InitiativeConnection
+    }
+  }
+}
 # Issues associated with the custom view.
 query customView_issues(
   $id: String!
@@ -6977,6 +9888,8 @@ query customView_issues(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Include issues from sub-teams when the custom view is associated with a team.
+  $includeSubTeams: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
@@ -6991,6 +9904,7 @@ query customView_issues(
       filter: $filter
       first: $first
       includeArchived: $includeArchived
+      includeSubTeams: $includeSubTeams
       last: $last
       orderBy: $orderBy
       sort: $sort
@@ -7030,10 +9944,14 @@ query customView_projects(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Include projects from sub-teams when the custom view is associated with a team.
+  $includeSubTeams: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
 ) {
   customView(id: $id) {
     projects(
@@ -7042,8 +9960,10 @@ query customView_projects(
       filter: $filter
       first: $first
       includeArchived: $includeArchived
+      includeSubTeams: $includeSubTeams
       last: $last
       orderBy: $orderBy
+      sort: $sort
     ) {
       ...ProjectConnection
     }
@@ -7090,6 +10010,8 @@ query customViews(
   $after: String
   # A cursor to be used with last for backward pagination.
   $before: String
+  # Filter returned custom views.
+  $filter: CustomViewFilter
   # The number of items to forward paginate (used with after). Defaults to 50.
   $first: Int
   # Should archived resources be included (default: false)
@@ -7098,14 +10020,18 @@ query customViews(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned custom views.
+  $sort: [CustomViewSortInput!]
 ) {
   customViews(
     after: $after
     before: $before
+    filter: $filter
     first: $first
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    sort: $sort
   ) {
     ...CustomViewConnection
   }
@@ -7117,9 +10043,27 @@ query customer($id: String!) {
   }
 }
 # One specific customer need
-query customerNeed($id: String!) {
-  customerNeed(id: $id) {
+query customerNeed(
+  # The hash of the need to retrieve.
+  $hash: String
+  # The identifier of the need to retrieve.
+  $id: String
+) {
+  customerNeed(hash: $hash, id: $id) {
     ...CustomerNeed
+  }
+}
+# The project attachment this need is referencing.
+query customerNeed_projectAttachment(
+  # The hash of the need to retrieve.
+  $hash: String
+  # The identifier of the need to retrieve.
+  $id: String
+) {
+  customerNeed(hash: $hash, id: $id) {
+    projectAttachment {
+      ...ProjectAttachment
+    }
   }
 }
 # All customer needs.
@@ -7419,6 +10363,20 @@ query documents(
     ...DocumentConnection
   }
 }
+# One specific email intake address.
+query emailIntakeAddress($id: String!) {
+  emailIntakeAddress(id: $id) {
+    ...EmailIntakeAddress
+  }
+}
+# The SES domain identity that the email address is associated with.
+query emailIntakeAddress_sesDomainIdentity($id: String!) {
+  emailIntakeAddress(id: $id) {
+    sesDomainIdentity {
+      ...SesDomainIdentity
+    }
+  }
+}
 # A specific emoji.
 query emoji(
   # The identifier or the name of the emoji to retrieve.
@@ -7562,6 +10520,46 @@ query initiative($id: String!) {
     ...Initiative
   }
 }
+# The content of the initiative description.
+query initiative_documentContent($id: String!) {
+  initiative(id: $id) {
+    documentContent {
+      ...DocumentContent
+    }
+  }
+}
+# Documents associated with the initiative.
+query initiative_documents(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned documents.
+  $filter: DocumentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  initiative(id: $id) {
+    documents(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...DocumentConnection
+    }
+  }
+}
 # History entries associated with the initiative.
 query initiative_history(
   $id: String!
@@ -7633,10 +10631,14 @@ query initiative_projects(
   $first: Int
   # Should archived resources be included (default: false)
   $includeArchived: Boolean
+  # Whether to include projects from sub-initiatives. Defaults to true.
+  $includeSubInitiatives: Boolean
   # The number of items to backward paginate (used with before). Defaults to 50.
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
 ) {
   initiative(id: $id) {
     projects(
@@ -7645,10 +10647,47 @@ query initiative_projects(
       filter: $filter
       first: $first
       includeArchived: $includeArchived
+      includeSubInitiatives: $includeSubInitiatives
       last: $last
       orderBy: $orderBy
+      sort: $sort
     ) {
       ...ProjectConnection
+    }
+  }
+}
+# Sub-initiatives associated with the initiative.
+query initiative_subInitiatives(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned sub-initiatives.
+  $filter: InitiativeFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned initiatives.
+  $sort: [InitiativeSortInput!]
+) {
+  initiative(id: $id) {
+    subInitiatives(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+      sort: $sort
+    ) {
+      ...InitiativeConnection
     }
   }
 }
@@ -7803,6 +10842,8 @@ query initiatives(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned initiatives.
+  $sort: [InitiativeSortInput!]
 ) {
   initiatives(
     after: $after
@@ -7812,6 +10853,7 @@ query initiatives(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    sort: $sort
   ) {
     ...InitiativeConnection
   }
@@ -8004,6 +11046,70 @@ query issue_comments(
       orderBy: $orderBy
     ) {
       ...CommentConnection
+    }
+  }
+}
+# Attachments previously associated with the issue before being moved to another issue.
+query issue_formerAttachments(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned attachments.
+  $filter: AttachmentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    formerAttachments(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...AttachmentConnection
+    }
+  }
+}
+# Customer needs previously associated with the issue before being moved to another issue.
+query issue_formerNeeds(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned needs.
+  $filter: CustomerNeedFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    formerNeeds(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CustomerNeedConnection
     }
   }
 }
@@ -8570,6 +11676,72 @@ query issueVcsBranchSearch_comments(
     }
   }
 }
+# Attachments previously associated with the issue before being moved to another issue.
+query issueVcsBranchSearch_formerAttachments(
+  # The VCS branch name to search for.
+  $branchName: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned attachments.
+  $filter: AttachmentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issueVcsBranchSearch(branchName: $branchName) {
+    formerAttachments(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...AttachmentConnection
+    }
+  }
+}
+# Customer needs previously associated with the issue before being moved to another issue.
+query issueVcsBranchSearch_formerNeeds(
+  # The VCS branch name to search for.
+  $branchName: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned needs.
+  $filter: CustomerNeedFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issueVcsBranchSearch(branchName: $branchName) {
+    formerNeeds(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CustomerNeedConnection
+    }
+  }
+}
 # History entries associated with the issue.
 query issueVcsBranchSearch_history(
   # The VCS branch name to search for.
@@ -8923,6 +12095,37 @@ query organization_labels(
       orderBy: $orderBy
     ) {
       ...IssueLabelConnection
+    }
+  }
+}
+# Project labels associated with the organization.
+query organization_projectLabels(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned project labels.
+  $filter: ProjectLabelFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  organization {
+    projectLabels(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ProjectLabelConnection
     }
   }
 }
@@ -9291,6 +12494,38 @@ query project_issues(
     }
   }
 }
+# Labels associated with this project.
+query project_labels(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned project labels.
+  $filter: ProjectLabelFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  project(id: $id) {
+    labels(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ProjectLabelConnection
+    }
+  }
+}
 # Users that are members of the project.
 query project_members(
   $id: String!
@@ -9323,6 +12558,38 @@ query project_members(
       orderBy: $orderBy
     ) {
       ...UserConnection
+    }
+  }
+}
+# Customer needs associated with the project.
+query project_needs(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned needs.
+  $filter: CustomerNeedFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  project(id: $id) {
+    needs(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...CustomerNeedConnection
     }
   }
 }
@@ -9452,6 +12719,108 @@ query project_teams(
 query projectFilterSuggestion($prompt: String!) {
   projectFilterSuggestion(prompt: $prompt) {
     ...ProjectFilterSuggestionPayload
+  }
+}
+# One specific label.
+query projectLabel($id: String!) {
+  projectLabel(id: $id) {
+    ...ProjectLabel
+  }
+}
+# Children of the label.
+query projectLabel_children(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned project labels.
+  $filter: ProjectLabelFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  projectLabel(id: $id) {
+    children(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...ProjectLabelConnection
+    }
+  }
+}
+# Projects associated with the label.
+query projectLabel_projects(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned projects.
+  $filter: ProjectFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
+) {
+  projectLabel(id: $id) {
+    projects(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+      sort: $sort
+    ) {
+      ...ProjectConnection
+    }
+  }
+}
+# All project labels.
+query projectLabels(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned project labels.
+  $filter: ProjectLabelFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  projectLabels(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    ...ProjectLabelConnection
   }
 }
 # One specific project milestone.
@@ -9680,6 +13049,8 @@ query projects(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
 ) {
   projects(
     after: $after
@@ -9689,6 +13060,7 @@ query projects(
     includeArchived: $includeArchived
     last: $last
     orderBy: $orderBy
+    sort: $sort
   ) {
     ...ProjectConnection
   }
@@ -9754,7 +13126,6 @@ query roadmapToProject($id: String!) {
     ...RoadmapToProject
   }
 }
-# Custom views for the user.
 query roadmapToProjects(
   # A cursor to be used with first for forward pagination
   $after: String
@@ -9822,8 +13193,6 @@ query searchDocuments(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
-  # Size of search snippet to return (default: 100)
-  $snippetSize: Float
   # UUID of a team to use as a boost.
   $teamId: String
   # Search string to look for.
@@ -9837,7 +13206,6 @@ query searchDocuments(
     includeComments: $includeComments
     last: $last
     orderBy: $orderBy
-    snippetSize: $snippetSize
     teamId: $teamId
     term: $term
   ) {
@@ -9860,8 +13228,6 @@ query searchDocuments_archivePayload(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
-  # Size of search snippet to return (default: 100)
-  $snippetSize: Float
   # UUID of a team to use as a boost.
   $teamId: String
   # Search string to look for.
@@ -9875,7 +13241,6 @@ query searchDocuments_archivePayload(
     includeComments: $includeComments
     last: $last
     orderBy: $orderBy
-    snippetSize: $snippetSize
     teamId: $teamId
     term: $term
   ) {
@@ -9902,8 +13267,6 @@ query searchIssues(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
-  # Size of search snippet to return (default: 100)
-  $snippetSize: Float
   # UUID of a team to use as a boost.
   $teamId: String
   # Search string to look for.
@@ -9918,7 +13281,6 @@ query searchIssues(
     includeComments: $includeComments
     last: $last
     orderBy: $orderBy
-    snippetSize: $snippetSize
     teamId: $teamId
     term: $term
   ) {
@@ -9943,8 +13305,6 @@ query searchIssues_archivePayload(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
-  # Size of search snippet to return (default: 100)
-  $snippetSize: Float
   # UUID of a team to use as a boost.
   $teamId: String
   # Search string to look for.
@@ -9959,7 +13319,6 @@ query searchIssues_archivePayload(
     includeComments: $includeComments
     last: $last
     orderBy: $orderBy
-    snippetSize: $snippetSize
     teamId: $teamId
     term: $term
   ) {
@@ -9984,8 +13343,6 @@ query searchProjects(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
-  # Size of search snippet to return (default: 100)
-  $snippetSize: Float
   # UUID of a team to use as a boost.
   $teamId: String
   # Search string to look for.
@@ -9999,7 +13356,6 @@ query searchProjects(
     includeComments: $includeComments
     last: $last
     orderBy: $orderBy
-    snippetSize: $snippetSize
     teamId: $teamId
     term: $term
   ) {
@@ -10022,8 +13378,6 @@ query searchProjects_archivePayload(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
-  # Size of search snippet to return (default: 100)
-  $snippetSize: Float
   # UUID of a team to use as a boost.
   $teamId: String
   # Search string to look for.
@@ -10037,7 +13391,6 @@ query searchProjects_archivePayload(
     includeComments: $includeComments
     last: $last
     orderBy: $orderBy
-    snippetSize: $snippetSize
     teamId: $teamId
     term: $term
   ) {
@@ -10274,6 +13627,8 @@ query team_projects(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned projects.
+  $sort: [ProjectSortInput!]
 ) {
   team(id: $id) {
     projects(
@@ -10285,6 +13640,7 @@ query team_projects(
       includeSubTeams: $includeSubTeams
       last: $last
       orderBy: $orderBy
+      sort: $sort
     ) {
       ...ProjectConnection
     }
@@ -10625,6 +13981,39 @@ query user_createdIssues(
     }
   }
 }
+# Issues delegated to this user.
+query user_delegatedIssues(
+  # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  user(id: $id) {
+    delegatedIssues(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
 # The user's drafts
 query user_drafts(
   # The identifier of the user to retrieve. To retrieve the authenticated user, use `viewer` query.
@@ -10777,6 +14166,16 @@ query userSettings_notificationCategoryPreferences_documentChanges {
   userSettings {
     notificationCategoryPreferences {
       documentChanges {
+        ...NotificationChannelPreferences
+      }
+    }
+  }
+}
+# The preferences for feed summary notifications.
+query userSettings_notificationCategoryPreferences_feed {
+  userSettings {
+    notificationCategoryPreferences {
+      feed {
         ...NotificationChannelPreferences
       }
     }
@@ -11027,6 +14426,8 @@ query users(
   $last: Int
   # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
   $orderBy: PaginationOrderBy
+  # [INTERNAL] Sort returned users.
+  $sort: [UserSortInput!]
 ) {
   users(
     after: $after
@@ -11037,13 +14438,17 @@ query users(
     includeDisabled: $includeDisabled
     last: $last
     orderBy: $orderBy
+    sort: $sort
   ) {
     ...UserConnection
   }
 }
 # Verify that we received the correct response from the GitHub Enterprise Server.
-query verifyGitHubEnterpriseServerInstallation {
-  verifyGitHubEnterpriseServerInstallation {
+query verifyGitHubEnterpriseServerInstallation(
+  # The integration ID.
+  $integrationId: String!
+) {
+  verifyGitHubEnterpriseServerInstallation(integrationId: $integrationId) {
     ...GitHubEnterpriseServerInstallVerificationPayload
   }
 }
@@ -11103,6 +14508,37 @@ query viewer_createdIssues(
 ) {
   viewer {
     createdIssues(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
+# Issues delegated to this user.
+query viewer_delegatedIssues(
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  viewer {
+    delegatedIssues(
       after: $after
       before: $before
       filter: $filter
@@ -11304,6 +14740,45 @@ query workflowStates(
     ...WorkflowStateConnection
   }
 }
+# Creates an agent activity.
+mutation createAgentActivity(
+  # The agent activity object to create.
+  $input: AgentActivityCreateInput!
+) {
+  agentActivityCreate(input: $input) {
+    ...AgentActivityPayload
+  }
+}
+# Creates a new agent session on a rootcomment.
+mutation agentSessionCreateOnComment(
+  # The agent session object to create.
+  $input: AgentSessionCreateOnComment!
+) {
+  agentSessionCreateOnComment(input: $input) {
+    ...AgentSessionPayload
+  }
+}
+# Creates a new agent session on an issue.
+mutation agentSessionCreateOnIssue(
+  # The agent session object to create.
+  $input: AgentSessionCreateOnIssue!
+) {
+  agentSessionCreateOnIssue(input: $input) {
+    ...AgentSessionPayload
+  }
+}
+# Updates the externalUrl of an agent session, which is an agent-hosted page associated with this
+# session.
+mutation agentSessionUpdateExternalUrl(
+  # The identifier of the agent session to update.
+  $id: String!
+  # The agent session object to update.
+  $input: AgentSessionUpdateExternalUrlInput!
+) {
+  agentSessionUpdateExternalUrl(id: $id, input: $input) {
+    ...AgentSessionPayload
+  }
+}
 # Creates an integration api key for Airbyte to connect with Linear.
 mutation airbyteIntegrationConnect(
   # Airbyte integration settings.
@@ -11335,9 +14810,9 @@ mutation deleteAttachment(
 mutation attachmentLinkDiscord(
   # The Discord channel ID for the message to link.
   $channelId: String!
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11367,9 +14842,9 @@ mutation attachmentLinkDiscord(
 mutation attachmentLinkFront(
   # The Front conversation ID to link.
   $conversationId: String!
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11391,9 +14866,9 @@ mutation attachmentLinkFront(
 }
 # Link a GitHub issue to a Linear issue.
 mutation attachmentLinkGitHubIssue(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11417,9 +14892,9 @@ mutation attachmentLinkGitHubIssue(
 }
 # Link a GitHub pull request to an issue.
 mutation attachmentLinkGitHubPR(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11446,9 +14921,9 @@ mutation attachmentLinkGitHubPR(
 }
 # Link an existing GitLab MR to an issue.
 mutation attachmentLinkGitLabMR(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11480,9 +14955,9 @@ mutation attachmentLinkGitLabMR(
 mutation attachmentLinkIntercom(
   # The Intercom conversation ID to link.
   $conversationId: String!
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11507,9 +14982,9 @@ mutation attachmentLinkIntercom(
 }
 # Link an existing Jira issue to an issue.
 mutation attachmentLinkJiraIssue(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11534,11 +15009,37 @@ mutation attachmentLinkJiraIssue(
     ...AttachmentPayload
   }
 }
+# Link an existing Salesforce case to an issue.
+mutation attachmentLinkSalesforce(
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
+  $createAsUser: String
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
+  $displayIconUrl: String
+  # Optional attachment ID that may be provided through the API.
+  $id: String
+  # The issue for which to link the Salesforce case.
+  $issueId: String!
+  # The title to use for the attachment.
+  $title: String
+  # The URL of the Salesforce case to link.
+  $url: String!
+) {
+  attachmentLinkSalesforce(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    title: $title
+    url: $url
+  ) {
+    ...AttachmentPayload
+  }
+}
 # Link an existing Slack message to an issue.
 mutation attachmentLinkSlack(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11565,9 +15066,9 @@ mutation attachmentLinkSlack(
 }
 # Link any url to an issue.
 mutation attachmentLinkURL(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # The id for the attachment.
   $id: String
@@ -11591,9 +15092,9 @@ mutation attachmentLinkURL(
 }
 # Link an existing Zendesk ticket to an issue.
 mutation attachmentLinkZendesk(
-  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode.
+  # Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=app` mode.
   $createAsUser: String
-  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode.
+  # Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=app` mode.
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
@@ -11848,7 +15349,36 @@ mutation updateCustomerNeed(
   $input: CustomerNeedUpdateInput!
 ) {
   customerNeedUpdate(id: $id, input: $input) {
-    ...CustomerNeedPayload
+    ...CustomerNeedUpdatePayload
+  }
+}
+# Creates a new customer status.
+mutation createCustomerStatus(
+  # The CustomerStatus object to create.
+  $input: CustomerStatusCreateInput!
+) {
+  customerStatusCreate(input: $input) {
+    ...CustomerStatusPayload
+  }
+}
+# Deletes a customer status.
+mutation deleteCustomerStatus(
+  # The identifier of the customer status to delete.
+  $id: String!
+) {
+  customerStatusDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates a customer status.
+mutation updateCustomerStatus(
+  # The identifier of the customer status to update.
+  $id: String!
+  # A partial CustomerStatus object to update the CustomerStatus with.
+  $input: CustomerStatusUpdateInput!
+) {
+  customerStatusUpdate(id: $id, input: $input) {
+    ...CustomerStatusPayload
   }
 }
 # Creates a new customer tier.
@@ -12411,8 +15941,10 @@ mutation integrationAsksConnectChannel(
 mutation deleteIntegration(
   # The identifier of the integration to delete.
   $id: String!
+  # Whether to skip deleting the installation on the external service side.
+  $skipInstallationDeletion: Boolean
 ) {
-  integrationDelete(id: $id) {
+  integrationDelete(id: $id, skipInstallationDeletion: $skipInstallationDeletion) {
     ...DeletePayload
   }
 }
@@ -12454,7 +15986,7 @@ mutation integrationGitHubEnterpriseServerConnect(
   # The base URL of the GitHub Enterprise Server installation.
   $githubUrl: String!
   # The name of GitHub organization.
-  $organizationName: String
+  $organizationName: String!
 ) {
   integrationGitHubEnterpriseServerConnect(githubUrl: $githubUrl, organizationName: $organizationName) {
     ...GitHubEnterpriseServerPayload
@@ -12464,8 +15996,10 @@ mutation integrationGitHubEnterpriseServerConnect(
 mutation integrationGitHubPersonal(
   # The GitHub OAuth code.
   $code: String!
+  # Whether to connect with code access.
+  $codeAccess: Boolean
 ) {
-  integrationGitHubPersonal(code: $code) {
+  integrationGitHubPersonal(code: $code, codeAccess: $codeAccess) {
     ...IntegrationPayload
   }
 }
@@ -12479,10 +16013,12 @@ mutation createIntegrationGithubCommit {
 mutation integrationGithubConnect(
   # The GitHub grant code that's exchanged for OAuth tokens.
   $code: String!
+  # Whether the integration should have code access
+  $codeAccess: Boolean
   # The GitHub data to connect with.
   $installationId: String!
 ) {
-  integrationGithubConnect(code: $code, installationId: $installationId) {
+  integrationGithubConnect(code: $code, codeAccess: $codeAccess, installationId: $installationId) {
     ...IntegrationPayload
   }
 }
@@ -12515,6 +16051,17 @@ mutation integrationGitlabConnect(
 ) {
   integrationGitlabConnect(accessToken: $accessToken, gitlabUrl: $gitlabUrl) {
     ...GitLabIntegrationCreatePayload
+  }
+}
+# Integrates the organization with Gong.
+mutation integrationGong(
+  # The Gong OAuth code.
+  $code: String!
+  # The Gong OAuth redirect URI.
+  $redirectUri: String!
+) {
+  integrationGong(code: $code, redirectUri: $redirectUri) {
+    ...IntegrationPayload
   }
 }
 # Integrates the organization with Google Sheets.
@@ -12578,6 +16125,19 @@ mutation integrationRequest(
 ) {
   integrationRequest(input: $input) {
     ...IntegrationRequestPayload
+  }
+}
+# Integrates the organization with Salesforce.
+mutation integrationSalesforce(
+  # The Salesforce OAuth code.
+  $code: String!
+  # The Salesforce OAuth redirect URI.
+  $redirectUri: String!
+  # The Salesforce installation subdomain.
+  $subdomain: String!
+) {
+  integrationSalesforce(code: $code, redirectUri: $redirectUri, subdomain: $subdomain) {
+    ...IntegrationPayload
   }
 }
 # Integrates the organization with Sentry.
@@ -12652,6 +16212,15 @@ mutation integrationSlackImportEmojis(
 ) {
   integrationSlackImportEmojis(code: $code, redirectUri: $redirectUri) {
     ...IntegrationPayload
+  }
+}
+# Updates the Slack team's name in Linear for an existing Slack or Asks integration.
+mutation integrationSlackOrAsksUpdateSlackTeamName(
+  # The integration ID.
+  $integrationId: String!
+) {
+  integrationSlackOrAsksUpdateSlackTeamName(integrationId: $integrationId) {
+    ...IntegrationSlackWorkspaceNamePayload
   }
 }
 # Slack integration for organization level project update notifications.
@@ -13389,6 +16958,17 @@ mutation updateOrganization(
     ...OrganizationPayload
   }
 }
+# Adds a label to a project.
+mutation projectAddLabel(
+  # The identifier of the project to add the label to.
+  $id: String!
+  # The identifier of the label to add.
+  $labelId: String!
+) {
+  projectAddLabel(id: $id, labelId: $labelId) {
+    ...ProjectPayload
+  }
+}
 # Archives a project.
 mutation archiveProject(
   # The identifier of the project to archive. Also the identifier from the URL is accepted.
@@ -13418,6 +16998,35 @@ mutation deleteProject(
 ) {
   projectDelete(id: $id) {
     ...ProjectArchivePayload
+  }
+}
+# Creates a new project label.
+mutation createProjectLabel(
+  # The project label to create.
+  $input: ProjectLabelCreateInput!
+) {
+  projectLabelCreate(input: $input) {
+    ...ProjectLabelPayload
+  }
+}
+# Deletes a project label.
+mutation deleteProjectLabel(
+  # The identifier of the label to delete.
+  $id: String!
+) {
+  projectLabelDelete(id: $id) {
+    ...DeletePayload
+  }
+}
+# Updates a project label.
+mutation updateProjectLabel(
+  # The identifier of the label to update.
+  $id: String!
+  # A partial label object to update.
+  $input: ProjectLabelUpdateInput!
+) {
+  projectLabelUpdate(id: $id, input: $input) {
+    ...ProjectLabelPayload
   }
 }
 # Creates a new project milestone.
@@ -13476,6 +17085,17 @@ mutation updateProjectRelation(
 ) {
   projectRelationUpdate(id: $id, input: $input) {
     ...ProjectRelationPayload
+  }
+}
+# Removes a label from a project.
+mutation projectRemoveLabel(
+  # The identifier of the project to remove the label from.
+  $id: String!
+  # The identifier of the label to remove.
+  $labelId: String!
+) {
+  projectRemoveLabel(id: $id, labelId: $labelId) {
+    ...ProjectPayload
   }
 }
 # Archives a project status.
@@ -13623,8 +17243,10 @@ mutation deleteReaction(
 mutation refreshGoogleSheetsData(
   # The identifier of the Google Sheets integration to update.
   $id: String!
+  # The type of export.
+  $type: String
 ) {
-  refreshGoogleSheetsData(id: $id) {
+  refreshGoogleSheetsData(id: $id, type: $type) {
     ...IntegrationPayload
   }
 }

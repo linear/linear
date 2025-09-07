@@ -6,6 +6,7 @@ import {
   InterfaceTypeDefinitionNode,
   ObjectTypeDefinitionNode,
   EnumTypeDefinitionNode,
+  UnionTypeDefinitionNode,
 } from "graphql";
 
 /**
@@ -115,6 +116,8 @@ export interface PluginContext<C extends PluginConfig = PluginConfig> {
   interfaceImplementations: { [interfaceName: string]: ObjectTypeDefinitionNode[] };
   /** All enums */
   enums: readonly EnumTypeDefinitionNode[];
+  /** All union types */
+  unions: readonly UnionTypeDefinitionNode[];
   /** The plugin config */
   config: C;
 }

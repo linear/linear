@@ -20,4 +20,14 @@ export const Doc = {
   SCALAR_JSON_TYPE: "Record<string, unknown>",
   SCALAR_DATE_OR_STRING_NAMES: ["DateTimeOrDuration"],
   SCALAR_DATE_OR_STRING_TYPE: "Date | string",
+  SCALAR_NOTIFICATION_TYPE_MAP: {
+    IssueAssignedToYouNotificationType: "issueAssignedToYou",
+    IssueMentionNotificationType: "issueMention",
+    IssueUnassignedFromYouNotificationType: "issueUnassignedFromYou",
+    IssueEmojiReactionNotificationType: "issueEmojiReaction",
+    IssueCommentMentionNotificationType: "issueCommentMention",
+    IssueCommentReactionNotificationType: "issueCommentReaction",
+    IssueNewCommentNotificationType: "issueNewComment",
+    IssueStatusChangedNotificationType: "issueStatusChanged",
+  },
 };
