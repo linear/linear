@@ -224,6 +224,7 @@ export class AgentActivity extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.ephemeral = data.ephemeral;
     this.id = data.id;
+    this.signalMetadata = parseJson(data.signalMetadata) ?? undefined;
     this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.signal = data.signal ?? undefined;
@@ -241,6 +242,8 @@ export class AgentActivity extends Request {
   public ephemeral: boolean;
   /** The unique identifier of the entity. */
   public id: string;
+  /** Metadata about this agent activity's signal. */
+  public signalMetadata?: Record<string, unknown>;
   /** Metadata about the external source that created this agent activity. */
   public sourceMetadata?: Record<string, unknown>;
   /**
@@ -459,6 +462,7 @@ export class AgentActivityWebhookPayload {
     this.createdAt = data.createdAt;
     this.id = data.id;
     this.signal = data.signal ?? undefined;
+    this.signalMetadata = data.signalMetadata ?? undefined;
     this.updatedAt = data.updatedAt;
     this.userId = data.userId ?? undefined;
   }
@@ -475,6 +479,8 @@ export class AgentActivityWebhookPayload {
   public id: string;
   /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
   public signal?: string;
+  /** Metadata about this agent activity's signal. */
+  public signalMetadata?: L.Scalars["JSONObject"];
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The ID of the user who created this agent activity. */
@@ -4903,6 +4909,7 @@ export class EmailIntakeAddress extends Request {
     this.issueCompletedAutoReply = data.issueCompletedAutoReply ?? undefined;
     this.issueCompletedAutoReplyEnabled = data.issueCompletedAutoReplyEnabled;
     this.issueCreatedAutoReply = data.issueCreatedAutoReply ?? undefined;
+    this.issueCreatedAutoReplyEnabled = data.issueCreatedAutoReplyEnabled;
     this.repliesEnabled = data.repliesEnabled;
     this.senderName = data.senderName ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
@@ -4940,6 +4947,8 @@ export class EmailIntakeAddress extends Request {
   public issueCompletedAutoReplyEnabled: boolean;
   /** The auto-reply message for issue created. If not set, the default reply will be used. */
   public issueCreatedAutoReply?: string;
+  /** Whether the auto-reply for issue created is enabled. */
+  public issueCreatedAutoReplyEnabled: boolean;
   /** Whether email replies are enabled. */
   public repliesEnabled: boolean;
   /** The name to be used for outgoing emails. */
@@ -5886,6 +5895,21 @@ export class FetchDataPayload extends Request {
   /** The GraphQL query used to fetch the data. */
   public query?: string;
   /** Whether the fetch operation was successful. */
+  public success: boolean;
+}
+/**
+ * FileUploadDeletePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.FileUploadDeletePayloadFragment response data
+ */
+export class FileUploadDeletePayload extends Request {
+  public constructor(request: LinearRequest, data: L.FileUploadDeletePayloadFragment) {
+    super(request);
+    this.success = data.success;
+  }
+
+  /** Whether the operation was successful. */
   public success: boolean;
 }
 /**
@@ -10231,6 +10255,7 @@ export class IssueSuggestion extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.dismissalReason = data.dismissalReason ?? undefined;
     this.id = data.id;
     this.issueId = data.issueId;
     this.stateChangedAt = parseDate(data.stateChangedAt) ?? new Date();
@@ -10253,6 +10278,7 @@ export class IssueSuggestion extends Request {
   public archivedAt?: Date;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  public dismissalReason?: string;
   /** The unique identifier of the entity. */
   public id: string;
   public issueId: string;
@@ -11648,6 +11674,7 @@ export class Organization extends Request {
     this.gitBranchFormat = data.gitBranchFormat ?? undefined;
     this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled;
     this.gitPublicLinkbackMessagesEnabled = data.gitPublicLinkbackMessagesEnabled;
+    this.hipaaComplianceEnabled = data.hipaaComplianceEnabled;
     this.id = data.id;
     this.initiativeUpdateReminderFrequencyInWeeks = data.initiativeUpdateReminderFrequencyInWeeks ?? undefined;
     this.initiativeUpdateRemindersHour = data.initiativeUpdateRemindersHour;
@@ -11709,6 +11736,8 @@ export class Organization extends Request {
   public gitLinkbackMessagesEnabled: boolean;
   /** Whether the Git integration linkback messages should be sent to public repositories. */
   public gitPublicLinkbackMessagesEnabled: boolean;
+  /** Whether HIPAA compliance is enabled for organization. */
+  public hipaaComplianceEnabled: boolean;
   /** The unique identifier of the entity. */
   public id: string;
   /** The n-weekly frequency at which to prompt for initiative updates. When not set, reminders are off. */
@@ -29889,6 +29918,35 @@ export class SuspendUserMutation extends Request {
 }
 
 /**
+ * A fetchable UserUnlinkFromIdentityProvider Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserUnlinkFromIdentityProviderMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserUnlinkFromIdentityProvider mutation and return a UserAdminPayload
+   *
+   * @param id - required id to pass to userUnlinkFromIdentityProvider
+   * @returns parsed response from UserUnlinkFromIdentityProviderMutation
+   */
+  public async fetch(id: string): LinearFetch<UserAdminPayload> {
+    const response = await this._request<
+      L.UserUnlinkFromIdentityProviderMutation,
+      L.UserUnlinkFromIdentityProviderMutationVariables
+    >(L.UserUnlinkFromIdentityProviderDocument, {
+      id,
+    });
+    const data = response.userUnlinkFromIdentityProvider;
+
+    return new UserAdminPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UnsuspendUser Mutation
  *
  * @param request - function to call the graphql client
@@ -40533,6 +40591,15 @@ export class LinearSdk extends Request {
    */
   public suspendUser(id: string): LinearFetch<UserAdminPayload> {
     return new SuspendUserMutation(this._request).fetch(id);
+  }
+  /**
+   * Unlinks a guest user from their identity provider. Can only be called by an admin when SCIM is enabled.
+   *
+   * @param id - required id to pass to userUnlinkFromIdentityProvider
+   * @returns UserAdminPayload
+   */
+  public userUnlinkFromIdentityProvider(id: string): LinearFetch<UserAdminPayload> {
+    return new UserUnlinkFromIdentityProviderMutation(this._request).fetch(id);
   }
   /**
    * Un-suspends a user. Can only be called by an admin.

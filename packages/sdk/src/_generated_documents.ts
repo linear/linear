@@ -77,6 +77,8 @@ export type AgentActivity = Node & {
   id: Scalars["ID"];
   /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
   signal?: Maybe<AgentActivitySignal>;
+  /** Metadata about this agent activity's signal. */
+  signalMetadata?: Maybe<Scalars["JSON"]>;
   /** The comment this activity is linked to. */
   sourceComment?: Maybe<Comment>;
   /** Metadata about the external source that created this agent activity. */
@@ -133,6 +135,8 @@ export type AgentActivityCreateInput = {
   id?: Maybe<Scalars["String"]>;
   /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
   signal?: Maybe<AgentActivitySignal>;
+  /** Metadata about this agent activity's signal. */
+  signalMetadata?: Maybe<Scalars["JSONObject"]>;
 };
 
 /** [Internal] Input for creating prompt-type agent activities (created by users). */
@@ -145,6 +149,8 @@ export type AgentActivityCreatePromptInput = {
   id?: Maybe<Scalars["String"]>;
   /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
   signal?: Maybe<AgentActivitySignal>;
+  /** Metadata about this agent activity's signal. */
+  signalMetadata?: Maybe<Scalars["JSONObject"]>;
   /** The comment that contains the content of this activity. */
   sourceCommentId?: Maybe<Scalars["String"]>;
 };
@@ -224,6 +230,7 @@ export type AgentActivityResponseContent = {
 
 /** A modifier that provides additional instructions on how the activity should be interpreted. */
 export enum AgentActivitySignal {
+  Auth = "auth",
   Continue = "continue",
   Stop = "stop",
 }
@@ -262,6 +269,8 @@ export type AgentActivityWebhookPayload = {
   id: Scalars["String"];
   /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
   signal?: Maybe<Scalars["String"]>;
+  /** Metadata about this agent activity's signal. */
+  signalMetadata?: Maybe<Scalars["JSONObject"]>;
   /** The time at which the entity was updated. */
   updatedAt: Scalars["String"];
   /** The ID of the user who created this agent activity. */
@@ -3912,6 +3921,8 @@ export type EmailIntakeAddress = Node & {
   issueCompletedAutoReplyEnabled: Scalars["Boolean"];
   /** The auto-reply message for issue created. If not set, the default reply will be used. */
   issueCreatedAutoReply?: Maybe<Scalars["String"]>;
+  /** Whether the auto-reply for issue created is enabled. */
+  issueCreatedAutoReplyEnabled: Scalars["Boolean"];
   /** The organization that the email address is associated with. */
   organization: Organization;
   /** Whether email replies are enabled. */
@@ -3952,6 +3963,8 @@ export type EmailIntakeAddressCreateInput = {
   issueCompletedAutoReplyEnabled?: Maybe<Scalars["Boolean"]>;
   /** The auto-reply message for issue created. */
   issueCreatedAutoReply?: Maybe<Scalars["String"]>;
+  /** Whether the issue created auto-reply is enabled. */
+  issueCreatedAutoReplyEnabled?: Maybe<Scalars["Boolean"]>;
   /** Whether email replies are enabled. */
   repliesEnabled?: Maybe<Scalars["Boolean"]>;
   /** The name to be used for outgoing emails. */
@@ -4000,6 +4013,8 @@ export type EmailIntakeAddressUpdateInput = {
   issueCompletedAutoReplyEnabled?: Maybe<Scalars["Boolean"]>;
   /** The auto-reply message for issue created. */
   issueCreatedAutoReply?: Maybe<Scalars["String"]>;
+  /** Whether the issue created auto-reply is enabled. */
+  issueCreatedAutoReplyEnabled?: Maybe<Scalars["Boolean"]>;
   /** Whether email replies are enabled. */
   repliesEnabled?: Maybe<Scalars["Boolean"]>;
   /** The name to be used for outgoing emails. */
@@ -4658,6 +4673,12 @@ export type FetchDataPayload = {
   /** The GraphQL query used to fetch the data. */
   query?: Maybe<Scalars["String"]>;
   /** Whether the fetch operation was successful. */
+  success: Scalars["Boolean"];
+};
+
+export type FileUploadDeletePayload = {
+  __typename?: "FileUploadDeletePayload";
+  /** Whether the operation was successful. */
   success: Scalars["Boolean"];
 };
 
@@ -8480,6 +8501,7 @@ export type IssueSuggestion = Node & {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  dismissalReason?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   issue: Issue;
@@ -9188,6 +9210,8 @@ export type Mutation = {
   favoriteUpdate: FavoritePayload;
   /** XHR request payload to upload an images, video and other attachments directly to Linear's cloud storage. */
   fileUpload: UploadPayload;
+  /** [INTERNAL] Permanently delete an uploaded file by asset URL. This should be used as a last resort and will break comments and documents that reference the asset. */
+  fileUploadDangerouslyDelete: FileUploadDeletePayload;
   /** Creates a new automation state. */
   gitAutomationStateCreate: GitAutomationStatePayload;
   /** Archives an automation state. */
@@ -9652,6 +9676,8 @@ export type Mutation = {
   userSettingsUpdate: UserSettingsPayload;
   /** Suspends a user. Can only be called by an admin. */
   userSuspend: UserAdminPayload;
+  /** Unlinks a guest user from their identity provider. Can only be called by an admin when SCIM is enabled. */
+  userUnlinkFromIdentityProvider: UserAdminPayload;
   /** Un-suspends a user. Can only be called by an admin. */
   userUnsuspend: UserAdminPayload;
   /** Updates a user. Only available to organization admins and the user themselves. */
@@ -10082,6 +10108,10 @@ export type MutationFileUploadArgs = {
   makePublic?: Maybe<Scalars["Boolean"]>;
   metaData?: Maybe<Scalars["JSON"]>;
   size: Scalars["Int"];
+};
+
+export type MutationFileUploadDangerouslyDeleteArgs = {
+  assetUrl: Scalars["String"];
 };
 
 export type MutationGitAutomationStateCreateArgs = {
@@ -10568,6 +10598,7 @@ export type MutationIssueRemoveLabelArgs = {
 
 export type MutationIssueSubscribeArgs = {
   id: Scalars["String"];
+  userEmail?: Maybe<Scalars["String"]>;
   userId?: Maybe<Scalars["String"]>;
 };
 
@@ -10577,6 +10608,7 @@ export type MutationIssueUnarchiveArgs = {
 
 export type MutationIssueUnsubscribeArgs = {
   id: Scalars["String"];
+  userEmail?: Maybe<Scalars["String"]>;
   userId?: Maybe<Scalars["String"]>;
 };
 
@@ -11050,6 +11082,10 @@ export type MutationUserSettingsUpdateArgs = {
 };
 
 export type MutationUserSuspendArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationUserUnlinkFromIdentityProviderArgs = {
   id: Scalars["String"];
 };
 
@@ -12376,6 +12412,8 @@ export type Organization = Node & {
   gitLinkbackMessagesEnabled: Scalars["Boolean"];
   /** Whether the Git integration linkback messages should be sent to public repositories. */
   gitPublicLinkbackMessagesEnabled: Scalars["Boolean"];
+  /** Whether HIPAA compliance is enabled for organization. */
+  hipaaComplianceEnabled: Scalars["Boolean"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The n-weekly frequency at which to prompt for initiative updates. When not set, reminders are off. */
@@ -15733,13 +15771,6 @@ export type Query = {
   apiKeys: ApiKeyConnection;
   /** Get basic information for an application. */
   applicationInfo: Application;
-  /** [INTERNAL] Get basic information for a list of applications. */
-  applicationInfoByIds: Array<Application>;
-  /**
-   * [DEPRECATED] [INTERNAL] Get information for a list of applications with memberships
-   * @deprecated Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead.
-   */
-  applicationInfoWithMembershipsByIds: Array<WorkspaceAuthorizedApplication>;
   /** Get information for an application and whether a user has approved it for the given scopes. */
   applicationWithAuthorization: UserAuthorizedApplication;
   /** [Internal] All archived teams of the organization. */
@@ -15770,8 +15801,6 @@ export type Query = {
   auditEntryTypes: Array<AuditEntryType>;
   /** User's active sessions. */
   authenticationSessions: Array<AuthenticationSessionResponse>;
-  /** [INTERNAL] Get all authorized applications for a user. */
-  authorizedApplications: Array<AuthorizedApplication>;
   /** Fetch users belonging to this user account. */
   availableUsers: AuthResolverResponse;
   /** A specific comment. */
@@ -16020,13 +16049,6 @@ export type Query = {
   workflowStates: WorkflowStateConnection;
   /** [INTERNAL] Get a specific non-internal authorized application (with limited fields) for a workspace */
   workspaceAuthorizedApplication: WorkspaceAuthorizedApplicationWithMemberships;
-  /**
-   * [DEPRECATED] [INTERNAL] Get non-internal authorized applications (with limited fields) for a workspace
-   * @deprecated Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead.
-   */
-  workspaceAuthorizedApplications: Array<WorkspaceAuthorizedApplication>;
-  /** [INTERNAL] Get non-internal authorized applications for a workspace, including each application's app user. */
-  workspaceAuthorizedApplicationsWithAppUser: Array<WorkspaceAuthorizedApplicationWithAppUser>;
 };
 
 export type QueryAdministrableTeamsArgs = {
@@ -16077,14 +16099,6 @@ export type QueryApiKeysArgs = {
 
 export type QueryApplicationInfoArgs = {
   clientId: Scalars["String"];
-};
-
-export type QueryApplicationInfoByIdsArgs = {
-  ids: Array<Scalars["String"]>;
-};
-
-export type QueryApplicationInfoWithMembershipsByIdsArgs = {
-  clientIds: Array<Scalars["String"]>;
 };
 
 export type QueryApplicationWithAuthorizationArgs = {
@@ -16844,10 +16858,6 @@ export type QueryWorkspaceAuthorizedApplicationArgs = {
   clientId: Scalars["String"];
 };
 
-export type QueryWorkspaceAuthorizedApplicationsWithAppUserArgs = {
-  clientIds?: Maybe<Array<Scalars["String"]>>;
-};
-
 export type RateLimitPayload = {
   __typename?: "RateLimitPayload";
   /** The identifier we rate limit on. */
@@ -17272,6 +17282,12 @@ export enum SLADayCountType {
   OnlyBusinessDays = "onlyBusinessDays",
 }
 
+/** [INTERNAL] Comparator for Salesforce metadata. */
+export type SalesforceMetadataIntegrationComparator = {
+  /** Salesforce Case metadata filter */
+  caseMetadata?: Maybe<Scalars["JSONObject"]>;
+};
+
 export type SalesforceSettingsInput = {
   /** Whether a ticket should be automatically reopened when its linked Linear issue is cancelled. */
   automateTicketReopeningOnCancellation?: Maybe<Scalars["Boolean"]>;
@@ -17587,7 +17603,9 @@ export type SourceMetadataComparator = {
   nin?: Maybe<Array<Scalars["String"]>>;
   /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
   null?: Maybe<Scalars["Boolean"]>;
-  /** Compound filters, all of which need to be matched by the sub type. */
+  /** [INTERNAL] Comparator for the salesforce metadata. */
+  salesforceMetadata?: Maybe<SalesforceMetadataIntegrationComparator>;
+  /** Comparator for the sub type. */
   subType?: Maybe<SubTypeComparator>;
 };
 
@@ -19888,60 +19906,6 @@ export type WorkflowStateUpdateInput = {
   position?: Maybe<Scalars["Float"]>;
 };
 
-/** [INTERNAL] Public information of the OAuth application, plus the userIds and scopes for those users. */
-export type WorkspaceAuthorizedApplication = {
-  __typename?: "WorkspaceAuthorizedApplication";
-  /** OAuth application's ID. */
-  appId: Scalars["String"];
-  /** OAuth application's client ID. */
-  clientId: Scalars["String"];
-  /** Description of the application. */
-  description?: Maybe<Scalars["String"]>;
-  /** Developer of the application. */
-  developer?: Maybe<Scalars["String"]>;
-  /** Developer URL of the application. */
-  developerUrl?: Maybe<Scalars["String"]>;
-  /** Image of the application. */
-  imageUrl?: Maybe<Scalars["String"]>;
-  /** UserIds and membership dates of everyone who has authorized the application with the set of scopes. */
-  memberships: Array<AuthMembership>;
-  /** Application name. */
-  name: Scalars["String"];
-  /** Scopes that are authorized for this application for a given user. */
-  scope: Array<Scalars["String"]>;
-  /** Total number of members that authorized the application. */
-  totalMembers: Scalars["Float"];
-  /** Whether or not webhooks are enabled for the application. */
-  webhooksEnabled: Scalars["Boolean"];
-};
-
-/** [INTERNAL] Public information of the OAuth application, plus the app user and aggregate membership count. */
-export type WorkspaceAuthorizedApplicationWithAppUser = {
-  __typename?: "WorkspaceAuthorizedApplicationWithAppUser";
-  /** OAuth application's ID. */
-  appId: Scalars["String"];
-  /** The app user associated with this client, if one exists. */
-  appUser?: Maybe<AuthMembership>;
-  /** OAuth application's client ID. */
-  clientId: Scalars["String"];
-  /** Description of the application. */
-  description?: Maybe<Scalars["String"]>;
-  /** Developer of the application. */
-  developer?: Maybe<Scalars["String"]>;
-  /** Developer URL of the application. */
-  developerUrl?: Maybe<Scalars["String"]>;
-  /** Image of the application. */
-  imageUrl?: Maybe<Scalars["String"]>;
-  /** Application name. */
-  name: Scalars["String"];
-  /** Scopes that are authorized for this application for a given user. */
-  scope: Array<Scalars["String"]>;
-  /** Total number of members (including the app user, if it exists) that authorized the application. */
-  totalMembers: Scalars["Float"];
-  /** Whether or not webhooks are enabled for the application. */
-  webhooksEnabled: Scalars["Boolean"];
-};
-
 /** [INTERNAL] Public information of the OAuth application with its memberships */
 export type WorkspaceAuthorizedApplicationWithMemberships = {
   __typename?: "WorkspaceAuthorizedApplicationWithMemberships";
@@ -21369,7 +21333,7 @@ export type ApiKeyFragment = { __typename: "ApiKey" } & Pick<
 
 export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
   AgentActivity,
-  "signal" | "sourceMetadata" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "ephemeral"
+  "signal" | "sourceMetadata" | "signalMetadata" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "ephemeral"
 > & {
     agentSession: { __typename?: "AgentSession" } & Pick<AgentSession, "id">;
     sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -21400,6 +21364,7 @@ export type EmailIntakeAddressFragment = { __typename: "EmailIntakeAddress" } & 
   | "customerRequestsEnabled"
   | "issueCanceledAutoReplyEnabled"
   | "issueCompletedAutoReplyEnabled"
+  | "issueCreatedAutoReplyEnabled"
   | "useUserNamesInReplies"
   | "enabled"
 > & {
@@ -21778,6 +21743,7 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "createdAt"
   | "trialEndsAt"
   | "id"
+  | "hipaaComplianceEnabled"
   | "samlEnabled"
   | "scimEnabled"
   | "allowMembersToInvite"
@@ -22696,7 +22662,15 @@ export type AgentSessionEventWebhookPayloadFragment = { __typename: "AgentSessio
 
 export type AgentActivityWebhookPayloadFragment = { __typename: "AgentActivityWebhookPayload" } & Pick<
   AgentActivityWebhookPayload,
-  "signal" | "agentSessionId" | "id" | "userId" | "content" | "archivedAt" | "createdAt" | "updatedAt"
+  | "signal"
+  | "signalMetadata"
+  | "agentSessionId"
+  | "id"
+  | "userId"
+  | "content"
+  | "archivedAt"
+  | "createdAt"
+  | "updatedAt"
 >;
 
 export type AgentSessionWebhookPayloadFragment = { __typename: "AgentSessionWebhookPayload" } & Pick<
@@ -23560,6 +23534,11 @@ export type FetchDataPayloadFragment = { __typename: "FetchDataPayload" } & Pick
   "query" | "data" | "filters" | "success"
 >;
 
+export type FileUploadDeletePayloadFragment = { __typename: "FileUploadDeletePayload" } & Pick<
+  FileUploadDeletePayload,
+  "success"
+>;
+
 export type FrontAttachmentPayloadFragment = { __typename: "FrontAttachmentPayload" } & Pick<
   FrontAttachmentPayload,
   "lastSyncId" | "success"
@@ -23828,6 +23807,7 @@ export type IssueSuggestionFragment = { __typename: "IssueSuggestion" } & Pick<
   | "archivedAt"
   | "createdAt"
   | "id"
+  | "dismissalReason"
   | "issueId"
   | "state"
   | "stateChangedAt"
@@ -29657,6 +29637,7 @@ export type IssueRemoveLabelMutation = { __typename?: "Mutation" } & {
 
 export type IssueSubscribeMutationVariables = Exact<{
   id: Scalars["String"];
+  userEmail?: Maybe<Scalars["String"]>;
   userId?: Maybe<Scalars["String"]>;
 }>;
 
@@ -29674,6 +29655,7 @@ export type UnarchiveIssueMutation = { __typename?: "Mutation" } & {
 
 export type IssueUnsubscribeMutationVariables = Exact<{
   id: Scalars["String"];
+  userEmail?: Maybe<Scalars["String"]>;
   userId?: Maybe<Scalars["String"]>;
 }>;
 
@@ -30517,6 +30499,14 @@ export type SuspendUserMutationVariables = Exact<{
 
 export type SuspendUserMutation = { __typename?: "Mutation" } & {
   userSuspend: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
+};
+
+export type UserUnlinkFromIdentityProviderMutationVariables = Exact<{
+  id: Scalars["String"];
+}>;
+
+export type UserUnlinkFromIdentityProviderMutation = { __typename?: "Mutation" } & {
+  userUnlinkFromIdentityProvider: { __typename?: "UserAdminPayload" } & UserAdminPayloadFragment;
 };
 
 export type UnsuspendUserMutationVariables = Exact<{
@@ -32955,6 +32945,7 @@ export const EmailIntakeAddressFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "customerRequestsEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "issueCanceledAutoReplyEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "issueCompletedAutoReplyEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "issueCreatedAutoReplyEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "useUserNamesInReplies" } },
           { kind: "Field", name: { kind: "Name", value: "enabled" } },
         ],
@@ -33229,6 +33220,7 @@ export const OrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "trialEndsAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "hipaaComplianceEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "samlEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "scimEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "allowMembersToInvite" } },
@@ -34663,6 +34655,7 @@ export const AgentActivityWebhookPayloadFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "signal" } },
+          { kind: "Field", name: { kind: "Name", value: "signalMetadata" } },
           { kind: "Field", name: { kind: "Name", value: "agentSessionId" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "userId" } },
@@ -36452,6 +36445,7 @@ export const AgentActivityFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "signal" } },
           { kind: "Field", name: { kind: "Name", value: "sourceMetadata" } },
+          { kind: "Field", name: { kind: "Name", value: "signalMetadata" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "agentSession" },
@@ -39592,6 +39586,23 @@ export const FetchDataPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<FetchDataPayloadFragment, unknown>;
+export const FileUploadDeletePayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "FileUploadDeletePayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FileUploadDeletePayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "success" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<FileUploadDeletePayloadFragment, unknown>;
 export const FrontAttachmentPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -41950,6 +41961,7 @@ export const IssueSuggestionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "dismissalReason" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "issue" },
@@ -75654,6 +75666,11 @@ export const IssueSubscribeDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "userEmail" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "userId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -75669,6 +75686,11 @@ export const IssueSubscribeDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "id" },
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "userEmail" },
+                value: { kind: "Variable", name: { kind: "Name", value: "userEmail" } },
               },
               {
                 kind: "Argument",
@@ -75740,6 +75762,11 @@ export const IssueUnsubscribeDocument = {
         },
         {
           kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "userEmail" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "userId" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
@@ -75755,6 +75782,11 @@ export const IssueUnsubscribeDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "id" },
                 value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "userEmail" },
+                value: { kind: "Variable", name: { kind: "Name", value: "userEmail" } },
               },
               {
                 kind: "Argument",
@@ -80143,6 +80175,44 @@ export const SuspendUserDocument = {
     ...UserAdminPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<SuspendUserMutation, SuspendUserMutationVariables>;
+export const UserUnlinkFromIdentityProviderDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userUnlinkFromIdentityProvider" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userUnlinkFromIdentityProvider" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserAdminPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserUnlinkFromIdentityProviderMutation, UserUnlinkFromIdentityProviderMutationVariables>;
 export const UnsuspendUserDocument = {
   kind: "Document",
   definitions: [
