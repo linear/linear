@@ -265,6 +265,18 @@
             "deprecationReason": null
           },
           {
+            "name": "signalMetadata",
+            "description": "Metadata about this agent activity's signal.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "ephemeral",
             "description": "Whether the activity is ephemeral, and should disappear after the next agent activity.",
             "args": [],
@@ -536,6 +548,18 @@
             "deprecationReason": null
           },
           {
+            "name": "signalMetadata",
+            "description": "Metadata about this agent activity's signal.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "content",
             "description": "The content payload of the agent activity. This object is not strictly typed.\nSee https://linear.app/developers/agents for typing details.",
             "type": {
@@ -608,6 +632,18 @@
             "type": {
               "kind": "ENUM",
               "name": "AgentActivitySignal",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "signalMetadata",
+            "description": "Metadata about this agent activity's signal.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
               "ofType": null
             },
             "defaultValue": null,
@@ -1073,6 +1109,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "auth",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -1255,6 +1297,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "signalMetadata",
+            "description": "Metadata about this agent activity's signal.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
               "ofType": null
             },
             "isDeprecated": false,
@@ -24050,6 +24104,22 @@
             "deprecationReason": null
           },
           {
+            "name": "issueCreatedAutoReplyEnabled",
+            "description": "Whether the auto-reply for issue created is enabled.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "issueCompletedAutoReplyEnabled",
             "description": "Whether the auto-reply for issue completed is enabled.",
             "args": [],
@@ -24210,6 +24280,18 @@
           {
             "name": "useUserNamesInReplies",
             "description": "Whether the commenter's name is included in the email replies.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCreatedAutoReplyEnabled",
+            "description": "Whether the issue created auto-reply is enabled.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -24465,6 +24547,18 @@
           {
             "name": "useUserNamesInReplies",
             "description": "Whether the commenter's name is included in the email replies.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issueCreatedAutoReplyEnabled",
+            "description": "Whether the issue created auto-reply is enabled.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -28489,6 +28583,33 @@
           {
             "name": "success",
             "description": "Whether the fetch operation was successful.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "FileUploadDeletePayload",
+        "description": null,
+        "fields": [
+          {
+            "name": "success",
+            "description": "Whether the operation was successful.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -52892,6 +53013,18 @@
             "deprecationReason": null
           },
           {
+            "name": "dismissalReason",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "metadata",
             "description": null,
             "args": [],
@@ -57190,6 +57323,39 @@
             "deprecationReason": null
           },
           {
+            "name": "userUnlinkFromIdentityProvider",
+            "description": "Unlinks a guest user from their identity provider. Can only be called by an admin when SCIM is enabled.",
+            "args": [
+              {
+                "name": "id",
+                "description": "The identifier of the guest user to unlink from their identity provider.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "UserAdminPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "triageResponsibilityCreate",
             "description": "Creates a new triage responsibility.",
             "args": [
@@ -60977,6 +61143,18 @@
             "description": "Subscribes a user to an issue.",
             "args": [
               {
+                "name": "userEmail",
+                "description": "The email of the user to subscribe, default is the current user.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "userId",
                 "description": "The identifier of the user to subscribe, default is the current user.",
                 "type": {
@@ -61021,6 +61199,18 @@
             "name": "issueUnsubscribe",
             "description": "Unsubscribes a user from an issue.",
             "args": [
+              {
+                "name": "userEmail",
+                "description": "The email of the user to unsubscribe, default is the current user.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "userId",
                 "description": "The identifier of the user to unsubscribe, default is the current user.",
@@ -65709,6 +65899,39 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "ImageUploadFromUrlPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "fileUploadDangerouslyDelete",
+            "description": "[INTERNAL] Permanently delete an uploaded file by asset URL. This should be used as a last resort and will break comments and documents that reference the asset.",
+            "args": [
+              {
+                "name": "assetUrl",
+                "description": "The asset URL of the uploaded file to delete.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FileUploadDeletePayload",
                 "ofType": null
               }
             },
@@ -78157,6 +78380,22 @@
               "kind": "SCALAR",
               "name": "Boolean",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hipaaComplianceEnabled",
+            "description": "Whether HIPAA compliance is enabled for organization.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -99693,104 +99932,6 @@
             "deprecationReason": null
           },
           {
-            "name": "applicationInfoByIds",
-            "description": "[INTERNAL] Get basic information for a list of applications.",
-            "args": [
-              {
-                "name": "ids",
-                "description": "The IDs of the applications.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "SCALAR",
-                        "name": "String",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "Application",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "applicationInfoWithMembershipsByIds",
-            "description": "[DEPRECATED] [INTERNAL] Get information for a list of applications with memberships",
-            "args": [
-              {
-                "name": "clientIds",
-                "description": "The client IDs to look up.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "LIST",
-                    "name": null,
-                    "ofType": {
-                      "kind": "NON_NULL",
-                      "name": null,
-                      "ofType": {
-                        "kind": "SCALAR",
-                        "name": "String",
-                        "ofType": null
-                      }
-                    }
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "WorkspaceAuthorizedApplication",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": true,
-            "deprecationReason": "Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead."
-          },
-          {
             "name": "applicationWithAuthorization",
             "description": "Get information for an application and whether a user has approved it for the given scopes.",
             "args": [
@@ -100337,30 +100478,6 @@
                   "ofType": {
                     "kind": "OBJECT",
                     "name": "AuthenticationSessionResponse",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "authorizedApplications",
-            "description": "[INTERNAL] Get all authorized applications for a user.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "AuthorizedApplication",
                     "ofType": null
                   }
                 }
@@ -107294,75 +107411,6 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
-          },
-          {
-            "name": "workspaceAuthorizedApplications",
-            "description": "[DEPRECATED] [INTERNAL] Get non-internal authorized applications (with limited fields) for a workspace",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "WorkspaceAuthorizedApplication",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": true,
-            "deprecationReason": "Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead."
-          },
-          {
-            "name": "workspaceAuthorizedApplicationsWithAppUser",
-            "description": "[INTERNAL] Get non-internal authorized applications for a workspace, including each application's app user.",
-            "args": [
-              {
-                "name": "clientIds",
-                "description": "Client IDs of specific applications to return. If not provided, all workspace-authorized applications will be returned.",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "String",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "WorkspaceAuthorizedApplicationWithAppUser",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -109943,6 +109991,29 @@
       },
       {
         "kind": "INPUT_OBJECT",
+        "name": "SalesforceMetadataIntegrationComparator",
+        "description": "[INTERNAL] Comparator for Salesforce metadata.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "caseMetadata",
+            "description": "Salesforce Case metadata filter",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
         "name": "SalesforceSettingsInput",
         "description": null,
         "fields": null,
@@ -111832,10 +111903,22 @@
           },
           {
             "name": "subType",
-            "description": "Compound filters, all of which need to be matched by the sub type.",
+            "description": "Comparator for the sub type.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "SubTypeComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "salesforceMetadata",
+            "description": "[INTERNAL] Comparator for the salesforce metadata.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "SalesforceMetadataIntegrationComparator",
               "ofType": null
             },
             "defaultValue": null,
@@ -126048,368 +126131,6 @@
           }
         ],
         "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "WorkspaceAuthorizedApplication",
-        "description": "[INTERNAL] Public information of the OAuth application, plus the userIds and scopes for those users.",
-        "fields": [
-          {
-            "name": "name",
-            "description": "Application name.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "description",
-            "description": "Description of the application.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "developer",
-            "description": "Developer of the application.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "developerUrl",
-            "description": "Developer URL of the application.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "imageUrl",
-            "description": "Image of the application.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "scope",
-            "description": "Scopes that are authorized for this application for a given user.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "appId",
-            "description": "OAuth application's ID.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "clientId",
-            "description": "OAuth application's client ID.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "webhooksEnabled",
-            "description": "Whether or not webhooks are enabled for the application.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "totalMembers",
-            "description": "Total number of members that authorized the application.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "memberships",
-            "description": "UserIds and membership dates of everyone who has authorized the application with the set of scopes.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "AuthMembership",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "WorkspaceAuthorizedApplicationWithAppUser",
-        "description": "[INTERNAL] Public information of the OAuth application, plus the app user and aggregate membership count.",
-        "fields": [
-          {
-            "name": "name",
-            "description": "Application name.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "description",
-            "description": "Description of the application.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "developer",
-            "description": "Developer of the application.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "developerUrl",
-            "description": "Developer URL of the application.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "imageUrl",
-            "description": "Image of the application.",
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "scope",
-            "description": "Scopes that are authorized for this application for a given user.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "appId",
-            "description": "OAuth application's ID.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "clientId",
-            "description": "OAuth application's client ID.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "webhooksEnabled",
-            "description": "Whether or not webhooks are enabled for the application.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "totalMembers",
-            "description": "Total number of members (including the app user, if it exists) that authorized the application.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "appUser",
-            "description": "The app user associated with this client, if one exists.",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "AuthMembership",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },

@@ -2753,6 +2753,8 @@ fragment AgentActivity on AgentActivity {
   signal
   # Metadata about the external source that created this agent activity.
   sourceMetadata
+  # Metadata about this agent activity's signal.
+  signalMetadata
   # The agent session this activity belongs to.
   agentSession {
     id
@@ -2849,6 +2851,8 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   issueCanceledAutoReplyEnabled
   # Whether the auto-reply for issue completed is enabled.
   issueCompletedAutoReplyEnabled
+  # Whether the auto-reply for issue created is enabled.
+  issueCreatedAutoReplyEnabled
   # Whether the commenter's name is included in the email replies.
   useUserNamesInReplies
   # Whether the email address is enabled.
@@ -3692,6 +3696,8 @@ fragment Organization on Organization {
   trialEndsAt
   # The unique identifier of the entity.
   id
+  # Whether HIPAA compliance is enabled for organization.
+  hipaaComplianceEnabled
   # Whether SAML authentication is enabled for organization.
   samlEnabled
   # Whether SCIM provisioning is enabled for organization.
@@ -5496,6 +5502,8 @@ fragment AgentActivityWebhookPayload on AgentActivityWebhookPayload {
   __typename
   # An optional modifier that provides additional instructions on how the activity should be interpreted.
   signal
+  # Metadata about this agent activity's signal.
+  signalMetadata
   # The ID of the agent session that this activity belongs to.
   agentSessionId
   # The ID of the entity.
@@ -7438,6 +7446,12 @@ fragment FetchDataPayload on FetchDataPayload {
   success
 }
 
+fragment FileUploadDeletePayload on FileUploadDeletePayload {
+  __typename
+  # Whether the operation was successful.
+  success
+}
+
 fragment FrontAttachmentPayload on FrontAttachmentPayload {
   __typename
   # The identifier of the last sync operation.
@@ -8034,6 +8048,7 @@ fragment IssueSuggestion on IssueSuggestion {
   createdAt
   # The unique identifier of the entity.
   id
+  dismissalReason
   issue {
     id
   }
@@ -16660,10 +16675,12 @@ mutation issueRemoveLabel(
 mutation issueSubscribe(
   # The identifier of the issue to subscribe to.
   $id: String!
+  # The email of the user to subscribe, default is the current user.
+  $userEmail: String
   # The identifier of the user to subscribe, default is the current user.
   $userId: String
 ) {
-  issueSubscribe(id: $id, userId: $userId) {
+  issueSubscribe(id: $id, userEmail: $userEmail, userId: $userId) {
     ...IssuePayload
   }
 }
@@ -16680,10 +16697,12 @@ mutation unarchiveIssue(
 mutation issueUnsubscribe(
   # The identifier of the issue to unsubscribe from.
   $id: String!
+  # The email of the user to unsubscribe, default is the current user.
+  $userEmail: String
   # The identifier of the user to unsubscribe, default is the current user.
   $userId: String
 ) {
-  issueUnsubscribe(id: $id, userId: $userId) {
+  issueUnsubscribe(id: $id, userEmail: $userEmail, userId: $userId) {
     ...IssuePayload
   }
 }
@@ -17645,6 +17664,16 @@ mutation suspendUser(
   $id: String!
 ) {
   userSuspend(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Unlinks a guest user from their identity provider. Can only be called by an admin when SCIM is
+# enabled.
+mutation userUnlinkFromIdentityProvider(
+  # The identifier of the guest user to unlink from their identity provider.
+  $id: String!
+) {
+  userUnlinkFromIdentityProvider(id: $id) {
     ...UserAdminPayload
   }
 }
