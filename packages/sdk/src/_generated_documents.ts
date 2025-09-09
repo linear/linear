@@ -976,17 +976,6 @@ export type AuthIdentityProvider = {
   ssoSigningCert?: Maybe<Scalars["String"]>;
 };
 
-/** [INTERNAL] An OAuth userId/createdDate tuple */
-export type AuthMembership = {
-  __typename?: "AuthMembership";
-  /** The user ID associated with the authorization */
-  authorizingUserId?: Maybe<Scalars["String"]>;
-  /** The date of the authorization */
-  createdAt: Scalars["DateTime"];
-  /** The user ID the authorization was done for */
-  userId: Scalars["String"];
-};
-
 /** An organization. Organizations are root-level objects that contain users and teams. */
 export type AuthOrganization = {
   __typename?: "AuthOrganization";
@@ -1118,29 +1107,6 @@ export enum AuthenticationSessionType {
   Ios = "ios",
   Web = "web",
 }
-
-/** [INTERNAL] Public information of the OAuth application, plus the authorized scopes for a given user. */
-export type AuthorizedApplication = {
-  __typename?: "AuthorizedApplication";
-  /** OAuth application's ID. */
-  appId: Scalars["String"];
-  /** OAuth application's client ID. */
-  clientId: Scalars["String"];
-  /** Description of the application. */
-  description?: Maybe<Scalars["String"]>;
-  /** Developer of the application. */
-  developer?: Maybe<Scalars["String"]>;
-  /** Developer URL of the application. */
-  developerUrl?: Maybe<Scalars["String"]>;
-  /** Image of the application. */
-  imageUrl?: Maybe<Scalars["String"]>;
-  /** Application name. */
-  name: Scalars["String"];
-  /** Scopes that are authorized for this application for a given user. */
-  scope: Array<Scalars["String"]>;
-  /** Whether or not webhooks are enabled for the application. */
-  webhooksEnabled: Scalars["Boolean"];
-};
 
 /** Details of the app user's authorizing user. */
 export type AuthorizingUser = {
@@ -16047,8 +16013,6 @@ export type Query = {
   workflowState: WorkflowState;
   /** All issue workflow states. */
   workflowStates: WorkflowStateConnection;
-  /** [INTERNAL] Get a specific non-internal authorized application (with limited fields) for a workspace */
-  workspaceAuthorizedApplication: WorkspaceAuthorizedApplicationWithMemberships;
 };
 
 export type QueryAdministrableTeamsArgs = {
@@ -16852,10 +16816,6 @@ export type QueryWorkflowStatesArgs = {
   includeArchived?: Maybe<Scalars["Boolean"]>;
   last?: Maybe<Scalars["Int"]>;
   orderBy?: Maybe<PaginationOrderBy>;
-};
-
-export type QueryWorkspaceAuthorizedApplicationArgs = {
-  clientId: Scalars["String"];
 };
 
 export type RateLimitPayload = {
@@ -19904,17 +19864,6 @@ export type WorkflowStateUpdateInput = {
   name?: Maybe<Scalars["String"]>;
   /** The position of the state. */
   position?: Maybe<Scalars["Float"]>;
-};
-
-/** [INTERNAL] Public information of the OAuth application with its memberships */
-export type WorkspaceAuthorizedApplicationWithMemberships = {
-  __typename?: "WorkspaceAuthorizedApplicationWithMemberships";
-  /** Details of the OAuth application */
-  client: AuthorizedApplication;
-  /** UserIds and membership dates of everyone who has authorized the application */
-  memberships: Array<AuthMembership>;
-  /** Total number of members that authorized the application. */
-  totalMembers: Scalars["Float"];
 };
 
 export type ZendeskSettingsInput = {
