@@ -22,6 +22,11 @@ generates:
       - typed-document-node
     config:
       namingConvention: './naming-override#case'
+      # Prefer `Pick` to reference prior types, rather than pre-resolving types and redefining primitives inline
+      # https://the-guild.dev/graphql/codegen/plugins/typescript/typescript-operations#preresolvetypes (changed to
+      # default true in v2 https://the-guild.dev/graphql/hive/blog/whats-new-in-graphql-codegen-v2). Keeps package size
+      # smaller.
+      preResolveTypes: false
   src/_generated_sdk.ts:
     plugins:
       - "@linear/codegen-sdk"
