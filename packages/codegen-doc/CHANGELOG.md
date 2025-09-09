@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.0
+
+### Minor Changes
+
+- feea0fb: Upgrade graphql-codegen from v1 to v2 internally, which produces slight changes in resultant schema fragments and documents.
+
 ## 3.2.12
 
 ### Patch Changes
