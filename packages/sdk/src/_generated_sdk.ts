@@ -40705,7 +40705,6 @@ export class LinearSdk extends Request {
     return new UpdateWorkflowStateMutation(this._request).fetch(id, input);
   }
 }
-/** Re-export enums for direct import */
 export {
   AgentActivitySignal,
   AgentActivityType,
