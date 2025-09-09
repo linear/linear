@@ -1,5 +1,15 @@
 # Change Log
 
+## 3.2.0
+
+### Minor Changes
+
+- 10828cf: Include enums in SDK export
+
+### Patch Changes
+
+- 340065a: chore(deps): update dependency patch versions
+
 ## 3.1.11
 
 ### Patch Changes
