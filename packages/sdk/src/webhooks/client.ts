@@ -62,7 +62,7 @@ export class LinearWebhookClient {
 
         let parsedPayload: LinearWebhookPayload;
         try {
-          parsedPayload = this.parseVerifiedPayload(rawBody, signature);
+          parsedPayload = this.parseData(rawBody, signature);
         } catch {
           return adapter.send(400, "Invalid webhook");
         }
@@ -186,20 +186,6 @@ export class LinearWebhookClient {
   }
 
   /**
-   * Parses the JSON body and verifies signature and optional timestamp.
-   * Throws if the JSON is invalid, the signature is invalid, or the timestamp
-   * check fails.
-   *
-   * @param rawBody - Raw request body as a Buffer
-   * @param signature - The value of the `linear-signature` header
-   * @returns The verified and parsed webhook payload
-   */
-  private parseVerifiedPayload(rawBody: Buffer, signature: string): LinearWebhookPayload {
-    const parsedBody = JSON.parse(rawBody.toString()) as { webhookTimestamp?: number };
-    return this.parseData(rawBody, signature, parsedBody.webhookTimestamp);
-  }
-
-  /**
    * Returns the list of handlers to invoke for a given event type,
    * including both specific and wildcard handlers.
    *
@@ -218,9 +204,13 @@ export class LinearWebhookClient {
 
   /**
    * Verify the webhook signature
+   *
+   * Throws an error if the signature or timestamp is invalid.
+   *
    * @param rawBody The webhook request raw body
    * @param signature The signature to verify
    * @param timestamp The `webhookTimestamp` field from the request parsed body
+   * @returns True if the signature is valid
    */
   public verify(rawBody: Buffer, signature: string, timestamp?: number): boolean {
     const verificationBuffer = Buffer.from(crypto.createHmac("sha256", this.secret).update(rawBody).digest("hex"));
@@ -246,18 +236,21 @@ export class LinearWebhookClient {
   }
 
   /**
-   * Parse and verify webhook data
+   * Parse and verify webhook data, throwing an error if the signature or timestamp is invalid.
+   *
    * @param rawBody The webhook request raw body
    * @param signature The signature to verify
-   * @param timestamp The `webhookTimestamp` field from the request parsed body
+   * @param timestamp Optional timestamp override. If not provided, uses `webhookTimestamp` from the parsed body
    */
   public parseData(rawBody: Buffer, signature: string, timestamp?: number): LinearWebhookPayload {
-    const verified = this.verify(rawBody, signature, timestamp);
+    const parsedBody = JSON.parse(rawBody.toString()) as LinearWebhookPayload & { webhookTimestamp?: number };
+
+    // Use provided timestamp as override, otherwise use timestamp from payload
+    const verified = this.verify(rawBody, signature, timestamp ?? parsedBody.webhookTimestamp);
     if (!verified) {
       throw new Error("Invalid webhook signature");
     }
 
-    const parsedBody = JSON.parse(rawBody.toString());
-    return parsedBody as LinearWebhookPayload;
+    return parsedBody;
   }
 }

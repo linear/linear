@@ -22,40 +22,64 @@ describe("webhooks", () => {
       type: "Comment",
       url: "https://linear.app/issue/LIN-1778/foo-bar#comment-77217de3-fb52-4dad-bb9a-b356beb93de8",
       createdAt: "2020-01-23T12:53:18.084Z",
-      webhookTimestamp: 1677611643000,
+      webhookTimestamp: new Date().getTime(),
     };
 
     rawBody = Buffer.from(JSON.stringify(requestBody));
     parsedBody = JSON.parse(rawBody.toString());
   });
 
-  it("incorrect signature, should fail verification", async () => {
-    const webhook = new LinearWebhookClient("SECRET");
-    const signature = crypto.createHmac("sha256", "WRONG_SECRET").update(rawBody).digest("hex");
-    expect(() => webhook.verify(rawBody, signature)).toThrowError("Invalid webhook signature");
+  describe("verify", () => {
+    it("incorrect signature, should fail verification", async () => {
+      const webhook = new LinearWebhookClient("SECRET");
+      const signature = crypto.createHmac("sha256", "WRONG_SECRET").update(rawBody).digest("hex");
+      expect(() => webhook.verify(rawBody, signature)).toThrowError("Invalid webhook signature");
+    });
+
+    it("correct signature, invalid timestamp should fail verification", async () => {
+      const webhook = new LinearWebhookClient("SECRET");
+      const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
+      expect(() => webhook.verify(rawBody, signature, new Date().getTime() - 1_000_000)).toThrowError(
+        "Invalid webhook timestamp"
+      );
+    });
+
+    it("correct signature, no timestamp, should pass verification", async () => {
+      const webhook = new LinearWebhookClient("SECRET");
+      const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
+      expect(() => webhook.verify(rawBody, signature)).toBeTruthy();
+    });
+
+    it("correct signature, correct timestamp should pass verification", async () => {
+      const webhook = new LinearWebhookClient("SECRET");
+      const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
+      expect(() => webhook.verify(rawBody, signature, parsedBody[LINEAR_WEBHOOK_TS_FIELD])).toBeTruthy();
+    });
   });
 
-  it("correct signature, incorrect timestamp should fail verification", async () => {
-    const webhook = new LinearWebhookClient("SECRET");
-    const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
-    expect(() => webhook.verify(rawBody, signature, parsedBody[LINEAR_WEBHOOK_TS_FIELD])).toThrowError(
-      "Invalid webhook timestamp"
-    );
-  });
+  describe("parseData", () => {
+    it("should return the parsed payload if valid", () => {
+      const client = new LinearWebhookClient("SECRET");
+      const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
+      const payload = client.parseData(rawBody, signature);
+      expect(payload).toEqual(parsedBody);
+    });
 
-  it("correct signature, no timestamp, should pass verification", async () => {
-    const webhook = new LinearWebhookClient("SECRET");
-    const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
-    expect(() => webhook.verify(rawBody, signature)).toBeTruthy();
-  });
+    it("should throw an error if the signature is invalid", () => {
+      const client = new LinearWebhookClient("SECRET");
+      const signature = crypto.createHmac("sha256", "WRONG_SIGNATURE").update(rawBody).digest("hex");
+      expect(() => client.parseData(rawBody, signature)).toThrowError("Invalid webhook signature");
+    });
 
-  it("correct signature, correct timestamp should pass verification", async () => {
-    requestBody.webhookTimestamp = new Date().getTime();
-    rawBody = Buffer.from(JSON.stringify(requestBody));
-    parsedBody = JSON.parse(rawBody.toString());
-
-    const webhook = new LinearWebhookClient("SECRET");
-    const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
-    expect(() => webhook.verify(rawBody, signature, parsedBody[LINEAR_WEBHOOK_TS_FIELD])).toBeTruthy();
+    it("should throw an error if the timestamp is invalid", () => {
+      const requestBodyWrongTimestamp = {
+        ...requestBody,
+        webhookTimestamp: new Date().getTime() - 1_000_000,
+      };
+      const rawBodyWrongTimestamp = Buffer.from(JSON.stringify(requestBodyWrongTimestamp));
+      const client = new LinearWebhookClient("SECRET");
+      const signature = crypto.createHmac("sha256", "SECRET").update(rawBodyWrongTimestamp).digest("hex");
+      expect(() => client.parseData(rawBodyWrongTimestamp, signature)).toThrowError("Invalid webhook timestamp");
+    });
   });
 });
