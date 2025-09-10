@@ -565,10 +565,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@changesets/apply-release-plan@^7.0.12":
-  version "7.0.12"
-  resolved "https://registry.yarnpkg.com/@changesets/apply-release-plan/-/apply-release-plan-7.0.12.tgz#8413977f117fa95f6e2db6f0c35479a2eba6960a"
-  integrity sha512-EaET7As5CeuhTzvXTQCRZeBUcisoYPDDcXvgTE/2jmmypKp0RC7LxKj/yzqeh/1qFTZI7oDGFcL1PHRuQuketQ==
+"@changesets/apply-release-plan@^7.0.13":
+  version "7.0.13"
+  resolved "https://registry.yarnpkg.com/@changesets/apply-release-plan/-/apply-release-plan-7.0.13.tgz#5c3813927002788d4e2ede1428faf85afa944c61"
+  integrity sha512-BIW7bofD2yAWoE8H4V40FikC+1nNFEKBisMECccS16W1rt6qqhNTBDmIw5HaqmMgtLNz9e7oiALiEUuKrQ4oHg==
   dependencies:
     "@changesets/config" "^3.1.1"
     "@changesets/get-version-range-type" "^0.4.0"
@@ -604,11 +604,11 @@
     "@changesets/types" "^6.1.0"
 
 "@changesets/cli@^2.14.1":
-  version "2.29.6"
-  resolved "https://registry.yarnpkg.com/@changesets/cli/-/cli-2.29.6.tgz#8ad7943e211b929d793132632eed52033a2c7caa"
-  integrity sha512-6qCcVsIG1KQLhpQ5zE8N0PckIx4+9QlHK3z6/lwKnw7Tir71Bjw8BeOZaxA/4Jt00pcgCnCSWZnyuZf5Il05QQ==
+  version "2.29.7"
+  resolved "https://registry.yarnpkg.com/@changesets/cli/-/cli-2.29.7.tgz#3e023eb3ec495211610404b835c23bfdaee93594"
+  integrity sha512-R7RqWoaksyyKXbKXBTbT4REdy22yH81mcFK6sWtqSanxUCbUi9Uf+6aqxZtDQouIqPdem2W56CdxXgsxdq7FLQ==
   dependencies:
-    "@changesets/apply-release-plan" "^7.0.12"
+    "@changesets/apply-release-plan" "^7.0.13"
     "@changesets/assemble-release-plan" "^6.0.9"
     "@changesets/changelog-git" "^0.2.1"
     "@changesets/config" "^3.1.1"
