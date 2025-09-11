@@ -187,16 +187,32 @@ export class LinearWebhookClient {
 
   /**
    * Parses the JSON body and verifies signature and optional timestamp.
-   * Throws if the JSON is invalid, the signature is invalid, or the timestamp
-   * check fails.
+   *
+   * Throws if the JSON is invalid, the signature is invalid, or the timestamp check fails.
    *
    * @param rawBody - Raw request body as a Buffer
    * @param signature - The value of the `linear-signature` header
    * @returns The verified and parsed webhook payload
    */
   private parseVerifiedPayload(rawBody: Buffer, signature: string): LinearWebhookPayload {
-    const parsedBody = JSON.parse(rawBody.toString()) as { webhookTimestamp?: number };
-    return this.parseData(rawBody, signature, parsedBody.webhookTimestamp);
+    const parsedBody = this.parseBodyAsWebhookPayload(rawBody);
+
+    const verified = this.verify(rawBody, signature, parsedBody.webhookTimestamp);
+    if (!verified) {
+      throw new Error("Invalid webhook signature");
+    }
+
+    return parsedBody;
+  }
+
+  /**
+   * Parses the raw body as a webhook payload with typing.
+   *
+   * @param rawBody - Raw request body as a Buffer
+   * @returns Parsed webhook payload object
+   */
+  private parseBodyAsWebhookPayload(rawBody: Buffer): LinearWebhookPayload & { webhookTimestamp?: number } {
+    return JSON.parse(rawBody.toString());
   }
 
   /**
@@ -218,9 +234,13 @@ export class LinearWebhookClient {
 
   /**
    * Verify the webhook signature
+   *
+   * Throws an error if the signature or timestamp is invalid.
+   *
    * @param rawBody The webhook request raw body
    * @param signature The signature to verify
    * @param timestamp The `webhookTimestamp` field from the request parsed body
+   * @returns True if the signature is valid
    */
   public verify(rawBody: Buffer, signature: string, timestamp?: number): boolean {
     const verificationBuffer = Buffer.from(crypto.createHmac("sha256", this.secret).update(rawBody).digest("hex"));
@@ -246,7 +266,8 @@ export class LinearWebhookClient {
   }
 
   /**
-   * Parse and verify webhook data
+   * Parse and verify webhook data, throwing an error if the signature or given timestamp is invalid.
+   *
    * @param rawBody The webhook request raw body
    * @param signature The signature to verify
    * @param timestamp The `webhookTimestamp` field from the request parsed body
@@ -257,7 +278,6 @@ export class LinearWebhookClient {
       throw new Error("Invalid webhook signature");
     }
 
-    const parsedBody = JSON.parse(rawBody.toString());
-    return parsedBody as LinearWebhookPayload;
+    return this.parseBodyAsWebhookPayload(rawBody);
   }
 }
