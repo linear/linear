@@ -1,5 +1,12 @@
 # Change Log
 
+## 59.1.1
+
+### Patch Changes
+
+- 7ae1128: chore(deps): update dependency patch versions
+- a8f03ca: Removed a redundant `parseData` call from handlers returned by `LinearWebhookClient.createHandler`.
+
 ## 59.1.0
 
 ### Minor Changes

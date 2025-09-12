@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.1
+
+### Patch Changes
+
+- 7ae1128: chore(deps): update dependency patch versions
+
 ## 3.3.0
 
 ### Minor Changes
