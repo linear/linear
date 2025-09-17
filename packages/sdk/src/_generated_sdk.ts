@@ -463,6 +463,7 @@ export class AgentActivityWebhookPayload {
     this.id = data.id;
     this.signal = data.signal ?? undefined;
     this.signalMetadata = data.signalMetadata ?? undefined;
+    this.sourceCommentId = data.sourceCommentId ?? undefined;
     this.updatedAt = data.updatedAt;
     this.userId = data.userId ?? undefined;
   }
@@ -481,6 +482,8 @@ export class AgentActivityWebhookPayload {
   public signal?: string;
   /** Metadata about this agent activity's signal. */
   public signalMetadata?: L.Scalars["JSONObject"];
+  /** The ID of the comment this activity is linked to. */
+  public sourceCommentId?: string;
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The ID of the user who created this agent activity. */
@@ -1368,6 +1371,7 @@ export class AuditEntryWebhookPayload {
 export class AuthIdentityProvider extends Request {
   public constructor(request: LinearRequest, data: L.AuthIdentityProviderFragment) {
     super(request);
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.defaultMigrated = data.defaultMigrated;
     this.id = data.id;
     this.issuerEntityId = data.issuerEntityId ?? undefined;
@@ -1380,6 +1384,8 @@ export class AuthIdentityProvider extends Request {
     this.ssoSigningCert = data.ssoSigningCert ?? undefined;
   }
 
+  /** The time at which the entity was created. */
+  public createdAt: Date;
   /** Whether the identity provider is the default identity provider migrated from organization level settings. */
   public defaultMigrated: boolean;
   /** The unique identifier of the entity. */
@@ -1411,6 +1417,7 @@ export class AuthOrganization extends Request {
   public constructor(request: LinearRequest, data: L.AuthOrganizationFragment) {
     super(request);
     this.allowedAuthServices = data.allowedAuthServices;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.deletionRequestedAt = parseDate(data.deletionRequestedAt) ?? undefined;
     this.enabled = data.enabled;
     this.id = data.id;
@@ -1428,6 +1435,8 @@ export class AuthOrganization extends Request {
 
   /** Allowed authentication providers, empty array means all are allowed */
   public allowedAuthServices: string[];
+  /** The time at which the entity was created. */
+  public createdAt: Date;
   /** The time at which deletion of the organization was requested. */
   public deletionRequestedAt?: Date;
   /** Whether the organization is enabled. Used as a superuser tool to lock down the org. */
@@ -1508,6 +1517,7 @@ export class AuthUser extends Request {
     super(request);
     this.active = data.active;
     this.avatarUrl = data.avatarUrl ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.displayName = data.displayName;
     this.email = data.email;
     this.id = data.id;
@@ -1521,6 +1531,8 @@ export class AuthUser extends Request {
   public active: boolean;
   /** An URL to the user's avatar image. */
   public avatarUrl?: string;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
   /** The user's display (nick) name. Unique within each organization. */
   public displayName: string;
   /** The user's email address. */
@@ -1571,7 +1583,7 @@ export class AuthenticationSessionResponse extends Request {
   public client?: string;
   /** Country codes of all seen locations. */
   public countryCodes: string[];
-  /** Date when the session was created. */
+  /** The time at which the entity was created. */
   public createdAt: Date;
   public id: string;
   /** IP address. */
@@ -15379,6 +15391,82 @@ export class RoadmapToProjectPayload extends Request {
   }
 }
 /**
+ * Payload returned by semantic search.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SemanticSearchPayloadFragment response data
+ */
+export class SemanticSearchPayload extends Request {
+  public constructor(request: LinearRequest, data: L.SemanticSearchPayloadFragment) {
+    super(request);
+    this.enabled = data.enabled;
+    this.results = data.results.map(node => new SemanticSearchResult(request, node));
+  }
+
+  /** Whether the semantic search is enabled. */
+  public enabled: boolean;
+  public results: SemanticSearchResult[];
+}
+/**
+ * A semantic search result reference.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.SemanticSearchResultFragment response data
+ */
+export class SemanticSearchResult extends Request {
+  private _document?: L.SemanticSearchResultFragment["document"];
+  private _initiative?: L.SemanticSearchResultFragment["initiative"];
+  private _issue?: L.SemanticSearchResultFragment["issue"];
+  private _project?: L.SemanticSearchResultFragment["project"];
+
+  public constructor(request: LinearRequest, data: L.SemanticSearchResultFragment) {
+    super(request);
+    this.id = data.id;
+    this.type = data.type;
+    this._document = data.document ?? undefined;
+    this._initiative = data.initiative ?? undefined;
+    this._issue = data.issue ?? undefined;
+    this._project = data.project ?? undefined;
+  }
+
+  /** The unique identifier of the entity. */
+  public id: string;
+  /** The type of the semantic search result. */
+  public type: L.SemanticSearchResultType;
+  /** The document related to the semantic search result. */
+  public get document(): LinearFetch<Document> | undefined {
+    return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
+  }
+  /** The ID of document related to the semantic search result. */
+  public get documentId(): string | undefined {
+    return this._document?.id;
+  }
+  /** The initiative related to the semantic search result. */
+  public get initiative(): LinearFetch<Initiative> | undefined {
+    return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
+  }
+  /** The ID of initiative related to the semantic search result. */
+  public get initiativeId(): string | undefined {
+    return this._initiative?.id;
+  }
+  /** The issue related to the semantic search result. */
+  public get issue(): LinearFetch<Issue> | undefined {
+    return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
+  }
+  /** The ID of issue related to the semantic search result. */
+  public get issueId(): string | undefined {
+    return this._issue?.id;
+  }
+  /** The project related to the semantic search result. */
+  public get project(): LinearFetch<Project> | undefined {
+    return this._project?.id ? new ProjectQuery(this._request).fetch(this._project?.id) : undefined;
+  }
+  /** The ID of project related to the semantic search result. */
+  public get projectId(): string | undefined {
+    return this._project?.id;
+  }
+}
+/**
  * SES domain identity used for sending emails from a custom domain.
  *
  * @param request - function to call the graphql client
@@ -21274,6 +21362,40 @@ export class SearchProjectsQuery extends Request {
 }
 
 /**
+ * A fetchable SemanticSearch Query
+ *
+ * @param request - function to call the graphql client
+ */
+export class SemanticSearchQuery extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the SemanticSearch query and return a SemanticSearchPayload
+   *
+   * @param query - required query to pass to semanticSearch
+   * @param variables - variables without 'query' to pass into the SemanticSearchQuery
+   * @returns parsed response from SemanticSearchQuery
+   */
+  public async fetch(
+    query: string,
+    variables?: Omit<L.SemanticSearchQueryVariables, "query">
+  ): LinearFetch<SemanticSearchPayload> {
+    const response = await this._request<L.SemanticSearchQuery, L.SemanticSearchQueryVariables>(
+      L.SemanticSearchDocument,
+      {
+        query,
+        ...variables,
+      }
+    );
+    const data = response.semanticSearch;
+
+    return new SemanticSearchPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable SsoUrlFromEmail Query
  *
  * @param request - function to call the graphql client
@@ -26328,6 +26450,35 @@ export class DeleteIssueMutation extends Request {
     const data = response.issueDelete;
 
     return new IssueArchivePayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable IssueExternalSyncDisable Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class IssueExternalSyncDisableMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the IssueExternalSyncDisable mutation and return a IssuePayload
+   *
+   * @param attachmentId - required attachmentId to pass to issueExternalSyncDisable
+   * @returns parsed response from IssueExternalSyncDisableMutation
+   */
+  public async fetch(attachmentId: string): LinearFetch<IssuePayload> {
+    const response = await this._request<
+      L.IssueExternalSyncDisableMutation,
+      L.IssueExternalSyncDisableMutationVariables
+    >(L.IssueExternalSyncDisableDocument, {
+      attachmentId,
+    });
+    const data = response.issueExternalSyncDisable;
+
+    return new IssuePayload(this._request, data);
   }
 }
 
@@ -37612,6 +37763,19 @@ export class LinearSdk extends Request {
     return new SearchProjectsQuery(this._request).fetch(term, variables);
   }
   /**
+   * Search for various resources using natural language.
+   *
+   * @param query - required query to pass to semanticSearch
+   * @param variables - variables without 'query' to pass into the SemanticSearchQuery
+   * @returns SemanticSearchPayload
+   */
+  public semanticSearch(
+    query: string,
+    variables?: Omit<L.SemanticSearchQueryVariables, "query">
+  ): LinearFetch<SemanticSearchPayload> {
+    return new SemanticSearchQuery(this._request).fetch(query, variables);
+  }
+  /**
    * Fetch SSO login URL for the email provided.
    *
    * @param email - required email to pass to ssoUrlFromEmail
@@ -39364,6 +39528,15 @@ export class LinearSdk extends Request {
     variables?: Omit<L.DeleteIssueMutationVariables, "id">
   ): LinearFetch<IssueArchivePayload> {
     return new DeleteIssueMutation(this._request).fetch(id, variables);
+  }
+  /**
+   * Disables external sync on an issue.
+   *
+   * @param attachmentId - required attachmentId to pass to issueExternalSyncDisable
+   * @returns IssuePayload
+   */
+  public issueExternalSyncDisable(attachmentId: string): LinearFetch<IssuePayload> {
+    return new IssueExternalSyncDisableMutation(this._request).fetch(attachmentId);
   }
   /**
    * Kicks off an Asana import job.

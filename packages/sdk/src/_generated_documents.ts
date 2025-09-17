@@ -233,6 +233,7 @@ export type AgentActivityResponseContent = {
 export enum AgentActivitySignal {
   Auth = "auth",
   Continue = "continue",
+  Select = "select",
   Stop = "stop",
 }
 
@@ -272,6 +273,8 @@ export type AgentActivityWebhookPayload = {
   signal?: Maybe<Scalars["String"]>;
   /** Metadata about this agent activity's signal. */
   signalMetadata?: Maybe<Scalars["JSONObject"]>;
+  /** The ID of the comment this activity is linked to. */
+  sourceCommentId?: Maybe<Scalars["String"]>;
   /** The time at which the entity was updated. */
   updatedAt: Scalars["String"];
   /** The ID of the user who created this agent activity. */
@@ -955,6 +958,8 @@ export type AuditEntryWebhookPayload = {
 /** An identity provider. */
 export type AuthIdentityProvider = {
   __typename?: "AuthIdentityProvider";
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
   /** Whether the identity provider is the default identity provider migrated from organization level settings. */
   defaultMigrated: Scalars["Boolean"];
   /** The unique identifier of the entity. */
@@ -982,6 +987,8 @@ export type AuthOrganization = {
   __typename?: "AuthOrganization";
   /** Allowed authentication providers, empty array means all are allowed */
   allowedAuthServices: Array<Scalars["String"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
   /** The time at which deletion of the organization was requested. */
   deletionRequestedAt?: Maybe<Scalars["DateTime"]>;
   /** Whether the organization is enabled. Used as a superuser tool to lock down the org. */
@@ -1043,6 +1050,8 @@ export type AuthUser = {
   active: Scalars["Boolean"];
   /** An URL to the user's avatar image. */
   avatarUrl?: Maybe<Scalars["String"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
   /** The user's display (nick) name. Unique within each organization. */
   displayName: Scalars["String"];
   /** The user's email address. */
@@ -1069,7 +1078,7 @@ export type AuthenticationSessionResponse = {
   client?: Maybe<Scalars["String"]>;
   /** Country codes of all seen locations. */
   countryCodes: Array<Scalars["String"]>;
-  /** Date when the session was created. */
+  /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   id: Scalars["String"];
   /** IP address. */
@@ -9354,6 +9363,8 @@ export type Mutation = {
   issueDelete: IssueArchivePayload;
   /** [INTERNAL] Updates an issue description from the Front app to handle Front attachments correctly. */
   issueDescriptionUpdateFromFront: IssuePayload;
+  /** Disables external sync on an issue. */
+  issueExternalSyncDisable: IssuePayload;
   /** Kicks off an Asana import job. */
   issueImportCreateAsana: IssueImportPayload;
   /** Kicks off a Jira import job from a CSV. */
@@ -9621,8 +9632,6 @@ export type Mutation = {
   triageResponsibilityUpdate: TriageResponsibilityPayload;
   /** [Internal] Updates existing Slack integration scopes. */
   updateIntegrationSlackScopes: IntegrationPayload;
-  /** [INTERNAL] Updates the summary of an issue. */
-  updateIssueSummary: IssuePayload;
   /** Makes user a regular user. Can only be called by an admin. */
   userDemoteAdmin: UserAdminPayload;
   /** Makes user a guest. Can only be called by an admin. */
@@ -10454,6 +10463,10 @@ export type MutationIssueDescriptionUpdateFromFrontArgs = {
   id: Scalars["String"];
 };
 
+export type MutationIssueExternalSyncDisableArgs = {
+  attachmentId: Scalars["String"];
+};
+
 export type MutationIssueImportCreateAsanaArgs = {
   asanaTeamName: Scalars["String"];
   asanaToken: Scalars["String"];
@@ -11003,10 +11016,6 @@ export type MutationUpdateIntegrationSlackScopesArgs = {
   code: Scalars["String"];
   integrationId: Scalars["String"];
   redirectUri: Scalars["String"];
-};
-
-export type MutationUpdateIssueSummaryArgs = {
-  id: Scalars["String"];
 };
 
 export type MutationUserDemoteAdminArgs = {
@@ -12157,6 +12166,8 @@ export type NullableUserFilter = {
   id?: InputMaybe<IdComparator>;
   /** Comparator for the user's invited status. */
   invited?: InputMaybe<BooleanComparator>;
+  /** Comparator for the user's invited status. */
+  isInvited?: InputMaybe<BooleanComparator>;
   /** Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user. */
   isMe?: InputMaybe<BooleanComparator>;
   /** Comparator for the user's name. */
@@ -15965,10 +15976,7 @@ export type Query = {
   searchIssues: IssueSearchPayload;
   /** Search projects. */
   searchProjects: ProjectSearchPayload;
-  /**
-   * [INTERNAL] Search for various resources using natural language.
-   * @deprecated Use specific search endpoints like searchIssues, searchProjects, searchDocuments instead.
-   */
+  /** Search for various resources using natural language. */
   semanticSearch: SemanticSearchPayload;
   /** Fetch SSO login URL for the email provided. */
   ssoUrlFromEmail: SsoUrlFromEmailResponse;
@@ -16696,6 +16704,7 @@ export type QuerySearchProjectsArgs = {
 };
 
 export type QuerySemanticSearchArgs = {
+  filters?: InputMaybe<SemanticSearchFilters>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   maxResults?: InputMaybe<Scalars["Int"]>;
   query: Scalars["String"];
@@ -17278,14 +17287,30 @@ export type SalesforceSettingsInput = {
   url?: InputMaybe<Scalars["String"]>;
 };
 
-/** [INTERNAL] Payload returned by semantic search. */
+/** Filters for semantic search results. */
+export type SemanticSearchFilters = {
+  /** Filters applied to documents. */
+  documents?: InputMaybe<DocumentFilter>;
+  /** Filters applied to initiatives. */
+  initiatives?: InputMaybe<InitiativeFilter>;
+  /** Filters applied to issues. */
+  issues?: InputMaybe<IssueFilter>;
+  /** Filters applied to projects. */
+  projects?: InputMaybe<ProjectFilter>;
+};
+
+/** Payload returned by semantic search. */
 export type SemanticSearchPayload = {
   __typename?: "SemanticSearchPayload";
+  /**
+   * Whether the semantic search is enabled.
+   * @deprecated Always true.
+   */
   enabled: Scalars["Boolean"];
   results: Array<SemanticSearchResult>;
 };
 
-/** [INTERNAL] A semantic search result reference. */
+/** A semantic search result reference. */
 export type SemanticSearchResult = Node & {
   __typename?: "SemanticSearchResult";
   /** The document related to the semantic search result. */
@@ -17302,7 +17327,7 @@ export type SemanticSearchResult = Node & {
   type: SemanticSearchResultType;
 };
 
-/** [INTERNAL] The type of the semantic search result. */
+/** The type of the semantic search result. */
 export enum SemanticSearchResultType {
   Document = "document",
   Initiative = "initiative",
@@ -19098,6 +19123,8 @@ export type UserCollectionFilter = {
   id?: InputMaybe<IdComparator>;
   /** Comparator for the user's invited status. */
   invited?: InputMaybe<BooleanComparator>;
+  /** Comparator for the user's invited status. */
+  isInvited?: InputMaybe<BooleanComparator>;
   /** Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user. */
   isMe?: InputMaybe<BooleanComparator>;
   /** Comparator for the collection length. */
@@ -19160,6 +19187,8 @@ export type UserFilter = {
   id?: InputMaybe<IdComparator>;
   /** Comparator for the user's invited status. */
   invited?: InputMaybe<BooleanComparator>;
+  /** Comparator for the user's invited status. */
+  isInvited?: InputMaybe<BooleanComparator>;
   /** Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user. */
   isMe?: InputMaybe<BooleanComparator>;
   /** Comparator for the user's name. */
@@ -22353,6 +22382,16 @@ export type InitiativeRelationFragment = { __typename: "InitiativeRelation" } & 
     initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
   };
 
+export type SemanticSearchResultFragment = { __typename: "SemanticSearchResult" } & Pick<
+  SemanticSearchResult,
+  "type" | "id"
+> & {
+    document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+    initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+    issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+    project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+  };
+
 export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   AgentSession,
   | "summary"
@@ -22504,7 +22543,7 @@ export type UserNotificationSubscriptionFragment = { __typename: "UserNotificati
 
 export type AuthUserFragment = { __typename: "AuthUser" } & Pick<
   AuthUser,
-  "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+  "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
 > & {
     organization: { __typename: "AuthOrganization" } & Pick<
       AuthOrganization,
@@ -22517,6 +22556,7 @@ export type AuthUserFragment = { __typename: "AuthUser" } & Pick<
       | "urlKey"
       | "region"
       | "deletionRequestedAt"
+      | "createdAt"
       | "id"
       | "samlEnabled"
       | "scimEnabled"
@@ -22861,6 +22901,7 @@ export type AuthIdentityProviderFragment = { __typename: "AuthIdentityProvider" 
   | "priority"
   | "ssoSignAlgo"
   | "issuerEntityId"
+  | "createdAt"
   | "id"
   | "samlEnabled"
   | "scimEnabled"
@@ -23430,6 +23471,7 @@ export type AuthOrganizationFragment = { __typename: "AuthOrganization" } & Pick
   | "urlKey"
   | "region"
   | "deletionRequestedAt"
+  | "createdAt"
   | "id"
   | "samlEnabled"
   | "scimEnabled"
@@ -23539,7 +23581,6 @@ export type AuthenticationSessionResponseFragment = { __typename: "Authenticatio
   AuthenticationSessionResponse,
   | "client"
   | "countryCodes"
-  | "createdAt"
   | "updatedAt"
   | "location"
   | "ip"
@@ -23552,6 +23593,7 @@ export type AuthenticationSessionResponseFragment = { __typename: "Authenticatio
   | "operatingSystem"
   | "service"
   | "userAgent"
+  | "createdAt"
   | "type"
   | "browserType"
   | "lastActiveAt"
@@ -24551,6 +24593,7 @@ export type AgentSessionEventWebhookPayloadFragment = { __typename: "AgentSessio
         | "signal"
         | "signalMetadata"
         | "agentSessionId"
+        | "sourceCommentId"
         | "id"
         | "userId"
         | "content"
@@ -24611,6 +24654,7 @@ export type AgentActivityWebhookPayloadFragment = { __typename: "AgentActivityWe
   | "signal"
   | "signalMetadata"
   | "agentSessionId"
+  | "sourceCommentId"
   | "id"
   | "userId"
   | "content"
@@ -25241,6 +25285,20 @@ export type IssueSlaWebhookPayloadFragment = { __typename: "IssueSlaWebhookPaylo
       };
   };
 
+export type SemanticSearchPayloadFragment = { __typename: "SemanticSearchPayload" } & Pick<
+  SemanticSearchPayload,
+  "enabled"
+> & {
+    results: Array<
+      { __typename: "SemanticSearchResult" } & Pick<SemanticSearchResult, "type" | "id"> & {
+          document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+          initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+          issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+          project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+        }
+    >;
+  };
+
 export type ProjectAttachmentFragment = { __typename: "ProjectAttachment" } & Pick<
   ProjectAttachment,
   "sourceType" | "metadata" | "source" | "subtitle" | "updatedAt" | "archivedAt" | "createdAt" | "id" | "title" | "url"
@@ -25754,7 +25812,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
     users: Array<
       { __typename: "AuthUser" } & Pick<
         AuthUser,
-        "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+        "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
       > & {
           organization: { __typename: "AuthOrganization" } & Pick<
             AuthOrganization,
@@ -25767,6 +25825,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
             | "urlKey"
             | "region"
             | "deletionRequestedAt"
+            | "createdAt"
             | "id"
             | "samlEnabled"
             | "scimEnabled"
@@ -25778,7 +25837,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
     lockedUsers: Array<
       { __typename: "AuthUser" } & Pick<
         AuthUser,
-        "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+        "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
       > & {
           organization: { __typename: "AuthOrganization" } & Pick<
             AuthOrganization,
@@ -25791,6 +25850,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
             | "urlKey"
             | "region"
             | "deletionRequestedAt"
+            | "createdAt"
             | "id"
             | "samlEnabled"
             | "scimEnabled"
@@ -25812,6 +25872,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
           | "urlKey"
           | "region"
           | "deletionRequestedAt"
+          | "createdAt"
           | "id"
           | "samlEnabled"
           | "scimEnabled"
@@ -25833,6 +25894,7 @@ export type AuthResolverResponseFragment = { __typename: "AuthResolverResponse" 
           | "urlKey"
           | "region"
           | "deletionRequestedAt"
+          | "createdAt"
           | "id"
           | "samlEnabled"
           | "scimEnabled"
@@ -25961,6 +26023,7 @@ export type CreateOrJoinOrganizationResponseFragment = { __typename: "CreateOrJo
     | "urlKey"
     | "region"
     | "deletionRequestedAt"
+    | "createdAt"
     | "id"
     | "samlEnabled"
     | "scimEnabled"
@@ -25969,7 +26032,7 @@ export type CreateOrJoinOrganizationResponseFragment = { __typename: "CreateOrJo
   >;
   user: { __typename: "AuthUser" } & Pick<
     AuthUser,
-    "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+    "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
   > & {
       organization: { __typename: "AuthOrganization" } & Pick<
         AuthOrganization,
@@ -25982,6 +26045,7 @@ export type CreateOrJoinOrganizationResponseFragment = { __typename: "CreateOrJo
         | "urlKey"
         | "region"
         | "deletionRequestedAt"
+        | "createdAt"
         | "id"
         | "samlEnabled"
         | "scimEnabled"
@@ -31938,7 +32002,6 @@ export type AuthenticationSessionsQuery = { __typename?: "Query" } & {
       AuthenticationSessionResponse,
       | "client"
       | "countryCodes"
-      | "createdAt"
       | "updatedAt"
       | "location"
       | "ip"
@@ -31951,6 +32014,7 @@ export type AuthenticationSessionsQuery = { __typename?: "Query" } & {
       | "operatingSystem"
       | "service"
       | "userAgent"
+      | "createdAt"
       | "type"
       | "browserType"
       | "lastActiveAt"
@@ -31969,7 +32033,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
       users: Array<
         { __typename: "AuthUser" } & Pick<
           AuthUser,
-          "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+          "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
         > & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
@@ -31982,6 +32046,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
               | "urlKey"
               | "region"
               | "deletionRequestedAt"
+              | "createdAt"
               | "id"
               | "samlEnabled"
               | "scimEnabled"
@@ -31993,7 +32058,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
       lockedUsers: Array<
         { __typename: "AuthUser" } & Pick<
           AuthUser,
-          "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+          "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
         > & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
@@ -32006,6 +32071,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
               | "urlKey"
               | "region"
               | "deletionRequestedAt"
+              | "createdAt"
               | "id"
               | "samlEnabled"
               | "scimEnabled"
@@ -32027,6 +32093,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
             | "urlKey"
             | "region"
             | "deletionRequestedAt"
+            | "createdAt"
             | "id"
             | "samlEnabled"
             | "scimEnabled"
@@ -32048,6 +32115,7 @@ export type AvailableUsersQuery = { __typename?: "Query" } & {
             | "urlKey"
             | "region"
             | "deletionRequestedAt"
+            | "createdAt"
             | "id"
             | "samlEnabled"
             | "scimEnabled"
@@ -41288,6 +41356,27 @@ export type SearchProjects_ArchivePayloadQuery = { __typename?: "Query" } & {
   };
 };
 
+export type SemanticSearchQueryVariables = Exact<{
+  filters?: InputMaybe<SemanticSearchFilters>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  maxResults?: InputMaybe<Scalars["Int"]>;
+  query: Scalars["String"];
+  types?: InputMaybe<Array<SemanticSearchResultType> | SemanticSearchResultType>;
+}>;
+
+export type SemanticSearchQuery = { __typename?: "Query" } & {
+  semanticSearch: { __typename: "SemanticSearchPayload" } & Pick<SemanticSearchPayload, "enabled"> & {
+      results: Array<
+        { __typename: "SemanticSearchResult" } & Pick<SemanticSearchResult, "type" | "id"> & {
+            document?: Maybe<{ __typename?: "Document" } & Pick<Document, "id">>;
+            initiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+            issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+            project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+          }
+      >;
+    };
+};
+
 export type SsoUrlFromEmailQueryVariables = Exact<{
   email: Scalars["String"];
   isDesktop?: InputMaybe<Scalars["Boolean"]>;
@@ -44684,6 +44773,7 @@ export type CreateOrganizationFromOnboardingMutation = { __typename?: "Mutation"
       | "urlKey"
       | "region"
       | "deletionRequestedAt"
+      | "createdAt"
       | "id"
       | "samlEnabled"
       | "scimEnabled"
@@ -44692,7 +44782,7 @@ export type CreateOrganizationFromOnboardingMutation = { __typename?: "Mutation"
     >;
     user: { __typename: "AuthUser" } & Pick<
       AuthUser,
-      "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+      "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
     > & {
         organization: { __typename: "AuthOrganization" } & Pick<
           AuthOrganization,
@@ -44705,6 +44795,7 @@ export type CreateOrganizationFromOnboardingMutation = { __typename?: "Mutation"
           | "urlKey"
           | "region"
           | "deletionRequestedAt"
+          | "createdAt"
           | "id"
           | "samlEnabled"
           | "scimEnabled"
@@ -45111,7 +45202,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
       users: Array<
         { __typename: "AuthUser" } & Pick<
           AuthUser,
-          "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+          "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
         > & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
@@ -45124,6 +45215,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
               | "urlKey"
               | "region"
               | "deletionRequestedAt"
+              | "createdAt"
               | "id"
               | "samlEnabled"
               | "scimEnabled"
@@ -45135,7 +45227,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
       lockedUsers: Array<
         { __typename: "AuthUser" } & Pick<
           AuthUser,
-          "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+          "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
         > & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
@@ -45148,6 +45240,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
               | "urlKey"
               | "region"
               | "deletionRequestedAt"
+              | "createdAt"
               | "id"
               | "samlEnabled"
               | "scimEnabled"
@@ -45169,6 +45262,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             | "urlKey"
             | "region"
             | "deletionRequestedAt"
+            | "createdAt"
             | "id"
             | "samlEnabled"
             | "scimEnabled"
@@ -45190,6 +45284,7 @@ export type EmailTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             | "urlKey"
             | "region"
             | "deletionRequestedAt"
+            | "createdAt"
             | "id"
             | "samlEnabled"
             | "scimEnabled"
@@ -45438,7 +45533,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
       users: Array<
         { __typename: "AuthUser" } & Pick<
           AuthUser,
-          "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+          "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
         > & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
@@ -45451,6 +45546,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
               | "urlKey"
               | "region"
               | "deletionRequestedAt"
+              | "createdAt"
               | "id"
               | "samlEnabled"
               | "scimEnabled"
@@ -45462,7 +45558,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
       lockedUsers: Array<
         { __typename: "AuthUser" } & Pick<
           AuthUser,
-          "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+          "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
         > & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
@@ -45475,6 +45571,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
               | "urlKey"
               | "region"
               | "deletionRequestedAt"
+              | "createdAt"
               | "id"
               | "samlEnabled"
               | "scimEnabled"
@@ -45496,6 +45593,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
             | "urlKey"
             | "region"
             | "deletionRequestedAt"
+            | "createdAt"
             | "id"
             | "samlEnabled"
             | "scimEnabled"
@@ -45517,6 +45615,7 @@ export type GoogleUserAccountAuthMutation = { __typename?: "Mutation" } & {
             | "urlKey"
             | "region"
             | "deletionRequestedAt"
+            | "createdAt"
             | "id"
             | "samlEnabled"
             | "scimEnabled"
@@ -46440,6 +46539,16 @@ export type DeleteIssueMutation = { __typename?: "Mutation" } & {
     };
 };
 
+export type IssueExternalSyncDisableMutationVariables = Exact<{
+  attachmentId: Scalars["String"];
+}>;
+
+export type IssueExternalSyncDisableMutation = { __typename?: "Mutation" } & {
+  issueExternalSyncDisable: { __typename: "IssuePayload" } & Pick<IssuePayload, "lastSyncId" | "success"> & {
+      issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+    };
+};
+
 export type IssueImportCreateAsanaMutationVariables = Exact<{
   asanaTeamName: Scalars["String"];
   asanaToken: Scalars["String"];
@@ -46859,6 +46968,7 @@ export type JoinOrganizationFromOnboardingMutation = { __typename?: "Mutation" }
       | "urlKey"
       | "region"
       | "deletionRequestedAt"
+      | "createdAt"
       | "id"
       | "samlEnabled"
       | "scimEnabled"
@@ -46867,7 +46977,7 @@ export type JoinOrganizationFromOnboardingMutation = { __typename?: "Mutation" }
     >;
     user: { __typename: "AuthUser" } & Pick<
       AuthUser,
-      "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+      "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
     > & {
         organization: { __typename: "AuthOrganization" } & Pick<
           AuthOrganization,
@@ -46880,6 +46990,7 @@ export type JoinOrganizationFromOnboardingMutation = { __typename?: "Mutation" }
           | "urlKey"
           | "region"
           | "deletionRequestedAt"
+          | "createdAt"
           | "id"
           | "samlEnabled"
           | "scimEnabled"
@@ -46907,6 +47018,7 @@ export type LeaveOrganizationMutation = { __typename?: "Mutation" } & {
       | "urlKey"
       | "region"
       | "deletionRequestedAt"
+      | "createdAt"
       | "id"
       | "samlEnabled"
       | "scimEnabled"
@@ -46915,7 +47027,7 @@ export type LeaveOrganizationMutation = { __typename?: "Mutation" } & {
     >;
     user: { __typename: "AuthUser" } & Pick<
       AuthUser,
-      "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+      "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
     > & {
         organization: { __typename: "AuthOrganization" } & Pick<
           AuthOrganization,
@@ -46928,6 +47040,7 @@ export type LeaveOrganizationMutation = { __typename?: "Mutation" } & {
           | "urlKey"
           | "region"
           | "deletionRequestedAt"
+          | "createdAt"
           | "id"
           | "samlEnabled"
           | "scimEnabled"
@@ -51346,7 +51459,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
       users: Array<
         { __typename: "AuthUser" } & Pick<
           AuthUser,
-          "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+          "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
         > & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
@@ -51359,6 +51472,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
               | "urlKey"
               | "region"
               | "deletionRequestedAt"
+              | "createdAt"
               | "id"
               | "samlEnabled"
               | "scimEnabled"
@@ -51370,7 +51484,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
       lockedUsers: Array<
         { __typename: "AuthUser" } & Pick<
           AuthUser,
-          "avatarUrl" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
+          "avatarUrl" | "createdAt" | "displayName" | "email" | "name" | "userAccountId" | "active" | "role" | "id"
         > & {
             organization: { __typename: "AuthOrganization" } & Pick<
               AuthOrganization,
@@ -51383,6 +51497,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
               | "urlKey"
               | "region"
               | "deletionRequestedAt"
+              | "createdAt"
               | "id"
               | "samlEnabled"
               | "scimEnabled"
@@ -51404,6 +51519,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             | "urlKey"
             | "region"
             | "deletionRequestedAt"
+            | "createdAt"
             | "id"
             | "samlEnabled"
             | "scimEnabled"
@@ -51425,6 +51541,7 @@ export type SamlTokenUserAccountAuthMutation = { __typename?: "Mutation" } & {
             | "urlKey"
             | "region"
             | "deletionRequestedAt"
+            | "createdAt"
             | "id"
             | "samlEnabled"
             | "scimEnabled"
@@ -54242,6 +54359,7 @@ export const AuthIdentityProviderFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "priority" } },
           { kind: "Field", name: { kind: "Name", value: "ssoSignAlgo" } },
           { kind: "Field", name: { kind: "Name", value: "issuerEntityId" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "samlEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "scimEnabled" } },
@@ -54524,7 +54642,6 @@ export const AuthenticationSessionResponseFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "client" } },
           { kind: "Field", name: { kind: "Name", value: "countryCodes" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "location" } },
           { kind: "Field", name: { kind: "Name", value: "ip" } },
@@ -54537,6 +54654,7 @@ export const AuthenticationSessionResponseFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "operatingSystem" } },
           { kind: "Field", name: { kind: "Name", value: "service" } },
           { kind: "Field", name: { kind: "Name", value: "userAgent" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "browserType" } },
           { kind: "Field", name: { kind: "Name", value: "lastActiveAt" } },
@@ -55930,6 +56048,7 @@ export const AgentActivityWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "signal" } },
           { kind: "Field", name: { kind: "Name", value: "signalMetadata" } },
           { kind: "Field", name: { kind: "Name", value: "agentSessionId" } },
+          { kind: "Field", name: { kind: "Name", value: "sourceCommentId" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "userId" } },
           { kind: "Field", name: { kind: "Name", value: "content" } },
@@ -56953,6 +57072,81 @@ export const IssueSlaWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IssueSlaWebhookPayloadFragment, unknown>;
+export const SemanticSearchResultFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SemanticSearchResult" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SemanticSearchResult" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "document" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "initiative" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issue" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "project" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SemanticSearchResultFragment, unknown>;
+export const SemanticSearchPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SemanticSearchPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "SemanticSearchPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "enabled" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "results" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SemanticSearchResult" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SemanticSearchPayloadFragment, unknown>;
 export const UserAuthorizedApplicationFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -58431,6 +58625,7 @@ export const AuthOrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "urlKey" } },
           { kind: "Field", name: { kind: "Name", value: "region" } },
           { kind: "Field", name: { kind: "Name", value: "deletionRequestedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "samlEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "scimEnabled" } },
@@ -58461,6 +58656,7 @@ export const AuthUserFragmentDoc = {
               selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "AuthOrganization" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "displayName" } },
           { kind: "Field", name: { kind: "Name", value: "email" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },
@@ -83460,6 +83656,91 @@ export const SearchProjects_ArchivePayloadDocument = {
     ...ArchiveResponseFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<SearchProjects_ArchivePayloadQuery, SearchProjects_ArchivePayloadQueryVariables>;
+export const SemanticSearchDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "semanticSearch" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "filters" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "SemanticSearchFilters" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "maxResults" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "query" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "types" } },
+          type: {
+            kind: "ListType",
+            type: {
+              kind: "NonNullType",
+              type: { kind: "NamedType", name: { kind: "Name", value: "SemanticSearchResultType" } },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "semanticSearch" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "filters" },
+                value: { kind: "Variable", name: { kind: "Name", value: "filters" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "includeArchived" },
+                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "maxResults" },
+                value: { kind: "Variable", name: { kind: "Name", value: "maxResults" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "query" },
+                value: { kind: "Variable", name: { kind: "Name", value: "query" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "types" },
+                value: { kind: "Variable", name: { kind: "Name", value: "types" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "SemanticSearchPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...SemanticSearchPayloadFragmentDoc.definitions,
+    ...SemanticSearchResultFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<SemanticSearchQuery, SemanticSearchQueryVariables>;
 export const SsoUrlFromEmailDocument = {
   kind: "Document",
   definitions: [
@@ -95887,6 +96168,44 @@ export const DeleteIssueDocument = {
     ...IssueArchivePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DeleteIssueMutation, DeleteIssueMutationVariables>;
+export const IssueExternalSyncDisableDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "issueExternalSyncDisable" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "attachmentId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "issueExternalSyncDisable" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "attachmentId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "attachmentId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssuePayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...IssuePayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<IssueExternalSyncDisableMutation, IssueExternalSyncDisableMutationVariables>;
 export const IssueImportCreateAsanaDocument = {
   kind: "Document",
   definitions: [

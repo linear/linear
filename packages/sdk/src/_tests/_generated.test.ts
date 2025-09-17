@@ -4558,6 +4558,15 @@ describe("generated", () => {
     });
   });
 
+  /** Test SemanticSearch query */
+  describe("SemanticSearch", () => {
+    /** Test the root model query for SemanticSearch */
+    it("semanticSearch", async () => {
+      const semanticSearch: L.SemanticSearchPayload | undefined = await client.semanticSearch("mock-query");
+      expect(semanticSearch instanceof L.SemanticSearchPayload);
+    });
+  });
+
   /** Test SsoUrlFromEmail query */
   describe("SsoUrlFromEmail", () => {
     /** Test the root model query for SsoUrlFromEmail */
