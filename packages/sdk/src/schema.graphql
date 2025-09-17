@@ -308,6 +308,7 @@ A modifier that provides additional instructions on how the activity should be i
 enum AgentActivitySignal {
   auth
   continue
+  select
   stop
 }
 
@@ -369,6 +370,10 @@ type AgentActivityWebhookPayload {
   Metadata about this agent activity's signal.
   """
   signalMetadata: JSONObject
+  """
+  The ID of the comment this activity is linked to.
+  """
+  sourceCommentId: String
   """
   The time at which the entity was updated.
   """
@@ -1533,6 +1538,10 @@ An identity provider.
 """
 type AuthIdentityProvider {
   """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
   Whether the identity provider is the default identity provider migrated from organization level settings.
   """
   defaultMigrated: Boolean!
@@ -1582,6 +1591,10 @@ type AuthOrganization {
   Allowed authentication providers, empty array means all are allowed
   """
   allowedAuthServices: [String!]!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
   """
   The time at which deletion of the organization was requested.
   """
@@ -1689,6 +1702,10 @@ type AuthUser {
   """
   avatarUrl: String
   """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
   The user's display (nick) name. Unique within each organization.
   """
   displayName: String!
@@ -1736,7 +1753,7 @@ type AuthenticationSessionResponse {
   """
   countryCodes: [String!]!
   """
-  Date when the session was created.
+  The time at which the entity was created.
   """
   createdAt: DateTime!
   id: String!
@@ -18009,6 +18026,15 @@ type Mutation {
     id: String!
   ): IssuePayload!
   """
+  Disables external sync on an issue.
+  """
+  issueExternalSyncDisable(
+    """
+    The ID of the sync attachment to disable.
+    """
+    attachmentId: String!
+  ): IssuePayload!
+  """
   Kicks off an Asana import job.
   """
   issueImportCreateAsana(
@@ -19402,15 +19428,6 @@ type Mutation {
     """
     redirectUri: String!
   ): IntegrationPayload!
-  """
-  [INTERNAL] Updates the summary of an issue.
-  """
-  updateIssueSummary(
-    """
-    The identifier of the issue to update.
-    """
-    id: String!
-  ): IssuePayload!
   """
   Makes user a regular user. Can only be called by an admin.
   """
@@ -21549,6 +21566,10 @@ input NullableUserFilter {
   Comparator for the user's invited status.
   """
   invited: BooleanComparator
+  """
+  Comparator for the user's invited status.
+  """
+  isInvited: BooleanComparator
   """
   Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user.
   """
@@ -29854,15 +29875,19 @@ type Query {
     term: String!
   ): ProjectSearchPayload!
   """
-  [INTERNAL] Search for various resources using natural language.
+  Search for various resources using natural language.
   """
   semanticSearch(
+    """
+    Filters to apply to the semantic search results of each type.
+    """
+    filters: SemanticSearchFilters
     """
     Whether to include archived results in the search (default: false).
     """
     includeArchived: Boolean
     """
-    The maximum number of results to return (default: 10).
+    The maximum number of results to return (default: 50).
     """
     maxResults: Int
     """
@@ -29874,7 +29899,6 @@ type Query {
     """
     types: [SemanticSearchResultType!]
   ): SemanticSearchPayload!
-    @deprecated(reason: "Use specific search endpoints like searchIssues, searchProjects, searchDocuments instead.")
   """
   Fetch SSO login URL for the email provided.
   """
@@ -30999,15 +31023,40 @@ input SalesforceSettingsInput {
 }
 
 """
-[INTERNAL] Payload returned by semantic search.
+Filters for semantic search results.
+"""
+input SemanticSearchFilters {
+  """
+  Filters applied to documents.
+  """
+  documents: DocumentFilter
+  """
+  Filters applied to initiatives.
+  """
+  initiatives: InitiativeFilter
+  """
+  Filters applied to issues.
+  """
+  issues: IssueFilter
+  """
+  Filters applied to projects.
+  """
+  projects: ProjectFilter
+}
+
+"""
+Payload returned by semantic search.
 """
 type SemanticSearchPayload {
-  enabled: Boolean!
+  """
+  Whether the semantic search is enabled.
+  """
+  enabled: Boolean! @deprecated(reason: "Always true.")
   results: [SemanticSearchResult!]!
 }
 
 """
-[INTERNAL] A semantic search result reference.
+A semantic search result reference.
 """
 type SemanticSearchResult implements Node {
   """
@@ -31037,7 +31086,7 @@ type SemanticSearchResult implements Node {
 }
 
 """
-[INTERNAL] The type of the semantic search result.
+The type of the semantic search result.
 """
 enum SemanticSearchResultType {
   document
@@ -34275,6 +34324,10 @@ input UserCollectionFilter {
   """
   invited: BooleanComparator
   """
+  Comparator for the user's invited status.
+  """
+  isInvited: BooleanComparator
+  """
   Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user.
   """
   isMe: BooleanComparator
@@ -34376,6 +34429,10 @@ input UserFilter {
   Comparator for the user's invited status.
   """
   invited: BooleanComparator
+  """
+  Comparator for the user's invited status.
+  """
+  isInvited: BooleanComparator
   """
   Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user.
   """

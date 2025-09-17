@@ -1071,6 +1071,12 @@
             "deprecationReason": null
           },
           {
+            "name": "select",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "stop",
             "description": null,
             "isDeprecated": false,
@@ -1269,6 +1275,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "JSONObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sourceCommentId",
+            "description": "The ID of the comment this activity is linked to.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -5625,6 +5643,22 @@
         "description": "An identity provider.",
         "fields": [
           {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "defaultMigrated",
             "description": "Whether the identity provider is the default identity provider migrated from organization level settings.",
             "args": [],
@@ -5790,6 +5824,22 @@
                     "ofType": null
                   }
                 }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
               }
             },
             "isDeprecated": false,
@@ -6222,6 +6272,22 @@
             "deprecationReason": null
           },
           {
+            "name": "createdAt",
+            "description": "The time at which the entity was created.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "displayName",
             "description": "The user's display (nick) name. Unique within each organization.",
             "args": [],
@@ -6406,7 +6472,7 @@
           },
           {
             "name": "createdAt",
-            "description": "Date when the session was created.",
+            "description": "The time at which the entity was created.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -63692,6 +63758,39 @@
             "deprecationReason": null
           },
           {
+            "name": "issueExternalSyncDisable",
+            "description": "Disables external sync on an issue.",
+            "args": [
+              {
+                "name": "attachmentId",
+                "description": "The ID of the sync attachment to disable.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IssuePayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "issueImportCreateAsana",
             "description": "Kicks off an Asana import job.",
             "args": [
@@ -68758,39 +68857,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "IntegrationPayload",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "updateIssueSummary",
-            "description": "[INTERNAL] Updates the summary of an issue.",
-            "args": [
-              {
-                "name": "id",
-                "description": "The identifier of the issue to update.",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "IssuePayload",
                 "ofType": null
               }
             },
@@ -76533,6 +76599,18 @@
           },
           {
             "name": "invited",
+            "description": "Comparator for the user's invited status.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "BooleanComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isInvited",
             "description": "Comparator for the user's invited status.",
             "type": {
               "kind": "INPUT_OBJECT",
@@ -105921,8 +105999,20 @@
           },
           {
             "name": "semanticSearch",
-            "description": "[INTERNAL] Search for various resources using natural language.",
+            "description": "Search for various resources using natural language.",
             "args": [
+              {
+                "name": "filters",
+                "description": "Filters to apply to the semantic search results of each type.",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "SemanticSearchFilters",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
               {
                 "name": "includeArchived",
                 "description": "Whether to include archived results in the search (default: false).",
@@ -105937,7 +106027,7 @@
               },
               {
                 "name": "maxResults",
-                "description": "The maximum number of results to return (default: 10).",
+                "description": "The maximum number of results to return (default: 50).",
                 "type": {
                   "kind": "SCALAR",
                   "name": "Int",
@@ -105993,8 +106083,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": true,
-            "deprecationReason": "Use specific search endpoints like searchIssues, searchProjects, searchDocuments instead."
+            "isDeprecated": false,
+            "deprecationReason": null
           },
           {
             "name": "ssoUrlFromEmail",
@@ -109935,13 +110025,72 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "SemanticSearchFilters",
+        "description": "Filters for semantic search results.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "documents",
+            "description": "Filters applied to documents.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DocumentFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiatives",
+            "description": "Filters applied to initiatives.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "InitiativeFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "issues",
+            "description": "Filters applied to issues.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IssueFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "projects",
+            "description": "Filters applied to projects.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProjectFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "SemanticSearchPayload",
-        "description": "[INTERNAL] Payload returned by semantic search.",
+        "description": "Payload returned by semantic search.",
         "fields": [
           {
             "name": "enabled",
-            "description": null,
+            "description": "Whether the semantic search is enabled.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -109952,8 +110101,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Always true."
           },
           {
             "name": "results",
@@ -109988,7 +110137,7 @@
       {
         "kind": "OBJECT",
         "name": "SemanticSearchResult",
-        "description": "[INTERNAL] A semantic search result reference.",
+        "description": "A semantic search result reference.",
         "fields": [
           {
             "name": "document",
@@ -110085,7 +110234,7 @@
       {
         "kind": "ENUM",
         "name": "SemanticSearchResultType",
-        "description": "[INTERNAL] The type of the semantic search result.",
+        "description": "The type of the semantic search result.",
         "fields": null,
         "inputFields": null,
         "interfaces": null,
@@ -121263,6 +121412,18 @@
             "deprecationReason": null
           },
           {
+            "name": "isInvited",
+            "description": "Comparator for the user's invited status.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "BooleanComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "isMe",
             "description": "Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user.",
             "type": {
@@ -121641,6 +121802,18 @@
           },
           {
             "name": "invited",
+            "description": "Comparator for the user's invited status.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "BooleanComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isInvited",
             "description": "Comparator for the user's invited status.",
             "type": {
               "kind": "INPUT_OBJECT",
