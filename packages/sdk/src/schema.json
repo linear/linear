@@ -77058,6 +77058,26 @@
             "deprecationReason": null
           },
           {
+            "name": "newlyRequestedScopes",
+            "description": "New scopes that were requested for approval after the initial request.",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "oauthClientId",
             "description": "The uuid of the OAuth client being requested for installation.",
             "args": [],
@@ -77115,7 +77135,7 @@
           },
           {
             "name": "scopes",
-            "description": "The scopes the app has requested.",
+            "description": "The scopes the app has been approved for.",
             "args": [],
             "type": {
               "kind": "NON_NULL",

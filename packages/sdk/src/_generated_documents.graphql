@@ -6404,6 +6404,8 @@ fragment Application on Application {
 # Request to install OAuth clients on organizations and the response to the request.
 fragment OauthClientApproval on OauthClientApproval {
   __typename
+  # New scopes that were requested for approval after the initial request.
+  newlyRequestedScopes
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -6415,7 +6417,7 @@ fragment OauthClientApproval on OauthClientApproval {
   requestReason
   # The reason the request for the OAuth client approval was denied.
   denyReason
-  # The scopes the app has requested.
+  # The scopes the app has been approved for.
   scopes
   # The status for the OAuth client approval request.
   status
