@@ -68,8 +68,8 @@ export class LinearCsvImporter implements Importer {
       if (!!row.Archived) {
         continue;
       }
-      
-      const tags = row.Labels ? row.Labels.split(', ') : [];
+
+      const tags = row.Labels ? row.Labels.split(", ") : [];
       const labels = tags.filter(tag => !!tag);
 
       importData.issues.push({
