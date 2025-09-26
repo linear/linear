@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.40
+
+### Patch Changes
+
+- d045e58: Fix CSV import when Labels field is omitted
+
 ## 2.2.39
 
 ### Patch Changes
