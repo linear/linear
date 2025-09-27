@@ -12244,6 +12244,8 @@ export type OauthClientApproval = Node & {
   denyReason?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** New scopes that were requested for approval after the initial request. */
+  newlyRequestedScopes?: Maybe<Array<Scalars["String"]>>;
   /** The uuid of the OAuth client being requested for installation. */
   oauthClientId: Scalars["String"];
   /** The reason the person wants to install this OAuth client. */
@@ -12252,7 +12254,7 @@ export type OauthClientApproval = Node & {
   requesterId: Scalars["String"];
   /** The person who responded to the request to install the OAuth client. */
   responderId?: Maybe<Scalars["String"]>;
-  /** The scopes the app has requested. */
+  /** The scopes the app has been approved for. */
   scopes: Array<Scalars["String"]>;
   /** The status for the OAuth client approval request. */
   status: OAuthClientApprovalStatus;
@@ -20835,6 +20837,7 @@ export type NotificationArchivePayloadFragment = { __typename: "NotificationArch
             user: { __typename?: "User" } & Pick<User, "id">;
             oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
               OauthClientApproval,
+              | "newlyRequestedScopes"
               | "updatedAt"
               | "requesterId"
               | "responderId"
@@ -21339,6 +21342,7 @@ type ArchivePayload_NotificationArchivePayload_Fragment = { __typename: "Notific
             user: { __typename?: "User" } & Pick<User, "id">;
             oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
               OauthClientApproval,
+              | "newlyRequestedScopes"
               | "updatedAt"
               | "requesterId"
               | "responderId"
@@ -21818,6 +21822,7 @@ type Notification_OauthClientApprovalNotification_Fragment = { __typename: "Oaut
     user: { __typename?: "User" } & Pick<User, "id">;
     oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
       OauthClientApproval,
+      | "newlyRequestedScopes"
       | "updatedAt"
       | "requesterId"
       | "responderId"
@@ -23354,6 +23359,7 @@ export type OauthClientApprovalNotificationFragment = { __typename: "OauthClient
 > & {
     oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
       OauthClientApproval,
+      | "newlyRequestedScopes"
       | "updatedAt"
       | "requesterId"
       | "responderId"
@@ -25326,6 +25332,7 @@ export type ApplicationFragment = { __typename: "Application" } & Pick<
 
 export type OauthClientApprovalFragment = { __typename: "OauthClientApproval" } & Pick<
   OauthClientApproval,
+  | "newlyRequestedScopes"
   | "updatedAt"
   | "requesterId"
   | "responderId"
@@ -28406,6 +28413,7 @@ export type NotificationBatchActionPayloadFragment = { __typename: "Notification
             user: { __typename?: "User" } & Pick<User, "id">;
             oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
               OauthClientApproval,
+              | "newlyRequestedScopes"
               | "updatedAt"
               | "requesterId"
               | "responderId"
@@ -28794,6 +28802,7 @@ export type NotificationConnectionFragment = { __typename: "NotificationConnecti
           user: { __typename?: "User" } & Pick<User, "id">;
           oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
             OauthClientApproval,
+            | "newlyRequestedScopes"
             | "updatedAt"
             | "requesterId"
             | "responderId"
@@ -29237,6 +29246,7 @@ export type NotificationPayloadFragment = { __typename: "NotificationPayload" } 
             user: { __typename?: "User" } & Pick<User, "id">;
             oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
               OauthClientApproval,
+              | "newlyRequestedScopes"
               | "updatedAt"
               | "requesterId"
               | "responderId"
@@ -37829,6 +37839,7 @@ export type NotificationQuery = { __typename?: "Query" } & {
           user: { __typename?: "User" } & Pick<User, "id">;
           oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
             OauthClientApproval,
+            | "newlyRequestedScopes"
             | "updatedAt"
             | "requesterId"
             | "responderId"
@@ -38527,6 +38538,7 @@ export type NotificationsQuery = { __typename?: "Query" } & {
             user: { __typename?: "User" } & Pick<User, "id">;
             oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
               OauthClientApproval,
+              | "newlyRequestedScopes"
               | "updatedAt"
               | "requesterId"
               | "responderId"
@@ -47425,6 +47437,7 @@ export type ArchiveNotificationMutation = { __typename?: "Mutation" } & {
               user: { __typename?: "User" } & Pick<User, "id">;
               oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
                 OauthClientApproval,
+                | "newlyRequestedScopes"
                 | "updatedAt"
                 | "requesterId"
                 | "responderId"
@@ -47870,6 +47883,7 @@ export type NotificationArchiveAllMutation = { __typename?: "Mutation" } & {
               user: { __typename?: "User" } & Pick<User, "id">;
               oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
                 OauthClientApproval,
+                | "newlyRequestedScopes"
                 | "updatedAt"
                 | "requesterId"
                 | "responderId"
@@ -48329,6 +48343,7 @@ export type NotificationMarkReadAllMutation = { __typename?: "Mutation" } & {
               user: { __typename?: "User" } & Pick<User, "id">;
               oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
                 OauthClientApproval,
+                | "newlyRequestedScopes"
                 | "updatedAt"
                 | "requesterId"
                 | "responderId"
@@ -48774,6 +48789,7 @@ export type NotificationMarkUnreadAllMutation = { __typename?: "Mutation" } & {
               user: { __typename?: "User" } & Pick<User, "id">;
               oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
                 OauthClientApproval,
+                | "newlyRequestedScopes"
                 | "updatedAt"
                 | "requesterId"
                 | "responderId"
@@ -49220,6 +49236,7 @@ export type NotificationSnoozeAllMutation = { __typename?: "Mutation" } & {
               user: { __typename?: "User" } & Pick<User, "id">;
               oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
                 OauthClientApproval,
+                | "newlyRequestedScopes"
                 | "updatedAt"
                 | "requesterId"
                 | "responderId"
@@ -49927,6 +49944,7 @@ export type UnarchiveNotificationMutation = { __typename?: "Mutation" } & {
               user: { __typename?: "User" } & Pick<User, "id">;
               oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
                 OauthClientApproval,
+                | "newlyRequestedScopes"
                 | "updatedAt"
                 | "requesterId"
                 | "responderId"
@@ -50373,6 +50391,7 @@ export type NotificationUnsnoozeAllMutation = { __typename?: "Mutation" } & {
               user: { __typename?: "User" } & Pick<User, "id">;
               oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
                 OauthClientApproval,
+                | "newlyRequestedScopes"
                 | "updatedAt"
                 | "requesterId"
                 | "responderId"
@@ -50816,6 +50835,7 @@ export type UpdateNotificationMutation = { __typename?: "Mutation" } & {
               user: { __typename?: "User" } & Pick<User, "id">;
               oauthClientApproval: { __typename: "OauthClientApproval" } & Pick<
                 OauthClientApproval,
+                | "newlyRequestedScopes"
                 | "updatedAt"
                 | "requesterId"
                 | "responderId"
@@ -53081,6 +53101,7 @@ export const OauthClientApprovalFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "newlyRequestedScopes" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "requesterId" } },
           { kind: "Field", name: { kind: "Name", value: "responderId" } },

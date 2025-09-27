@@ -11521,6 +11521,7 @@ export class OauthClientApproval extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.denyReason = data.denyReason ?? undefined;
     this.id = data.id;
+    this.newlyRequestedScopes = data.newlyRequestedScopes ?? undefined;
     this.oauthClientId = data.oauthClientId;
     this.requestReason = data.requestReason ?? undefined;
     this.requesterId = data.requesterId;
@@ -11538,6 +11539,8 @@ export class OauthClientApproval extends Request {
   public denyReason?: string;
   /** The unique identifier of the entity. */
   public id: string;
+  /** New scopes that were requested for approval after the initial request. */
+  public newlyRequestedScopes?: string[];
   /** The uuid of the OAuth client being requested for installation. */
   public oauthClientId: string;
   /** The reason the person wants to install this OAuth client. */
@@ -11546,7 +11549,7 @@ export class OauthClientApproval extends Request {
   public requesterId: string;
   /** The person who responded to the request to install the OAuth client. */
   public responderId?: string;
-  /** The scopes the app has requested. */
+  /** The scopes the app has been approved for. */
   public scopes: string[];
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
