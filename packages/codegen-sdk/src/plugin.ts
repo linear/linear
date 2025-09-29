@@ -5,6 +5,7 @@ import { Sdk } from "./constants";
 import { ModelVisitor } from "./model-visitor";
 import { parseOperations } from "./parse-operation";
 import { printConnection } from "./print-connection";
+import { printEnumExports } from "./print-enum-exports";
 import { printModels } from "./print-model";
 import { printOperations } from "./print-operation";
 import { printRequest } from "./print-request";
@@ -55,6 +56,9 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
     logger.info(log, "Printing sdk");
     const printedSdk = printSdk(sdkContext);
 
+    logger.info(log, "Printing enum exports");
+    const printedEnumExports = printEnumExports(sdkContext);
+
     return {
       prepend: [
         /** Import DocumentNode */
@@ -75,6 +79,8 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
         printedOperations,
         /** Print the api root operations */
         printedSdk,
+        /** Print enum re-exports */
+        printedEnumExports,
       ]),
     };
   } catch (e) {

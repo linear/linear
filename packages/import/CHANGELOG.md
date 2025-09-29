@@ -1,5 +1,32 @@
 # Change Log
 
+## 2.2.40
+
+### Patch Changes
+
+- d045e58: Fix CSV import when Labels field is omitted
+
+## 2.2.39
+
+### Patch Changes
+
+- 7ae1128: chore(deps): update dependency patch versions
+- Updated dependencies [7ae1128]
+- Updated dependencies [a4c0822]
+- Updated dependencies [a8f03ca]
+  - @linear/sdk@60.0.0
+
+## 2.2.38
+
+### Patch Changes
+
+- 340065a: chore(deps): update dependency patch versions
+- Updated dependencies [340065a]
+- Updated dependencies [8a2105d]
+- Updated dependencies [695cb48]
+- Updated dependencies [10828cf]
+  - @linear/sdk@59.0.0
+
 ## 2.2.37
 
 ### Patch Changes

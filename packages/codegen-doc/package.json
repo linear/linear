@@ -2,7 +2,7 @@
   "name": "@linear/codegen-doc",
   "private": true,
   "description": "Plugin for generating GraphQL fragments and documents from a schema",
-  "version": "3.2.11",
+  "version": "3.3.1",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
@@ -26,8 +26,8 @@
     "tracer": "^1.1.4"
   },
   "devDependencies": {
-    "@graphql-codegen/plugin-helpers": "^1.18.1",
-    "@graphql-codegen/visitor-plugin-common": "^1.17.17",
+    "@graphql-codegen/plugin-helpers": "^2.7.0",
+    "@graphql-codegen/visitor-plugin-common": "^2.13.0",
     "@rollup/plugin-typescript": "^12.1.4",
     "auto-bind": "^4.0.0",
     "graphql": "^15.4.0",

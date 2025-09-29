@@ -1,5 +1,136 @@
 # Change Log
 
+## 60.0.0
+
+### Major Changes
+
+- a4c0822: feat(schema): [breaking] Field 'updateIssueSummary' was removed from object type 'Mutation' (Mutation.updateIssueSummary)
+
+  feat(schema): [dangerous] Enum value 'select' was added to enum 'AgentActivitySignal' (AgentActivitySignal.select)
+
+  feat(schema): [dangerous] Input field 'isInvited' was added to input object type 'NullableUserFilter' (NullableUserFilter.isInvited)
+
+  feat(schema): [dangerous] Field 'Query.semanticSearch' is no longer deprecated (Query.semanticSearch)
+
+  feat(schema): [dangerous] Argument 'filters: SemanticSearchFilters' added to field 'Query.semanticSearch' (Query.semanticSearch.filters)
+
+  feat(schema): [dangerous] Input field 'isInvited' was added to input object type 'UserCollectionFilter' (UserCollectionFilter.isInvited)
+
+  feat(schema): [dangerous] Input field 'isInvited' was added to input object type 'UserFilter' (UserFilter.isInvited)
+
+  feat(schema): [non_breaking] Type 'SemanticSearchFilters' was added (SemanticSearchFilters)
+
+  feat(schema): [non_breaking] Field 'sourceCommentId' was added to object type 'AgentActivityWebhookPayload' (AgentActivityWebhookPayload.sourceCommentId)
+
+  feat(schema): [non_breaking] Field 'createdAt' was added to object type 'AuthIdentityProvider' (AuthIdentityProvider.createdAt)
+
+  feat(schema): [non_breaking] Field 'createdAt' was added to object type 'AuthOrganization' (AuthOrganization.createdAt)
+
+  feat(schema): [non_breaking] Field 'createdAt' was added to object type 'AuthUser' (AuthUser.createdAt)
+
+  feat(schema): [non_breaking] Field 'AuthenticationSessionResponse.createdAt' description changed from 'Date when the session was created.' to 'The time at which the entity was created.' (AuthenticationSessionResponse.createdAt)
+
+  feat(schema): [non_breaking] Field 'issueExternalSyncDisable' was added to object type 'Mutation' (Mutation.issueExternalSyncDisable)
+
+  feat(schema): [non_breaking] Field 'Query.semanticSearch' description changed from '[INTERNAL] Search for various resources using natural language.' to 'Search for various resources using natural language.' (Query.semanticSearch)
+
+  feat(schema): [non_breaking] Deprecation reason was removed from field 'Query.semanticSearch' (Query.semanticSearch)
+
+  feat(schema): [non_breaking] Description for argument 'maxResults' on field 'Query.semanticSearch' changed from 'The maximum number of results to return (default: 10).' to 'The maximum number of results to return (default: 50).' (Query.semanticSearch.maxResults)
+
+  feat(schema): [non_breaking] Field 'SemanticSearchPayload.enabled' has description 'Whether the semantic search is enabled.' (SemanticSearchPayload.enabled)
+
+  feat(schema): [non_breaking] Field 'SemanticSearchPayload.enabled' is deprecated (SemanticSearchPayload.enabled)
+
+  feat(schema): [non_breaking] Field 'SemanticSearchPayload.enabled' has deprecation reason 'Always true.' (SemanticSearchPayload.enabled)
+
+  feat(schema): [non_breaking] Description '[INTERNAL] Payload returned by semantic search.' on type 'SemanticSearchPayload' has changed to 'Payload returned by semantic search.' (SemanticSearchPayload)
+
+  feat(schema): [non_breaking] Description '[INTERNAL] A semantic search result reference.' on type 'SemanticSearchResult' has changed to 'A semantic search result reference.' (SemanticSearchResult)
+
+  feat(schema): [non_breaking] Description '[INTERNAL] The type of the semantic search result.' on type 'SemanticSearchResultType' has changed to 'The type of the semantic search result.' (SemanticSearchResultType)
+
+### Patch Changes
+
+- 7ae1128: chore(deps): update dependency patch versions
+- a8f03ca: Removed a redundant `parseData` call from handlers returned by `LinearWebhookClient.createHandler`.
+
+## 59.1.0
+
+### Minor Changes
+
+- feea0fb: Upgrade graphql-codegen from v1 to v2 internally, which produces slight changes in resultant schema fragments and documents.
+
+## 59.0.0
+
+### Major Changes
+
+- 8a2105d: feat(schema): [breaking] Type 'AuthMembership' was removed (AuthMembership)
+
+  feat(schema): [breaking] Type 'AuthorizedApplication' was removed (AuthorizedApplication)
+
+  feat(schema): [breaking] Type 'WorkspaceAuthorizedApplicationWithMemberships' was removed (WorkspaceAuthorizedApplicationWithMemberships)
+
+  feat(schema): [breaking] Field 'workspaceAuthorizedApplication' was removed from object type 'Query' (Query.workspaceAuthorizedApplication)
+
+- 695cb48: feat(schema): [breaking] Type 'WorkspaceAuthorizedApplication' was removed (WorkspaceAuthorizedApplication)
+
+  feat(schema): [breaking] Type 'WorkspaceAuthorizedApplicationWithAppUser' was removed (WorkspaceAuthorizedApplicationWithAppUser)
+
+  feat(schema): [breaking] Field 'applicationInfoByIds' was removed from object type 'Query' (Query.applicationInfoByIds)
+
+  feat(schema): [breaking] Field 'applicationInfoWithMembershipsByIds' (deprecated) was removed from object type 'Query' (Query.applicationInfoWithMembershipsByIds)
+
+  feat(schema): [breaking] Field 'authorizedApplications' was removed from object type 'Query' (Query.authorizedApplications)
+
+  feat(schema): [breaking] Field 'workspaceAuthorizedApplications' (deprecated) was removed from object type 'Query' (Query.workspaceAuthorizedApplications)
+
+  feat(schema): [breaking] Field 'workspaceAuthorizedApplicationsWithAppUser' was removed from object type 'Query' (Query.workspaceAuthorizedApplicationsWithAppUser)
+
+  feat(schema): [dangerous] Input field 'signalMetadata' was added to input object type 'AgentActivityCreateInput' (AgentActivityCreateInput.signalMetadata)
+
+  feat(schema): [dangerous] Input field 'signalMetadata' was added to input object type 'AgentActivityCreatePromptInput' (AgentActivityCreatePromptInput.signalMetadata)
+
+  feat(schema): [dangerous] Enum value 'auth' was added to enum 'AgentActivitySignal' (AgentActivitySignal.auth)
+
+  feat(schema): [dangerous] Input field 'issueCreatedAutoReplyEnabled' was added to input object type 'EmailIntakeAddressCreateInput' (EmailIntakeAddressCreateInput.issueCreatedAutoReplyEnabled)
+
+  feat(schema): [dangerous] Input field 'issueCreatedAutoReplyEnabled' was added to input object type 'EmailIntakeAddressUpdateInput' (EmailIntakeAddressUpdateInput.issueCreatedAutoReplyEnabled)
+
+  feat(schema): [dangerous] Argument 'userEmail: String' added to field 'Mutation.issueSubscribe' (Mutation.issueSubscribe.userEmail)
+
+  feat(schema): [dangerous] Argument 'userEmail: String' added to field 'Mutation.issueUnsubscribe' (Mutation.issueUnsubscribe.userEmail)
+
+  feat(schema): [dangerous] Input field 'salesforceMetadata' was added to input object type 'SourceMetadataComparator' (SourceMetadataComparator.salesforceMetadata)
+
+  feat(schema): [non_breaking] Type 'FileUploadDeletePayload' was added (FileUploadDeletePayload)
+
+  feat(schema): [non_breaking] Type 'SalesforceMetadataIntegrationComparator' was added (SalesforceMetadataIntegrationComparator)
+
+  feat(schema): [non_breaking] Field 'signalMetadata' was added to object type 'AgentActivity' (AgentActivity.signalMetadata)
+
+  feat(schema): [non_breaking] Field 'signalMetadata' was added to object type 'AgentActivityWebhookPayload' (AgentActivityWebhookPayload.signalMetadata)
+
+  feat(schema): [non_breaking] Field 'issueCreatedAutoReplyEnabled' was added to object type 'EmailIntakeAddress' (EmailIntakeAddress.issueCreatedAutoReplyEnabled)
+
+  feat(schema): [non_breaking] Field 'dismissalReason' was added to object type 'IssueSuggestion' (IssueSuggestion.dismissalReason)
+
+  feat(schema): [non_breaking] Field 'fileUploadDangerouslyDelete' was added to object type 'Mutation' (Mutation.fileUploadDangerouslyDelete)
+
+  feat(schema): [non_breaking] Field 'userUnlinkFromIdentityProvider' was added to object type 'Mutation' (Mutation.userUnlinkFromIdentityProvider)
+
+  feat(schema): [non_breaking] Field 'hipaaComplianceEnabled' was added to object type 'Organization' (Organization.hipaaComplianceEnabled)
+
+  feat(schema): [non_breaking] Input field 'SourceMetadataComparator.subType' description changed from 'Compound filters, all of which need to be matched by the sub type.' to 'Comparator for the sub type.' (SourceMetadataComparator.subType)
+
+### Minor Changes
+
+- 10828cf: Include enums in SDK export
+
+### Patch Changes
+
+- 340065a: chore(deps): update dependency patch versions
+
 ## 58.1.0
 
 ### Minor Changes

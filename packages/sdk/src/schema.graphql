@@ -66,6 +66,10 @@ type AgentActivity implements Node {
   """
   signal: AgentActivitySignal
   """
+  Metadata about this agent activity's signal.
+  """
+  signalMetadata: JSON
+  """
   The comment this activity is linked to.
   """
   sourceComment: Comment
@@ -145,6 +149,10 @@ input AgentActivityCreateInput {
   An optional modifier that provides additional instructions on how the activity should be interpreted.
   """
   signal: AgentActivitySignal
+  """
+  Metadata about this agent activity's signal.
+  """
+  signalMetadata: JSONObject
 }
 
 """
@@ -167,6 +175,10 @@ input AgentActivityCreatePromptInput {
   An optional modifier that provides additional instructions on how the activity should be interpreted.
   """
   signal: AgentActivitySignal
+  """
+  Metadata about this agent activity's signal.
+  """
+  signalMetadata: JSONObject
   """
   The comment that contains the content of this activity.
   """
@@ -294,7 +306,9 @@ type AgentActivityResponseContent {
 A modifier that provides additional instructions on how the activity should be interpreted.
 """
 enum AgentActivitySignal {
+  auth
   continue
+  select
   stop
 }
 
@@ -352,6 +366,14 @@ type AgentActivityWebhookPayload {
   An optional modifier that provides additional instructions on how the activity should be interpreted.
   """
   signal: String
+  """
+  Metadata about this agent activity's signal.
+  """
+  signalMetadata: JSONObject
+  """
+  The ID of the comment this activity is linked to.
+  """
+  sourceCommentId: String
   """
   The time at which the entity was updated.
   """
@@ -1516,6 +1538,10 @@ An identity provider.
 """
 type AuthIdentityProvider {
   """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
   Whether the identity provider is the default identity provider migrated from organization level settings.
   """
   defaultMigrated: Boolean!
@@ -1558,24 +1584,6 @@ type AuthIdentityProvider {
 }
 
 """
-[INTERNAL] An OAuth userId/createdDate tuple
-"""
-type AuthMembership {
-  """
-  The user ID associated with the authorization
-  """
-  authorizingUserId: String
-  """
-  The date of the authorization
-  """
-  createdAt: DateTime!
-  """
-  The user ID the authorization was done for
-  """
-  userId: String!
-}
-
-"""
 An organization. Organizations are root-level objects that contain users and teams.
 """
 type AuthOrganization {
@@ -1583,6 +1591,10 @@ type AuthOrganization {
   Allowed authentication providers, empty array means all are allowed
   """
   allowedAuthServices: [String!]!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
   """
   The time at which deletion of the organization was requested.
   """
@@ -1690,6 +1702,10 @@ type AuthUser {
   """
   avatarUrl: String
   """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
   The user's display (nick) name. Unique within each organization.
   """
   displayName: String!
@@ -1737,7 +1753,7 @@ type AuthenticationSessionResponse {
   """
   countryCodes: [String!]!
   """
-  Date when the session was created.
+  The time at which the entity was created.
   """
   createdAt: DateTime!
   id: String!
@@ -1804,48 +1820,6 @@ enum AuthenticationSessionType {
   desktop
   ios
   web
-}
-
-"""
-[INTERNAL] Public information of the OAuth application, plus the authorized scopes for a given user.
-"""
-type AuthorizedApplication {
-  """
-  OAuth application's ID.
-  """
-  appId: String!
-  """
-  OAuth application's client ID.
-  """
-  clientId: String!
-  """
-  Description of the application.
-  """
-  description: String
-  """
-  Developer of the application.
-  """
-  developer: String
-  """
-  Developer URL of the application.
-  """
-  developerUrl: String
-  """
-  Image of the application.
-  """
-  imageUrl: String
-  """
-  Application name.
-  """
-  name: String!
-  """
-  Scopes that are authorized for this application for a given user.
-  """
-  scope: [String!]!
-  """
-  Whether or not webhooks are enabled for the application.
-  """
-  webhooksEnabled: Boolean!
 }
 
 """
@@ -6791,6 +6765,10 @@ type EmailIntakeAddress implements Node {
   """
   issueCreatedAutoReply: String
   """
+  Whether the auto-reply for issue created is enabled.
+  """
+  issueCreatedAutoReplyEnabled: Boolean!
+  """
   The organization that the email address is associated with.
   """
   organization: Organization!
@@ -6862,6 +6840,10 @@ input EmailIntakeAddressCreateInput {
   The auto-reply message for issue created.
   """
   issueCreatedAutoReply: String
+  """
+  Whether the issue created auto-reply is enabled.
+  """
+  issueCreatedAutoReplyEnabled: Boolean
   """
   Whether email replies are enabled.
   """
@@ -6945,6 +6927,10 @@ input EmailIntakeAddressUpdateInput {
   The auto-reply message for issue created.
   """
   issueCreatedAutoReply: String
+  """
+  Whether the issue created auto-reply is enabled.
+  """
+  issueCreatedAutoReplyEnabled: Boolean
   """
   Whether email replies are enabled.
   """
@@ -8029,6 +8015,13 @@ type FetchDataPayload {
   query: String
   """
   Whether the fetch operation was successful.
+  """
+  success: Boolean!
+}
+
+type FileUploadDeletePayload {
+  """
+  Whether the operation was successful.
   """
   success: Boolean!
 }
@@ -15022,6 +15015,7 @@ type IssueSuggestion implements Node {
   The time at which the entity was created.
   """
   createdAt: DateTime!
+  dismissalReason: String
   """
   The unique identifier of the entity.
   """
@@ -17056,6 +17050,15 @@ type Mutation {
     size: Int!
   ): UploadPayload!
   """
+  [INTERNAL] Permanently delete an uploaded file by asset URL. This should be used as a last resort and will break comments and documents that reference the asset.
+  """
+  fileUploadDangerouslyDelete(
+    """
+    The asset URL of the uploaded file to delete.
+    """
+    assetUrl: String!
+  ): FileUploadDeletePayload!
+  """
   Creates a new automation state.
   """
   gitAutomationStateCreate(
@@ -18023,6 +18026,15 @@ type Mutation {
     id: String!
   ): IssuePayload!
   """
+  Disables external sync on an issue.
+  """
+  issueExternalSyncDisable(
+    """
+    The ID of the sync attachment to disable.
+    """
+    attachmentId: String!
+  ): IssuePayload!
+  """
   Kicks off an Asana import job.
   """
   issueImportCreateAsana(
@@ -18348,6 +18360,10 @@ type Mutation {
     """
     id: String!
     """
+    The email of the user to subscribe, default is the current user.
+    """
+    userEmail: String
+    """
     The identifier of the user to subscribe, default is the current user.
     """
     userId: String
@@ -18369,6 +18385,10 @@ type Mutation {
     The identifier of the issue to unsubscribe from.
     """
     id: String!
+    """
+    The email of the user to unsubscribe, default is the current user.
+    """
+    userEmail: String
     """
     The identifier of the user to unsubscribe, default is the current user.
     """
@@ -19409,15 +19429,6 @@ type Mutation {
     redirectUri: String!
   ): IntegrationPayload!
   """
-  [INTERNAL] Updates the summary of an issue.
-  """
-  updateIssueSummary(
-    """
-    The identifier of the issue to update.
-    """
-    id: String!
-  ): IssuePayload!
-  """
   Makes user a regular user. Can only be called by an admin.
   """
   userDemoteAdmin(
@@ -19516,6 +19527,15 @@ type Mutation {
   userSuspend(
     """
     The identifier of the user to suspend.
+    """
+    id: String!
+  ): UserAdminPayload!
+  """
+  Unlinks a guest user from their identity provider. Can only be called by an admin when SCIM is enabled.
+  """
+  userUnlinkFromIdentityProvider(
+    """
+    The identifier of the guest user to unlink from their identity provider.
     """
     id: String!
   ): UserAdminPayload!
@@ -21547,6 +21567,10 @@ input NullableUserFilter {
   """
   invited: BooleanComparator
   """
+  Comparator for the user's invited status.
+  """
+  isInvited: BooleanComparator
+  """
   Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user.
   """
   isMe: BooleanComparator
@@ -21932,6 +21956,10 @@ type Organization implements Node {
   Whether the Git integration linkback messages should be sent to public repositories.
   """
   gitPublicLinkbackMessagesEnabled: Boolean!
+  """
+  Whether HIPAA compliance is enabled for organization.
+  """
+  hipaaComplianceEnabled: Boolean!
   """
   The unique identifier of the entity.
   """
@@ -28150,27 +28178,6 @@ type Query {
     clientId: String!
   ): Application!
   """
-  [INTERNAL] Get basic information for a list of applications.
-  """
-  applicationInfoByIds(
-    """
-    The IDs of the applications.
-    """
-    ids: [String!]!
-  ): [Application!]!
-  """
-  [DEPRECATED] [INTERNAL] Get information for a list of applications with memberships
-  """
-  applicationInfoWithMembershipsByIds(
-    """
-    The client IDs to look up.
-    """
-    clientIds: [String!]!
-  ): [WorkspaceAuthorizedApplication!]!
-    @deprecated(
-      reason: "Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead."
-    )
-  """
   Get information for an application and whether a user has approved it for the given scopes.
   """
   applicationWithAuthorization(
@@ -28330,10 +28337,6 @@ type Query {
   User's active sessions.
   """
   authenticationSessions: [AuthenticationSessionResponse!]!
-  """
-  [INTERNAL] Get all authorized applications for a user.
-  """
-  authorizedApplications: [AuthorizedApplication!]!
   """
   Fetch users belonging to this user account.
   """
@@ -29872,15 +29875,19 @@ type Query {
     term: String!
   ): ProjectSearchPayload!
   """
-  [INTERNAL] Search for various resources using natural language.
+  Search for various resources using natural language.
   """
   semanticSearch(
+    """
+    Filters to apply to the semantic search results of each type.
+    """
+    filters: SemanticSearchFilters
     """
     Whether to include archived results in the search (default: false).
     """
     includeArchived: Boolean
     """
-    The maximum number of results to return (default: 10).
+    The maximum number of results to return (default: 50).
     """
     maxResults: Int
     """
@@ -29892,7 +29899,6 @@ type Query {
     """
     types: [SemanticSearchResultType!]
   ): SemanticSearchPayload!
-    @deprecated(reason: "Use specific search endpoints like searchIssues, searchProjects, searchDocuments instead.")
   """
   Fetch SSO login URL for the email provided.
   """
@@ -30225,31 +30231,6 @@ type Query {
     """
     orderBy: PaginationOrderBy
   ): WorkflowStateConnection!
-  """
-  [INTERNAL] Get a specific non-internal authorized application (with limited fields) for a workspace
-  """
-  workspaceAuthorizedApplication(
-    """
-    The client ID of the application.
-    """
-    clientId: String!
-  ): WorkspaceAuthorizedApplicationWithMemberships!
-  """
-  [DEPRECATED] [INTERNAL] Get non-internal authorized applications (with limited fields) for a workspace
-  """
-  workspaceAuthorizedApplications: [WorkspaceAuthorizedApplication!]!
-    @deprecated(
-      reason: "Use more efficient `workspaceAuthorizedApplicationsWithAppUser` and `workspaceAuthorizedApplication` instead."
-    )
-  """
-  [INTERNAL] Get non-internal authorized applications for a workspace, including each application's app user.
-  """
-  workspaceAuthorizedApplicationsWithAppUser(
-    """
-    Client IDs of specific applications to return. If not provided, all workspace-authorized applications will be returned.
-    """
-    clientIds: [String!]
-  ): [WorkspaceAuthorizedApplicationWithAppUser!]!
 }
 
 type RateLimitPayload {
@@ -30976,6 +30957,16 @@ enum SLADayCountType {
   onlyBusinessDays
 }
 
+"""
+[INTERNAL] Comparator for Salesforce metadata.
+"""
+input SalesforceMetadataIntegrationComparator {
+  """
+  Salesforce Case metadata filter
+  """
+  caseMetadata: JSONObject
+}
+
 input SalesforceSettingsInput {
   """
   Whether a ticket should be automatically reopened when its linked Linear issue is cancelled.
@@ -31032,15 +31023,40 @@ input SalesforceSettingsInput {
 }
 
 """
-[INTERNAL] Payload returned by semantic search.
+Filters for semantic search results.
+"""
+input SemanticSearchFilters {
+  """
+  Filters applied to documents.
+  """
+  documents: DocumentFilter
+  """
+  Filters applied to initiatives.
+  """
+  initiatives: InitiativeFilter
+  """
+  Filters applied to issues.
+  """
+  issues: IssueFilter
+  """
+  Filters applied to projects.
+  """
+  projects: ProjectFilter
+}
+
+"""
+Payload returned by semantic search.
 """
 type SemanticSearchPayload {
-  enabled: Boolean!
+  """
+  Whether the semantic search is enabled.
+  """
+  enabled: Boolean! @deprecated(reason: "Always true.")
   results: [SemanticSearchResult!]!
 }
 
 """
-[INTERNAL] A semantic search result reference.
+A semantic search result reference.
 """
 type SemanticSearchResult implements Node {
   """
@@ -31070,7 +31086,7 @@ type SemanticSearchResult implements Node {
 }
 
 """
-[INTERNAL] The type of the semantic search result.
+The type of the semantic search result.
 """
 enum SemanticSearchResultType {
   document
@@ -31511,7 +31527,11 @@ input SourceMetadataComparator {
   """
   null: Boolean
   """
-  Compound filters, all of which need to be matched by the sub type.
+  [INTERNAL] Comparator for the salesforce metadata.
+  """
+  salesforceMetadata: SalesforceMetadataIntegrationComparator
+  """
+  Comparator for the sub type.
   """
   subType: SubTypeComparator
 }
@@ -34304,6 +34324,10 @@ input UserCollectionFilter {
   """
   invited: BooleanComparator
   """
+  Comparator for the user's invited status.
+  """
+  isInvited: BooleanComparator
+  """
   Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user.
   """
   isMe: BooleanComparator
@@ -34405,6 +34429,10 @@ input UserFilter {
   Comparator for the user's invited status.
   """
   invited: BooleanComparator
+  """
+  Comparator for the user's invited status.
+  """
+  isInvited: BooleanComparator
   """
   Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user.
   """
@@ -35531,124 +35559,6 @@ input WorkflowStateUpdateInput {
   The position of the state.
   """
   position: Float
-}
-
-"""
-[INTERNAL] Public information of the OAuth application, plus the userIds and scopes for those users.
-"""
-type WorkspaceAuthorizedApplication {
-  """
-  OAuth application's ID.
-  """
-  appId: String!
-  """
-  OAuth application's client ID.
-  """
-  clientId: String!
-  """
-  Description of the application.
-  """
-  description: String
-  """
-  Developer of the application.
-  """
-  developer: String
-  """
-  Developer URL of the application.
-  """
-  developerUrl: String
-  """
-  Image of the application.
-  """
-  imageUrl: String
-  """
-  UserIds and membership dates of everyone who has authorized the application with the set of scopes.
-  """
-  memberships: [AuthMembership!]!
-  """
-  Application name.
-  """
-  name: String!
-  """
-  Scopes that are authorized for this application for a given user.
-  """
-  scope: [String!]!
-  """
-  Total number of members that authorized the application.
-  """
-  totalMembers: Float!
-  """
-  Whether or not webhooks are enabled for the application.
-  """
-  webhooksEnabled: Boolean!
-}
-
-"""
-[INTERNAL] Public information of the OAuth application, plus the app user and aggregate membership count.
-"""
-type WorkspaceAuthorizedApplicationWithAppUser {
-  """
-  OAuth application's ID.
-  """
-  appId: String!
-  """
-  The app user associated with this client, if one exists.
-  """
-  appUser: AuthMembership
-  """
-  OAuth application's client ID.
-  """
-  clientId: String!
-  """
-  Description of the application.
-  """
-  description: String
-  """
-  Developer of the application.
-  """
-  developer: String
-  """
-  Developer URL of the application.
-  """
-  developerUrl: String
-  """
-  Image of the application.
-  """
-  imageUrl: String
-  """
-  Application name.
-  """
-  name: String!
-  """
-  Scopes that are authorized for this application for a given user.
-  """
-  scope: [String!]!
-  """
-  Total number of members (including the app user, if it exists) that authorized the application.
-  """
-  totalMembers: Float!
-  """
-  Whether or not webhooks are enabled for the application.
-  """
-  webhooksEnabled: Boolean!
-}
-
-"""
-[INTERNAL] Public information of the OAuth application with its memberships
-"""
-type WorkspaceAuthorizedApplicationWithMemberships {
-  """
-  Details of the OAuth application
-  """
-  client: AuthorizedApplication!
-  """
-  UserIds and membership dates of everyone who has authorized the application
-  """
-  memberships: [AuthMembership!]!
-  """
-  Total number of members that authorized the application.
-  """
-  totalMembers: Float!
 }
 
 input ZendeskSettingsInput {

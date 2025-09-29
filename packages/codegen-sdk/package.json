@@ -2,7 +2,7 @@
   "name": "@linear/codegen-sdk",
   "private": true,
   "description": "Plugin for generating the Linear SDK from fragments and documents",
-  "version": "3.1.11",
+  "version": "3.3.1",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "main": "dist/index-cjs.min.js",
@@ -22,8 +22,8 @@
     "build:rollup": "npx rollup -c"
   },
   "devDependencies": {
-    "@graphql-codegen/plugin-helpers": "^1.18.1",
-    "@graphql-codegen/visitor-plugin-common": "^1.17.17",
+    "@graphql-codegen/plugin-helpers": "^2.7.0",
+    "@graphql-codegen/visitor-plugin-common": "^2.13.0",
     "@graphql-tools/graphql-file-loader": "^6.2.5",
     "@graphql-tools/load": "^6.2.5",
     "@rollup/plugin-typescript": "^12.1.4",

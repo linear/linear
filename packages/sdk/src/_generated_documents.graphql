@@ -2064,6 +2064,31 @@ fragment InitiativeRelation on InitiativeRelation {
   id
 }
 
+# A semantic search result reference.
+fragment SemanticSearchResult on SemanticSearchResult {
+  __typename
+  # The document related to the semantic search result.
+  document {
+    id
+  }
+  # The initiative related to the semantic search result.
+  initiative {
+    id
+  }
+  # The issue related to the semantic search result.
+  issue {
+    id
+  }
+  # The project related to the semantic search result.
+  project {
+    id
+  }
+  # The type of the semantic search result.
+  type
+  # The unique identifier of the entity.
+  id
+}
+
 # A session for agent activities and state management.
 fragment AgentSession on AgentSession {
   __typename
@@ -2453,6 +2478,8 @@ fragment AuthUser on AuthUser {
   organization {
     ...AuthOrganization
   }
+  # The time at which the entity was created.
+  createdAt
   # The user's display (nick) name. Unique within each organization.
   displayName
   # The user's email address.
@@ -2753,6 +2780,8 @@ fragment AgentActivity on AgentActivity {
   signal
   # Metadata about the external source that created this agent activity.
   sourceMetadata
+  # Metadata about this agent activity's signal.
+  signalMetadata
   # The agent session this activity belongs to.
   agentSession {
     id
@@ -2849,6 +2878,8 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   issueCanceledAutoReplyEnabled
   # Whether the auto-reply for issue completed is enabled.
   issueCompletedAutoReplyEnabled
+  # Whether the auto-reply for issue created is enabled.
+  issueCreatedAutoReplyEnabled
   # Whether the commenter's name is included in the email replies.
   useUserNamesInReplies
   # Whether the email address is enabled.
@@ -2941,6 +2972,8 @@ fragment AuthIdentityProvider on AuthIdentityProvider {
   ssoSignAlgo
   # The issuer's custom entity ID.
   issuerEntityId
+  # The time at which the entity was created.
+  createdAt
   # The unique identifier of the entity.
   id
   # Whether SAML authentication is enabled for organization.
@@ -3692,6 +3725,8 @@ fragment Organization on Organization {
   trialEndsAt
   # The unique identifier of the entity.
   id
+  # Whether HIPAA compliance is enabled for organization.
+  hipaaComplianceEnabled
   # Whether SAML authentication is enabled for organization.
   samlEnabled
   # Whether SCIM provisioning is enabled for organization.
@@ -3739,6 +3774,8 @@ fragment AuthOrganization on AuthOrganization {
   region
   # The time at which deletion of the organization was requested.
   deletionRequestedAt
+  # The time at which the entity was created.
+  createdAt
   # The unique identifier of the entity.
   id
   # Whether SAML authentication is enabled for organization.
@@ -3961,8 +3998,6 @@ fragment AuthenticationSessionResponse on AuthenticationSessionResponse {
   client
   # Country codes of all seen locations.
   countryCodes
-  # Date when the session was created.
-  createdAt
   # Date when the session was last updated.
   updatedAt
   # Human readable location
@@ -3987,6 +4022,8 @@ fragment AuthenticationSessionResponse on AuthenticationSessionResponse {
   service
   # Session's user-agent.
   userAgent
+  # The time at which the entity was created.
+  createdAt
   # Type of application used to authenticate.
   type
   # Used web browser.
@@ -5496,8 +5533,12 @@ fragment AgentActivityWebhookPayload on AgentActivityWebhookPayload {
   __typename
   # An optional modifier that provides additional instructions on how the activity should be interpreted.
   signal
+  # Metadata about this agent activity's signal.
+  signalMetadata
   # The ID of the agent session that this activity belongs to.
   agentSessionId
+  # The ID of the comment this activity is linked to.
+  sourceCommentId
   # The ID of the entity.
   id
   # The ID of the user who created this agent activity.
@@ -6271,6 +6312,16 @@ fragment IssueSlaWebhookPayload on IssueSlaWebhookPayload {
   type
   # URL for the issue.
   url
+}
+
+# Payload returned by semantic search.
+fragment SemanticSearchPayload on SemanticSearchPayload {
+  __typename
+  # Whether the semantic search is enabled.
+  enabled
+  results {
+    ...SemanticSearchResult
+  }
 }
 
 # Project attachment
@@ -7438,6 +7489,12 @@ fragment FetchDataPayload on FetchDataPayload {
   success
 }
 
+fragment FileUploadDeletePayload on FileUploadDeletePayload {
+  __typename
+  # Whether the operation was successful.
+  success
+}
+
 fragment FrontAttachmentPayload on FrontAttachmentPayload {
   __typename
   # The identifier of the last sync operation.
@@ -8034,6 +8091,7 @@ fragment IssueSuggestion on IssueSuggestion {
   createdAt
   # The unique identifier of the entity.
   id
+  dismissalReason
   issue {
     id
   }
@@ -13399,6 +13457,29 @@ query searchProjects_archivePayload(
     }
   }
 }
+# Search for various resources using natural language.
+query semanticSearch(
+  # Filters to apply to the semantic search results of each type.
+  $filters: SemanticSearchFilters
+  # Whether to include archived results in the search (default: false).
+  $includeArchived: Boolean
+  # The maximum number of results to return (default: 50).
+  $maxResults: Int
+  # Search query to look for.
+  $query: String!
+  # The types of results to return (default: all).
+  $types: [SemanticSearchResultType!]
+) {
+  semanticSearch(
+    filters: $filters
+    includeArchived: $includeArchived
+    maxResults: $maxResults
+    query: $query
+    types: $types
+  ) {
+    ...SemanticSearchPayload
+  }
+}
 # Fetch SSO login URL for the email provided.
 query ssoUrlFromEmail(
   # Email to query the SSO login URL by.
@@ -16390,6 +16471,15 @@ mutation deleteIssue(
     ...IssueArchivePayload
   }
 }
+# Disables external sync on an issue.
+mutation issueExternalSyncDisable(
+  # The ID of the sync attachment to disable.
+  $attachmentId: String!
+) {
+  issueExternalSyncDisable(attachmentId: $attachmentId) {
+    ...IssuePayload
+  }
+}
 # Kicks off an Asana import job.
 mutation issueImportCreateAsana(
   # Asana team name to choose which issues we should import.
@@ -16660,10 +16750,12 @@ mutation issueRemoveLabel(
 mutation issueSubscribe(
   # The identifier of the issue to subscribe to.
   $id: String!
+  # The email of the user to subscribe, default is the current user.
+  $userEmail: String
   # The identifier of the user to subscribe, default is the current user.
   $userId: String
 ) {
-  issueSubscribe(id: $id, userId: $userId) {
+  issueSubscribe(id: $id, userEmail: $userEmail, userId: $userId) {
     ...IssuePayload
   }
 }
@@ -16680,10 +16772,12 @@ mutation unarchiveIssue(
 mutation issueUnsubscribe(
   # The identifier of the issue to unsubscribe from.
   $id: String!
+  # The email of the user to unsubscribe, default is the current user.
+  $userEmail: String
   # The identifier of the user to unsubscribe, default is the current user.
   $userId: String
 ) {
-  issueUnsubscribe(id: $id, userId: $userId) {
+  issueUnsubscribe(id: $id, userEmail: $userEmail, userId: $userId) {
     ...IssuePayload
   }
 }
@@ -17645,6 +17739,16 @@ mutation suspendUser(
   $id: String!
 ) {
   userSuspend(id: $id) {
+    ...UserAdminPayload
+  }
+}
+# Unlinks a guest user from their identity provider. Can only be called by an admin when SCIM is
+# enabled.
+mutation userUnlinkFromIdentityProvider(
+  # The identifier of the guest user to unlink from their identity provider.
+  $id: String!
+) {
+  userUnlinkFromIdentityProvider(id: $id) {
     ...UserAdminPayload
   }
 }

@@ -1,5 +1,23 @@
 # Change Log
 
+## 3.3.1
+
+### Patch Changes
+
+- 7ae1128: chore(deps): update dependency patch versions
+
+## 3.3.0
+
+### Minor Changes
+
+- feea0fb: Upgrade graphql-codegen from v1 to v2 internally, which produces slight changes in resultant schema fragments and documents.
+
+## 3.2.12
+
+### Patch Changes
+
+- 340065a: chore(deps): update dependency patch versions
+
 ## 3.2.11
 
 ### Patch Changes
