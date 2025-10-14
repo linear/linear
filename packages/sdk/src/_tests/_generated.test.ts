@@ -443,16 +443,6 @@ describe("generated", () => {
     });
   });
 
-  /** Test ApplicationWithAuthorization query */
-  describe("ApplicationWithAuthorization", () => {
-    /** Test the root model query for ApplicationWithAuthorization */
-    it("applicationWithAuthorization", async () => {
-      const applicationWithAuthorization: L.UserAuthorizedApplication | undefined =
-        await client.applicationWithAuthorization("mock-clientId", ["mock-scope"]);
-      expect(applicationWithAuthorization instanceof L.UserAuthorizedApplication);
-    });
-  });
-
   /** Test AttachmentIssue query */
   describe("AttachmentIssue", () => {
     let _attachmentIssue: L.Issue | undefined;
