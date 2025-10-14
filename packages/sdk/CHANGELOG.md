@@ -1,5 +1,13 @@
 # Change Log
 
+## 60.0.1
+
+### Patch Changes
+
+- 9a2b6c7: feat(schema): [non_breaking] Field 'newlyRequestedScopes' was added to object type 'OauthClientApproval' (OauthClientApproval.newlyRequestedScopes)
+
+  feat(schema): [non_breaking] Field 'OauthClientApproval.scopes' description changed from 'The scopes the app has requested.' to 'The scopes the app has been approved for.' (OauthClientApproval.scopes)
+
 ## 60.0.0
 
 ### Major Changes
