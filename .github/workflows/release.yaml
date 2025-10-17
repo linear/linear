@@ -55,3 +55,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  notify-slack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [releast]
+    if: ${{ always() && github.ref_name == 'master' && contains(needs.*.result, 'failure') }}
+    steps:
+      - uses: ravsamhq/notify-slack-action@bca2d7f5660b833a27bda4f6b8bef389ebfefd25 # 2.3.0
+        with:
+          status: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          notification_title: "SDK CI check failed on master branch"
+          message_format: ":x: Check failed in <{repo_url}|{repo}@{branch}> on <{commit_url}|{commit_sha}>"
+          footer: <{run_url}|View Run>
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
