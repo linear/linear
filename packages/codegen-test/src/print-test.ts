@@ -13,7 +13,7 @@ import {
 import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
 import { ObjectTypeDefinitionNode } from "graphql";
 import { printTestHooks } from "./print-hooks";
-import { lowerCase } from "lodash";
+import { lowerCase, startCase } from "lodash";
 
 /**
  * Print all tests
@@ -66,24 +66,65 @@ function getConnectionNode(operation: SdkOperation): SdkListField | undefined {
 }
 
 /**
+ * Mock value mappings for primitive types
+ */
+const PRIMITIVE_MOCK_VALUES: Record<string, string> = {
+  ["string"]: `"mock-{name}"`,
+  ["string[]"]: `["mock-{name}"]`,
+  ["number"]: `123`,
+  ["number[]"]: `[123]`,
+  ["boolean"]: `true`,
+  ["boolean[]"]: `[true]`,
+};
+
+/**
+ * Get a mock value for an enum type
+ */
+function getMockEnumValue(context: SdkPluginContext, typeName: string, isArray: boolean): string | undefined {
+  const typeWithoutNamespace = typeName.replace(`${Sdk.NAMESPACE}.`, "");
+  const enumDef = context.enums.find(e => e.name.value === typeWithoutNamespace);
+
+  if (enumDef && enumDef.values && enumDef.values.length > 0) {
+    const firstValue = enumDef.values[0].name.value;
+    // GraphQL enum values are uppercase, TypeScript enums use PascalCase
+    const pascalCaseValue = startCase(firstValue).replace(/ /g, "");
+    const enumValue = `${Sdk.NAMESPACE}.${typeWithoutNamespace}.${pascalCaseValue}`;
+    return isArray ? `[${enumValue}]` : enumValue;
+  }
+
+  return undefined;
+}
+
+/**
  * Print mocked arguments for an operation
  */
-function printOperationArgs(operation: SdkOperation): string {
+function printOperationArgs(context: SdkPluginContext, operation: SdkOperation): string {
   const parentArgNames = operation.parent?.requiredArgs.args.map(arg => arg.name) ?? [];
   const fieldMockArgs = operation.requiredArgs.args
-    .map(arg =>
-      parentArgNames.includes(arg.name)
-        ? undefined
-        : arg.type === "string"
-          ? `"mock-${arg.name}"`
-          : arg.type === "string[]"
-            ? `["mock-${arg.name}"]`
-            : arg.type === "number"
-              ? `123`
-              : arg.type === "number[]"
-                ? `[123]`
-                : `"UNMAPPED_MOCK_TYPE"`
-    )
+    .map(arg => {
+      if (parentArgNames.includes(arg.name)) {
+        return undefined;
+      }
+
+      // Handle primitive types
+      const primitiveMock = PRIMITIVE_MOCK_VALUES[arg.type];
+      if (primitiveMock) {
+        return primitiveMock.replace("{name}", arg.name);
+      }
+
+      // Check if it's an array type
+      const isArray = arg.type.endsWith("[]");
+      const baseType = isArray ? arg.type.slice(0, -2) : arg.type;
+
+      // Check if it's an enum type (with or without namespace prefix)
+      const enumMock = getMockEnumValue(context, baseType, isArray);
+      if (enumMock) {
+        return enumMock;
+      }
+
+      // Fallback for unmapped types
+      return `"UNMAPPED_MOCK_TYPE"`;
+    })
     .filter(nonNullable);
 
   return fieldMockArgs.length || operation.optionalArgs.args.length ? `(${printList(fieldMockArgs)})` : "";
@@ -125,7 +166,7 @@ function printModelQueryTest(context: SdkPluginContext, operation: SdkOperation,
             `const ${fieldName}: ${printResponseType(fieldType, operation.print.list)} = ${
               isModelObject
                 ? `${clientName}.${fieldName}`
-                : `await ${clientName}.${fieldName}${printOperationArgs(operation)}`
+                : `await ${clientName}.${fieldName}${printOperationArgs(context, operation)}`
             }`,
             sdkOperations.length ? printSet(`_${fieldName}`, fieldName) : undefined,
             operation.print.list
@@ -218,7 +259,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
             `const ${fieldName}: ${printResponseType(
               fieldType,
               operation.print.list
-            )} = await ${clientName}.${fieldName}${printOperationArgs(operation)}`,
+            )} = await ${clientName}.${fieldName}${printOperationArgs(context, operation)}`,
             itemOperation
               ? printLines([
                   `const ${itemField} = ${fieldName}?.${Sdk.NODE_NAME}?.[0]`,
