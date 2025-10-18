@@ -13,7 +13,7 @@ import {
 import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
 import { ObjectTypeDefinitionNode } from "graphql";
 import { printTestHooks } from "./print-hooks";
-import { lowerCase } from "lodash";
+import { lowerCase, upperFirst } from "lodash";
 
 /**
  * Print all tests
@@ -66,6 +66,36 @@ function getConnectionNode(operation: SdkOperation): SdkListField | undefined {
 }
 
 /**
+ * Mock value mappings for primitive types
+ */
+const PRIMITIVE_MOCK_VALUES: Record<string, string> = {
+  ["string"]: `"mock-{name}"`,
+  ["string[]"]: `["mock-{name}"]`,
+  ["number"]: `123`,
+  ["number[]"]: `[123]`,
+  ["boolean"]: `true`,
+  ["boolean[]"]: `[true]`,
+};
+
+/**
+ * Get a mock value for an enum type
+ */
+function getMockEnumValue(context: SdkPluginContext, typeName: string, isArray: boolean): string | undefined {
+  const typeWithoutNamespace = typeName.replace(`${Sdk.NAMESPACE}.`, "");
+  const enumDef = context.enums.find(e => e.name.value === typeWithoutNamespace);
+
+  if (enumDef && enumDef.values && enumDef.values.length > 0) {
+    const firstValue = enumDef.values[0].name.value;
+    // GraphQL enum values are uppercase, TypeScript enums use PascalCase
+    const pascalCaseValue = upperFirst(lowerCase(firstValue).replace(/ /g, ""));
+    const enumValue = `${Sdk.NAMESPACE}.${typeWithoutNamespace}.${pascalCaseValue}`;
+    return isArray ? `[${enumValue}]` : enumValue;
+  }
+
+  return undefined;
+}
+
+/**
  * Print mocked arguments for an operation
  */
 function printOperationArgs(context: SdkPluginContext, operation: SdkOperation): string {
@@ -77,32 +107,19 @@ function printOperationArgs(context: SdkPluginContext, operation: SdkOperation):
       }
 
       // Handle primitive types
-      if (arg.type === "string") {
-        return `"mock-${arg.name}"`;
+      const primitiveMock = PRIMITIVE_MOCK_VALUES[arg.type];
+      if (primitiveMock) {
+        return primitiveMock.replace("{name}", arg.name);
       }
-      if (arg.type === "string[]") {
-        return `["mock-${arg.name}"]`;
-      }
-      if (arg.type === "number") {
-        return `123`;
-      }
-      if (arg.type === "number[]") {
-        return `[123]`;
-      }
-      if (arg.type === "boolean") {
-        return `true`;
-      }
-      if (arg.type === "boolean[]") {
-        return `[true]`;
-      }
+
+      // Check if it's an array type
+      const isArray = arg.type.endsWith("[]");
+      const baseType = isArray ? arg.type.slice(0, -2) : arg.type;
 
       // Check if it's an enum type (with or without namespace prefix)
-      const typeWithoutNamespace = arg.type.replace(`${Sdk.NAMESPACE}.`, "");
-      const enumDef = context.enums.find(e => e.name.value === typeWithoutNamespace);
-
-      if (enumDef && enumDef.values && enumDef.values.length > 0) {
-        const firstValue = enumDef.values[0].name.value;
-        return `${Sdk.NAMESPACE}.${typeWithoutNamespace}.${firstValue}`;
+      const enumMock = getMockEnumValue(context, baseType, isArray);
+      if (enumMock) {
+        return enumMock;
       }
 
       // Fallback for unmapped types
