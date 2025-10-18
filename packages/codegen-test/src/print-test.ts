@@ -68,22 +68,46 @@ function getConnectionNode(operation: SdkOperation): SdkListField | undefined {
 /**
  * Print mocked arguments for an operation
  */
-function printOperationArgs(operation: SdkOperation): string {
+function printOperationArgs(context: SdkPluginContext, operation: SdkOperation): string {
   const parentArgNames = operation.parent?.requiredArgs.args.map(arg => arg.name) ?? [];
   const fieldMockArgs = operation.requiredArgs.args
-    .map(arg =>
-      parentArgNames.includes(arg.name)
-        ? undefined
-        : arg.type === "string"
-          ? `"mock-${arg.name}"`
-          : arg.type === "string[]"
-            ? `["mock-${arg.name}"]`
-            : arg.type === "number"
-              ? `123`
-              : arg.type === "number[]"
-                ? `[123]`
-                : `"UNMAPPED_MOCK_TYPE"`
-    )
+    .map(arg => {
+      if (parentArgNames.includes(arg.name)) {
+        return undefined;
+      }
+
+      // Handle primitive types
+      if (arg.type === "string") {
+        return `"mock-${arg.name}"`;
+      }
+      if (arg.type === "string[]") {
+        return `["mock-${arg.name}"]`;
+      }
+      if (arg.type === "number") {
+        return `123`;
+      }
+      if (arg.type === "number[]") {
+        return `[123]`;
+      }
+      if (arg.type === "boolean") {
+        return `true`;
+      }
+      if (arg.type === "boolean[]") {
+        return `[true]`;
+      }
+
+      // Check if it's an enum type (with or without namespace prefix)
+      const typeWithoutNamespace = arg.type.replace(`${Sdk.NAMESPACE}.`, "");
+      const enumDef = context.enums.find(e => e.name.value === typeWithoutNamespace);
+
+      if (enumDef && enumDef.values && enumDef.values.length > 0) {
+        const firstValue = enumDef.values[0].name.value;
+        return `${Sdk.NAMESPACE}.${typeWithoutNamespace}.${firstValue}`;
+      }
+
+      // Fallback for unmapped types
+      return `"UNMAPPED_MOCK_TYPE"`;
+    })
     .filter(nonNullable);
 
   return fieldMockArgs.length || operation.optionalArgs.args.length ? `(${printList(fieldMockArgs)})` : "";
@@ -125,7 +149,7 @@ function printModelQueryTest(context: SdkPluginContext, operation: SdkOperation,
             `const ${fieldName}: ${printResponseType(fieldType, operation.print.list)} = ${
               isModelObject
                 ? `${clientName}.${fieldName}`
-                : `await ${clientName}.${fieldName}${printOperationArgs(operation)}`
+                : `await ${clientName}.${fieldName}${printOperationArgs(context, operation)}`
             }`,
             sdkOperations.length ? printSet(`_${fieldName}`, fieldName) : undefined,
             operation.print.list
@@ -218,7 +242,7 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
             `const ${fieldName}: ${printResponseType(
               fieldType,
               operation.print.list
-            )} = await ${clientName}.${fieldName}${printOperationArgs(operation)}`,
+            )} = await ${clientName}.${fieldName}${printOperationArgs(context, operation)}`,
             itemOperation
               ? printLines([
                   `const ${itemField} = ${fieldName}?.${Sdk.NODE_NAME}?.[0]`,
