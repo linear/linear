@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.2.41
+
+### Patch Changes
+
+- 4ae6010: chore(deps): update dependency patch versions
+- Updated dependencies [4ae6010]
+- Updated dependencies [4c5acd5]
+  - @linear/sdk@61.0.0
+
 ## 2.2.40
 
 ### Patch Changes
