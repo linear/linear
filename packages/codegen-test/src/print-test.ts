@@ -82,7 +82,7 @@ function printOperationArgs(operation: SdkOperation): string {
               ? `123`
               : arg.type === "number[]"
                 ? `[123]`
-                : "UNMAPPED_MOCK_TYPE"
+                : `"UNMAPPED_MOCK_TYPE"`
     )
     .filter(nonNullable);
 
