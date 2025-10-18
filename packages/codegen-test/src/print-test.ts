@@ -13,7 +13,7 @@ import {
 import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
 import { ObjectTypeDefinitionNode } from "graphql";
 import { printTestHooks } from "./print-hooks";
-import { lowerCase, upperFirst } from "lodash";
+import { lowerCase, startCase } from "lodash";
 
 /**
  * Print all tests
@@ -87,7 +87,7 @@ function getMockEnumValue(context: SdkPluginContext, typeName: string, isArray: 
   if (enumDef && enumDef.values && enumDef.values.length > 0) {
     const firstValue = enumDef.values[0].name.value;
     // GraphQL enum values are uppercase, TypeScript enums use PascalCase
-    const pascalCaseValue = upperFirst(lowerCase(firstValue).replace(/ /g, ""));
+    const pascalCaseValue = startCase(firstValue).replace(/ /g, "");
     const enumValue = `${Sdk.NAMESPACE}.${typeWithoutNamespace}.${pascalCaseValue}`;
     return isArray ? `[${enumValue}]` : enumValue;
   }
