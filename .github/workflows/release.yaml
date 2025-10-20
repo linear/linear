@@ -58,7 +58,7 @@ jobs:
   notify-slack:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [releast]
+    needs: [release]
     if: ${{ always() && github.ref_name == 'master' && contains(needs.*.result, 'failure') }}
     steps:
       - uses: ravsamhq/notify-slack-action@bca2d7f5660b833a27bda4f6b8bef389ebfefd25 # 2.3.0
