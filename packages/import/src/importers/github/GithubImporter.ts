@@ -42,8 +42,25 @@ interface GITHUB_ISSUE {
 export class GithubImporter implements Importer {
   public constructor(apiKey: string, owner: string, repo: string) {
     this.apiKey = apiKey;
-    this.owner = owner;
-    this.repo = repo;
+
+    // If repo contains a slash, it's a full repo name (e.g. "owner/repo")
+    if (repo.includes("/")) {
+      const [parsedOwner, parsedRepo] = repo.split("/");
+      if (!parsedOwner || !parsedRepo) {
+        throw new Error(`Invalid repository format: "${repo}". Expected format: "owner/repo" (e.g. "facebook/react")`);
+      }
+      this.owner = parsedOwner;
+      this.repo = parsedRepo;
+    } else {
+      // If no slash, use the provided owner and repo separately
+      if (!owner) {
+        throw new Error(
+          `Missing organization/owner name. Please provide the full repository name (e.g. "facebook/react") or specify the owner separately.`
+        );
+      }
+      this.owner = owner;
+      this.repo = repo;
+    }
   }
 
   public get name(): string {
