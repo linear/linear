@@ -341,6 +341,15 @@ export type AgentSessionConnection = {
   pageInfo: PageInfo;
 };
 
+export type AgentSessionCreateInput = {
+  /** The app user (agent) to create a session for. */
+  appUserId: Scalars["String"];
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars["String"]>;
+  /** The issue that this session will be associated with. */
+  issueId: Scalars["String"];
+};
+
 export type AgentSessionCreateOnComment = {
   /** The root comment that this session will be associated with. */
   commentId: Scalars["String"];
@@ -9123,6 +9132,8 @@ export type Mutation = {
   agentActivityCreate: AgentActivityPayload;
   /** [Internal] Creates a prompt agent activity from Linear user input. */
   agentActivityCreatePrompt: AgentActivityPayload;
+  /** [Internal] Creates a new agent session on behalf of the current user */
+  agentSessionCreate: AgentSessionPayload;
   /** Creates a new agent session on a rootcomment. */
   agentSessionCreateOnComment: AgentSessionPayload;
   /** Creates a new agent session on an issue. */
@@ -9789,6 +9800,10 @@ export type MutationAgentActivityCreateArgs = {
 
 export type MutationAgentActivityCreatePromptArgs = {
   input: AgentActivityCreatePromptInput;
+};
+
+export type MutationAgentSessionCreateArgs = {
+  input: AgentSessionCreateInput;
 };
 
 export type MutationAgentSessionCreateOnCommentArgs = {
