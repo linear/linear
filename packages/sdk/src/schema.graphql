@@ -494,6 +494,21 @@ type AgentSessionConnection {
   pageInfo: PageInfo!
 }
 
+input AgentSessionCreateInput {
+  """
+  The app user (agent) to create a session for.
+  """
+  appUserId: String!
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The issue that this session will be associated with.
+  """
+  issueId: String!
+}
+
 input AgentSessionCreateOnComment {
   """
   The root comment that this session will be associated with.
@@ -16194,6 +16209,15 @@ type Mutation {
     """
     input: AgentActivityCreatePromptInput!
   ): AgentActivityPayload!
+  """
+  [Internal] Creates a new agent session on behalf of the current user
+  """
+  agentSessionCreate(
+    """
+    The agent session object to create.
+    """
+    input: AgentSessionCreateInput!
+  ): AgentSessionPayload!
   """
   Creates a new agent session on a rootcomment.
   """
