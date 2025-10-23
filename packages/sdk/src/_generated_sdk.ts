@@ -505,6 +505,7 @@ export class AgentSession extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.dismissedAt = parseDate(data.dismissedAt) ?? undefined;
     this.endedAt = parseDate(data.endedAt) ?? undefined;
     this.externalLink = data.externalLink ?? undefined;
     this.id = data.id;
@@ -525,6 +526,8 @@ export class AgentSession extends Request {
   public archivedAt?: Date;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** The time the agent session was dismissed. */
+  public dismissedAt?: Date;
   /** The time the agent session ended. */
   public endedAt?: Date;
   /** The URL of an external agent-hosted page associated with this session. */
@@ -782,91 +785,6 @@ export class AiPromptRules extends Request {
   public get updatedById(): string | undefined {
     return this._updatedBy?.id;
   }
-}
-/**
- * An API key. Grants access to the user's resources.
- *
- * @param request - function to call the graphql client
- * @param data - L.ApiKeyFragment response data
- */
-export class ApiKey extends Request {
-  public constructor(request: LinearRequest, data: L.ApiKeyFragment) {
-    super(request);
-    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
-    this.createdAt = parseDate(data.createdAt) ?? new Date();
-    this.id = data.id;
-    this.label = data.label;
-    this.lastActiveAt = parseDate(data.lastActiveAt) ?? undefined;
-    this.requestedSyncGroups = data.requestedSyncGroups ?? undefined;
-    this.scope = data.scope ?? undefined;
-    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
-  }
-
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
-  /** The time at which the entity was created. */
-  public createdAt: Date;
-  /** The unique identifier of the entity. */
-  public id: string;
-  /** The label of the API key. */
-  public label: string;
-  /** When the API key was last used. */
-  public lastActiveAt?: Date;
-  /** The sync groups that this API key requests access to. If null, the API key has access to all sync groups the user has access to. The final set of sync groups is computed as the intersection of these requested groups with the user's base sync groups. */
-  public requestedSyncGroups?: string[];
-  /** Scopes associated with the API key. */
-  public scope?: string[];
-  /**
-   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  public updatedAt: Date;
-  /** Organization the API key belongs to. */
-  public get organization(): LinearFetch<Organization> {
-    return new OrganizationQuery(this._request).fetch();
-  }
-}
-/**
- * ApiKeyConnection model
- *
- * @param request - function to call the graphql client
- * @param fetch - function to trigger a refetch of this ApiKeyConnection model
- * @param data - ApiKeyConnection response data
- */
-export class ApiKeyConnection extends Connection<ApiKey> {
-  public constructor(
-    request: LinearRequest,
-    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<ApiKey> | undefined>,
-    data: L.ApiKeyConnectionFragment
-  ) {
-    super(
-      request,
-      fetch,
-      data.nodes.map(node => new ApiKey(request, node)),
-      new PageInfo(request, data.pageInfo)
-    );
-  }
-}
-/**
- * ApiKeyPayload model
- *
- * @param request - function to call the graphql client
- * @param data - L.ApiKeyPayloadFragment response data
- */
-export class ApiKeyPayload extends Request {
-  public constructor(request: LinearRequest, data: L.ApiKeyPayloadFragment) {
-    super(request);
-    this.lastSyncId = data.lastSyncId;
-    this.success = data.success;
-    this.apiKey = new ApiKey(request, data.apiKey);
-  }
-
-  /** The identifier of the last sync operation. */
-  public lastSyncId: number;
-  /** Whether the operation was successful. */
-  public success: boolean;
-  /** The API key that was created. */
-  public apiKey: ApiKey;
 }
 /**
  * Payload for app user notification webhook events.
@@ -11955,7 +11873,7 @@ export class Organization extends Request {
   public users(variables?: L.Organization_UsersQueryVariables) {
     return new Organization_UsersQuery(this._request, variables).fetch(variables);
   }
-  /** Delete's an organization. Administrator privileges required. */
+  /** Deletes an organization. */
   public delete(input: L.DeleteOrganizationInput) {
     return new DeleteOrganizationMutation(this._request).fetch(input);
   }
@@ -17205,6 +17123,7 @@ export class User extends Request {
     this.statusEmoji = data.statusEmoji ?? undefined;
     this.statusLabel = data.statusLabel ?? undefined;
     this.statusUntilAt = parseDate(data.statusUntilAt) ?? undefined;
+    this.supportsAgentSessions = data.supportsAgentSessions;
     this.timezone = data.timezone ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.url = data.url;
@@ -17264,6 +17183,8 @@ export class User extends Request {
   public statusLabel?: string;
   /** A date at which the user current status should be cleared. */
   public statusUntilAt?: Date;
+  /** Whether this agent user supports agent sessions. */
+  public supportsAgentSessions: boolean;
   /** The local timezone of the user. */
   public timezone?: string;
   /**
@@ -18426,40 +18347,6 @@ export class AgentSessionsQuery extends Request {
     const data = response.agentSessions;
 
     return new AgentSessionConnection(
-      this._request,
-      connection =>
-        this.fetch(
-          defaultConnection({
-            ...variables,
-            ...connection,
-          })
-        ),
-      data
-    );
-  }
-}
-
-/**
- * A fetchable ApiKeys Query
- *
- * @param request - function to call the graphql client
- */
-export class ApiKeysQuery extends Request {
-  public constructor(request: LinearRequest) {
-    super(request);
-  }
-
-  /**
-   * Call the ApiKeys query and return a ApiKeyConnection
-   *
-   * @param variables - variables to pass into the ApiKeysQuery
-   * @returns parsed response from ApiKeysQuery
-   */
-  public async fetch(variables?: L.ApiKeysQueryVariables): LinearFetch<ApiKeyConnection> {
-    const response = await this._request<L.ApiKeysQuery, L.ApiKeysQueryVariables>(L.ApiKeysDocument, variables);
-    const data = response.apiKeys;
-
-    return new ApiKeyConnection(
       this._request,
       connection =>
         this.fetch(
@@ -30102,6 +29989,37 @@ export class UpdateTriageResponsibilityMutation extends Request {
 }
 
 /**
+ * A fetchable UserChangeRole Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class UserChangeRoleMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the UserChangeRole mutation and return a UserAdminPayload
+   *
+   * @param id - required id to pass to userChangeRole
+   * @param role - required role to pass to userChangeRole
+   * @returns parsed response from UserChangeRoleMutation
+   */
+  public async fetch(id: string, role: L.UserRoleType): LinearFetch<UserAdminPayload> {
+    const response = await this._request<L.UserChangeRoleMutation, L.UserChangeRoleMutationVariables>(
+      L.UserChangeRoleDocument,
+      {
+        id,
+        role,
+      }
+    );
+    const data = response.userChangeRole;
+
+    return new UserAdminPayload(this._request, data);
+  }
+}
+
+/**
  * A fetchable UserDemoteAdmin Mutation
  *
  * @param request - function to call the graphql client
@@ -37539,15 +37457,6 @@ export class LinearSdk extends Request {
     return new AgentSessionsQuery(this._request).fetch(variables);
   }
   /**
-   * All API keys for the user.
-   *
-   * @param variables - variables to pass into the ApiKeysQuery
-   * @returns ApiKeyConnection
-   */
-  public apiKeys(variables?: L.ApiKeysQueryVariables): LinearFetch<ApiKeyConnection> {
-    return new ApiKeysQuery(this._request).fetch(variables);
-  }
-  /**
    * Get basic information for an application.
    *
    * @param clientId - required clientId to pass to applicationInfo
@@ -40718,7 +40627,7 @@ export class LinearSdk extends Request {
     return new UpdateNotificationMutation(this._request).fetch(id, input);
   }
   /**
-   * Cancels the deletion of an organization. Administrator privileges required.
+   * Cancels the deletion of an organization.
    *
    * @returns OrganizationCancelDeletePayload
    */
@@ -40726,7 +40635,7 @@ export class LinearSdk extends Request {
     return new DeleteOrganizationCancelMutation(this._request).fetch();
   }
   /**
-   * Delete's an organization. Administrator privileges required.
+   * Deletes an organization.
    *
    * @param input - required input to pass to deleteOrganization
    * @returns OrganizationDeletePayload
@@ -40735,7 +40644,7 @@ export class LinearSdk extends Request {
     return new DeleteOrganizationMutation(this._request).fetch(input);
   }
   /**
-   * Get an organization's delete confirmation token. Administrator privileges required.
+   * Get an organization's delete confirmation token.
    *
    * @returns OrganizationDeletePayload
    */
@@ -40783,7 +40692,7 @@ export class LinearSdk extends Request {
     return new UpdateOrganizationInviteMutation(this._request).fetch(id, input);
   }
   /**
-   * [DEPRECATED] Starts a trial for the organization. Administrator privileges required.
+   * [DEPRECATED] Starts a trial for the organization.
    *
    * @returns OrganizationStartTrialPayload
    */
@@ -40791,7 +40700,7 @@ export class LinearSdk extends Request {
     return new OrganizationStartTrialMutation(this._request).fetch();
   }
   /**
-   * Starts a trial for the organization on the specified plan type. Administrator privileges required.
+   * Starts a trial for the organization on the specified plan type.
    *
    * @param input - required input to pass to organizationStartTrialForPlan
    * @returns OrganizationStartTrialPayload
@@ -41433,7 +41342,17 @@ export class LinearSdk extends Request {
     return new UpdateTriageResponsibilityMutation(this._request).fetch(id, input);
   }
   /**
-   * Makes user a regular user. Can only be called by an admin.
+   * Changes the role of a user.
+   *
+   * @param id - required id to pass to userChangeRole
+   * @param role - required role to pass to userChangeRole
+   * @returns UserAdminPayload
+   */
+  public userChangeRole(id: string, role: L.UserRoleType): LinearFetch<UserAdminPayload> {
+    return new UserChangeRoleMutation(this._request).fetch(id, role);
+  }
+  /**
+   * Makes user a regular user. Can only be called by an admin or owner.
    *
    * @param id - required id to pass to userDemoteAdmin
    * @returns UserAdminPayload
@@ -41483,7 +41402,7 @@ export class LinearSdk extends Request {
     return new UpdateUserFlagMutation(this._request).fetch(flag, operation);
   }
   /**
-   * Makes user an admin. Can only be called by an admin.
+   * Makes user an admin. Can only be called by an admin or owner.
    *
    * @param id - required id to pass to userPromoteAdmin
    * @returns UserAdminPayload

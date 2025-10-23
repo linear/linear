@@ -2147,6 +2147,8 @@ fragment AgentSession on AgentSession {
   endedAt
   # The time the agent session started.
   startedAt
+  # The time the agent session was dismissed.
+  dismissedAt
   # The type of the agent session.
   type
   # The unique identifier of the entity.
@@ -2577,6 +2579,8 @@ fragment User on User {
   isMentionable
   # Whether the user is the currently authenticated user.
   isMe
+  # Whether this agent user supports agent sessions.
+  supportsAgentSessions
   # Whether this user can access any public team in the organization.
   canAccessAnyPublicTeam
   # [DEPRECATED] Hash for the user to be used in calendar URLs.
@@ -2791,28 +2795,6 @@ fragment AiPromptRules on AiPromptRules {
   updatedBy {
     id
   }
-}
-
-# An API key. Grants access to the user's resources.
-fragment ApiKey on ApiKey {
-  __typename
-  # Scopes associated with the API key.
-  scope
-  # The label of the API key.
-  label
-  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-  #     been updated after creation.
-  updatedAt
-  # The sync groups that this API key requests access to. If null, the API key has access to all sync groups the user has access to. The final set of sync groups is computed as the intersection of these requested groups with the user's base sync groups.
-  requestedSyncGroups
-  # The time at which the entity was archived. Null if the entity has not been archived.
-  archivedAt
-  # The time at which the entity was created.
-  createdAt
-  # The unique identifier of the entity.
-  id
-  # When the API key was last used.
-  lastActiveAt
 }
 
 # An activity within an agent context.
@@ -6986,28 +6968,6 @@ fragment AgentSessionPayload on AgentSessionPayload {
   success
 }
 
-fragment ApiKeyConnection on ApiKeyConnection {
-  __typename
-  nodes {
-    ...ApiKey
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-fragment ApiKeyPayload on ApiKeyPayload {
-  __typename
-  # The API key that was created.
-  apiKey {
-    ...ApiKey
-  }
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
 fragment AsksChannelConnectPayload on AsksChannelConnectPayload {
   __typename
   # The identifier of the last sync operation.
@@ -9348,32 +9308,6 @@ query agentSessions(
     orderBy: $orderBy
   ) {
     ...AgentSessionConnection
-  }
-}
-# All API keys for the user.
-query apiKeys(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  apiKeys(
-    after: $after
-    before: $before
-    first: $first
-    includeArchived: $includeArchived
-    last: $last
-    orderBy: $orderBy
-  ) {
-    ...ApiKeyConnection
   }
 }
 # Get basic information for an application.
@@ -17295,13 +17229,13 @@ mutation updateNotification(
     ...NotificationPayload
   }
 }
-# Cancels the deletion of an organization. Administrator privileges required.
+# Cancels the deletion of an organization.
 mutation deleteOrganizationCancel {
   organizationCancelDelete {
     ...OrganizationCancelDeletePayload
   }
 }
-# Delete's an organization. Administrator privileges required.
+# Deletes an organization.
 mutation deleteOrganization(
   # Information required to delete an organization.
   $input: DeleteOrganizationInput!
@@ -17310,7 +17244,7 @@ mutation deleteOrganization(
     ...OrganizationDeletePayload
   }
 }
-# Get an organization's delete confirmation token. Administrator privileges required.
+# Get an organization's delete confirmation token.
 mutation organizationDeleteChallenge {
   organizationDeleteChallenge {
     ...OrganizationDeletePayload
@@ -17354,13 +17288,13 @@ mutation updateOrganizationInvite(
     ...OrganizationInvitePayload
   }
 }
-# [DEPRECATED] Starts a trial for the organization. Administrator privileges required.
+# [DEPRECATED] Starts a trial for the organization.
 mutation organizationStartTrial {
   organizationStartTrial {
     ...OrganizationStartTrialPayload
   }
 }
-# Starts a trial for the organization on the specified plan type. Administrator privileges required.
+# Starts a trial for the organization on the specified plan type.
 mutation organizationStartTrialForPlan(
   # Plan details for trial
   $input: OrganizationStartTrialInput!
@@ -17990,7 +17924,18 @@ mutation updateTriageResponsibility(
     ...TriageResponsibilityPayload
   }
 }
-# Makes user a regular user. Can only be called by an admin.
+# Changes the role of a user.
+mutation userChangeRole(
+  # The identifier of the user
+  $id: String!
+  # The new role for the user.
+  $role: UserRoleType!
+) {
+  userChangeRole(id: $id, role: $role) {
+    ...UserAdminPayload
+  }
+}
+# Makes user a regular user. Can only be called by an admin or owner.
 mutation userDemoteAdmin(
   # The identifier of the user to make a regular user.
   $id: String!
@@ -18039,7 +17984,7 @@ mutation updateUserFlag(
     ...UserSettingsFlagPayload
   }
 }
-# Makes user an admin. Can only be called by an admin.
+# Makes user an admin. Can only be called by an admin or owner.
 mutation userPromoteAdmin(
   # The identifier of the user to make an admin.
   $id: String!
