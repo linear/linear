@@ -442,6 +442,10 @@ type AgentSession implements Node {
   """
   creator: User
   """
+  The time the agent session was dismissed.
+  """
+  dismissedAt: DateTime
+  """
   The time the agent session ended.
   """
   endedAt: DateTime
@@ -628,11 +632,15 @@ input AgentSessionUpdateExternalUrlInput {
 
 input AgentSessionUpdateInput {
   """
-  The URL of an external agent-hosted page associated with this session.
+  [Internal] The time the agent session was dismissed. Only updatable by internal clients.
+  """
+  dismissedAt: DateTime
+  """
+  The URL of an external agent-hosted page associated with this session. Only updatable by the OAuth application that owns the session.
   """
   externalLink: String
   """
-  A dynamically updated list of the agent's execution strategy.
+  A dynamically updated list of the agent's execution strategy. Only updatable by the OAuth application that owns the session.
   """
   plan: JSONObject
 }
@@ -747,116 +755,6 @@ input AirbyteConfigurationInput {
   Linear export API key.
   """
   apiKey: String!
-}
-
-"""
-An API key. Grants access to the user's resources.
-"""
-type ApiKey implements Node {
-  """
-  The time at which the entity was archived. Null if the entity has not been archived.
-  """
-  archivedAt: DateTime
-  """
-  The time at which the entity was created.
-  """
-  createdAt: DateTime!
-  """
-  The unique identifier of the entity.
-  """
-  id: ID!
-  """
-  The label of the API key.
-  """
-  label: String!
-  """
-  When the API key was last used.
-  """
-  lastActiveAt: DateTime
-  """
-  Organization the API key belongs to.
-  """
-  organization: Organization!
-  """
-  The sync groups that this API key requests access to. If null, the API key has access to all sync groups the user has access to. The final set of sync groups is computed as the intersection of these requested groups with the user's base sync groups.
-  """
-  requestedSyncGroups: [String!]
-  """
-  Scopes associated with the API key.
-  """
-  scope: [String!]
-  """
-  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-      been updated after creation.
-  """
-  updatedAt: DateTime!
-}
-
-type ApiKeyConnection {
-  edges: [ApiKeyEdge!]!
-  nodes: [ApiKey!]!
-  pageInfo: PageInfo!
-}
-
-input ApiKeyCreateInput {
-  """
-  The identifier in UUID v4 format. If none is provided, the backend will generate one.
-  """
-  id: String
-  """
-  The API key value.
-  """
-  key: String!
-  """
-  The label for the API key.
-  """
-  label: String!
-  """
-  Scopes the API key has access to. Default is all scopes.
-  """
-  scope: [String!]
-  """
-  List of team IDs to restrict this API key to. Default is all teams the user has access to.
-  """
-  teamIds: [String!]
-}
-
-type ApiKeyEdge {
-  """
-  Used in `before` and `after` args
-  """
-  cursor: String!
-  node: ApiKey!
-}
-
-type ApiKeyPayload {
-  """
-  The API key that was created.
-  """
-  apiKey: ApiKey!
-  """
-  The identifier of the last sync operation.
-  """
-  lastSyncId: Float!
-  """
-  Whether the operation was successful.
-  """
-  success: Boolean!
-}
-
-input ApiKeyUpdateInput {
-  """
-  The new label for the API key.
-  """
-  label: String
-  """
-  Scopes the API key has access to. Default is all scopes.
-  """
-  scope: [String!]
-  """
-  List of team IDs to restrict this API key to. Default is all teams the user has access to.
-  """
-  teamIds: [String!]
 }
 
 """
@@ -2572,6 +2470,10 @@ input ContactSalesCreateInput {
   Size of the company.
   """
   companySize: String
+  """
+  PostHog distinct ID for analytics correlation.
+  """
+  distinctId: String
   """
   Work email of the person requesting information.
   """
@@ -8772,6 +8674,10 @@ type IdentityProvider implements Node {
   """
   issuerEntityId: String
   """
+  [INTERNAL] SCIM owners group push settings.
+  """
+  ownersGroupPush: JSONObject
+  """
   The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference.
   """
   priority: Float
@@ -12037,6 +11943,10 @@ Issue filtering options.
 """
 input IssueCollectionFilter {
   """
+  Comparator for the issue's accumulatedStateUpdatedAt date.
+  """
+  accumulatedStateUpdatedAt: NullableDateComparator
+  """
   Comparator for the issues added to cycle at date.
   """
   addedToCycleAt: NullableDateComparator
@@ -12789,6 +12699,10 @@ type IssueEmojiReactionNotificationWebhookPayload {
 Issue filtering options.
 """
 input IssueFilter {
+  """
+  Comparator for the issue's accumulatedStateUpdatedAt date.
+  """
+  accumulatedStateUpdatedAt: NullableDateComparator
   """
   Comparator for the issues added to cycle at date.
   """
@@ -16272,37 +16186,6 @@ type Mutation {
     input: AirbyteConfigurationInput!
   ): IntegrationPayload!
   """
-  [INTERNAL] Creates a new API key.
-  """
-  apiKeyCreate(
-    """
-    The api key object to create.
-    """
-    input: ApiKeyCreateInput!
-  ): ApiKeyPayload!
-  """
-  [INTERNAL] Deletes an API key.
-  """
-  apiKeyDelete(
-    """
-    The identifier of the API key to delete.
-    """
-    id: String!
-  ): DeletePayload!
-  """
-  [INTERNAL] Updates an API key's allowed teams.
-  """
-  apiKeyUpdate(
-    """
-    The identifier of the API key to update.
-    """
-    id: String!
-    """
-    The update input.
-    """
-    input: ApiKeyUpdateInput!
-  ): ApiKeyPayload!
-  """
   Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
   """
   attachmentCreate(
@@ -18866,11 +18749,11 @@ type Mutation {
     input: NotificationUpdateInput!
   ): NotificationPayload!
   """
-  Cancels the deletion of an organization. Administrator privileges required.
+  Cancels the deletion of an organization.
   """
   organizationCancelDelete: OrganizationCancelDeletePayload!
   """
-  Delete's an organization. Administrator privileges required.
+  Deletes an organization.
   """
   organizationDelete(
     """
@@ -18879,7 +18762,7 @@ type Mutation {
     input: DeleteOrganizationInput!
   ): OrganizationDeletePayload!
   """
-  Get an organization's delete confirmation token. Administrator privileges required.
+  Get an organization's delete confirmation token.
   """
   organizationDeleteChallenge: OrganizationDeletePayload!
   """
@@ -18967,11 +18850,11 @@ type Mutation {
     input: OrganizationInviteUpdateInput!
   ): OrganizationInvitePayload!
   """
-  [DEPRECATED] Starts a trial for the organization. Administrator privileges required.
+  [DEPRECATED] Starts a trial for the organization.
   """
   organizationStartTrial: OrganizationStartTrialPayload! @deprecated(reason: "Use organizationStartTrialForPlan")
   """
-  Starts a trial for the organization on the specified plan type. Administrator privileges required.
+  Starts a trial for the organization on the specified plan type.
   """
   organizationStartTrialForPlan(
     """
@@ -19706,7 +19589,20 @@ type Mutation {
     redirectUri: String!
   ): IntegrationPayload!
   """
-  Makes user a regular user. Can only be called by an admin.
+  Changes the role of a user.
+  """
+  userChangeRole(
+    """
+    The identifier of the user
+    """
+    id: String!
+    """
+    The new role for the user.
+    """
+    role: UserRoleType!
+  ): UserAdminPayload!
+  """
+  Makes user a regular user. Can only be called by an admin or owner.
   """
   userDemoteAdmin(
     """
@@ -19759,7 +19655,7 @@ type Mutation {
     operation: UserFlagUpdateOperation!
   ): UserSettingsFlagPayload!
   """
-  Makes user an admin. Can only be called by an admin.
+  Makes user an admin. Can only be called by an admin or owner.
   """
   userPromoteAdmin(
     """
@@ -21057,6 +20953,10 @@ input NullableDurationComparator {
 Issue filtering options.
 """
 input NullableIssueFilter {
+  """
+  Comparator for the issue's accumulatedStateUpdatedAt date.
+  """
+  accumulatedStateUpdatedAt: NullableDateComparator
   """
   Comparator for the issues added to cycle at date.
   """
@@ -28519,35 +28419,6 @@ type Query {
     orderBy: PaginationOrderBy
   ): AgentSessionConnection!
   """
-  All API keys for the user.
-  """
-  apiKeys(
-    """
-    A cursor to be used with first for forward pagination
-    """
-    after: String
-    """
-    A cursor to be used with last for backward pagination.
-    """
-    before: String
-    """
-    The number of items to forward paginate (used with after). Defaults to 50.
-    """
-    first: Int
-    """
-    Should archived resources be included (default: false)
-    """
-    includeArchived: Boolean
-    """
-    The number of items to backward paginate (used with before). Defaults to 50.
-    """
-    last: Int
-    """
-    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-    """
-    orderBy: PaginationOrderBy
-  ): ApiKeyConnection!
-  """
   Get basic information for an application.
   """
   applicationInfo(
@@ -34476,6 +34347,10 @@ type User implements Node {
   """
   statusUntilAt: DateTime
   """
+  Whether this agent user supports agent sessions.
+  """
+  supportsAgentSessions: Boolean!
+  """
   Memberships associated with the user. For easier access of the same data, use `teams` query.
   """
   teamMemberships(
@@ -34831,6 +34706,7 @@ enum UserFlagType {
   projectWelcomeDismissed
   pulseWelcomeDismissed
   rewindBannerDismissed
+  slackAgentPromoFromCreateNewIssueShown
   slackBotWelcomeMessageShown
   slackCommentReactionTipShown
   teamsPageIntroductionDismissed

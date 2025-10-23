@@ -296,6 +296,8 @@ export type AgentSession = Node & {
   createdAt: Scalars["DateTime"];
   /** The user that created this agent session. */
   creator?: Maybe<User>;
+  /** The time the agent session was dismissed. */
+  dismissedAt?: Maybe<Scalars["DateTime"]>;
   /** The time the agent session ended. */
   endedAt?: Maybe<Scalars["DateTime"]>;
   /** The URL of an external agent-hosted page associated with this session. */
@@ -427,9 +429,11 @@ export type AgentSessionUpdateExternalUrlInput = {
 };
 
 export type AgentSessionUpdateInput = {
-  /** The URL of an external agent-hosted page associated with this session. */
+  /** [Internal] The time the agent session was dismissed. Only updatable by internal clients. */
+  dismissedAt?: InputMaybe<Scalars["DateTime"]>;
+  /** The URL of an external agent-hosted page associated with this session. Only updatable by the OAuth application that owns the session. */
   externalLink?: InputMaybe<Scalars["String"]>;
-  /** A dynamically updated list of the agent's execution strategy. */
+  /** A dynamically updated list of the agent's execution strategy. Only updatable by the OAuth application that owns the session. */
   plan?: InputMaybe<Scalars["JSONObject"]>;
 };
 
@@ -495,78 +499,6 @@ export type AiPromptRules = Node & {
 export type AirbyteConfigurationInput = {
   /** Linear export API key. */
   apiKey: Scalars["String"];
-};
-
-/** An API key. Grants access to the user's resources. */
-export type ApiKey = Node & {
-  __typename?: "ApiKey";
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars["DateTime"]>;
-  /** The time at which the entity was created. */
-  createdAt: Scalars["DateTime"];
-  /** The unique identifier of the entity. */
-  id: Scalars["ID"];
-  /** The label of the API key. */
-  label: Scalars["String"];
-  /** When the API key was last used. */
-  lastActiveAt?: Maybe<Scalars["DateTime"]>;
-  /** Organization the API key belongs to. */
-  organization: Organization;
-  /** The sync groups that this API key requests access to. If null, the API key has access to all sync groups the user has access to. The final set of sync groups is computed as the intersection of these requested groups with the user's base sync groups. */
-  requestedSyncGroups?: Maybe<Array<Scalars["String"]>>;
-  /** Scopes associated with the API key. */
-  scope?: Maybe<Array<Scalars["String"]>>;
-  /**
-   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
-   *     been updated after creation.
-   */
-  updatedAt: Scalars["DateTime"];
-};
-
-export type ApiKeyConnection = {
-  __typename?: "ApiKeyConnection";
-  edges: Array<ApiKeyEdge>;
-  nodes: Array<ApiKey>;
-  pageInfo: PageInfo;
-};
-
-export type ApiKeyCreateInput = {
-  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
-  id?: InputMaybe<Scalars["String"]>;
-  /** The API key value. */
-  key: Scalars["String"];
-  /** The label for the API key. */
-  label: Scalars["String"];
-  /** Scopes the API key has access to. Default is all scopes. */
-  scope?: InputMaybe<Array<Scalars["String"]>>;
-  /** List of team IDs to restrict this API key to. Default is all teams the user has access to. */
-  teamIds?: InputMaybe<Array<Scalars["String"]>>;
-};
-
-export type ApiKeyEdge = {
-  __typename?: "ApiKeyEdge";
-  /** Used in `before` and `after` args */
-  cursor: Scalars["String"];
-  node: ApiKey;
-};
-
-export type ApiKeyPayload = {
-  __typename?: "ApiKeyPayload";
-  /** The API key that was created. */
-  apiKey: ApiKey;
-  /** The identifier of the last sync operation. */
-  lastSyncId: Scalars["Float"];
-  /** Whether the operation was successful. */
-  success: Scalars["Boolean"];
-};
-
-export type ApiKeyUpdateInput = {
-  /** The new label for the API key. */
-  label?: InputMaybe<Scalars["String"]>;
-  /** Scopes the API key has access to. Default is all scopes. */
-  scope?: InputMaybe<Array<Scalars["String"]>>;
-  /** List of team IDs to restrict this API key to. Default is all teams the user has access to. */
-  teamIds?: InputMaybe<Array<Scalars["String"]>>;
 };
 
 /** Payload for app user notification webhook events. */
@@ -1525,6 +1457,8 @@ export type ContactPayload = {
 export type ContactSalesCreateInput = {
   /** Size of the company. */
   companySize?: InputMaybe<Scalars["String"]>;
+  /** PostHog distinct ID for analytics correlation. */
+  distinctId?: InputMaybe<Scalars["String"]>;
   /** Work email of the person requesting information. */
   email: Scalars["String"];
   /** The message the user sent. */
@@ -5109,6 +5043,8 @@ export type IdentityProvider = Node & {
   id: Scalars["ID"];
   /** The issuer's custom entity ID. */
   issuerEntityId?: Maybe<Scalars["String"]>;
+  /** [INTERNAL] SCIM owners group push settings. */
+  ownersGroupPush?: Maybe<Scalars["JSONObject"]>;
   /** The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference. */
   priority?: Maybe<Scalars["Float"]>;
   /** Whether SAML authentication is enabled for organization. */
@@ -6919,6 +6855,8 @@ export type IssueChildWebhookPayload = {
 
 /** Issue filtering options. */
 export type IssueCollectionFilter = {
+  /** Comparator for the issue's accumulatedStateUpdatedAt date. */
+  accumulatedStateUpdatedAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the issues added to cycle at date. */
   addedToCycleAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the period when issue was added to a cycle. */
@@ -7315,6 +7253,8 @@ export type IssueEmojiReactionNotificationWebhookPayload = {
 
 /** Issue filtering options. */
 export type IssueFilter = {
+  /** Comparator for the issue's accumulatedStateUpdatedAt date. */
+  accumulatedStateUpdatedAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the issues added to cycle at date. */
   addedToCycleAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the period when issue was added to a cycle. */
@@ -9144,12 +9084,6 @@ export type Mutation = {
   agentSessionUpdateExternalUrl: AgentSessionPayload;
   /** Creates an integration api key for Airbyte to connect with Linear. */
   airbyteIntegrationConnect: IntegrationPayload;
-  /** [INTERNAL] Creates a new API key. */
-  apiKeyCreate: ApiKeyPayload;
-  /** [INTERNAL] Deletes an API key. */
-  apiKeyDelete: DeletePayload;
-  /** [INTERNAL] Updates an API key's allowed teams. */
-  apiKeyUpdate: ApiKeyPayload;
   /** Creates a new attachment, or updates existing if the same `url` and `issueId` is used. */
   attachmentCreate: AttachmentPayload;
   /** Deletes an issue attachment. */
@@ -9560,11 +9494,11 @@ export type Mutation = {
   notificationUnsnoozeAll: NotificationBatchActionPayload;
   /** Updates a notification. */
   notificationUpdate: NotificationPayload;
-  /** Cancels the deletion of an organization. Administrator privileges required. */
+  /** Cancels the deletion of an organization. */
   organizationCancelDelete: OrganizationCancelDeletePayload;
-  /** Delete's an organization. Administrator privileges required. */
+  /** Deletes an organization. */
   organizationDelete: OrganizationDeletePayload;
-  /** Get an organization's delete confirmation token. Administrator privileges required. */
+  /** Get an organization's delete confirmation token. */
   organizationDeleteChallenge: OrganizationDeletePayload;
   /** [INTERNAL] Verifies a domain claim. */
   organizationDomainClaim: OrganizationDomainSimplePayload;
@@ -9583,11 +9517,11 @@ export type Mutation = {
   /** Updates an organization invite. */
   organizationInviteUpdate: OrganizationInvitePayload;
   /**
-   * [DEPRECATED] Starts a trial for the organization. Administrator privileges required.
+   * [DEPRECATED] Starts a trial for the organization.
    * @deprecated Use organizationStartTrialForPlan
    */
   organizationStartTrial: OrganizationStartTrialPayload;
-  /** Starts a trial for the organization on the specified plan type. Administrator privileges required. */
+  /** Starts a trial for the organization on the specified plan type. */
   organizationStartTrialForPlan: OrganizationStartTrialPayload;
   /** Updates the user's organization. */
   organizationUpdate: OrganizationPayload;
@@ -9748,7 +9682,9 @@ export type Mutation = {
   triageResponsibilityUpdate: TriageResponsibilityPayload;
   /** [Internal] Updates existing Slack integration scopes. */
   updateIntegrationSlackScopes: IntegrationPayload;
-  /** Makes user a regular user. Can only be called by an admin. */
+  /** Changes the role of a user. */
+  userChangeRole: UserAdminPayload;
+  /** Makes user a regular user. Can only be called by an admin or owner. */
   userDemoteAdmin: UserAdminPayload;
   /** Makes user a guest. Can only be called by an admin. */
   userDemoteMember: UserAdminPayload;
@@ -9758,7 +9694,7 @@ export type Mutation = {
   userExternalUserDisconnect: UserPayload;
   /** Updates a user's settings flag. */
   userFlagUpdate: UserSettingsFlagPayload;
-  /** Makes user an admin. Can only be called by an admin. */
+  /** Makes user an admin. Can only be called by an admin or owner. */
   userPromoteAdmin: UserAdminPayload;
   /** Makes user a regular user. Can only be called by an admin. */
   userPromoteMember: UserAdminPayload;
@@ -9826,19 +9762,6 @@ export type MutationAgentSessionUpdateExternalUrlArgs = {
 
 export type MutationAirbyteIntegrationConnectArgs = {
   input: AirbyteConfigurationInput;
-};
-
-export type MutationApiKeyCreateArgs = {
-  input: ApiKeyCreateInput;
-};
-
-export type MutationApiKeyDeleteArgs = {
-  id: Scalars["String"];
-};
-
-export type MutationApiKeyUpdateArgs = {
-  id: Scalars["String"];
-  input: ApiKeyUpdateInput;
 };
 
 export type MutationAttachmentCreateArgs = {
@@ -11164,6 +11087,11 @@ export type MutationUpdateIntegrationSlackScopesArgs = {
   redirectUri: Scalars["String"];
 };
 
+export type MutationUserChangeRoleArgs = {
+  id: Scalars["String"];
+  role: UserRoleType;
+};
+
 export type MutationUserDemoteAdminArgs = {
   id: Scalars["String"];
 };
@@ -11910,6 +11838,8 @@ export type NullableDurationComparator = {
 
 /** Issue filtering options. */
 export type NullableIssueFilter = {
+  /** Comparator for the issue's accumulatedStateUpdatedAt date. */
+  accumulatedStateUpdatedAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the issues added to cycle at date. */
   addedToCycleAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the period when issue was added to a cycle. */
@@ -15944,8 +15874,6 @@ export type Query = {
   agentSession: AgentSession;
   /** All agent sessions. */
   agentSessions: AgentSessionConnection;
-  /** All API keys for the user. */
-  apiKeys: ApiKeyConnection;
   /** Get basic information for an application. */
   applicationInfo: Application;
   /** [Internal] All archived teams of the organization. */
@@ -16250,15 +16178,6 @@ export type QueryAgentSessionArgs = {
 };
 
 export type QueryAgentSessionsArgs = {
-  after?: InputMaybe<Scalars["String"]>;
-  before?: InputMaybe<Scalars["String"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  includeArchived?: InputMaybe<Scalars["Boolean"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<PaginationOrderBy>;
-};
-
-export type QueryApiKeysArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
@@ -19151,6 +19070,8 @@ export type User = Node & {
   statusLabel?: Maybe<Scalars["String"]>;
   /** A date at which the user current status should be cleared. */
   statusUntilAt?: Maybe<Scalars["DateTime"]>;
+  /** Whether this agent user supports agent sessions. */
+  supportsAgentSessions: Scalars["Boolean"];
   /** Memberships associated with the user. For easier access of the same data, use `teams` query. */
   teamMemberships: TeamMembershipConnection;
   /** Teams the user is part of. */
@@ -19416,6 +19337,7 @@ export enum UserFlagType {
   ProjectWelcomeDismissed = "projectWelcomeDismissed",
   PulseWelcomeDismissed = "pulseWelcomeDismissed",
   RewindBannerDismissed = "rewindBannerDismissed",
+  SlackAgentPromoFromCreateNewIssueShown = "slackAgentPromoFromCreateNewIssueShown",
   SlackBotWelcomeMessageShown = "slackBotWelcomeMessageShown",
   SlackCommentReactionTipShown = "slackCommentReactionTipShown",
   TeamsPageIntroductionDismissed = "teamsPageIntroductionDismissed",
@@ -22466,6 +22388,7 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "isAssignable"
           | "isMentionable"
           | "isMe"
+          | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
           | "calendarHash"
           | "inviteHash"
@@ -22503,6 +22426,7 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "isAssignable"
           | "isMentionable"
           | "isMe"
+          | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
           | "calendarHash"
           | "inviteHash"
@@ -22624,6 +22548,7 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "isAssignable"
           | "isMentionable"
           | "isMe"
+          | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
           | "calendarHash"
           | "inviteHash"
@@ -22679,6 +22604,7 @@ export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   | "createdAt"
   | "endedAt"
   | "startedAt"
+  | "dismissedAt"
   | "type"
   | "id"
 > & {
@@ -22870,6 +22796,7 @@ export type UserFragment = { __typename: "User" } & Pick<
   | "isAssignable"
   | "isMentionable"
   | "isMe"
+  | "supportsAgentSessions"
   | "canAccessAnyPublicTeam"
   | "calendarHash"
   | "inviteHash"
@@ -23092,11 +23019,6 @@ export type AiPromptRulesFragment = { __typename: "AiPromptRules" } & Pick<
   AiPromptRules,
   "updatedAt" | "archivedAt" | "createdAt" | "id"
 > & { updatedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">> };
-
-export type ApiKeyFragment = { __typename: "ApiKey" } & Pick<
-  ApiKey,
-  "scope" | "label" | "updatedAt" | "requestedSyncGroups" | "archivedAt" | "createdAt" | "id" | "lastActiveAt"
->;
 
 export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
   AgentActivity,
@@ -25990,6 +25912,7 @@ export type AgentSessionConnectionFragment = { __typename: "AgentSessionConnecti
       | "createdAt"
       | "endedAt"
       | "startedAt"
+      | "dismissedAt"
       | "type"
       | "id"
     > & {
@@ -26009,26 +25932,6 @@ export type AgentSessionPayloadFragment = { __typename: "AgentSessionPayload" } 
   AgentSessionPayload,
   "lastSyncId" | "success"
 > & { agentSession: { __typename?: "AgentSession" } & Pick<AgentSession, "id"> };
-
-export type ApiKeyConnectionFragment = { __typename: "ApiKeyConnection" } & {
-  nodes: Array<
-    { __typename: "ApiKey" } & Pick<
-      ApiKey,
-      "scope" | "label" | "updatedAt" | "requestedSyncGroups" | "archivedAt" | "createdAt" | "id" | "lastActiveAt"
-    >
-  >;
-  pageInfo: { __typename: "PageInfo" } & Pick<
-    PageInfo,
-    "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
-  >;
-};
-
-export type ApiKeyPayloadFragment = { __typename: "ApiKeyPayload" } & Pick<ApiKeyPayload, "lastSyncId" | "success"> & {
-    apiKey: { __typename: "ApiKey" } & Pick<
-      ApiKey,
-      "scope" | "label" | "updatedAt" | "requestedSyncGroups" | "archivedAt" | "createdAt" | "id" | "lastActiveAt"
-    >;
-  };
 
 export type AsksChannelConnectPayloadFragment = { __typename: "AsksChannelConnectPayload" } & Pick<
   AsksChannelConnectPayload,
@@ -27518,6 +27421,7 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "isAssignable"
               | "isMentionable"
               | "isMe"
+              | "supportsAgentSessions"
               | "canAccessAnyPublicTeam"
               | "calendarHash"
               | "inviteHash"
@@ -27555,6 +27459,7 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "isAssignable"
               | "isMentionable"
               | "isMe"
+              | "supportsAgentSessions"
               | "canAccessAnyPublicTeam"
               | "calendarHash"
               | "inviteHash"
@@ -27679,6 +27584,7 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "isAssignable"
               | "isMentionable"
               | "isMe"
+              | "supportsAgentSessions"
               | "canAccessAnyPublicTeam"
               | "calendarHash"
               | "inviteHash"
@@ -28094,8 +28000,6 @@ type Node_AgentSession_Fragment = { __typename: "AgentSession" } & Pick<AgentSes
 
 type Node_AiPromptRules_Fragment = { __typename: "AiPromptRules" } & Pick<AiPromptRules, "id">;
 
-type Node_ApiKey_Fragment = { __typename: "ApiKey" } & Pick<ApiKey, "id">;
-
 type Node_Attachment_Fragment = { __typename: "Attachment" } & Pick<Attachment, "id">;
 
 type Node_AuditEntry_Fragment = { __typename: "AuditEntry" } & Pick<AuditEntry, "id">;
@@ -28317,7 +28221,6 @@ export type NodeFragment =
   | Node_AgentActivity_Fragment
   | Node_AgentSession_Fragment
   | Node_AiPromptRules_Fragment
-  | Node_ApiKey_Fragment
   | Node_Attachment_Fragment
   | Node_AuditEntry_Fragment
   | Node_Comment_Fragment
@@ -30841,6 +30744,7 @@ export type UserConnectionFragment = { __typename: "UserConnection" } & {
       | "isAssignable"
       | "isMentionable"
       | "isMe"
+      | "supportsAgentSessions"
       | "canAccessAnyPublicTeam"
       | "calendarHash"
       | "inviteHash"
@@ -31144,6 +31048,7 @@ export type AgentSessionQuery = { __typename?: "Query" } & {
     | "createdAt"
     | "endedAt"
     | "startedAt"
+    | "dismissedAt"
     | "type"
     | "id"
   > & {
@@ -31223,6 +31128,7 @@ export type AgentSessionsQuery = { __typename?: "Query" } & {
         | "createdAt"
         | "endedAt"
         | "startedAt"
+        | "dismissedAt"
         | "type"
         | "id"
       > & {
@@ -31231,30 +31137,6 @@ export type AgentSessionsQuery = { __typename?: "Query" } & {
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         }
-    >;
-    pageInfo: { __typename: "PageInfo" } & Pick<
-      PageInfo,
-      "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
-    >;
-  };
-};
-
-export type ApiKeysQueryVariables = Exact<{
-  after?: InputMaybe<Scalars["String"]>;
-  before?: InputMaybe<Scalars["String"]>;
-  first?: InputMaybe<Scalars["Int"]>;
-  includeArchived?: InputMaybe<Scalars["Boolean"]>;
-  last?: InputMaybe<Scalars["Int"]>;
-  orderBy?: InputMaybe<PaginationOrderBy>;
-}>;
-
-export type ApiKeysQuery = { __typename?: "Query" } & {
-  apiKeys: { __typename: "ApiKeyConnection" } & {
-    nodes: Array<
-      { __typename: "ApiKey" } & Pick<
-        ApiKey,
-        "scope" | "label" | "updatedAt" | "requestedSyncGroups" | "archivedAt" | "createdAt" | "id" | "lastActiveAt"
-      >
     >;
     pageInfo: { __typename: "PageInfo" } & Pick<
       PageInfo,
@@ -31936,6 +31818,7 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "isAssignable"
                   | "isMentionable"
                   | "isMe"
+                  | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
                   | "calendarHash"
                   | "inviteHash"
@@ -31973,6 +31856,7 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "isAssignable"
                   | "isMentionable"
                   | "isMe"
+                  | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
                   | "calendarHash"
                   | "inviteHash"
@@ -32097,6 +31981,7 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "isAssignable"
                   | "isMentionable"
                   | "isMe"
+                  | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
                   | "calendarHash"
                   | "inviteHash"
@@ -32311,6 +32196,7 @@ export type AttachmentIssue_SubscribersQuery = { __typename?: "Query" } & {
           | "isAssignable"
           | "isMentionable"
           | "isMe"
+          | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
           | "calendarHash"
           | "inviteHash"
@@ -36145,6 +36031,7 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "isAssignable"
                   | "isMentionable"
                   | "isMe"
+                  | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
                   | "calendarHash"
                   | "inviteHash"
@@ -36182,6 +36069,7 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "isAssignable"
                   | "isMentionable"
                   | "isMe"
+                  | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
                   | "calendarHash"
                   | "inviteHash"
@@ -36306,6 +36194,7 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "isAssignable"
                   | "isMentionable"
                   | "isMe"
+                  | "supportsAgentSessions"
                   | "canAccessAnyPublicTeam"
                   | "calendarHash"
                   | "inviteHash"
@@ -36520,6 +36409,7 @@ export type Issue_SubscribersQuery = { __typename?: "Query" } & {
           | "isAssignable"
           | "isMentionable"
           | "isMe"
+          | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
           | "calendarHash"
           | "inviteHash"
@@ -37750,6 +37640,7 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "isAssignable"
                     | "isMentionable"
                     | "isMe"
+                    | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
                     | "calendarHash"
                     | "inviteHash"
@@ -37787,6 +37678,7 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "isAssignable"
                     | "isMentionable"
                     | "isMe"
+                    | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
                     | "calendarHash"
                     | "inviteHash"
@@ -37911,6 +37803,7 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "isAssignable"
                     | "isMentionable"
                     | "isMe"
+                    | "supportsAgentSessions"
                     | "canAccessAnyPublicTeam"
                     | "calendarHash"
                     | "inviteHash"
@@ -38135,6 +38028,7 @@ export type IssueVcsBranchSearch_SubscribersQuery = { __typename?: "Query" } & {
             | "isAssignable"
             | "isMentionable"
             | "isMe"
+            | "supportsAgentSessions"
             | "canAccessAnyPublicTeam"
             | "calendarHash"
             | "inviteHash"
@@ -39764,6 +39658,7 @@ export type Organization_UsersQuery = { __typename?: "Query" } & {
           | "isAssignable"
           | "isMentionable"
           | "isMe"
+          | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
           | "calendarHash"
           | "inviteHash"
@@ -40511,6 +40406,7 @@ export type Project_MembersQuery = { __typename?: "Query" } & {
           | "isAssignable"
           | "isMentionable"
           | "isMe"
+          | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
           | "calendarHash"
           | "inviteHash"
@@ -42623,6 +42519,7 @@ export type Team_MembersQuery = { __typename?: "Query" } & {
           | "isAssignable"
           | "isMentionable"
           | "isMe"
+          | "supportsAgentSessions"
           | "canAccessAnyPublicTeam"
           | "calendarHash"
           | "inviteHash"
@@ -43194,6 +43091,7 @@ export type UserQuery = { __typename?: "Query" } & {
     | "isAssignable"
     | "isMentionable"
     | "isMe"
+    | "supportsAgentSessions"
     | "canAccessAnyPublicTeam"
     | "calendarHash"
     | "inviteHash"
@@ -44582,6 +44480,7 @@ export type UsersQuery = { __typename?: "Query" } & {
         | "isAssignable"
         | "isMentionable"
         | "isMe"
+        | "supportsAgentSessions"
         | "canAccessAnyPublicTeam"
         | "calendarHash"
         | "inviteHash"
@@ -44637,6 +44536,7 @@ export type ViewerQuery = { __typename?: "Query" } & {
     | "isAssignable"
     | "isMentionable"
     | "isMe"
+    | "supportsAgentSessions"
     | "canAccessAnyPublicTeam"
     | "calendarHash"
     | "inviteHash"
@@ -52798,6 +52698,15 @@ export type UpdateTriageResponsibilityMutation = { __typename?: "Mutation" } & {
   > & { triageResponsibility: { __typename?: "TriageResponsibility" } & Pick<TriageResponsibility, "id"> };
 };
 
+export type UserChangeRoleMutationVariables = Exact<{
+  id: Scalars["String"];
+  role: UserRoleType;
+}>;
+
+export type UserChangeRoleMutation = { __typename?: "Mutation" } & {
+  userChangeRole: { __typename: "UserAdminPayload" } & Pick<UserAdminPayload, "success">;
+};
+
 export type UserDemoteAdminMutationVariables = Exact<{
   id: Scalars["String"];
 }>;
@@ -59261,6 +59170,7 @@ export const AgentSessionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "endedAt" } },
           { kind: "Field", name: { kind: "Name", value: "startedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "dismissedAt" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           {
@@ -59334,88 +59244,6 @@ export const AgentSessionPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<AgentSessionPayloadFragment, unknown>;
-export const ApiKeyFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ApiKey" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ApiKey" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "scope" } },
-          { kind: "Field", name: { kind: "Name", value: "label" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "requestedSyncGroups" } },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "lastActiveAt" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<ApiKeyFragment, unknown>;
-export const ApiKeyConnectionFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ApiKeyConnection" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ApiKeyConnection" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "nodes" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKey" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "pageInfo" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<ApiKeyConnectionFragment, unknown>;
-export const ApiKeyPayloadFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ApiKeyPayload" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ApiKeyPayload" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "apiKey" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKey" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "lastSyncId" } },
-          { kind: "Field", name: { kind: "Name", value: "success" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<ApiKeyPayloadFragment, unknown>;
 export const SlackAsksTeamSettingsFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -63659,6 +63487,7 @@ export const UserFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "isAssignable" } },
           { kind: "Field", name: { kind: "Name", value: "isMentionable" } },
           { kind: "Field", name: { kind: "Name", value: "isMe" } },
+          { kind: "Field", name: { kind: "Name", value: "supportsAgentSessions" } },
           { kind: "Field", name: { kind: "Name", value: "canAccessAnyPublicTeam" } },
           { kind: "Field", name: { kind: "Name", value: "calendarHash" } },
           { kind: "Field", name: { kind: "Name", value: "inviteHash" } },
@@ -68313,96 +68142,6 @@ export const AgentSessionsDocument = {
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<AgentSessionsQuery, AgentSessionsQueryVariables>;
-export const ApiKeysDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "apiKeys" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "apiKeys" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "after" },
-                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "before" },
-                value: { kind: "Variable", name: { kind: "Name", value: "before" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "includeArchived" },
-                value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "last" },
-                value: { kind: "Variable", name: { kind: "Name", value: "last" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "orderBy" },
-                value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ApiKeyConnection" } }],
-            },
-          },
-        ],
-      },
-    },
-    ...ApiKeyConnectionFragmentDoc.definitions,
-    ...ApiKeyFragmentDoc.definitions,
-    ...PageInfoFragmentDoc.definitions,
-  ],
-} as unknown as DocumentNode<ApiKeysQuery, ApiKeysQueryVariables>;
 export const ApplicationInfoDocument = {
   kind: "Document",
   definitions: [
@@ -103610,6 +103349,54 @@ export const UpdateTriageResponsibilityDocument = {
     ...TriageResponsibilityPayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<UpdateTriageResponsibilityMutation, UpdateTriageResponsibilityMutationVariables>;
+export const UserChangeRoleDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "userChangeRole" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "role" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "UserRoleType" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "userChangeRole" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "role" },
+                value: { kind: "Variable", name: { kind: "Name", value: "role" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserAdminPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...UserAdminPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<UserChangeRoleMutation, UserChangeRoleMutationVariables>;
 export const UserDemoteAdminDocument = {
   kind: "Document",
   definitions: [
