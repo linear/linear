@@ -36,7 +36,7 @@ export type LinearWebhookPayload =
   | OAuthAppWebhookPayload
   | AppUserNotificationWebhookPayloadWithNotification
   | AppUserTeamAccessChangedWebhookPayload
-  | AgentSessionEventWebhookPayload;
+  | AgentSessionWebhookEvent;
 
 /**
  * All possible Linear webhook event types.
@@ -86,7 +86,7 @@ export type LinearWebhookEventTypeMap = {
   OAuthApp: OAuthAppWebhookPayload;
   AppUserNotification: AppUserNotificationWebhookPayloadWithNotification;
   PermissionChange: AppUserTeamAccessChangedWebhookPayload;
-  AgentSessionEvent: AgentSessionEventWebhookPayload;
+  AgentSessionEvent: AgentSessionWebhookEvent;
 };
 
 /**
@@ -297,9 +297,14 @@ export type EntityWebhookPayloadWithUserData = EntityWebhookPayload & {
 /**
  * A webhook payload for an Agent Session Event webhook.
  */
-export type AgentSessionEventWebhookPayload = AgentSessionEventWebhookPayloadType & {
+export type AgentSessionWebhookEvent = AgentSessionEventWebhookPayloadType & {
   type: "AgentSessionEvent";
 };
+
+/**
+ * @deprecated Use AgentSessionWebhookEvent instead. This alias will be removed in a future version.
+ */
+export type AgentSessionEventWebhookPayload = AgentSessionWebhookEvent;
 
 /**
  * A webhook payload for an Issue SLA webhook with a narrowed `type`.

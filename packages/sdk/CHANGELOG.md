@@ -6,6 +6,11 @@
 
 - 8fd4df9: feat(schema): [breaking] Field 'Customer.revenue' changed type from 'Float' to 'Int' (Customer.revenue)
 
+### Improvements
+
+- fix(webhooks): Resolved naming conflict between webhook types and SDK classes. The webhook handler type `AgentSessionEventWebhookPayload` has been renamed to `AgentSessionWebhookEvent` to avoid conflicts with the generated SDK class of the same name. The old name is maintained as a deprecated alias for backward compatibility. This improves IDE auto-import behavior when working with webhook handlers.
+
+
   feat(schema): [dangerous] Enum value 'mcpServerPersonal' was added to enum 'IntegrationService' (IntegrationService.mcpServerPersonal)
 
   feat(schema): [dangerous] Input field 'accumulatedStateUpdatedAt' was added to input object type 'IssueSortInput' (IssueSortInput.accumulatedStateUpdatedAt)
