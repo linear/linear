@@ -790,6 +790,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the comment connection query for the Issue */
+    it("comment.createdIssues", async () => {
+      if (_comment) {
+        const createdIssues: L.IssueConnection | undefined = await _comment.createdIssues();
+        expect(createdIssues instanceof L.IssueConnection);
+      } else {
+        console.warn("codegen-doc:print: No comment found - cannot test _comment.createdIssues query");
+      }
+    });
+
     let _documentContent: L.DocumentContent | undefined;
 
     /** Test the comment model query for Comment_DocumentContent */
