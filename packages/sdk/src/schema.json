@@ -145,6 +145,18 @@
             "deprecationReason": null
           },
           {
+            "name": "contextualMetadata",
+            "description": "[Internal] Metadata about user-provided contextual information for this agent activity.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "createdAt",
             "description": "The time at which the entity was created.",
             "args": [],
@@ -6806,6 +6818,107 @@
             "deprecationReason": null
           },
           {
+            "name": "createdIssues",
+            "description": "Issues created from this comment.",
+            "args": [
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "filter",
+                "description": "Filter returned issues.",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "IssueFilter",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IssueConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "documentContent",
             "description": "The document content that the comment is associated with.",
             "args": [],
@@ -11385,7 +11498,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "Float",
+              "name": "Int",
               "ofType": null
             },
             "isDeprecated": false,
@@ -37798,6 +37911,12 @@
             "deprecationReason": null
           },
           {
+            "name": "mcpServerPersonal",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "notion",
             "description": null,
             "isDeprecated": false,
@@ -42177,7 +42296,7 @@
         "inputFields": [
           {
             "name": "accumulatedStateUpdatedAt",
-            "description": "Comparator for the issue's accumulatedStateUpdatedAt date.",
+            "description": "[Internal] Comparator for the issue's accumulatedStateUpdatedAt date.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableDateComparator",
@@ -44747,7 +44866,7 @@
         "inputFields": [
           {
             "name": "accumulatedStateUpdatedAt",
-            "description": "Comparator for the issue's accumulatedStateUpdatedAt date.",
+            "description": "[Internal] Comparator for the issue's accumulatedStateUpdatedAt date.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableDateComparator",
@@ -52456,6 +52575,18 @@
         "description": "Issue sorting options.",
         "fields": null,
         "inputFields": [
+          {
+            "name": "accumulatedStateUpdatedAt",
+            "description": "[Internal] Sort by the accumulated time in the current workflow state",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "TimeInStatusSort",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "assignee",
             "description": "Sort by assignee name",
@@ -62351,6 +62482,39 @@
             "deprecationReason": "Not available."
           },
           {
+            "name": "integrationMcpServerPersonalConnect",
+            "description": "[INTERNAL] Connects the user's personal account with an MCP server.",
+            "args": [
+              {
+                "name": "serverUrl",
+                "description": "The URL of the MCP server to connect with.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationOpsgenieConnect",
             "description": "[INTERNAL] Integrates the organization with Opsgenie.",
             "args": [
@@ -69279,7 +69443,7 @@
           },
           {
             "name": "userDemoteAdmin",
-            "description": "Makes user a regular user. Can only be called by an admin or owner.",
+            "description": "[DEPRECATED] Makes user a regular user. Can only be called by an admin or owner.",
             "args": [
               {
                 "name": "id",
@@ -69307,12 +69471,12 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use userChangeRole instead. This mutation will be removed in a future release."
           },
           {
             "name": "userDemoteMember",
-            "description": "Makes user a guest. Can only be called by an admin.",
+            "description": "[DEPRECATED] Makes user a guest. Can only be called by an admin.",
             "args": [
               {
                 "name": "id",
@@ -69340,8 +69504,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use userChangeRole instead. This mutation will be removed in a future release."
           },
           {
             "name": "userDiscordConnect",
@@ -69476,7 +69640,7 @@
           },
           {
             "name": "userPromoteAdmin",
-            "description": "Makes user an admin. Can only be called by an admin or owner.",
+            "description": "[DEPRECATED] Makes user an admin. Can only be called by an admin or owner.",
             "args": [
               {
                 "name": "id",
@@ -69504,12 +69668,12 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use userChangeRole instead. This mutation will be removed in a future release."
           },
           {
             "name": "userPromoteMember",
-            "description": "Makes user a regular user. Can only be called by an admin.",
+            "description": "[DEPRECATED] Makes user a regular user. Can only be called by an admin.",
             "args": [
               {
                 "name": "id",
@@ -69537,8 +69701,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use userChangeRole instead. This mutation will be removed in a future release."
           },
           {
             "name": "userSettingsFlagsReset",
@@ -69628,7 +69792,7 @@
           },
           {
             "name": "userSuspend",
-            "description": "Suspends a user. Can only be called by an admin.",
+            "description": "Suspends a user. Can only be called by an admin or owner.",
             "args": [
               {
                 "name": "id",
@@ -69694,7 +69858,7 @@
           },
           {
             "name": "userUnsuspend",
-            "description": "Un-suspends a user. Can only be called by an admin.",
+            "description": "Un-suspends a user. Can only be called by an admin or owner.",
             "args": [
               {
                 "name": "id",
@@ -74578,7 +74742,7 @@
         "inputFields": [
           {
             "name": "accumulatedStateUpdatedAt",
-            "description": "Comparator for the issue's accumulatedStateUpdatedAt date.",
+            "description": "[Internal] Comparator for the issue's accumulatedStateUpdatedAt date.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "NullableDateComparator",
@@ -77122,6 +77286,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "owner",
+            "description": "[Internal] Comparator for the user's owner status.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "BooleanComparator",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -111630,6 +111806,18 @@
             "deprecationReason": null
           },
           {
+            "name": "externalUserActions",
+            "description": "Whether to allow external users to perform actions on unfurls",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "shouldUnfurl",
             "description": "Whether to show unfurl previews in Slack",
             "type": {
@@ -112411,6 +112599,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "externalUserActions",
+            "description": "Whether to allow external users to perform actions on unfurls",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -118871,6 +119071,41 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "TimeInStatusSort",
+        "description": "Issue time in status sorting options.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "nulls",
+            "description": "Whether nulls should be sorted first or last",
+            "type": {
+              "kind": "ENUM",
+              "name": "PaginationNulls",
+              "ofType": null
+            },
+            "defaultValue": "last",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "order",
+            "description": "The order for the individual sort",
+            "type": {
+              "kind": "ENUM",
+              "name": "PaginationSortOrder",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "TimeSchedule",
         "description": "A time schedule.",
@@ -122061,6 +122296,18 @@
             "deprecationReason": null
           },
           {
+            "name": "owner",
+            "description": "[Internal] Comparator for the user's owner status.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "BooleanComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "some",
             "description": "Filters that needs to be matched by some users.",
             "type": {
@@ -122444,6 +122691,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "owner",
+            "description": "[Internal] Comparator for the user's owner status.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "BooleanComparator",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,

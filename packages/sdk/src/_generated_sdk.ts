@@ -1756,6 +1756,10 @@ export class Comment extends Request {
   public children(variables?: L.Comment_ChildrenQueryVariables) {
     return new Comment_ChildrenQuery(this._request, variables).fetch(variables);
   }
+  /** Issues created from this comment. */
+  public createdIssues(variables?: L.Comment_CreatedIssuesQueryVariables) {
+    return new Comment_CreatedIssuesQuery(this._request, variables).fetch(variables);
+  }
   /** Creates a new comment. */
   public create(input: L.CommentCreateInput) {
     return new CreateCommentMutation(this._request).fetch(input);
@@ -17222,11 +17226,11 @@ export class User extends Request {
   public teams(variables?: Omit<L.User_TeamsQueryVariables, "id">) {
     return new User_TeamsQuery(this._request, this.id, variables).fetch(variables);
   }
-  /** Suspends a user. Can only be called by an admin. */
+  /** Suspends a user. Can only be called by an admin or owner. */
   public suspend() {
     return new SuspendUserMutation(this._request).fetch(this.id);
   }
-  /** Un-suspends a user. Can only be called by an admin. */
+  /** Un-suspends a user. Can only be called by an admin or owner. */
   public unsuspend() {
     return new UnsuspendUserMutation(this._request).fetch(this.id);
   }
@@ -31482,6 +31486,49 @@ export class Comment_ChildrenQuery extends Request {
 }
 
 /**
+ * A fetchable Comment_CreatedIssues Query
+ *
+ * @param request - function to call the graphql client
+ * @param variables - variables to pass into the Comment_CreatedIssuesQuery
+ */
+export class Comment_CreatedIssuesQuery extends Request {
+  private _variables?: L.Comment_CreatedIssuesQueryVariables;
+
+  public constructor(request: LinearRequest, variables?: L.Comment_CreatedIssuesQueryVariables) {
+    super(request);
+
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Comment_CreatedIssues query and return a IssueConnection
+   *
+   * @param variables - variables to pass into the Comment_CreatedIssuesQuery
+   * @returns parsed response from Comment_CreatedIssuesQuery
+   */
+  public async fetch(variables?: L.Comment_CreatedIssuesQueryVariables): LinearFetch<IssueConnection> {
+    const response = await this._request<L.Comment_CreatedIssuesQuery, L.Comment_CreatedIssuesQueryVariables>(
+      L.Comment_CreatedIssuesDocument,
+      variables
+    );
+    const data = response.comment.createdIssues;
+
+    return new IssueConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Comment_DocumentContent Query
  *
  * @param request - function to call the graphql client
@@ -41352,7 +41399,7 @@ export class LinearSdk extends Request {
     return new UserChangeRoleMutation(this._request).fetch(id, role);
   }
   /**
-   * Makes user a regular user. Can only be called by an admin or owner.
+   * [DEPRECATED] Makes user a regular user. Can only be called by an admin or owner.
    *
    * @param id - required id to pass to userDemoteAdmin
    * @returns UserAdminPayload
@@ -41361,7 +41408,7 @@ export class LinearSdk extends Request {
     return new UserDemoteAdminMutation(this._request).fetch(id);
   }
   /**
-   * Makes user a guest. Can only be called by an admin.
+   * [DEPRECATED] Makes user a guest. Can only be called by an admin.
    *
    * @param id - required id to pass to userDemoteMember
    * @returns UserAdminPayload
@@ -41402,7 +41449,7 @@ export class LinearSdk extends Request {
     return new UpdateUserFlagMutation(this._request).fetch(flag, operation);
   }
   /**
-   * Makes user an admin. Can only be called by an admin or owner.
+   * [DEPRECATED] Makes user an admin. Can only be called by an admin or owner.
    *
    * @param id - required id to pass to userPromoteAdmin
    * @returns UserAdminPayload
@@ -41411,7 +41458,7 @@ export class LinearSdk extends Request {
     return new UserPromoteAdminMutation(this._request).fetch(id);
   }
   /**
-   * Makes user a regular user. Can only be called by an admin.
+   * [DEPRECATED] Makes user a regular user. Can only be called by an admin.
    *
    * @param id - required id to pass to userPromoteMember
    * @returns UserAdminPayload
@@ -41441,7 +41488,7 @@ export class LinearSdk extends Request {
     return new UpdateUserSettingsMutation(this._request).fetch(id, input);
   }
   /**
-   * Suspends a user. Can only be called by an admin.
+   * Suspends a user. Can only be called by an admin or owner.
    *
    * @param id - required id to pass to suspendUser
    * @returns UserAdminPayload
@@ -41459,7 +41506,7 @@ export class LinearSdk extends Request {
     return new UserUnlinkFromIdentityProviderMutation(this._request).fetch(id);
   }
   /**
-   * Un-suspends a user. Can only be called by an admin.
+   * Un-suspends a user. Can only be called by an admin or owner.
    *
    * @param id - required id to pass to unsuspendUser
    * @returns UserAdminPayload

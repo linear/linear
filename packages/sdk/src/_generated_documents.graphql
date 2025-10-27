@@ -9902,6 +9902,41 @@ query comment_children(
     }
   }
 }
+# Issues created from this comment.
+query comment_createdIssues(
+  # The hash of the comment to retrieve.
+  $hash: String
+  # The identifier of the comment to retrieve.
+  $id: String
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  comment(hash: $hash, id: $id) {
+    createdIssues(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
 # The document content that the comment is associated with.
 query comment_documentContent(
   # The hash of the comment to retrieve.
@@ -17935,7 +17970,7 @@ mutation userChangeRole(
     ...UserAdminPayload
   }
 }
-# Makes user a regular user. Can only be called by an admin or owner.
+# [DEPRECATED] Makes user a regular user. Can only be called by an admin or owner.
 mutation userDemoteAdmin(
   # The identifier of the user to make a regular user.
   $id: String!
@@ -17944,7 +17979,7 @@ mutation userDemoteAdmin(
     ...UserAdminPayload
   }
 }
-# Makes user a guest. Can only be called by an admin.
+# [DEPRECATED] Makes user a guest. Can only be called by an admin.
 mutation userDemoteMember(
   # The identifier of the user to make a guest.
   $id: String!
@@ -17984,7 +18019,7 @@ mutation updateUserFlag(
     ...UserSettingsFlagPayload
   }
 }
-# Makes user an admin. Can only be called by an admin or owner.
+# [DEPRECATED] Makes user an admin. Can only be called by an admin or owner.
 mutation userPromoteAdmin(
   # The identifier of the user to make an admin.
   $id: String!
@@ -17993,7 +18028,7 @@ mutation userPromoteAdmin(
     ...UserAdminPayload
   }
 }
-# Makes user a regular user. Can only be called by an admin.
+# [DEPRECATED] Makes user a regular user. Can only be called by an admin.
 mutation userPromoteMember(
   # The identifier of the user to make a regular user.
   $id: String!
@@ -18022,7 +18057,7 @@ mutation updateUserSettings(
     ...UserSettingsPayload
   }
 }
-# Suspends a user. Can only be called by an admin.
+# Suspends a user. Can only be called by an admin or owner.
 mutation suspendUser(
   # The identifier of the user to suspend.
   $id: String!
@@ -18041,7 +18076,7 @@ mutation userUnlinkFromIdentityProvider(
     ...UserAdminPayload
   }
 }
-# Un-suspends a user. Can only be called by an admin.
+# Un-suspends a user. Can only be called by an admin or owner.
 mutation unsuspendUser(
   # The identifier of the user to unsuspend.
   $id: String!
