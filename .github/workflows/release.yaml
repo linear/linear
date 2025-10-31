@@ -23,10 +23,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Use node 18
+      - name: Use node 20
         uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "20"
           registry-url: "https://registry.npmjs.org"
 
       # Ensure npm 11.5.1 or later is installed (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
