@@ -132,6 +132,8 @@ export type AgentActivityCreateInput = {
    * See https://linear.app/developers/agent-interaction#activity-content-payload for typing details.
    */
   content: Scalars["JSONObject"];
+  /** [Internal] Metadata about user-provided contextual information for this agent activity. */
+  contextualMetadata?: InputMaybe<Scalars["JSONObject"]>;
   /** Whether the activity is ephemeral, and should disappear after the next activity. Defaults to false. */
   ephemeral?: InputMaybe<Scalars["Boolean"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
@@ -148,6 +150,8 @@ export type AgentActivityCreatePromptInput = {
   agentSessionId: Scalars["String"];
   /** The content payload of the prompt agent activity. */
   content: Scalars["JSONObject"];
+  /** [Internal] Metadata about user-provided contextual information for this agent activity. */
+  contextualMetadata?: InputMaybe<Scalars["JSONObject"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
   /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
@@ -4687,6 +4691,8 @@ export type FrontSettingsInput = {
   automateTicketReopeningOnProjectCompletion?: InputMaybe<Scalars["Boolean"]>;
   /** [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue. */
   disableCustomerRequestsAutoCreation?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether Linear Agent should be enabled for this integration. */
+  enableAiIntake?: InputMaybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when someone comments on an issue. */
   sendNoteOnComment?: InputMaybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
@@ -6476,6 +6482,8 @@ export type IntercomSettingsInput = {
   automateTicketReopeningOnProjectCompletion?: InputMaybe<Scalars["Boolean"]>;
   /** [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue. */
   disableCustomerRequestsAutoCreation?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether Linear Agent should be enabled for this integration. */
+  enableAiIntake?: InputMaybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when someone comments on an issue. */
   sendNoteOnComment?: InputMaybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
@@ -12970,6 +12978,10 @@ export type OrganizationPayload = {
 };
 
 export type OrganizationSecuritySettingsInput = {
+  /** The minimum role required to manage API settings. */
+  apiSettingsRole?: InputMaybe<UserRoleType>;
+  /** The minimum role required to import data. */
+  importRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to invite users. */
   invitationsRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to manage labels. */
@@ -17459,6 +17471,8 @@ export type SalesforceSettingsInput = {
   defaultTeam?: InputMaybe<Scalars["String"]>;
   /** [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue. */
   disableCustomerRequestsAutoCreation?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether Linear Agent should be enabled for this integration. */
+  enableAiIntake?: InputMaybe<Scalars["Boolean"]>;
   /** The Salesforce case status to use to reopen cases. */
   reopenCaseStatus?: InputMaybe<Scalars["String"]>;
   /** Whether to restrict visibility of the integration to issues that have been either created from Salesforce or linked to Salesforce. */
@@ -19516,6 +19530,8 @@ export type UserSettings = Node & {
   calendarHash?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** The user's feed summary schedule preference. */
+  feedSummarySchedule?: Maybe<FeedSummarySchedule>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The user's notification category preferences. */
@@ -20154,6 +20170,8 @@ export type ZendeskSettingsInput = {
   canReadCustomers?: InputMaybe<Scalars["Boolean"]>;
   /** [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue. */
   disableCustomerRequestsAutoCreation?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether Linear Agent should be enabled for this integration. */
+  enableAiIntake?: InputMaybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when someone comments on an issue. */
   sendNoteOnComment?: InputMaybe<Scalars["Boolean"]>;
   /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
@@ -25725,6 +25743,7 @@ export type UserSettingsFragment = { __typename: "UserSettings" } & Pick<
   | "archivedAt"
   | "createdAt"
   | "id"
+  | "feedSummarySchedule"
   | "subscribedToDPA"
   | "subscribedToChangelog"
   | "subscribedToInviteAccepted"
@@ -43853,6 +43872,7 @@ export type UserSettingsQuery = { __typename?: "Query" } & {
     | "archivedAt"
     | "createdAt"
     | "id"
+    | "feedSummarySchedule"
     | "subscribedToDPA"
     | "subscribedToChangelog"
     | "subscribedToInviteAccepted"
@@ -58951,6 +58971,7 @@ export const UserSettingsFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "feedSummarySchedule" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "notificationCategoryPreferences" },

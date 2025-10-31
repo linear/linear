@@ -6665,6 +6665,8 @@ fragment UserSettings on UserSettings {
   user {
     id
   }
+  # The user's feed summary schedule preference.
+  feedSummarySchedule
   # The user's notification category preferences.
   notificationCategoryPreferences {
     ...NotificationCategoryPreferences
