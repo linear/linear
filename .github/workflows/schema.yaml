@@ -37,6 +37,10 @@ jobs:
       - name: Run tests
         run: yarn test
 
+      - name: Validate CJS and ESM resolution for SDK
+        # Catch issues like https://github.com/linear/linear/issues/830
+        run: npx @arethetypeswrong/cli@0.18.2 --pack packages/sdk
+
       - name: Compare schema for changes
         uses: kamilkisiela/graphql-inspector@master
         with:
@@ -53,6 +57,7 @@ jobs:
           body: "Update schema, regenerate types and SDK"
           branch: schema
           base: master
+
   notify-slack:
     runs-on: ubuntu-latest
     timeout-minutes: 10
