@@ -20,10 +20,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Use node 18
+      - name: Use node 20
         uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "20"
 
       - name: Install dependencies
         run: yarn
