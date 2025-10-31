@@ -1,9 +1,15 @@
 name: build
 
 on:
+  # Run for pushes from collaborators
   push:
     branches-ignore:
       - master
+
+  # Run for any pull request
+  pull_request:
+
+  # Allow manually triggering the workflow
   workflow_dispatch:
 
 permissions:
@@ -49,6 +55,7 @@ jobs:
 
       - name: Check for no generated changes
         run: git update-index --refresh && git diff-index HEAD
+
   notify-slack:
     runs-on: ubuntu-latest
     timeout-minutes: 10
