@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.44
+
+### Patch Changes
+
+- 97292f1: Use more consistent readme formatting for importer
+
 ## 2.2.43
 
 ### Patch Changes
