@@ -78576,6 +78576,30 @@
             "deprecationReason": null
           },
           {
+            "name": "allowedAiProviders",
+            "description": "[INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "allowedAuthServices",
             "description": "Allowed authentication providers, empty array means all are allowed.",
             "args": [],
@@ -79498,6 +79522,22 @@
               "kind": "SCALAR",
               "name": "JSONObject",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "securitySettings",
+            "description": "Security settings for the organization.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -81545,6 +81585,65 @@
       },
       {
         "kind": "INPUT_OBJECT",
+        "name": "OrganizationSecuritySettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "invitationsRole",
+            "description": "The minimum role required to invite users.",
+            "type": {
+              "kind": "ENUM",
+              "name": "UserRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "labelManagementRole",
+            "description": "The minimum role required to manage labels.",
+            "type": {
+              "kind": "ENUM",
+              "name": "UserRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "personalApiKeysRole",
+            "description": "The minimum role required to create personal API keys.",
+            "type": {
+              "kind": "ENUM",
+              "name": "UserRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamCreationRole",
+            "description": "The minimum role required to create teams.",
+            "type": {
+              "kind": "ENUM",
+              "name": "UserRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
         "name": "OrganizationStartTrialInput",
         "description": null,
         "fields": null,
@@ -81658,6 +81757,26 @@
               "kind": "SCALAR",
               "name": "Boolean",
               "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "allowedAiProviders",
+            "description": "[INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed.",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -82005,6 +82124,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "securitySettings",
+            "description": "The security settings for the organization.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "OrganizationSecuritySettingsInput",
               "ofType": null
             },
             "defaultValue": null,
@@ -121567,6 +121698,22 @@
             "deprecationReason": null
           },
           {
+            "name": "owner",
+            "description": "Whether the user is an organization owner.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "statusEmoji",
             "description": "The emoji to represent the user current status.",
             "args": [],
@@ -124714,6 +124861,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "owner",
+            "description": "Whether the user is an owner.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null

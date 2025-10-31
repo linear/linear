@@ -2573,6 +2573,8 @@ fragment User on User {
   app
   # Whether the user is an organization administrator.
   admin
+  # Whether the user is an organization owner.
+  owner
   # Whether the user is assignable.
   isAssignable
   # Whether the user is mentionable.
@@ -3714,6 +3716,8 @@ fragment Organization on Organization {
   previousUrlKeys
   # Rolling 30-day total upload volume for the organization, in megabytes.
   periodUploadVolume
+  # Security settings for the organization.
+  securitySettings
   # The day at which to prompt for initiative updates.
   initiativeUpdateRemindersDay
   # The day at which to prompt for project updates.
@@ -5557,6 +5561,8 @@ fragment UserWebhookPayload on UserWebhookPayload {
   admin
   # Whether the user is an app.
   app
+  # Whether the user is an owner.
+  owner
 }
 
 # Payload for agent session webhook events.

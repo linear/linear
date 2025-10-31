@@ -12505,6 +12505,8 @@ export type Organization = Node & {
   aiThreadSummariesEnabled: Scalars["Boolean"];
   /** Whether member users are allowed to send invites. */
   allowMembersToInvite?: Maybe<Scalars["Boolean"]>;
+  /** [INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed. */
+  allowedAiProviders: Array<Scalars["String"]>;
   /** Allowed authentication providers, empty array means all are allowed. */
   allowedAuthServices: Array<Scalars["String"]>;
   /** Allowed file upload content types */
@@ -12594,6 +12596,8 @@ export type Organization = Node & {
   scimEnabled: Scalars["Boolean"];
   /** [INTERNAL] SCIM settings. */
   scimSettings?: Maybe<Scalars["JSONObject"]>;
+  /** Security settings for the organization. */
+  securitySettings: Scalars["JSONObject"];
   /**
    * [DEPRECATED] Which day count to use for SLA calculations.
    * @deprecated No longer in use
@@ -12965,6 +12969,17 @@ export type OrganizationPayload = {
   success: Scalars["Boolean"];
 };
 
+export type OrganizationSecuritySettingsInput = {
+  /** The minimum role required to invite users. */
+  invitationsRole?: InputMaybe<UserRoleType>;
+  /** The minimum role required to manage labels. */
+  labelManagementRole?: InputMaybe<UserRoleType>;
+  /** The minimum role required to create personal API keys. */
+  personalApiKeysRole?: InputMaybe<UserRoleType>;
+  /** The minimum role required to create teams. */
+  teamCreationRole?: InputMaybe<UserRoleType>;
+};
+
 export type OrganizationStartTrialInput = {
   /** The plan type to trial. */
   planType: Scalars["String"];
@@ -12987,6 +13002,8 @@ export type OrganizationUpdateInput = {
   aiThreadSummariesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether member users are allowed to send invites. */
   allowMembersToInvite?: InputMaybe<Scalars["Boolean"]>;
+  /** [INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed. */
+  allowedAiProviders?: InputMaybe<Array<Scalars["String"]>>;
   /** List of services that are allowed to be used for login. */
   allowedAuthServices?: InputMaybe<Array<Scalars["String"]>>;
   /** Allowed file upload content types. */
@@ -13041,6 +13058,8 @@ export type OrganizationUpdateInput = {
   restrictTeamCreationToAdmins?: InputMaybe<Scalars["Boolean"]>;
   /** Whether the organization is using roadmap. */
   roadmapEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** The security settings for the organization. */
+  securitySettings?: InputMaybe<OrganizationSecuritySettingsInput>;
   /** Internal. Whether SLAs have been enabled for the organization. */
   slaEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** [ALPHA] Theme settings for the organization. */
@@ -19114,6 +19133,8 @@ export type User = Node & {
   name: Scalars["String"];
   /** Organization the user belongs to. */
   organization: Organization;
+  /** Whether the user is an organization owner. */
+  owner: Scalars["Boolean"];
   /** The emoji to represent the user current status. */
   statusEmoji?: Maybe<Scalars["String"]>;
   /** The label of the user current status. */
@@ -19699,6 +19720,8 @@ export type UserWebhookPayload = {
   id: Scalars["String"];
   /** The name of the user. */
   name: Scalars["String"];
+  /** Whether the user is an owner. */
+  owner?: Maybe<Scalars["Boolean"]>;
   /** The local timezone of the user. */
   timezone?: Maybe<Scalars["String"]>;
   /** The time at which the entity was updated. */
@@ -22439,6 +22462,7 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "guest"
           | "app"
           | "admin"
+          | "owner"
           | "isAssignable"
           | "isMentionable"
           | "isMe"
@@ -22477,6 +22501,7 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "guest"
           | "app"
           | "admin"
+          | "owner"
           | "isAssignable"
           | "isMentionable"
           | "isMe"
@@ -22599,6 +22624,7 @@ export type IssueHistoryFragment = { __typename: "IssueHistory" } & Pick<
           | "guest"
           | "app"
           | "admin"
+          | "owner"
           | "isAssignable"
           | "isMentionable"
           | "isMe"
@@ -22847,6 +22873,7 @@ export type UserFragment = { __typename: "User" } & Pick<
   | "guest"
   | "app"
   | "admin"
+  | "owner"
   | "isAssignable"
   | "isMentionable"
   | "isMe"
@@ -23653,6 +23680,7 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "customerCount"
   | "previousUrlKeys"
   | "periodUploadVolume"
+  | "securitySettings"
   | "initiativeUpdateRemindersDay"
   | "projectUpdateRemindersDay"
   | "releaseChannel"
@@ -24863,6 +24891,7 @@ export type UserWebhookPayloadFragment = { __typename: "UserWebhookPayload" } & 
   | "active"
   | "admin"
   | "app"
+  | "owner"
 >;
 
 export type AgentSessionEventWebhookPayloadFragment = { __typename: "AgentSessionEventWebhookPayload" } & Pick<
@@ -27472,6 +27501,7 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "guest"
               | "app"
               | "admin"
+              | "owner"
               | "isAssignable"
               | "isMentionable"
               | "isMe"
@@ -27510,6 +27540,7 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "guest"
               | "app"
               | "admin"
+              | "owner"
               | "isAssignable"
               | "isMentionable"
               | "isMe"
@@ -27635,6 +27666,7 @@ export type IssueHistoryConnectionFragment = { __typename: "IssueHistoryConnecti
               | "guest"
               | "app"
               | "admin"
+              | "owner"
               | "isAssignable"
               | "isMentionable"
               | "isMe"
@@ -30795,6 +30827,7 @@ export type UserConnectionFragment = { __typename: "UserConnection" } & {
       | "guest"
       | "app"
       | "admin"
+      | "owner"
       | "isAssignable"
       | "isMentionable"
       | "isMe"
@@ -31869,6 +31902,7 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "guest"
                   | "app"
                   | "admin"
+                  | "owner"
                   | "isAssignable"
                   | "isMentionable"
                   | "isMe"
@@ -31907,6 +31941,7 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "guest"
                   | "app"
                   | "admin"
+                  | "owner"
                   | "isAssignable"
                   | "isMentionable"
                   | "isMe"
@@ -32032,6 +32067,7 @@ export type AttachmentIssue_HistoryQuery = { __typename?: "Query" } & {
                   | "guest"
                   | "app"
                   | "admin"
+                  | "owner"
                   | "isAssignable"
                   | "isMentionable"
                   | "isMe"
@@ -32247,6 +32283,7 @@ export type AttachmentIssue_SubscribersQuery = { __typename?: "Query" } & {
           | "guest"
           | "app"
           | "admin"
+          | "owner"
           | "isAssignable"
           | "isMentionable"
           | "isMe"
@@ -36204,6 +36241,7 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "guest"
                   | "app"
                   | "admin"
+                  | "owner"
                   | "isAssignable"
                   | "isMentionable"
                   | "isMe"
@@ -36242,6 +36280,7 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "guest"
                   | "app"
                   | "admin"
+                  | "owner"
                   | "isAssignable"
                   | "isMentionable"
                   | "isMe"
@@ -36367,6 +36406,7 @@ export type Issue_HistoryQuery = { __typename?: "Query" } & {
                   | "guest"
                   | "app"
                   | "admin"
+                  | "owner"
                   | "isAssignable"
                   | "isMentionable"
                   | "isMe"
@@ -36582,6 +36622,7 @@ export type Issue_SubscribersQuery = { __typename?: "Query" } & {
           | "guest"
           | "app"
           | "admin"
+          | "owner"
           | "isAssignable"
           | "isMentionable"
           | "isMe"
@@ -37813,6 +37854,7 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "guest"
                     | "app"
                     | "admin"
+                    | "owner"
                     | "isAssignable"
                     | "isMentionable"
                     | "isMe"
@@ -37851,6 +37893,7 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "guest"
                     | "app"
                     | "admin"
+                    | "owner"
                     | "isAssignable"
                     | "isMentionable"
                     | "isMe"
@@ -37976,6 +38019,7 @@ export type IssueVcsBranchSearch_HistoryQuery = { __typename?: "Query" } & {
                     | "guest"
                     | "app"
                     | "admin"
+                    | "owner"
                     | "isAssignable"
                     | "isMentionable"
                     | "isMe"
@@ -38201,6 +38245,7 @@ export type IssueVcsBranchSearch_SubscribersQuery = { __typename?: "Query" } & {
             | "guest"
             | "app"
             | "admin"
+            | "owner"
             | "isAssignable"
             | "isMentionable"
             | "isMe"
@@ -39450,6 +39495,7 @@ export type OrganizationQuery = { __typename?: "Query" } & {
     | "customerCount"
     | "previousUrlKeys"
     | "periodUploadVolume"
+    | "securitySettings"
     | "initiativeUpdateRemindersDay"
     | "projectUpdateRemindersDay"
     | "releaseChannel"
@@ -39831,6 +39877,7 @@ export type Organization_UsersQuery = { __typename?: "Query" } & {
           | "guest"
           | "app"
           | "admin"
+          | "owner"
           | "isAssignable"
           | "isMentionable"
           | "isMe"
@@ -40579,6 +40626,7 @@ export type Project_MembersQuery = { __typename?: "Query" } & {
           | "guest"
           | "app"
           | "admin"
+          | "owner"
           | "isAssignable"
           | "isMentionable"
           | "isMe"
@@ -42692,6 +42740,7 @@ export type Team_MembersQuery = { __typename?: "Query" } & {
           | "guest"
           | "app"
           | "admin"
+          | "owner"
           | "isAssignable"
           | "isMentionable"
           | "isMe"
@@ -43264,6 +43313,7 @@ export type UserQuery = { __typename?: "Query" } & {
     | "guest"
     | "app"
     | "admin"
+    | "owner"
     | "isAssignable"
     | "isMentionable"
     | "isMe"
@@ -44653,6 +44703,7 @@ export type UsersQuery = { __typename?: "Query" } & {
         | "guest"
         | "app"
         | "admin"
+        | "owner"
         | "isAssignable"
         | "isMentionable"
         | "isMe"
@@ -44709,6 +44760,7 @@ export type ViewerQuery = { __typename?: "Query" } & {
     | "guest"
     | "app"
     | "admin"
+    | "owner"
     | "isAssignable"
     | "isMentionable"
     | "isMe"
@@ -55705,6 +55757,7 @@ export const OrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "customerCount" } },
           { kind: "Field", name: { kind: "Name", value: "previousUrlKeys" } },
           { kind: "Field", name: { kind: "Name", value: "periodUploadVolume" } },
+          { kind: "Field", name: { kind: "Name", value: "securitySettings" } },
           { kind: "Field", name: { kind: "Name", value: "initiativeUpdateRemindersDay" } },
           { kind: "Field", name: { kind: "Name", value: "projectUpdateRemindersDay" } },
           { kind: "Field", name: { kind: "Name", value: "releaseChannel" } },
@@ -57164,6 +57217,7 @@ export const UserWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "active" } },
           { kind: "Field", name: { kind: "Name", value: "admin" } },
           { kind: "Field", name: { kind: "Name", value: "app" } },
+          { kind: "Field", name: { kind: "Name", value: "owner" } },
         ],
       },
     },
@@ -63660,6 +63714,7 @@ export const UserFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "guest" } },
           { kind: "Field", name: { kind: "Name", value: "app" } },
           { kind: "Field", name: { kind: "Name", value: "admin" } },
+          { kind: "Field", name: { kind: "Name", value: "owner" } },
           { kind: "Field", name: { kind: "Name", value: "isAssignable" } },
           { kind: "Field", name: { kind: "Name", value: "isMentionable" } },
           { kind: "Field", name: { kind: "Name", value: "isMe" } },
