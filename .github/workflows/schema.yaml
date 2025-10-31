@@ -57,6 +57,7 @@ jobs:
           body: "Update schema, regenerate types and SDK"
           branch: schema
           base: master
+          author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
 
   notify-slack:
     runs-on: ubuntu-latest
