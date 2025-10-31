@@ -1,9 +1,16 @@
 name: build
 
 on:
+  # Run for pushes from collaborators
   push:
     branches-ignore:
       - master
+
+  # Run for any pull request, since our Actions-generated PRs do not lead to "push" events. We filter to only these
+  # automated PRs below (no external PRs).
+  pull_request:
+
+  # Allow manually triggering the workflow
   workflow_dispatch:
 
 permissions:
@@ -15,6 +22,8 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    # Avoid redundant builds for PRs/pushes: run on push OR automated PRs only, and not for external PRs
+    if: ${{ github.event_name != 'pull_request' || github.actor == 'github-actions[bot]' }}
 
     steps:
       - name: Checkout code
@@ -49,6 +58,7 @@ jobs:
 
       - name: Check for no generated changes
         run: git update-index --refresh && git diff-index HEAD
+
   notify-slack:
     runs-on: ubuntu-latest
     timeout-minutes: 10
