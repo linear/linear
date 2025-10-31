@@ -12,6 +12,11 @@ on:
   # Allow manually triggering the workflow
   workflow_dispatch:
 
+# Avoid redundant builds
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
   checks: write
