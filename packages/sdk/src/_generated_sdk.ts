@@ -11742,6 +11742,7 @@ export class Organization extends Request {
     this.roadmapEnabled = data.roadmapEnabled;
     this.samlEnabled = data.samlEnabled;
     this.scimEnabled = data.scimEnabled;
+    this.securitySettings = data.securitySettings;
     this.trialEndsAt = parseDate(data.trialEndsAt) ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.urlKey = data.urlKey;
@@ -11823,6 +11824,8 @@ export class Organization extends Request {
   public samlEnabled: boolean;
   /** Whether SCIM provisioning is enabled for organization. */
   public scimEnabled: boolean;
+  /** Security settings for the organization. */
+  public securitySettings: L.Scalars["JSONObject"];
   /** The time at which the trial will end. */
   public trialEndsAt?: Date;
   /**
@@ -17124,6 +17127,7 @@ export class User extends Request {
     this.isMentionable = data.isMentionable;
     this.lastSeen = parseDate(data.lastSeen) ?? undefined;
     this.name = data.name;
+    this.owner = data.owner;
     this.statusEmoji = data.statusEmoji ?? undefined;
     this.statusLabel = data.statusLabel ?? undefined;
     this.statusUntilAt = parseDate(data.statusUntilAt) ?? undefined;
@@ -17181,6 +17185,8 @@ export class User extends Request {
   public lastSeen?: Date;
   /** The user's full name. */
   public name: string;
+  /** Whether the user is an organization owner. */
+  public owner: boolean;
   /** The emoji to represent the user current status. */
   public statusEmoji?: string;
   /** The label of the user current status. */
@@ -17722,6 +17728,7 @@ export class UserWebhookPayload {
     this.guest = data.guest;
     this.id = data.id;
     this.name = data.name;
+    this.owner = data.owner ?? undefined;
     this.timezone = data.timezone ?? undefined;
     this.updatedAt = data.updatedAt;
     this.url = data.url;
@@ -17753,6 +17760,8 @@ export class UserWebhookPayload {
   public id: string;
   /** The name of the user. */
   public name: string;
+  /** Whether the user is an owner. */
+  public owner?: boolean;
   /** The local timezone of the user. */
   public timezone?: string;
   /** The time at which the entity was updated. */

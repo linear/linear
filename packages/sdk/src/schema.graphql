@@ -22191,6 +22191,10 @@ type Organization implements Node {
   """
   allowMembersToInvite: Boolean
   """
+  [INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed.
+  """
+  allowedAiProviders: [String!]!
+  """
   Allowed authentication providers, empty array means all are allowed.
   """
   allowedAuthServices: [String!]!
@@ -22446,6 +22450,10 @@ type Organization implements Node {
   [INTERNAL] SCIM settings.
   """
   scimSettings: JSONObject
+  """
+  Security settings for the organization.
+  """
+  securitySettings: JSONObject!
   """
   [DEPRECATED] Which day count to use for SLA calculations.
   """
@@ -23009,6 +23017,25 @@ type OrganizationPayload {
   success: Boolean!
 }
 
+input OrganizationSecuritySettingsInput {
+  """
+  The minimum role required to invite users.
+  """
+  invitationsRole: UserRoleType
+  """
+  The minimum role required to manage labels.
+  """
+  labelManagementRole: UserRoleType
+  """
+  The minimum role required to create personal API keys.
+  """
+  personalApiKeysRole: UserRoleType
+  """
+  The minimum role required to create teams.
+  """
+  teamCreationRole: UserRoleType
+}
+
 input OrganizationStartTrialInput {
   """
   The plan type to trial.
@@ -23044,6 +23071,10 @@ input OrganizationUpdateInput {
   Whether member users are allowed to send invites.
   """
   allowMembersToInvite: Boolean
+  """
+  [INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed.
+  """
+  allowedAiProviders: [String!]
   """
   List of services that are allowed to be used for login.
   """
@@ -23152,6 +23183,10 @@ input OrganizationUpdateInput {
   Whether the organization is using roadmap.
   """
   roadmapEnabled: Boolean
+  """
+  The security settings for the organization.
+  """
+  securitySettings: OrganizationSecuritySettingsInput
   """
   Internal. Whether SLAs have been enabled for the organization.
   """
@@ -34416,6 +34451,10 @@ type User implements Node {
   """
   organization: Organization!
   """
+  Whether the user is an organization owner.
+  """
+  owner: Boolean!
+  """
   The emoji to represent the user current status.
   """
   statusEmoji: String
@@ -35290,6 +35329,10 @@ type UserWebhookPayload {
   The name of the user.
   """
   name: String!
+  """
+  Whether the user is an owner.
+  """
+  owner: Boolean
   """
   The local timezone of the user.
   """
