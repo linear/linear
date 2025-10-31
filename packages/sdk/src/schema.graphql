@@ -142,6 +142,10 @@ input AgentActivityCreateInput {
   """
   content: JSONObject!
   """
+  [Internal] Metadata about user-provided contextual information for this agent activity.
+  """
+  contextualMetadata: JSONObject
+  """
   Whether the activity is ephemeral, and should disappear after the next activity. Defaults to false.
   """
   ephemeral: Boolean
@@ -171,6 +175,10 @@ input AgentActivityCreatePromptInput {
   The content payload of the prompt agent activity.
   """
   content: JSONObject!
+  """
+  [Internal] Metadata about user-provided contextual information for this agent activity.
+  """
+  contextualMetadata: JSONObject
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -8106,6 +8114,10 @@ input FrontSettingsInput {
   """
   disableCustomerRequestsAutoCreation: Boolean
   """
+  Whether Linear Agent should be enabled for this integration.
+  """
+  enableAiIntake: Boolean
+  """
   Whether an internal message should be added when someone comments on an issue.
   """
   sendNoteOnComment: Boolean
@@ -11132,6 +11144,10 @@ input IntercomSettingsInput {
   [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
   """
   disableCustomerRequestsAutoCreation: Boolean
+  """
+  Whether Linear Agent should be enabled for this integration.
+  """
+  enableAiIntake: Boolean
   """
   Whether an internal message should be added when someone comments on an issue.
   """
@@ -23019,6 +23035,14 @@ type OrganizationPayload {
 
 input OrganizationSecuritySettingsInput {
   """
+  The minimum role required to manage API settings.
+  """
+  apiSettingsRole: UserRoleType
+  """
+  The minimum role required to import data.
+  """
+  importRole: UserRoleType
+  """
   The minimum role required to invite users.
   """
   invitationsRole: UserRoleType
@@ -31355,6 +31379,10 @@ input SalesforceSettingsInput {
   """
   disableCustomerRequestsAutoCreation: Boolean
   """
+  Whether Linear Agent should be enabled for this integration.
+  """
+  enableAiIntake: Boolean
+  """
   The Salesforce case status to use to reopen cases.
   """
   reopenCaseStatus: String
@@ -34994,6 +35022,10 @@ type UserSettings implements Node {
   """
   createdAt: DateTime!
   """
+  The user's feed summary schedule preference.
+  """
+  feedSummarySchedule: FeedSummarySchedule
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -36031,6 +36063,10 @@ input ZendeskSettingsInput {
   [ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.
   """
   disableCustomerRequestsAutoCreation: Boolean
+  """
+  Whether Linear Agent should be enabled for this integration.
+  """
+  enableAiIntake: Boolean
   """
   Whether an internal message should be added when someone comments on an issue.
   """

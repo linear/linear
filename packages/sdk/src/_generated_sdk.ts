@@ -17529,6 +17529,7 @@ export class UserSettings extends Request {
       data.notificationDeliveryPreferences
     );
     this.theme = data.theme ? new UserSettingsTheme(request, data.theme) : undefined;
+    this.feedSummarySchedule = data.feedSummarySchedule ?? undefined;
     this._user = data.user;
   }
 
@@ -17567,6 +17568,8 @@ export class UserSettings extends Request {
   public notificationDeliveryPreferences: NotificationDeliveryPreferences;
   /** The user's theme for a given mode and device type. */
   public theme?: UserSettingsTheme;
+  /** The user's feed summary schedule preference. */
+  public feedSummarySchedule?: L.FeedSummarySchedule;
   /** The user associated with these settings. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);

@@ -522,6 +522,18 @@
             "deprecationReason": null
           },
           {
+            "name": "contextualMetadata",
+            "description": "[Internal] Metadata about user-provided contextual information for this agent activity.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "ephemeral",
             "description": "Whether the activity is ephemeral, and should disappear after the next activity. Defaults to false.",
             "type": {
@@ -607,6 +619,18 @@
                 "name": "JSONObject",
                 "ofType": null
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "contextualMetadata",
+            "description": "[Internal] Metadata about user-provided contextual information for this agent activity.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONObject",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -28573,6 +28597,18 @@
             "deprecationReason": null
           },
           {
+            "name": "enableAiIntake",
+            "description": "Whether Linear Agent should be enabled for this integration.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "sendNoteOnComment",
             "description": "Whether an internal message should be added when someone comments on an issue.",
             "type": {
@@ -39536,6 +39572,18 @@
           {
             "name": "disableCustomerRequestsAutoCreation",
             "description": "[ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "enableAiIntake",
+            "description": "Whether Linear Agent should be enabled for this integration.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -81590,6 +81638,30 @@
         "fields": null,
         "inputFields": [
           {
+            "name": "apiSettingsRole",
+            "description": "The minimum role required to manage API settings.",
+            "type": {
+              "kind": "ENUM",
+              "name": "UserRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "importRole",
+            "description": "The minimum role required to import data.",
+            "type": {
+              "kind": "ENUM",
+              "name": "UserRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "invitationsRole",
             "description": "The minimum role required to invite users.",
             "type": {
@@ -111006,6 +111078,18 @@
             "deprecationReason": null
           },
           {
+            "name": "enableAiIntake",
+            "description": "Whether Linear Agent should be enabled for this integration.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "reopenCaseStatus",
             "description": "The Salesforce case status to use to reopen cases.",
             "type": {
@@ -123666,6 +123750,18 @@
             "deprecationReason": null
           },
           {
+            "name": "feedSummarySchedule",
+            "description": "The user's feed summary schedule preference.",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "FeedSummarySchedule",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "id",
             "description": "The unique identifier of the entity.",
             "args": [],
@@ -127519,6 +127615,18 @@
           {
             "name": "disableCustomerRequestsAutoCreation",
             "description": "[ALPHA] Whether customer and customer requests should not be automatically created when conversations are linked to a Linear issue.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "enableAiIntake",
+            "description": "Whether Linear Agent should be enabled for this integration.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
