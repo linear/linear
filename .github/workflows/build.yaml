@@ -12,11 +12,6 @@ on:
   # Allow manually triggering the workflow
   workflow_dispatch:
 
-# Avoid redundant builds
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: write
   checks: write
@@ -26,6 +21,8 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    # Avoid redundant builds for PRs/pushes: run on push OR external PRs OR automated PRs
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository || github.actor == 'github-actions[bot]' }}
 
     steps:
       - name: Checkout code
