@@ -6,7 +6,8 @@ on:
     branches-ignore:
       - master
 
-  # Run for any pull request
+  # Run for any pull request, since our Actions-generated PRs do not lead to "push" events. We filter to only these
+  # automated PRs below (no external PRs).
   pull_request:
 
   # Allow manually triggering the workflow
