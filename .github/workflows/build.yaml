@@ -21,8 +21,8 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    # Avoid redundant builds for PRs/pushes: run on push OR external PRs OR automated PRs
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository || github.actor == 'github-actions[bot]' }}
+    # Avoid redundant builds for PRs/pushes: run on push OR automated PRs only, and not for external PRs
+    if: ${{ github.event_name != 'pull_request' || github.actor == 'github-actions[bot]' }}
 
     steps:
       - name: Checkout code
