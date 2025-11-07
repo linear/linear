@@ -5607,6 +5607,27 @@ export class Facet extends Request {
   }
 }
 /**
+ * FacetConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this FacetConnection model
+ * @param data - FacetConnection response data
+ */
+export class FacetConnection extends Connection<Facet> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<Facet> | undefined>,
+    data: L.FacetConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new Facet(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
  * User favorites presented in the sidebar.
  *
  * @param request - function to call the graphql client
@@ -17508,6 +17529,7 @@ export class UserSettings extends Request {
     this.autoAssignToSelf = data.autoAssignToSelf;
     this.calendarHash = data.calendarHash ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.feedLastSeenTime = parseDate(data.feedLastSeenTime) ?? undefined;
     this.id = data.id;
     this.showFullUserNames = data.showFullUserNames;
     this.subscribedToChangelog = data.subscribedToChangelog;
@@ -17541,6 +17563,8 @@ export class UserSettings extends Request {
   public calendarHash?: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
+  /** The user's last seen time for the pulse feed. */
+  public feedLastSeenTime?: Date;
   /** The unique identifier of the entity. */
   public id: string;
   /** Whether to show full user names instead of display names. */

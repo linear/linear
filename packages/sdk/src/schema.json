@@ -26844,6 +26844,124 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "FacetConnection",
+        "description": null,
+        "fields": [
+          {
+            "name": "edges",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "FacetEdge",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nodes",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Facet",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pageInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "FacetEdge",
+        "description": null,
+        "fields": [
+          {
+            "name": "cursor",
+            "description": "Used in `before` and `after` args",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "node",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Facet",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "ENUM",
         "name": "FacetPageSource",
         "description": null,
@@ -37942,6 +38060,12 @@
           },
           {
             "name": "loom",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "mcpServer",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -62530,6 +62654,39 @@
             "deprecationReason": "Not available."
           },
           {
+            "name": "integrationMcpServerConnect",
+            "description": "[INTERNAL] Connects the workspace with an MCP server.",
+            "args": [
+              {
+                "name": "serverUrl",
+                "description": "The URL of the MCP server to connect with.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "IntegrationPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "integrationMcpServerPersonalConnect",
             "description": "[INTERNAL] Connects the user's personal account with an MCP server.",
             "args": [
@@ -81675,7 +81832,7 @@
           },
           {
             "name": "labelManagementRole",
-            "description": "The minimum role required to manage labels.",
+            "description": "The minimum role required to manage workspace labels.",
             "type": {
               "kind": "ENUM",
               "name": "UserRoleType",
@@ -81700,6 +81857,18 @@
           {
             "name": "teamCreationRole",
             "description": "The minimum role required to create teams.",
+            "type": {
+              "kind": "ENUM",
+              "name": "UserRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "templateManagementRole",
+            "description": "The minimum role required to manage workspace templates.",
             "type": {
               "kind": "ENUM",
               "name": "UserRoleType",
@@ -112045,6 +112214,18 @@
             "deprecationReason": null
           },
           {
+            "name": "shouldUseDefaultUnfurl",
+            "description": "Whether to show unfurls in the default style instead of Work Objects in Slack",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "slackChannelMapping",
             "description": "The mapping of Slack channel ID => Slack channel name for connected channels.",
             "type": {
@@ -112797,6 +112978,30 @@
         "fields": null,
         "inputFields": [
           {
+            "name": "enableAgent",
+            "description": "Whether Linear Agent should be enabled for this Slack integration.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "enableLinearAgentWorkflowAccess",
+            "description": "Whether Linear Agent should be given Org-wide access within Slack workflows.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "enterpriseId",
             "description": "Enterprise id of the connected Slack enterprise",
             "type": {
@@ -112851,6 +113056,18 @@
           {
             "name": "shouldUnfurl",
             "description": "Whether to show unfurl previews in Slack",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "shouldUseDefaultUnfurl",
+            "description": "Whether to show unfurls in the default style instead of Work Objects in Slack",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -121513,6 +121730,95 @@
             "deprecationReason": null
           },
           {
+            "name": "feedFacets",
+            "description": "[INTERNAL] The user's pinned feeds.",
+            "args": [
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FacetConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "gitHubUserId",
             "description": "The user's GitHub user ID.",
             "args": [],
@@ -123750,6 +124056,18 @@
             "deprecationReason": null
           },
           {
+            "name": "feedLastSeenTime",
+            "description": "The user's last seen time for the pulse feed.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "feedSummarySchedule",
             "description": "The user's feed summary schedule preference.",
             "args": [],
@@ -124485,6 +124803,18 @@
         "description": null,
         "fields": null,
         "inputFields": [
+          {
+            "name": "feedLastSeenTime",
+            "description": "[Internal] The user's last seen time for the pulse feed.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "feedSummarySchedule",
             "description": "[Internal] How often to generate a feed summary.",
