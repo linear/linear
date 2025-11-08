@@ -7618,6 +7618,20 @@ type Facet implements Node {
   updatedAt: DateTime!
 }
 
+type FacetConnection {
+  edges: [FacetEdge!]!
+  nodes: [Facet!]!
+  pageInfo: PageInfo!
+}
+
+type FacetEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: Facet!
+}
+
 enum FacetPageSource {
   feed
   projects
@@ -10743,6 +10757,7 @@ enum IntegrationService {
   launchDarkly
   launchDarklyPersonal
   loom
+  mcpServer
   mcpServerPersonal
   notion
   opsgenie
@@ -17772,6 +17787,15 @@ type Mutation {
   """
   integrationLoom: IntegrationPayload! @deprecated(reason: "Not available.")
   """
+  [INTERNAL] Connects the workspace with an MCP server.
+  """
+  integrationMcpServerConnect(
+    """
+    The URL of the MCP server to connect with.
+    """
+    serverUrl: String!
+  ): IntegrationPayload!
+  """
   [INTERNAL] Connects the user's personal account with an MCP server.
   """
   integrationMcpServerPersonalConnect(
@@ -23047,7 +23071,7 @@ input OrganizationSecuritySettingsInput {
   """
   invitationsRole: UserRoleType
   """
-  The minimum role required to manage labels.
+  The minimum role required to manage workspace labels.
   """
   labelManagementRole: UserRoleType
   """
@@ -23058,6 +23082,10 @@ input OrganizationSecuritySettingsInput {
   The minimum role required to create teams.
   """
   teamCreationRole: UserRoleType
+  """
+  The minimum role required to manage workspace templates.
+  """
+  templateManagementRole: UserRoleType
 }
 
 input OrganizationStartTrialInput {
@@ -31661,6 +31689,10 @@ input SlackAsksSettingsInput {
   """
   shouldUnfurl: Boolean
   """
+  Whether to show unfurls in the default style instead of Work Objects in Slack
+  """
+  shouldUseDefaultUnfurl: Boolean
+  """
   The mapping of Slack channel ID => Slack channel name for connected channels.
   """
   slackChannelMapping: [SlackChannelNameMappingInput!]
@@ -31867,6 +31899,14 @@ input SlackPostSettingsInput {
 
 input SlackSettingsInput {
   """
+  Whether Linear Agent should be enabled for this Slack integration.
+  """
+  enableAgent: Boolean
+  """
+  Whether Linear Agent should be given Org-wide access within Slack workflows.
+  """
+  enableLinearAgentWorkflowAccess: Boolean
+  """
   Enterprise id of the connected Slack enterprise
   """
   enterpriseId: String
@@ -31886,6 +31926,10 @@ input SlackSettingsInput {
   Whether to show unfurl previews in Slack
   """
   shouldUnfurl: Boolean
+  """
+  Whether to show unfurls in the default style instead of Work Objects in Slack
+  """
+  shouldUseDefaultUnfurl: Boolean
   """
   Slack workspace id
   """
@@ -34402,6 +34446,35 @@ type User implements Node {
   """
   email: String!
   """
+  [INTERNAL] The user's pinned feeds.
+  """
+  feedFacets(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): FacetConnection!
+  """
   The user's GitHub user ID.
   """
   gitHubUserId: String
@@ -35022,6 +35095,10 @@ type UserSettings implements Node {
   """
   createdAt: DateTime!
   """
+  The user's last seen time for the pulse feed.
+  """
+  feedLastSeenTime: DateTime
+  """
   The user's feed summary schedule preference.
   """
   feedSummarySchedule: FeedSummarySchedule
@@ -35210,6 +35287,10 @@ enum UserSettingsThemePreset {
 }
 
 input UserSettingsUpdateInput {
+  """
+  [Internal] The user's last seen time for the pulse feed.
+  """
+  feedLastSeenTime: DateTime
   """
   [Internal] How often to generate a feed summary.
   """

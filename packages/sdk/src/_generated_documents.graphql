@@ -6667,6 +6667,8 @@ fragment UserSettings on UserSettings {
   }
   # The user's feed summary schedule preference.
   feedSummarySchedule
+  # The user's last seen time for the pulse feed.
+  feedLastSeenTime
   # The user's notification category preferences.
   notificationCategoryPreferences {
     ...NotificationCategoryPreferences
@@ -7481,6 +7483,16 @@ fragment ExternalUserConnection on ExternalUserConnection {
   __typename
   nodes {
     ...ExternalUser
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment FacetConnection on FacetConnection {
+  __typename
+  nodes {
+    ...Facet
   }
   pageInfo {
     ...PageInfo

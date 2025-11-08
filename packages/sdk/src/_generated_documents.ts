@@ -4401,6 +4401,20 @@ export type Facet = Node & {
   updatedAt: Scalars["DateTime"];
 };
 
+export type FacetConnection = {
+  __typename?: "FacetConnection";
+  edges: Array<FacetEdge>;
+  nodes: Array<Facet>;
+  pageInfo: PageInfo;
+};
+
+export type FacetEdge = {
+  __typename?: "FacetEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: Facet;
+};
+
 export enum FacetPageSource {
   Feed = "feed",
   Projects = "projects",
@@ -6225,6 +6239,7 @@ export enum IntegrationService {
   LaunchDarkly = "launchDarkly",
   LaunchDarklyPersonal = "launchDarklyPersonal",
   Loom = "loom",
+  McpServer = "mcpServer",
   McpServerPersonal = "mcpServerPersonal",
   Notion = "notion",
   Opsgenie = "opsgenie",
@@ -9360,6 +9375,8 @@ export type Mutation = {
    * @deprecated Not available.
    */
   integrationLoom: IntegrationPayload;
+  /** [INTERNAL] Connects the workspace with an MCP server. */
+  integrationMcpServerConnect: IntegrationPayload;
   /** [INTERNAL] Connects the user's personal account with an MCP server. */
   integrationMcpServerPersonalConnect: IntegrationPayload;
   /** [INTERNAL] Integrates the organization with Opsgenie. */
@@ -10391,6 +10408,10 @@ export type MutationIntegrationLaunchDarklyConnectArgs = {
 
 export type MutationIntegrationLaunchDarklyPersonalConnectArgs = {
   code: Scalars["String"];
+};
+
+export type MutationIntegrationMcpServerConnectArgs = {
+  serverUrl: Scalars["String"];
 };
 
 export type MutationIntegrationMcpServerPersonalConnectArgs = {
@@ -12984,12 +13005,14 @@ export type OrganizationSecuritySettingsInput = {
   importRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to invite users. */
   invitationsRole?: InputMaybe<UserRoleType>;
-  /** The minimum role required to manage labels. */
+  /** The minimum role required to manage workspace labels. */
   labelManagementRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to create personal API keys. */
   personalApiKeysRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to create teams. */
   teamCreationRole?: InputMaybe<UserRoleType>;
+  /** The minimum role required to manage workspace templates. */
+  templateManagementRole?: InputMaybe<UserRoleType>;
 };
 
 export type OrganizationStartTrialInput = {
@@ -17644,6 +17667,8 @@ export type SlackAsksSettingsInput = {
   externalUserActions?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to show unfurl previews in Slack */
   shouldUnfurl?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether to show unfurls in the default style instead of Work Objects in Slack */
+  shouldUseDefaultUnfurl?: InputMaybe<Scalars["Boolean"]>;
   /** The mapping of Slack channel ID => Slack channel name for connected channels. */
   slackChannelMapping?: InputMaybe<Array<SlackChannelNameMappingInput>>;
   /** Slack workspace id */
@@ -17765,6 +17790,10 @@ export type SlackPostSettingsInput = {
 };
 
 export type SlackSettingsInput = {
+  /** Whether Linear Agent should be enabled for this Slack integration. */
+  enableAgent?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether Linear Agent should be given Org-wide access within Slack workflows. */
+  enableLinearAgentWorkflowAccess?: InputMaybe<Scalars["Boolean"]>;
   /** Enterprise id of the connected Slack enterprise */
   enterpriseId?: InputMaybe<Scalars["String"]>;
   /** Enterprise name of the connected Slack enterprise */
@@ -17775,6 +17804,8 @@ export type SlackSettingsInput = {
   linkOnIssueIdMention: Scalars["Boolean"];
   /** Whether to show unfurl previews in Slack */
   shouldUnfurl?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether to show unfurls in the default style instead of Work Objects in Slack */
+  shouldUseDefaultUnfurl?: InputMaybe<Scalars["Boolean"]>;
   /** Slack workspace id */
   teamId?: InputMaybe<Scalars["String"]>;
   /** Slack workspace name */
@@ -19118,6 +19149,8 @@ export type User = Node & {
   drafts: DraftConnection;
   /** The user's email address. */
   email: Scalars["String"];
+  /** [INTERNAL] The user's pinned feeds. */
+  feedFacets: FacetConnection;
   /** The user's GitHub user ID. */
   gitHubUserId?: Maybe<Scalars["String"]>;
   /** Whether the user is a guest in the workspace and limited to accessing a subset of teams. */
@@ -19207,6 +19240,16 @@ export type UserDelegatedIssuesArgs = {
 
 /** A user that has access to the the resources of an organization. */
 export type UserDraftsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** A user that has access to the the resources of an organization. */
+export type UserFeedFacetsArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
@@ -19530,6 +19573,8 @@ export type UserSettings = Node & {
   calendarHash?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** The user's last seen time for the pulse feed. */
+  feedLastSeenTime?: Maybe<Scalars["DateTime"]>;
   /** The user's feed summary schedule preference. */
   feedSummarySchedule?: Maybe<FeedSummarySchedule>;
   /** The unique identifier of the entity. */
@@ -19656,6 +19701,8 @@ export enum UserSettingsThemePreset {
 }
 
 export type UserSettingsUpdateInput = {
+  /** [Internal] The user's last seen time for the pulse feed. */
+  feedLastSeenTime?: InputMaybe<Scalars["DateTime"]>;
   /** [Internal] How often to generate a feed summary. */
   feedSummarySchedule?: InputMaybe<FeedSummarySchedule>;
   /** The user's notification category preferences. */
@@ -25744,6 +25791,7 @@ export type UserSettingsFragment = { __typename: "UserSettings" } & Pick<
   | "createdAt"
   | "id"
   | "feedSummarySchedule"
+  | "feedLastSeenTime"
   | "subscribedToDPA"
   | "subscribedToChangelog"
   | "subscribedToInviteAccepted"
@@ -26861,6 +26909,25 @@ export type ExternalUserConnectionFragment = { __typename: "ExternalUserConnecti
       ExternalUser,
       "avatarUrl" | "displayName" | "email" | "name" | "updatedAt" | "lastSeen" | "archivedAt" | "createdAt" | "id"
     >
+  >;
+  pageInfo: { __typename: "PageInfo" } & Pick<
+    PageInfo,
+    "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+  >;
+};
+
+export type FacetConnectionFragment = { __typename: "FacetConnection" } & {
+  nodes: Array<
+    { __typename: "Facet" } & Pick<
+      Facet,
+      "updatedAt" | "sourcePage" | "sortOrder" | "archivedAt" | "createdAt" | "id"
+    > & {
+        sourceFeedUser?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        sourceInitiative?: Maybe<{ __typename?: "Initiative" } & Pick<Initiative, "id">>;
+        sourceProject?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+        sourceTeam?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
+        targetCustomView?: Maybe<{ __typename?: "CustomView" } & Pick<CustomView, "id">>;
+      }
   >;
   pageInfo: { __typename: "PageInfo" } & Pick<
     PageInfo,
@@ -43873,6 +43940,7 @@ export type UserSettingsQuery = { __typename?: "Query" } & {
     | "createdAt"
     | "id"
     | "feedSummarySchedule"
+    | "feedLastSeenTime"
     | "subscribedToDPA"
     | "subscribedToChangelog"
     | "subscribedToInviteAccepted"
@@ -53495,68 +53563,6 @@ export const CycleNotificationSubscriptionFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<CycleNotificationSubscriptionFragment, unknown>;
-export const FacetFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "Facet" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Facet" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "__typename" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "sourceFeedUser" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "sourceInitiative" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "sourcePage" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "sourceProject" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "sourceTeam" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "targetCustomView" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
-          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<FacetFragment, unknown>;
 export const CustomerNeedArchivePayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -58972,6 +58978,7 @@ export const UserSettingsFragmentDoc = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "feedSummarySchedule" } },
+          { kind: "Field", name: { kind: "Name", value: "feedLastSeenTime" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "notificationCategoryPreferences" },
@@ -62095,6 +62102,100 @@ export const ExternalUserConnectionFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<ExternalUserConnectionFragment, unknown>;
+export const FacetFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "Facet" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Facet" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "sourceFeedUser" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "sourceInitiative" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "sourcePage" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "sourceProject" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "sourceTeam" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "sortOrder" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "targetCustomView" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<FacetFragment, unknown>;
+export const FacetConnectionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "FacetConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "FacetConnection" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "Facet" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<FacetConnectionFragment, unknown>;
 export const FavoriteFragmentDoc = {
   kind: "Document",
   definitions: [
