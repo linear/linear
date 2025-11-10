@@ -36,14 +36,19 @@ jobs:
         run: yarn test
 
       - name: Create dependencies pull request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          sign-commits: true
           commit-message: "chore(release): update dependencies"
           title: "chore(release): update dependencies"
           body: "Update dependencies"
           branch: dependencies
           base: master
+          # Use bot author for scheduled runs, and the triggering user (GitHub actor, as is typically the default
+          # https://github.com/peter-evans/create-pull-request/blob/0edc001d28a2959cd7a6b505629f1d82f0a6e67d/action.yml#L32)
+          # for manual runs
+          author: ${{ github.event_name == 'schedule' && 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' || '${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>' }}
+
   notify-slack:
     runs-on: ubuntu-latest
     timeout-minutes: 10
