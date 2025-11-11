@@ -1526,7 +1526,7 @@
           },
           {
             "name": "creator",
-            "description": "The user that created this agent session.",
+            "description": "The human user responsible for the agent session. Null if the session was initiated via automation or by an agent user, with no responsible human user.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -2402,7 +2402,7 @@
           },
           {
             "name": "creator",
-            "description": "The user that created the agent session.",
+            "description": "The human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -2414,7 +2414,7 @@
           },
           {
             "name": "creatorId",
-            "description": "The ID of the user that created the agent session.",
+            "description": "The ID of the human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -18432,6 +18432,18 @@
           {
             "name": "id",
             "description": "Comparator for the identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inheritedFromId",
+            "description": "Comparator for the inherited cycle ID.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "IDComparator",
@@ -74366,6 +74378,18 @@
             "deprecationReason": null
           },
           {
+            "name": "inheritedFromId",
+            "description": "Comparator for the inherited cycle ID.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "isActive",
             "description": "Comparator for the filtering active cycle.",
             "type": {
@@ -74702,6 +74726,18 @@
                   "ofType": null
                 }
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "content",
+            "description": "Comparator for the document content.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableStringComparator",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -77077,6 +77113,18 @@
           {
             "name": "id",
             "description": "Comparator for the identifier.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "IDComparator",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "inheritedFromId",
+            "description": "Comparator for the inherited template's ID.",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "IDComparator",
@@ -118613,7 +118661,7 @@
           },
           {
             "name": "joinByDefault",
-            "description": "Whether new users should join this team by default. Mutation restricted to workspace admins!",
+            "description": "Whether new users should join this team by default. Mutation restricted to workspace admins or owners!",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -118709,7 +118757,7 @@
           },
           {
             "name": "scimManaged",
-            "description": "Whether the team is managed by SCIM integration. Mutation restricted to workspace admins and only unsetting is allowed!",
+            "description": "Whether the team is managed by SCIM integration. Mutation restricted to workspace admins or owners and only unsetting is allowed!",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",

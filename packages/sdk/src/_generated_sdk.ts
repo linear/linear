@@ -567,11 +567,11 @@ export class AgentSession extends Request {
   public get commentId(): string | undefined {
     return this._comment?.id;
   }
-  /** The user that created this agent session. */
+  /** The human user responsible for the agent session. Null if the session was initiated via automation or by an agent user, with no responsible human user. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
   }
-  /** The ID of user that created this agent session. */
+  /** The ID of human user responsible for the agent session. null if the session was initiated via automation or by an agent user, with no responsible human user. */
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
@@ -719,7 +719,7 @@ export class AgentSessionWebhookPayload {
   public commentId?: string;
   /** The time at which the entity was created. */
   public createdAt: string;
-  /** The ID of the user that created the agent session. */
+  /** The ID of the human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user. */
   public creatorId?: string;
   /** The time the agent session ended. */
   public endedAt?: string;
@@ -743,7 +743,7 @@ export class AgentSessionWebhookPayload {
   public updatedAt: string;
   /** The comment this agent session is associated with. */
   public comment?: CommentChildWebhookPayload;
-  /** The user that created the agent session. */
+  /** The human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user. */
   public creator?: UserChildWebhookPayload;
   /** The issue this agent session is associated with. */
   public issue?: IssueWithDescriptionChildWebhookPayload;
