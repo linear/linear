@@ -2132,6 +2132,10 @@ fragment AgentSession on AgentSession {
   }
   # The current status of the agent session.
   status
+  # The human user responsible for the agent session. Null if the session was initiated via automation or by an agent user, with no responsible human user.
+  creator {
+    id
+  }
   # The issue this agent session is associated with.
   issue {
     id
@@ -2153,10 +2157,6 @@ fragment AgentSession on AgentSession {
   type
   # The unique identifier of the entity.
   id
-  # The user that created this agent session.
-  creator {
-    id
-  }
 }
 
 # A set of issues to be resolved in a specified amount of time.
@@ -5636,18 +5636,22 @@ fragment AgentSessionWebhookPayload on AgentSessionWebhookPayload {
   commentId
   # The ID of the entity.
   id
+  # The ID of the human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user.
+  creatorId
   # The ID of the issue this agent session is associated with.
   issueId
   # The ID of the organization that the agent session belongs to.
   organizationId
-  # The ID of the user that created the agent session.
-  creatorId
   # The comment this agent session is associated with.
   comment {
     ...CommentChildWebhookPayload
   }
   # The current status of the agent session.
   status
+  # The human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user.
+  creator {
+    ...UserChildWebhookPayload
+  }
   # The issue this agent session is associated with.
   issue {
     ...IssueWithDescriptionChildWebhookPayload
@@ -5664,10 +5668,6 @@ fragment AgentSessionWebhookPayload on AgentSessionWebhookPayload {
   startedAt
   # The type of the agent session.
   type
-  # The user that created the agent session.
-  creator {
-    ...UserChildWebhookPayload
-  }
 }
 
 # Payload for an attachment webhook.

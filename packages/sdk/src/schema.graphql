@@ -450,7 +450,7 @@ type AgentSession implements Node {
   """
   createdAt: DateTime!
   """
-  The user that created this agent session.
+  The human user responsible for the agent session. Null if the session was initiated via automation or by an agent user, with no responsible human user.
   """
   creator: User
   """
@@ -682,11 +682,11 @@ type AgentSessionWebhookPayload {
   """
   createdAt: String!
   """
-  The user that created the agent session.
+  The human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user.
   """
   creator: UserChildWebhookPayload
   """
-  The ID of the user that created the agent session.
+  The ID of the human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user.
   """
   creatorId: String
   """
@@ -5266,6 +5266,10 @@ input CycleFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Comparator for the inherited cycle ID.
+  """
+  inheritedFromId: IDComparator
   """
   Comparator for the filtering active cycle.
   """
@@ -20865,6 +20869,10 @@ input NullableCycleFilter {
   """
   id: IDComparator
   """
+  Comparator for the inherited cycle ID.
+  """
+  inheritedFromId: IDComparator
+  """
   Comparator for the filtering active cycle.
   """
   isActive: BooleanComparator
@@ -20972,6 +20980,10 @@ input NullableDocumentContentFilter {
   Compound filters, all of which need to be matched by the user.
   """
   and: [NullableDocumentContentFilter!]
+  """
+  Comparator for the document content.
+  """
+  content: NullableStringComparator
   """
   Comparator for the created at date.
   """
@@ -21738,6 +21750,10 @@ input NullableTemplateFilter {
   Comparator for the identifier.
   """
   id: IDComparator
+  """
+  Comparator for the inherited template's ID.
+  """
+  inheritedFromId: IDComparator
   """
   Comparator for the template's name.
   """
@@ -33583,7 +33599,7 @@ input TeamUpdateInput {
   """
   issueEstimationType: String
   """
-  Whether new users should join this team by default. Mutation restricted to workspace admins!
+  Whether new users should join this team by default. Mutation restricted to workspace admins or owners!
   """
   joinByDefault: Boolean
   """
@@ -33615,7 +33631,7 @@ input TeamUpdateInput {
   """
   requirePriorityToLeaveTriage: Boolean
   """
-  Whether the team is managed by SCIM integration. Mutation restricted to workspace admins and only unsetting is allowed!
+  Whether the team is managed by SCIM integration. Mutation restricted to workspace admins or owners and only unsetting is allowed!
   """
   scimManaged: Boolean
   """

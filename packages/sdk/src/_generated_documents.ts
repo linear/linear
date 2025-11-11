@@ -300,7 +300,7 @@ export type AgentSession = Node & {
   comment?: Maybe<Comment>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
-  /** The user that created this agent session. */
+  /** The human user responsible for the agent session. Null if the session was initiated via automation or by an agent user, with no responsible human user. */
   creator?: Maybe<User>;
   /** The time the agent session was dismissed. */
   dismissedAt?: Maybe<Scalars["DateTime"]>;
@@ -456,9 +456,9 @@ export type AgentSessionWebhookPayload = {
   commentId?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["String"];
-  /** The user that created the agent session. */
+  /** The human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user. */
   creator?: Maybe<UserChildWebhookPayload>;
-  /** The ID of the user that created the agent session. */
+  /** The ID of the human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user. */
   creatorId?: Maybe<Scalars["String"]>;
   /** The time the agent session ended. */
   endedAt?: Maybe<Scalars["String"]>;
@@ -3029,6 +3029,8 @@ export type CycleFilter = {
   endsAt?: InputMaybe<DateComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
+  /** Comparator for the inherited cycle ID. */
+  inheritedFromId?: InputMaybe<IdComparator>;
   /** Comparator for the filtering active cycle. */
   isActive?: InputMaybe<BooleanComparator>;
   /** Comparator for the filtering future cycles. */
@@ -11807,6 +11809,8 @@ export type NullableCycleFilter = {
   endsAt?: InputMaybe<DateComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
+  /** Comparator for the inherited cycle ID. */
+  inheritedFromId?: InputMaybe<IdComparator>;
   /** Comparator for the filtering active cycle. */
   isActive?: InputMaybe<BooleanComparator>;
   /** Comparator for the filtering future cycles. */
@@ -11863,6 +11867,8 @@ export type NullableDateComparator = {
 export type NullableDocumentContentFilter = {
   /** Compound filters, all of which need to be matched by the user. */
   and?: InputMaybe<Array<NullableDocumentContentFilter>>;
+  /** Comparator for the document content. */
+  content?: InputMaybe<NullableStringComparator>;
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the document content document must satisfy. */
@@ -12255,6 +12261,8 @@ export type NullableTemplateFilter = {
   createdAt?: InputMaybe<DateComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
+  /** Comparator for the inherited template's ID. */
+  inheritedFromId?: InputMaybe<IdComparator>;
   /** Comparator for the template's name. */
   name?: InputMaybe<StringComparator>;
   /** Filter based on the existence of the relation. */
@@ -18702,7 +18710,7 @@ export type TeamUpdateInput = {
   issueEstimationExtended?: InputMaybe<Scalars["Boolean"]>;
   /** The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt". */
   issueEstimationType?: InputMaybe<Scalars["String"]>;
-  /** Whether new users should join this team by default. Mutation restricted to workspace admins! */
+  /** Whether new users should join this team by default. Mutation restricted to workspace admins or owners! */
   joinByDefault?: InputMaybe<Scalars["Boolean"]>;
   /** The key of the team. */
   key?: InputMaybe<Scalars["String"]>;
@@ -18718,7 +18726,7 @@ export type TeamUpdateInput = {
   productIntelligenceScope?: InputMaybe<ProductIntelligenceScope>;
   /** Whether an issue needs to have a priority set before leaving triage. */
   requirePriorityToLeaveTriage?: InputMaybe<Scalars["Boolean"]>;
-  /** Whether the team is managed by SCIM integration. Mutation restricted to workspace admins and only unsetting is allowed! */
+  /** Whether the team is managed by SCIM integration. Mutation restricted to workspace admins or owners and only unsetting is allowed! */
   scimManaged?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to move issues to bottom of the column when changing state. */
   setIssueSortOrderOnStateChange?: InputMaybe<Scalars["String"]>;
@@ -22755,8 +22763,8 @@ export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
 > & {
     appUser: { __typename?: "User" } & Pick<User, "id">;
     comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
-    issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+    issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
   };
 
 export type CycleFragment = { __typename: "Cycle" } & Pick<
@@ -24986,9 +24994,9 @@ export type AgentSessionEventWebhookPayloadFragment = { __typename: "AgentSessio
       | "appUserId"
       | "commentId"
       | "id"
+      | "creatorId"
       | "issueId"
       | "organizationId"
-      | "creatorId"
       | "status"
       | "archivedAt"
       | "createdAt"
@@ -25003,17 +25011,17 @@ export type AgentSessionEventWebhookPayloadFragment = { __typename: "AgentSessio
             "id" | "documentContentId" | "initiativeUpdateId" | "issueId" | "projectUpdateId" | "userId" | "body"
           >
         >;
-        issue?: Maybe<
-          { __typename: "IssueWithDescriptionChildWebhookPayload" } & Pick<
-            IssueWithDescriptionChildWebhookPayload,
-            "id" | "teamId" | "url" | "description" | "identifier" | "title"
-          > & { team: { __typename: "TeamChildWebhookPayload" } & Pick<TeamChildWebhookPayload, "id" | "key" | "name"> }
-        >;
         creator?: Maybe<
           { __typename: "UserChildWebhookPayload" } & Pick<
             UserChildWebhookPayload,
             "id" | "url" | "avatarUrl" | "email" | "name"
           >
+        >;
+        issue?: Maybe<
+          { __typename: "IssueWithDescriptionChildWebhookPayload" } & Pick<
+            IssueWithDescriptionChildWebhookPayload,
+            "id" | "teamId" | "url" | "description" | "identifier" | "title"
+          > & { team: { __typename: "TeamChildWebhookPayload" } & Pick<TeamChildWebhookPayload, "id" | "key" | "name"> }
         >;
       };
     previousComments?: Maybe<
@@ -25047,9 +25055,9 @@ export type AgentSessionWebhookPayloadFragment = { __typename: "AgentSessionWebh
   | "appUserId"
   | "commentId"
   | "id"
+  | "creatorId"
   | "issueId"
   | "organizationId"
-  | "creatorId"
   | "status"
   | "archivedAt"
   | "createdAt"
@@ -25064,17 +25072,17 @@ export type AgentSessionWebhookPayloadFragment = { __typename: "AgentSessionWebh
         "id" | "documentContentId" | "initiativeUpdateId" | "issueId" | "projectUpdateId" | "userId" | "body"
       >
     >;
-    issue?: Maybe<
-      { __typename: "IssueWithDescriptionChildWebhookPayload" } & Pick<
-        IssueWithDescriptionChildWebhookPayload,
-        "id" | "teamId" | "url" | "description" | "identifier" | "title"
-      > & { team: { __typename: "TeamChildWebhookPayload" } & Pick<TeamChildWebhookPayload, "id" | "key" | "name"> }
-    >;
     creator?: Maybe<
       { __typename: "UserChildWebhookPayload" } & Pick<
         UserChildWebhookPayload,
         "id" | "url" | "avatarUrl" | "email" | "name"
       >
+    >;
+    issue?: Maybe<
+      { __typename: "IssueWithDescriptionChildWebhookPayload" } & Pick<
+        IssueWithDescriptionChildWebhookPayload,
+        "id" | "teamId" | "url" | "description" | "identifier" | "title"
+      > & { team: { __typename: "TeamChildWebhookPayload" } & Pick<TeamChildWebhookPayload, "id" | "key" | "name"> }
     >;
   };
 
@@ -26068,8 +26076,8 @@ export type AgentSessionConnectionFragment = { __typename: "AgentSessionConnecti
     > & {
         appUser: { __typename?: "User" } & Pick<User, "id">;
         comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
-        issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
         creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+        issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
       }
   >;
   pageInfo: { __typename: "PageInfo" } & Pick<
@@ -31227,8 +31235,8 @@ export type AgentSessionQuery = { __typename?: "Query" } & {
   > & {
       appUser: { __typename?: "User" } & Pick<User, "id">;
       comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
-      issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
       creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+      issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
     };
 };
 
@@ -31307,8 +31315,8 @@ export type AgentSessionsQuery = { __typename?: "Query" } & {
       > & {
           appUser: { __typename?: "User" } & Pick<User, "id">;
           comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
-          issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
           creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+          issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
         }
     >;
     pageInfo: { __typename: "PageInfo" } & Pick<
@@ -57308,9 +57316,9 @@ export const AgentSessionWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "appUserId" } },
           { kind: "Field", name: { kind: "Name", value: "commentId" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "creatorId" } },
           { kind: "Field", name: { kind: "Name", value: "issueId" } },
           { kind: "Field", name: { kind: "Name", value: "organizationId" } },
-          { kind: "Field", name: { kind: "Name", value: "creatorId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "comment" },
@@ -57320,6 +57328,14 @@ export const AgentSessionWebhookPayloadFragmentDoc = {
             },
           },
           { kind: "Field", name: { kind: "Name", value: "status" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserChildWebhookPayload" } }],
+            },
+          },
           {
             kind: "Field",
             name: { kind: "Name", value: "issue" },
@@ -57336,14 +57352,6 @@ export const AgentSessionWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "endedAt" } },
           { kind: "Field", name: { kind: "Name", value: "startedAt" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "UserChildWebhookPayload" } }],
-            },
-          },
         ],
       },
     },
@@ -59417,6 +59425,14 @@ export const AgentSessionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "status" } },
           {
             kind: "Field",
+            name: { kind: "Name", value: "creator" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "issue" },
             selectionSet: {
               kind: "SelectionSet",
@@ -59431,14 +59447,6 @@ export const AgentSessionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "dismissedAt" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "creator" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-            },
-          },
         ],
       },
     },
