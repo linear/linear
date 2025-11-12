@@ -1,0 +1,37 @@
+Title,Description,Status,Priority,Labels,Milestone,Assignee
+"JKO-5: Notion Setup - Create Master Plan","สร้างหน้า JKOS Unified Master Plan ใน Notion และกำหนดโครงสร้าง Sprint ทั้งหมด
+
+✅ Task เสร็จแล้ว","Done","1","foundation","Foundation (Week 1-2)",""
+"JKO-6: Google Drive - The Warehouse Setup","1. รัน Python Script จาก EngineerTask
+2. ย้ายโฟลเดอร์ JKOS_System จาก Desktop → Google Drive
+3. แชร์ให้ Assistant (Editor Access)
+
+📄 Script: ดูใน Notion EngineerTask page","Todo","1","infrastructure, sprint-1","Foundation (Week 1-2)",""
+"JKO-7: Apple ID & iCloud Setup","1. ตรวจสอบ Apple ID และพื้นที่ iCloud
+2. ตั้งค่า iCloud Drive
+3. แยก Folder MINDCRAFT_Personal ออกจากงาน","Todo","1","apple-ecosystem, sprint-1","Foundation (Week 1-2)",""
+"JKO-8: Device Setup (Hybrid: Windows + Mac)","Acer Nitro (Windows):
+- ติดตั้ง Google Drive Desktop
+- ติดตั้ง Craft (Web)
+
+MacBook (macOS):
+- ติดตั้ง Google Drive Desktop
+- ติดตั้ง Craft App
+- ติดตั้ง Notion App","Todo","2","devices, sprint-2","Workspace (Week 3-4)",""
+"JKO-9: Craft Workspace Setup","1. เปลี่ยนชื่อ Space → JK'OS
+2. สร้างหน้า Command Center
+3. เชิญ Assistant เข้า Space","Todo","2","workspace, sprint-2","Workspace (Week 3-4)",""
+"JKO-10: Notion Dashboard Creation","สร้างหน้า Dashboard หลักใน Notion ที่ลิงก์มาหา Master Plan","Todo","2","notion, sprint-2","Workspace (Week 3-4)",""
+"JKO-11: File Migration to Google Drive","(Assistant รับผิดชอบ)
+เริ่มย้ายไฟล์งานเก่าเข้า JKOS_System ใน Google Drive","Todo","3","migration, sprint-3","Automation (Week 5-6)","Assistant"
+"JKO-12: Apple Shortcuts Creation","1. Shortcut: Quick Capture (จดโน้ตด่วนลง Craft)
+2. Shortcut: Meeting Mode (เปิด Notion + Calendar)","Todo","2","automation, apple-ecosystem, sprint-3","Automation (Week 5-6)",""
+"JKO-13: Backup Strategy - 3 Layer Protection","1. ตั้งค่า Time Machine บน Mac
+2. ตรวจสอบการสำรองข้อมูล Google Drive
+3. ทดสอบ Restore","Todo","1","backup, sprint-4","Advanced (Week 7-10)",""
+"JKO-14: Documentation - JKOS Work Manual","เขียนคู่มือ JKOS Work Manual เก็บไว้ใน 02_Areas
+
+รวม:
+- วิธีใช้งาน
+- Troubleshooting
+- Best Practices","Todo","3","documentation, sprint-4","Advanced (Week 7-10)",""
