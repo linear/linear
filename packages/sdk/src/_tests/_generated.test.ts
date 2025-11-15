@@ -414,6 +414,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the agentSession.dismissedBy query for L.User */
+    it("agentSession.dismissedBy", async () => {
+      if (_agentSession) {
+        const agentSession_dismissedBy: L.User | undefined = await _agentSession.dismissedBy;
+        expect(agentSession_dismissedBy instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No AgentSession found - cannot test agentSession.dismissedBy query");
+      }
+    });
+
     /** Test the agentSession.issue query for L.Issue */
     it("agentSession.issue", async () => {
       if (_agentSession) {
@@ -421,6 +431,16 @@ describe("generated", () => {
         expect(agentSession_issue instanceof L.Issue);
       } else {
         console.warn("codegen-doc:print: No AgentSession found - cannot test agentSession.issue query");
+      }
+    });
+
+    /** Test the agentSession.sourceComment query for L.Comment */
+    it("agentSession.sourceComment", async () => {
+      if (_agentSession) {
+        const agentSession_sourceComment: L.Comment | undefined = await _agentSession.sourceComment;
+        expect(agentSession_sourceComment instanceof L.Comment);
+      } else {
+        console.warn("codegen-doc:print: No AgentSession found - cannot test agentSession.sourceComment query");
       }
     });
   });

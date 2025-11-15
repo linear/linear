@@ -499,7 +499,9 @@ export class AgentSession extends Request {
   private _appUser: L.AgentSessionFragment["appUser"];
   private _comment?: L.AgentSessionFragment["comment"];
   private _creator?: L.AgentSessionFragment["creator"];
+  private _dismissedBy?: L.AgentSessionFragment["dismissedBy"];
   private _issue?: L.AgentSessionFragment["issue"];
+  private _sourceComment?: L.AgentSessionFragment["sourceComment"];
 
   public constructor(request: LinearRequest, data: L.AgentSessionFragment) {
     super(request);
@@ -519,7 +521,9 @@ export class AgentSession extends Request {
     this._appUser = data.appUser;
     this._comment = data.comment ?? undefined;
     this._creator = data.creator ?? undefined;
+    this._dismissedBy = data.dismissedBy ?? undefined;
     this._issue = data.issue ?? undefined;
+    this._sourceComment = data.sourceComment ?? undefined;
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -575,6 +579,14 @@ export class AgentSession extends Request {
   public get creatorId(): string | undefined {
     return this._creator?.id;
   }
+  /** The user who dismissed the agent session. */
+  public get dismissedBy(): LinearFetch<User> | undefined {
+    return this._dismissedBy?.id ? new UserQuery(this._request).fetch(this._dismissedBy?.id) : undefined;
+  }
+  /** The ID of user who dismissed the agent session. */
+  public get dismissedById(): string | undefined {
+    return this._dismissedBy?.id;
+  }
   /** The issue this agent session is associated with. */
   public get issue(): LinearFetch<Issue> | undefined {
     return this._issue?.id ? new IssueQuery(this._request).fetch(this._issue?.id) : undefined;
@@ -582,6 +594,14 @@ export class AgentSession extends Request {
   /** The ID of issue this agent session is associated with. */
   public get issueId(): string | undefined {
     return this._issue?.id;
+  }
+  /** The comment that this agent session was spawned from, if from a different thread. */
+  public get sourceComment(): LinearFetch<Comment> | undefined {
+    return this._sourceComment?.id ? new CommentQuery(this._request).fetch({ id: this._sourceComment?.id }) : undefined;
+  }
+  /** The ID of comment that this agent session was spawned from, if from a different thread. */
+  public get sourceCommentId(): string | undefined {
+    return this._sourceComment?.id;
   }
   /** Activities associated with this agent session. */
   public activities(variables?: Omit<L.AgentSession_ActivitiesQueryVariables, "id">) {
@@ -700,6 +720,7 @@ export class AgentSessionWebhookPayload {
     this.id = data.id;
     this.issueId = data.issueId ?? undefined;
     this.organizationId = data.organizationId;
+    this.sourceCommentId = data.sourceCommentId ?? undefined;
     this.sourceMetadata = data.sourceMetadata ?? undefined;
     this.startedAt = data.startedAt ?? undefined;
     this.status = data.status;
@@ -715,7 +736,7 @@ export class AgentSessionWebhookPayload {
   public appUserId: string;
   /** The time at which the entity was archived. */
   public archivedAt?: string;
-  /** The ID of the comment this agent session is associated with. */
+  /** The ID of the root comment of the thread this agent session is attached to. */
   public commentId?: string;
   /** The time at which the entity was created. */
   public createdAt: string;
@@ -729,6 +750,8 @@ export class AgentSessionWebhookPayload {
   public issueId?: string;
   /** The ID of the organization that the agent session belongs to. */
   public organizationId: string;
+  /** The ID of the comment that this agent session was spawned from, if from a different thread. */
+  public sourceCommentId?: string;
   /** Metadata about the external source that created this agent session. */
   public sourceMetadata?: L.Scalars["JSONObject"];
   /** The time the agent session started working. */
@@ -741,7 +764,7 @@ export class AgentSessionWebhookPayload {
   public type: string;
   /** The time at which the entity was updated. */
   public updatedAt: string;
-  /** The comment this agent session is associated with. */
+  /** The root comment of the thread this agent session is attached to. */
   public comment?: CommentChildWebhookPayload;
   /** The human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user. */
   public creator?: UserChildWebhookPayload;
@@ -1398,7 +1421,7 @@ export class AuthOrganization extends Request {
     this.scimEnabled = data.scimEnabled;
     this.serviceId = data.serviceId;
     this.urlKey = data.urlKey;
-    this.userCount = data.userCount;
+    this.userCount = data.userCount ?? undefined;
     this.releaseChannel = data.releaseChannel;
   }
 
@@ -1428,7 +1451,7 @@ export class AuthOrganization extends Request {
   public serviceId: string;
   /** The organization's unique URL key. */
   public urlKey: string;
-  public userCount: number;
+  public userCount?: number;
   /** The feature release channel the organization belongs to. */
   public releaseChannel: L.ReleaseChannel;
 }
@@ -11746,6 +11769,7 @@ export class Organization extends Request {
     this.feedEnabled = data.feedEnabled;
     this.fiscalYearStartMonth = data.fiscalYearStartMonth;
     this.gitBranchFormat = data.gitBranchFormat ?? undefined;
+    this.gitLinkbackDescriptionsEnabled = data.gitLinkbackDescriptionsEnabled;
     this.gitLinkbackMessagesEnabled = data.gitLinkbackMessagesEnabled;
     this.gitPublicLinkbackMessagesEnabled = data.gitPublicLinkbackMessagesEnabled;
     this.hipaaComplianceEnabled = data.hipaaComplianceEnabled;
@@ -11811,6 +11835,8 @@ export class Organization extends Request {
   public fiscalYearStartMonth: number;
   /** How git branches are formatted. If null, default formatting will be used. */
   public gitBranchFormat?: string;
+  /** Whether issue descriptions should be included in Git integration linkback messages. */
+  public gitLinkbackDescriptionsEnabled: boolean;
   /** Whether the Git integration linkback messages should be sent to private repositories. */
   public gitLinkbackMessagesEnabled: boolean;
   /** Whether the Git integration linkback messages should be sent to public repositories. */
