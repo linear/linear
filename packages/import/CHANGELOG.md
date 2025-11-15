@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.2.45
+
+### Patch Changes
+
+- Updated dependencies [d535751]
+  - @linear/sdk@64.0.0
+
 ## 2.2.44
 
 ### Patch Changes
