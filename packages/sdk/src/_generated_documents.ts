@@ -304,6 +304,8 @@ export type AgentSession = Node & {
   creator?: Maybe<User>;
   /** The time the agent session was dismissed. */
   dismissedAt?: Maybe<Scalars["DateTime"]>;
+  /** The user who dismissed the agent session. */
+  dismissedBy?: Maybe<User>;
   /** The time the agent session ended. */
   endedAt?: Maybe<Scalars["DateTime"]>;
   /** The URL of an external agent-hosted page associated with this session. */
@@ -314,6 +316,8 @@ export type AgentSession = Node & {
   issue?: Maybe<Issue>;
   /** A dynamically updated list of the agent's execution strategy. */
   plan?: Maybe<Scalars["JSON"]>;
+  /** The comment that this agent session was spawned from, if from a different thread. */
+  sourceComment?: Maybe<Comment>;
   /** Metadata about the external source that created this agent session. */
   sourceMetadata?: Maybe<Scalars["JSON"]>;
   /** The time the agent session started. */
@@ -450,9 +454,9 @@ export type AgentSessionWebhookPayload = {
   appUserId: Scalars["String"];
   /** The time at which the entity was archived. */
   archivedAt?: Maybe<Scalars["String"]>;
-  /** The comment this agent session is associated with. */
+  /** The root comment of the thread this agent session is attached to. */
   comment?: Maybe<CommentChildWebhookPayload>;
-  /** The ID of the comment this agent session is associated with. */
+  /** The ID of the root comment of the thread this agent session is attached to. */
   commentId?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["String"];
@@ -470,6 +474,8 @@ export type AgentSessionWebhookPayload = {
   issueId?: Maybe<Scalars["String"]>;
   /** The ID of the organization that the agent session belongs to. */
   organizationId: Scalars["String"];
+  /** The ID of the comment that this agent session was spawned from, if from a different thread. */
+  sourceCommentId?: Maybe<Scalars["String"]>;
   /** Metadata about the external source that created this agent session. */
   sourceMetadata?: Maybe<Scalars["JSONObject"]>;
   /** The time the agent session started working. */
@@ -980,7 +986,7 @@ export type AuthOrganization = {
   serviceId: Scalars["String"];
   /** The organization's unique URL key. */
   urlKey: Scalars["String"];
-  userCount: Scalars["Float"];
+  userCount?: Maybe<Scalars["Float"]>;
 };
 
 export type AuthResolverResponse = {
@@ -2245,6 +2251,8 @@ export type CustomerNeedNotification = Entity &
     id: Scalars["ID"];
     /** [Internal] Inbox URL for the notification. */
     inboxUrl: Scalars["String"];
+    /** [Internal] Initiative update health for new updates. */
+    initiativeUpdateHealth?: Maybe<Scalars["String"]>;
     /** [Internal] If notification actor was Linear. */
     isLinearActor: Scalars["Boolean"];
     /** [Internal] Issue's status type for issue notifications. */
@@ -2404,6 +2412,8 @@ export type CustomerNotification = Entity &
     id: Scalars["ID"];
     /** [Internal] Inbox URL for the notification. */
     inboxUrl: Scalars["String"];
+    /** [Internal] Initiative update health for new updates. */
+    initiativeUpdateHealth?: Maybe<Scalars["String"]>;
     /** [Internal] If notification actor was Linear. */
     isLinearActor: Scalars["Boolean"];
     /** [Internal] Issue's status type for issue notifications. */
@@ -3601,6 +3611,8 @@ export type DocumentNotification = Entity &
     id: Scalars["ID"];
     /** [Internal] Inbox URL for the notification. */
     inboxUrl: Scalars["String"];
+    /** [Internal] Initiative update health for new updates. */
+    initiativeUpdateHealth?: Maybe<Scalars["String"]>;
     /** [Internal] If notification actor was Linear. */
     isLinearActor: Scalars["Boolean"];
     /** [Internal] Issue's status type for issue notifications. */
@@ -5532,6 +5544,8 @@ export type InitiativeNotification = Entity &
     initiativeId: Scalars["String"];
     /** The initiative update related to the notification. */
     initiativeUpdate?: Maybe<InitiativeUpdate>;
+    /** [Internal] Initiative update health for new updates. */
+    initiativeUpdateHealth?: Maybe<Scalars["String"]>;
     /** Related initiative update ID. */
     initiativeUpdateId?: Maybe<Scalars["String"]>;
     /** [Internal] If notification actor was Linear. */
@@ -7990,6 +8004,8 @@ export type IssueNotification = Entity &
     id: Scalars["ID"];
     /** [Internal] Inbox URL for the notification. */
     inboxUrl: Scalars["String"];
+    /** [Internal] Initiative update health for new updates. */
+    initiativeUpdateHealth?: Maybe<Scalars["String"]>;
     /** [Internal] If notification actor was Linear. */
     isLinearActor: Scalars["Boolean"];
     /** The issue related to the notification. */
@@ -10414,6 +10430,7 @@ export type MutationIntegrationLaunchDarklyPersonalConnectArgs = {
 
 export type MutationIntegrationMcpServerConnectArgs = {
   serverUrl: Scalars["String"];
+  teamId?: InputMaybe<Scalars["String"]>;
 };
 
 export type MutationIntegrationMcpServerPersonalConnectArgs = {
@@ -11300,6 +11317,8 @@ export type Notification = {
   id: Scalars["ID"];
   /** [Internal] Inbox URL for the notification. */
   inboxUrl: Scalars["String"];
+  /** [Internal] Initiative update health for new updates. */
+  initiativeUpdateHealth?: Maybe<Scalars["String"]>;
   /** [Internal] If notification actor was Linear. */
   isLinearActor: Scalars["Boolean"];
   /** [Internal] Issue's status type for issue notifications. */
@@ -12479,6 +12498,8 @@ export type OauthClientApprovalNotification = Entity &
     id: Scalars["ID"];
     /** [Internal] Inbox URL for the notification. */
     inboxUrl: Scalars["String"];
+    /** [Internal] Initiative update health for new updates. */
+    initiativeUpdateHealth?: Maybe<Scalars["String"]>;
     /** [Internal] If notification actor was Linear. */
     isLinearActor: Scalars["Boolean"];
     /** [Internal] Issue's status type for issue notifications. */
@@ -12550,6 +12571,10 @@ export type Organization = Node & {
   allowedFileUploadContentTypes?: Maybe<Array<Scalars["String"]>>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** [INTERNAL] Whether code intelligence is enabled for the organization. */
+  codeIntelligenceEnabled: Scalars["Boolean"];
+  /** [INTERNAL] GitHub repository in owner/repo format for code intelligence. */
+  codeIntelligenceRepository?: Maybe<Scalars["String"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** Aproximate number of issues in the organization, including archived ones. */
@@ -12574,6 +12599,8 @@ export type Organization = Node & {
   generatedUpdatesEnabled: Scalars["Boolean"];
   /** How git branches are formatted. If null, default formatting will be used. */
   gitBranchFormat?: Maybe<Scalars["String"]>;
+  /** Whether issue descriptions should be included in Git integration linkback messages. */
+  gitLinkbackDescriptionsEnabled: Scalars["Boolean"];
   /** Whether the Git integration linkback messages should be sent to private repositories. */
   gitLinkbackMessagesEnabled: Scalars["Boolean"];
   /** Whether the Git integration linkback messages should be sent to public repositories. */
@@ -13007,6 +13034,8 @@ export type OrganizationPayload = {
 };
 
 export type OrganizationSecuritySettingsInput = {
+  /** The minimum role required to manage agent guidance prompts and settings. */
+  agentGuidanceRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to manage API settings. */
   apiSettingsRole?: InputMaybe<UserRoleType>;
   /** The minimum role required to import data. */
@@ -13051,6 +13080,10 @@ export type OrganizationUpdateInput = {
   allowedAuthServices?: InputMaybe<Array<Scalars["String"]>>;
   /** Allowed file upload content types. */
   allowedFileUploadContentTypes?: InputMaybe<Array<Scalars["String"]>>;
+  /** [INTERNAL] Whether code intelligence is enabled for the organization. */
+  codeIntelligenceEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** [INTERNAL] GitHub repository in owner/repo format for code intelligence. */
+  codeIntelligenceRepository?: InputMaybe<Scalars["String"]>;
   /** [INTERNAL] Configuration settings for the Customers feature. */
   customersConfiguration?: InputMaybe<Scalars["JSONObject"]>;
   /** [INTERNAL] Whether the organization is using customers. */
@@ -13065,6 +13098,8 @@ export type OrganizationUpdateInput = {
   generatedUpdatesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** How git branches are formatted. If null, default formatting will be used. */
   gitBranchFormat?: InputMaybe<Scalars["String"]>;
+  /** Whether issue descriptions should be included in Git integration linkback messages. */
+  gitLinkbackDescriptionsEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether the Git integration linkback messages should be sent for private repositories. */
   gitLinkbackMessagesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether the Git integration linkback messages should be sent for public repositories. */
@@ -13435,6 +13470,8 @@ export type PostNotification = Entity &
     id: Scalars["ID"];
     /** [Internal] Inbox URL for the notification. */
     inboxUrl: Scalars["String"];
+    /** [Internal] Initiative update health for new updates. */
+    initiativeUpdateHealth?: Maybe<Scalars["String"]>;
     /** [Internal] If notification actor was Linear. */
     isLinearActor: Scalars["Boolean"];
     /** [Internal] Issue's status type for issue notifications. */
@@ -14613,6 +14650,8 @@ export type ProjectNotification = Entity &
     id: Scalars["ID"];
     /** [Internal] Inbox URL for the notification. */
     inboxUrl: Scalars["String"];
+    /** [Internal] Initiative update health for new updates. */
+    initiativeUpdateHealth?: Maybe<Scalars["String"]>;
     /** [Internal] If notification actor was Linear. */
     isLinearActor: Scalars["Boolean"];
     /** [Internal] Issue's status type for issue notifications. */
@@ -15758,6 +15797,8 @@ export type PullRequest = Node & {
   createdAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** The merge commit created when the PR was merged. */
+  mergeCommit?: Maybe<PullRequestCommit>;
   /** Merge settings for this pull request. */
   mergeSettings?: Maybe<PullRequestMergeSettings>;
   /** The number of the pull request in the version control system. */
@@ -15862,6 +15903,8 @@ export type PullRequestNotification = Entity &
     id: Scalars["ID"];
     /** [Internal] Inbox URL for the notification. */
     inboxUrl: Scalars["String"];
+    /** [Internal] Initiative update health for new updates. */
+    initiativeUpdateHealth?: Maybe<Scalars["String"]>;
     /** [Internal] If notification actor was Linear. */
     isLinearActor: Scalars["Boolean"];
     /** [Internal] Issue's status type for issue notifications. */
@@ -17785,6 +17828,7 @@ export enum SlackChannelType {
   DirectMessage = "DirectMessage",
   MultiPersonDirectMessage = "MultiPersonDirectMessage",
   Private = "Private",
+  PrivateGroup = "PrivateGroup",
   Public = "Public",
 }
 
@@ -18770,6 +18814,8 @@ export type Template = Node & {
   creator?: Maybe<User>;
   /** Template description. */
   description?: Maybe<Scalars["String"]>;
+  /** [Internal] Whether the template has form fields */
+  hasFormFields: Scalars["Boolean"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
   /** The original template inherited from. */
@@ -22762,9 +22808,11 @@ export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   | "id"
 > & {
     appUser: { __typename?: "User" } & Pick<User, "id">;
+    sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
     comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
     creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+    dismissedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
   };
 
 export type CycleFragment = { __typename: "Cycle" } & Pick<
@@ -23774,6 +23822,7 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "hipaaComplianceEnabled"
   | "samlEnabled"
   | "scimEnabled"
+  | "gitLinkbackDescriptionsEnabled"
   | "allowMembersToInvite"
   | "restrictTeamCreationToAdmins"
   | "gitLinkbackMessagesEnabled"
@@ -24992,11 +25041,12 @@ export type AgentSessionEventWebhookPayloadFragment = { __typename: "AgentSessio
       | "summary"
       | "sourceMetadata"
       | "appUserId"
-      | "commentId"
+      | "sourceCommentId"
       | "id"
       | "creatorId"
       | "issueId"
       | "organizationId"
+      | "commentId"
       | "status"
       | "archivedAt"
       | "createdAt"
@@ -25005,12 +25055,6 @@ export type AgentSessionEventWebhookPayloadFragment = { __typename: "AgentSessio
       | "startedAt"
       | "type"
     > & {
-        comment?: Maybe<
-          { __typename: "CommentChildWebhookPayload" } & Pick<
-            CommentChildWebhookPayload,
-            "id" | "documentContentId" | "initiativeUpdateId" | "issueId" | "projectUpdateId" | "userId" | "body"
-          >
-        >;
         creator?: Maybe<
           { __typename: "UserChildWebhookPayload" } & Pick<
             UserChildWebhookPayload,
@@ -25022,6 +25066,12 @@ export type AgentSessionEventWebhookPayloadFragment = { __typename: "AgentSessio
             IssueWithDescriptionChildWebhookPayload,
             "id" | "teamId" | "url" | "description" | "identifier" | "title"
           > & { team: { __typename: "TeamChildWebhookPayload" } & Pick<TeamChildWebhookPayload, "id" | "key" | "name"> }
+        >;
+        comment?: Maybe<
+          { __typename: "CommentChildWebhookPayload" } & Pick<
+            CommentChildWebhookPayload,
+            "id" | "documentContentId" | "initiativeUpdateId" | "issueId" | "projectUpdateId" | "userId" | "body"
+          >
         >;
       };
     previousComments?: Maybe<
@@ -25053,11 +25103,12 @@ export type AgentSessionWebhookPayloadFragment = { __typename: "AgentSessionWebh
   | "summary"
   | "sourceMetadata"
   | "appUserId"
-  | "commentId"
+  | "sourceCommentId"
   | "id"
   | "creatorId"
   | "issueId"
   | "organizationId"
+  | "commentId"
   | "status"
   | "archivedAt"
   | "createdAt"
@@ -25066,12 +25117,6 @@ export type AgentSessionWebhookPayloadFragment = { __typename: "AgentSessionWebh
   | "startedAt"
   | "type"
 > & {
-    comment?: Maybe<
-      { __typename: "CommentChildWebhookPayload" } & Pick<
-        CommentChildWebhookPayload,
-        "id" | "documentContentId" | "initiativeUpdateId" | "issueId" | "projectUpdateId" | "userId" | "body"
-      >
-    >;
     creator?: Maybe<
       { __typename: "UserChildWebhookPayload" } & Pick<
         UserChildWebhookPayload,
@@ -25083,6 +25128,12 @@ export type AgentSessionWebhookPayloadFragment = { __typename: "AgentSessionWebh
         IssueWithDescriptionChildWebhookPayload,
         "id" | "teamId" | "url" | "description" | "identifier" | "title"
       > & { team: { __typename: "TeamChildWebhookPayload" } & Pick<TeamChildWebhookPayload, "id" | "key" | "name"> }
+    >;
+    comment?: Maybe<
+      { __typename: "CommentChildWebhookPayload" } & Pick<
+        CommentChildWebhookPayload,
+        "id" | "documentContentId" | "initiativeUpdateId" | "issueId" | "projectUpdateId" | "userId" | "body"
+      >
     >;
   };
 
@@ -26075,9 +26126,11 @@ export type AgentSessionConnectionFragment = { __typename: "AgentSessionConnecti
       | "id"
     > & {
         appUser: { __typename?: "User" } & Pick<User, "id">;
+        sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
         comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
         creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+        dismissedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
       }
   >;
   pageInfo: { __typename: "PageInfo" } & Pick<
@@ -31234,9 +31287,11 @@ export type AgentSessionQuery = { __typename?: "Query" } & {
     | "id"
   > & {
       appUser: { __typename?: "User" } & Pick<User, "id">;
+      sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
       comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
       creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
       issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+      dismissedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
     };
 };
 
@@ -31314,9 +31369,11 @@ export type AgentSessionsQuery = { __typename?: "Query" } & {
         | "id"
       > & {
           appUser: { __typename?: "User" } & Pick<User, "id">;
+          sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
           comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
           creator?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
           issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+          dismissedBy?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
         }
     >;
     pageInfo: { __typename: "PageInfo" } & Pick<
@@ -39610,6 +39667,7 @@ export type OrganizationQuery = { __typename?: "Query" } & {
     | "hipaaComplianceEnabled"
     | "samlEnabled"
     | "scimEnabled"
+    | "gitLinkbackDescriptionsEnabled"
     | "allowMembersToInvite"
     | "restrictTeamCreationToAdmins"
     | "gitLinkbackMessagesEnabled"
@@ -55828,6 +55886,7 @@ export const OrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "hipaaComplianceEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "samlEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "scimEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "gitLinkbackDescriptionsEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "allowMembersToInvite" } },
           { kind: "Field", name: { kind: "Name", value: "restrictTeamCreationToAdmins" } },
           { kind: "Field", name: { kind: "Name", value: "gitLinkbackMessagesEnabled" } },
@@ -57314,19 +57373,12 @@ export const AgentSessionWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "summary" } },
           { kind: "Field", name: { kind: "Name", value: "sourceMetadata" } },
           { kind: "Field", name: { kind: "Name", value: "appUserId" } },
-          { kind: "Field", name: { kind: "Name", value: "commentId" } },
+          { kind: "Field", name: { kind: "Name", value: "sourceCommentId" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "creatorId" } },
           { kind: "Field", name: { kind: "Name", value: "issueId" } },
           { kind: "Field", name: { kind: "Name", value: "organizationId" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "comment" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentChildWebhookPayload" } }],
-            },
-          },
+          { kind: "Field", name: { kind: "Name", value: "commentId" } },
           { kind: "Field", name: { kind: "Name", value: "status" } },
           {
             kind: "Field",
@@ -57344,6 +57396,14 @@ export const AgentSessionWebhookPayloadFragmentDoc = {
               selections: [
                 { kind: "FragmentSpread", name: { kind: "Name", value: "IssueWithDescriptionChildWebhookPayload" } },
               ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "comment" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "CommentChildWebhookPayload" } }],
             },
           },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
@@ -59416,6 +59476,14 @@ export const AgentSessionFragmentDoc = {
           },
           {
             kind: "Field",
+            name: { kind: "Name", value: "sourceComment" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          {
+            kind: "Field",
             name: { kind: "Name", value: "comment" },
             selectionSet: {
               kind: "SelectionSet",
@@ -59447,6 +59515,14 @@ export const AgentSessionFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "dismissedAt" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "dismissedBy" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
         ],
       },
     },

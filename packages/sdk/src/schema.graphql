@@ -458,6 +458,10 @@ type AgentSession implements Node {
   """
   dismissedAt: DateTime
   """
+  The user who dismissed the agent session.
+  """
+  dismissedBy: User
+  """
   The time the agent session ended.
   """
   endedAt: DateTime
@@ -477,6 +481,10 @@ type AgentSession implements Node {
   A dynamically updated list of the agent's execution strategy.
   """
   plan: JSON
+  """
+  The comment that this agent session was spawned from, if from a different thread.
+  """
+  sourceComment: Comment
   """
   Metadata about the external source that created this agent session.
   """
@@ -670,11 +678,11 @@ type AgentSessionWebhookPayload {
   """
   archivedAt: String
   """
-  The comment this agent session is associated with.
+  The root comment of the thread this agent session is attached to.
   """
   comment: CommentChildWebhookPayload
   """
-  The ID of the comment this agent session is associated with.
+  The ID of the root comment of the thread this agent session is attached to.
   """
   commentId: String
   """
@@ -709,6 +717,10 @@ type AgentSessionWebhookPayload {
   The ID of the organization that the agent session belongs to.
   """
   organizationId: String!
+  """
+  The ID of the comment that this agent session was spawned from, if from a different thread.
+  """
+  sourceCommentId: String
   """
   Metadata about the external source that created this agent session.
   """
@@ -1600,7 +1612,7 @@ type AuthOrganization {
   The organization's unique URL key.
   """
   urlKey: String!
-  userCount: Float!
+  userCount: Float
 }
 
 type AuthResolverResponse {
@@ -3893,6 +3905,10 @@ type CustomerNeedNotification implements Entity & Node & Notification {
   """
   inboxUrl: String!
   """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
+  """
   [Internal] If notification actor was Linear.
   """
   isLinearActor: Boolean!
@@ -4175,6 +4191,10 @@ type CustomerNotification implements Entity & Node & Notification {
   [Internal] Inbox URL for the notification.
   """
   inboxUrl: String!
+  """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
   """
   [Internal] If notification actor was Linear.
   """
@@ -6265,6 +6285,10 @@ type DocumentNotification implements Entity & Node & Notification {
   [Internal] Inbox URL for the notification.
   """
   inboxUrl: String!
+  """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
   """
   [Internal] If notification actor was Linear.
   """
@@ -9581,6 +9605,10 @@ type InitiativeNotification implements Entity & Node & Notification {
   The initiative update related to the notification.
   """
   initiativeUpdate: InitiativeUpdate
+  """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
   """
   Related initiative update ID.
   """
@@ -14050,6 +14078,10 @@ type IssueNotification implements Entity & Node & Notification {
   """
   inboxUrl: String!
   """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
+  """
   [Internal] If notification actor was Linear.
   """
   isLinearActor: Boolean!
@@ -17798,6 +17830,10 @@ type Mutation {
     The URL of the MCP server to connect with.
     """
     serverUrl: String!
+    """
+    The ID of the team to connect the MCP server to.
+    """
+    teamId: String
   ): IntegrationPayload!
   """
   [INTERNAL] Connects the user's personal account with an MCP server.
@@ -20011,6 +20047,10 @@ interface Notification implements Entity & Node {
   """
   inboxUrl: String!
   """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
+  """
   [Internal] If notification actor was Linear.
   """
   isLinearActor: Boolean!
@@ -22142,6 +22182,10 @@ type OauthClientApprovalNotification implements Entity & Node & Notification {
   """
   inboxUrl: String!
   """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
+  """
   [Internal] If notification actor was Linear.
   """
   isLinearActor: Boolean!
@@ -22263,6 +22307,14 @@ type Organization implements Node {
   """
   archivedAt: DateTime
   """
+  [INTERNAL] Whether code intelligence is enabled for the organization.
+  """
+  codeIntelligenceEnabled: Boolean!
+  """
+  [INTERNAL] GitHub repository in owner/repo format for code intelligence.
+  """
+  codeIntelligenceRepository: String
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -22310,6 +22362,10 @@ type Organization implements Node {
   How git branches are formatted. If null, default formatting will be used.
   """
   gitBranchFormat: String
+  """
+  Whether issue descriptions should be included in Git integration linkback messages.
+  """
+  gitLinkbackDescriptionsEnabled: Boolean!
   """
   Whether the Git integration linkback messages should be sent to private repositories.
   """
@@ -23075,6 +23131,10 @@ type OrganizationPayload {
 
 input OrganizationSecuritySettingsInput {
   """
+  The minimum role required to manage agent guidance prompts and settings.
+  """
+  agentGuidanceRole: UserRoleType
+  """
   The minimum role required to manage API settings.
   """
   apiSettingsRole: UserRoleType
@@ -23152,6 +23212,14 @@ input OrganizationUpdateInput {
   """
   allowedFileUploadContentTypes: [String!]
   """
+  [INTERNAL] Whether code intelligence is enabled for the organization.
+  """
+  codeIntelligenceEnabled: Boolean
+  """
+  [INTERNAL] GitHub repository in owner/repo format for code intelligence.
+  """
+  codeIntelligenceRepository: String
+  """
   [INTERNAL] Configuration settings for the Customers feature.
   """
   customersConfiguration: JSONObject
@@ -23179,6 +23247,10 @@ input OrganizationUpdateInput {
   How git branches are formatted. If null, default formatting will be used.
   """
   gitBranchFormat: String
+  """
+  Whether issue descriptions should be included in Git integration linkback messages.
+  """
+  gitLinkbackDescriptionsEnabled: Boolean
   """
   Whether the Git integration linkback messages should be sent for private repositories.
   """
@@ -23763,6 +23835,10 @@ type PostNotification implements Entity & Node & Notification {
   [Internal] Inbox URL for the notification.
   """
   inboxUrl: String!
+  """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
   """
   [Internal] If notification actor was Linear.
   """
@@ -25983,6 +26059,10 @@ type ProjectNotification implements Entity & Node & Notification {
   """
   inboxUrl: String!
   """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
+  """
   [Internal] If notification actor was Linear.
   """
   isLinearActor: Boolean!
@@ -28139,6 +28219,10 @@ type PullRequest implements Node {
   """
   id: ID!
   """
+  The merge commit created when the PR was merged.
+  """
+  mergeCommit: PullRequestCommit
+  """
   Merge settings for this pull request.
   """
   mergeSettings: PullRequestMergeSettings
@@ -28315,6 +28399,10 @@ type PullRequestNotification implements Entity & Node & Notification {
   [Internal] Inbox URL for the notification.
   """
   inboxUrl: String!
+  """
+  [Internal] Initiative update health for new updates.
+  """
+  initiativeUpdateHealth: String
   """
   [Internal] If notification actor was Linear.
   """
@@ -31899,6 +31987,7 @@ enum SlackChannelType {
   DirectMessage
   MultiPersonDirectMessage
   Private
+  PrivateGroup
   Public
 }
 
@@ -33710,6 +33799,10 @@ type Template implements Node {
   Template description.
   """
   description: String
+  """
+  [Internal] Whether the template has form fields
+  """
+  hasFormFields: Boolean!
   """
   The unique identifier of the entity.
   """

@@ -2126,6 +2126,10 @@ fragment AgentSession on AgentSession {
   appUser {
     id
   }
+  # The comment that this agent session was spawned from, if from a different thread.
+  sourceComment {
+    id
+  }
   # The comment this agent session is associated with.
   comment {
     id
@@ -2157,6 +2161,10 @@ fragment AgentSession on AgentSession {
   type
   # The unique identifier of the entity.
   id
+  # The user who dismissed the agent session.
+  dismissedBy {
+    id
+  }
 }
 
 # A set of issues to be resolved in a specified amount of time.
@@ -3767,6 +3775,8 @@ fragment Organization on Organization {
   samlEnabled
   # Whether SCIM provisioning is enabled for organization.
   scimEnabled
+  # Whether issue descriptions should be included in Git integration linkback messages.
+  gitLinkbackDescriptionsEnabled
   # Whether member users are allowed to send invites.
   allowMembersToInvite
   # Whether team creation is restricted to admins.
@@ -5632,8 +5642,8 @@ fragment AgentSessionWebhookPayload on AgentSessionWebhookPayload {
   sourceMetadata
   # The ID of the agent that the agent session belongs to.
   appUserId
-  # The ID of the comment this agent session is associated with.
-  commentId
+  # The ID of the comment that this agent session was spawned from, if from a different thread.
+  sourceCommentId
   # The ID of the entity.
   id
   # The ID of the human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user.
@@ -5642,10 +5652,8 @@ fragment AgentSessionWebhookPayload on AgentSessionWebhookPayload {
   issueId
   # The ID of the organization that the agent session belongs to.
   organizationId
-  # The comment this agent session is associated with.
-  comment {
-    ...CommentChildWebhookPayload
-  }
+  # The ID of the root comment of the thread this agent session is attached to.
+  commentId
   # The current status of the agent session.
   status
   # The human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user.
@@ -5655,6 +5663,10 @@ fragment AgentSessionWebhookPayload on AgentSessionWebhookPayload {
   # The issue this agent session is associated with.
   issue {
     ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The root comment of the thread this agent session is attached to.
+  comment {
+    ...CommentChildWebhookPayload
   }
   # The time at which the entity was archived.
   archivedAt

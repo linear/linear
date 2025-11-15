@@ -1549,6 +1549,18 @@
             "deprecationReason": null
           },
           {
+            "name": "dismissedBy",
+            "description": "The user who dismissed the agent session.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "endedAt",
             "description": "The time the agent session ended.",
             "args": [],
@@ -1607,6 +1619,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "JSON",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sourceComment",
+            "description": "The comment that this agent session was spawned from, if from a different thread.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Comment",
               "ofType": null
             },
             "isDeprecated": false,
@@ -2362,7 +2386,7 @@
           },
           {
             "name": "comment",
-            "description": "The comment this agent session is associated with.",
+            "description": "The root comment of the thread this agent session is attached to.",
             "args": [],
             "type": {
               "kind": "OBJECT",
@@ -2374,7 +2398,7 @@
           },
           {
             "name": "commentId",
-            "description": "The ID of the comment this agent session is associated with.",
+            "description": "The ID of the root comment of the thread this agent session is attached to.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -2488,6 +2512,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sourceCommentId",
+            "description": "The ID of the comment that this agent session was spawned from, if from a different thread.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -5758,13 +5794,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -13557,6 +13589,18 @@
             "deprecationReason": null
           },
           {
+            "name": "initiativeUpdateHealth",
+            "description": "[Internal] Initiative update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "isLinearActor",
             "description": "[Internal] If notification actor was Linear.",
             "args": [],
@@ -14519,6 +14563,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeUpdateHealth",
+            "description": "[Internal] Initiative update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -21888,6 +21944,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeUpdateHealth",
+            "description": "[Internal] Initiative update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -33746,6 +33814,18 @@
             "type": {
               "kind": "OBJECT",
               "name": "InitiativeUpdate",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeUpdateHealth",
+            "description": "[Internal] Initiative update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -49328,6 +49408,18 @@
             "deprecationReason": null
           },
           {
+            "name": "initiativeUpdateHealth",
+            "description": "[Internal] Initiative update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "isLinearActor",
             "description": "[Internal] If notification actor was Linear.",
             "args": [],
@@ -62684,6 +62776,18 @@
                 "defaultValue": null,
                 "isDeprecated": false,
                 "deprecationReason": null
+              },
+              {
+                "name": "teamId",
+                "description": "The ID of the team to connect the MCP server to.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
               }
             ],
             "type": {
@@ -71231,6 +71335,18 @@
             "deprecationReason": null
           },
           {
+            "name": "initiativeUpdateHealth",
+            "description": "[Internal] Initiative update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "isLinearActor",
             "description": "[Internal] If notification actor was Linear.",
             "args": [],
@@ -78437,6 +78553,18 @@
             "deprecationReason": null
           },
           {
+            "name": "initiativeUpdateHealth",
+            "description": "[Internal] Initiative update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "isLinearActor",
             "description": "[Internal] If notification actor was Linear.",
             "args": [],
@@ -78909,6 +79037,34 @@
             "deprecationReason": null
           },
           {
+            "name": "codeIntelligenceEnabled",
+            "description": "[INTERNAL] Whether code intelligence is enabled for the organization.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "codeIntelligenceRepository",
+            "description": "[INTERNAL] GitHub repository in owner/repo format for code intelligence.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "createdAt",
             "description": "The time at which the entity was created.",
             "args": [],
@@ -79092,6 +79248,22 @@
               "kind": "SCALAR",
               "name": "String",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gitLinkbackDescriptionsEnabled",
+            "description": "Whether issue descriptions should be included in Git integration linkback messages.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -81843,6 +82015,18 @@
         "fields": null,
         "inputFields": [
           {
+            "name": "agentGuidanceRole",
+            "description": "The minimum role required to manage agent guidance prompts and settings.",
+            "type": {
+              "kind": "ENUM",
+              "name": "UserRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "apiSettingsRole",
             "description": "The minimum role required to manage API settings.",
             "type": {
@@ -82112,6 +82296,30 @@
             "deprecationReason": null
           },
           {
+            "name": "codeIntelligenceEnabled",
+            "description": "[INTERNAL] Whether code intelligence is enabled for the organization.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "codeIntelligenceRepository",
+            "description": "[INTERNAL] GitHub repository in owner/repo format for code intelligence.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "customersConfiguration",
             "description": "[INTERNAL] Configuration settings for the Customers feature.",
             "type": {
@@ -82189,6 +82397,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "gitLinkbackDescriptionsEnabled",
+            "description": "Whether issue descriptions should be included in Git integration linkback messages.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null,
@@ -84323,6 +84543,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeUpdateHealth",
+            "description": "[Internal] Initiative update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -91858,6 +92090,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeUpdateHealth",
+            "description": "[Internal] Initiative update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -99482,6 +99726,18 @@
             "deprecationReason": null
           },
           {
+            "name": "mergeCommit",
+            "description": "The merge commit created when the PR was merged.",
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PullRequestCommit",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "mergeSettings",
             "description": "Merge settings for this pull request.",
             "args": [],
@@ -100113,6 +100369,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeUpdateHealth",
+            "description": "[Internal] Initiative update health for new updates.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -112928,6 +113196,12 @@
             "deprecationReason": null
           },
           {
+            "name": "PrivateGroup",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "Public",
             "description": null,
             "isDeprecated": false,
@@ -118996,6 +119270,22 @@
               "kind": "SCALAR",
               "name": "String",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hasFormFields",
+            "description": "[Internal] Whether the template has form fields",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
