@@ -35480,6 +35480,22 @@
             "deprecationReason": null
           },
           {
+            "name": "commentCount",
+            "description": "Number of comments associated with the initiative update.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "comments",
             "description": "Comments associated with the initiative update.",
             "args": [
@@ -82224,18 +82240,6 @@
             "deprecationReason": null
           },
           {
-            "name": "allowMembersToInvite",
-            "description": "Whether member users are allowed to send invites.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "allowedAiProviders",
             "description": "[INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed.",
             "type": {
@@ -82532,18 +82536,6 @@
             "deprecationReason": null
           },
           {
-            "name": "personalApiKeysEnabled",
-            "description": "[INTERNAL] Whether the organization has enabled the member API keys.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "projectUpdateReminderFrequencyInWeeks",
             "description": "The n-weekly frequency at which to prompt for project updates.",
             "type": {
@@ -82594,30 +82586,6 @@
           {
             "name": "restrictAgentInvocationToMembers",
             "description": "Whether agent invocation is restricted to full workspace members.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "restrictLabelManagementToAdmins",
-            "description": "Whether label creation is restricted to admins.",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "restrictTeamCreationToAdmins",
-            "description": "Whether team creation is restricted to admins.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -96966,6 +96934,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "commentCount",
+            "description": "Number of comments associated with the project update.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
                 "ofType": null
               }
             },
@@ -116306,6 +116290,22 @@
             "deprecationReason": null
           },
           {
+            "name": "securitySettings",
+            "description": "Security settings for the team.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "setIssueSortOrderOnStateChange",
             "description": "Where to move issues when changing state.",
             "args": [],
@@ -118533,6 +118533,88 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "TeamRoleType",
+        "description": "All possible roles within a team in terms of access to team settings and operations.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "member",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "owner",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "TeamSecuritySettingsInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "labelManagement",
+            "description": "The minimum team role required to manage labels in the team.",
+            "type": {
+              "kind": "ENUM",
+              "name": "TeamRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "memberManagement",
+            "description": "The minimum team role required to manage full workspace members (non-guests) in the team.",
+            "type": {
+              "kind": "ENUM",
+              "name": "TeamRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "teamManagement",
+            "description": "The minimum team role required to manage team settings.",
+            "type": {
+              "kind": "ENUM",
+              "name": "TeamRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "templateManagement",
+            "description": "The minimum team role required to manage templates in the team.",
+            "type": {
+              "kind": "ENUM",
+              "name": "TeamRoleType",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "TeamSort",
         "description": "Issue team sorting options.",
@@ -119035,6 +119117,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "securitySettings",
+            "description": "The security settings for the team.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "TeamSecuritySettingsInput",
               "ofType": null
             },
             "defaultValue": null,
