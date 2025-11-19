@@ -5826,6 +5826,8 @@ export type InitiativeUpdate = Node & {
   body: Scalars["String"];
   /** [Internal] The content of the update as a Prosemirror document. */
   bodyData: Scalars["String"];
+  /** Number of comments associated with the initiative update. */
+  commentCount: Scalars["Int"];
   /** Comments associated with the initiative update. */
   comments: CommentConnection;
   /** The time at which the entity was created. */
@@ -13072,8 +13074,6 @@ export type OrganizationUpdateInput = {
   aiTelemetryEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether the organization has enabled resolved thread AI summaries. */
   aiThreadSummariesEnabled?: InputMaybe<Scalars["Boolean"]>;
-  /** Whether member users are allowed to send invites. */
-  allowMembersToInvite?: InputMaybe<Scalars["Boolean"]>;
   /** [INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed. */
   allowedAiProviders?: InputMaybe<Array<Scalars["String"]>>;
   /** List of services that are allowed to be used for login. */
@@ -13118,8 +13118,6 @@ export type OrganizationUpdateInput = {
   name?: InputMaybe<Scalars["String"]>;
   /** Whether the organization has opted for having to approve all OAuth applications for install. */
   oauthAppReview?: InputMaybe<Scalars["Boolean"]>;
-  /** [INTERNAL] Whether the organization has enabled the member API keys. */
-  personalApiKeysEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** The n-weekly frequency at which to prompt for project updates. */
   projectUpdateReminderFrequencyInWeeks?: InputMaybe<Scalars["Float"]>;
   /** The day at which project updates are sent. */
@@ -13130,10 +13128,6 @@ export type OrganizationUpdateInput = {
   reducedPersonalInformation?: InputMaybe<Scalars["Boolean"]>;
   /** Whether agent invocation is restricted to full workspace members. */
   restrictAgentInvocationToMembers?: InputMaybe<Scalars["Boolean"]>;
-  /** Whether label creation is restricted to admins. */
-  restrictLabelManagementToAdmins?: InputMaybe<Scalars["Boolean"]>;
-  /** Whether team creation is restricted to admins. */
-  restrictTeamCreationToAdmins?: InputMaybe<Scalars["Boolean"]>;
   /** Whether the organization is using roadmap. */
   roadmapEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** The security settings for the organization. */
@@ -15378,6 +15372,8 @@ export type ProjectUpdate = Node & {
   body: Scalars["String"];
   /** [Internal] The content of the update as a Prosemirror document. */
   bodyData: Scalars["String"];
+  /** Number of comments associated with the project update. */
+  commentCount: Scalars["Int"];
   /** Comments associated with the project update. */
   comments: CommentConnection;
   /** The time at which the entity was created. */
@@ -18231,6 +18227,8 @@ export type Team = Node & {
   scimGroupName?: Maybe<Scalars["String"]>;
   /** Whether the team is managed by SCIM integration. */
   scimManaged: Scalars["Boolean"];
+  /** Security settings for the team. */
+  securitySettings: Scalars["JSONObject"];
   /** Where to move issues when changing state. */
   setIssueSortOrderOnStateChange: Scalars["String"];
   /**
@@ -18685,6 +18683,23 @@ export type TeamPayload = {
   team?: Maybe<Team>;
 };
 
+/** All possible roles within a team in terms of access to team settings and operations. */
+export enum TeamRoleType {
+  Member = "member",
+  Owner = "owner",
+}
+
+export type TeamSecuritySettingsInput = {
+  /** The minimum team role required to manage labels in the team. */
+  labelManagement?: InputMaybe<TeamRoleType>;
+  /** The minimum team role required to manage full workspace members (non-guests) in the team. */
+  memberManagement?: InputMaybe<TeamRoleType>;
+  /** The minimum team role required to manage team settings. */
+  teamManagement?: InputMaybe<TeamRoleType>;
+  /** The minimum team role required to manage templates in the team. */
+  templateManagement?: InputMaybe<TeamRoleType>;
+};
+
 /** Issue team sorting options. */
 export type TeamSort = {
   /** Whether nulls should be sorted first or last */
@@ -18772,6 +18787,8 @@ export type TeamUpdateInput = {
   requirePriorityToLeaveTriage?: InputMaybe<Scalars["Boolean"]>;
   /** Whether the team is managed by SCIM integration. Mutation restricted to workspace admins or owners and only unsetting is allowed! */
   scimManaged?: InputMaybe<Scalars["Boolean"]>;
+  /** The security settings for the team. */
+  securitySettings?: InputMaybe<TeamSecuritySettingsInput>;
   /** Whether to move issues to bottom of the column when changing state. */
   setIssueSortOrderOnStateChange?: InputMaybe<Scalars["String"]>;
   /** Whether to send new issue comment notifications to Slack. */
@@ -23462,6 +23479,7 @@ export type InitiativeFragment = { __typename: "Initiative" } & Pick<
 export type InitiativeUpdateFragment = { __typename: "InitiativeUpdate" } & Pick<
   InitiativeUpdate,
   | "reactionData"
+  | "commentCount"
   | "url"
   | "diffMarkdown"
   | "diff"
@@ -23908,6 +23926,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "issueCount"
   | "autoArchivePeriod"
   | "autoClosePeriod"
+  | "securitySettings"
   | "scimGroupName"
   | "autoCloseStateId"
   | "cycleCooldownTime"
@@ -23969,6 +23988,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
 export type ProjectUpdateFragment = { __typename: "ProjectUpdate" } & Pick<
   ProjectUpdate,
   | "reactionData"
+  | "commentCount"
   | "url"
   | "diffMarkdown"
   | "diff"
@@ -27255,6 +27275,7 @@ export type InitiativeUpdateConnectionFragment = { __typename: "InitiativeUpdate
     { __typename: "InitiativeUpdate" } & Pick<
       InitiativeUpdate,
       | "reactionData"
+      | "commentCount"
       | "url"
       | "diffMarkdown"
       | "diff"
@@ -30582,6 +30603,7 @@ export type ProjectUpdateConnectionFragment = { __typename: "ProjectUpdateConnec
     { __typename: "ProjectUpdate" } & Pick<
       ProjectUpdate,
       | "reactionData"
+      | "commentCount"
       | "url"
       | "diffMarkdown"
       | "diff"
@@ -30761,6 +30783,7 @@ export type TeamConnectionFragment = { __typename: "TeamConnection" } & {
       | "issueCount"
       | "autoArchivePeriod"
       | "autoClosePeriod"
+      | "securitySettings"
       | "scimGroupName"
       | "autoCloseStateId"
       | "cycleCooldownTime"
@@ -31133,6 +31156,7 @@ export type AdministrableTeamsQuery = { __typename?: "Query" } & {
         | "issueCount"
         | "autoArchivePeriod"
         | "autoClosePeriod"
+        | "securitySettings"
         | "scimGroupName"
         | "autoCloseStateId"
         | "cycleCooldownTime"
@@ -35366,6 +35390,7 @@ export type InitiativeUpdateQuery = { __typename?: "Query" } & {
   initiativeUpdate: { __typename: "InitiativeUpdate" } & Pick<
     InitiativeUpdate,
     | "reactionData"
+    | "commentCount"
     | "url"
     | "diffMarkdown"
     | "diff"
@@ -35532,6 +35557,7 @@ export type InitiativeUpdatesQuery = { __typename?: "Query" } & {
       { __typename: "InitiativeUpdate" } & Pick<
         InitiativeUpdate,
         | "reactionData"
+        | "commentCount"
         | "url"
         | "diffMarkdown"
         | "diff"
@@ -39883,6 +39909,7 @@ export type Organization_TeamsQuery = { __typename?: "Query" } & {
           | "issueCount"
           | "autoArchivePeriod"
           | "autoClosePeriod"
+          | "securitySettings"
           | "scimGroupName"
           | "autoCloseStateId"
           | "cycleCooldownTime"
@@ -40921,6 +40948,7 @@ export type Project_ProjectUpdatesQuery = { __typename?: "Query" } & {
         { __typename: "ProjectUpdate" } & Pick<
           ProjectUpdate,
           | "reactionData"
+          | "commentCount"
           | "url"
           | "diffMarkdown"
           | "diff"
@@ -41015,6 +41043,7 @@ export type Project_TeamsQuery = { __typename?: "Query" } & {
           | "issueCount"
           | "autoArchivePeriod"
           | "autoClosePeriod"
+          | "securitySettings"
           | "scimGroupName"
           | "autoCloseStateId"
           | "cycleCooldownTime"
@@ -41641,6 +41670,7 @@ export type ProjectUpdateQuery = { __typename?: "Query" } & {
   projectUpdate: { __typename: "ProjectUpdate" } & Pick<
     ProjectUpdate,
     | "reactionData"
+    | "commentCount"
     | "url"
     | "diffMarkdown"
     | "diff"
@@ -41807,6 +41837,7 @@ export type ProjectUpdatesQuery = { __typename?: "Query" } & {
       { __typename: "ProjectUpdate" } & Pick<
         ProjectUpdate,
         | "reactionData"
+        | "commentCount"
         | "url"
         | "diffMarkdown"
         | "diff"
@@ -42539,6 +42570,7 @@ export type TeamQuery = { __typename?: "Query" } & {
     | "issueCount"
     | "autoArchivePeriod"
     | "autoClosePeriod"
+    | "securitySettings"
     | "scimGroupName"
     | "autoCloseStateId"
     | "cycleCooldownTime"
@@ -43206,6 +43238,7 @@ export type TeamsQuery = { __typename?: "Query" } & {
         | "issueCount"
         | "autoArchivePeriod"
         | "autoClosePeriod"
+        | "securitySettings"
         | "scimGroupName"
         | "autoCloseStateId"
         | "cycleCooldownTime"
@@ -43928,6 +43961,7 @@ export type User_TeamsQuery = { __typename?: "Query" } & {
           | "issueCount"
           | "autoArchivePeriod"
           | "autoClosePeriod"
+          | "securitySettings"
           | "scimGroupName"
           | "autoCloseStateId"
           | "cycleCooldownTime"
@@ -45371,6 +45405,7 @@ export type Viewer_TeamsQuery = { __typename?: "Query" } & {
           | "issueCount"
           | "autoArchivePeriod"
           | "autoClosePeriod"
+          | "securitySettings"
           | "scimGroupName"
           | "autoCloseStateId"
           | "cycleCooldownTime"
@@ -63188,6 +63223,7 @@ export const InitiativeUpdateFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "reactionData" } },
+          { kind: "Field", name: { kind: "Name", value: "commentCount" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "reactions" },
@@ -66393,6 +66429,7 @@ export const ProjectUpdateFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "reactionData" } },
+          { kind: "Field", name: { kind: "Name", value: "commentCount" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "reactions" },
@@ -66970,6 +67007,7 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "issueCount" } },
           { kind: "Field", name: { kind: "Name", value: "autoArchivePeriod" } },
           { kind: "Field", name: { kind: "Name", value: "autoClosePeriod" } },
+          { kind: "Field", name: { kind: "Name", value: "securitySettings" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "integrationsSettings" },

@@ -10063,6 +10063,10 @@ type InitiativeUpdate implements Node {
   """
   bodyData: String!
   """
+  Number of comments associated with the initiative update.
+  """
+  commentCount: Int!
+  """
   Comments associated with the initiative update.
   """
   comments(
@@ -23196,10 +23200,6 @@ input OrganizationUpdateInput {
   """
   aiThreadSummariesEnabled: Boolean
   """
-  Whether member users are allowed to send invites.
-  """
-  allowMembersToInvite: Boolean
-  """
   [INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed.
   """
   allowedAiProviders: [String!]
@@ -23288,10 +23288,6 @@ input OrganizationUpdateInput {
   """
   oauthAppReview: Boolean
   """
-  [INTERNAL] Whether the organization has enabled the member API keys.
-  """
-  personalApiKeysEnabled: Boolean
-  """
   The n-weekly frequency at which to prompt for project updates.
   """
   projectUpdateReminderFrequencyInWeeks: Float
@@ -23311,14 +23307,6 @@ input OrganizationUpdateInput {
   Whether agent invocation is restricted to full workspace members.
   """
   restrictAgentInvocationToMembers: Boolean
-  """
-  Whether label creation is restricted to admins.
-  """
-  restrictLabelManagementToAdmins: Boolean
-  """
-  Whether team creation is restricted to admins.
-  """
-  restrictTeamCreationToAdmins: Boolean
   """
   Whether the organization is using roadmap.
   """
@@ -27450,6 +27438,10 @@ type ProjectUpdate implements Node {
   [Internal] The content of the update as a Prosemirror document.
   """
   bodyData: String!
+  """
+  Number of comments associated with the project update.
+  """
+  commentCount: Int!
   """
   Comments associated with the project update.
   """
@@ -32920,6 +32912,10 @@ type Team implements Node {
   """
   scimManaged: Boolean!
   """
+  Security settings for the team.
+  """
+  securitySettings: JSONObject!
+  """
   Where to move issues when changing state.
   """
   setIssueSortOrderOnStateChange: String!
@@ -33553,6 +33549,33 @@ type TeamPayload {
 }
 
 """
+All possible roles within a team in terms of access to team settings and operations.
+"""
+enum TeamRoleType {
+  member
+  owner
+}
+
+input TeamSecuritySettingsInput {
+  """
+  The minimum team role required to manage labels in the team.
+  """
+  labelManagement: TeamRoleType
+  """
+  The minimum team role required to manage full workspace members (non-guests) in the team.
+  """
+  memberManagement: TeamRoleType
+  """
+  The minimum team role required to manage team settings.
+  """
+  teamManagement: TeamRoleType
+  """
+  The minimum team role required to manage templates in the team.
+  """
+  templateManagement: TeamRoleType
+}
+
+"""
 Issue team sorting options.
 """
 input TeamSort {
@@ -33723,6 +33746,10 @@ input TeamUpdateInput {
   Whether the team is managed by SCIM integration. Mutation restricted to workspace admins or owners and only unsetting is allowed!
   """
   scimManaged: Boolean
+  """
+  The security settings for the team.
+  """
+  securitySettings: TeamSecuritySettingsInput
   """
   Whether to move issues to bottom of the column when changing state.
   """

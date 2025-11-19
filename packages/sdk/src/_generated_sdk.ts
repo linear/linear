@@ -7235,6 +7235,7 @@ export class InitiativeUpdate extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.body = data.body;
+    this.commentCount = data.commentCount;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.diff = data.diff ?? undefined;
     this.diffMarkdown = data.diffMarkdown ?? undefined;
@@ -7256,6 +7257,8 @@ export class InitiativeUpdate extends Request {
   public archivedAt?: Date;
   /** The update content in markdown format. */
   public body: string;
+  /** Number of comments associated with the initiative update. */
+  public commentCount: number;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The diff between the current update and the previous one. */
@@ -14402,6 +14405,7 @@ export class ProjectUpdate extends Request {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.body = data.body;
+    this.commentCount = data.commentCount;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.diff = data.diff ?? undefined;
     this.diffMarkdown = data.diffMarkdown ?? undefined;
@@ -14423,6 +14427,8 @@ export class ProjectUpdate extends Request {
   public archivedAt?: Date;
   /** The update content in markdown format. */
   public body: string;
+  /** Number of comments associated with the project update. */
+  public commentCount: number;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The diff between the current update and the previous one. */
@@ -15934,6 +15940,7 @@ export class Team extends Request {
     this.requirePriorityToLeaveTriage = data.requirePriorityToLeaveTriage;
     this.scimGroupName = data.scimGroupName ?? undefined;
     this.scimManaged = data.scimManaged;
+    this.securitySettings = data.securitySettings;
     this.setIssueSortOrderOnStateChange = data.setIssueSortOrderOnStateChange;
     this.slackIssueComments = data.slackIssueComments;
     this.slackIssueStatuses = data.slackIssueStatuses;
@@ -16040,6 +16047,8 @@ export class Team extends Request {
   public scimGroupName?: string;
   /** Whether the team is managed by SCIM integration. */
   public scimManaged: boolean;
+  /** Security settings for the team. */
+  public securitySettings: L.Scalars["JSONObject"];
   /** Where to move issues when changing state. */
   public setIssueSortOrderOnStateChange: string;
   /** Whether to send new issue comment notifications to Slack. */
@@ -41724,6 +41733,7 @@ export {
   SendStrategy,
   SlaStatus,
   SlackChannelType,
+  TeamRoleType,
   TriageResponsibilityAction,
   UserContextViewType,
   UserFlagType,

@@ -3312,6 +3312,8 @@ fragment InitiativeUpdate on InitiativeUpdate {
   __typename
   # Emoji reaction summary, grouped by emoji type.
   reactionData
+  # Number of comments associated with the initiative update.
+  commentCount
   # Reactions associated with the initiative update.
   reactions {
     ...Reaction
@@ -3856,6 +3858,8 @@ fragment Team on Team {
   autoArchivePeriod
   # Period after which issues are automatically closed in months. Null/undefined means disabled.
   autoClosePeriod
+  # Security settings for the team.
+  securitySettings
   # Settings for all integrations associated with that team.
   integrationsSettings {
     id
@@ -4002,6 +4006,8 @@ fragment ProjectUpdate on ProjectUpdate {
   __typename
   # Emoji reaction summary, grouped by emoji type.
   reactionData
+  # Number of comments associated with the project update.
+  commentCount
   # Reactions associated with the project update.
   reactions {
     ...Reaction
