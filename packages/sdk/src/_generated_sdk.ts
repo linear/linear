@@ -16665,6 +16665,7 @@ export class Template extends Request {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.description = data.description ?? undefined;
     this.id = data.id;
+    this.lastAppliedAt = parseDate(data.lastAppliedAt) ?? undefined;
     this.name = data.name;
     this.sortOrder = data.sortOrder;
     this.templateData = parseJson(data.templateData) ?? {};
@@ -16684,6 +16685,8 @@ export class Template extends Request {
   public description?: string;
   /** The unique identifier of the entity. */
   public id: string;
+  /** The date when the template was last applied. */
+  public lastAppliedAt?: Date;
   /** The name of the template. */
   public name: string;
   /** The sort order of the template. */

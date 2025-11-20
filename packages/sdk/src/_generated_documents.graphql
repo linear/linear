@@ -2354,6 +2354,8 @@ fragment Template on Template {
   templateData
   # Template description.
   description
+  # The date when the template was last applied.
+  lastAppliedAt
   # The entity type this template is for.
   type
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
