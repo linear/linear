@@ -18837,6 +18837,8 @@ export type Template = Node & {
   id: Scalars["ID"];
   /** The original template inherited from. */
   inheritedFrom?: Maybe<Template>;
+  /** The date when the template was last applied. */
+  lastAppliedAt?: Maybe<Scalars["DateTime"]>;
   /** The user who last updated the template. */
   lastUpdatedBy?: Maybe<User>;
   /** The name of the template. */
@@ -22905,7 +22907,16 @@ export type TriageResponsibilityFragment = { __typename: "TriageResponsibility" 
 
 export type TemplateFragment = { __typename: "Template" } & Pick<
   Template,
-  "templateData" | "description" | "type" | "updatedAt" | "name" | "sortOrder" | "archivedAt" | "createdAt" | "id"
+  | "templateData"
+  | "description"
+  | "lastAppliedAt"
+  | "type"
+  | "updatedAt"
+  | "name"
+  | "sortOrder"
+  | "archivedAt"
+  | "createdAt"
+  | "id"
 > & {
     inheritedFrom?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
     team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -30874,7 +30885,16 @@ export type TemplateConnectionFragment = { __typename: "TemplateConnection" } & 
   nodes: Array<
     { __typename: "Template" } & Pick<
       Template,
-      "templateData" | "description" | "type" | "updatedAt" | "name" | "sortOrder" | "archivedAt" | "createdAt" | "id"
+      | "templateData"
+      | "description"
+      | "lastAppliedAt"
+      | "type"
+      | "updatedAt"
+      | "name"
+      | "sortOrder"
+      | "archivedAt"
+      | "createdAt"
+      | "id"
     > & {
         inheritedFrom?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -39994,6 +40014,7 @@ export type Organization_TemplatesQuery = { __typename?: "Query" } & {
           Template,
           | "templateData"
           | "description"
+          | "lastAppliedAt"
           | "type"
           | "updatedAt"
           | "name"
@@ -43119,6 +43140,7 @@ export type Team_TemplatesQuery = { __typename?: "Query" } & {
           Template,
           | "templateData"
           | "description"
+          | "lastAppliedAt"
           | "type"
           | "updatedAt"
           | "name"
@@ -43311,7 +43333,16 @@ export type TemplateQueryVariables = Exact<{
 export type TemplateQuery = { __typename?: "Query" } & {
   template: { __typename: "Template" } & Pick<
     Template,
-    "templateData" | "description" | "type" | "updatedAt" | "name" | "sortOrder" | "archivedAt" | "createdAt" | "id"
+    | "templateData"
+    | "description"
+    | "lastAppliedAt"
+    | "type"
+    | "updatedAt"
+    | "name"
+    | "sortOrder"
+    | "archivedAt"
+    | "createdAt"
+    | "id"
   > & {
       inheritedFrom?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
       team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -43326,7 +43357,16 @@ export type TemplatesQuery = { __typename?: "Query" } & {
   templates: Array<
     { __typename: "Template" } & Pick<
       Template,
-      "templateData" | "description" | "type" | "updatedAt" | "name" | "sortOrder" | "archivedAt" | "createdAt" | "id"
+      | "templateData"
+      | "description"
+      | "lastAppliedAt"
+      | "type"
+      | "updatedAt"
+      | "name"
+      | "sortOrder"
+      | "archivedAt"
+      | "createdAt"
+      | "id"
     > & {
         inheritedFrom?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -43344,7 +43384,16 @@ export type TemplatesForIntegrationQuery = { __typename?: "Query" } & {
   templatesForIntegration: Array<
     { __typename: "Template" } & Pick<
       Template,
-      "templateData" | "description" | "type" | "updatedAt" | "name" | "sortOrder" | "archivedAt" | "createdAt" | "id"
+      | "templateData"
+      | "description"
+      | "lastAppliedAt"
+      | "type"
+      | "updatedAt"
+      | "name"
+      | "sortOrder"
+      | "archivedAt"
+      | "createdAt"
+      | "id"
     > & {
         inheritedFrom?: Maybe<{ __typename?: "Template" } & Pick<Template, "id">>;
         team?: Maybe<{ __typename?: "Team" } & Pick<Team, "id">>;
@@ -67333,6 +67382,7 @@ export const TemplateFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "templateData" } },
           { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "lastAppliedAt" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
           { kind: "Field", name: { kind: "Name", value: "name" } },

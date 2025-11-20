@@ -33839,6 +33839,10 @@ type Template implements Node {
   """
   inheritedFrom: Template
   """
+  The date when the template was last applied.
+  """
+  lastAppliedAt: DateTime
+  """
   The user who last updated the template.
   """
   lastUpdatedBy: User
