@@ -102,19 +102,27 @@ export class LinearCsvImporter implements Importer {
 }
 
 /**
- * Parse comma-separated labels from Linear CSV export.
- * Linear exports multiple labels separated by ", " but individual label names
- * can themselves contain commas (e.g., "Label Group/Sub Label, with commas").
+ * Parse labels from Linear CSV export.
  *
- * Simple heuristic: Count "/" characters. If there's exactly one "/", treat the
- * entire string as a single hierarchical label (since it's likely "Parent/Child, with, commas").
- * Otherwise, use the standard ", " split for multiple labels.
+ * Linear's CSV export format has evolved:
+ * - Newer exports: labels separated by " | "
+ * - Older exports: labels separated by ", "
+ *
+ * For backward compatibility with older exports that used ", ", we use a heuristic:
+ * If the string contains " | ", split on that. Otherwise, count "/" characters -
+ * if there's exactly one "/", treat as a single hierarchical label.
  */
 function parseLabels(labelsStr: string): string[] {
   if (!labelsStr || !labelsStr.trim()) {
     return [];
   }
 
+  // New format: split on " | " delimiter
+  if (labelsStr.includes(" | ")) {
+    return labelsStr.split(" | ").filter(label => label.trim().length > 0);
+  }
+
+  // Legacy format: use heuristic for ", " separated labels
   // Count slashes to detect hierarchical labels
   const slashCount = (labelsStr.match(/\//g) || []).length;
 
