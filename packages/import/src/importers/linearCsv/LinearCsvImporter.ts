@@ -106,74 +106,26 @@ export class LinearCsvImporter implements Importer {
  * Linear exports multiple labels separated by ", " but individual label names
  * can themselves contain commas (e.g., "Label Group/Sub Label, with commas").
  *
- * This function attempts to intelligently split labels by looking for ", " patterns
- * that separate distinct labels rather than being part of a label name.
- *
- * Strategy: Split on ", " only when what follows appears to start a new label:
- * - Contains "/" (indicating a hierarchical label like "Parent/Child")
- * - After we've moved past any "/" in the current label (not in the middle of a sub-label name)
+ * Simple heuristic: Count "/" characters. If there's exactly one "/", treat the
+ * entire string as a single hierarchical label (since it's likely "Parent/Child, with, commas").
+ * Otherwise, use the standard ", " split for multiple labels.
  */
 function parseLabels(labelsStr: string): string[] {
-  // Handle empty or whitespace-only strings
   if (!labelsStr || !labelsStr.trim()) {
     return [];
   }
 
-  const labels: string[] = [];
-  let currentLabel = "";
+  // Count slashes to detect hierarchical labels
+  const slashCount = (labelsStr.match(/\//g) || []).length;
 
-  for (let i = 0; i < labelsStr.length; i++) {
-    // Check for potential label separator (", ")
-    if (labelsStr[i] === "," && labelsStr[i + 1] === " ") {
-      const remainingStr = labelsStr.substring(i + 2);
-      const lastSlashInCurrent = currentLabel.lastIndexOf("/");
-
-      // Check if what follows contains "/" (indicating start of new hierarchical label)
-      const nextSlashIndex = remainingStr.indexOf("/");
-      const nextCommaIndex = remainingStr.indexOf(", ");
-
-      // A ", " is a label separator if what follows has "/" before the next ", "
-      // This indicates a new "Parent/Child" label is starting
-      const followingHasSlash = nextSlashIndex !== -1 && (nextCommaIndex === -1 || nextSlashIndex < nextCommaIndex);
-
-      // We're in a hierarchical label if current has "/"
-      const inHierarchicalLabel = lastSlashInCurrent !== -1;
-
-      // If we're in a hierarchical label (e.g., "Parent/Child, with commas")
-      // only split if what follows also starts a hierarchical label
-      // Otherwise (flat label), split on any ", " followed by uppercase (new label)
-      let isLabelSeparator = false;
-      if (inHierarchicalLabel) {
-        // In hierarchy: only split if next part also has hierarchy
-        isLabelSeparator = followingHasSlash;
-      } else {
-        // Not in hierarchy: split if next part starts a new label (has "/" or is capitalized)
-        const nextStartsWithUpper = remainingStr.length > 0 && /^[A-Z]/.test(remainingStr);
-        isLabelSeparator = followingHasSlash || nextStartsWithUpper;
-      }
-
-      if (isLabelSeparator) {
-        // This ", " separates labels
-        if (currentLabel.trim()) {
-          labels.push(currentLabel.trim());
-        }
-        currentLabel = "";
-        i++; // Skip the space after comma (loop increment handles comma)
-      } else {
-        // This ", " is part of the label name
-        currentLabel += labelsStr[i];
-      }
-    } else {
-      currentLabel += labelsStr[i];
-    }
+  // If there's exactly one slash, treat as single hierarchical label
+  // This handles the common case: "Parent/Child, with, commas"
+  if (slashCount === 1) {
+    return [labelsStr.trim()];
   }
 
-  // Add the final label
-  if (currentLabel.trim()) {
-    labels.push(currentLabel.trim());
-  }
-
-  return labels;
+  // Otherwise, split on ", " as before (multiple labels)
+  return labelsStr.split(", ").filter(label => label.trim().length > 0);
 }
 
 // Linear CSV exports add a single quote to the beginning of text fields when that field could otherwise be interpreted
