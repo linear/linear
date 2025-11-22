@@ -1,5 +1,5 @@
 ---
-"@linear/sdk": patch
+"@linear/sdk": minor
 ---
 
-Exclude source maps, compressed files, and unminified JavaScript to reduce unpacked size
+Exclude compressed files and unminified JavaScript to reduce unpacked size (source maps are included for debugging)

@@ -25,7 +25,9 @@
   },
   "files": [
     "dist/**/*.min.js",
+    "dist/**/*.min.js.map",
     "dist/**/*.d.ts",
+    "dist/**/*.d.ts.map",
     "webhooks",
     "README.md"
   ],

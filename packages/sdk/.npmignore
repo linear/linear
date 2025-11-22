@@ -1,8 +1,4 @@
-# Exclude source maps
-*.map
-**/*.map
-
-# Exclude compressed files
+# Exclude compressed files (redundant with minified files)
 *.br
 *.gz
 **/*.br
