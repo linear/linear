@@ -24,8 +24,10 @@
     "yarn": "1.x"
   },
   "files": [
-    "dist",
-    "webhooks"
+    "dist/**/*.min.js",
+    "dist/**/*.d.ts",
+    "webhooks",
+    "README.md"
   ],
   "scripts": {
     "build:clean": "npx rimraf -G dist .rollup-cache tsconfig.tsbuildinfo",
