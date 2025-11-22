@@ -2434,6 +2434,7 @@ export class Customer extends Request {
     this.slackChannelId = data.slackChannelId ?? undefined;
     this.slugId = data.slugId;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this.url = data.url;
     this._integration = data.integration ?? undefined;
     this._owner = data.owner ?? undefined;
     this._status = data.status;
@@ -2471,6 +2472,8 @@ export class Customer extends Request {
    *     been updated after creation.
    */
   public updatedAt: Date;
+  /** URL of the customer in Linear. */
+  public url: string;
   /** The integration that manages the Customer. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -3548,6 +3551,7 @@ export class CustomerWebhookPayload {
     this.statusId = data.statusId ?? undefined;
     this.tierId = data.tierId ?? undefined;
     this.updatedAt = data.updatedAt;
+    this.url = data.url;
     this.status = data.status ? new CustomerStatusChildWebhookPayload(data.status) : undefined;
     this.tier = data.tier ? new CustomerTierChildWebhookPayload(data.tier) : undefined;
   }
@@ -3586,6 +3590,8 @@ export class CustomerWebhookPayload {
   public tierId?: string;
   /** The time at which the entity was updated. */
   public updatedAt: string;
+  /** The URL of the customer. */
+  public url: string;
   /** The customer status. */
   public status?: CustomerStatusChildWebhookPayload;
   /** The customer tier. */
@@ -6532,6 +6538,10 @@ export class Initiative extends Request {
   /** History entries associated with the initiative. */
   public history(variables?: Omit<L.Initiative_HistoryQueryVariables, "id">) {
     return new Initiative_HistoryQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Initiative updates associated with the initiative. */
+  public initiativeUpdates(variables?: Omit<L.Initiative_InitiativeUpdatesQueryVariables, "id">) {
+    return new Initiative_InitiativeUpdatesQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Links associated with the initiative. */
   public links(variables?: Omit<L.Initiative_LinksQueryVariables, "id">) {
@@ -11812,7 +11822,7 @@ export class Organization extends Request {
   public aiDiscussionSummariesEnabled: boolean;
   /** Whether the organization has enabled resolved thread AI summaries. */
   public aiThreadSummariesEnabled: boolean;
-  /** Whether member users are allowed to send invites. */
+  /** [DEPRECATED] Whether member users are allowed to send invites. */
   public allowMembersToInvite?: boolean;
   /** Allowed authentication providers, empty array means all are allowed. */
   public allowedAuthServices: string[];
@@ -11864,9 +11874,9 @@ export class Organization extends Request {
   public projectUpdateReminderFrequencyInWeeks?: number;
   /** The hour at which to prompt for project updates. */
   public projectUpdateRemindersHour: number;
-  /** Whether workspace label creation, update, and deletion is restricted to admins. */
+  /** [DEPRECATED] Whether workspace label creation, update, and deletion is restricted to admins. */
   public restrictLabelManagementToAdmins?: boolean;
-  /** Whether team creation is restricted to admins. */
+  /** [DEPRECATED] Whether team creation is restricted to admins. */
   public restrictTeamCreationToAdmins?: boolean;
   /** Whether the organization is using a roadmap. */
   public roadmapEnabled: boolean;
@@ -16356,7 +16366,7 @@ export class TeamMembership extends Request {
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
-  /** Whether the user is the owner of the team. */
+  /** Whether the user is an owner of the team. */
   public owner: boolean;
   /** The order of the item in the users team list. */
   public sortOrder: number;
@@ -32413,6 +32423,61 @@ export class Initiative_HistoryQuery extends Request {
 }
 
 /**
+ * A fetchable Initiative_InitiativeUpdates Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to initiative
+ * @param variables - variables without 'id' to pass into the Initiative_InitiativeUpdatesQuery
+ */
+export class Initiative_InitiativeUpdatesQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Initiative_InitiativeUpdatesQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.Initiative_InitiativeUpdatesQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Initiative_InitiativeUpdates query and return a InitiativeUpdateConnection
+   *
+   * @param variables - variables without 'id' to pass into the Initiative_InitiativeUpdatesQuery
+   * @returns parsed response from Initiative_InitiativeUpdatesQuery
+   */
+  public async fetch(
+    variables?: Omit<L.Initiative_InitiativeUpdatesQueryVariables, "id">
+  ): LinearFetch<InitiativeUpdateConnection> {
+    const response = await this._request<
+      L.Initiative_InitiativeUpdatesQuery,
+      L.Initiative_InitiativeUpdatesQueryVariables
+    >(L.Initiative_InitiativeUpdatesDocument, {
+      id: this._id,
+      ...this._variables,
+      ...variables,
+    });
+    const data = response.initiative.initiativeUpdates;
+
+    return new InitiativeUpdateConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
  * A fetchable Initiative_Links Query
  *
  * @param request - function to call the graphql client
@@ -41691,6 +41756,7 @@ export {
   AuthenticationSessionType,
   ContextViewType,
   CustomerStatusType,
+  CustomerVisibilityMode,
   CyclePeriod,
   DateResolutionType,
   Day,

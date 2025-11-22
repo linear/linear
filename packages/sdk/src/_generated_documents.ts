@@ -1929,6 +1929,8 @@ export type Customer = Node & {
    *     been updated after creation.
    */
   updatedAt: Scalars["DateTime"];
+  /** URL of the customer in Linear. */
+  url: Scalars["String"];
 };
 
 /** Certain properties of a customer. */
@@ -2841,6 +2843,13 @@ export type CustomerUpsertInput = {
   tierName?: InputMaybe<Scalars["String"]>;
 };
 
+/** Mode that controls who can see and set Customers in Slack Asks. */
+export enum CustomerVisibilityMode {
+  LinearOnly = "LinearOnly",
+  SlackMembers = "SlackMembers",
+  SlackMembersAndGuests = "SlackMembersAndGuests",
+}
+
 /** Payload for a customer webhook. */
 export type CustomerWebhookPayload = {
   __typename?: "CustomerWebhookPayload";
@@ -2882,6 +2891,8 @@ export type CustomerWebhookPayload = {
   tierId?: Maybe<Scalars["String"]>;
   /** The time at which the entity was updated. */
   updatedAt: Scalars["String"];
+  /** The URL of the customer. */
+  url: Scalars["String"];
 };
 
 /** A set of issues to be resolved in a specified amount of time. */
@@ -5177,6 +5188,8 @@ export type Initiative = Node & {
   icon?: Maybe<Scalars["String"]>;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** Initiative updates associated with the initiative. */
+  initiativeUpdates: InitiativeUpdateConnection;
   /** Settings for all integrations associated with that initiative. */
   integrationsSettings?: Maybe<IntegrationsSettings>;
   /** The last initiative update posted for this initiative. */
@@ -5239,6 +5252,16 @@ export type InitiativeDocumentsArgs = {
 
 /** An initiative to group projects. */
 export type InitiativeHistoryArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** An initiative to group projects. */
+export type InitiativeInitiativeUpdatesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
@@ -12563,7 +12586,10 @@ export type Organization = Node & {
   aiDiscussionSummariesEnabled: Scalars["Boolean"];
   /** Whether the organization has enabled resolved thread AI summaries. */
   aiThreadSummariesEnabled: Scalars["Boolean"];
-  /** Whether member users are allowed to send invites. */
+  /**
+   * [DEPRECATED] Whether member users are allowed to send invites.
+   * @deprecated Use `securitySettings.invitationsRole` instead.
+   */
   allowMembersToInvite?: Maybe<Scalars["Boolean"]>;
   /** [INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed. */
   allowedAiProviders: Array<Scalars["String"]>;
@@ -12648,9 +12674,15 @@ export type Organization = Node & {
   projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency;
   /** The feature release channel the organization belongs to. */
   releaseChannel: ReleaseChannel;
-  /** Whether workspace label creation, update, and deletion is restricted to admins. */
+  /**
+   * [DEPRECATED] Whether workspace label creation, update, and deletion is restricted to admins.
+   * @deprecated Use `securitySettings.labelManagementRole` instead.
+   */
   restrictLabelManagementToAdmins?: Maybe<Scalars["Boolean"]>;
-  /** Whether team creation is restricted to admins. */
+  /**
+   * [DEPRECATED] Whether team creation is restricted to admins.
+   * @deprecated Use `securitySettings.teamCreationRole` instead.
+   */
   restrictTeamCreationToAdmins?: Maybe<Scalars["Boolean"]>;
   /** Whether the organization is using a roadmap. */
   roadmapEnabled: Scalars["Boolean"];
@@ -17706,6 +17738,8 @@ export type SlaStatusSort = {
 export type SlackAsksSettingsInput = {
   /** The user role type that is allowed to manage Asks settings. */
   canAdministrate: UserRoleType;
+  /** Controls who can see and set Customers when creating Asks in Slack. */
+  customerVisibility?: InputMaybe<CustomerVisibilityMode>;
   /** Enterprise id of the connected Slack enterprise */
   enterpriseId?: InputMaybe<Scalars["String"]>;
   /** Enterprise name of the connected Slack enterprise */
@@ -18431,6 +18465,8 @@ export type TeamCollectionFilter = {
   length?: InputMaybe<NumberComparator>;
   /** Compound filters, one of which need to be matched by the team. */
   or?: InputMaybe<Array<TeamCollectionFilter>>;
+  /** Filters that the teams parent must satisfy. */
+  parent?: InputMaybe<NullableTeamFilter>;
   /** Filters that needs to be matched by some teams. */
   some?: InputMaybe<TeamFilter>;
   /** Comparator for the updated at date. */
@@ -18561,7 +18597,7 @@ export type TeamMembership = Node & {
   createdAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
-  /** Whether the user is the owner of the team. */
+  /** Whether the user is an owner of the team. */
   owner: Scalars["Boolean"];
   /** The order of the item in the users team list. */
   sortOrder: Scalars["Float"];
@@ -18715,9 +18751,9 @@ export type TeamUpdateInput = {
   aiThreadSummariesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Period after which closed and completed issues are automatically archived, in months. */
   autoArchivePeriod?: InputMaybe<Scalars["Float"]>;
-  /** [INTERNAL] Whether to automatically close all sub-issues when a parent issue in this team is closed. */
+  /** Whether to automatically close all sub-issues when a parent issue in this team is closed. */
   autoCloseChildIssues?: InputMaybe<Scalars["Boolean"]>;
-  /** [INTERNAL] Whether to automatically close a parent issue in this team if all its sub-issues are closed. */
+  /** Whether to automatically close a parent issue in this team if all its sub-issues are closed. */
   autoCloseParentIssues?: InputMaybe<Scalars["Boolean"]>;
   /** Period after which issues are automatically closed, in months. */
   autoClosePeriod?: InputMaybe<Scalars["Float"]>;
@@ -20743,6 +20779,7 @@ export type CustomerFragment = { __typename: "Customer" } & Pick<
   | "archivedAt"
   | "createdAt"
   | "id"
+  | "url"
 > & {
     status: { __typename?: "CustomerStatus" } & Pick<CustomerStatus, "id">;
     integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">>;
@@ -23852,8 +23889,6 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "samlEnabled"
   | "scimEnabled"
   | "gitLinkbackDescriptionsEnabled"
-  | "allowMembersToInvite"
-  | "restrictTeamCreationToAdmins"
   | "gitLinkbackMessagesEnabled"
   | "gitPublicLinkbackMessagesEnabled"
   | "aiDiscussionSummariesEnabled"
@@ -23861,8 +23896,10 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "feedEnabled"
   | "customersEnabled"
   | "roadmapEnabled"
-  | "restrictLabelManagementToAdmins"
   | "projectUpdatesReminderFrequency"
+  | "allowMembersToInvite"
+  | "restrictTeamCreationToAdmins"
+  | "restrictLabelManagementToAdmins"
   | "slaDayCount"
 > & {
     ipRestrictions?: Maybe<
@@ -24795,6 +24832,7 @@ export type CustomerWebhookPayloadFragment = { __typename: "CustomerWebhookPaylo
   | "id"
   | "mainSourceId"
   | "ownerId"
+  | "url"
   | "revenue"
   | "approximateNeedCount"
   | "logoUrl"
@@ -26617,6 +26655,7 @@ export type CustomerConnectionFragment = { __typename: "CustomerConnection" } & 
       | "archivedAt"
       | "createdAt"
       | "id"
+      | "url"
     > & {
         status: { __typename?: "CustomerStatus" } & Pick<CustomerStatus, "id">;
         integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">>;
@@ -33853,6 +33892,7 @@ export type CustomerQuery = { __typename?: "Query" } & {
     | "archivedAt"
     | "createdAt"
     | "id"
+    | "url"
   > & {
       status: { __typename?: "CustomerStatus" } & Pick<CustomerStatus, "id">;
       integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">>;
@@ -34087,6 +34127,7 @@ export type CustomersQuery = { __typename?: "Query" } & {
         | "archivedAt"
         | "createdAt"
         | "id"
+        | "url"
       > & {
           status: { __typename?: "CustomerStatus" } & Pick<CustomerStatus, "id">;
           integration?: Maybe<{ __typename?: "Integration" } & Pick<Integration, "id">>;
@@ -35100,6 +35141,60 @@ export type Initiative_HistoryQuery = { __typename?: "Query" } & {
           InitiativeHistory,
           "entries" | "updatedAt" | "archivedAt" | "createdAt" | "id"
         > & { initiative: { __typename?: "Initiative" } & Pick<Initiative, "id"> }
+      >;
+      pageInfo: { __typename: "PageInfo" } & Pick<
+        PageInfo,
+        "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+      >;
+    };
+  };
+};
+
+export type Initiative_InitiativeUpdatesQueryVariables = Exact<{
+  id: Scalars["String"];
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+}>;
+
+export type Initiative_InitiativeUpdatesQuery = { __typename?: "Query" } & {
+  initiative: { __typename?: "Initiative" } & {
+    initiativeUpdates: { __typename: "InitiativeUpdateConnection" } & {
+      nodes: Array<
+        { __typename: "InitiativeUpdate" } & Pick<
+          InitiativeUpdate,
+          | "reactionData"
+          | "commentCount"
+          | "url"
+          | "diffMarkdown"
+          | "diff"
+          | "health"
+          | "updatedAt"
+          | "archivedAt"
+          | "createdAt"
+          | "editedAt"
+          | "id"
+          | "body"
+          | "slugId"
+          | "isDiffHidden"
+          | "isStale"
+        > & {
+            reactions: Array<
+              { __typename: "Reaction" } & Pick<Reaction, "emoji" | "updatedAt" | "archivedAt" | "createdAt" | "id"> & {
+                  comment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
+                  externalUser?: Maybe<{ __typename?: "ExternalUser" } & Pick<ExternalUser, "id">>;
+                  initiativeUpdate?: Maybe<{ __typename?: "InitiativeUpdate" } & Pick<InitiativeUpdate, "id">>;
+                  issue?: Maybe<{ __typename?: "Issue" } & Pick<Issue, "id">>;
+                  projectUpdate?: Maybe<{ __typename?: "ProjectUpdate" } & Pick<ProjectUpdate, "id">>;
+                  user?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                }
+            >;
+            initiative: { __typename?: "Initiative" } & Pick<Initiative, "id">;
+            user: { __typename?: "User" } & Pick<User, "id">;
+          }
       >;
       pageInfo: { __typename: "PageInfo" } & Pick<
         PageInfo,
@@ -39714,8 +39809,6 @@ export type OrganizationQuery = { __typename?: "Query" } & {
     | "samlEnabled"
     | "scimEnabled"
     | "gitLinkbackDescriptionsEnabled"
-    | "allowMembersToInvite"
-    | "restrictTeamCreationToAdmins"
     | "gitLinkbackMessagesEnabled"
     | "gitPublicLinkbackMessagesEnabled"
     | "aiDiscussionSummariesEnabled"
@@ -39723,8 +39816,10 @@ export type OrganizationQuery = { __typename?: "Query" } & {
     | "feedEnabled"
     | "customersEnabled"
     | "roadmapEnabled"
-    | "restrictLabelManagementToAdmins"
     | "projectUpdatesReminderFrequency"
+    | "allowMembersToInvite"
+    | "restrictTeamCreationToAdmins"
+    | "restrictLabelManagementToAdmins"
     | "slaDayCount"
   > & {
       ipRestrictions?: Maybe<
@@ -55971,8 +56066,6 @@ export const OrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "samlEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "scimEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "gitLinkbackDescriptionsEnabled" } },
-          { kind: "Field", name: { kind: "Name", value: "allowMembersToInvite" } },
-          { kind: "Field", name: { kind: "Name", value: "restrictTeamCreationToAdmins" } },
           { kind: "Field", name: { kind: "Name", value: "gitLinkbackMessagesEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "gitPublicLinkbackMessagesEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "aiDiscussionSummariesEnabled" } },
@@ -55980,8 +56073,10 @@ export const OrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "feedEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "customersEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "roadmapEnabled" } },
-          { kind: "Field", name: { kind: "Name", value: "restrictLabelManagementToAdmins" } },
           { kind: "Field", name: { kind: "Name", value: "projectUpdatesReminderFrequency" } },
+          { kind: "Field", name: { kind: "Name", value: "allowMembersToInvite" } },
+          { kind: "Field", name: { kind: "Name", value: "restrictTeamCreationToAdmins" } },
+          { kind: "Field", name: { kind: "Name", value: "restrictLabelManagementToAdmins" } },
           { kind: "Field", name: { kind: "Name", value: "slaDayCount" } },
         ],
       },
@@ -56975,6 +57070,7 @@ export const CustomerWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "mainSourceId" } },
           { kind: "Field", name: { kind: "Name", value: "ownerId" } },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
           { kind: "Field", name: { kind: "Name", value: "revenue" } },
           { kind: "Field", name: { kind: "Name", value: "approximateNeedCount" } },
           {
@@ -60963,6 +61059,7 @@ export const CustomerFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
+          { kind: "Field", name: { kind: "Name", value: "url" } },
         ],
       },
     },
@@ -74555,6 +74652,120 @@ export const Initiative_HistoryDocument = {
     ...PageInfoFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<Initiative_HistoryQuery, Initiative_HistoryQueryVariables>;
+export const Initiative_InitiativeUpdatesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "initiative_initiativeUpdates" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "before" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Boolean" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "last" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "PaginationOrderBy" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "initiative" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "initiativeUpdates" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "after" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "before" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "before" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "includeArchived" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "includeArchived" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "last" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "last" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "orderBy" } },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "FragmentSpread", name: { kind: "Name", value: "InitiativeUpdateConnection" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...InitiativeUpdateConnectionFragmentDoc.definitions,
+    ...InitiativeUpdateFragmentDoc.definitions,
+    ...ReactionFragmentDoc.definitions,
+    ...PageInfoFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<Initiative_InitiativeUpdatesQuery, Initiative_InitiativeUpdatesQueryVariables>;
 export const Initiative_LinksDocument = {
   kind: "Document",
   definitions: [

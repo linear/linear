@@ -2819,7 +2819,7 @@ type CustomView implements Node {
     """
     Include projects from sub-teams when the custom view is associated with a team.
     """
-    includeSubTeams: Boolean = false
+    includeSubTeams: Boolean = true
     """
     The number of items to backward paginate (used with before). Defaults to 50.
     """
@@ -3343,6 +3343,10 @@ type Customer implements Node {
       been updated after creation.
   """
   updatedAt: DateTime!
+  """
+  URL of the customer in Linear.
+  """
+  url: String!
 }
 
 """
@@ -4915,6 +4919,15 @@ input CustomerUpsertInput {
 }
 
 """
+Mode that controls who can see and set Customers in Slack Asks.
+"""
+enum CustomerVisibilityMode {
+  LinearOnly
+  SlackMembers
+  SlackMembersAndGuests
+}
+
+"""
 Payload for a customer webhook.
 """
 type CustomerWebhookPayload {
@@ -4994,6 +5007,10 @@ type CustomerWebhookPayload {
   The time at which the entity was updated.
   """
   updatedAt: String!
+  """
+  The URL of the customer.
+  """
+  url: String!
 }
 
 """
@@ -8967,6 +8984,35 @@ type Initiative implements Node {
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  Initiative updates associated with the initiative.
+  """
+  initiativeUpdates(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): InitiativeUpdateConnection!
   """
   Settings for all integrations associated with that initiative.
   """
@@ -22291,9 +22337,9 @@ type Organization implements Node {
   """
   aiThreadSummariesEnabled: Boolean!
   """
-  Whether member users are allowed to send invites.
+  [DEPRECATED] Whether member users are allowed to send invites.
   """
-  allowMembersToInvite: Boolean
+  allowMembersToInvite: Boolean @deprecated(reason: "Use `securitySettings.invitationsRole` instead.")
   """
   [INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed.
   """
@@ -22539,13 +22585,13 @@ type Organization implements Node {
   """
   releaseChannel: ReleaseChannel!
   """
-  Whether workspace label creation, update, and deletion is restricted to admins.
+  [DEPRECATED] Whether workspace label creation, update, and deletion is restricted to admins.
   """
-  restrictLabelManagementToAdmins: Boolean
+  restrictLabelManagementToAdmins: Boolean @deprecated(reason: "Use `securitySettings.labelManagementRole` instead.")
   """
-  Whether team creation is restricted to admins.
+  [DEPRECATED] Whether team creation is restricted to admins.
   """
-  restrictTeamCreationToAdmins: Boolean
+  restrictTeamCreationToAdmins: Boolean @deprecated(reason: "Use `securitySettings.teamCreationRole` instead.")
   """
   Whether the organization is using a roadmap.
   """
@@ -31769,6 +31815,10 @@ input SlackAsksSettingsInput {
   """
   canAdministrate: UserRoleType!
   """
+  Controls who can see and set Customers when creating Asks in Slack.
+  """
+  customerVisibility: CustomerVisibilityMode
+  """
   Enterprise id of the connected Slack enterprise
   """
   enterpriseId: String
@@ -33122,6 +33172,10 @@ input TeamCollectionFilter {
   """
   or: [TeamCollectionFilter!]
   """
+  Filters that the teams parent must satisfy.
+  """
+  parent: NullableTeamFilter
+  """
   Filters that needs to be matched by some teams.
   """
   some: TeamFilter
@@ -33359,7 +33413,7 @@ type TeamMembership implements Node {
   """
   id: ID!
   """
-  Whether the user is the owner of the team.
+  Whether the user is an owner of the team.
   """
   owner: Boolean!
   """
@@ -33603,11 +33657,11 @@ input TeamUpdateInput {
   """
   autoArchivePeriod: Float
   """
-  [INTERNAL] Whether to automatically close all sub-issues when a parent issue in this team is closed.
+  Whether to automatically close all sub-issues when a parent issue in this team is closed.
   """
   autoCloseChildIssues: Boolean
   """
-  [INTERNAL] Whether to automatically close a parent issue in this team if all its sub-issues are closed.
+  Whether to automatically close a parent issue in this team if all its sub-issues are closed.
   """
   autoCloseParentIssues: Boolean
   """
