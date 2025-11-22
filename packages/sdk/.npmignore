@@ -1,13 +1,9 @@
-# Source maps are excluded (not needed for production)
+# Exclude source maps
 *.map
 **/*.map
 
-# Compressed files are excluded (redundant with minified files)
+# Exclude compressed files
 *.br
 *.gz
 **/*.br
 **/*.gz
-
-# Unminified JavaScript files are excluded (only .min.js needed)
-# Note: The files field in package.json explicitly includes only .min.js files
-
