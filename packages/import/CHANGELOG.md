@@ -1,5 +1,15 @@
 # Change Log
 
+## 2.2.46
+
+### Patch Changes
+
+- Updated dependencies [3af98e1]
+- Updated dependencies [4aa0311]
+- Updated dependencies [c87d844]
+- Updated dependencies [570529f]
+  - @linear/sdk@65.0.0
+
 ## 2.2.45
 
 ### Patch Changes
