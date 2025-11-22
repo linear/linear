@@ -1,4 +1,4 @@
-# Exclude compressed files (redundant with minified files)
+# Exclude compressed files
 *.br
 *.gz
 **/*.br
