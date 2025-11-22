@@ -9863,7 +9863,7 @@
                   "name": "Boolean",
                   "ofType": null
                 },
-                "defaultValue": "false",
+                "defaultValue": "true",
                 "isDeprecated": false,
                 "deprecationReason": null
               },
@@ -11638,6 +11638,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "url",
+            "description": "URL of the customer in Linear.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -17113,6 +17129,35 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "CustomerVisibilityMode",
+        "description": "Mode that controls who can see and set Customers in Slack Asks.",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "LinearOnly",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SlackMembers",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SlackMembersAndGuests",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "CustomerWebhookPayload",
         "description": "Payload for a customer webhook.",
@@ -17380,6 +17425,22 @@
           {
             "name": "updatedAt",
             "description": "The time at which the entity was updated.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "url",
+            "description": "The URL of the customer.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -31664,6 +31725,95 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "initiativeUpdates",
+            "description": "Initiative updates associated with the initiative.",
+            "args": [
+              {
+                "name": "after",
+                "description": "A cursor to be used with first for forward pagination",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "before",
+                "description": "A cursor to be used with last for backward pagination.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "first",
+                "description": "The number of items to forward paginate (used with after). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "includeArchived",
+                "description": "Should archived resources be included (default: false)",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "last",
+                "description": "The number of items to backward paginate (used with before). Defaults to 50.",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "orderBy",
+                "description": "By which field should the pagination order by. Available options are createdAt (default) and updatedAt.",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "PaginationOrderBy",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "InitiativeUpdateConnection",
                 "ofType": null
               }
             },
@@ -78962,15 +79112,15 @@
           },
           {
             "name": "allowMembersToInvite",
-            "description": "Whether member users are allowed to send invites.",
+            "description": "[DEPRECATED] Whether member users are allowed to send invites.",
             "args": [],
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use `securitySettings.invitationsRole` instead."
           },
           {
             "name": "allowedAiProviders",
@@ -79873,27 +80023,27 @@
           },
           {
             "name": "restrictLabelManagementToAdmins",
-            "description": "Whether workspace label creation, update, and deletion is restricted to admins.",
+            "description": "[DEPRECATED] Whether workspace label creation, update, and deletion is restricted to admins.",
             "args": [],
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use `securitySettings.labelManagementRole` instead."
           },
           {
             "name": "restrictTeamCreationToAdmins",
-            "description": "Whether team creation is restricted to admins.",
+            "description": "[DEPRECATED] Whether team creation is restricted to admins.",
             "args": [],
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use `securitySettings.teamCreationRole` instead."
           },
           {
             "name": "roadmapEnabled",
@@ -112466,6 +112616,18 @@
             "deprecationReason": null
           },
           {
+            "name": "customerVisibility",
+            "description": "Controls who can see and set Customers when creating Asks in Slack.",
+            "type": {
+              "kind": "ENUM",
+              "name": "CustomerVisibilityMode",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "enterpriseId",
             "description": "Enterprise id of the connected Slack enterprise",
             "type": {
@@ -116987,6 +117149,18 @@
             "deprecationReason": null
           },
           {
+            "name": "parent",
+            "description": "Filters that the teams parent must satisfy.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "NullableTeamFilter",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "some",
             "description": "Filters that needs to be matched by some teams.",
             "type": {
@@ -117790,7 +117964,7 @@
           },
           {
             "name": "owner",
-            "description": "Whether the user is the owner of the team.",
+            "description": "Whether the user is an owner of the team.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -118693,7 +118867,7 @@
           },
           {
             "name": "autoCloseChildIssues",
-            "description": "[INTERNAL] Whether to automatically close all sub-issues when a parent issue in this team is closed.",
+            "description": "Whether to automatically close all sub-issues when a parent issue in this team is closed.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -118705,7 +118879,7 @@
           },
           {
             "name": "autoCloseParentIssues",
-            "description": "[INTERNAL] Whether to automatically close a parent issue in this team if all its sub-issues are closed.",
+            "description": "Whether to automatically close a parent issue in this team if all its sub-issues are closed.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",

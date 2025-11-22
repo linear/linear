@@ -1982,6 +1982,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the initiative connection query for the InitiativeUpdate */
+    it("initiative.initiativeUpdates", async () => {
+      if (_initiative) {
+        const initiativeUpdates: L.InitiativeUpdateConnection | undefined = await _initiative.initiativeUpdates();
+        expect(initiativeUpdates instanceof L.InitiativeUpdateConnection);
+      } else {
+        console.warn("codegen-doc:print: No initiative found - cannot test _initiative.initiativeUpdates query");
+      }
+    });
+
     /** Test the initiative connection query for the EntityExternalLink */
     it("initiative.links", async () => {
       if (_initiative) {
