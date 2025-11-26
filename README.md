@@ -1,4 +1,4 @@
-<!-- TEXT_SECTION:header:START -->
+
 <p align="center">
   <a href="https://linear.app" target="_blank" rel="noopener noreferrer">
     <img width="64" src="https://raw.githubusercontent.com/linear/linear/master/docs/logo.svg" alt="Linear logo">
