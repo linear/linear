@@ -4,8 +4,7 @@
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "engines": {
-    "node": ">=12.x",
-    "yarn": "1.x"
+    "node": ">=18.x"
   },
   "workspaces": [
     "./packages/*"
@@ -29,7 +28,7 @@
     "test:update": "yarn test -u",
     "test:watch": "yarn test --watch",
     "test": "npx jest -w 1",
-    "update:dependencies": "yarn upgrade && lerna run generate:changeset:dependencies",
+    "update:dependencies": "yarn up && lerna run generate:changeset:dependencies",
     "update:schema": "lerna run generate:schema && lerna run generate:changeset:schema"
   },
   "dependencies": {
@@ -118,5 +117,5 @@
       }
     }
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@4.12.0"
 }

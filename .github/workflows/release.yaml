@@ -33,8 +33,11 @@ jobs:
       - name: Update npm
         run: npm install -g npm@latest
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
 
       - name: Build packages
         run: yarn build
