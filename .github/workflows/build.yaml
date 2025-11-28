@@ -30,8 +30,11 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
 
       - name: Build packages
         run: yarn build

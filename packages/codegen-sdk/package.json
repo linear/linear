@@ -10,8 +10,7 @@
   "types": "dist/index.d.ts",
   "repository": "https://github.com/linear/linear",
   "engines": {
-    "node": ">=12.x",
-    "yarn": "1.x"
+    "node": ">=18.x"
   },
   "files": [
     "dist"

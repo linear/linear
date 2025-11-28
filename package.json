@@ -4,23 +4,22 @@
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "engines": {
-    "node": ">=12.x",
-    "yarn": "1.x"
+    "node": ">=18.x"
   },
   "workspaces": [
     "./packages/*"
   ],
   "scripts": {
-    "build:import": "lerna run build:import",
-    "build:sdk": "lerna run build:sdk",
+    "build:import": "yarn workspaces foreach -Apt run build:import",
+    "build:sdk": "yarn workspaces foreach -Apt run build:sdk",
     "build:types": "npx tsc --project tsconfig.check.json",
     "build": "run-s generate build:sdk generate:test build:import build:types docs",
     "dev": "NODE_ENV=development yarn build",
     "docs": "npx md-magic 'packages/**/README.md' --config ./docs/markdown-magic.config.js",
-    "generate:clean": "lerna run generate:clean",
-    "generate:doc": "lerna run build:codegen-doc && lerna run generate:doc",
-    "generate:sdk": "lerna run build:codegen-sdk && lerna run generate:sdk",
-    "generate:test": "lerna run build:codegen-test && lerna run generate:test",
+    "generate:clean": "yarn workspaces foreach -Apt run generate:clean",
+    "generate:doc": "yarn workspaces foreach -Apt run build:codegen-doc && yarn workspaces foreach -Apt run generate:doc",
+    "generate:sdk": "yarn workspaces foreach -Apt run build:codegen-sdk && yarn workspaces foreach -Apt run generate:sdk",
+    "generate:test": "yarn workspaces foreach -Apt run build:codegen-test && yarn workspaces foreach -Apt run generate:test",
     "generate": "run-s generate:clean generate:doc generate:sdk",
     "lint": "npx eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
     "mock": "npx graphql-faker packages/sdk/src/schema.graphql",
@@ -29,8 +28,8 @@
     "test:update": "yarn test -u",
     "test:watch": "yarn test --watch",
     "test": "npx jest -w 1",
-    "update:dependencies": "yarn upgrade && lerna run generate:changeset:dependencies",
-    "update:schema": "lerna run generate:schema && lerna run generate:changeset:schema"
+    "update:dependencies": "yarn up && yarn workspaces foreach -Apt run generate:changeset:dependencies",
+    "update:schema": "yarn workspaces foreach -Apt run generate:schema && yarn workspaces foreach -Apt run generate:changeset:schema"
   },
   "dependencies": {
     "@changesets/cli": "^2.14.1",
@@ -61,7 +60,6 @@
     "graphql-faker": "2.0.0-rc.25",
     "husky": "^4.3.8",
     "jest": "^26.6.3",
-    "lerna": "7.1.4",
     "lint-staged": "^10.5.1",
     "markdown-magic": "^3.7.0",
     "npm-run-all": "^4.1.5",
@@ -118,5 +116,5 @@
       }
     }
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@4.12.0"
 }

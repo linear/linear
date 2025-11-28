@@ -20,8 +20,7 @@
   },
   "repository": "https://github.com/linear/linear",
   "engines": {
-    "node": ">=12.x",
-    "yarn": "1.x"
+    "node": ">=18.x"
   },
   "files": [
     "dist/**/*.min.js",
@@ -37,7 +36,7 @@
     "build:rollup": "npx rollup -c",
     "generate:changeset:dependencies": "ts-node scripts/generate-dependencies-changeset.ts",
     "generate:changeset:schema": "ts-node scripts/generate-schema-changeset.ts",
-    "generate:clean": "npx rimraf src/**/_generated*",
+    "generate:clean": "npx rimraf -G src/**/_generated* || true",
     "generate:doc": "npx graphql-codegen --config codegen.doc.yml",
     "generate:schema": "npx graphql-codegen --config codegen.schema.yml",
     "generate:sdk": "npx graphql-codegen --config codegen.sdk.yml && yarn update:scalars",

@@ -9,13 +9,13 @@
 Install the CLI:
 
 ```
-yarn global add @linear/import
-```
-
-or
-
-```
 npm i --location=global @linear/import
+```
+
+or run directly without installing:
+
+```
+yarn dlx @linear/import
 ```
 
 Run interactive importer:
