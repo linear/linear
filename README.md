@@ -44,9 +44,7 @@ The Linear Client uses custom [GraphQL Code Generator](https://graphql-code-gene
 
 ### Structure
 
-This monorepo uses `yarn workspaces` (Yarn Modern/Berry) and `lerna` to publish packages.
-
-**Note:** This project uses Yarn Modern (v4+). Make sure you have Node 18+ and Corepack enabled (`corepack enable`). The project uses `node-modules` linker by default (configured in `.yarnrc.yml`).
+This monorepo uses `yarn workspaces` and `lerna` to publish packages.
 
 Generated code uses file prefix `_generated` and should never be manually updated.
 
@@ -58,6 +56,8 @@ Open source packages:
 - [codegen-test](https://github.com/linear/linear/tree/master/packages/codegen-test/README.md) - GraphQL codegen plugin to generate a jest test for the Typescript SDK
 
 ### Get Started
+
+Make sure you have Node 18+ and Corepack enabled (`corepack enable`).
 
 ```shell
 # install dependencies
