@@ -44,7 +44,7 @@ The Linear Client uses custom [GraphQL Code Generator](https://graphql-code-gene
 
 ### Structure
 
-This monorepo uses `yarn workspaces` and `lerna` to publish packages.
+This monorepo uses `yarn workspaces` to manage and publish packages.
 
 Generated code uses file prefix `_generated` and should never be manually updated.
 
