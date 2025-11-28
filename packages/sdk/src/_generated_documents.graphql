@@ -179,6 +179,23 @@ fragment SyncedExternalThread on SyncedExternalThread {
   id
 }
 
+# A continuous period of time during which an issue remained in a specific workflow state.
+fragment IssueStateSpan on IssueStateSpan {
+  __typename
+  # The timestamp when the issue entered this state.
+  startedAt
+  # The timestamp when the issue left this state. Null if the issue is currently in this state.
+  endedAt
+  # The unique identifier of the state span.
+  id
+  # The workflow state for this span.
+  state {
+    id
+  }
+  # The workflow state identifier for this span.
+  stateId
+}
+
 # A custom emoji.
 fragment Emoji on Emoji {
   __typename
@@ -3965,6 +3982,8 @@ fragment Team on Team {
   defaultIssueEstimate
   # Where to move issues when changing state.
   setIssueSortOrderOnStateChange
+  # Whether all members in the workspace can join the team. Only used for public teams.
+  allMembersCanJoin
   # Whether an issue needs to have a priority set before leaving triage.
   requirePriorityToLeaveTriage
   # Whether child issues should automatically close when their parent issue is closed
@@ -4230,6 +4249,19 @@ fragment DocumentChildWebhookPayload on DocumentChildWebhookPayload {
   }
   # The title of the document.
   title
+}
+
+# Certain properties of a project label.
+fragment ProjectLabelChildWebhookPayload on ProjectLabelChildWebhookPayload {
+  __typename
+  # The ID of the project label.
+  id
+  # The color of the project label.
+  color
+  # The name of the project label.
+  name
+  # The parent ID of the project label.
+  parentId
 }
 
 # Certain properties of a project milestone.
@@ -5328,6 +5360,31 @@ fragment DocumentWebhookPayload on DocumentWebhookPayload {
   updatedAt
   # The title of the document.
   title
+}
+
+# Payload for a project label webhook.
+fragment ProjectLabelWebhookPayload on ProjectLabelWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The color of the project label.
+  color
+  # The creator ID of the project label.
+  creatorId
+  # The label's description.
+  description
+  # The name of the project label.
+  name
+  # The parent ID of the project label.
+  parentId
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # Whether the label is a group.
+  isGroup
 }
 
 # Payload for a project update webhook.
@@ -8145,6 +8202,16 @@ fragment IssueSearchResult on IssueSearchResult {
   # The workflow state that the issue is associated with.
   state {
     id
+  }
+}
+
+fragment IssueStateSpanConnection on IssueStateSpanConnection {
+  __typename
+  nodes {
+    ...IssueStateSpan
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 

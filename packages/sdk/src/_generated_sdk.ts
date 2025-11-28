@@ -10263,6 +10263,58 @@ export class IssueSlaWebhookPayload {
   public issueData: IssueWebhookPayload;
 }
 /**
+ * A continuous period of time during which an issue remained in a specific workflow state.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.IssueStateSpanFragment response data
+ */
+export class IssueStateSpan extends Request {
+  private _state?: L.IssueStateSpanFragment["state"];
+
+  public constructor(request: LinearRequest, data: L.IssueStateSpanFragment) {
+    super(request);
+    this.endedAt = parseDate(data.endedAt) ?? undefined;
+    this.id = data.id;
+    this.startedAt = parseDate(data.startedAt) ?? new Date();
+    this.stateId = data.stateId;
+    this._state = data.state ?? undefined;
+  }
+
+  /** The timestamp when the issue left this state. Null if the issue is currently in this state. */
+  public endedAt?: Date;
+  /** The unique identifier of the state span. */
+  public id: string;
+  /** The timestamp when the issue entered this state. */
+  public startedAt: Date;
+  /** The workflow state identifier for this span. */
+  public stateId: string;
+  /** The workflow state for this span. */
+  public get state(): LinearFetch<WorkflowState> | undefined {
+    return this._state?.id ? new WorkflowStateQuery(this._request).fetch(this._state?.id) : undefined;
+  }
+}
+/**
+ * IssueStateSpanConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this IssueStateSpanConnection model
+ * @param data - IssueStateSpanConnection response data
+ */
+export class IssueStateSpanConnection extends Connection<IssueStateSpan> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (connection?: LinearConnectionVariables) => LinearFetch<LinearConnection<IssueStateSpan> | undefined>,
+    data: L.IssueStateSpanConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new IssueStateSpan(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
+  }
+}
+/**
  * Payload for a terminal issue status change notification.
  *
  * @param data - L.IssueStatusChangedNotificationWebhookPayloadFragment response data
@@ -13240,6 +13292,28 @@ export class ProjectLabel extends Request {
   }
 }
 /**
+ * Certain properties of a project label.
+ *
+ * @param data - L.ProjectLabelChildWebhookPayloadFragment response data
+ */
+export class ProjectLabelChildWebhookPayload {
+  public constructor(data: L.ProjectLabelChildWebhookPayloadFragment) {
+    this.color = data.color;
+    this.id = data.id;
+    this.name = data.name;
+    this.parentId = data.parentId ?? undefined;
+  }
+
+  /** The color of the project label. */
+  public color: string;
+  /** The ID of the project label. */
+  public id: string;
+  /** The name of the project label. */
+  public name: string;
+  /** The parent ID of the project label. */
+  public parentId?: string;
+}
+/**
  * ProjectLabelConnection model
  *
  * @param request - function to call the graphql client
@@ -13288,6 +13362,46 @@ export class ProjectLabelPayload extends Request {
   public get projectLabelId(): string | undefined {
     return this._projectLabel?.id;
   }
+}
+/**
+ * Payload for a project label webhook.
+ *
+ * @param data - L.ProjectLabelWebhookPayloadFragment response data
+ */
+export class ProjectLabelWebhookPayload {
+  public constructor(data: L.ProjectLabelWebhookPayloadFragment) {
+    this.archivedAt = data.archivedAt ?? undefined;
+    this.color = data.color;
+    this.createdAt = data.createdAt;
+    this.creatorId = data.creatorId ?? undefined;
+    this.description = data.description ?? undefined;
+    this.id = data.id;
+    this.isGroup = data.isGroup;
+    this.name = data.name;
+    this.parentId = data.parentId ?? undefined;
+    this.updatedAt = data.updatedAt;
+  }
+
+  /** The time at which the entity was archived. */
+  public archivedAt?: string;
+  /** The color of the project label. */
+  public color: string;
+  /** The time at which the entity was created. */
+  public createdAt: string;
+  /** The creator ID of the project label. */
+  public creatorId?: string;
+  /** The label's description. */
+  public description?: string;
+  /** The ID of the entity. */
+  public id: string;
+  /** Whether the label is a group. */
+  public isGroup: boolean;
+  /** The name of the project label. */
+  public name: string;
+  /** The parent ID of the project label. */
+  public parentId?: string;
+  /** The time at which the entity was updated. */
+  public updatedAt: string;
 }
 /**
  * A milestone for a project.
@@ -15911,6 +16025,7 @@ export class Team extends Request {
     super(request);
     this.aiDiscussionSummariesEnabled = data.aiDiscussionSummariesEnabled;
     this.aiThreadSummariesEnabled = data.aiThreadSummariesEnabled;
+    this.allMembersCanJoin = data.allMembersCanJoin ?? undefined;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.autoArchivePeriod = data.autoArchivePeriod;
     this.autoCloseChildIssues = data.autoCloseChildIssues ?? undefined;
@@ -15979,6 +16094,8 @@ export class Team extends Request {
   public aiDiscussionSummariesEnabled: boolean;
   /** Whether to enable resolved thread AI summaries. */
   public aiThreadSummariesEnabled: boolean;
+  /** Whether all members in the workspace can join the team. Only used for public teams. */
+  public allMembersCanJoin?: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** Period after which automatically closed and completed issues are automatically archived in months. */
