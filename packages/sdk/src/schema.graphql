@@ -5716,6 +5716,7 @@ union DataWebhookPayload =
   | InitiativeWebhookPayload
   | IssueLabelWebhookPayload
   | IssueWebhookPayload
+  | ProjectLabelWebhookPayload
   | ProjectUpdateWebhookPayload
   | ProjectWebhookPayload
   | ReactionWebhookPayload
@@ -11860,6 +11861,27 @@ type Issue implements Node {
   """
   state: WorkflowState!
   """
+  [ALPHA] The issue's workflow states over time.
+  """
+  stateHistory(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+  ): IssueStateSpanConnection!
+  """
   The order of the item in the sub-issue list. Only set if the issue has a parent.
   """
   subIssueSortOrder: Float
@@ -14978,6 +15000,27 @@ type IssueSearchResult implements Node {
   """
   state: WorkflowState!
   """
+  [ALPHA] The issue's workflow states over time.
+  """
+  stateHistory(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+  ): IssueStateSpanConnection!
+  """
   The order of the item in the sub-issue list. Only set if the issue has a parent.
   """
   subIssueSortOrder: Float
@@ -15224,6 +15267,46 @@ input IssueSortInput {
   Sort by workflow state type
   """
   workflowState: WorkflowStateSort
+}
+
+"""
+A continuous period of time during which an issue remained in a specific workflow state.
+"""
+type IssueStateSpan {
+  """
+  The timestamp when the issue left this state. Null if the issue is currently in this state.
+  """
+  endedAt: DateTime
+  """
+  The unique identifier of the state span.
+  """
+  id: ID!
+  """
+  The timestamp when the issue entered this state.
+  """
+  startedAt: DateTime!
+  """
+  The workflow state for this span.
+  """
+  state: WorkflowState
+  """
+  The workflow state identifier for this span.
+  """
+  stateId: ID!
+}
+
+type IssueStateSpanConnection {
+  edges: [IssueStateSpanEdge!]!
+  nodes: [IssueStateSpan!]!
+  pageInfo: PageInfo!
+}
+
+type IssueStateSpanEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: IssueStateSpan!
 }
 
 """
@@ -18173,6 +18256,19 @@ type Mutation {
     """
     service: String!
   ): SlackChannelConnectPayload!
+  """
+  [Internal] Enables Linear Agent Slack workflow access for a Slack integration.
+  """
+  integrationSlackWorkflowAccessUpdate(
+    """
+    Whether to enable workflow access.
+    """
+    enabled: Boolean!
+    """
+    The ID of the integration to toggle workflow access for.
+    """
+    integrationId: String!
+  ): IntegrationPayload!
   """
   Creates a new integrationTemplate join.
   """
@@ -21644,6 +21740,10 @@ input NullableProjectMilestoneFilter {
   Compound filters, one of which need to be matched by the project milestone.
   """
   or: [NullableProjectMilestoneFilter!]
+  """
+  Filters that the project milestone's project must satisfy.
+  """
+  project: NullableProjectFilter
   """
   Comparator for the project milestone target date.
   """
@@ -25400,6 +25500,28 @@ type ProjectLabel implements Node {
 }
 
 """
+Certain properties of a project label.
+"""
+type ProjectLabelChildWebhookPayload {
+  """
+  The color of the project label.
+  """
+  color: String!
+  """
+  The ID of the project label.
+  """
+  id: String!
+  """
+  The name of the project label.
+  """
+  name: String!
+  """
+  The parent ID of the project label.
+  """
+  parentId: String
+}
+
+"""
 Project label filtering options.
 """
 input ProjectLabelCollectionFilter {
@@ -25587,6 +25709,52 @@ input ProjectLabelUpdateInput {
 }
 
 """
+Payload for a project label webhook.
+"""
+type ProjectLabelWebhookPayload {
+  """
+  The time at which the entity was archived.
+  """
+  archivedAt: String
+  """
+  The color of the project label.
+  """
+  color: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: String!
+  """
+  The creator ID of the project label.
+  """
+  creatorId: String
+  """
+  The label's description.
+  """
+  description: String
+  """
+  The ID of the entity.
+  """
+  id: String!
+  """
+  Whether the label is a group.
+  """
+  isGroup: Boolean!
+  """
+  The name of the project label.
+  """
+  name: String!
+  """
+  The parent ID of the project label.
+  """
+  parentId: String
+  """
+  The time at which the entity was updated.
+  """
+  updatedAt: String!
+}
+
+"""
 Project lead sorting options.
 """
 input ProjectLeadSort {
@@ -25765,6 +25933,10 @@ input ProjectMilestoneCollectionFilter {
   """
   or: [ProjectMilestoneCollectionFilter!]
   """
+  Filters that the project milestone's project must satisfy.
+  """
+  project: NullableProjectFilter
+  """
   Filters that needs to be matched by some milestones.
   """
   some: ProjectMilestoneFilter
@@ -25847,6 +26019,10 @@ input ProjectMilestoneFilter {
   Compound filters, one of which need to be matched by the project milestone.
   """
   or: [ProjectMilestoneFilter!]
+  """
+  Filters that the project milestone's project must satisfy.
+  """
+  project: NullableProjectFilter
   """
   Comparator for the project milestone target date.
   """
@@ -32481,6 +32657,10 @@ type Team implements Node {
   """
   aiThreadSummariesEnabled: Boolean!
   """
+  Whether all members in the workspace can join the team. Only used for public teams.
+  """
+  allMembersCanJoin: Boolean
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -33652,6 +33832,10 @@ input TeamUpdateInput {
   Whether to enable resolved thread AI summaries.
   """
   aiThreadSummariesEnabled: Boolean
+  """
+  Whether all members in the workspace can join the team. Only used for public teams.
+  """
+  allMembersCanJoin: Boolean
   """
   Period after which closed and completed issues are automatically archived, in months.
   """

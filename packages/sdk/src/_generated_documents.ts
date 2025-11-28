@@ -3287,6 +3287,7 @@ export type DataWebhookPayload =
   | InitiativeWebhookPayload
   | IssueLabelWebhookPayload
   | IssueWebhookPayload
+  | ProjectLabelWebhookPayload
   | ProjectUpdateWebhookPayload
   | ProjectWebhookPayload
   | ReactionWebhookPayload
@@ -6686,6 +6687,8 @@ export type Issue = Node & {
   startedTriageAt?: Maybe<Scalars["DateTime"]>;
   /** The workflow state that the issue is associated with. */
   state: WorkflowState;
+  /** [ALPHA] The issue's workflow states over time. */
+  stateHistory: IssueStateSpanConnection;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
   subIssueSortOrder?: Maybe<Scalars["Float"]>;
   /** Users who are subscribed to the issue. */
@@ -6839,6 +6842,14 @@ export type IssueRelationsArgs = {
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** An issue. */
+export type IssueStateHistoryArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
 };
 
 /** An issue. */
@@ -8327,6 +8338,8 @@ export type IssueSearchResult = Node & {
   startedTriageAt?: Maybe<Scalars["DateTime"]>;
   /** The workflow state that the issue is associated with. */
   state: WorkflowState;
+  /** [ALPHA] The issue's workflow states over time. */
+  stateHistory: IssueStateSpanConnection;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
   subIssueSortOrder?: Maybe<Scalars["Float"]>;
   /** Users who are subscribed to the issue. */
@@ -8470,6 +8483,13 @@ export type IssueSearchResultRelationsArgs = {
   orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
+export type IssueSearchResultStateHistoryArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+};
+
 export type IssueSearchResultSubscribersArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -8566,6 +8586,35 @@ export type IssueSortInput = {
   updatedAt?: InputMaybe<UpdatedAtSort>;
   /** Sort by workflow state type */
   workflowState?: InputMaybe<WorkflowStateSort>;
+};
+
+/** A continuous period of time during which an issue remained in a specific workflow state. */
+export type IssueStateSpan = {
+  __typename?: "IssueStateSpan";
+  /** The timestamp when the issue left this state. Null if the issue is currently in this state. */
+  endedAt?: Maybe<Scalars["DateTime"]>;
+  /** The unique identifier of the state span. */
+  id: Scalars["ID"];
+  /** The timestamp when the issue entered this state. */
+  startedAt: Scalars["DateTime"];
+  /** The workflow state for this span. */
+  state?: Maybe<WorkflowState>;
+  /** The workflow state identifier for this span. */
+  stateId: Scalars["ID"];
+};
+
+export type IssueStateSpanConnection = {
+  __typename?: "IssueStateSpanConnection";
+  edges: Array<IssueStateSpanEdge>;
+  nodes: Array<IssueStateSpan>;
+  pageInfo: PageInfo;
+};
+
+export type IssueStateSpanEdge = {
+  __typename?: "IssueStateSpanEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: IssueStateSpan;
 };
 
 /** Payload for a terminal issue status change notification. */
@@ -9467,6 +9516,8 @@ export type Mutation = {
   integrationSlackPost: SlackChannelConnectPayload;
   /** Slack integration for project notifications. */
   integrationSlackProjectPost: SlackChannelConnectPayload;
+  /** [Internal] Enables Linear Agent Slack workflow access for a Slack integration. */
+  integrationSlackWorkflowAccessUpdate: IntegrationPayload;
   /** Creates a new integrationTemplate join. */
   integrationTemplateCreate: IntegrationTemplatePayload;
   /** Deletes a integrationTemplate. */
@@ -10561,6 +10612,11 @@ export type MutationIntegrationSlackProjectPostArgs = {
   projectId: Scalars["String"];
   redirectUri: Scalars["String"];
   service: Scalars["String"];
+};
+
+export type MutationIntegrationSlackWorkflowAccessUpdateArgs = {
+  enabled: Scalars["Boolean"];
+  integrationId: Scalars["String"];
 };
 
 export type MutationIntegrationTemplateCreateArgs = {
@@ -12203,6 +12259,8 @@ export type NullableProjectMilestoneFilter = {
   null?: InputMaybe<Scalars["Boolean"]>;
   /** Compound filters, one of which need to be matched by the project milestone. */
   or?: InputMaybe<Array<NullableProjectMilestoneFilter>>;
+  /** Filters that the project milestone's project must satisfy. */
+  project?: InputMaybe<NullableProjectFilter>;
   /** Comparator for the project milestone target date. */
   targetDate?: InputMaybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
@@ -14275,6 +14333,19 @@ export type ProjectLabelProjectsArgs = {
   sort?: InputMaybe<Array<ProjectSortInput>>;
 };
 
+/** Certain properties of a project label. */
+export type ProjectLabelChildWebhookPayload = {
+  __typename?: "ProjectLabelChildWebhookPayload";
+  /** The color of the project label. */
+  color: Scalars["String"];
+  /** The ID of the project label. */
+  id: Scalars["String"];
+  /** The name of the project label. */
+  name: Scalars["String"];
+  /** The parent ID of the project label. */
+  parentId?: Maybe<Scalars["String"]>;
+};
+
 /** Project label filtering options. */
 export type ProjectLabelCollectionFilter = {
   /** Compound filters, all of which need to be matched by the label. */
@@ -14383,6 +14454,31 @@ export type ProjectLabelUpdateInput = {
   retiredAt?: InputMaybe<Scalars["DateTime"]>;
 };
 
+/** Payload for a project label webhook. */
+export type ProjectLabelWebhookPayload = {
+  __typename?: "ProjectLabelWebhookPayload";
+  /** The time at which the entity was archived. */
+  archivedAt?: Maybe<Scalars["String"]>;
+  /** The color of the project label. */
+  color: Scalars["String"];
+  /** The time at which the entity was created. */
+  createdAt: Scalars["String"];
+  /** The creator ID of the project label. */
+  creatorId?: Maybe<Scalars["String"]>;
+  /** The label's description. */
+  description?: Maybe<Scalars["String"]>;
+  /** The ID of the entity. */
+  id: Scalars["String"];
+  /** Whether the label is a group. */
+  isGroup: Scalars["Boolean"];
+  /** The name of the project label. */
+  name: Scalars["String"];
+  /** The parent ID of the project label. */
+  parentId?: Maybe<Scalars["String"]>;
+  /** The time at which the entity was updated. */
+  updatedAt: Scalars["String"];
+};
+
 /** Project lead sorting options. */
 export type ProjectLeadSort = {
   /** Whether nulls should be sorted first or last */
@@ -14477,6 +14573,8 @@ export type ProjectMilestoneCollectionFilter = {
   name?: InputMaybe<NullableStringComparator>;
   /** Compound filters, one of which need to be matched by the milestone. */
   or?: InputMaybe<Array<ProjectMilestoneCollectionFilter>>;
+  /** Filters that the project milestone's project must satisfy. */
+  project?: InputMaybe<NullableProjectFilter>;
   /** Filters that needs to be matched by some milestones. */
   some?: InputMaybe<ProjectMilestoneFilter>;
   /** Comparator for the project milestone target date. */
@@ -14528,6 +14626,8 @@ export type ProjectMilestoneFilter = {
   name?: InputMaybe<NullableStringComparator>;
   /** Compound filters, one of which need to be matched by the project milestone. */
   or?: InputMaybe<Array<ProjectMilestoneFilter>>;
+  /** Filters that the project milestone's project must satisfy. */
+  project?: InputMaybe<NullableProjectFilter>;
   /** Comparator for the project milestone target date. */
   targetDate?: InputMaybe<NullableDateComparator>;
   /** Comparator for the updated at date. */
@@ -18107,6 +18207,8 @@ export type Team = Node & {
   aiDiscussionSummariesEnabled: Scalars["Boolean"];
   /** Whether to enable resolved thread AI summaries. */
   aiThreadSummariesEnabled: Scalars["Boolean"];
+  /** Whether all members in the workspace can join the team. Only used for public teams. */
+  allMembersCanJoin?: Maybe<Scalars["Boolean"]>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** Period after which automatically closed and completed issues are automatically archived in months. */
@@ -18749,6 +18851,8 @@ export type TeamUpdateInput = {
   aiDiscussionSummariesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether to enable resolved thread AI summaries. */
   aiThreadSummariesEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether all members in the workspace can join the team. Only used for public teams. */
+  allMembersCanJoin?: InputMaybe<Scalars["Boolean"]>;
   /** Period after which closed and completed issues are automatically archived, in months. */
   autoArchivePeriod?: InputMaybe<Scalars["Float"]>;
   /** Whether to automatically close all sub-issues when a parent issue in this team is closed. */
@@ -20565,6 +20669,11 @@ export type SyncedExternalThreadFragment = { __typename: "SyncedExternalThread" 
   | "isConnected"
   | "id"
 >;
+
+export type IssueStateSpanFragment = { __typename: "IssueStateSpan" } & Pick<
+  IssueStateSpan,
+  "startedAt" | "endedAt" | "id" | "stateId"
+> & { state?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">> };
 
 export type EmojiFragment = { __typename: "Emoji" } & Pick<
   Emoji,
@@ -23997,6 +24106,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "inviteHash"
   | "defaultIssueEstimate"
   | "setIssueSortOrderOnStateChange"
+  | "allMembersCanJoin"
   | "requirePriorityToLeaveTriage"
   | "autoCloseChildIssues"
   | "autoCloseParentIssues"
@@ -24153,6 +24263,11 @@ export type DocumentChildWebhookPayloadFragment = { __typename: "DocumentChildWe
       { __typename: "ProjectChildWebhookPayload" } & Pick<ProjectChildWebhookPayload, "id" | "url" | "name">
     >;
   };
+
+export type ProjectLabelChildWebhookPayloadFragment = { __typename: "ProjectLabelChildWebhookPayload" } & Pick<
+  ProjectLabelChildWebhookPayload,
+  "id" | "color" | "name" | "parentId"
+>;
 
 export type ProjectMilestoneChildWebhookPayloadFragment = { __typename: "ProjectMilestoneChildWebhookPayload" } & Pick<
   ProjectMilestoneChildWebhookPayload,
@@ -24904,6 +25019,20 @@ export type DocumentWebhookPayloadFragment = { __typename: "DocumentWebhookPaylo
   | "createdAt"
   | "updatedAt"
   | "title"
+>;
+
+export type ProjectLabelWebhookPayloadFragment = { __typename: "ProjectLabelWebhookPayload" } & Pick<
+  ProjectLabelWebhookPayload,
+  | "id"
+  | "color"
+  | "creatorId"
+  | "description"
+  | "name"
+  | "parentId"
+  | "archivedAt"
+  | "createdAt"
+  | "updatedAt"
+  | "isGroup"
 >;
 
 export type ProjectUpdateWebhookPayloadFragment = { __typename: "ProjectUpdateWebhookPayload" } & Pick<
@@ -28221,6 +28350,18 @@ export type IssueSearchResultFragment = { __typename: "IssueSearchResult" } & Pi
     state: { __typename?: "WorkflowState" } & Pick<WorkflowState, "id">;
   };
 
+export type IssueStateSpanConnectionFragment = { __typename: "IssueStateSpanConnection" } & {
+  nodes: Array<
+    { __typename: "IssueStateSpan" } & Pick<IssueStateSpan, "startedAt" | "endedAt" | "id" | "stateId"> & {
+        state?: Maybe<{ __typename?: "WorkflowState" } & Pick<WorkflowState, "id">>;
+      }
+  >;
+  pageInfo: { __typename: "PageInfo" } & Pick<
+    PageInfo,
+    "startCursor" | "endCursor" | "hasPreviousPage" | "hasNextPage"
+  >;
+};
+
 export type IssueSuggestionFragment = { __typename: "IssueSuggestion" } & Pick<
   IssueSuggestion,
   | "updatedAt"
@@ -30856,6 +30997,7 @@ export type TeamConnectionFragment = { __typename: "TeamConnection" } & {
       | "inviteHash"
       | "defaultIssueEstimate"
       | "setIssueSortOrderOnStateChange"
+      | "allMembersCanJoin"
       | "requirePriorityToLeaveTriage"
       | "autoCloseChildIssues"
       | "autoCloseParentIssues"
@@ -31238,6 +31380,7 @@ export type AdministrableTeamsQuery = { __typename?: "Query" } & {
         | "inviteHash"
         | "defaultIssueEstimate"
         | "setIssueSortOrderOnStateChange"
+        | "allMembersCanJoin"
         | "requirePriorityToLeaveTriage"
         | "autoCloseChildIssues"
         | "autoCloseParentIssues"
@@ -40047,6 +40190,7 @@ export type Organization_TeamsQuery = { __typename?: "Query" } & {
           | "inviteHash"
           | "defaultIssueEstimate"
           | "setIssueSortOrderOnStateChange"
+          | "allMembersCanJoin"
           | "requirePriorityToLeaveTriage"
           | "autoCloseChildIssues"
           | "autoCloseParentIssues"
@@ -41182,6 +41326,7 @@ export type Project_TeamsQuery = { __typename?: "Query" } & {
           | "inviteHash"
           | "defaultIssueEstimate"
           | "setIssueSortOrderOnStateChange"
+          | "allMembersCanJoin"
           | "requirePriorityToLeaveTriage"
           | "autoCloseChildIssues"
           | "autoCloseParentIssues"
@@ -42709,6 +42854,7 @@ export type TeamQuery = { __typename?: "Query" } & {
     | "inviteHash"
     | "defaultIssueEstimate"
     | "setIssueSortOrderOnStateChange"
+    | "allMembersCanJoin"
     | "requirePriorityToLeaveTriage"
     | "autoCloseChildIssues"
     | "autoCloseParentIssues"
@@ -43378,6 +43524,7 @@ export type TeamsQuery = { __typename?: "Query" } & {
         | "inviteHash"
         | "defaultIssueEstimate"
         | "setIssueSortOrderOnStateChange"
+        | "allMembersCanJoin"
         | "requirePriorityToLeaveTriage"
         | "autoCloseChildIssues"
         | "autoCloseParentIssues"
@@ -44128,6 +44275,7 @@ export type User_TeamsQuery = { __typename?: "Query" } & {
           | "inviteHash"
           | "defaultIssueEstimate"
           | "setIssueSortOrderOnStateChange"
+          | "allMembersCanJoin"
           | "requirePriorityToLeaveTriage"
           | "autoCloseChildIssues"
           | "autoCloseParentIssues"
@@ -45572,6 +45720,7 @@ export type Viewer_TeamsQuery = { __typename?: "Query" } & {
           | "inviteHash"
           | "defaultIssueEstimate"
           | "setIssueSortOrderOnStateChange"
+          | "allMembersCanJoin"
           | "requirePriorityToLeaveTriage"
           | "autoCloseChildIssues"
           | "autoCloseParentIssues"
@@ -56157,6 +56306,26 @@ export const CustomerNeedChildWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<CustomerNeedChildWebhookPayloadFragment, unknown>;
+export const ProjectLabelChildWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectLabelChildWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectLabelChildWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "color" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "parentId" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ProjectLabelChildWebhookPayloadFragment, unknown>;
 export const IntegrationChildWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -57178,6 +57347,32 @@ export const DocumentWebhookPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<DocumentWebhookPayloadFragment, unknown>;
+export const ProjectLabelWebhookPayloadFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ProjectLabelWebhookPayload" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectLabelWebhookPayload" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          { kind: "Field", name: { kind: "Name", value: "color" } },
+          { kind: "Field", name: { kind: "Name", value: "creatorId" } },
+          { kind: "Field", name: { kind: "Name", value: "description" } },
+          { kind: "Field", name: { kind: "Name", value: "name" } },
+          { kind: "Field", name: { kind: "Name", value: "parentId" } },
+          { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "isGroup" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ProjectLabelWebhookPayloadFragment, unknown>;
 export const ProjectUpdateWebhookPayloadFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -65027,6 +65222,66 @@ export const IssueSearchPayloadFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<IssueSearchPayloadFragment, unknown>;
+export const IssueStateSpanFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueStateSpan" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueStateSpan" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "startedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "endedAt" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "state" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "stateId" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<IssueStateSpanFragment, unknown>;
+export const IssueStateSpanConnectionFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "IssueStateSpanConnection" },
+      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "IssueStateSpanConnection" } },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "nodes" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "IssueStateSpan" } }],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pageInfo" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "PageInfo" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<IssueStateSpanConnectionFragment, unknown>;
 export const IssueSuggestionMetadataFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -67288,6 +67543,7 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "inviteHash" } },
           { kind: "Field", name: { kind: "Name", value: "defaultIssueEstimate" } },
           { kind: "Field", name: { kind: "Name", value: "setIssueSortOrderOnStateChange" } },
+          { kind: "Field", name: { kind: "Name", value: "allMembersCanJoin" } },
           { kind: "Field", name: { kind: "Name", value: "requirePriorityToLeaveTriage" } },
           { kind: "Field", name: { kind: "Name", value: "autoCloseChildIssues" } },
           { kind: "Field", name: { kind: "Name", value: "autoCloseParentIssues" } },
