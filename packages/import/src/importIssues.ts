@@ -196,8 +196,10 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
 
   const workflowStates = await teamInfo?.states();
 
-  const projectId = importAnswers.targetProjectId;
+  spinner.stop();
+  spinner = ora("Updating labels").start();
 
+  const projectId = importAnswers.targetProjectId;
   const labelMapping = await handleLabels(client, importData, teamId, [...allTeamLabels, ...allWorkspaceLabels]);
 
   const existingStateMap = {} as { [name: string]: string };
