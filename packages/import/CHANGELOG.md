@@ -1,5 +1,52 @@
 # Change Log
 
+## 2.2.46
+
+### Patch Changes
+
+- Updated dependencies [3af98e1]
+- Updated dependencies [4aa0311]
+- Updated dependencies [c87d844]
+- Updated dependencies [570529f]
+  - @linear/sdk@65.0.0
+
+## 2.2.45
+
+### Patch Changes
+
+- Updated dependencies [d535751]
+  - @linear/sdk@64.0.0
+
+## 2.2.44
+
+### Patch Changes
+
+- 97292f1: Use more consistent readme formatting for importer
+
+## 2.2.43
+
+### Patch Changes
+
+- Updated dependencies [8fd4df9]
+  - @linear/sdk@63.0.0
+
+## 2.2.42
+
+### Patch Changes
+
+- Updated dependencies [ec18151]
+- Updated dependencies [e7529e7]
+  - @linear/sdk@62.0.0
+
+## 2.2.41
+
+### Patch Changes
+
+- 4ae6010: chore(deps): update dependency patch versions
+- Updated dependencies [4ae6010]
+- Updated dependencies [4c5acd5]
+  - @linear/sdk@61.0.0
+
 ## 2.2.40
 
 ### Patch Changes

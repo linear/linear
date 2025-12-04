@@ -15,7 +15,7 @@ To run this example, you'll need a Linear account and a Linear API key. You can 
 Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) to bootstrap the example:
 
 ```shell
-yarn create next-app --example https://github.com/linear/linear/tree/master/examples/nextjs-file-upload nextjs-file-upload
+yarn dlx create-next-app --example https://github.com/linear/linear/tree/master/examples/nextjs-file-upload nextjs-file-upload
 ```
 
 Then rename `.env.local.example` to `.env.local` and add your API key:

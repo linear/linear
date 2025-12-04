@@ -1,9 +1,12 @@
 name: build
 
 on:
+  # Run for pushes from collaborators
   push:
     branches-ignore:
       - master
+
+  # Allow manually triggering the workflow
   workflow_dispatch:
 
 permissions:
@@ -22,13 +25,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Use node 18
+      - name: Use node 20
         uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "20"
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
 
       - name: Build packages
         run: yarn build
@@ -49,3 +55,19 @@ jobs:
 
       - name: Check for no generated changes
         run: git update-index --refresh && git diff-index HEAD
+
+  notify-slack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build]
+    if: ${{ always() && github.ref_name == 'master' && contains(needs.*.result, 'failure') }}
+    steps:
+      - uses: ravsamhq/notify-slack-action@bca2d7f5660b833a27bda4f6b8bef389ebfefd25 # 2.3.0
+        with:
+          status: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          notification_title: "SDK CI check failed on master branch"
+          message_format: ":x: Check failed in <{repo_url}|{repo}@{branch}> on <{commit_url}|{commit_sha}>"
+          footer: <{run_url}|View Run>
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

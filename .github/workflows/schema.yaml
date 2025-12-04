@@ -20,13 +20,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Use node 18
+      - name: Use node 20
         uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "20"
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
 
       - name: Update schema
         run: yarn update:schema
@@ -37,6 +40,10 @@ jobs:
       - name: Run tests
         run: yarn test
 
+      - name: Validate CJS and ESM resolution for SDK
+        # Catch issues like https://github.com/linear/linear/issues/830
+        run: npx @arethetypeswrong/cli@0.18.2 --pack packages/sdk
+
       - name: Compare schema for changes
         uses: kamilkisiela/graphql-inspector@master
         with:
@@ -45,11 +52,27 @@ jobs:
           fail-on-breaking: false
 
       - name: Create schema pull request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          sign-commits: true
           commit-message: "feat(sdk): update schema"
           title: "feat(sdk): update schema"
           body: "Update schema, regenerate types and SDK"
           branch: schema
           base: master
+
+  notify-slack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [schema]
+    if: ${{ always() && github.ref_name == 'master' && contains(needs.*.result, 'failure') }}
+    steps:
+      - uses: ravsamhq/notify-slack-action@bca2d7f5660b833a27bda4f6b8bef389ebfefd25 # 2.3.0
+        with:
+          status: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          notification_title: "SDK CI check failed on master branch"
+          message_format: ":x: Check failed in <{repo_url}|{repo}@{branch}> on <{commit_url}|{commit_sha}>"
+          footer: <{run_url}|View Run>
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

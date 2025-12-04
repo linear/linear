@@ -48,6 +48,16 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
+# Yarn Modern
+.yarn/install-state.gz
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Corepack handles yarn binary
+.yarn/releases/
+
 # dotenv environment variables file
 .env
 .env.local

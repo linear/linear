@@ -414,6 +414,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the agentSession.dismissedBy query for L.User */
+    it("agentSession.dismissedBy", async () => {
+      if (_agentSession) {
+        const agentSession_dismissedBy: L.User | undefined = await _agentSession.dismissedBy;
+        expect(agentSession_dismissedBy instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No AgentSession found - cannot test agentSession.dismissedBy query");
+      }
+    });
+
     /** Test the agentSession.issue query for L.Issue */
     it("agentSession.issue", async () => {
       if (_agentSession) {
@@ -423,14 +433,15 @@ describe("generated", () => {
         console.warn("codegen-doc:print: No AgentSession found - cannot test agentSession.issue query");
       }
     });
-  });
 
-  /** Test all ApiKey queries */
-  describe("ApiKeys", () => {
-    /** Test the root connection query for the ApiKey */
-    it("apiKeys", async () => {
-      const apiKeys: L.ApiKeyConnection | undefined = await client.apiKeys();
-      expect(apiKeys instanceof L.ApiKeyConnection);
+    /** Test the agentSession.sourceComment query for L.Comment */
+    it("agentSession.sourceComment", async () => {
+      if (_agentSession) {
+        const agentSession_sourceComment: L.Comment | undefined = await _agentSession.sourceComment;
+        expect(agentSession_sourceComment instanceof L.Comment);
+      } else {
+        console.warn("codegen-doc:print: No AgentSession found - cannot test agentSession.sourceComment query");
+      }
     });
   });
 
@@ -440,16 +451,6 @@ describe("generated", () => {
     it("applicationInfo", async () => {
       const applicationInfo: L.Application | undefined = await client.applicationInfo("mock-clientId");
       expect(applicationInfo instanceof L.Application);
-    });
-  });
-
-  /** Test ApplicationWithAuthorization query */
-  describe("ApplicationWithAuthorization", () => {
-    /** Test the root model query for ApplicationWithAuthorization */
-    it("applicationWithAuthorization", async () => {
-      const applicationWithAuthorization: L.UserAuthorizedApplication | undefined =
-        await client.applicationWithAuthorization("mock-clientId", ["mock-scope"]);
-      expect(applicationWithAuthorization instanceof L.UserAuthorizedApplication);
     });
   });
 
@@ -501,6 +502,16 @@ describe("generated", () => {
         expect(comments instanceof L.CommentConnection);
       } else {
         console.warn("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.comments query");
+      }
+    });
+
+    /** Test the attachmentIssue connection query for the Document */
+    it("attachmentIssue.documents", async () => {
+      if (_attachmentIssue) {
+        const documents: L.DocumentConnection | undefined = await _attachmentIssue.documents();
+        expect(documents instanceof L.DocumentConnection);
+      } else {
+        console.warn("codegen-doc:print: No attachmentIssue found - cannot test _attachmentIssue.documents query");
       }
     });
 
@@ -799,13 +810,36 @@ describe("generated", () => {
       }
     });
 
+    /** Test the comment connection query for the Issue */
+    it("comment.createdIssues", async () => {
+      if (_comment) {
+        const createdIssues: L.IssueConnection | undefined = await _comment.createdIssues();
+        expect(createdIssues instanceof L.IssueConnection);
+      } else {
+        console.warn("codegen-doc:print: No comment found - cannot test _comment.createdIssues query");
+      }
+    });
+
+    let _documentContent: L.DocumentContent | undefined;
+
     /** Test the comment model query for Comment_DocumentContent */
     it("comment.documentContent", async () => {
       if (_comment) {
         const documentContent: L.DocumentContent | undefined = _comment.documentContent;
+        _documentContent = documentContent;
         expect(documentContent instanceof L.DocumentContent);
       } else {
         console.warn("codegen-doc:print: No comment found - cannot test _comment.documentContent query");
+      }
+    });
+
+    /** Test the comment_documentContent model query for Comment_DocumentContent_AiPromptRules */
+    it("comment_documentContent.aiPromptRules", async () => {
+      if (_documentContent) {
+        const aiPromptRules: L.AiPromptRules | undefined = _documentContent.aiPromptRules;
+        expect(aiPromptRules instanceof L.AiPromptRules);
+      } else {
+        console.warn("codegen-doc:print: No documentContent found - cannot test _documentContent.aiPromptRules query");
       }
     });
 
@@ -1436,6 +1470,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the document.issue query for L.Issue */
+    it("document.issue", async () => {
+      if (_document) {
+        const document_issue: L.Issue | undefined = await _document.issue;
+        expect(document_issue instanceof L.Issue);
+      } else {
+        console.warn("codegen-doc:print: No Document found - cannot test document.issue query");
+      }
+    });
+
     /** Test the document.lastAppliedTemplate query for L.Template */
     it("document.lastAppliedTemplate", async () => {
       if (_document) {
@@ -1895,13 +1939,26 @@ describe("generated", () => {
       }
     });
 
+    let _documentContent: L.DocumentContent | undefined;
+
     /** Test the initiative model query for Initiative_DocumentContent */
     it("initiative.documentContent", async () => {
       if (_initiative) {
         const documentContent: L.DocumentContent | undefined = _initiative.documentContent;
+        _documentContent = documentContent;
         expect(documentContent instanceof L.DocumentContent);
       } else {
         console.warn("codegen-doc:print: No initiative found - cannot test _initiative.documentContent query");
+      }
+    });
+
+    /** Test the initiative_documentContent model query for Initiative_DocumentContent_AiPromptRules */
+    it("initiative_documentContent.aiPromptRules", async () => {
+      if (_documentContent) {
+        const aiPromptRules: L.AiPromptRules | undefined = _documentContent.aiPromptRules;
+        expect(aiPromptRules instanceof L.AiPromptRules);
+      } else {
+        console.warn("codegen-doc:print: No documentContent found - cannot test _documentContent.aiPromptRules query");
       }
     });
 
@@ -1922,6 +1979,16 @@ describe("generated", () => {
         expect(history instanceof L.InitiativeHistoryConnection);
       } else {
         console.warn("codegen-doc:print: No initiative found - cannot test _initiative.history query");
+      }
+    });
+
+    /** Test the initiative connection query for the InitiativeUpdate */
+    it("initiative.initiativeUpdates", async () => {
+      if (_initiative) {
+        const initiativeUpdates: L.InitiativeUpdateConnection | undefined = await _initiative.initiativeUpdates();
+        expect(initiativeUpdates instanceof L.InitiativeUpdateConnection);
+      } else {
+        console.warn("codegen-doc:print: No initiative found - cannot test _initiative.initiativeUpdates query");
       }
     });
 
@@ -2207,6 +2274,16 @@ describe("generated", () => {
         expect(comments instanceof L.CommentConnection);
       } else {
         console.warn("codegen-doc:print: No issue found - cannot test _issue.comments query");
+      }
+    });
+
+    /** Test the issue connection query for the Document */
+    it("issue.documents", async () => {
+      if (_issue) {
+        const documents: L.DocumentConnection | undefined = await _issue.documents();
+        expect(documents instanceof L.DocumentConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.documents query");
       }
     });
 
@@ -2592,6 +2669,16 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issueLabel.retiredBy query for L.User */
+    it("issueLabel.retiredBy", async () => {
+      if (_issueLabel) {
+        const issueLabel_retiredBy: L.User | undefined = await _issueLabel.retiredBy;
+        expect(issueLabel_retiredBy instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No IssueLabel found - cannot test issueLabel.retiredBy query");
+      }
+    });
+
     /** Test the issueLabel.team query for L.Team */
     it("issueLabel.team", async () => {
       if (_issueLabel) {
@@ -2718,6 +2805,16 @@ describe("generated", () => {
         expect(comments instanceof L.CommentConnection);
       } else {
         console.warn("codegen-doc:print: No issue found - cannot test _issue.comments query");
+      }
+    });
+
+    /** Test the issue connection query for the Document */
+    it("issue.documents", async () => {
+      if (_issue) {
+        const documents: L.DocumentConnection | undefined = await _issue.documents();
+        expect(documents instanceof L.DocumentConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.documents query");
       }
     });
 
@@ -3041,6 +3138,18 @@ describe("generated", () => {
       }
     });
 
+    /** Test the issueVcsBranchSearch connection query for the Document */
+    it("issueVcsBranchSearch.documents", async () => {
+      if (_issueVcsBranchSearch) {
+        const documents: L.DocumentConnection | undefined = await _issueVcsBranchSearch.documents();
+        expect(documents instanceof L.DocumentConnection);
+      } else {
+        console.warn(
+          "codegen-doc:print: No issueVcsBranchSearch found - cannot test _issueVcsBranchSearch.documents query"
+        );
+      }
+    });
+
     /** Test the issueVcsBranchSearch connection query for the Attachment */
     it("issueVcsBranchSearch.formerAttachments", async () => {
       if (_issueVcsBranchSearch) {
@@ -3199,6 +3308,16 @@ describe("generated", () => {
         expect(comments instanceof L.CommentConnection);
       } else {
         console.warn("codegen-doc:print: No issue found - cannot test _issue.comments query");
+      }
+    });
+
+    /** Test the issue connection query for the Document */
+    it("issue.documents", async () => {
+      if (_issue) {
+        const documents: L.DocumentConnection | undefined = await _issue.documents();
+        expect(documents instanceof L.DocumentConnection);
+      } else {
+        console.warn("codegen-doc:print: No issue found - cannot test _issue.documents query");
       }
     });
 
@@ -3923,6 +4042,16 @@ describe("generated", () => {
         console.warn("codegen-doc:print: No ProjectLabel found - cannot test projectLabel.parent query");
       }
     });
+
+    /** Test the projectLabel.retiredBy query for L.User */
+    it("projectLabel.retiredBy", async () => {
+      if (_projectLabel) {
+        const projectLabel_retiredBy: L.User | undefined = await _projectLabel.retiredBy;
+        expect(projectLabel_retiredBy instanceof L.User);
+      } else {
+        console.warn("codegen-doc:print: No ProjectLabel found - cannot test projectLabel.retiredBy query");
+      }
+    });
   });
 
   /** Test all ProjectMilestone queries */
@@ -3951,15 +4080,28 @@ describe("generated", () => {
       }
     });
 
+    let _documentContent: L.DocumentContent | undefined;
+
     /** Test the projectMilestone model query for ProjectMilestone_DocumentContent */
     it("projectMilestone.documentContent", async () => {
       if (_projectMilestone) {
         const documentContent: L.DocumentContent | undefined = _projectMilestone.documentContent;
+        _documentContent = documentContent;
         expect(documentContent instanceof L.DocumentContent);
       } else {
         console.warn(
           "codegen-doc:print: No projectMilestone found - cannot test _projectMilestone.documentContent query"
         );
+      }
+    });
+
+    /** Test the projectMilestone_documentContent model query for ProjectMilestone_DocumentContent_AiPromptRules */
+    it("projectMilestone_documentContent.aiPromptRules", async () => {
+      if (_documentContent) {
+        const aiPromptRules: L.AiPromptRules | undefined = _documentContent.aiPromptRules;
+        expect(aiPromptRules instanceof L.AiPromptRules);
+      } else {
+        console.warn("codegen-doc:print: No documentContent found - cannot test _documentContent.aiPromptRules query");
       }
     });
 
@@ -4180,13 +4322,26 @@ describe("generated", () => {
       }
     });
 
+    let _documentContent: L.DocumentContent | undefined;
+
     /** Test the project model query for Project_DocumentContent */
     it("project.documentContent", async () => {
       if (_project) {
         const documentContent: L.DocumentContent | undefined = _project.documentContent;
+        _documentContent = documentContent;
         expect(documentContent instanceof L.DocumentContent);
       } else {
         console.warn("codegen-doc:print: No project found - cannot test _project.documentContent query");
+      }
+    });
+
+    /** Test the project_documentContent model query for Project_DocumentContent_AiPromptRules */
+    it("project_documentContent.aiPromptRules", async () => {
+      if (_documentContent) {
+        const aiPromptRules: L.AiPromptRules | undefined = _documentContent.aiPromptRules;
+        expect(aiPromptRules instanceof L.AiPromptRules);
+      } else {
+        console.warn("codegen-doc:print: No documentContent found - cannot test _documentContent.aiPromptRules query");
       }
     });
 
@@ -4571,7 +4726,10 @@ describe("generated", () => {
   describe("SsoUrlFromEmail", () => {
     /** Test the root model query for SsoUrlFromEmail */
     it("ssoUrlFromEmail", async () => {
-      const ssoUrlFromEmail: L.SsoUrlFromEmailResponse | undefined = await client.ssoUrlFromEmail("mock-email");
+      const ssoUrlFromEmail: L.SsoUrlFromEmailResponse | undefined = await client.ssoUrlFromEmail(
+        "mock-email",
+        L.IdentityProviderType.General
+      );
       expect(ssoUrlFromEmail instanceof L.SsoUrlFromEmailResponse);
     });
   });
@@ -5302,6 +5460,32 @@ describe("generated", () => {
         console.warn(
           "codegen-doc:print: No notificationDeliveryPreferences found - cannot test _notificationDeliveryPreferences.mobile query"
         );
+      }
+    });
+
+    let _theme: L.UserSettingsTheme | undefined;
+
+    /** Test the userSettings model query for UserSettings_Theme */
+    it("userSettings.theme", async () => {
+      if (_userSettings) {
+        const theme: L.UserSettingsTheme | undefined = _userSettings.theme;
+        _theme = theme;
+        expect(theme instanceof L.UserSettingsTheme);
+      } else {
+        console.warn("codegen-doc:print: No userSettings found - cannot test _userSettings.theme query");
+      }
+    });
+
+    let _custom: L.UserSettingsCustomTheme | undefined;
+
+    /** Test the userSettings_theme model query for UserSettings_Theme_Custom */
+    it("userSettings_theme.custom", async () => {
+      if (_theme) {
+        const custom: L.UserSettingsCustomTheme | undefined = _theme.custom;
+        _custom = custom;
+        expect(custom instanceof L.UserSettingsCustomTheme);
+      } else {
+        console.warn("codegen-doc:print: No theme found - cannot test _theme.custom query");
       }
     });
   });

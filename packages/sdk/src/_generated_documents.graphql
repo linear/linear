@@ -78,6 +78,18 @@ fragment Comment on Comment {
   reactions {
     ...Reaction
   }
+  # The ID of the comment that resolved the thread.
+  resolvingCommentId
+  # The ID of the document content that the comment is associated with.
+  documentContentId
+  # The ID of the initiative update that the comment is associated with.
+  initiativeUpdateId
+  # The ID of the issue that the comment is associated with.
+  issueId
+  # The ID of the parent comment under which the current comment is nested.
+  parentId
+  # The ID of the project update that the comment is associated with.
+  projectUpdateId
   # The bot that created the comment.
   botActor {
     ...ActorBot
@@ -165,6 +177,23 @@ fragment SyncedExternalThread on SyncedExternalThread {
   # Whether this thread is syncing with the external service.
   isConnected
   id
+}
+
+# A continuous period of time during which an issue remained in a specific workflow state.
+fragment IssueStateSpan on IssueStateSpan {
+  __typename
+  # The timestamp when the issue entered this state.
+  startedAt
+  # The timestamp when the issue left this state. Null if the issue is currently in this state.
+  endedAt
+  # The unique identifier of the state span.
+  id
+  # The workflow state for this span.
+  state {
+    id
+  }
+  # The workflow state identifier for this span.
+  stateId
 }
 
 # A custom emoji.
@@ -629,6 +658,8 @@ fragment Customer on Customer {
   owner {
     id
   }
+  # URL of the customer in Linear.
+  url
 }
 
 # A cycle notification subscription.
@@ -692,6 +723,10 @@ fragment CycleNotificationSubscription on CycleNotificationSubscription {
 # A document content for a project.
 fragment DocumentContent on DocumentContent {
   __typename
+  # The AI prompt rules that the content is associated with.
+  aiPromptRules {
+    ...AiPromptRules
+  }
   # The document content in markdown format.
   content
   # The document content state as a base64 encoded string.
@@ -801,6 +836,10 @@ fragment Document on Document {
   icon
   # The initiative that the document is associated with.
   initiative {
+    id
+  }
+  # The issue that the document is associated with.
+  issue {
     id
   }
   # The last template that was applied to this document.
@@ -1795,6 +1834,8 @@ fragment Reaction on Reaction {
 # A record of changes to an issue.
 fragment IssueHistory on IssueHistory {
   __typename
+  # Boolean indicating if the issue was auto-assigned using the triage responsibility feature.
+  triageResponsibilityAutoAssigned
   # Changed issue relationships.
   relationChanges {
     ...IssueRelationHistoryPayload
@@ -2092,6 +2133,8 @@ fragment SemanticSearchResult on SemanticSearchResult {
 # A session for agent activities and state management.
 fragment AgentSession on AgentSession {
   __typename
+  # A dynamically updated list of the agent's execution strategy.
+  plan
   # A summary of the activities in this session.
   summary
   # Metadata about the external source that created this agent session.
@@ -2102,12 +2145,20 @@ fragment AgentSession on AgentSession {
   appUser {
     id
   }
+  # The comment that this agent session was spawned from, if from a different thread.
+  sourceComment {
+    id
+  }
   # The comment this agent session is associated with.
   comment {
     id
   }
   # The current status of the agent session.
   status
+  # The human user responsible for the agent session. Null if the session was initiated via automation or by an agent user, with no responsible human user.
+  creator {
+    id
+  }
   # The issue this agent session is associated with.
   issue {
     id
@@ -2123,12 +2174,14 @@ fragment AgentSession on AgentSession {
   endedAt
   # The time the agent session started.
   startedAt
+  # The time the agent session was dismissed.
+  dismissedAt
   # The type of the agent session.
   type
   # The unique identifier of the entity.
   id
-  # The user that created this agent session.
-  creator {
+  # The user who dismissed the agent session.
+  dismissedBy {
     id
   }
 }
@@ -2320,6 +2373,8 @@ fragment Template on Template {
   templateData
   # Template description.
   description
+  # The date when the template was last applied.
+  lastAppliedAt
   # The entity type this template is for.
   type
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -2547,12 +2602,16 @@ fragment User on User {
   app
   # Whether the user is an organization administrator.
   admin
+  # Whether the user is an organization owner.
+  owner
   # Whether the user is assignable.
   isAssignable
   # Whether the user is mentionable.
   isMentionable
   # Whether the user is the currently authenticated user.
   isMe
+  # Whether this agent user supports agent sessions.
+  supportsAgentSessions
   # Whether this user can access any public team in the organization.
   canAccessAnyPublicTeam
   # [DEPRECATED] Hash for the user to be used in calendar URLs.
@@ -2751,26 +2810,22 @@ fragment Webhook on Webhook {
   enabled
 }
 
-# An API key. Grants access to the user's resources.
-fragment ApiKey on ApiKey {
+# AI prompt rules for a team.
+fragment AiPromptRules on AiPromptRules {
   __typename
-  # Scopes associated with the API key.
-  scope
-  # The label of the API key.
-  label
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
-  # The sync groups that this API key requests access to. If null, the API key has access to all sync groups the user has access to. The final set of sync groups is computed as the intersection of these requested groups with the user's base sync groups.
-  requestedSyncGroups
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
   createdAt
   # The unique identifier of the entity.
   id
-  # When the API key was last used.
-  lastActiveAt
+  # The user who last updated the AI prompt rules.
+  updatedBy {
+    id
+  }
 }
 
 # An activity within an agent context.
@@ -2972,8 +3027,12 @@ fragment AuthIdentityProvider on AuthIdentityProvider {
   ssoSignAlgo
   # The issuer's custom entity ID.
   issuerEntityId
+  # The service provider (Linear) custom entity ID. Defaults to https://auth.linear.app/sso
+  spEntityId
   # The time at which the entity was created.
   createdAt
+  # The type of identity provider.
+  type
   # The unique identifier of the entity.
   id
   # Whether SAML authentication is enabled for organization.
@@ -3002,10 +3061,14 @@ fragment IdentityProvider on IdentityProvider {
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
+  # The service provider (Linear) custom entity ID. Defaults to https://auth.linear.app/sso
+  spEntityId
   # The time at which the entity was archived. Null if the entity has not been archived.
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The type of identity provider.
+  type
   # The unique identifier of the entity.
   id
   # Whether SAML authentication is enabled for organization.
@@ -3270,6 +3333,8 @@ fragment InitiativeUpdate on InitiativeUpdate {
   __typename
   # Emoji reaction summary, grouped by emoji type.
   reactionData
+  # Number of comments associated with the initiative update.
+  commentCount
   # Reactions associated with the initiative update.
   reactions {
     ...Reaction
@@ -3662,6 +3727,8 @@ fragment Organization on Organization {
   allowedAuthServices
   # Allowed file upload content types
   allowedFileUploadContentTypes
+  # Aproximate number of issues in the organization, including archived ones.
+  createdIssueCount
   # Configuration settings for the Customers feature.
   customersConfiguration
   # Default schedule for how often feed summaries are generated.
@@ -3676,12 +3743,12 @@ fragment Organization on Organization {
   userCount
   # Number of customers in the organization.
   customerCount
-  # Number of issues in the organization.
-  createdIssueCount
   # Previously used URL keys for the organization (last 3 are kept and redirected).
   previousUrlKeys
   # Rolling 30-day total upload volume for the organization, in megabytes.
   periodUploadVolume
+  # Security settings for the organization.
+  securitySettings
   # The day at which to prompt for initiative updates.
   initiativeUpdateRemindersDay
   # The day at which to prompt for project updates.
@@ -3731,24 +3798,30 @@ fragment Organization on Organization {
   samlEnabled
   # Whether SCIM provisioning is enabled for organization.
   scimEnabled
-  # Whether member users are allowed to send invites.
-  allowMembersToInvite
-  # Whether team creation is restricted to admins.
-  restrictTeamCreationToAdmins
+  # Whether issue descriptions should be included in Git integration linkback messages.
+  gitLinkbackDescriptionsEnabled
   # Whether the Git integration linkback messages should be sent to private repositories.
   gitLinkbackMessagesEnabled
   # Whether the Git integration linkback messages should be sent to public repositories.
   gitPublicLinkbackMessagesEnabled
+  # Whether the organization has enabled AI discussion summaries for issues.
+  aiDiscussionSummariesEnabled
+  # Whether the organization has enabled resolved thread AI summaries.
+  aiThreadSummariesEnabled
   # Whether the organization has enabled the feed feature.
   feedEnabled
   # Whether the organization is using Customers.
   customersEnabled
   # Whether the organization is using a roadmap.
   roadmapEnabled
-  # Whether workspace label creation, update, and deletion is restricted to admins.
-  restrictLabelManagementToAdmins
   # [DEPRECATED] The frequency at which to prompt for project updates.
   projectUpdatesReminderFrequency
+  # [DEPRECATED] Whether member users are allowed to send invites.
+  allowMembersToInvite
+  # [DEPRECATED] Whether team creation is restricted to admins.
+  restrictTeamCreationToAdmins
+  # [DEPRECATED] Whether workspace label creation, update, and deletion is restricted to admins.
+  restrictLabelManagementToAdmins
   # [DEPRECATED] Which day count to use for SLA calculations.
   slaDayCount
 }
@@ -3806,6 +3879,8 @@ fragment Team on Team {
   autoArchivePeriod
   # Period after which issues are automatically closed in months. Null/undefined means disabled.
   autoClosePeriod
+  # Security settings for the team.
+  securitySettings
   # Settings for all integrations associated with that team.
   integrationsSettings {
     id
@@ -3907,6 +3982,8 @@ fragment Team on Team {
   defaultIssueEstimate
   # Where to move issues when changing state.
   setIssueSortOrderOnStateChange
+  # Whether all members in the workspace can join the team. Only used for public teams.
+  allMembersCanJoin
   # Whether an issue needs to have a priority set before leaving triage.
   requirePriorityToLeaveTriage
   # Whether child issues should automatically close when their parent issue is closed
@@ -3927,6 +4004,8 @@ fragment Team on Team {
   issueEstimationExtended
   # Whether to allow zeros in issues estimates.
   issueEstimationAllowZero
+  # Whether to enable AI discussion summaries for issues in this team.
+  aiDiscussionSummariesEnabled
   # Whether to enable resolved thread AI summaries.
   aiThreadSummariesEnabled
   # Whether to group recent issue history entries.
@@ -3950,6 +4029,8 @@ fragment ProjectUpdate on ProjectUpdate {
   __typename
   # Emoji reaction summary, grouped by emoji type.
   reactionData
+  # Number of comments associated with the project update.
+  commentCount
   # Reactions associated with the project update.
   reactions {
     ...Reaction
@@ -4168,6 +4249,19 @@ fragment DocumentChildWebhookPayload on DocumentChildWebhookPayload {
   }
   # The title of the document.
   title
+}
+
+# Certain properties of a project label.
+fragment ProjectLabelChildWebhookPayload on ProjectLabelChildWebhookPayload {
+  __typename
+  # The ID of the project label.
+  id
+  # The color of the project label.
+  color
+  # The name of the project label.
+  name
+  # The parent ID of the project label.
+  parentId
 }
 
 # Certain properties of a project milestone.
@@ -4458,7 +4552,7 @@ fragment TeamMembership on TeamMembership {
   user {
     id
   }
-  # Whether the user is the owner of the team.
+  # Whether the user is an owner of the team.
   owner
 }
 
@@ -4494,15 +4588,6 @@ fragment OrganizationDomain on OrganizationDomain {
   authType
   # Whether the domains was claimed by the organization through DNS verification.
   claimed
-}
-
-# Details of the app user's authorizing user.
-fragment AuthorizingUser on AuthorizingUser {
-  __typename
-  # The user's display name.
-  displayName
-  # The user's full name.
-  name
 }
 
 # Entity representing a webhook execution failure.
@@ -4760,6 +4845,10 @@ fragment IssueLabel on IssueLabel {
   creator {
     id
   }
+  # The user who retired the label.
+  retiredBy {
+    id
+  }
   # Whether the label is a group.
   isGroup
 }
@@ -4790,6 +4879,10 @@ fragment ProjectLabel on ProjectLabel {
   id
   # The user who created the label.
   creator {
+    id
+  }
+  # The user who retired the label.
+  retiredBy {
     id
   }
   # Whether the label is a group.
@@ -4981,6 +5074,33 @@ fragment OAuthAppWebhookPayload on OAuthAppWebhookPayload {
   type
 }
 
+# Payload for OAuth authorization webhook events.
+fragment OAuthAuthorizationWebhookPayload on OAuthAuthorizationWebhookPayload {
+  __typename
+  # Details of the OAuth client the authorization belongs to.
+  oauthClient {
+    ...OauthClientChildWebhookPayload
+  }
+  # Details of the user that the authorization belongs to.
+  user {
+    ...UserChildWebhookPayload
+  }
+  # ID of the OAuth client the authorization belongs to.
+  oauthClientId
+  # ID of the organization for which the webhook belongs to.
+  organizationId
+  # ID of the user that the authorization belongs to.
+  userId
+  # The number of currently active tokens for the user for this client.
+  activeTokensForUser
+  # The time the payload was created.
+  createdAt
+  # The type of action that triggered the webhook.
+  action
+  # The type of resource.
+  type
+}
+
 # Payload for a comment webhook.
 fragment CommentWebhookPayload on CommentWebhookPayload {
   __typename
@@ -5120,6 +5240,8 @@ fragment CustomerWebhookPayload on CustomerWebhookPayload {
   mainSourceId
   # The ID of the user who owns the customer.
   ownerId
+  # The URL of the customer.
+  url
   # The annual revenue generated by the customer.
   revenue
   # The approximate number of needs of the customer.
@@ -5238,6 +5360,31 @@ fragment DocumentWebhookPayload on DocumentWebhookPayload {
   updatedAt
   # The title of the document.
   title
+}
+
+# Payload for a project label webhook.
+fragment ProjectLabelWebhookPayload on ProjectLabelWebhookPayload {
+  __typename
+  # The ID of the entity.
+  id
+  # The color of the project label.
+  color
+  # The creator ID of the project label.
+  creatorId
+  # The label's description.
+  description
+  # The name of the project label.
+  name
+  # The parent ID of the project label.
+  parentId
+  # The time at which the entity was archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The time at which the entity was updated.
+  updatedAt
+  # Whether the label is a group.
+  isGroup
 }
 
 # Payload for a project update webhook.
@@ -5493,6 +5640,8 @@ fragment UserWebhookPayload on UserWebhookPayload {
   admin
   # Whether the user is an app.
   app
+  # Whether the user is an owner.
+  owner
 }
 
 # Payload for agent session webhook events.
@@ -5562,25 +5711,31 @@ fragment AgentSessionWebhookPayload on AgentSessionWebhookPayload {
   sourceMetadata
   # The ID of the agent that the agent session belongs to.
   appUserId
-  # The ID of the comment this agent session is associated with.
-  commentId
+  # The ID of the comment that this agent session was spawned from, if from a different thread.
+  sourceCommentId
   # The ID of the entity.
   id
+  # The ID of the human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user.
+  creatorId
   # The ID of the issue this agent session is associated with.
   issueId
   # The ID of the organization that the agent session belongs to.
   organizationId
-  # The ID of the user that created the agent session.
-  creatorId
-  # The comment this agent session is associated with.
-  comment {
-    ...CommentChildWebhookPayload
-  }
+  # The ID of the root comment of the thread this agent session is attached to.
+  commentId
   # The current status of the agent session.
   status
+  # The human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user.
+  creator {
+    ...UserChildWebhookPayload
+  }
   # The issue this agent session is associated with.
   issue {
     ...IssueWithDescriptionChildWebhookPayload
+  }
+  # The root comment of the thread this agent session is attached to.
+  comment {
+    ...CommentChildWebhookPayload
   }
   # The time at which the entity was archived.
   archivedAt
@@ -5594,10 +5749,6 @@ fragment AgentSessionWebhookPayload on AgentSessionWebhookPayload {
   startedAt
   # The type of the agent session.
   type
-  # The user that created the agent session.
-  creator {
-    ...UserChildWebhookPayload
-  }
 }
 
 # Payload for an attachment webhook.
@@ -6354,34 +6505,6 @@ fragment ProjectAttachment on ProjectAttachment {
   url
 }
 
-# Public information of the OAuth application, plus whether the application has been authorized for
-# the given scopes.
-fragment UserAuthorizedApplication on UserAuthorizedApplication {
-  __typename
-  # Application name.
-  name
-  # Error associated with the application needing to be requested for approval in the workspace.
-  approvalErrorCode
-  # Image of the application.
-  imageUrl
-  # Information about the application.
-  description
-  # Name of the developer.
-  developer
-  # OAuth application's ID.
-  id
-  # OAuth application's client ID.
-  clientId
-  # Url of the developer (homepage or docs).
-  developerUrl
-  # Whether or not webhooks are enabled for the application.
-  webhooksEnabled
-  # Whether the application was created by Linear.
-  createdByLinear
-  # Whether the user has authorized the application for the given scopes.
-  isAuthorized
-}
-
 # Public information of the OAuth application.
 fragment Application on Application {
   __typename
@@ -6404,6 +6527,8 @@ fragment Application on Application {
 # Request to install OAuth clients on organizations and the response to the request.
 fragment OauthClientApproval on OauthClientApproval {
   __typename
+  # New scopes that were requested for approval after the initial request.
+  newlyRequestedScopes
   # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
   #     been updated after creation.
   updatedAt
@@ -6415,7 +6540,7 @@ fragment OauthClientApproval on OauthClientApproval {
   requestReason
   # The reason the request for the OAuth client approval was denied.
   denyReason
-  # The scopes the app has requested.
+  # The scopes the app has been approved for.
   scopes
   # The status for the OAuth client approval request.
   status
@@ -6621,6 +6746,10 @@ fragment UserSettings on UserSettings {
   user {
     id
   }
+  # The user's feed summary schedule preference.
+  feedSummarySchedule
+  # The user's last seen time for the pulse feed.
+  feedLastSeenTime
   # The user's notification category preferences.
   notificationCategoryPreferences {
     ...NotificationCategoryPreferences
@@ -6628,6 +6757,10 @@ fragment UserSettings on UserSettings {
   # The user's notification channel preferences.
   notificationChannelPreferences {
     ...NotificationChannelPreferences
+  }
+  # The user's theme for a given mode and device type.
+  theme {
+    ...UserSettingsTheme
   }
   # Whether this user is subscribed to DPA emails or not.
   subscribedToDPA
@@ -6919,28 +7052,6 @@ fragment AgentSessionPayload on AgentSessionPayload {
   # The agent session that was created or updated.
   agentSession {
     id
-  }
-  # The identifier of the last sync operation.
-  lastSyncId
-  # Whether the operation was successful.
-  success
-}
-
-fragment ApiKeyConnection on ApiKeyConnection {
-  __typename
-  nodes {
-    ...ApiKey
-  }
-  pageInfo {
-    ...PageInfo
-  }
-}
-
-fragment ApiKeyPayload on ApiKeyPayload {
-  __typename
-  # The API key that was created.
-  apiKey {
-    ...ApiKey
   }
   # The identifier of the last sync operation.
   lastSyncId
@@ -7334,6 +7445,10 @@ fragment DocumentSearchResult on DocumentSearchResult {
   initiative {
     id
   }
+  # The issue that the document is associated with.
+  issue {
+    id
+  }
   # The last template that was applied to this document.
   lastAppliedTemplate {
     id
@@ -7449,6 +7564,16 @@ fragment ExternalUserConnection on ExternalUserConnection {
   __typename
   nodes {
     ...ExternalUser
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
+fragment FacetConnection on FacetConnection {
+  __typename
+  nodes {
+    ...Facet
   }
   pageInfo {
     ...PageInfo
@@ -8077,6 +8202,16 @@ fragment IssueSearchResult on IssueSearchResult {
   # The workflow state that the issue is associated with.
   state {
     id
+  }
+}
+
+fragment IssueStateSpanConnection on IssueStateSpanConnection {
+  __typename
+  nodes {
+    ...IssueStateSpan
+  }
+  pageInfo {
+    ...PageInfo
   }
 }
 
@@ -8752,6 +8887,24 @@ fragment ReactionPayload on ReactionPayload {
   success
 }
 
+fragment RepositorySuggestion on RepositorySuggestion {
+  __typename
+  # Confidence score from 0.0 to 1.0.
+  confidence
+  # Hostname of the Git service (e.g., 'github.com', 'github.company.com').
+  hostname
+  # The full name of the repository in owner/name format (e.g., 'acme/backend').
+  repositoryFullName
+}
+
+fragment RepositorySuggestionsPayload on RepositorySuggestionsPayload {
+  __typename
+  # The suggested repositories.
+  suggestions {
+    ...RepositorySuggestion
+  }
+}
+
 fragment RoadmapConnection on RoadmapConnection {
   __typename
   nodes {
@@ -8828,12 +8981,6 @@ fragment SuccessPayload on SuccessPayload {
   lastSyncId
   # Whether the operation was successful.
   success
-}
-
-fragment SummaryPayload on SummaryPayload {
-  __typename
-  # Summary for project updates.
-  summary
 }
 
 fragment TeamConnection on TeamConnection {
@@ -9010,6 +9157,30 @@ fragment UserPayload on UserPayload {
   success
 }
 
+fragment UserSettingsCustomSidebarTheme on UserSettingsCustomSidebarTheme {
+  __typename
+  # The accent color in LCH format.
+  accent
+  # The base color in LCH format.
+  base
+  # The contrast value.
+  contrast
+}
+
+fragment UserSettingsCustomTheme on UserSettingsCustomTheme {
+  __typename
+  # Optional sidebar theme colors.
+  sidebar {
+    ...UserSettingsCustomSidebarTheme
+  }
+  # The accent color in LCH format.
+  accent
+  # The base color in LCH format.
+  base
+  # The contrast value.
+  contrast
+}
+
 fragment UserSettingsFlagPayload on UserSettingsFlagPayload {
   __typename
   # The flag key which was updated.
@@ -9036,6 +9207,16 @@ fragment UserSettingsPayload on UserSettingsPayload {
   lastSyncId
   # Whether the operation was successful.
   success
+}
+
+fragment UserSettingsTheme on UserSettingsTheme {
+  __typename
+  # The custom theme definition, only present when preset is 'custom'.
+  custom {
+    ...UserSettingsCustomTheme
+  }
+  # The theme preset.
+  preset
 }
 
 fragment ViewPreferencesPayload on ViewPreferencesPayload {
@@ -9240,32 +9421,6 @@ query agentSessions(
     ...AgentSessionConnection
   }
 }
-# All API keys for the user.
-query apiKeys(
-  # A cursor to be used with first for forward pagination
-  $after: String
-  # A cursor to be used with last for backward pagination.
-  $before: String
-  # The number of items to forward paginate (used with after). Defaults to 50.
-  $first: Int
-  # Should archived resources be included (default: false)
-  $includeArchived: Boolean
-  # The number of items to backward paginate (used with before). Defaults to 50.
-  $last: Int
-  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
-  $orderBy: PaginationOrderBy
-) {
-  apiKeys(
-    after: $after
-    before: $before
-    first: $first
-    includeArchived: $includeArchived
-    last: $last
-    orderBy: $orderBy
-  ) {
-    ...ApiKeyConnection
-  }
-}
 # Get basic information for an application.
 query applicationInfo(
   # The client ID of the application.
@@ -9273,21 +9428,6 @@ query applicationInfo(
 ) {
   applicationInfo(clientId: $clientId) {
     ...Application
-  }
-}
-# Get information for an application and whether a user has approved it for the given scopes.
-query applicationWithAuthorization(
-  # Actor mode used for the authorization.
-  $actor: String
-  # The client ID of the application.
-  $clientId: String!
-  # Redirect URI for the application.
-  $redirectUri: String
-  # Scopes being requested by the application.
-  $scope: [String!]!
-) {
-  applicationWithAuthorization(actor: $actor, clientId: $clientId, redirectUri: $redirectUri, scope: $scope) {
-    ...UserAuthorizedApplication
   }
 }
 # One specific issue attachment.
@@ -9413,6 +9553,39 @@ query attachmentIssue_comments(
       orderBy: $orderBy
     ) {
       ...CommentConnection
+    }
+  }
+}
+# Documents associated with the issue.
+query attachmentIssue_documents(
+  # `id` of the attachment for which you'll want to get the issue for. [Deprecated] `url` as the `id` parameter.
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned documents.
+  $filter: DocumentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  attachmentIssue(id: $id) {
+    documents(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...DocumentConnection
     }
   }
 }
@@ -9840,6 +10013,41 @@ query comment_children(
     }
   }
 }
+# Issues created from this comment.
+query comment_createdIssues(
+  # The hash of the comment to retrieve.
+  $hash: String
+  # The identifier of the comment to retrieve.
+  $id: String
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned issues.
+  $filter: IssueFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  comment(hash: $hash, id: $id) {
+    createdIssues(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...IssueConnection
+    }
+  }
+}
 # The document content that the comment is associated with.
 query comment_documentContent(
   # The hash of the comment to retrieve.
@@ -9850,6 +10058,21 @@ query comment_documentContent(
   comment(hash: $hash, id: $id) {
     documentContent {
       ...DocumentContent
+    }
+  }
+}
+# The AI prompt rules that the content is associated with.
+query comment_documentContent_aiPromptRules(
+  # The hash of the comment to retrieve.
+  $hash: String
+  # The identifier of the comment to retrieve.
+  $id: String
+) {
+  comment(hash: $hash, id: $id) {
+    documentContent {
+      aiPromptRules {
+        ...AiPromptRules
+      }
     }
   }
 }
@@ -10586,6 +10809,16 @@ query initiative_documentContent($id: String!) {
     }
   }
 }
+# The AI prompt rules that the content is associated with.
+query initiative_documentContent_aiPromptRules($id: String!) {
+  initiative(id: $id) {
+    documentContent {
+      aiPromptRules {
+        ...AiPromptRules
+      }
+    }
+  }
+}
 # Documents associated with the initiative.
 query initiative_documents(
   $id: String!
@@ -10644,6 +10877,35 @@ query initiative_history(
       orderBy: $orderBy
     ) {
       ...InitiativeHistoryConnection
+    }
+  }
+}
+# Initiative updates associated with the initiative.
+query initiative_initiativeUpdates(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  initiative(id: $id) {
+    initiativeUpdates(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...InitiativeUpdateConnection
     }
   }
 }
@@ -11104,6 +11366,38 @@ query issue_comments(
       orderBy: $orderBy
     ) {
       ...CommentConnection
+    }
+  }
+}
+# Documents associated with the issue.
+query issue_documents(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned documents.
+  $filter: DocumentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issue(id: $id) {
+    documents(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...DocumentConnection
     }
   }
 }
@@ -11731,6 +12025,39 @@ query issueVcsBranchSearch_comments(
       orderBy: $orderBy
     ) {
       ...CommentConnection
+    }
+  }
+}
+# Documents associated with the issue.
+query issueVcsBranchSearch_documents(
+  # The VCS branch name to search for.
+  $branchName: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # Filter returned documents.
+  $filter: DocumentFilter
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  issueVcsBranchSearch(branchName: $branchName) {
+    documents(
+      after: $after
+      before: $before
+      filter: $filter
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...DocumentConnection
     }
   }
 }
@@ -12372,6 +12699,16 @@ query project_documentContent($id: String!) {
     }
   }
 }
+# The AI prompt rules that the content is associated with.
+query project_documentContent_aiPromptRules($id: String!) {
+  project(id: $id) {
+    documentContent {
+      aiPromptRules {
+        ...AiPromptRules
+      }
+    }
+  }
+}
 # Documents associated with the project.
 query project_documents(
   $id: String!
@@ -12892,6 +13229,16 @@ query projectMilestone_documentContent($id: String!) {
   projectMilestone(id: $id) {
     documentContent {
       ...DocumentContent
+    }
+  }
+}
+# The AI prompt rules that the content is associated with.
+query projectMilestone_documentContent_aiPromptRules($id: String!) {
+  projectMilestone(id: $id) {
+    documentContent {
+      aiPromptRules {
+        ...AiPromptRules
+      }
     }
   }
 }
@@ -13486,8 +13833,10 @@ query ssoUrlFromEmail(
   $email: String!
   # Whether the client is the desktop app.
   $isDesktop: Boolean
+  # Type of identity provider.
+  $type: IdentityProviderType!
 ) {
-  ssoUrlFromEmail(email: $email, isDesktop: $isDesktop) {
+  ssoUrlFromEmail(email: $email, isDesktop: $isDesktop, type: $type) {
     ...SsoUrlFromEmailResponse
   }
 }
@@ -14489,6 +14838,51 @@ query userSettings_notificationDeliveryPreferences_mobile_schedule_wednesday {
     }
   }
 }
+# The user's theme for a given mode and device type.
+query userSettings_theme(
+  # The device type.
+  $deviceType: UserSettingsThemeDeviceType
+  # The theme color mode.
+  $mode: UserSettingsThemeMode
+) {
+  userSettings {
+    theme(deviceType: $deviceType, mode: $mode) {
+      ...UserSettingsTheme
+    }
+  }
+}
+# The custom theme definition, only present when preset is 'custom'.
+query userSettings_theme_custom(
+  # The device type.
+  $deviceType: UserSettingsThemeDeviceType
+  # The theme color mode.
+  $mode: UserSettingsThemeMode
+) {
+  userSettings {
+    theme(deviceType: $deviceType, mode: $mode) {
+      custom {
+        ...UserSettingsCustomTheme
+      }
+    }
+  }
+}
+# Optional sidebar theme colors.
+query userSettings_theme_custom_sidebar(
+  # The device type.
+  $deviceType: UserSettingsThemeDeviceType
+  # The theme color mode.
+  $mode: UserSettingsThemeMode
+) {
+  userSettings {
+    theme(deviceType: $deviceType, mode: $mode) {
+      custom {
+        sidebar {
+          ...UserSettingsCustomSidebarTheme
+        }
+      }
+    }
+  }
+}
 # All users for the organization.
 query users(
   # A cursor to be used with first for forward pagination
@@ -14845,6 +15239,17 @@ mutation agentSessionCreateOnIssue(
   $input: AgentSessionCreateOnIssue!
 ) {
   agentSessionCreateOnIssue(input: $input) {
+    ...AgentSessionPayload
+  }
+}
+# Updates an agent session.
+mutation updateAgentSession(
+  # The identifier of the agent session to update.
+  $id: String!
+  # A partial agent session object to update the agent session with.
+  $input: AgentSessionUpdateInput!
+) {
+  agentSessionUpdate(id: $id, input: $input) {
     ...AgentSessionPayload
   }
 }
@@ -15264,8 +15669,10 @@ mutation updateComment(
   $id: String!
   # A partial comment object to update the comment with.
   $input: CommentUpdateInput!
+  # [INTERNAL] Flag to prevent setting editedAt when updating bodyData (used for background uploads).
+  $skipEditedAt: Boolean
 ) {
-  commentUpdate(id: $id, input: $input) {
+  commentUpdate(id: $id, input: $input, skipEditedAt: $skipEditedAt) {
     ...CommentPayload
   }
 }
@@ -15489,6 +15896,16 @@ mutation updateCustomerTier(
 ) {
   customerTierUpdate(id: $id, input: $input) {
     ...CustomerTierPayload
+  }
+}
+# Unsyncs a managed customer from the its current data source. External IDs mapping to the external
+# source will be cleared.
+mutation customerUnsync(
+  # The identifier of the customer to unsync.
+  $id: String!
+) {
+  customerUnsync(id: $id) {
+    ...CustomerPayload
   }
 }
 # Updates a customer
@@ -16679,7 +17096,25 @@ mutation deleteIssueLabel(
     ...DeletePayload
   }
 }
-# Updates an label.
+# Restores a label.
+mutation issueLabelRestore(
+  # The identifier of the label to restore.
+  $id: String!
+) {
+  issueLabelRestore(id: $id) {
+    ...IssueLabelPayload
+  }
+}
+# Retires a label.
+mutation issueLabelRetire(
+  # The identifier of the label to retire.
+  $id: String!
+) {
+  issueLabelRetire(id: $id) {
+    ...IssueLabelPayload
+  }
+}
+# Updates a label.
 mutation updateIssueLabel(
   # The identifier of the label to update.
   $id: String!
@@ -16969,13 +17404,13 @@ mutation updateNotification(
     ...NotificationPayload
   }
 }
-# Cancels the deletion of an organization. Administrator privileges required.
+# Cancels the deletion of an organization.
 mutation deleteOrganizationCancel {
   organizationCancelDelete {
     ...OrganizationCancelDeletePayload
   }
 }
-# Delete's an organization. Administrator privileges required.
+# Deletes an organization.
 mutation deleteOrganization(
   # Information required to delete an organization.
   $input: DeleteOrganizationInput!
@@ -16984,7 +17419,7 @@ mutation deleteOrganization(
     ...OrganizationDeletePayload
   }
 }
-# Get an organization's delete confirmation token. Administrator privileges required.
+# Get an organization's delete confirmation token.
 mutation organizationDeleteChallenge {
   organizationDeleteChallenge {
     ...OrganizationDeletePayload
@@ -17028,13 +17463,13 @@ mutation updateOrganizationInvite(
     ...OrganizationInvitePayload
   }
 }
-# [DEPRECATED] Starts a trial for the organization. Administrator privileges required.
+# [DEPRECATED] Starts a trial for the organization.
 mutation organizationStartTrial {
   organizationStartTrial {
     ...OrganizationStartTrialPayload
   }
 }
-# Starts a trial for the organization on the specified plan type. Administrator privileges required.
+# Starts a trial for the organization on the specified plan type.
 mutation organizationStartTrialForPlan(
   # Plan details for trial
   $input: OrganizationStartTrialInput!
@@ -17110,6 +17545,24 @@ mutation deleteProjectLabel(
 ) {
   projectLabelDelete(id: $id) {
     ...DeletePayload
+  }
+}
+# Restores a project label.
+mutation projectLabelRestore(
+  # The identifier of the label to restore.
+  $id: String!
+) {
+  projectLabelRestore(id: $id) {
+    ...ProjectLabelPayload
+  }
+}
+# Retires a project label.
+mutation projectLabelRetire(
+  # The identifier of the label to retire.
+  $id: String!
+) {
+  projectLabelRetire(id: $id) {
+    ...ProjectLabelPayload
   }
 }
 # Updates a project label.
@@ -17646,7 +18099,18 @@ mutation updateTriageResponsibility(
     ...TriageResponsibilityPayload
   }
 }
-# Makes user a regular user. Can only be called by an admin.
+# Changes the role of a user.
+mutation userChangeRole(
+  # The identifier of the user
+  $id: String!
+  # The new role for the user.
+  $role: UserRoleType!
+) {
+  userChangeRole(id: $id, role: $role) {
+    ...UserAdminPayload
+  }
+}
+# [DEPRECATED] Makes user a regular user. Can only be called by an admin or owner.
 mutation userDemoteAdmin(
   # The identifier of the user to make a regular user.
   $id: String!
@@ -17655,7 +18119,7 @@ mutation userDemoteAdmin(
     ...UserAdminPayload
   }
 }
-# Makes user a guest. Can only be called by an admin.
+# [DEPRECATED] Makes user a guest. Can only be called by an admin.
 mutation userDemoteMember(
   # The identifier of the user to make a guest.
   $id: String!
@@ -17695,7 +18159,7 @@ mutation updateUserFlag(
     ...UserSettingsFlagPayload
   }
 }
-# Makes user an admin. Can only be called by an admin.
+# [DEPRECATED] Makes user an admin. Can only be called by an admin or owner.
 mutation userPromoteAdmin(
   # The identifier of the user to make an admin.
   $id: String!
@@ -17704,7 +18168,7 @@ mutation userPromoteAdmin(
     ...UserAdminPayload
   }
 }
-# Makes user a regular user. Can only be called by an admin.
+# [DEPRECATED] Makes user a regular user. Can only be called by an admin.
 mutation userPromoteMember(
   # The identifier of the user to make a regular user.
   $id: String!
@@ -17733,7 +18197,7 @@ mutation updateUserSettings(
     ...UserSettingsPayload
   }
 }
-# Suspends a user. Can only be called by an admin.
+# Suspends a user. Can only be called by an admin or owner.
 mutation suspendUser(
   # The identifier of the user to suspend.
   $id: String!
@@ -17752,7 +18216,7 @@ mutation userUnlinkFromIdentityProvider(
     ...UserAdminPayload
   }
 }
-# Un-suspends a user. Can only be called by an admin.
+# Un-suspends a user. Can only be called by an admin or owner.
 mutation unsuspendUser(
   # The identifier of the user to unsuspend.
   $id: String!

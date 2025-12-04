@@ -16,25 +16,38 @@ jobs:
       checks: write
       pull-requests: write
       statuses: read
+      id-token: write # Required for OIDC (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: Use node 18
+      - name: Use node 20
         uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      # Ensure npm 11.5.1 or later is installed (https://docs.npmjs.com/trusted-publishers#github-actions-configuration)
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
 
       - name: Build packages
         run: yarn build
 
       - name: Run tests
         run: yarn test
+
+      - name: Validate CJS and ESM resolution for SDK
+        # Catch issues like https://github.com/linear/linear/issues/830
+        run: npx @arethetypeswrong/cli@0.18.2 --pack packages/sdk
 
       - name: Compare schema for changes
         uses: kamilkisiela/graphql-inspector@master
@@ -54,4 +67,19 @@ jobs:
           title: "chore(release): version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  notify-slack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [release]
+    if: ${{ always() && github.ref_name == 'master' && contains(needs.*.result, 'failure') }}
+    steps:
+      - uses: ravsamhq/notify-slack-action@bca2d7f5660b833a27bda4f6b8bef389ebfefd25 # 2.3.0
+        with:
+          status: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          notification_title: "SDK CI check failed on master branch"
+          message_format: ":x: Check failed in <{repo_url}|{repo}@{branch}> on <{commit_url}|{commit_sha}>"
+          footer: <{run_url}|View Run>
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
