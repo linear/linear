@@ -1,5 +1,18 @@
 # Change Log
 
+## 2.2.47
+
+### Patch Changes
+
+- cc5cff7: Fixed GitLab import to handle estimates correctly
+- Updated dependencies [cad223e]
+- Updated dependencies [cad223e]
+- Updated dependencies [cad223e]
+- Updated dependencies [cad223e]
+- Updated dependencies [cad223e]
+- Updated dependencies [cad223e]
+  - @linear/sdk@65.2.0
+
 ## 2.2.46
 
 ### Patch Changes
