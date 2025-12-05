@@ -106,7 +106,7 @@ const normalizeWeights = (weights: Set<number>) => {
  * Convert GitLab time estimate (in seconds) to Linear estimate points.
  * GitLab exports estimates in seconds, but Linear uses a point scale (max 64).
  * We convert seconds to hours and map to a reasonable estimate scale.
- * 
+ *
  * @param seconds - Time estimate in seconds from GitLab
  * @returns Linear estimate points (0-64)
  */
@@ -127,7 +127,7 @@ const convertTimeEstimateToPoints = (seconds: number): number => {
   // 16-32h -> 13 points
   // 32-64h -> 21 points
   // 64h+ -> 64 points (Linear's maximum)
-  
+
   if (hours <= 1) {
     return 1;
   }
@@ -149,7 +149,7 @@ const convertTimeEstimateToPoints = (seconds: number): number => {
   if (hours <= 64) {
     return 21;
   }
-  
+
   // For very large estimates, cap at Linear's maximum
   return 64;
 };

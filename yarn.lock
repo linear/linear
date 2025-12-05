@@ -2494,7 +2494,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@linear/import@workspace:packages/import"
   dependencies:
-    "@linear/sdk": "npm:^65.0.0"
+    "@linear/sdk": "npm:^65.2.0"
     "@rollup/plugin-commonjs": "npm:^17.1.0"
     "@rollup/plugin-json": "npm:^4.1.0"
     "@rollup/plugin-node-resolve": "npm:^11.2.0"
@@ -2520,7 +2520,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@linear/sdk@npm:^65.0.0, @linear/sdk@workspace:packages/sdk":
+"@linear/sdk@npm:^65.2.0, @linear/sdk@workspace:packages/sdk":
   version: 0.0.0-use.local
   resolution: "@linear/sdk@workspace:packages/sdk"
   dependencies:
