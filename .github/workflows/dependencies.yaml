@@ -27,7 +27,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn
 
       - name: Update dependencies
         run: yarn update:dependencies
