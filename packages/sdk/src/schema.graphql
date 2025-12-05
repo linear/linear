@@ -11813,6 +11813,10 @@ type Issue implements Node {
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
   """
+  [Internal] Id of the releases associated with this issue.
+  """
+  releaseIds: [String!]!
+  """
   The time at which the issue's SLA will breach.
   """
   slaBreachesAt: DateTime
@@ -14951,6 +14955,10 @@ type IssueSearchResult implements Node {
     """
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
+  """
+  [Internal] Id of the releases associated with this issue.
+  """
+  releaseIds: [String!]!
   """
   The time at which the issue's SLA will breach.
   """
@@ -19525,6 +19533,135 @@ type Mutation {
     """
     type: String
   ): IntegrationPayload!
+  """
+  [ALPHA] Archives a release.
+  """
+  releaseArchive(
+    """
+    The identifier of the release to archive.
+    """
+    id: String!
+  ): ReleaseArchivePayload!
+  """
+  [ALPHA] Creates a new release.
+  """
+  releaseCreate(
+    """
+    The Release object to create.
+    """
+    input: ReleaseCreateInput!
+  ): ReleasePayload!
+  """
+  [ALPHA] Archives a release pipeline.
+  """
+  releasePipelineArchive(
+    """
+    The identifier of the release pipeline to archive.
+    """
+    id: String!
+  ): ReleasePipelineArchivePayload!
+  """
+  [ALPHA] Creates a new release pipeline.
+  """
+  releasePipelineCreate(
+    """
+    The ReleasePipeline object to create.
+    """
+    input: ReleasePipelineCreateInput!
+  ): ReleasePipelinePayload!
+  """
+  [ALPHA] Deletes a release pipeline.
+  """
+  releasePipelineDelete(
+    """
+    The identifier of the release pipeline to delete.
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  [ALPHA] Unarchives a release pipeline.
+  """
+  releasePipelineUnarchive(
+    """
+    The identifier of the release pipeline to unarchive.
+    """
+    id: String!
+  ): ReleasePipelineArchivePayload!
+  """
+  [ALPHA] Updates a release pipeline.
+  """
+  releasePipelineUpdate(
+    """
+    The identifier of the release pipeline to update.
+    """
+    id: String!
+    """
+    A partial ReleasePipeline object to update the ReleasePipeline with.
+    """
+    input: ReleasePipelineUpdateInput!
+  ): ReleasePipelinePayload!
+  """
+  [ALPHA] Archives a release stage.
+  """
+  releaseStageArchive(
+    """
+    The identifier of the release stage to archive.
+    """
+    id: String!
+  ): ReleaseStageArchivePayload!
+  """
+  [ALPHA] Creates a new release stage.
+  """
+  releaseStageCreate(
+    """
+    The ReleaseStage object to create.
+    """
+    input: ReleaseStageCreateInput!
+  ): ReleaseStagePayload!
+  """
+  [ALPHA] Unarchives a release stage.
+  """
+  releaseStageUnarchive(
+    """
+    The identifier of the release stage to unarchive.
+    """
+    id: String!
+  ): ReleaseStageArchivePayload!
+  """
+  [ALPHA] Updates a release stage.
+  """
+  releaseStageUpdate(
+    """
+    The identifier of the release stage to update.
+    """
+    id: String!
+    """
+    A partial ReleaseStage object to update the ReleaseStage with.
+    """
+    input: ReleaseStageUpdateInput!
+  ): ReleaseStagePayload!
+  """
+  [ALPHA] Unarchives a release.
+  """
+  releaseUnarchive(
+    """
+    The identifier of the release to unarchive.
+    """
+    id: String!
+  ): ReleaseArchivePayload!
+  """
+  [ALPHA] Updates a release.
+  """
+  releaseUpdate(
+    """
+    The identifier of the release to update.
+    """
+    id: String!
+    """
+    A partial Release object to update the Release with.
+    """
+    input: ReleaseUpdateInput!
+  ): ReleasePayload!
   """
   Re-send an organization invite.
   """
@@ -25105,6 +25242,14 @@ input ProjectCreateInput {
   The identifiers of the teams this project is associated with.
   """
   teamIds: [String!]!
+  """
+  The ID of the template to apply when creating the project.
+  """
+  templateId: String
+  """
+  When set to true, the default project template of the first team provided will be applied. If templateId is provided, this will be ignored.
+  """
+  useDefaultTemplate: Boolean
 }
 
 """
@@ -28680,6 +28825,24 @@ type PullRequestNotification implements Entity & Node & Notification {
   user: User!
 }
 
+"""
+Input for referencing a pull request by repository and number.
+"""
+input PullRequestReferenceInput {
+  """
+  The pull request number.
+  """
+  number: Float!
+  """
+  The name of the repository.
+  """
+  repositoryName: String!
+  """
+  The owner of the repository (e.g., organization or user name).
+  """
+  repositoryOwner: String!
+}
+
 enum PullRequestReviewTool {
   graphite
   source
@@ -30394,6 +30557,105 @@ type Query {
   """
   rateLimitStatus: RateLimitPayload!
   """
+  [ALPHA] One specific release.
+  """
+  release(id: String!): Release!
+  """
+  [ALPHA] One specific release pipeline.
+  """
+  releasePipeline(id: String!): ReleasePipeline!
+  """
+  [ALPHA] All release pipelines.
+  """
+  releasePipelines(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ReleasePipelineConnection!
+  """
+  [ALPHA] One specific release stage.
+  """
+  releaseStage(id: String!): ReleaseStage!
+  """
+  [ALPHA] All release stages.
+  """
+  releaseStages(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ReleaseStageConnection!
+  """
+  [ALPHA] All releases.
+  """
+  releases(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ReleaseConnection!
+  """
   One specific roadmap.
   """
   roadmap(id: String!): Roadmap! @deprecated(reason: "Roadmaps are deprecated, use initiatives instead.")
@@ -31248,6 +31510,67 @@ input RelationExistsComparator {
 }
 
 """
+[Internal] A release.
+"""
+type Release implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The commit SHA associated with this release.
+  """
+  commitSha: String
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The name of the release.
+  """
+  name: String!
+  """
+  The pipeline this release belongs to.
+  """
+  pipeline: ReleasePipeline!
+  """
+  The current stage of the release.
+  """
+  stage: ReleaseStage!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+  """
+  The version of the release.
+  """
+  version: String
+}
+
+"""
+A generic payload return from entity archive mutations.
+"""
+type ReleaseArchivePayload implements ArchivePayload {
+  """
+  The archived/unarchived entity. Null if entity was deleted.
+  """
+  entity: Release
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
 Features release channel.
 """
 enum ReleaseChannel {
@@ -31257,6 +31580,452 @@ enum ReleaseChannel {
   preRelease
   privateBeta
   public
+}
+
+type ReleaseConnection {
+  edges: [ReleaseEdge!]!
+  nodes: [Release!]!
+  pageInfo: PageInfo!
+}
+
+input ReleaseCreateInput {
+  """
+  The commit SHA associated with this release.
+  """
+  commitSha: String
+  """
+  Debug information for release creation diagnostics.
+  """
+  debugSink: ReleaseDebugSinkInput
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  Issue identifiers (e.g. ENG-123) to associate with this release.
+  """
+  issueIdentifiers: [String!]
+  """
+  The name of the release.
+  """
+  name: String!
+  """
+  The identifier of the pipeline this release belongs to.
+  """
+  pipelineId: String!
+  """
+  Pull request references to look up. Issues linked to found PRs will be associated with this release.
+  """
+  pullRequestReferences: [PullRequestReferenceInput!]
+  """
+  The current stage of the release. Defaults to the first 'planned' stage.
+  """
+  stageId: String
+  """
+  The version of the release.
+  """
+  version: String
+}
+
+"""
+Debug sink for release creation diagnostics.
+"""
+input ReleaseDebugSinkInput {
+  """
+  List of commit SHAs that were inspected.
+  """
+  inspectedShas: [String!]!
+  """
+  Map of issue identifiers to their source information.
+  """
+  issues: JSONObject!
+  """
+  Pull request debug information.
+  """
+  pullRequests: [JSONObject!]!
+}
+
+type ReleaseEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: Release!
+}
+
+type ReleasePayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The release that was created or updated.
+  """
+  release: Release!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+[Internal] A release pipeline.
+"""
+type ReleasePipeline implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The name of the pipeline.
+  """
+  name: String!
+  """
+  [ALPHA] Releases associated with this pipeline.
+  """
+  releases(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ReleaseConnection!
+  """
+  The pipeline's unique slug identifier.
+  """
+  slugId: String!
+  """
+  [ALPHA] Stages associated with this pipeline.
+  """
+  stages(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ReleaseStageConnection!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+A generic payload return from entity archive mutations.
+"""
+type ReleasePipelineArchivePayload implements ArchivePayload {
+  """
+  The archived/unarchived entity. Null if entity was deleted.
+  """
+  entity: ReleasePipeline
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+type ReleasePipelineConnection {
+  edges: [ReleasePipelineEdge!]!
+  nodes: [ReleasePipeline!]!
+  pageInfo: PageInfo!
+}
+
+input ReleasePipelineCreateInput {
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The name of the pipeline.
+  """
+  name: String!
+  """
+  The pipeline's unique slug identifier. If not provided, it will be auto-generated.
+  """
+  slugId: String
+}
+
+type ReleasePipelineEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: ReleasePipeline!
+}
+
+type ReleasePipelinePayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The release pipeline that was created or updated.
+  """
+  releasePipeline: ReleasePipeline!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+input ReleasePipelineUpdateInput {
+  """
+  The name of the pipeline.
+  """
+  name: String
+  """
+  The pipeline's unique slug identifier.
+  """
+  slugId: String
+}
+
+"""
+[Internal] A release stage.
+"""
+type ReleaseStage implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The UI color of the stage as a HEX string.
+  """
+  color: String!
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The name of the stage.
+  """
+  name: String!
+  """
+  The pipeline this stage belongs to.
+  """
+  pipeline: ReleasePipeline!
+  """
+  The position of the stage.
+  """
+  position: Float!
+  """
+  [ALPHA] Releases associated with this stage.
+  """
+  releases(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): ReleaseConnection!
+  """
+  The type of the stage.
+  """
+  type: ReleaseStageType!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+"""
+A generic payload return from entity archive mutations.
+"""
+type ReleaseStageArchivePayload implements ArchivePayload {
+  """
+  The archived/unarchived entity. Null if entity was deleted.
+  """
+  entity: ReleaseStage
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+type ReleaseStageConnection {
+  edges: [ReleaseStageEdge!]!
+  nodes: [ReleaseStage!]!
+  pageInfo: PageInfo!
+}
+
+input ReleaseStageCreateInput {
+  """
+  The UI color of the stage as a HEX string.
+  """
+  color: String!
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The name of the stage.
+  """
+  name: String!
+  """
+  The identifier of the pipeline this stage belongs to.
+  """
+  pipelineId: String!
+  """
+  The position of the stage.
+  """
+  position: Float!
+  """
+  The type of the stage.
+  """
+  type: ReleaseStageType!
+}
+
+type ReleaseStageEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: ReleaseStage!
+}
+
+type ReleaseStagePayload {
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  The release stage that was created or updated.
+  """
+  releaseStage: ReleaseStage!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+A type of release stage.
+"""
+enum ReleaseStageType {
+  canceled
+  completed
+  planned
+  started
+}
+
+input ReleaseStageUpdateInput {
+  """
+  The UI color of the stage as a HEX string.
+  """
+  color: String
+  """
+  The name of the stage.
+  """
+  name: String
+  """
+  The position of the stage.
+  """
+  position: Float
+  """
+  The type of the stage.
+  """
+  type: ReleaseStageType
+}
+
+input ReleaseUpdateInput {
+  """
+  The commit SHA associated with this release.
+  """
+  commitSha: String
+  """
+  The name of the release.
+  """
+  name: String
+  """
+  The identifier of the pipeline this release belongs to.
+  """
+  pipelineId: String
+  """
+  The current stage of the release.
+  """
+  stageId: String
+  """
+  The version of the release.
+  """
+  version: String
 }
 
 type RepositorySuggestion {

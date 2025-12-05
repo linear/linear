@@ -15339,6 +15339,114 @@ export class ReactionWebhookPayload {
   public user?: UserChildWebhookPayload;
 }
 /**
+ * A generic payload return from entity archive mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReleaseArchivePayloadFragment response data
+ */
+export class ReleaseArchivePayload extends Request {
+  public constructor(request: LinearRequest, data: L.ReleaseArchivePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
+ * ReleasePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReleasePayloadFragment response data
+ */
+export class ReleasePayload extends Request {
+  public constructor(request: LinearRequest, data: L.ReleasePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
+ * A generic payload return from entity archive mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReleasePipelineArchivePayloadFragment response data
+ */
+export class ReleasePipelineArchivePayload extends Request {
+  public constructor(request: LinearRequest, data: L.ReleasePipelineArchivePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
+ * ReleasePipelinePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReleasePipelinePayloadFragment response data
+ */
+export class ReleasePipelinePayload extends Request {
+  public constructor(request: LinearRequest, data: L.ReleasePipelinePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
+ * A generic payload return from entity archive mutations.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReleaseStageArchivePayloadFragment response data
+ */
+export class ReleaseStageArchivePayload extends Request {
+  public constructor(request: LinearRequest, data: L.ReleaseStageArchivePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
+ * ReleaseStagePayload model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.ReleaseStagePayloadFragment response data
+ */
+export class ReleaseStagePayload extends Request {
+  public constructor(request: LinearRequest, data: L.ReleaseStagePayloadFragment) {
+    super(request);
+    this.lastSyncId = data.lastSyncId;
+    this.success = data.success;
+  }
+
+  /** The identifier of the last sync operation. */
+  public lastSyncId: number;
+  /** Whether the operation was successful. */
+  public success: boolean;
+}
+/**
  * RepositorySuggestion model
  *
  * @param request - function to call the graphql client
@@ -41914,6 +42022,7 @@ export {
   PullRequestStatus,
   PushSubscriptionType,
   ReleaseChannel,
+  ReleaseStageType,
   SLADayCountType,
   SemanticSearchResultType,
   SendStrategy,

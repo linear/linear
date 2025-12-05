@@ -1099,6 +1099,33 @@ fragment ProjectUpdateArchivePayload on ProjectUpdateArchivePayload {
 }
 
 # A generic payload return from entity archive mutations.
+fragment ReleaseArchivePayload on ReleaseArchivePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
+fragment ReleasePipelineArchivePayload on ReleasePipelineArchivePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
+fragment ReleaseStageArchivePayload on ReleaseStageArchivePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+# A generic payload return from entity archive mutations.
 fragment RoadmapArchivePayload on RoadmapArchivePayload {
   __typename
   # The archived/unarchived entity. Null if entity was deleted.
@@ -1187,6 +1214,18 @@ fragment ArchivePayload on ArchivePayload {
 
   ... on ProjectUpdateArchivePayload {
     ...ProjectUpdateArchivePayload
+  }
+
+  ... on ReleaseArchivePayload {
+    ...ReleaseArchivePayload
+  }
+
+  ... on ReleasePipelineArchivePayload {
+    ...ReleasePipelineArchivePayload
+  }
+
+  ... on ReleaseStageArchivePayload {
+    ...ReleaseStageArchivePayload
   }
 
   ... on RoadmapArchivePayload {
@@ -8884,6 +8923,30 @@ fragment ReactionPayload on ReactionPayload {
   reaction {
     ...Reaction
   }
+  success
+}
+
+fragment ReleasePayload on ReleasePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment ReleasePipelinePayload on ReleasePipelinePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
+  success
+}
+
+fragment ReleaseStagePayload on ReleaseStagePayload {
+  __typename
+  # The identifier of the last sync operation.
+  lastSyncId
+  # Whether the operation was successful.
   success
 }
 
