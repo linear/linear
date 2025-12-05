@@ -51,7 +51,7 @@ export class GitLabCsvImporter implements Importer {
     for (const row of data) {
       const labels = row.Labels.split(",").filter(tag => !!tag);
       const weight = safeParseInt(row.Weight);
-      const estimate = safeParseInt(row["Time Estimate"]);
+      const timeEstimateSeconds = safeParseInt(row["Time Estimate"]);
 
       importData.issues.push({
         title: row.Title,
@@ -62,7 +62,7 @@ export class GitLabCsvImporter implements Importer {
         labels,
         priority: !!weight ? normalizedWeights.get(weight) : undefined,
         dueDate: !!row["Due Date"] ? new Date(row["Due Date"]) : undefined,
-        estimate: !!estimate ? estimate : undefined,
+        estimate: !!timeEstimateSeconds ? convertTimeEstimateToPoints(timeEstimateSeconds) : undefined,
       });
 
       for (const lab of labels) {
@@ -100,4 +100,56 @@ const normalizeWeights = (weights: Set<number>) => {
   }
 
   return res;
+};
+
+/**
+ * Convert GitLab time estimate (in seconds) to Linear estimate points.
+ * GitLab exports estimates in seconds, but Linear uses a point scale (max 64).
+ * We convert seconds to hours and map to a reasonable estimate scale.
+ * 
+ * @param seconds - Time estimate in seconds from GitLab
+ * @returns Linear estimate points (0-64)
+ */
+const convertTimeEstimateToPoints = (seconds: number): number => {
+  if (seconds <= 0) {
+    return 0;
+  }
+
+  // Convert seconds to hours
+  const hours = seconds / 3600;
+
+  // Map hours to story points using a modified fibonacci sequence:
+  // 0-1h -> 1 point
+  // 1-2h -> 2 points
+  // 2-4h -> 3 points
+  // 4-8h -> 5 points
+  // 8-16h -> 8 points
+  // 16-32h -> 13 points
+  // 32-64h -> 21 points
+  // 64h+ -> 64 points (Linear's maximum)
+  
+  if (hours <= 1) {
+    return 1;
+  }
+  if (hours <= 2) {
+    return 2;
+  }
+  if (hours <= 4) {
+    return 3;
+  }
+  if (hours <= 8) {
+    return 5;
+  }
+  if (hours <= 16) {
+    return 8;
+  }
+  if (hours <= 32) {
+    return 13;
+  }
+  if (hours <= 64) {
+    return 21;
+  }
+  
+  // For very large estimates, cap at Linear's maximum
+  return 64;
 };
