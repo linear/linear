@@ -6308,6 +6308,7 @@ export class GuidanceRuleWebhookPayload {
 export class IdentityProvider extends Request {
   public constructor(request: LinearRequest, data: L.IdentityProviderFragment) {
     super(request);
+    this.allowNameChange = data.allowNameChange;
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.defaultMigrated = data.defaultMigrated;
@@ -6325,6 +6326,8 @@ export class IdentityProvider extends Request {
     this.type = data.type;
   }
 
+  /** Whether users are allowed to change their name and display name even if SCIM is enabled. */
+  public allowNameChange: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date;
   /** The time at which the entity was created. */

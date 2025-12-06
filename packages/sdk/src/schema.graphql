@@ -8759,6 +8759,10 @@ type IdentityProvider implements Node {
   """
   adminsGroupPush: JSONObject
   """
+  Whether users are allowed to change their name and display name even if SCIM is enabled.
+  """
+  allowNameChange: Boolean!
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime

@@ -5092,6 +5092,8 @@ export type IdentityProvider = Node & {
   __typename?: "IdentityProvider";
   /** [INTERNAL] SCIM admins group push settings. */
   adminsGroupPush?: Maybe<Scalars["JSONObject"]>;
+  /** Whether users are allowed to change their name and display name even if SCIM is enabled. */
+  allowNameChange: Scalars["Boolean"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
@@ -23996,6 +23998,7 @@ export type IdentityProviderFragment = { __typename: "IdentityProvider" } & Pick
   | "samlEnabled"
   | "scimEnabled"
   | "defaultMigrated"
+  | "allowNameChange"
   | "ssoSigningCert"
 >;
 
@@ -24905,6 +24908,7 @@ export type OrganizationDomainFragment = { __typename: "OrganizationDomain" } & 
         | "samlEnabled"
         | "scimEnabled"
         | "defaultMigrated"
+        | "allowNameChange"
         | "ssoSigningCert"
       >
     >;
@@ -56958,6 +56962,7 @@ export const IdentityProviderFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "samlEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "scimEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "defaultMigrated" } },
+          { kind: "Field", name: { kind: "Name", value: "allowNameChange" } },
           { kind: "Field", name: { kind: "Name", value: "ssoSigningCert" } },
         ],
       },
