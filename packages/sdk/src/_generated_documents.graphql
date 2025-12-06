@@ -3116,6 +3116,8 @@ fragment IdentityProvider on IdentityProvider {
   scimEnabled
   # Whether the identity provider is the default identity provider migrated from organization level settings.
   defaultMigrated
+  # Whether users are allowed to change their name and display name even if SCIM is enabled.
+  allowNameChange
   # X.509 Signing Certificate in string form.
   ssoSigningCert
 }
