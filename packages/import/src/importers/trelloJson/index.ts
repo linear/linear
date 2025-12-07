@@ -10,7 +10,10 @@ export const trelloJsonImport = async (): Promise<Importer> => {
     answers.trelloFilePath,
     answers.mapListsToStatuses,
     answers.discardArchivedCards,
-    answers.discardArchivedLists
+    answers.discardArchivedLists,
+    answers.migrateAttachments,
+    answers.migrateAttachments ? answers.trelloApiKey || "" : "",
+    answers.migrateAttachments ? answers.trelloApiToken || "" : ""
   );
   return trelloImporter;
 };
@@ -20,6 +23,9 @@ interface TrelloImportAnswers {
   mapListsToStatuses: boolean;
   discardArchivedCards: boolean;
   discardArchivedLists: boolean;
+  migrateAttachments: boolean;
+  trelloApiKey: string;
+  trelloApiToken: string;
 }
 
 const questions = [
@@ -46,5 +52,26 @@ const questions = [
     name: "discardArchivedLists",
     message: "Would you like to discard the (possibly unarchived) cards within archived lists?",
     default: true,
+  },
+  {
+    type: "confirm",
+    name: "migrateAttachments",
+    message:
+      "Do you want to migrate attachments? (If yes, you need to provide your Trello API Key and Token otherwise the importer will simply include links to the trello attachments)",
+    default: false,
+  },
+  {
+    type: "string",
+    name: "trelloApiKey",
+    message: "Please enter your Trello API Key",
+    default: "",
+    when: (answers: TrelloImportAnswers) => answers.migrateAttachments,
+  },
+  {
+    type: "string",
+    name: "trelloApiToken",
+    message: "Please enter your Trello API Token",
+    default: "",
+    when: (answers: TrelloImportAnswers) => answers.migrateAttachments,
   },
 ];

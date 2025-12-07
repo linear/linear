@@ -70,7 +70,8 @@
     "typescript": "~4.7.4"
   },
   "devDependencies": {
-    "@types/react-transition-group": "~4.4.5"
+    "@types/react-transition-group": "~4.4.5",
+    "ts-node": "^10.9.1"
   },
   "resolutions": {
     "graphql": "^15.4.0"

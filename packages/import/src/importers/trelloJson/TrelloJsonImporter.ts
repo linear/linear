@@ -55,12 +55,18 @@ export class TrelloJsonImporter implements Importer {
     filePath: string,
     mapListsToStatuses: boolean,
     discardArchivedCards: boolean,
-    discardArchivedLists: boolean
+    discardArchivedLists: boolean,
+    migrateAttachments: boolean,
+    trelloApiKey: string,
+    trelloApiToken: string
   ) {
     this.filePath = filePath;
     this.mapListsToStatuses = mapListsToStatuses;
     this.discardArchivedCards = discardArchivedCards;
     this.discardArchivedLists = discardArchivedLists;
+    this.migrateAttachments = migrateAttachments;
+    this.trelloApiKey = trelloApiKey;
+    this.trelloApiToken = trelloApiToken;
   }
 
   public get name(): string {
@@ -134,14 +140,19 @@ export class TrelloJsonImporter implements Importer {
           )
           .join("\n\n---\n\n");
       }
-      const formattedAttachments = card.attachments
-        .map(attachment => `[${attachment.name}](${attachment.url})`)
-        .join("\n");
+      const formattedAttachments = this.migrateAttachments
+        ? ""
+        : card.attachments.map(attachment => `[${attachment.name}](${attachment.url})`).join("\n");
       const cardList = trelloLists.find(list => list.id === card.idList);
 
-      const description = `${mdDesc}${formattedChecklists && `\n\nChecklists:\n${formattedChecklists}`}${
-        formattedAttachments && `\n\nAttachments:\n${formattedAttachments}`
-      }\n\n[View original card in Trello](${url})`;
+      let description = `${mdDesc}`;
+      if (formattedChecklists) {
+        description += `\n\nChecklists:\n${formattedChecklists}`;
+      }
+      if (!this.migrateAttachments && card.attachments && card.attachments.length > 0) {
+        description += `\n\nAttachments:\n${formattedAttachments}`;
+      }
+      description += `\n\n[View original card in Trello](${url})`;
       const labels = card.labels?.map(l => l.id);
 
       if (this.discardArchivedCards && card.closed) {
@@ -152,7 +163,7 @@ export class TrelloJsonImporter implements Importer {
         continue;
       }
 
-      importData.issues.push({
+      const issueBase = {
         title: card.name,
         description,
         url,
@@ -160,6 +171,19 @@ export class TrelloJsonImporter implements Importer {
         comments: comments[card.id],
         status: this.mapListsToStatuses ? cardList?.name : undefined,
         archived: card.closed || cardList?.closed,
+      };
+
+      const attachments = card.attachments.map(attachment => ({
+        url: attachment.url,
+        name: attachment.name,
+        httpHeaders: {
+          Authorization: `OAuth oauth_consumer_key="${this.trelloApiKey}", oauth_token="${this.trelloApiToken}"`,
+        },
+      }));
+
+      importData.issues.push({
+        ...issueBase,
+        attachments: this.migrateAttachments ? attachments : undefined,
       });
 
       const allLabels =
@@ -184,6 +208,9 @@ export class TrelloJsonImporter implements Importer {
   private mapListsToStatuses: boolean;
   private discardArchivedCards: boolean;
   private discardArchivedLists: boolean;
+  private migrateAttachments: boolean;
+  private trelloApiKey: string;
+  private trelloApiToken: string;
 }
 
 // Maps Trello colors to Linear branded colors
