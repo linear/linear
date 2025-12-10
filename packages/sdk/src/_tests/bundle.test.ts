@@ -5,7 +5,7 @@ import { startClient, stopClient } from "./test-client";
 const bundles = {
   // umd: require("../../dist/index-umd.min.js"),
   cjs: require("../../dist/index-cjs.min.js") as typeof es,
-  // Jest is not capable of testing the ES module bundle from an CJS environment. We need to add e2e tests that
+  // Jest is not capable of testing the ES module bundle from a CJS environment. We need to add e2e tests that
   // execute `node` directory to test this functionality. As-is this would just re-test the CJS module.
   // es: require("../../") as typeof es,
 };
