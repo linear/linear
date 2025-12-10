@@ -6,49 +6,40 @@
   "engines": {
     "node": ">=18.x"
   },
-  "workspaces": [
-    "./packages/*"
-  ],
   "scripts": {
-    "build:import": "yarn workspaces foreach -Apt run build:import",
-    "build:sdk": "yarn workspaces foreach -Apt run build:sdk",
-    "build:types": "npx tsc --project tsconfig.check.json",
+    "build:import": "pnpm run -r build:import",
+    "build:sdk": "pnpm run -r build:sdk",
+    "build:types": "tsc --project tsconfig.check.json",
     "build": "run-s generate build:sdk generate:test build:import build:types docs",
-    "dev": "NODE_ENV=development yarn build",
-    "docs": "npx md-magic 'packages/**/README.md' --config ./docs/markdown-magic.config.js",
-    "generate:clean": "yarn workspaces foreach -Apt run generate:clean",
-    "generate:doc": "yarn workspaces foreach -Apt run build:codegen-doc && yarn workspaces foreach -Apt run generate:doc",
-    "generate:sdk": "yarn workspaces foreach -Apt run build:codegen-sdk && yarn workspaces foreach -Apt run generate:sdk",
-    "generate:test": "yarn workspaces foreach -Apt run build:codegen-test && yarn workspaces foreach -Apt run generate:test",
+    "dev": "NODE_ENV=development pnpm build",
+    "docs": "md-magic 'packages/**/README.md' --config ./docs/markdown-magic.config.js",
+    "generate:clean": "pnpm run -r generate:clean",
+    "generate:doc": "pnpm run -r build:codegen-doc && pnpm run -r generate:doc",
+    "generate:sdk": "pnpm run -r build:codegen-sdk && pnpm run -r generate:sdk",
+    "generate:test": "pnpm run -r build:codegen-test && pnpm run -r generate:test",
     "generate": "run-s generate:clean generate:doc generate:sdk",
-    "lint": "npx eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
-    "mock": "npx graphql-faker packages/sdk/src/schema.graphql",
-    "schema": "yarn update:schema",
-    "test:e2e": "E2E=true yarn test _generated.test",
-    "test:update": "yarn test -u",
-    "test:watch": "yarn test --watch",
-    "test": "npx jest -w 1",
-    "update:dependencies": "yarn up && yarn workspaces foreach -Apt run generate:changeset:dependencies",
-    "update:schema": "yarn workspaces foreach -Apt run generate:schema && yarn workspaces foreach -Apt run generate:changeset:schema"
+    "lint": "eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
+    "mock": "graphql-faker packages/sdk/src/schema.graphql",
+    "schema": "pnpm run update:schema",
+    "test:e2e": "E2E=true jest -w 1 _generated.test",
+    "test:update": "jest -w 1 -u",
+    "test:watch": "jest -w 1 --watch",
+    "test": "jest -w 1",
+    "update:dependencies": "pnpm up && pnpm run -r generate:changeset:dependencies",
+    "update:schema": "pnpm run -r generate:schema && pnpm run -r generate:changeset:schema"
   },
-  "dependencies": {
+  "devDependencies": {
     "@changesets/cli": "^2.14.1",
     "@commitlint/cli": "^17.6.7",
     "@commitlint/config-conventional": "^11.0.0",
-    "@graphql-codegen/cli": "^2.16.0",
     "@octokit/core": "^3.2.1",
-    "@rollup/plugin-typescript": "^12.1.4",
     "@types/express": "^4.17.8",
-    "@types/inquirer": "^7.3.1",
     "@types/jest": "^26.0.20",
     "@types/lodash": "^4.14.165",
-    "@types/node": "20.5.1",
-    "@types/node-fetch": "^2.5.7",
+    "@types/node": "catalog:",
     "@types/ws": "^7.4.1",
     "@typescript-eslint/eslint-plugin": "^4.8.0",
     "@typescript-eslint/parser": "^4.8.0",
-    "auto-bind": "^4.0.0",
-    "body-parser": "^1.20.1",
     "eslint": "^7.13.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-import": "^2.22.1",
@@ -67,13 +58,7 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^26.4.4",
     "tslib": "^2.1.0",
-    "typescript": "~4.7.4"
-  },
-  "devDependencies": {
-    "@types/react-transition-group": "~4.4.5"
-  },
-  "resolutions": {
-    "graphql": "^15.4.0"
+    "typescript": "catalog:"
   },
   "lint-staged": {
     "*.{js,ts,tsx,json,css,yaml}": [
@@ -116,5 +101,5 @@
       }
     }
   },
-  "packageManager": "yarn@4.12.0"
+  "packageManager": "pnpm@10.25.0"
 }

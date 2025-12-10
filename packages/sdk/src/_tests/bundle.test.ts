@@ -1,11 +1,13 @@
-import * as es from "@linear/sdk";
+import type * as es from "../index";
 import { LinearErrorType } from "../types";
 import { startClient, stopClient } from "./test-client";
 
 const bundles = {
   // umd: require("../../dist/index-umd.min.js"),
-  cjs: require("../../dist/index-cjs.min.js"),
-  es: es,
+  cjs: require("../../dist/index-cjs.min.js") as typeof es,
+  // Jest is not capable of testing the ES module bundle from a CJS environment. We need to add e2e tests that
+  // execute `node` directory to test this functionality. As-is this would just re-test the CJS module.
+  // es: require("../../") as typeof es,
 };
 
 // https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid/2117523#2117523
@@ -24,7 +26,8 @@ function uuid() {
 async function expectError(shouldError: () => unknown, type: LinearErrorType, message: string) {
   try {
     await shouldError();
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     expect(error.type).toEqual(type);
     expect(error.message).toEqual(expect.stringContaining(message));
   }

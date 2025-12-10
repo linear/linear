@@ -16,20 +16,24 @@
     "dist"
   ],
   "scripts": {
-    "build:clean": "npx rimraf -G dist .rollup-cache tsconfig.tsbuildinfo",
+    "build:clean": "rimraf -G dist .rollup-cache tsconfig.tsbuildinfo",
     "build:codegen-sdk": "run-s build:clean build:rollup",
-    "build:rollup": "npx rollup -c"
+    "build:rollup": "rollup -c"
+  },
+  "dependencies": {
+    "@graphql-codegen/plugin-helpers": "catalog:",
+    "@graphql-codegen/visitor-plugin-common": "catalog:",
+    "@graphql-tools/graphql-file-loader": "catalog:",
+    "@graphql-tools/load": "catalog:",
+    "@linear/codegen-doc": "workspace:*",
+    "auto-bind": "catalog:",
+    "graphql": "catalog:"
   },
   "devDependencies": {
-    "@graphql-codegen/plugin-helpers": "^2.7.0",
-    "@graphql-codegen/visitor-plugin-common": "^2.13.0",
-    "@graphql-tools/graphql-file-loader": "^6.2.5",
-    "@graphql-tools/load": "^6.2.5",
-    "@rollup/plugin-typescript": "^12.1.4",
-    "auto-bind": "^4.0.0",
-    "graphql": "^15.4.0",
-    "rollup": "^2.38.3",
-    "rollup-plugin-gzip": "^4.1.1",
-    "rollup-plugin-terser": "^7.0.2"
+    "@rollup/plugin-typescript": "catalog:",
+    "rimraf": "catalog:",
+    "rollup": "catalog:",
+    "rollup-plugin-gzip": "catalog:",
+    "rollup-plugin-terser": "catalog:"
   }
 }

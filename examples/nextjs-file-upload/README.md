@@ -15,7 +15,7 @@ To run this example, you'll need a Linear account and a Linear API key. You can 
 Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) to bootstrap the example:
 
 ```shell
-yarn dlx create-next-app --example https://github.com/linear/linear/tree/master/examples/nextjs-file-upload nextjs-file-upload
+pnpm dlx create-next-app --example https://github.com/linear/linear/tree/master/examples/nextjs-file-upload nextjs-file-upload
 ```
 
 Then rename `.env.local.example` to `.env.local` and add your API key:
@@ -29,7 +29,7 @@ Finally, `cd` into the directory and run the Next.js development server:
 
 ```shell
 cd nextjs-file-upload
-yarn dev
+pnpm dev
 ```
 
 Visit [`http://localhost:3000`](http://localhost:3000) to see the running example.

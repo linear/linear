@@ -27,16 +27,16 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: yarn
+        run: pnpm install
 
       - name: Update dependencies
-        run: yarn update:dependencies
+        run: pnpm update:dependencies
 
       - name: Build packages
-        run: yarn build
+        run: pnpm build
 
       - name: Run tests
-        run: yarn test
+        run: pnpm test
 
       - name: Create dependencies pull request
         uses: peter-evans/create-pull-request@v7
