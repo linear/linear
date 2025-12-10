@@ -29,16 +29,16 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: yarn
+        run: pnpm install
 
       - name: Update schema
-        run: yarn update:schema
+        run: pnpm update:schema
 
       - name: Build packages
-        run: yarn build
+        run: pnpm build
 
       - name: Run tests
-        run: yarn test
+        run: pnpm test
 
       - name: Validate CJS and ESM resolution for SDK
         # Catch issues like https://github.com/linear/linear/issues/830
