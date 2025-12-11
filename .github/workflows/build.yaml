@@ -69,7 +69,7 @@ jobs:
           retention-days: 1
 
   smoke:
-    name: Smoke Test (Node ${{ matrix.node }} / TS ${{ matrix.typescript }})
+    name: Smoke Test ${{ matrix.module }} (Node ${{ matrix.node }} / TS ${{ matrix.typescript }})
     runs-on: ubuntu-latest
     needs: build
     strategy:
@@ -77,6 +77,7 @@ jobs:
       matrix:
         node: ["20", "22", "24"]
         typescript: ["5.7", "5.8", "5.9"]
+        module: ["cjs", "esm"]
 
     steps:
       - name: Checkout code
@@ -94,13 +95,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd e2e/smoke
+          cd e2e/smoke-${{ matrix.module }}
           npm install typescript@${{ matrix.typescript }} @types/node
           npm install ../../linear-sdk.tar.gz
 
       - name: Run smoke test
         run: |
-          cd e2e/smoke
+          cd e2e/smoke-${{ matrix.module }}
           npm test
 
   notify-slack:

@@ -24,7 +24,7 @@ export default defineConfig(
       "**/dist/**",
       "docs/**",
       "examples/**",
-      "e2e/smoke/*",
+      "e2e/smoke-*/*",
       "packages/import/bin/*.js",
       "packages/sdk/naming-override/*.js",
     ],
