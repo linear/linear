@@ -21,8 +21,8 @@ export function isConnectionModel(model?: SdkModel): boolean {
   return model
     ? Boolean(
         isConnection(model.name) &&
-          model.fields.list.find(field => field.name === Sdk.NODE_NAME) &&
-          model.fields.object.find(field => field.name === Sdk.PAGEINFO_NAME)
+        model.fields.list.find(field => field.name === Sdk.NODE_NAME) &&
+        model.fields.object.find(field => field.name === Sdk.PAGEINFO_NAME)
       )
     : false;
 }
