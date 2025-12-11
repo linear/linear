@@ -1,6 +1,6 @@
 import csv from "csvtojson";
 import { Importer, ImportResult, IssuePriority } from "../../types";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const j2m = require("jira2md");
 
 type AsanaPriority = "High" | "Med" | "Low";

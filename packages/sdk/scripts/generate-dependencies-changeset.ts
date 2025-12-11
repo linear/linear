@@ -1,7 +1,7 @@
+import { logger, printLines } from "@linear/codegen-doc";
 import { writeFile } from "fs";
 import path from "path";
 import { promisify } from "util";
-import { logger, printLines } from "../../codegen-doc/src/index";
 
 const filename = path.resolve(`../../.changeset/_generated_dependencies.md`);
 

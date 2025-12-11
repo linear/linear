@@ -3,6 +3,8 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
+    "noEmit": true,
+    "emitDeclarationOnly": true,
     "declarationDir": "dist"
   },
   "exclude": ["scripts", "src/_tests", "dist", "rollup.config.js", "src/scratch.ts"]

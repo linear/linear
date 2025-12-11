@@ -2,10 +2,10 @@ import { CriticalityLevel, diff } from "@graphql-inspector/core";
 import { GraphQLFileLoader } from "@graphql-tools/graphql-file-loader";
 import { loadSchema } from "@graphql-tools/load";
 import { UrlLoader } from "@graphql-tools/url-loader";
+import { logger, printLines } from "@linear/codegen-doc";
 import { writeFile } from "fs";
 import path from "path";
 import { promisify } from "util";
-import { logger, printLines } from "../../codegen-doc/src/index";
 
 const levelOrder = {
   [CriticalityLevel.Breaking]: 2,

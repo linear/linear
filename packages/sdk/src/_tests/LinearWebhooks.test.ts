@@ -52,7 +52,9 @@ describe("webhooks", () => {
     it("correct signature, correct timestamp should pass verification", async () => {
       const webhook = new LinearWebhookClient("SECRET");
       const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
-      expect(() => webhook.verify(rawBody, signature, parsedBody[LINEAR_WEBHOOK_TS_FIELD])).toBeTruthy();
+      expect(() =>
+        webhook.verify(rawBody, signature, (parsedBody as Record<string, number>)[LINEAR_WEBHOOK_TS_FIELD])
+      ).toBeTruthy();
     });
   });
 

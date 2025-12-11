@@ -68,6 +68,7 @@ export class LinearWebhookClient {
         }
 
         const allHandlers = this.collectHandlers(eventHandlers, parsedPayload.type);
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         await Promise.all(allHandlers.map(h => h(parsedPayload)));
         return adapter.send(200, "OK");
       } catch {

@@ -37,6 +37,7 @@ export class GraphQLClientError<Data, Variables extends Record<string, unknown>>
   private static extractMessage(response: LinearRawResponse<unknown>): string {
     try {
       return response.errors?.[0]?.message ?? `GraphQL Error (Code: ${response.status})`;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       return `GraphQL Error (Code: ${response.status})`;
     }
@@ -150,7 +151,7 @@ export class LinearGraphQLClient {
 
     if (headers) {
       // todo what if headers is in nested array form... ?
-      headers[key] = value;
+      (headers as Record<string, string>)[key] = value;
     } else {
       this.options.headers = { [key]: value };
     }

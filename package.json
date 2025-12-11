@@ -10,7 +10,7 @@
     "prepare": "husky",
     "build:import": "pnpm run -r build:import",
     "build:sdk": "pnpm run -r build:sdk",
-    "build:types": "tsc --project tsconfig.check.json",
+    "build:types": "pnpm run -r build:types",
     "build": "run-s generate build:sdk generate:test build:import build:types docs",
     "dev": "NODE_ENV=development pnpm build",
     "docs": "md-magic 'packages/**/README.md' --config ./docs/markdown-magic.config.js",
@@ -19,7 +19,7 @@
     "generate:sdk": "pnpm run -r build:codegen-sdk && pnpm run -r generate:sdk",
     "generate:test": "pnpm run -r build:codegen-test && pnpm run -r generate:test",
     "generate": "run-s generate:clean generate:doc generate:sdk",
-    "lint": "eslint --max-warnings 0 --ext .ts,.tsx **/src/*",
+    "lint": "eslint --max-warnings 0 .",
     "mock": "graphql-faker packages/sdk/src/schema.graphql",
     "schema": "pnpm run update:schema",
     "test:e2e": "E2E=true jest -w 1 _generated.test",
@@ -33,19 +33,18 @@
     "@changesets/cli": "^2.14.1",
     "@commitlint/cli": "^17.6.7",
     "@commitlint/config-conventional": "^11.0.0",
+    "@eslint/js": "^9.39.1",
     "@octokit/core": "^3.2.1",
     "@types/express": "^4.17.8",
     "@types/jest": "^26.0.20",
     "@types/lodash": "^4.14.165",
     "@types/node": "catalog:",
     "@types/ws": "^7.4.1",
-    "@typescript-eslint/eslint-plugin": "^4.8.0",
+    "@typescript-eslint/eslint-plugin": "^8.49.0",
     "@typescript-eslint/parser": "^4.8.0",
-    "eslint": "^7.13.0",
-    "eslint-config-prettier": "^6.15.0",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jsdoc": "^30.7.8",
-    "eslint-plugin-no-null": "^1.0.2",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsdoc": "^61.5.0",
     "express": "^4.17.3",
     "get-port": "^5.1.1",
     "graphql": "^15.4.0",
@@ -59,14 +58,15 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^26.4.4",
     "tslib": "^2.1.0",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "typescript-eslint": "^8.49.0"
   },
   "lint-staged": {
     "*.{js,ts,tsx,json,css,yaml}": [
       "prettier --write"
     ],
     "*.{js,ts,tsx}": [
-      "eslint --max-warnings 0 --fix -c .eslintrc.precommit.json"
+      "eslint --max-warnings 0 --fix"
     ]
   },
   "commitlint": {

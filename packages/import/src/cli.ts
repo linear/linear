@@ -13,6 +13,7 @@ import { shortcutCsvImport } from "./importers/shortcutCsv";
 import { trelloJsonImport } from "./importers/trelloJson";
 import { ImportAnswers } from "./types";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 inquirer.registerPrompt("filePath", require("inquirer-file-path"));
 
 (async () => {

@@ -269,6 +269,7 @@ describe("readme.md", () => {
       async function createComment(
         input: LinearDocument.CommentCreateInput
       ): LinearFetch<Comment | undefined | UserError> {
+        // eslint-disable-next-line no-useless-catch
         try {
           /** Try to create a comment */
           const commentPayload = await linearClient.createComment(input);

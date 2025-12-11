@@ -1,3 +1,4 @@
+import { JsonObject } from "type-fest";
 import { LinearClient } from "../index";
 import { LinearErrorType } from "../types";
 import { createTestServer, MOCK_API_KEY } from "./_mock";
@@ -117,6 +118,7 @@ describe("LinearClient", () => {
 
     const allTeamLabels = await team.paginate(team.labels, { includeArchived: true });
     expect(allTeamLabels.length).toEqual(2);
-    expect(requests.at(-1)?.body.variables?.["id"]).toEqual("teamId");
+    // eslint-disable-next-line @typescript-eslint/dot-notation
+    expect((requests.at(-1)?.body.variables as JsonObject)?.["id"]).toEqual("teamId");
   });
 });
