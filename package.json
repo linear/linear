@@ -63,10 +63,10 @@
   },
   "lint-staged": {
     "*.{js,ts,tsx,json,css,yaml}": [
-      "npx prettier --write **/*.{js,ts,tsx,json,css,yaml}"
+      "prettier --write"
     ],
     "*.{js,ts,tsx}": [
-      "npx eslint --max-warnings 0 --fix -c .eslintrc.precommit.json"
+      "eslint --max-warnings 0 --fix -c .eslintrc.precommit.json"
     ]
   },
   "commitlint": {
