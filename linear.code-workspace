@@ -43,6 +43,7 @@
       "**/*.tsbuildinfo": true,
       "**/.size-snapshot.json": true,
     },
+    "oxc.enable": false,
     "typescript.tsdk": "./node_modules/typescript/lib",
     "typescript.enablePromptUseWorkspaceTsdk": true,
     "cSpell.words": ["uuidv4"],
