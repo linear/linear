@@ -24,6 +24,7 @@ export function printTests(context: SdkPluginContext): string {
     ["Auto generated API tests"],
     printLines([
       printTestHooks(),
+      // eslint-disable-next-line no-unsafe-optional-chaining
       ...context.sdkDefinitions[""].operations?.map(operation =>
         operation.node.operation === OperationType.query ? printQueryTest(context, operation) : undefined
       ),

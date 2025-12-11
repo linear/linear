@@ -1,5 +1,5 @@
 import { InterfaceTypeDefinitionNode, Kind, NonNullTypeNode, ObjectTypeDefinitionNode } from "graphql";
-import { NamedTypeNode } from "graphql/language/ast";
+import { NamedTypeNode, TypeNode } from "graphql/language/ast";
 
 /**
  * Checks if an interface implementation has conflicting types with its parent definition.
@@ -14,12 +14,15 @@ export function conflictsWithInterfaceDefinition(
     for (const i of implementation.interfaces) {
       const interfaceFields = interfaces
         .find(interfaceDefinition => interfaceDefinition.name.value === i.name.value)
-        ?.fields?.reduce((acc, field) => {
-          return {
-            ...acc,
-            [field.name.value]: field.type,
-          };
-        }, {});
+        ?.fields?.reduce(
+          (acc, field) => {
+            return {
+              ...acc,
+              [field.name.value]: field.type,
+            };
+          },
+          {} as Record<string, TypeNode>
+        );
 
       for (const field of implementation.fields) {
         const interfaceField = interfaceFields?.[field.name.value];
@@ -36,10 +39,12 @@ export function conflictsWithInterfaceDefinition(
               break;
             case Kind.NON_NULL_TYPE:
               if (
-                interfaceField.type.name.value !== ((field.type as NonNullTypeNode).type as NamedTypeNode).name.value
+                (interfaceField.type as NamedTypeNode).name.value !==
+                ((field.type as NonNullTypeNode).type as NamedTypeNode).name.value
               ) {
                 return true;
               }
+              break;
             default:
               break;
           }

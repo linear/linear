@@ -3,7 +3,6 @@ import { LinearSdk } from "../index";
 
 function resolveWithData(data: unknown) {
   return () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return Promise.resolve(data) as any;
   };
 }

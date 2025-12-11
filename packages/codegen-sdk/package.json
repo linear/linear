@@ -18,7 +18,8 @@
   "scripts": {
     "build:clean": "rimraf -G dist .rollup-cache tsconfig.tsbuildinfo",
     "build:codegen-sdk": "run-s build:clean build:rollup",
-    "build:rollup": "rollup -c"
+    "build:rollup": "rollup -c",
+    "build:types": "tsc --noEmit"
   },
   "dependencies": {
     "@graphql-codegen/plugin-helpers": "catalog:",

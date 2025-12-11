@@ -3,6 +3,7 @@ import { LinearClient } from "@linear/sdk";
 import { replaceAsync } from "./replaceAsync";
 
 const IMAGE_MD_REGEX = /(?:!\[(.*?)\]\((https?:\/\/.*?)\))/;
+// eslint-disable-next-line no-useless-escape
 const IMAGE_TAG_REGEX = /(?:<img.*?src=\"(.*?)\".*?>)/;
 
 /**
@@ -25,6 +26,7 @@ export const replaceImagesInMarkdown = async (
 
   // Markdown tags
   result = await replaceAsync(result, IMAGE_MD_REGEX, async (match, ...args: string[]) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     match;
     const title = args[0];
     const url = args[1];
@@ -34,6 +36,7 @@ export const replaceImagesInMarkdown = async (
 
   // HTML tags
   result = await replaceAsync(result, IMAGE_TAG_REGEX, async (match, ...args: string[]) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     match;
     const url = args[0];
     const uploadedUrl = await replaceImageUrl(client, url + effectiveURLSuffix);

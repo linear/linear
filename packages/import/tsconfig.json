@@ -3,7 +3,11 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "declarationDir": "dist"
+    "declarationDir": "dist",
+    "noEmit": true,
+    // @types/inquirer@7.3.3 does not pass internal type checks on new TypeScript versions.
+    // Should be removed after upgrading to a newer inquirer version.
+    "skipLibCheck": true
   },
   "exclude": ["bin", "src/_tests", "dist", "rollup.config.js"]
 }

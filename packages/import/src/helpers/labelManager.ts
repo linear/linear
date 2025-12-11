@@ -328,13 +328,11 @@ const createLabel = async (
 ) => {
   try {
     const response = await client.createIssueLabel({ name, description, color, teamId, parentId, isGroup });
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return (await response?.issueLabel)!.id;
   } catch {
     // If the label failed to create it's likely it's a name conflict, in which case we try one more time with a new name
     const newName = renameConflictingLabel(name);
     const response = await client.createIssueLabel({ name: newName, description, color, teamId, parentId, isGroup });
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return (await response?.issueLabel)!.id;
   }
 };
