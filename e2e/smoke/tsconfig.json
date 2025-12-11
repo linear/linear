@@ -4,7 +4,6 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "skipLibCheck": true,
     "strict": true
   }
 }
