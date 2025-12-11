@@ -8759,6 +8759,10 @@ type IdentityProvider implements Node {
   """
   adminsGroupPush: JSONObject
   """
+  Whether users are allowed to change their name and display name even if SCIM is enabled.
+  """
+  allowNameChange: Boolean!
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -11812,10 +11816,6 @@ type Issue implements Node {
     """
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
-  """
-  [Internal] Id of the releases associated with this issue.
-  """
-  releaseIds: [String!]!
   """
   The time at which the issue's SLA will breach.
   """
@@ -14955,10 +14955,6 @@ type IssueSearchResult implements Node {
     """
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
-  """
-  [Internal] Id of the releases associated with this issue.
-  """
-  releaseIds: [String!]!
   """
   The time at which the issue's SLA will breach.
   """
@@ -19224,6 +19220,19 @@ type Mutation {
     id: String!
   ): ProjectArchivePayload!
   """
+  Disables external sync on a project.
+  """
+  projectExternalSyncDisable(
+    """
+    The ID of the project to disable external sync for.
+    """
+    projectId: String!
+    """
+    The source of the external sync to disable.
+    """
+    syncSource: ExternalSyncService!
+  ): ProjectPayload!
+  """
   Creates a new project label.
   """
   projectLabelCreate(
@@ -22935,6 +22944,10 @@ type Organization implements Node {
   The time at which the trial will end.
   """
   trialEndsAt: DateTime
+  """
+  The time at which the trial started.
+  """
+  trialStartsAt: DateTime
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -31538,6 +31551,10 @@ type Release implements Node {
   """
   pipeline: ReleasePipeline!
   """
+  The release's unique URL slug.
+  """
+  slugId: String!
+  """
   The current stage of the release.
   """
   stage: ReleaseStage!
@@ -31618,7 +31635,7 @@ input ReleaseCreateInput {
   """
   pullRequestReferences: [PullRequestReferenceInput!]
   """
-  The current stage of the release. Defaults to the first 'planned' stage.
+  The current stage of the release. Defaults to the first 'completed' stage.
   """
   stageId: String
   """
@@ -33632,9 +33649,9 @@ type Team implements Node {
   """
   integrationsSettings: IntegrationsSettings
   """
-  Unique hash for the team to be used in invite URLs.
+  [DEPRECATED] Unique hash for the team to be used in invite URLs.
   """
-  inviteHash: String!
+  inviteHash: String! @deprecated(reason: "Not used anymore, simply returning an empty string.")
   """
   Number of issues in the team.
   """
@@ -36787,6 +36804,7 @@ enum ViewType {
   projectsBacklog
   projectsClosed
   quickView
+  release
   reviews
   roadmap
   roadmapAll

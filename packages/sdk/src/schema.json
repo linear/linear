@@ -31004,6 +31004,22 @@
             "deprecationReason": null
           },
           {
+            "name": "allowNameChange",
+            "description": "Whether users are allowed to change their name and display name even if SCIM is enabled.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "archivedAt",
             "description": "The time at which the entity was archived. Null if the entity has not been archived.",
             "args": [],
@@ -41790,30 +41806,6 @@
             "deprecationReason": null
           },
           {
-            "name": "releaseIds",
-            "description": "[Internal] Id of the releases associated with this issue.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "slaBreachesAt",
             "description": "The time at which the issue's SLA will breach.",
             "args": [],
@@ -52471,30 +52463,6 @@
                 "kind": "OBJECT",
                 "name": "IssueRelationConnection",
                 "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "releaseIds",
-            "description": "[Internal] Id of the releases associated with this issue.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                }
               }
             },
             "isDeprecated": false,
@@ -67930,6 +67898,55 @@
             "deprecationReason": null
           },
           {
+            "name": "projectExternalSyncDisable",
+            "description": "Disables external sync on a project.",
+            "args": [
+              {
+                "name": "projectId",
+                "description": "The ID of the project to disable external sync for.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "syncSource",
+                "description": "The source of the external sync to disable.",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "ENUM",
+                    "name": "ExternalSyncService",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ProjectPayload",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "projectLabelCreate",
             "description": "Creates a new project label.",
             "args": [
@@ -81330,6 +81347,18 @@
           {
             "name": "trialEndsAt",
             "description": "The time at which the trial will end.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "trialStartsAt",
+            "description": "The time at which the trial started.",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -111702,6 +111731,22 @@
             "deprecationReason": null
           },
           {
+            "name": "slugId",
+            "description": "The release's unique URL slug.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "stage",
             "description": "The current stage of the release.",
             "args": [],
@@ -112056,7 +112101,7 @@
           },
           {
             "name": "stageId",
-            "description": "The current stage of the release. Defaults to the first 'planned' stage.",
+            "description": "The current stage of the release. Defaults to the first 'completed' stage.",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -119161,7 +119206,7 @@
           },
           {
             "name": "inviteHash",
-            "description": "Unique hash for the team to be used in invite URLs.",
+            "description": "[DEPRECATED] Unique hash for the team to be used in invite URLs.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -119172,8 +119217,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Not used anymore, simply returning an empty string."
           },
           {
             "name": "issueCount",
@@ -130320,6 +130365,12 @@
           },
           {
             "name": "quickView",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "release",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

@@ -5092,6 +5092,8 @@ export type IdentityProvider = Node & {
   __typename?: "IdentityProvider";
   /** [INTERNAL] SCIM admins group push settings. */
   adminsGroupPush?: Maybe<Scalars["JSONObject"]>;
+  /** Whether users are allowed to change their name and display name even if SCIM is enabled. */
+  allowNameChange: Scalars["Boolean"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
@@ -6663,8 +6665,6 @@ export type Issue = Node & {
   recurringIssueTemplate?: Maybe<Template>;
   /** Relations associated with this issue. */
   relations: IssueRelationConnection;
-  /** [Internal] Id of the releases associated with this issue. */
-  releaseIds: Array<Scalars["String"]>;
   /** The time at which the issue's SLA will breach. */
   slaBreachesAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the issue's SLA will enter high risk state. */
@@ -8316,8 +8316,6 @@ export type IssueSearchResult = Node & {
   recurringIssueTemplate?: Maybe<Template>;
   /** Relations associated with this issue. */
   relations: IssueRelationConnection;
-  /** [Internal] Id of the releases associated with this issue. */
-  releaseIds: Array<Scalars["String"]>;
   /** The time at which the issue's SLA will breach. */
   slaBreachesAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the issue's SLA will enter high risk state. */
@@ -9683,6 +9681,8 @@ export type Mutation = {
   projectCreate: ProjectPayload;
   /** Deletes (trashes) a project. */
   projectDelete: ProjectArchivePayload;
+  /** Disables external sync on a project. */
+  projectExternalSyncDisable: ProjectPayload;
   /** Creates a new project label. */
   projectLabelCreate: ProjectLabelPayload;
   /** Deletes a project label. */
@@ -11009,6 +11009,11 @@ export type MutationProjectCreateArgs = {
 
 export type MutationProjectDeleteArgs = {
   id: Scalars["String"];
+};
+
+export type MutationProjectExternalSyncDisableArgs = {
+  projectId: Scalars["String"];
+  syncSource: ExternalSyncService;
 };
 
 export type MutationProjectLabelCreateArgs = {
@@ -12854,6 +12859,8 @@ export type Organization = Node & {
   themeSettings?: Maybe<Scalars["JSONObject"]>;
   /** The time at which the trial will end. */
   trialEndsAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the trial started. */
+  trialStartsAt?: Maybe<Scalars["DateTime"]>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -17550,6 +17557,8 @@ export type Release = Node & {
   name: Scalars["String"];
   /** The pipeline this release belongs to. */
   pipeline: ReleasePipeline;
+  /** The release's unique URL slug. */
+  slugId: Scalars["String"];
   /** The current stage of the release. */
   stage: ReleaseStage;
   /**
@@ -17604,7 +17613,7 @@ export type ReleaseCreateInput = {
   pipelineId: Scalars["String"];
   /** Pull request references to look up. Issues linked to found PRs will be associated with this release. */
   pullRequestReferences?: InputMaybe<Array<PullRequestReferenceInput>>;
-  /** The current stage of the release. Defaults to the first 'planned' stage. */
+  /** The current stage of the release. Defaults to the first 'completed' stage. */
   stageId?: InputMaybe<Scalars["String"]>;
   /** The version of the release. */
   version?: InputMaybe<Scalars["String"]>;
@@ -18749,7 +18758,10 @@ export type Team = Node & {
   inheritWorkflowStatuses: Scalars["Boolean"];
   /** Settings for all integrations associated with that team. */
   integrationsSettings?: Maybe<IntegrationsSettings>;
-  /** Unique hash for the team to be used in invite URLs. */
+  /**
+   * [DEPRECATED] Unique hash for the team to be used in invite URLs.
+   * @deprecated Not used anymore, simply returning an empty string.
+   */
   inviteHash: Scalars["String"];
   /** Number of issues in the team. */
   issueCount: Scalars["Int"];
@@ -20588,6 +20600,7 @@ export enum ViewType {
   ProjectsBacklog = "projectsBacklog",
   ProjectsClosed = "projectsClosed",
   QuickView = "quickView",
+  Release = "release",
   Reviews = "reviews",
   Roadmap = "roadmap",
   RoadmapAll = "roadmapAll",
@@ -23996,6 +24009,7 @@ export type IdentityProviderFragment = { __typename: "IdentityProvider" } & Pick
   | "samlEnabled"
   | "scimEnabled"
   | "defaultMigrated"
+  | "allowNameChange"
   | "ssoSigningCert"
 >;
 
@@ -24482,6 +24496,7 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "deletionRequestedAt"
   | "archivedAt"
   | "createdAt"
+  | "trialStartsAt"
   | "trialEndsAt"
   | "id"
   | "hipaaComplianceEnabled"
@@ -24593,7 +24608,6 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "createdAt"
   | "timezone"
   | "id"
-  | "inviteHash"
   | "defaultIssueEstimate"
   | "setIssueSortOrderOnStateChange"
   | "allMembersCanJoin"
@@ -24614,6 +24628,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "slackNewIssue"
   | "slackIssueStatuses"
   | "triageEnabled"
+  | "inviteHash"
   | "issueOrderingNoPriorityFirst"
   | "issueSortOrderDefaultToBottom"
 > & {
@@ -24905,6 +24920,7 @@ export type OrganizationDomainFragment = { __typename: "OrganizationDomain" } & 
         | "samlEnabled"
         | "scimEnabled"
         | "defaultMigrated"
+        | "allowNameChange"
         | "ssoSigningCert"
       >
     >;
@@ -31505,7 +31521,6 @@ export type TeamConnectionFragment = { __typename: "TeamConnection" } & {
       | "createdAt"
       | "timezone"
       | "id"
-      | "inviteHash"
       | "defaultIssueEstimate"
       | "setIssueSortOrderOnStateChange"
       | "allMembersCanJoin"
@@ -31526,6 +31541,7 @@ export type TeamConnectionFragment = { __typename: "TeamConnection" } & {
       | "slackNewIssue"
       | "slackIssueStatuses"
       | "triageEnabled"
+      | "inviteHash"
       | "issueOrderingNoPriorityFirst"
       | "issueSortOrderDefaultToBottom"
     > & {
@@ -31888,7 +31904,6 @@ export type AdministrableTeamsQuery = { __typename?: "Query" } & {
         | "createdAt"
         | "timezone"
         | "id"
-        | "inviteHash"
         | "defaultIssueEstimate"
         | "setIssueSortOrderOnStateChange"
         | "allMembersCanJoin"
@@ -31909,6 +31924,7 @@ export type AdministrableTeamsQuery = { __typename?: "Query" } & {
         | "slackNewIssue"
         | "slackIssueStatuses"
         | "triageEnabled"
+        | "inviteHash"
         | "issueOrderingNoPriorityFirst"
         | "issueSortOrderDefaultToBottom"
       > & {
@@ -40457,6 +40473,7 @@ export type OrganizationQuery = { __typename?: "Query" } & {
     | "deletionRequestedAt"
     | "archivedAt"
     | "createdAt"
+    | "trialStartsAt"
     | "trialEndsAt"
     | "id"
     | "hipaaComplianceEnabled"
@@ -40698,7 +40715,6 @@ export type Organization_TeamsQuery = { __typename?: "Query" } & {
           | "createdAt"
           | "timezone"
           | "id"
-          | "inviteHash"
           | "defaultIssueEstimate"
           | "setIssueSortOrderOnStateChange"
           | "allMembersCanJoin"
@@ -40719,6 +40735,7 @@ export type Organization_TeamsQuery = { __typename?: "Query" } & {
           | "slackNewIssue"
           | "slackIssueStatuses"
           | "triageEnabled"
+          | "inviteHash"
           | "issueOrderingNoPriorityFirst"
           | "issueSortOrderDefaultToBottom"
         > & {
@@ -41834,7 +41851,6 @@ export type Project_TeamsQuery = { __typename?: "Query" } & {
           | "createdAt"
           | "timezone"
           | "id"
-          | "inviteHash"
           | "defaultIssueEstimate"
           | "setIssueSortOrderOnStateChange"
           | "allMembersCanJoin"
@@ -41855,6 +41871,7 @@ export type Project_TeamsQuery = { __typename?: "Query" } & {
           | "slackNewIssue"
           | "slackIssueStatuses"
           | "triageEnabled"
+          | "inviteHash"
           | "issueOrderingNoPriorityFirst"
           | "issueSortOrderDefaultToBottom"
         > & {
@@ -43362,7 +43379,6 @@ export type TeamQuery = { __typename?: "Query" } & {
     | "createdAt"
     | "timezone"
     | "id"
-    | "inviteHash"
     | "defaultIssueEstimate"
     | "setIssueSortOrderOnStateChange"
     | "allMembersCanJoin"
@@ -43383,6 +43399,7 @@ export type TeamQuery = { __typename?: "Query" } & {
     | "slackNewIssue"
     | "slackIssueStatuses"
     | "triageEnabled"
+    | "inviteHash"
     | "issueOrderingNoPriorityFirst"
     | "issueSortOrderDefaultToBottom"
   > & {
@@ -44032,7 +44049,6 @@ export type TeamsQuery = { __typename?: "Query" } & {
         | "createdAt"
         | "timezone"
         | "id"
-        | "inviteHash"
         | "defaultIssueEstimate"
         | "setIssueSortOrderOnStateChange"
         | "allMembersCanJoin"
@@ -44053,6 +44069,7 @@ export type TeamsQuery = { __typename?: "Query" } & {
         | "slackNewIssue"
         | "slackIssueStatuses"
         | "triageEnabled"
+        | "inviteHash"
         | "issueOrderingNoPriorityFirst"
         | "issueSortOrderDefaultToBottom"
       > & {
@@ -44783,7 +44800,6 @@ export type User_TeamsQuery = { __typename?: "Query" } & {
           | "createdAt"
           | "timezone"
           | "id"
-          | "inviteHash"
           | "defaultIssueEstimate"
           | "setIssueSortOrderOnStateChange"
           | "allMembersCanJoin"
@@ -44804,6 +44820,7 @@ export type User_TeamsQuery = { __typename?: "Query" } & {
           | "slackNewIssue"
           | "slackIssueStatuses"
           | "triageEnabled"
+          | "inviteHash"
           | "issueOrderingNoPriorityFirst"
           | "issueSortOrderDefaultToBottom"
         > & {
@@ -46228,7 +46245,6 @@ export type Viewer_TeamsQuery = { __typename?: "Query" } & {
           | "createdAt"
           | "timezone"
           | "id"
-          | "inviteHash"
           | "defaultIssueEstimate"
           | "setIssueSortOrderOnStateChange"
           | "allMembersCanJoin"
@@ -46249,6 +46265,7 @@ export type Viewer_TeamsQuery = { __typename?: "Query" } & {
           | "slackNewIssue"
           | "slackIssueStatuses"
           | "triageEnabled"
+          | "inviteHash"
           | "issueOrderingNoPriorityFirst"
           | "issueSortOrderDefaultToBottom"
         > & {
@@ -53197,6 +53214,17 @@ export type DeleteProjectMutation = { __typename?: "Mutation" } & {
     };
 };
 
+export type ProjectExternalSyncDisableMutationVariables = Exact<{
+  projectId: Scalars["String"];
+  syncSource: ExternalSyncService;
+}>;
+
+export type ProjectExternalSyncDisableMutation = { __typename?: "Mutation" } & {
+  projectExternalSyncDisable: { __typename: "ProjectPayload" } & Pick<ProjectPayload, "lastSyncId" | "success"> & {
+      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    };
+};
+
 export type CreateProjectLabelMutationVariables = Exact<{
   input: ProjectLabelCreateInput;
 }>;
@@ -56798,6 +56826,7 @@ export const OrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "deletionRequestedAt" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "trialStartsAt" } },
           { kind: "Field", name: { kind: "Name", value: "trialEndsAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "hipaaComplianceEnabled" } },
@@ -56958,6 +56987,7 @@ export const IdentityProviderFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "samlEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "scimEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "defaultMigrated" } },
+          { kind: "Field", name: { kind: "Name", value: "allowNameChange" } },
           { kind: "Field", name: { kind: "Name", value: "ssoSigningCert" } },
         ],
       },
@@ -68183,7 +68213,6 @@ export const TeamFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "inviteHash" } },
           { kind: "Field", name: { kind: "Name", value: "defaultIssueEstimate" } },
           { kind: "Field", name: { kind: "Name", value: "setIssueSortOrderOnStateChange" } },
           { kind: "Field", name: { kind: "Name", value: "allMembersCanJoin" } },
@@ -68204,6 +68233,7 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "slackNewIssue" } },
           { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" } },
           { kind: "Field", name: { kind: "Name", value: "triageEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "inviteHash" } },
           { kind: "Field", name: { kind: "Name", value: "issueOrderingNoPriorityFirst" } },
           { kind: "Field", name: { kind: "Name", value: "issueSortOrderDefaultToBottom" } },
         ],
@@ -102600,6 +102630,57 @@ export const DeleteProjectDocument = {
     ...ProjectArchivePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DeleteProjectMutation, DeleteProjectMutationVariables>;
+export const ProjectExternalSyncDisableDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "projectExternalSyncDisable" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "syncSource" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ExternalSyncService" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectExternalSyncDisable" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "projectId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "syncSource" },
+                value: { kind: "Variable", name: { kind: "Name", value: "syncSource" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ProjectExternalSyncDisableMutation, ProjectExternalSyncDisableMutationVariables>;
 export const CreateProjectLabelDocument = {
   kind: "Document",
   definitions: [
