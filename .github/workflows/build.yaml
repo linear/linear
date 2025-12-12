@@ -56,6 +56,54 @@ jobs:
       - name: Check for no generated changes
         run: git update-index --refresh && git diff-index HEAD
 
+      - name: Package SDK for smoke tests
+        run: |
+          cd packages/sdk
+          pnpm pack --out linear-sdk.tar.gz
+
+      - name: Upload SDK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linear-sdk
+          path: packages/sdk/linear-sdk.tar.gz
+          retention-days: 1
+
+  smoke:
+    name: Smoke Test ${{ matrix.module }} (Node ${{ matrix.node }} / TS ${{ matrix.typescript }})
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["20", "24"]
+        typescript: ["5.7", "5.9"]
+        module: ["cjs", "esm"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Download SDK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linear-sdk
+
+      - name: Install dependencies
+        run: |
+          cd e2e/smoke-${{ matrix.module }}
+          npm install typescript@${{ matrix.typescript }} @types/node
+          npm install ../../linear-sdk.tar.gz
+
+      - name: Run smoke test
+        run: |
+          cd e2e/smoke-${{ matrix.module }}
+          npm test
+
   notify-slack:
     runs-on: ubuntu-latest
     timeout-minutes: 10

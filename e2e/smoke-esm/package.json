@@ -1,0 +1,10 @@
+{
+  "name": "linear-sdk-smoke-test-esm",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "ESM smoke test for Linear SDK",
+  "scripts": {
+    "test": "tsc && node test.js"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "linear-sdk-smoke-test-cjs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CommonJS smoke test for Linear SDK",
+  "scripts": {
+    "test": "tsc && node test.js"
+  }
+}
