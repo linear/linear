@@ -5,20 +5,13 @@
   "version": "3.3.2",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
-  "main": "dist/index-cjs.min.js",
-  "module": "dist/index-es.min.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
   "repository": "https://github.com/linear/linear",
   "engines": {
     "node": ">=18.x"
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
-    "build:clean": "rimraf -G dist .rollup-cache tsconfig.tsbuildinfo",
-    "build:codegen-sdk": "run-s build:clean build:rollup",
-    "build:rollup": "rollup -c",
+    "build:codegen-sdk": "tsdown --clean --exports --dts",
     "build:types": "tsc --noEmit"
   },
   "dependencies": {
@@ -31,10 +24,14 @@
     "graphql": "catalog:"
   },
   "devDependencies": {
-    "@rollup/plugin-typescript": "catalog:",
-    "rimraf": "catalog:",
-    "rollup": "catalog:",
-    "rollup-plugin-gzip": "catalog:",
-    "rollup-plugin-terser": "catalog:"
+    "tsdown": "catalog:",
+    "typescript": "catalog:"
+  },
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
   }
 }

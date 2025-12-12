@@ -12,8 +12,9 @@ import {
 } from "@linear/codegen-doc";
 import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codegen-sdk";
 import { ObjectTypeDefinitionNode } from "graphql";
+import lowerCase from "lodash/lowerCase.js";
+import startCase from "lodash/startCase.js";
 import { printTestHooks } from "./print-hooks";
-import { lowerCase, startCase } from "lodash";
 
 /**
  * Print all tests

@@ -64,6 +64,7 @@
     "@graphql-tools/url-loader": "^6.8.1",
     "@linear/codegen-doc": "workspace:*",
     "@linear/codegen-sdk": "workspace:*",
+    "@linear/codegen-test": "workspace:*",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.2.0",
