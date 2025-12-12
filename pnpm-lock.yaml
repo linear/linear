@@ -385,18 +385,6 @@ importers:
       '@linear/codegen-test':
         specifier: workspace:*
         version: link:../codegen-test
-      '@rollup/plugin-commonjs':
-        specifier: ^17.1.0
-        version: 17.1.0(rollup@2.79.2)
-      '@rollup/plugin-json':
-        specifier: ^4.1.0
-        version: 4.1.0(rollup@2.79.2)
-      '@rollup/plugin-node-resolve':
-        specifier: ^11.2.0
-        version: 11.2.1(rollup@2.79.2)
-      '@rollup/plugin-typescript':
-        specifier: ^12.1.4
-        version: 12.3.0(rollup@2.79.2)(tslib@2.8.1)(typescript@5.9.3)
       '@types/body-parser':
         specifier: ^1.19.6
         version: 1.19.6
@@ -427,24 +415,12 @@ importers:
       replace-in-file:
         specifier: ^6.2.0
         version: 6.3.5
-      rimraf:
-        specifier: 'catalog:'
-        version: 3.0.2
-      rollup:
-        specifier: 'catalog:'
-        version: 2.79.2
-      rollup-plugin-gzip:
-        specifier: 'catalog:'
-        version: 4.1.1(rollup@2.79.2)
-      rollup-plugin-inject-process-env:
-        specifier: ^1.3.1
-        version: 1.3.1
-      rollup-plugin-terser:
-        specifier: 'catalog:'
-        version: 7.0.2(rollup@2.79.2)
       ts-node:
         specifier: 'catalog:'
         version: 10.9.2(@types/node@24.10.2)(typescript@5.9.3)
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.17.2(typescript@5.9.3)
       type-fest:
         specifier: ^5.3.1
         version: 5.3.1
@@ -5285,9 +5261,6 @@ packages:
     engines: {node: '>=10.0.0'}
     peerDependencies:
       rollup: '>=2.0.0'
-
-  rollup-plugin-inject-process-env@1.3.1:
-    resolution: {integrity: sha512-kKDoL30IZr0wxbNVJjq+OS92RJSKRbKV6B5eNW4q3mZTFqoWDh6lHy+mPDYuuGuERFNKXkG+AKxvYqC9+DRpKQ==}
 
   rollup-plugin-terser@7.0.2:
     resolution: {integrity: sha512-w3iIaU4OxcF52UUXiZNsNeuXIMDvFrr+ZXK6bFZ0Q60qyVfq4uLptoS4bbq3paG3x216eQllFZX7zt6TIImguQ==}
@@ -12670,10 +12643,6 @@ snapshots:
   rollup-plugin-gzip@4.1.1(rollup@2.79.2):
     dependencies:
       rollup: 2.79.2
-
-  rollup-plugin-inject-process-env@1.3.1:
-    dependencies:
-      magic-string: 0.25.9
 
   rollup-plugin-terser@7.0.2(rollup@2.79.2):
     dependencies:
