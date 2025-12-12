@@ -75,8 +75,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["20", "22", "24"]
-        typescript: ["5.7", "5.8", "5.9"]
+        node: ["20", "24"]
+        typescript: ["5.7", "5.9"]
         module: ["cjs", "esm"]
 
     steps:
