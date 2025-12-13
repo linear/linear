@@ -6,9 +6,54 @@ settings:
 
 catalogs:
   default:
+    '@graphql-codegen/cli':
+      specifier: ^2.16.0
+      version: 2.16.5
+    '@graphql-codegen/plugin-helpers':
+      specifier: ^2.7.0
+      version: 2.7.2
+    '@graphql-codegen/visitor-plugin-common':
+      specifier: ^2.13.0
+      version: 2.13.8
+    '@graphql-tools/apollo-engine-loader':
+      specifier: ^8.0.27
+      version: 8.0.27
+    '@graphql-tools/graphql-file-loader':
+      specifier: ^7.5.13
+      version: 7.5.17
+    '@graphql-tools/load':
+      specifier: ^7.8.8
+      version: 7.8.14
+    '@rollup/plugin-typescript':
+      specifier: ^12.1.4
+      version: 12.3.0
     '@types/node':
       specifier: ^24
       version: 24.10.2
+    auto-bind:
+      specifier: ^4.0.0
+      version: 4.0.0
+    lodash:
+      specifier: 4.17.21
+      version: 4.17.21
+    rimraf:
+      specifier: ^3.0.2
+      version: 3.0.2
+    rollup:
+      specifier: ^2.38.3
+      version: 2.79.2
+    rollup-plugin-gzip:
+      specifier: ^4.1.1
+      version: 4.1.1
+    rollup-plugin-terser:
+      specifier: ^7.0.2
+      version: 7.0.2
+    ts-node:
+      specifier: ^10.9.1
+      version: 10.9.2
+    tsdown:
+      specifier: ^0.17.2
+      version: 0.17.2
     typescript:
       specifier: ^5.9
       version: 5.9.3
@@ -364,9 +409,6 @@ importers:
       replace-in-file:
         specifier: ^6.2.0
         version: 6.3.5
-      ts-node:
-        specifier: 'catalog:'
-        version: 10.9.2(@types/node@24.10.2)(typescript@5.9.3)
       tsdown:
         specifier: 'catalog:'
         version: 0.17.2(typescript@5.9.3)

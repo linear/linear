@@ -17,16 +17,15 @@
     "test": "vitest",
     "build:sdk": "tsdown --clean --exports --dts --format esm --format cjs src/index.ts src/webhooks/index.ts",
     "build:types": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
-    "generate:changeset:dependencies": "ts-node scripts/generate-dependencies-changeset.ts",
-    "generate:changeset:schema": "ts-node scripts/generate-schema-changeset.ts",
+    "generate:changeset:dependencies": "node scripts/generate-dependencies-changeset.ts",
+    "generate:changeset:schema": "node scripts/generate-schema-changeset.ts",
     "generate:clean": "rimraf -G src/**/_generated* || true",
     "generate:doc": "graphql-codegen --config codegen.doc.yml",
     "generate:schema": "graphql-codegen --config codegen.schema.yml",
     "generate:sdk": "graphql-codegen --config codegen.sdk.yml && pnpm run update:scalars",
     "generate:test": "graphql-codegen --config codegen.test.yml",
-    "update:scalars": "ts-node scripts/update-scalars.ts",
-    "schema": "graphql-codegen --config codegen.schema.yml",
-    "scratch": "ts-node src/scratch.ts"
+    "update:scalars": "node scripts/update-scalars.ts",
+    "schema": "graphql-codegen --config codegen.schema.yml"
   },
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.1.0",
@@ -58,7 +57,6 @@
     "get-port": "^5.1.1",
     "graphql-request": "^3.3.0",
     "replace-in-file": "^6.2.0",
-    "ts-node": "catalog:",
     "tsdown": "catalog:",
     "type-fest": "^5.3.1",
     "typescript": "catalog:",
