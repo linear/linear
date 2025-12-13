@@ -1,5 +1,5 @@
 import { InterfaceTypeDefinitionNode, Kind, NonNullTypeNode, ObjectTypeDefinitionNode } from "graphql";
-import { NamedTypeNode, TypeNode } from "graphql/language/ast";
+import { NamedTypeNode, TypeNode } from "graphql/language/ast.js";
 
 /**
  * Checks if an interface implementation has conflicting types with its parent definition.

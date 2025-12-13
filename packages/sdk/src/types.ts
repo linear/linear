@@ -118,4 +118,4 @@ export type {
   EntityWebhookPayloadWithProjectUpdateData,
   EntityWebhookPayloadWithReactionData,
   EntityWebhookPayloadWithUserData,
-} from "./webhooks/types";
+} from "./webhooks/types.js";

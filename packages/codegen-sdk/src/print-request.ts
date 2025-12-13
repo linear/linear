@@ -7,8 +7,8 @@ import {
   printLines,
   printList,
 } from "@linear/codegen-doc";
-import { Sdk } from "./constants";
-import { SdkOperation } from "./types";
+import { Sdk } from "./constants.js";
+import { SdkOperation } from "./types.js";
 
 /**
  * Get the argument definition for the requester

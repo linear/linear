@@ -1,7 +1,7 @@
 import { EnumTypeDefinitionNode, FieldDefinitionNode } from "graphql";
-import { Named, PluginContext } from "./types";
-import { reduceTypeName } from "./utils";
-import { findObject, isValidObject } from "./object";
+import { Named, PluginContext } from "./types.js";
+import { reduceTypeName } from "./utils.js";
+import { findObject, isValidObject } from "./object.js";
 
 /**
  * Determine whether the node is a scalar field

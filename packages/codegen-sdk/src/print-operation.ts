@@ -8,11 +8,11 @@ import {
   printTernary,
 } from "@linear/codegen-doc";
 import { ObjectTypeDefinitionNode } from "graphql";
-import { Sdk } from "./constants";
-import { printNamespaced } from "./print";
-import { isConnectionModel } from "./print-connection";
-import { getRequestArg } from "./print-request";
-import { SdkOperation, SdkPluginContext } from "./types";
+import { Sdk } from "./constants.js";
+import { printNamespaced } from "./print.js";
+import { isConnectionModel } from "./print-connection.js";
+import { getRequestArg } from "./print-request.js";
+import { SdkOperation, SdkPluginContext } from "./types.js";
 
 /**
  * Print a return type for all operations

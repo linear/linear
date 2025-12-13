@@ -1,7 +1,8 @@
+import { describe, beforeEach, it, expect } from "vitest";
 import { JsonObject } from "type-fest";
-import { LinearClient } from "../index";
-import { LinearErrorType } from "../types";
-import { createTestServer, MOCK_API_KEY } from "./_mock";
+import { LinearClient } from "../index.js";
+import { LinearErrorType } from "../types.js";
+import { createTestServer, MOCK_API_KEY } from "./_mock.js";
 
 const ctx = createTestServer();
 

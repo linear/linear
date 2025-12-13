@@ -4,10 +4,10 @@ import {
   ObjectTypeDefinitionNode,
   OperationTypeDefinitionNode,
 } from "graphql";
-import { getObjectName, isConnection, isEdge, isOperationRoot, isValidObject } from "./object";
-import { printTypescriptType } from "./print";
-import { Named, NamedFields, PluginContext } from "./types";
-import { nodeHasSkipComment } from "./utils";
+import { getObjectName, isConnection, isEdge, isOperationRoot, isValidObject } from "./object.js";
+import { printTypescriptType } from "./print.js";
+import { Named, NamedFields, PluginContext } from "./types.js";
+import { nodeHasSkipComment } from "./utils.js";
 
 /**
  * Get the fragment object type matching the name arg

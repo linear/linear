@@ -1,8 +1,8 @@
 import { ASTNode, visit } from "graphql";
 import { pascalCase } from "pascal-case";
-import { ArgumentGraphqlVisitor } from "./argument-graphql-visitor";
-import { ArgumentTypescriptVisitor } from "./argument-typescript-visitor";
-import { PluginContext } from "./types";
+import { ArgumentGraphqlVisitor } from "./argument-graphql-visitor.js";
+import { ArgumentTypescriptVisitor } from "./argument-typescript-visitor.js";
+import { PluginContext } from "./types.js";
 
 const argGraphqlVisitor = new ArgumentGraphqlVisitor();
 

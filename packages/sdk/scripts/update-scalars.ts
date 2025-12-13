@@ -1,9 +1,9 @@
 import { Doc, logger } from "@linear/codegen-doc";
-import { replaceInFileSync } from "replace-in-file";
+import replaceInFile from "replace-in-file";
 
 function updateScalars() {
   try {
-    const results = replaceInFileSync({
+    const results = replaceInFile.replaceInFileSync({
       files: "src/_generated_documents.ts",
       from: [
         ...Doc.SCALAR_STRING_NAMES,

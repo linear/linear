@@ -1,5 +1,5 @@
 import { printLines } from "@linear/codegen-doc";
-import { SdkPluginContext } from "./types";
+import { SdkPluginContext } from "./types.js";
 
 /**
  * Print enum re-exports for direct import from the SDK
@@ -11,5 +11,9 @@ export function printEnumExports(context: SdkPluginContext): string {
 
   const enumNames = context.enums.map(enumDef => enumDef.name.value).sort();
 
-  return printLines([`export {`, ...enumNames.map(name => `  ${name},`), `} from '${context.config.documentFile}';`]);
+  return printLines([
+    `export {`,
+    ...enumNames.map(name => `  ${name},`),
+    `} from '${context.config.documentFile}.js';`,
+  ]);
 }

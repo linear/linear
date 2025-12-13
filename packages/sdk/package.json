@@ -5,18 +5,16 @@
   "author": "Linear Orbit, Inc",
   "license": "MIT",
   "repository": "https://github.com/linear/linear",
+  "type": "module",
   "engines": {
     "node": ">=18.x"
   },
   "files": [
-    "dist/**/*.min.js",
-    "dist/**/*.min.js.map",
-    "dist/**/*.d.ts",
-    "dist/**/*.d.ts.map",
-    "webhooks",
+    "dist",
     "README.md"
   ],
   "scripts": {
+    "test": "vitest",
     "build:sdk": "tsdown --clean --exports --dts --format esm --format cjs src/index.ts src/webhooks/index.ts",
     "build:types": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
     "generate:changeset:dependencies": "ts-node scripts/generate-dependencies-changeset.ts",
@@ -54,16 +52,18 @@
     "@types/node-fetch": "^2.5.7",
     "@types/uuid": "^9.0.1",
     "body-parser": "^1.20.1",
+    "change-case-all": "^2.1.0",
     "dotenv": "^16.3.1",
     "execa": "^5.0.0",
     "get-port": "^5.1.1",
     "graphql-request": "^3.3.0",
     "replace-in-file": "^6.2.0",
     "ts-node": "catalog:",
+    "tsdown": "catalog:",
     "type-fest": "^5.3.1",
     "typescript": "catalog:",
-    "tsdown": "catalog:",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "vitest": "^4.0.15"
   },
   "publishConfig": {
     "access": "public"

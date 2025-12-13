@@ -2,7 +2,10 @@
   "extends": "../../tsconfig",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "esModuleInterop": true
   },
-  "exclude": ["scripts", "src/_tests"]
+  "exclude": ["scripts", "src/_tests", "dist"]
 }

@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "alwaysStrict": true,
@@ -12,8 +11,6 @@
     "incremental": true,
     "isolatedModules": true,
     "lib": ["es6", "dom", "esnext.asynciterable", "es2019", "es2022"],
-    "module": "commonjs",
-    "moduleResolution": "node",
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": false,
@@ -22,8 +19,11 @@
     "sourceMap": true,
     "strict": true,
     "strictNullChecks": true,
-    "target": "es2020",
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    // tsdown takes care of downleveling the output in our packages.
+    "target": "esnext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext"
   },
   "exclude": ["../**/node_modules", "../**/build", "../**/dist", "./**/jest"]
 }
