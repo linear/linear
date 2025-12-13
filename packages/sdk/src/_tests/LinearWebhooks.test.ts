@@ -1,5 +1,6 @@
+import { describe, beforeEach, it, expect } from "vitest";
 import crypto from "crypto";
-import { LinearWebhookClient, LINEAR_WEBHOOK_TS_FIELD } from "../webhooks";
+import { LinearWebhookClient, LINEAR_WEBHOOK_TS_FIELD } from "../webhooks/index.js";
 
 describe("webhooks", () => {
   let parsedBody = {};

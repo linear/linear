@@ -2,8 +2,9 @@
 import dotenv from "dotenv";
 import execa, { ExecaChildProcess } from "execa";
 import getPort from "get-port";
-import { LinearClient } from "../index";
 import * as net from "net";
+import * as path from "node:path";
+import { LinearClient } from "../index.js";
 
 const log = "client:test-client";
 
@@ -29,7 +30,9 @@ export async function startClient(Client: typeof LinearClient = LinearClient): P
     /** Start the mock server */
     try {
       console.log(log, `Using mock server on http://localhost:${serverPort}/graphql`);
-      mockServer = execa("graphql-faker", ["packages/sdk/src/schema.graphql", `-p ${serverPort}`]);
+      mockServer = execa("graphql-faker", [path.join(import.meta.dirname, "../schema.graphql"), `-p ${serverPort}`]);
+
+      console.log(import.meta.dirname);
     } catch (error) {
       console.error(log, error);
       throw new Error(`${log} Failed to start the mock server`);

@@ -1,8 +1,8 @@
 import { PluginValidateFn, Types } from "@graphql-codegen/plugin-helpers";
 import { GraphQLSchema } from "graphql";
-import { logger } from "./logger";
-import { PluginConfig } from "./types";
-import { validateExtension } from "./utils";
+import { logger } from "./logger.js";
+import { PluginConfig } from "./types.js";
+import { validateExtension } from "./utils.js";
 
 const log = "codegen-doc:validate:";
 /**

@@ -1,6 +1,6 @@
 import { PluginContext, printList } from "@linear/codegen-doc";
-import { Sdk } from "./constants";
-import { SdkPluginConfig } from "./types";
+import { Sdk } from "./constants.js";
+import { SdkPluginConfig } from "./types.js";
 
 /**
  * Prepend the import namespace if required

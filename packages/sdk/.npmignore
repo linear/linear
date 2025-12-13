@@ -1,5 +1,0 @@
-# Exclude compressed files
-*.br
-*.gz
-**/*.br
-**/*.gz

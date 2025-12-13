@@ -9,9 +9,9 @@ import {
   printTernary,
 } from "@linear/codegen-doc";
 import { ObjectTypeDefinitionNode } from "graphql";
-import { Sdk } from "./constants";
-import { getRequestArg } from "./print-request";
-import { SdkModel, SdkPluginContext } from "./types";
+import { Sdk } from "./constants.js";
+import { getRequestArg } from "./print-request.js";
+import { SdkModel, SdkPluginContext } from "./types.js";
 
 /**
  * Determine whether this is a connection model

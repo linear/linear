@@ -1,7 +1,7 @@
 import { getArgList, printComment, printDebug, printLines } from "@linear/codegen-doc";
-import { Sdk } from "./constants";
-import { getRequestArg } from "./print-request";
-import { SdkOperation, SdkPluginContext } from "./types";
+import { Sdk } from "./constants.js";
+import { getRequestArg } from "./print-request.js";
+import { SdkOperation, SdkPluginContext } from "./types.js";
 
 /**
  * Print a top level sdk class with all root operations

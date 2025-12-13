@@ -1,8 +1,7 @@
-import { DocumentNode } from "graphql/language/ast";
-import { print } from "graphql/language/printer";
-import isoFetch from "isomorphic-unfetch";
-import { parseLinearError } from "./error";
-import { GraphQLRequestContext, LinearRawResponse } from "./types";
+import { DocumentNode } from "graphql/language/ast.js";
+import { print } from "graphql/language/printer.js";
+import { parseLinearError } from "./error.js";
+import { GraphQLRequestContext, LinearRawResponse } from "./types.js";
 
 /**
  * Identical class to graphql-request ClientError
@@ -68,7 +67,7 @@ export class LinearGraphQLClient {
     const { headers, ...others } = this.options;
     const body = JSON.stringify({ query, variables });
 
-    const fetch = globalThis.fetch ?? isoFetch;
+    const fetch = globalThis.fetch;
     const response = await fetch(this.url, {
       method: "POST",
       headers: {
@@ -111,7 +110,7 @@ export class LinearGraphQLClient {
 
     const body = JSON.stringify({ query, variables });
 
-    const response = await isoFetch(this.url, {
+    const response = await fetch(this.url, {
       method: "POST",
       headers: {
         ...(typeof body === "string" ? { "Content-Type": "application/json" } : {}),

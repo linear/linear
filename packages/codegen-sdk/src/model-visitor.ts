@@ -26,8 +26,8 @@ import {
   Kind,
   ObjectTypeDefinitionNode,
 } from "graphql";
-import { Sdk } from "./constants";
-import { printNamespaced } from "./print";
+import { Sdk } from "./constants.js";
+import { printNamespaced } from "./print.js";
 import {
   SdkConnectionField,
   SdkEnumField,
@@ -43,7 +43,7 @@ import {
   SdkScalarField,
   SdkScalarListField,
   SdkUnionField,
-} from "./types";
+} from "./types.js";
 
 /**
  * Ensure the models is not a root operation, an edge, or has a skip comment.

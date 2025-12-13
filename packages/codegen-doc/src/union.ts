@@ -1,6 +1,6 @@
 import { FieldDefinitionNode, UnionTypeDefinitionNode } from "graphql";
-import { Named, PluginContext } from "./types";
-import { reduceTypeName } from "./utils";
+import { Named, PluginContext } from "./types.js";
+import { reduceTypeName } from "./utils.js";
 
 /**
  * Get the union type matching the field type

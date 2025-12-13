@@ -2,11 +2,9 @@ import crypto from "crypto";
 import express from "express";
 import getPort from "get-port";
 import http from "http";
-import { Response } from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
-import { LinearWebhookClient, LINEAR_WEBHOOK_SIGNATURE_HEADER } from "../webhooks";
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(globalThis as any).Response = Response;
+import { describe, expect, it } from "vitest";
+import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LinearWebhookClient } from "../webhooks/index.js";
 
 export interface SignedBody {
   body: Buffer;

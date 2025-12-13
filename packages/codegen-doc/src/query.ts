@@ -1,8 +1,8 @@
 import { FieldDefinitionNode } from "graphql";
-import { getRequiredArgs } from "./args";
-import { Doc } from "./constants";
-import { Named, PluginContext } from "./types";
-import { nodeHasSkipComment, reduceListType, reduceTypeName } from "./utils";
+import { getRequiredArgs } from "./args.js";
+import { Doc } from "./constants.js";
+import { Named, PluginContext } from "./types.js";
+import { nodeHasSkipComment, reduceListType, reduceTypeName } from "./utils.js";
 
 /**
  * Find a query that can return this field

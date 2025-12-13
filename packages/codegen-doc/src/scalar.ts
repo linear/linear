@@ -1,6 +1,6 @@
 import { DEFAULT_SCALARS } from "@graphql-codegen/visitor-plugin-common";
-import { Doc } from "./constants";
-import { printList } from "./print";
+import { Doc } from "./constants.js";
+import { printList } from "./print.js";
 
 /**
  * Print a parsed typescript scalar type

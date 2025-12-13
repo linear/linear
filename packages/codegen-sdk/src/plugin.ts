@@ -1,17 +1,17 @@
 import { PluginFunction, Types } from "@graphql-codegen/plugin-helpers";
 import { ContextVisitor, logger, nonNullable, PluginContext, printLines } from "@linear/codegen-doc";
 import { GraphQLSchema, parse, printSchema, visit } from "graphql";
-import { Sdk } from "./constants";
-import { ModelVisitor } from "./model-visitor";
-import { parseOperations } from "./parse-operation";
-import { printConnection } from "./print-connection";
-import { printEnumExports } from "./print-enum-exports";
-import { printModels } from "./print-model";
-import { printOperations } from "./print-operation";
-import { printRequest } from "./print-request";
-import { printScalarParsers } from "./print-scalar";
-import { printSdk } from "./print-sdk";
-import { SdkModel, SdkPluginConfig, SdkPluginContext } from "./types";
+import { Sdk } from "./constants.js";
+import { ModelVisitor } from "./model-visitor.js";
+import { parseOperations } from "./parse-operation.js";
+import { printConnection } from "./print-connection.js";
+import { printEnumExports } from "./print-enum-exports.js";
+import { printModels } from "./print-model.js";
+import { printOperations } from "./print-operation.js";
+import { printRequest } from "./print-request.js";
+import { printScalarParsers } from "./print-scalar.js";
+import { printSdk } from "./print-sdk.js";
+import { SdkModel, SdkPluginConfig, SdkPluginContext } from "./types.js";
 
 const log = "codegen-sdk:plugin:";
 
@@ -62,9 +62,9 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
     return {
       prepend: [
         /** Import DocumentNode */
-        "import { DocumentNode } from 'graphql/language/ast'",
+        "import { DocumentNode } from 'graphql/language/ast.js'",
         /** Import document namespace */
-        `import * as ${Sdk.NAMESPACE} from '${config.documentFile}'`,
+        `import * as ${Sdk.NAMESPACE} from '${config.documentFile}.js'`,
       ].filter(nonNullable),
       content: printLines([
         /** Print the requester base class */

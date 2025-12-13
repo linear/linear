@@ -1,7 +1,7 @@
 import { lowerFirst, nonNullable } from "@linear/codegen-doc";
 import { FieldDefinitionNode } from "graphql";
-import { Sdk } from "./constants";
-import { SdkModel, SdkOperation, SdkPluginContext } from "./types";
+import { Sdk } from "./constants.js";
+import { SdkModel, SdkOperation, SdkPluginContext } from "./types.js";
 
 /**
  * Find mutations that are applied to a model

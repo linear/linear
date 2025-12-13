@@ -1,5 +1,5 @@
-import { LinearErrorRaw, LinearErrorType, LinearGraphQLErrorRaw } from "./types";
-import { capitalize, getKeyByValue, nonNullable } from "./utils";
+import { LinearErrorRaw, LinearErrorType, LinearGraphQLErrorRaw } from "./types.js";
+import { capitalize, getKeyByValue, nonNullable } from "./utils.js";
 
 /**
  * A map between the Linear API string type and the LinearErrorType enum
