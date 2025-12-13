@@ -9,48 +9,9 @@ catalogs:
     '@graphql-codegen/cli':
       specifier: ^2.16.0
       version: 2.16.5
-    '@graphql-codegen/plugin-helpers':
-      specifier: ^2.7.0
-      version: 2.7.2
-    '@graphql-codegen/visitor-plugin-common':
-      specifier: ^2.13.0
-      version: 2.13.8
-    '@graphql-tools/apollo-engine-loader':
-      specifier: ^8.0.27
-      version: 8.0.27
-    '@graphql-tools/graphql-file-loader':
-      specifier: ^7.5.13
-      version: 7.5.17
-    '@graphql-tools/load':
-      specifier: ^7.8.8
-      version: 7.8.14
-    '@rollup/plugin-typescript':
-      specifier: ^12.1.4
-      version: 12.3.0
     '@types/node':
       specifier: ^24
       version: 24.10.2
-    auto-bind:
-      specifier: ^4.0.0
-      version: 4.0.0
-    lodash:
-      specifier: 4.17.21
-      version: 4.17.21
-    rimraf:
-      specifier: ^3.0.2
-      version: 3.0.2
-    rollup:
-      specifier: ^2.38.3
-      version: 2.79.2
-    rollup-plugin-gzip:
-      specifier: ^4.1.1
-      version: 4.1.1
-    rollup-plugin-terser:
-      specifier: ^7.0.2
-      version: 7.0.2
-    ts-node:
-      specifier: ^10.9.1
-      version: 10.9.2
     tsdown:
       specifier: ^0.17.2
       version: 0.17.2
@@ -333,9 +294,6 @@ importers:
       graphql:
         specifier: ^15.4.0
         version: 15.10.1
-      isomorphic-unfetch:
-        specifier: ^3.1.0
-        version: 3.1.0
     devDependencies:
       '@graphql-codegen/cli':
         specifier: 'catalog:'
@@ -423,7 +381,7 @@ importers:
         version: 9.0.1
       vitest:
         specifier: ^4.0.15
-        version: 4.0.15(@types/node@24.10.2)(jiti@1.17.1)(jsdom@16.7.0)(terser@5.44.1)(yaml@2.8.2)
+        version: 4.0.15(@types/node@24.10.2)(jsdom@16.7.0)(terser@5.44.1)(yaml@2.8.2)
 
 packages:
 
@@ -8040,13 +7998,13 @@ snapshots:
       chai: 6.2.1
       tinyrainbow: 3.0.3
 
-  '@vitest/mocker@4.0.15(vite@7.2.7(@types/node@24.10.2)(jiti@1.17.1)(terser@5.44.1)(yaml@2.8.2))':
+  '@vitest/mocker@4.0.15(vite@7.2.7(@types/node@24.10.2)(terser@5.44.1)(yaml@2.8.2))':
     dependencies:
       '@vitest/spy': 4.0.15
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.2.7(@types/node@24.10.2)(jiti@1.17.1)(terser@5.44.1)(yaml@2.8.2)
+      vite: 7.2.7(@types/node@24.10.2)(terser@5.44.1)(yaml@2.8.2)
 
   '@vitest/pretty-format@4.0.15':
     dependencies:
@@ -12260,7 +12218,7 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vite@7.2.7(@types/node@24.10.2)(jiti@1.17.1)(terser@5.44.1)(yaml@2.8.2):
+  vite@7.2.7(@types/node@24.10.2)(terser@5.44.1)(yaml@2.8.2):
     dependencies:
       esbuild: 0.25.12
       fdir: 6.5.0(picomatch@4.0.3)
@@ -12271,14 +12229,13 @@ snapshots:
     optionalDependencies:
       '@types/node': 24.10.2
       fsevents: 2.3.3
-      jiti: 1.17.1
       terser: 5.44.1
       yaml: 2.8.2
 
-  vitest@4.0.15(@types/node@24.10.2)(jiti@1.17.1)(jsdom@16.7.0)(terser@5.44.1)(yaml@2.8.2):
+  vitest@4.0.15(@types/node@24.10.2)(jsdom@16.7.0)(terser@5.44.1)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.15
-      '@vitest/mocker': 4.0.15(vite@7.2.7(@types/node@24.10.2)(jiti@1.17.1)(terser@5.44.1)(yaml@2.8.2))
+      '@vitest/mocker': 4.0.15(vite@7.2.7(@types/node@24.10.2)(terser@5.44.1)(yaml@2.8.2))
       '@vitest/pretty-format': 4.0.15
       '@vitest/runner': 4.0.15
       '@vitest/snapshot': 4.0.15
@@ -12295,7 +12252,7 @@ snapshots:
       tinyexec: 1.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-      vite: 7.2.7(@types/node@24.10.2)(jiti@1.17.1)(terser@5.44.1)(yaml@2.8.2)
+      vite: 7.2.7(@types/node@24.10.2)(terser@5.44.1)(yaml@2.8.2)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.10.2
