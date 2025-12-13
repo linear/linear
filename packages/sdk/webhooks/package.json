@@ -1,0 +1,7 @@
+{
+  "name": "@linear/sdk/webhooks",
+  "private": true,
+  "types": "../dist/webhooks/index.d.cts",
+  "main": "../dist/webhooks/index.cjs",
+  "module": "../dist/webhooks/index.mjs"
+}
