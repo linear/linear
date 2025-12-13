@@ -19,7 +19,7 @@ function printBeforeSuite(): string {
 function printBeforeEach(): string {
   return printLines([
     `beforeEach(() => {
-      jest.useFakeTimers()
+      vi.useFakeTimers()
     })`,
     "\n",
   ]);

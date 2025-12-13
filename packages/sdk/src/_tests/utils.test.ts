@@ -1,4 +1,5 @@
-import { serializeUserAgent } from "../utils";
+import { describe, it, expect } from "vitest";
+import { serializeUserAgent } from "../utils.js";
 
 describe("serializeUserAgent", () => {
   it("handles empty", async () => {

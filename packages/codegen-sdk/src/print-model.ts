@@ -12,12 +12,12 @@ import {
   printTypescriptType,
   reduceNonNullType,
 } from "@linear/codegen-doc";
-import { Sdk } from "./constants";
-import { findMutations, getMutationTypeFromPrefixedName } from "./mutation";
-import { isConnectionModel, isValidConnectionModel, printConnectionModel } from "./print-connection";
-import { getRequestArg } from "./print-request";
-import { printModelScalar } from "./print-scalar";
-import { SdkModel, SdkModelField, SdkPluginContext } from "./types";
+import { Sdk } from "./constants.js";
+import { findMutations, getMutationTypeFromPrefixedName } from "./mutation.js";
+import { isConnectionModel, isValidConnectionModel, printConnectionModel } from "./print-connection.js";
+import { getRequestArg } from "./print-request.js";
+import { printModelScalar } from "./print-scalar.js";
+import { SdkModel, SdkModelField, SdkPluginContext } from "./types.js";
 
 /**
  * Print all models

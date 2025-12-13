@@ -1,7 +1,7 @@
 import { FieldDefinitionNode, InputValueDefinitionNode, Kind } from "graphql";
-import { printGraphqlComment, printGraphqlType, printLines, printList } from "./print";
-import { ArgDefinition, ArgList } from "./types";
-import { nonNullable } from "./utils";
+import { printGraphqlComment, printGraphqlType, printLines, printList } from "./print.js";
+import { ArgDefinition, ArgList } from "./types.js";
+import { nonNullable } from "./utils.js";
 
 /**
  * Return only the required arguments

@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
-import * as L from "../index";
-import { startClient, stopClient } from "./test-client";
+import { vi, describe, beforeEach, beforeAll, afterAll, it, expect } from "vitest";
+import * as L from "../index.js";
+import { startClient, stopClient } from "./test-client.js";
 
 /** Auto generated API tests */
 describe("generated", () => {
@@ -8,7 +9,7 @@ describe("generated", () => {
   let client: L.LinearClient;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   beforeAll(async () => {

@@ -2,9 +2,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable no-console */
+import { describe, beforeAll, beforeEach, it, vi, afterAll } from "vitest";
 import { DocumentNode, print } from "graphql";
 import { gql, GraphQLClient } from "graphql-request";
-import { parseLinearError } from "../error";
+import { parseLinearError } from "../error.js";
 import {
   ArchivePayload,
   InvalidInputLinearError,
@@ -17,15 +18,15 @@ import {
   LinearSdk,
   User,
   UserConnection,
-} from "../index";
-import { startClient, stopClient } from "./test-client";
+} from "../index.js";
+import { startClient, stopClient } from "./test-client.js";
 
 describe("readme.md", () => {
   /** Initialize Linear client variable */
   let linearClient: LinearClient;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   beforeAll(async () => {

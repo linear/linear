@@ -1,6 +1,11 @@
 import crypto from "crypto";
 import type { IncomingMessage, ServerResponse } from "http";
-import { LinearWebhookEventHandler, LinearWebhookEventType, LinearWebhookHandler, LinearWebhookPayload } from "./types";
+import {
+  LinearWebhookEventHandler,
+  LinearWebhookEventType,
+  LinearWebhookHandler,
+  LinearWebhookPayload,
+} from "./types.js";
 
 export const LINEAR_WEBHOOK_SIGNATURE_HEADER = "linear-signature";
 export const LINEAR_WEBHOOK_TS_FIELD = "webhookTimestamp";

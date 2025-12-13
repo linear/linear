@@ -14,7 +14,7 @@ import { Sdk, SdkListField, SdkOperation, SdkPluginContext } from "@linear/codeg
 import { ObjectTypeDefinitionNode } from "graphql";
 import lowerCase from "lodash/lowerCase.js";
 import startCase from "lodash/startCase.js";
-import { printTestHooks } from "./print-hooks";
+import { printTestHooks } from "./print-hooks.js";
 
 /**
  * Print all tests

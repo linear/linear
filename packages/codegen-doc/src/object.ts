@@ -1,6 +1,6 @@
 import { FieldDefinitionNode, InterfaceTypeDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
-import { Named, NamedFields, PluginContext } from "./types";
-import { nodeHasSkipComment, reduceTypeName } from "./utils";
+import { Named, NamedFields, PluginContext } from "./types.js";
+import { nodeHasSkipComment, reduceTypeName } from "./utils.js";
 
 /**
  * Get the object type matching the name arg

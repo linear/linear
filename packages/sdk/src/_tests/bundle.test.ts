@@ -1,6 +1,7 @@
-import type * as es from "../index";
-import { LinearErrorType } from "../types";
-import { startClient, stopClient } from "./test-client";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import type * as es from "../index.js";
+import { LinearErrorType } from "../types.js";
+import { startClient, stopClient } from "./test-client.js";
 
 const bundles = {
   // umd: require("../../dist/index-umd.min.js"),

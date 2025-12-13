@@ -1,2 +1,2 @@
-export * from "./plugin";
-export * from "./validate";
+export * from "./plugin.js";
+export * from "./validate.js";

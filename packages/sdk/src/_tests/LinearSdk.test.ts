@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { LinearSdk } from "../index";
+import { describe, expect, it } from "vitest";
+import { LinearSdk } from "../index.js";
 
 function resolveWithData(data: unknown) {
   return () => {

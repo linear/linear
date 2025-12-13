@@ -23,7 +23,7 @@ import {
   ProjectWebhookPayload,
   ReactionWebhookPayload,
   UserWebhookPayload,
-} from "../_generated_documents";
+} from "../_generated_documents.js";
 
 /**
  * Union type representing all possible Linear webhook payloads.
