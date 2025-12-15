@@ -4,26 +4,26 @@
   "version": "2.2.49",
   "author": "Linear Orbit, Inc",
   "license": "MIT",
-  "main": "dist/index-cjs.min.js",
-  "module": "dist/index-es.min.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json"
+  },
   "bin": {
-    "linear-import": "bin/linear-import.js"
+    "linear-import": "bin/linear-import.cjs"
   },
   "repository": "https://github.com/linear/linear",
   "engines": {
     "node": ">=18.x"
   },
   "files": [
+    "bin",
     "dist"
   ],
   "scripts": {
     "cli": "ts-node src/cli",
     "cli:local": "NODE_TLS_REJECT_UNAUTHORIZED=0 ts-node src/cli --apiUrl https://local.linear.dev:8090/graphql",
     "dev:import": "NODE_ENV=development pnpm run build:import",
-    "build:import": "run-s build:clean build:rollup",
-    "build:rollup": "rollup -c",
-    "build:clean": "rimraf -G dist .rollup-cache tsconfig.tsbuildinfo",
+    "build:import": "tsdown --clean --format cjs src/cli.ts",
     "build:types": "tsc --noEmit"
   },
   "dependencies": {
@@ -40,19 +40,12 @@
     "ora": "^5.4.1"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^11.2.0",
-    "@rollup/plugin-typescript": "catalog:",
     "@types/cli-progress": "^3.11.5",
     "@types/inquirer": "^7.3.3",
     "@types/node-fetch": "^2.5.7",
-    "npm-run-all": "^4.1.5",
-    "rimraf": "catalog:",
-    "rollup": "catalog:",
-    "rollup-plugin-gzip": "catalog:",
-    "rollup-plugin-terser": "catalog:",
-    "ts-node": "catalog:"
+    "tsdown": "catalog:",
+    "ts-node": "catalog:",
+    "typescript": "catalog:"
   },
   "publishConfig": {
     "access": "public"

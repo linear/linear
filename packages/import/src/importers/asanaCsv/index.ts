@@ -1,6 +1,6 @@
-import * as inquirer from "inquirer";
-import { Importer } from "../../types";
-import { AsanaCsvImporter } from "./AsanaCsvImporter";
+import inquirer from "inquirer";
+import type { Importer } from "../../types.ts";
+import { AsanaCsvImporter } from "./AsanaCsvImporter.ts";
 
 const BASE_PATH = process.cwd();
 

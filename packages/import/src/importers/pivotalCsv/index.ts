@@ -1,6 +1,6 @@
-import * as inquirer from "inquirer";
-import { Importer } from "../../types";
-import { PivotalCsvImporter } from "./PivotalCsvImporter";
+import inquirer from "inquirer";
+import type { Importer } from "../../types.ts";
+import { PivotalCsvImporter } from "./PivotalCsvImporter.ts";
 
 const BASE_PATH = process.cwd();
 

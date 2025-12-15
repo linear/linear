@@ -1,5 +1,5 @@
 import fs from "fs";
-import { Comment, Importer, ImportResult } from "../../types";
+import type { Comment, Importer, ImportResult } from "../../types.ts";
 
 type TrelloLabelColor = "green" | "yellow" | "orange" | "red" | "purple" | "blue" | "sky" | "lime" | "pink" | "black";
 

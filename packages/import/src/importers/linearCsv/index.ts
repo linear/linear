@@ -1,7 +1,7 @@
-import * as inquirer from "inquirer";
+import inquirer from "inquirer";
 
-import { Importer } from "../../types";
-import { LinearCsvImporter } from "./LinearCsvImporter";
+import type { Importer } from "../../types.ts";
+import { LinearCsvImporter } from "./LinearCsvImporter.ts";
 
 const BASE_PATH = process.cwd();
 

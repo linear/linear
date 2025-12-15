@@ -1,6 +1,6 @@
-import * as inquirer from "inquirer";
-import { Importer } from "../../types";
-import { TrelloJsonImporter } from "./TrelloJsonImporter";
+import inquirer from "inquirer";
+import type { Importer } from "../../types.ts";
+import { TrelloJsonImporter } from "./TrelloJsonImporter.ts";
 
 const BASE_PATH = process.cwd();
 

@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { LinearClient } from "@linear/sdk";
-import { replaceAsync } from "./replaceAsync";
+import { replaceAsync } from "./replaceAsync.ts";
 
 const IMAGE_MD_REGEX = /(?:!\[(.*?)\]\((https?:\/\/.*?)\))/;
 // eslint-disable-next-line no-useless-escape

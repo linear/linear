@@ -1,20 +1,19 @@
 /* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-var-requires */
 import chalk from "chalk";
-import * as inquirer from "inquirer";
-import { importIssues } from "./importIssues";
-import { asanaCsvImport } from "./importers/asanaCsv";
-import { githubImport } from "./importers/github";
-import { gitlabCsvImporter } from "./importers/gitlabCsv";
-import { jiraCsvImport } from "./importers/jiraCsv";
-import { linearCsvImporter } from "./importers/linearCsv";
-import { pivotalCsvImport } from "./importers/pivotalCsv";
-import { shortcutCsvImport } from "./importers/shortcutCsv";
-import { trelloJsonImport } from "./importers/trelloJson";
-import { ImportAnswers } from "./types";
+import inquirer from "inquirer";
+import inquirerFilePath from "inquirer-file-path";
+import { importIssues } from "./importIssues.ts";
+import { asanaCsvImport } from "./importers/asanaCsv/index.ts";
+import { githubImport } from "./importers/github/index.ts";
+import { gitlabCsvImporter } from "./importers/gitlabCsv/index.ts";
+import { jiraCsvImport } from "./importers/jiraCsv/index.ts";
+import { linearCsvImporter } from "./importers/linearCsv/index.ts";
+import { pivotalCsvImport } from "./importers/pivotalCsv/index.ts";
+import { shortcutCsvImport } from "./importers/shortcutCsv/index.ts";
+import { trelloJsonImport } from "./importers/trelloJson/index.ts";
+import type { ImportAnswers } from "./types.ts";
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-inquirer.registerPrompt("filePath", require("inquirer-file-path"));
+inquirer.registerPrompt("filePath", inquirerFilePath);
 
 (async () => {
   try {

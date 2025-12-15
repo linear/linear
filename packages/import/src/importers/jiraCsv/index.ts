@@ -1,6 +1,6 @@
-import * as inquirer from "inquirer";
-import { Importer } from "../../types";
-import { JiraCsvImporter } from "./JiraCsvImporter";
+import inquirer from "inquirer";
+import type { Importer } from "../../types.ts";
+import { JiraCsvImporter } from "./JiraCsvImporter.ts";
 
 const BASE_PATH = process.cwd();
 
