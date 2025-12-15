@@ -12,7 +12,6 @@ jobs:
       - uses: actions/stale@v10
         with:
           debug-only: true
-          # Only mark issues as stale, not pull requests.
-          days-before-pr-stale: -1
           days-before-issue-stale: 180
           stale-issue-message: "This issue has seen no recent activity and has been automatically closed for house-keeping purposes."
+          stale-pr-message: "This PR has seen no recent activity and has been automatically closed for house-keeping purposes."
