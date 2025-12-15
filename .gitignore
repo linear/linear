@@ -73,6 +73,8 @@ dist/
 !.vscode/launch.json
 
 # Other
+.idea/
+.claude/settings.local.json
 package-lock.json
 webpack-stats.json
 .DS_Store
