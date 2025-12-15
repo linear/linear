@@ -3116,6 +3116,8 @@ fragment IdentityProvider on IdentityProvider {
   scimEnabled
   # Whether the identity provider is the default identity provider migrated from organization level settings.
   defaultMigrated
+  # Whether users are allowed to change their name and display name even if SCIM is enabled.
+  allowNameChange
   # X.509 Signing Certificate in string form.
   ssoSigningCert
 }
@@ -3827,6 +3829,8 @@ fragment Organization on Organization {
   archivedAt
   # The time at which the entity was created.
   createdAt
+  # The time at which the trial started.
+  trialStartsAt
   # The time at which the trial will end.
   trialEndsAt
   # The unique identifier of the entity.
@@ -4015,8 +4019,6 @@ fragment Team on Team {
   triageIssueState {
     id
   }
-  # Unique hash for the team to be used in invite URLs.
-  inviteHash
   # What to use as a default estimate for unestimated issues.
   defaultIssueEstimate
   # Where to move issues when changing state.
@@ -4057,6 +4059,8 @@ fragment Team on Team {
   slackIssueStatuses
   # Whether triage mode is enabled for the team or not.
   triageEnabled
+  # [DEPRECATED] Unique hash for the team to be used in invite URLs.
+  inviteHash
   # [DEPRECATED] Whether issues without priority should be sorted first.
   issueOrderingNoPriorityFirst
   # [DEPRECATED] Whether to move issues to bottom of the column when changing state.
@@ -17590,6 +17594,17 @@ mutation deleteProject(
 ) {
   projectDelete(id: $id) {
     ...ProjectArchivePayload
+  }
+}
+# Disables external sync on a project.
+mutation projectExternalSyncDisable(
+  # The ID of the project to disable external sync for.
+  $projectId: String!
+  # The source of the external sync to disable.
+  $syncSource: ExternalSyncService!
+) {
+  projectExternalSyncDisable(projectId: $projectId, syncSource: $syncSource) {
+    ...ProjectPayload
   }
 }
 # Creates a new project label.

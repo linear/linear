@@ -2756,10 +2756,10 @@ export type CustomerTierFilter = {
   createdAt?: InputMaybe<DateComparator>;
   /** Comparator for the customer tier description. */
   description?: InputMaybe<StringComparator>;
+  /** Comparator for the customer tier display name. */
+  displayName?: InputMaybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
-  /** Comparator for the customer tier name. */
-  name?: InputMaybe<StringComparator>;
   /** Compound filters, one of which needs to be matched by the customer tier. */
   or?: InputMaybe<Array<CustomerTierFilter>>;
   /** Comparator for the customer tier position. */
@@ -5092,6 +5092,8 @@ export type IdentityProvider = Node & {
   __typename?: "IdentityProvider";
   /** [INTERNAL] SCIM admins group push settings. */
   adminsGroupPush?: Maybe<Scalars["JSONObject"]>;
+  /** Whether users are allowed to change their name and display name even if SCIM is enabled. */
+  allowNameChange: Scalars["Boolean"];
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
@@ -6663,8 +6665,6 @@ export type Issue = Node & {
   recurringIssueTemplate?: Maybe<Template>;
   /** Relations associated with this issue. */
   relations: IssueRelationConnection;
-  /** [Internal] Id of the releases associated with this issue. */
-  releaseIds: Array<Scalars["String"]>;
   /** The time at which the issue's SLA will breach. */
   slaBreachesAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the issue's SLA will enter high risk state. */
@@ -7494,6 +7494,10 @@ export type IssueHistory = Node & {
   addedLabelIds?: Maybe<Array<Scalars["String"]>>;
   /** The labels that were added to the issue. */
   addedLabels?: Maybe<Array<IssueLabel>>;
+  /** [ALPHA] ID's of releases that the issue was added to. */
+  addedToReleaseIds?: Maybe<Array<Scalars["String"]>>;
+  /** The releases that the issue was added to. */
+  addedToReleases?: Maybe<Array<Release>>;
   /** Whether the issue is archived at the time of this history entry. */
   archived?: Maybe<Scalars["Boolean"]>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -7558,6 +7562,10 @@ export type IssueHistory = Node & {
   issueImport?: Maybe<IssueImport>;
   /** Changed issue relationships. */
   relationChanges?: Maybe<Array<IssueRelationHistoryPayload>>;
+  /** [ALPHA] ID's of releases that the issue was removed from. */
+  removedFromReleaseIds?: Maybe<Array<Scalars["String"]>>;
+  /** The releases that the issue was removed from. */
+  removedFromReleases?: Maybe<Array<Release>>;
   /** ID's of labels that were removed. */
   removedLabelIds?: Maybe<Array<Scalars["String"]>>;
   /** The labels that were removed from the issue. */
@@ -8316,8 +8324,6 @@ export type IssueSearchResult = Node & {
   recurringIssueTemplate?: Maybe<Template>;
   /** Relations associated with this issue. */
   relations: IssueRelationConnection;
-  /** [Internal] Id of the releases associated with this issue. */
-  releaseIds: Array<Scalars["String"]>;
   /** The time at which the issue's SLA will breach. */
   slaBreachesAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the issue's SLA will enter high risk state. */
@@ -8785,6 +8791,61 @@ export type IssueTitleSuggestionFromCustomerRequestPayload = {
   logId?: Maybe<Scalars["String"]>;
   /** The suggested issue title. */
   title: Scalars["String"];
+};
+
+/** [Internal] Join table between issues and releases. */
+export type IssueToRelease = Node & {
+  __typename?: "IssueToRelease";
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars["DateTime"];
+  /** The unique identifier of the entity. */
+  id: Scalars["ID"];
+  /** The issue associated with the release. */
+  issue: Issue;
+  /** The release associated with the issue. */
+  release: Release;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars["DateTime"];
+};
+
+export type IssueToReleaseConnection = {
+  __typename?: "IssueToReleaseConnection";
+  edges: Array<IssueToReleaseEdge>;
+  nodes: Array<IssueToRelease>;
+  pageInfo: PageInfo;
+};
+
+/** [ALPHA] The properties of the issueToRelease to create. */
+export type IssueToReleaseCreateInput = {
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars["String"]>;
+  /** The identifier of the issue */
+  issueId: Scalars["String"];
+  /** The identifier of the release */
+  releaseId: Scalars["String"];
+};
+
+export type IssueToReleaseEdge = {
+  __typename?: "IssueToReleaseEdge";
+  /** Used in `before` and `after` args */
+  cursor: Scalars["String"];
+  node: IssueToRelease;
+};
+
+/** [ALPHA] The result of an issueToRelease mutation. */
+export type IssueToReleasePayload = {
+  __typename?: "IssueToReleasePayload";
+  /** The issueToRelease that was created or updated. */
+  issueToRelease: IssueToRelease;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars["Float"];
+  /** Whether the operation was successful. */
+  success: Scalars["Boolean"];
 };
 
 /** Payload for an issue unassignment notification. */
@@ -9590,6 +9651,12 @@ export type Mutation = {
   issueRemoveLabel: IssuePayload;
   /** Subscribes a user to an issue. */
   issueSubscribe: IssuePayload;
+  /** [ALPHA] Creates a new issueToRelease join, adding an issue to a release. */
+  issueToReleaseCreate: IssueToReleasePayload;
+  /** [ALPHA] Deletes an issueToRelease by its identifier, removing an issue from a release. */
+  issueToReleaseDelete: DeletePayload;
+  /** [ALPHA] Deletes an issueToRelease by issue and release identifiers */
+  issueToReleaseDeleteByIssueAndRelease: DeletePayload;
   /** Unarchives an issue. */
   issueUnarchive: IssueArchivePayload;
   /** Unsubscribes a user from an issue. */
@@ -9683,6 +9750,8 @@ export type Mutation = {
   projectCreate: ProjectPayload;
   /** Deletes (trashes) a project. */
   projectDelete: ProjectArchivePayload;
+  /** Disables external sync on a project. */
+  projectExternalSyncDisable: ProjectPayload;
   /** Creates a new project label. */
   projectLabelCreate: ProjectLabelPayload;
   /** Deletes a project label. */
@@ -10838,6 +10907,19 @@ export type MutationIssueSubscribeArgs = {
   userId?: InputMaybe<Scalars["String"]>;
 };
 
+export type MutationIssueToReleaseCreateArgs = {
+  input: IssueToReleaseCreateInput;
+};
+
+export type MutationIssueToReleaseDeleteArgs = {
+  id: Scalars["String"];
+};
+
+export type MutationIssueToReleaseDeleteByIssueAndReleaseArgs = {
+  issueId: Scalars["String"];
+  releaseId: Scalars["String"];
+};
+
 export type MutationIssueUnarchiveArgs = {
   id: Scalars["String"];
 };
@@ -11009,6 +11091,11 @@ export type MutationProjectCreateArgs = {
 
 export type MutationProjectDeleteArgs = {
   id: Scalars["String"];
+};
+
+export type MutationProjectExternalSyncDisableArgs = {
+  projectId: Scalars["String"];
+  syncSource: ExternalSyncService;
 };
 
 export type MutationProjectLabelCreateArgs = {
@@ -12854,6 +12941,8 @@ export type Organization = Node & {
   themeSettings?: Maybe<Scalars["JSONObject"]>;
   /** The time at which the trial will end. */
   trialEndsAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the trial started. */
+  trialStartsAt?: Maybe<Scalars["DateTime"]>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -16390,6 +16479,10 @@ export type Query = {
   issueSearch: IssueConnection;
   /** Suggests issue title based on a customer request. */
   issueTitleSuggestionFromCustomerRequest: IssueTitleSuggestionFromCustomerRequestPayload;
+  /** [ALPHA] One specific issueToRelease. */
+  issueToRelease: IssueToRelease;
+  /** [ALPHA] Returns a list of issue to release entities. */
+  issueToReleases: IssueToReleaseConnection;
   /** Find issue based on the VCS branch name. */
   issueVcsBranchSearch?: Maybe<Issue>;
   /** All issues. */
@@ -16968,6 +17061,19 @@ export type QueryIssueSearchArgs = {
 
 export type QueryIssueTitleSuggestionFromCustomerRequestArgs = {
   request: Scalars["String"];
+};
+
+export type QueryIssueToReleaseArgs = {
+  id: Scalars["String"];
+};
+
+export type QueryIssueToReleasesArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
 export type QueryIssueVcsBranchSearchArgs = {
@@ -17550,6 +17656,8 @@ export type Release = Node & {
   name: Scalars["String"];
   /** The pipeline this release belongs to. */
   pipeline: ReleasePipeline;
+  /** The release's unique URL slug. */
+  slugId: Scalars["String"];
   /** The current stage of the release. */
   stage: ReleaseStage;
   /**
@@ -17604,7 +17712,7 @@ export type ReleaseCreateInput = {
   pipelineId: Scalars["String"];
   /** Pull request references to look up. Issues linked to found PRs will be associated with this release. */
   pullRequestReferences?: InputMaybe<Array<PullRequestReferenceInput>>;
-  /** The current stage of the release. Defaults to the first 'planned' stage. */
+  /** The current stage of the release. Defaults to the first 'completed' stage. */
   stageId?: InputMaybe<Scalars["String"]>;
   /** The version of the release. */
   version?: InputMaybe<Scalars["String"]>;
@@ -17654,6 +17762,8 @@ export type ReleasePipeline = Node & {
   slugId: Scalars["String"];
   /** [ALPHA] Stages associated with this pipeline. */
   stages: ReleaseStageConnection;
+  /** The type of the pipeline. */
+  type: ReleasePipelineType;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -17706,6 +17816,8 @@ export type ReleasePipelineCreateInput = {
   name: Scalars["String"];
   /** The pipeline's unique slug identifier. If not provided, it will be auto-generated. */
   slugId?: InputMaybe<Scalars["String"]>;
+  /** The type of the pipeline. */
+  type?: InputMaybe<ReleasePipelineType>;
 };
 
 export type ReleasePipelineEdge = {
@@ -17725,11 +17837,19 @@ export type ReleasePipelinePayload = {
   success: Scalars["Boolean"];
 };
 
+/** A type of release pipeline. */
+export enum ReleasePipelineType {
+  Continuous = "continuous",
+  Scheduled = "scheduled",
+}
+
 export type ReleasePipelineUpdateInput = {
   /** The name of the pipeline. */
   name?: InputMaybe<Scalars["String"]>;
   /** The pipeline's unique slug identifier. */
   slugId?: InputMaybe<Scalars["String"]>;
+  /** The type of the pipeline. */
+  type?: InputMaybe<ReleasePipelineType>;
 };
 
 /** [Internal] A release stage. */
@@ -18749,7 +18869,10 @@ export type Team = Node & {
   inheritWorkflowStatuses: Scalars["Boolean"];
   /** Settings for all integrations associated with that team. */
   integrationsSettings?: Maybe<IntegrationsSettings>;
-  /** Unique hash for the team to be used in invite URLs. */
+  /**
+   * [DEPRECATED] Unique hash for the team to be used in invite URLs.
+   * @deprecated Not used anymore, simply returning an empty string.
+   */
   inviteHash: Scalars["String"];
   /** Number of issues in the team. */
   issueCount: Scalars["Int"];
@@ -20588,6 +20711,7 @@ export enum ViewType {
   ProjectsBacklog = "projectsBacklog",
   ProjectsClosed = "projectsClosed",
   QuickView = "quickView",
+  Release = "release",
   Reviews = "reviews",
   Roadmap = "roadmap",
   RoadmapAll = "roadmapAll",
@@ -23996,6 +24120,7 @@ export type IdentityProviderFragment = { __typename: "IdentityProvider" } & Pick
   | "samlEnabled"
   | "scimEnabled"
   | "defaultMigrated"
+  | "allowNameChange"
   | "ssoSigningCert"
 >;
 
@@ -24482,6 +24607,7 @@ export type OrganizationFragment = { __typename: "Organization" } & Pick<
   | "deletionRequestedAt"
   | "archivedAt"
   | "createdAt"
+  | "trialStartsAt"
   | "trialEndsAt"
   | "id"
   | "hipaaComplianceEnabled"
@@ -24593,7 +24719,6 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "createdAt"
   | "timezone"
   | "id"
-  | "inviteHash"
   | "defaultIssueEstimate"
   | "setIssueSortOrderOnStateChange"
   | "allMembersCanJoin"
@@ -24614,6 +24739,7 @@ export type TeamFragment = { __typename: "Team" } & Pick<
   | "slackNewIssue"
   | "slackIssueStatuses"
   | "triageEnabled"
+  | "inviteHash"
   | "issueOrderingNoPriorityFirst"
   | "issueSortOrderDefaultToBottom"
 > & {
@@ -24905,6 +25031,7 @@ export type OrganizationDomainFragment = { __typename: "OrganizationDomain" } & 
         | "samlEnabled"
         | "scimEnabled"
         | "defaultMigrated"
+        | "allowNameChange"
         | "ssoSigningCert"
       >
     >;
@@ -29054,6 +29181,8 @@ type Node_IssueSearchResult_Fragment = { __typename: "IssueSearchResult" } & Pic
 
 type Node_IssueSuggestion_Fragment = { __typename: "IssueSuggestion" } & Pick<IssueSuggestion, "id">;
 
+type Node_IssueToRelease_Fragment = { __typename: "IssueToRelease" } & Pick<IssueToRelease, "id">;
+
 type Node_LabelNotificationSubscription_Fragment = { __typename: "LabelNotificationSubscription" } & Pick<
   LabelNotificationSubscription,
   "id"
@@ -29211,6 +29340,7 @@ export type NodeFragment =
   | Node_IssueRelation_Fragment
   | Node_IssueSearchResult_Fragment
   | Node_IssueSuggestion_Fragment
+  | Node_IssueToRelease_Fragment
   | Node_LabelNotificationSubscription_Fragment
   | Node_OauthClientApproval_Fragment
   | Node_OauthClientApprovalNotification_Fragment
@@ -31505,7 +31635,6 @@ export type TeamConnectionFragment = { __typename: "TeamConnection" } & {
       | "createdAt"
       | "timezone"
       | "id"
-      | "inviteHash"
       | "defaultIssueEstimate"
       | "setIssueSortOrderOnStateChange"
       | "allMembersCanJoin"
@@ -31526,6 +31655,7 @@ export type TeamConnectionFragment = { __typename: "TeamConnection" } & {
       | "slackNewIssue"
       | "slackIssueStatuses"
       | "triageEnabled"
+      | "inviteHash"
       | "issueOrderingNoPriorityFirst"
       | "issueSortOrderDefaultToBottom"
     > & {
@@ -31888,7 +32018,6 @@ export type AdministrableTeamsQuery = { __typename?: "Query" } & {
         | "createdAt"
         | "timezone"
         | "id"
-        | "inviteHash"
         | "defaultIssueEstimate"
         | "setIssueSortOrderOnStateChange"
         | "allMembersCanJoin"
@@ -31909,6 +32038,7 @@ export type AdministrableTeamsQuery = { __typename?: "Query" } & {
         | "slackNewIssue"
         | "slackIssueStatuses"
         | "triageEnabled"
+        | "inviteHash"
         | "issueOrderingNoPriorityFirst"
         | "issueSortOrderDefaultToBottom"
       > & {
@@ -40457,6 +40587,7 @@ export type OrganizationQuery = { __typename?: "Query" } & {
     | "deletionRequestedAt"
     | "archivedAt"
     | "createdAt"
+    | "trialStartsAt"
     | "trialEndsAt"
     | "id"
     | "hipaaComplianceEnabled"
@@ -40698,7 +40829,6 @@ export type Organization_TeamsQuery = { __typename?: "Query" } & {
           | "createdAt"
           | "timezone"
           | "id"
-          | "inviteHash"
           | "defaultIssueEstimate"
           | "setIssueSortOrderOnStateChange"
           | "allMembersCanJoin"
@@ -40719,6 +40849,7 @@ export type Organization_TeamsQuery = { __typename?: "Query" } & {
           | "slackNewIssue"
           | "slackIssueStatuses"
           | "triageEnabled"
+          | "inviteHash"
           | "issueOrderingNoPriorityFirst"
           | "issueSortOrderDefaultToBottom"
         > & {
@@ -41834,7 +41965,6 @@ export type Project_TeamsQuery = { __typename?: "Query" } & {
           | "createdAt"
           | "timezone"
           | "id"
-          | "inviteHash"
           | "defaultIssueEstimate"
           | "setIssueSortOrderOnStateChange"
           | "allMembersCanJoin"
@@ -41855,6 +41985,7 @@ export type Project_TeamsQuery = { __typename?: "Query" } & {
           | "slackNewIssue"
           | "slackIssueStatuses"
           | "triageEnabled"
+          | "inviteHash"
           | "issueOrderingNoPriorityFirst"
           | "issueSortOrderDefaultToBottom"
         > & {
@@ -43362,7 +43493,6 @@ export type TeamQuery = { __typename?: "Query" } & {
     | "createdAt"
     | "timezone"
     | "id"
-    | "inviteHash"
     | "defaultIssueEstimate"
     | "setIssueSortOrderOnStateChange"
     | "allMembersCanJoin"
@@ -43383,6 +43513,7 @@ export type TeamQuery = { __typename?: "Query" } & {
     | "slackNewIssue"
     | "slackIssueStatuses"
     | "triageEnabled"
+    | "inviteHash"
     | "issueOrderingNoPriorityFirst"
     | "issueSortOrderDefaultToBottom"
   > & {
@@ -44032,7 +44163,6 @@ export type TeamsQuery = { __typename?: "Query" } & {
         | "createdAt"
         | "timezone"
         | "id"
-        | "inviteHash"
         | "defaultIssueEstimate"
         | "setIssueSortOrderOnStateChange"
         | "allMembersCanJoin"
@@ -44053,6 +44183,7 @@ export type TeamsQuery = { __typename?: "Query" } & {
         | "slackNewIssue"
         | "slackIssueStatuses"
         | "triageEnabled"
+        | "inviteHash"
         | "issueOrderingNoPriorityFirst"
         | "issueSortOrderDefaultToBottom"
       > & {
@@ -44783,7 +44914,6 @@ export type User_TeamsQuery = { __typename?: "Query" } & {
           | "createdAt"
           | "timezone"
           | "id"
-          | "inviteHash"
           | "defaultIssueEstimate"
           | "setIssueSortOrderOnStateChange"
           | "allMembersCanJoin"
@@ -44804,6 +44934,7 @@ export type User_TeamsQuery = { __typename?: "Query" } & {
           | "slackNewIssue"
           | "slackIssueStatuses"
           | "triageEnabled"
+          | "inviteHash"
           | "issueOrderingNoPriorityFirst"
           | "issueSortOrderDefaultToBottom"
         > & {
@@ -46228,7 +46359,6 @@ export type Viewer_TeamsQuery = { __typename?: "Query" } & {
           | "createdAt"
           | "timezone"
           | "id"
-          | "inviteHash"
           | "defaultIssueEstimate"
           | "setIssueSortOrderOnStateChange"
           | "allMembersCanJoin"
@@ -46249,6 +46379,7 @@ export type Viewer_TeamsQuery = { __typename?: "Query" } & {
           | "slackNewIssue"
           | "slackIssueStatuses"
           | "triageEnabled"
+          | "inviteHash"
           | "issueOrderingNoPriorityFirst"
           | "issueSortOrderDefaultToBottom"
         > & {
@@ -53197,6 +53328,17 @@ export type DeleteProjectMutation = { __typename?: "Mutation" } & {
     };
 };
 
+export type ProjectExternalSyncDisableMutationVariables = Exact<{
+  projectId: Scalars["String"];
+  syncSource: ExternalSyncService;
+}>;
+
+export type ProjectExternalSyncDisableMutation = { __typename?: "Mutation" } & {
+  projectExternalSyncDisable: { __typename: "ProjectPayload" } & Pick<ProjectPayload, "lastSyncId" | "success"> & {
+      project?: Maybe<{ __typename?: "Project" } & Pick<Project, "id">>;
+    };
+};
+
 export type CreateProjectLabelMutationVariables = Exact<{
   input: ProjectLabelCreateInput;
 }>;
@@ -56798,6 +56940,7 @@ export const OrganizationFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "deletionRequestedAt" } },
           { kind: "Field", name: { kind: "Name", value: "archivedAt" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "trialStartsAt" } },
           { kind: "Field", name: { kind: "Name", value: "trialEndsAt" } },
           { kind: "Field", name: { kind: "Name", value: "id" } },
           { kind: "Field", name: { kind: "Name", value: "hipaaComplianceEnabled" } },
@@ -56958,6 +57101,7 @@ export const IdentityProviderFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "samlEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "scimEnabled" } },
           { kind: "Field", name: { kind: "Name", value: "defaultMigrated" } },
+          { kind: "Field", name: { kind: "Name", value: "allowNameChange" } },
           { kind: "Field", name: { kind: "Name", value: "ssoSigningCert" } },
         ],
       },
@@ -68183,7 +68327,6 @@ export const TeamFragmentDoc = {
               selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
             },
           },
-          { kind: "Field", name: { kind: "Name", value: "inviteHash" } },
           { kind: "Field", name: { kind: "Name", value: "defaultIssueEstimate" } },
           { kind: "Field", name: { kind: "Name", value: "setIssueSortOrderOnStateChange" } },
           { kind: "Field", name: { kind: "Name", value: "allMembersCanJoin" } },
@@ -68204,6 +68347,7 @@ export const TeamFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "slackNewIssue" } },
           { kind: "Field", name: { kind: "Name", value: "slackIssueStatuses" } },
           { kind: "Field", name: { kind: "Name", value: "triageEnabled" } },
+          { kind: "Field", name: { kind: "Name", value: "inviteHash" } },
           { kind: "Field", name: { kind: "Name", value: "issueOrderingNoPriorityFirst" } },
           { kind: "Field", name: { kind: "Name", value: "issueSortOrderDefaultToBottom" } },
         ],
@@ -102600,6 +102744,57 @@ export const DeleteProjectDocument = {
     ...ProjectArchivePayloadFragmentDoc.definitions,
   ],
 } as unknown as DocumentNode<DeleteProjectMutation, DeleteProjectMutationVariables>;
+export const ProjectExternalSyncDisableDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "projectExternalSyncDisable" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "syncSource" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ExternalSyncService" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "projectExternalSyncDisable" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "projectId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "syncSource" },
+                value: { kind: "Variable", name: { kind: "Name", value: "syncSource" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "FragmentSpread", name: { kind: "Name", value: "ProjectPayload" } }],
+            },
+          },
+        ],
+      },
+    },
+    ...ProjectPayloadFragmentDoc.definitions,
+  ],
+} as unknown as DocumentNode<ProjectExternalSyncDisableMutation, ProjectExternalSyncDisableMutationVariables>;
 export const CreateProjectLabelDocument = {
   kind: "Document",
   definitions: [
