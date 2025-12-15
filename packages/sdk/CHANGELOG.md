@@ -1,5 +1,11 @@
 # Change Log
 
+## 66.0.1
+
+### Patch Changes
+
+- aa4abf2: Update publish pipeline to use pnpm publish -r
+
 ## 66.0.0
 
 ### Major Changes

@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.2.49
+
+### Patch Changes
+
+- aa4abf2: Update publish pipeline to use pnpm publish -r
+- Updated dependencies [aa4abf2]
+  - @linear/sdk@66.0.1
+
 ## 2.2.48
 
 ### Patch Changes
