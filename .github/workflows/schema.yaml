@@ -58,7 +58,6 @@ jobs:
 
       - name: Create schema pull request
         uses: peter-evans/create-pull-request@v7
-        if: false
         with:
           sign-commits: true
           commit-message: "feat(sdk): update schema"
