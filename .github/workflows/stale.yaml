@@ -13,6 +13,6 @@ jobs:
         with:
           debug-only: true
           operations-per-run: 1000
-          days-before-issue-stale: 180
+          days-before-stale: 180
           stale-issue-message: "This issue has seen no recent activity and has been automatically closed for house-keeping purposes."
           stale-pr-message: "This PR has seen no recent activity and has been automatically closed for house-keeping purposes."
