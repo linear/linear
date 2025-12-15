@@ -28,3 +28,5 @@ onlyBuiltDependencies:
   - husky
   - jss
   - spawn-sync
+
+minimumReleaseAge: 1440
