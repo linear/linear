@@ -59,7 +59,7 @@ jobs:
       - name: Check for no generated changes
         run: git update-index --refresh && git diff-index HEAD
 
-      - name: Create release pull request
+      - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@master
         with:
           commit: "chore(release): version packages"
