@@ -1,6 +1,5 @@
 name: "Close stale issues"
 on:
-  pull_request:
   workflow_dispatch:
   schedule:
     - cron: "30 1 * * *"
