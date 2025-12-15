@@ -32,12 +32,14 @@ jobs:
         run: pnpm install
 
       - name: Build packages
+        # update:schema depends on utilities from other packages, so we have to build them first, then rebuild once
+        # we've generated the updated schema.
         run: pnpm build
 
       - name: Update schema
         run: pnpm update:schema
 
-      - name: Build packages
+      - name: Build packages with updated schema
         run: pnpm build
 
       - name: Run tests
