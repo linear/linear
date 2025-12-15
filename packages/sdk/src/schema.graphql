@@ -4761,13 +4761,13 @@ input CustomerTierFilter {
   """
   description: StringComparator
   """
+  Comparator for the customer tier display name.
+  """
+  displayName: StringComparator
+  """
   Comparator for the identifier.
   """
   id: IDComparator
-  """
-  Comparator for the customer tier name.
-  """
-  name: StringComparator
   """
   Compound filters, one of which needs to be matched by the customer tier.
   """
@@ -8759,6 +8759,10 @@ type IdentityProvider implements Node {
   """
   adminsGroupPush: JSONObject
   """
+  Whether users are allowed to change their name and display name even if SCIM is enabled.
+  """
+  allowNameChange: Boolean!
+  """
   The time at which the entity was archived. Null if the entity has not been archived.
   """
   archivedAt: DateTime
@@ -11813,10 +11817,6 @@ type Issue implements Node {
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
   """
-  [Internal] Id of the releases associated with this issue.
-  """
-  releaseIds: [String!]!
-  """
   The time at which the issue's SLA will breach.
   """
   slaBreachesAt: DateTime
@@ -13158,6 +13158,14 @@ type IssueHistory implements Node {
   """
   addedLabels: [IssueLabel!]
   """
+  [ALPHA] ID's of releases that the issue was added to.
+  """
+  addedToReleaseIds: [String!]
+  """
+  The releases that the issue was added to.
+  """
+  addedToReleases: [Release!]
+  """
   Whether the issue is archived at the time of this history entry.
   """
   archived: Boolean
@@ -13285,6 +13293,14 @@ type IssueHistory implements Node {
   Changed issue relationships.
   """
   relationChanges: [IssueRelationHistoryPayload!]
+  """
+  [ALPHA] ID's of releases that the issue was removed from.
+  """
+  removedFromReleaseIds: [String!]
+  """
+  The releases that the issue was removed from.
+  """
+  removedFromReleases: [Release!]
   """
   ID's of labels that were removed.
   """
@@ -14956,10 +14972,6 @@ type IssueSearchResult implements Node {
     orderBy: PaginationOrderBy
   ): IssueRelationConnection!
   """
-  [Internal] Id of the releases associated with this issue.
-  """
-  releaseIds: [String!]!
-  """
   The time at which the issue's SLA will breach.
   """
   slaBreachesAt: DateTime
@@ -15572,6 +15584,87 @@ type IssueTitleSuggestionFromCustomerRequestPayload {
   The suggested issue title.
   """
   title: String!
+}
+
+"""
+[Internal] Join table between issues and releases.
+"""
+type IssueToRelease implements Node {
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The issue associated with the release.
+  """
+  issue: Issue!
+  """
+  The release associated with the issue.
+  """
+  release: Release!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type IssueToReleaseConnection {
+  edges: [IssueToReleaseEdge!]!
+  nodes: [IssueToRelease!]!
+  pageInfo: PageInfo!
+}
+
+"""
+[ALPHA] The properties of the issueToRelease to create.
+"""
+input IssueToReleaseCreateInput {
+  """
+  The identifier in UUID v4 format. If none is provided, the backend will generate one.
+  """
+  id: String
+  """
+  The identifier of the issue
+  """
+  issueId: String!
+  """
+  The identifier of the release
+  """
+  releaseId: String!
+}
+
+type IssueToReleaseEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: IssueToRelease!
+}
+
+"""
+[ALPHA] The result of an issueToRelease mutation.
+"""
+type IssueToReleasePayload {
+  """
+  The issueToRelease that was created or updated.
+  """
+  issueToRelease: IssueToRelease!
+  """
+  The identifier of the last sync operation.
+  """
+  lastSyncId: Float!
+  """
+  Whether the operation was successful.
+  """
+  success: Boolean!
 }
 
 """
@@ -18796,6 +18889,37 @@ type Mutation {
     userId: String
   ): IssuePayload!
   """
+  [ALPHA] Creates a new issueToRelease join, adding an issue to a release.
+  """
+  issueToReleaseCreate(
+    """
+    The properties of the issueToRelease to create.
+    """
+    input: IssueToReleaseCreateInput!
+  ): IssueToReleasePayload!
+  """
+  [ALPHA] Deletes an issueToRelease by its identifier, removing an issue from a release.
+  """
+  issueToReleaseDelete(
+    """
+    The identifier of the issueToRelease to delete
+    """
+    id: String!
+  ): DeletePayload!
+  """
+  [ALPHA] Deletes an issueToRelease by issue and release identifiers
+  """
+  issueToReleaseDeleteByIssueAndRelease(
+    """
+    The identifier of the issue
+    """
+    issueId: String!
+    """
+    The identifier of the release
+    """
+    releaseId: String!
+  ): DeletePayload!
+  """
   Unarchives an issue.
   """
   issueUnarchive(
@@ -19223,6 +19347,19 @@ type Mutation {
     """
     id: String!
   ): ProjectArchivePayload!
+  """
+  Disables external sync on a project.
+  """
+  projectExternalSyncDisable(
+    """
+    The ID of the project to disable external sync for.
+    """
+    projectId: String!
+    """
+    The source of the external sync to disable.
+    """
+    syncSource: ExternalSyncService!
+  ): ProjectPayload!
   """
   Creates a new project label.
   """
@@ -22935,6 +23072,10 @@ type Organization implements Node {
   The time at which the trial will end.
   """
   trialEndsAt: DateTime
+  """
+  The time at which the trial started.
+  """
+  trialStartsAt: DateTime
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -30126,6 +30267,39 @@ type Query {
   """
   issueTitleSuggestionFromCustomerRequest(request: String!): IssueTitleSuggestionFromCustomerRequestPayload!
   """
+  [ALPHA] One specific issueToRelease.
+  """
+  issueToRelease(id: String!): IssueToRelease!
+  """
+  [ALPHA] Returns a list of issue to release entities.
+  """
+  issueToReleases(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): IssueToReleaseConnection!
+  """
   Find issue based on the VCS branch name.
   """
   issueVcsBranchSearch(
@@ -31538,6 +31712,10 @@ type Release implements Node {
   """
   pipeline: ReleasePipeline!
   """
+  The release's unique URL slug.
+  """
+  slugId: String!
+  """
   The current stage of the release.
   """
   stage: ReleaseStage!
@@ -31618,7 +31796,7 @@ input ReleaseCreateInput {
   """
   pullRequestReferences: [PullRequestReferenceInput!]
   """
-  The current stage of the release. Defaults to the first 'planned' stage.
+  The current stage of the release. Defaults to the first 'completed' stage.
   """
   stageId: String
   """
@@ -31751,6 +31929,10 @@ type ReleasePipeline implements Node {
     orderBy: PaginationOrderBy
   ): ReleaseStageConnection!
   """
+  The type of the pipeline.
+  """
+  type: ReleasePipelineType!
+  """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
   """
@@ -31794,6 +31976,10 @@ input ReleasePipelineCreateInput {
   The pipeline's unique slug identifier. If not provided, it will be auto-generated.
   """
   slugId: String
+  """
+  The type of the pipeline.
+  """
+  type: ReleasePipelineType
 }
 
 type ReleasePipelineEdge {
@@ -31819,6 +32005,14 @@ type ReleasePipelinePayload {
   success: Boolean!
 }
 
+"""
+A type of release pipeline.
+"""
+enum ReleasePipelineType {
+  continuous
+  scheduled
+}
+
 input ReleasePipelineUpdateInput {
   """
   The name of the pipeline.
@@ -31828,6 +32022,10 @@ input ReleasePipelineUpdateInput {
   The pipeline's unique slug identifier.
   """
   slugId: String
+  """
+  The type of the pipeline.
+  """
+  type: ReleasePipelineType
 }
 
 """
@@ -33632,9 +33830,9 @@ type Team implements Node {
   """
   integrationsSettings: IntegrationsSettings
   """
-  Unique hash for the team to be used in invite URLs.
+  [DEPRECATED] Unique hash for the team to be used in invite URLs.
   """
-  inviteHash: String!
+  inviteHash: String! @deprecated(reason: "Not used anymore, simply returning an empty string.")
   """
   Number of issues in the team.
   """
@@ -36787,6 +36985,7 @@ enum ViewType {
   projectsBacklog
   projectsClosed
   quickView
+  release
   reviews
   roadmap
   roadmapAll
