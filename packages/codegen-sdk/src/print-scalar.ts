@@ -1,6 +1,6 @@
 import { getArgList, printComment, printLines, printList, printTernary } from "@linear/codegen-doc";
-import { Sdk } from "./constants";
-import { SdkModelField } from "./types";
+import { Sdk } from "./constants.js";
+import { SdkModelField } from "./types.js";
 
 const parseDateFunction = "parseDate";
 const parseJsonFunction = "parseJson";

@@ -3,9 +3,9 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "noEmit": true,
-    "emitDeclarationOnly": true,
-    "declarationDir": "dist"
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "esModuleInterop": true
   },
-  "exclude": ["scripts", "src/_tests", "dist", "rollup.config.js", "src/scratch.ts"]
+  "exclude": ["scripts", "src/_tests", "dist"]
 }

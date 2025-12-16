@@ -1,6 +1,6 @@
 import autoBind from "auto-bind";
 import { InputValueDefinitionNode, ListTypeNode, NamedTypeNode, NameNode, NonNullTypeNode } from "graphql";
-import { Named } from "./types";
+import { Named } from "./types.js";
 
 /**
  * Graphql-codegen visitor for printing a graphql argument

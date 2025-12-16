@@ -1,9 +1,9 @@
-import { DocumentNode } from "graphql/language/ast";
-import { parseLinearError } from "./error";
-import { LinearGraphQLClient } from "./graphql-client";
-import { LinearClientOptions, LinearClientParsedOptions } from "./types";
-import { serializeUserAgent } from "./utils";
-import { LinearSdk } from "./_generated_sdk";
+import { DocumentNode } from "graphql/language/ast.js";
+import { parseLinearError } from "./error.js";
+import { LinearGraphQLClient } from "./graphql-client.js";
+import { LinearClientOptions, LinearClientParsedOptions } from "./types.js";
+import { serializeUserAgent } from "./utils.js";
+import { LinearSdk } from "./_generated_sdk.js";
 
 /**
  * Validate and return default LinearGraphQLClient options

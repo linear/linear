@@ -8,7 +8,7 @@ import {
   NonNullTypeNode,
   ObjectTypeDefinitionNode,
 } from "graphql";
-import { NamedFields, PluginContext } from "./types";
+import { NamedFields, PluginContext } from "./types.js";
 
 const log = "codegen-doc:utils:";
 

@@ -1,14 +1,14 @@
 import { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
-import { printGraphqlInputArgs, printGraphqlResponseArgs } from "./args";
-import { isScalarField, isValidField } from "./field";
-import { findFragment } from "./fragment";
-import { logger } from "./logger";
-import { findObject } from "./object";
-import { printGraphqlDebug, printGraphqlDescription, printLines, printList } from "./print";
-import { findQuery } from "./query";
-import { OperationType, PluginContext } from "./types";
-import { getLast, lowerFirst, reduceListType, upperFirst } from "./utils";
-import { Doc } from "./constants";
+import { printGraphqlInputArgs, printGraphqlResponseArgs } from "./args.js";
+import { isScalarField, isValidField } from "./field.js";
+import { findFragment } from "./fragment.js";
+import { logger } from "./logger.js";
+import { findObject } from "./object.js";
+import { printGraphqlDebug, printGraphqlDescription, printLines, printList } from "./print.js";
+import { findQuery } from "./query.js";
+import { OperationType, PluginContext } from "./types.js";
+import { getLast, lowerFirst, reduceListType, upperFirst } from "./utils.js";
+import { Doc } from "./constants.js";
 
 const log = "codegen-doc:print-operation:";
 

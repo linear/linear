@@ -23,9 +23,9 @@ import {
   ObjectTypeDefinitionNode,
   OperationDefinitionNode,
 } from "graphql";
-import { Sdk } from "./constants";
-import { printNamespaced } from "./print";
-import { SdkDefinitions, SdkModel, SdkOperation, SdkOperationPrint, SdkPluginConfig } from "./types";
+import { Sdk } from "./constants.js";
+import { printNamespaced } from "./print.js";
+import { SdkDefinitions, SdkModel, SdkOperation, SdkOperationPrint, SdkPluginConfig } from "./types.js";
 
 /**
  * Get a list of all non null document notes

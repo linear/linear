@@ -1,3 +1,4 @@
+import { beforeAll, afterAll } from "vitest";
 import body from "body-parser";
 import express, { Application, Request } from "express";
 import getPort from "get-port";
@@ -55,7 +56,7 @@ export function createTestServer(): MockContext {
   const requests: CapturedRequest[] = [];
   let mockResponseFn: () => MockSpec;
 
-  beforeAll(async done => {
+  beforeAll(async () => {
     /** Initialise the test server */
     const port = await getPort();
     ctx.server = express();
@@ -63,7 +64,11 @@ export function createTestServer(): MockContext {
     ctx.nodeServer = createServer();
     ctx.nodeServer.listen({ port });
     ctx.nodeServer.on("request", ctx.server);
-    ctx.nodeServer.once("listening", done);
+
+    const isListening = new Promise(resolve => {
+      ctx.nodeServer.once("listening", resolve);
+    });
+
     ctx.url = `http://localhost:${port}`;
 
     /** Listen to all routes */
@@ -100,11 +105,15 @@ export function createTestServer(): MockContext {
       mockResponseFn = specFn;
       return { specFn, requests };
     };
+
+    await isListening;
   });
 
-  afterAll(done => {
+  afterAll(async () => {
     /** Stop the test server */
-    ctx.nodeServer.close(done);
+    await new Promise(resolve => {
+      ctx.nodeServer.close(resolve);
+    });
   });
 
   return ctx;

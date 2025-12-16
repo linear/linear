@@ -9,8 +9,8 @@ import {
   ScalarTypeDefinitionNode,
   UnionTypeDefinitionNode,
 } from "graphql";
-import { OperationType, PluginConfig, PluginContext } from "./types";
-import { nodeHasSkipComment } from "./utils";
+import { OperationType, PluginConfig, PluginContext } from "./types.js";
+import { nodeHasSkipComment } from "./utils.js";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments

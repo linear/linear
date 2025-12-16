@@ -10,16 +10,16 @@ import {
   NonNullTypeNode,
   ObjectTypeDefinitionNode,
 } from "graphql";
-import { getRequiredArgs } from "./args";
-import { findEnum, isValidField } from "./field";
-import { isValidFragment } from "./fragment";
-import { findInterface, findObject, isConnection } from "./object";
-import { printGraphqlComment, printGraphqlDebug, printGraphqlDescription, printLines } from "./print";
-import { findQuery } from "./query";
-import { Fragment, Named, NamedFields, PluginContext } from "./types";
-import { findUnion, getUnionMemberTypes } from "./union";
-import { nonNullable, reduceTypeName } from "./utils";
-import { conflictsWithInterfaceDefinition } from "./interface";
+import { getRequiredArgs } from "./args.js";
+import { findEnum, isValidField } from "./field.js";
+import { isValidFragment } from "./fragment.js";
+import { findInterface, findObject, isConnection } from "./object.js";
+import { printGraphqlComment, printGraphqlDebug, printGraphqlDescription, printLines } from "./print.js";
+import { findQuery } from "./query.js";
+import { Fragment, Named, NamedFields, PluginContext } from "./types.js";
+import { findUnion, getUnionMemberTypes } from "./union.js";
+import { nonNullable, reduceTypeName } from "./utils.js";
+import { conflictsWithInterfaceDefinition } from "./interface.js";
 
 /**
  * Graphql-codegen visitor for processing the ast and generating fragments

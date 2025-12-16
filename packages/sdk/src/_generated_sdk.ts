@@ -1,5 +1,5 @@
-import { DocumentNode } from "graphql/language/ast";
-import * as L from "./_generated_documents";
+import { DocumentNode } from "graphql/language/ast.js";
+import * as L from "./_generated_documents.js";
 
 /** The function for calling the graphql client */
 export type LinearRequest = <Response, Variables extends Record<string, unknown>>(
@@ -42087,4 +42087,4 @@ export {
   UserSettingsThemePreset,
   ViewPreferencesType,
   ViewType,
-} from "./_generated_documents";
+} from "./_generated_documents.js";

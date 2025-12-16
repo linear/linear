@@ -7,9 +7,9 @@ import {
   NonNullTypeNode,
   VariableDefinitionNode,
 } from "graphql";
-import { printList } from "./print";
-import { printTypescriptScalar } from "./scalar";
-import { Named, PluginContext } from "./types";
+import { printList } from "./print.js";
+import { printTypescriptScalar } from "./scalar.js";
+import { Named, PluginContext } from "./types.js";
 
 /**
  * Graphql-codegen visitor for printing a typescript argument
