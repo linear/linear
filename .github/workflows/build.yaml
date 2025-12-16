@@ -68,6 +68,18 @@ jobs:
           path: packages/sdk/linear-sdk.tar.gz
           retention-days: 1
 
+      - name: Package import for smoke tests
+        run: |
+          cd packages/import
+          pnpm pack --out linear-import.tar.gz
+
+      - name: Upload import artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linear-import
+          path: packages/import/linear-import.tar.gz
+          retention-days: 1
+
   smoke:
     name: Smoke Test ${{ matrix.module }} (Node ${{ matrix.node }} / TS ${{ matrix.typescript }})
     runs-on: ubuntu-latest
@@ -103,6 +115,38 @@ jobs:
         run: |
           cd e2e/smoke-${{ matrix.module }}
           npm test
+
+  smoke-import:
+    name: Smoke Test Import (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["18", "20", "22", "24"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Download import artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linear-import
+
+      - name: Install dependencies
+        run: |
+          npm install -g linear-import.tar.gz
+
+      - name: Run smoke test
+        run: |
+          linear-import --version
+          yes '' | linear-import
 
   notify-slack:
     runs-on: ubuntu-latest
