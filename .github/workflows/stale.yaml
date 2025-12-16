@@ -1,0 +1,15 @@
+name: "Close stale issues"
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 1 * * *"
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v10
+        with:
+          days-before-stale: 180
+          stale-issue-message: "This issue has seen no recent activity and has been automatically closed for house-keeping purposes."
+          stale-pr-message: "This PR has seen no recent activity and has been automatically closed for house-keeping purposes."
