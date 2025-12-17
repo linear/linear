@@ -196,16 +196,16 @@ export class ActorBot extends Request {
   }
 
   /** A url pointing to the avatar representing this bot. */
-  public avatarUrl?: string;
-  public id?: string;
+  public avatarUrl?: string | null;
+  public id?: string | null;
   /** The display name of the bot. */
-  public name?: string;
+  public name?: string | null;
   /** The sub type of the bot. */
-  public subType?: string;
+  public subType?: string | null;
   /** The type of bot. */
   public type: string;
   /** The display name of the external user on behalf of which the bot acted. */
-  public userDisplayName?: string;
+  public userDisplayName?: string | null;
 }
 /**
  * An activity within an agent context.
@@ -235,7 +235,7 @@ export class AgentActivity extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Whether the activity is ephemeral, and should disappear after the next agent activity. */
@@ -243,16 +243,16 @@ export class AgentActivity extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** Metadata about this agent activity's signal. */
-  public signalMetadata?: Record<string, unknown>;
+  public signalMetadata?: Record<string, unknown> | null;
   /** Metadata about the external source that created this agent activity. */
-  public sourceMetadata?: Record<string, unknown>;
+  public sourceMetadata?: Record<string, unknown> | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
-  public signal?: L.AgentActivitySignal;
+  public signal?: L.AgentActivitySignal | null;
   /** The content of the activity */
   public content: L.AgentActivityContent;
   /** The agent session this activity belongs to. */
@@ -305,7 +305,7 @@ export class AgentActivityActionContent extends Request {
   /** The parameters for the action, e.g. a file path, a keyword, etc. */
   public parameter: string;
   /** The result of the action in Markdown format. */
-  public result?: string;
+  public result?: string | null;
   /** The type of activity. */
   public type: L.AgentActivityType;
 }
@@ -471,7 +471,7 @@ export class AgentActivityWebhookPayload {
   /** The ID of the agent session that this activity belongs to. */
   public agentSessionId: string;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The content of the agent activity. */
   public content: L.Scalars["JSONObject"];
   /** The time at which the entity was created. */
@@ -479,15 +479,15 @@ export class AgentActivityWebhookPayload {
   /** The ID of the entity. */
   public id: string;
   /** An optional modifier that provides additional instructions on how the activity should be interpreted. */
-  public signal?: string;
+  public signal?: string | null;
   /** Metadata about this agent activity's signal. */
-  public signalMetadata?: L.Scalars["JSONObject"];
+  public signalMetadata?: L.Scalars["JSONObject"] | null;
   /** The ID of the comment this activity is linked to. */
-  public sourceCommentId?: string;
+  public sourceCommentId?: string | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The ID of the user who created this agent activity. */
-  public userId?: string;
+  public userId?: string | null;
 }
 /**
  * A session for agent activities and state management.
@@ -527,25 +527,25 @@ export class AgentSession extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The time the agent session was dismissed. */
-  public dismissedAt?: Date;
+  public dismissedAt?: Date | null;
   /** The time the agent session ended. */
-  public endedAt?: Date;
+  public endedAt?: Date | null;
   /** The URL of an external agent-hosted page associated with this session. */
-  public externalLink?: string;
+  public externalLink?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** A dynamically updated list of the agent's execution strategy. */
-  public plan?: Record<string, unknown>;
+  public plan?: Record<string, unknown> | null;
   /** Metadata about the external source that created this agent session. */
-  public sourceMetadata?: Record<string, unknown>;
+  public sourceMetadata?: Record<string, unknown> | null;
   /** The time the agent session started. */
-  public startedAt?: Date;
+  public startedAt?: Date | null;
   /** A summary of the activities in this session. */
-  public summary?: string;
+  public summary?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -668,7 +668,7 @@ export class AgentSessionEventWebhookPayload {
   /** ID of the organization for which the webhook belongs to. */
   public organizationId: string;
   /** A formatted prompt string containing the relevant context for the agent session, including issue details, comments, and guidance. Present only for `created` events. */
-  public promptContext?: string;
+  public promptContext?: string | null;
   /** The type of resource. */
   public type: string;
   /** The ID of the webhook that sent this event. */
@@ -676,11 +676,11 @@ export class AgentSessionEventWebhookPayload {
   /** Unix timestamp in milliseconds when the webhook was sent. */
   public webhookTimestamp: number;
   /** Guidance to inform the agent's behavior, which comes from configuration at the level of the workspace, parent teams, and/or current team for this session. The nearest team-specific guidance should take highest precendence. */
-  public guidance?: GuidanceRuleWebhookPayload[];
+  public guidance?: GuidanceRuleWebhookPayload[] | null;
   /** The previous comments in the thread before this agent was mentioned and the session was initiated, if any. Present only for `created` events where the session was initiated by mentioning the agent in a child comment of a thread. */
-  public previousComments?: CommentChildWebhookPayload[];
+  public previousComments?: CommentChildWebhookPayload[] | null;
   /** The agent activity that was created. */
-  public agentActivity?: AgentActivityWebhookPayload;
+  public agentActivity?: AgentActivityWebhookPayload | null;
   /** The agent session that the event belongs to. */
   public agentSession: AgentSessionWebhookPayload;
 }
@@ -744,41 +744,41 @@ export class AgentSessionWebhookPayload {
   /** The ID of the agent that the agent session belongs to. */
   public appUserId: string;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The ID of the root comment of the thread this agent session is attached to. */
-  public commentId?: string;
+  public commentId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user. */
-  public creatorId?: string;
+  public creatorId?: string | null;
   /** The time the agent session ended. */
-  public endedAt?: string;
+  public endedAt?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this agent session is associated with. */
-  public issueId?: string;
+  public issueId?: string | null;
   /** The ID of the organization that the agent session belongs to. */
   public organizationId: string;
   /** The ID of the comment that this agent session was spawned from, if from a different thread. */
-  public sourceCommentId?: string;
+  public sourceCommentId?: string | null;
   /** Metadata about the external source that created this agent session. */
-  public sourceMetadata?: L.Scalars["JSONObject"];
+  public sourceMetadata?: L.Scalars["JSONObject"] | null;
   /** The time the agent session started working. */
-  public startedAt?: string;
+  public startedAt?: string | null;
   /** The current status of the agent session. */
   public status: string;
   /** A summary of the activities in this session. */
-  public summary?: string;
+  public summary?: string | null;
   /** The type of the agent session. */
   public type: string;
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The root comment of the thread this agent session is attached to. */
-  public comment?: CommentChildWebhookPayload;
+  public comment?: CommentChildWebhookPayload | null;
   /** The human user responsible for the agent session. Unset if the session was initiated via automation or by an agent user, with no responsible human user. */
-  public creator?: UserChildWebhookPayload;
+  public creator?: UserChildWebhookPayload | null;
   /** The issue this agent session is associated with. */
-  public issue?: IssueWithDescriptionChildWebhookPayload;
+  public issue?: IssueWithDescriptionChildWebhookPayload | null;
 }
 /**
  * AI prompt rules for a team.
@@ -799,7 +799,7 @@ export class AiPromptRules extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -916,7 +916,7 @@ export class Application extends Request {
   /** OAuth application's client ID. */
   public clientId: string;
   /** Information about the application. */
-  public description?: string;
+  public description?: string | null;
   /** Name of the developer. */
   public developer: string;
   /** Url of the developer (homepage or docs). */
@@ -924,7 +924,7 @@ export class Application extends Request {
   /** OAuth application's ID. */
   public id: string;
   /** Image of the application. */
-  public imageUrl?: string;
+  public imageUrl?: string | null;
   /** Application name. */
   public name: string;
 }
@@ -1038,9 +1038,9 @@ export class Attachment extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The body data of the attachment, if any. */
-  public bodyData?: string;
+  public bodyData?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Indicates if attachments for the same source application should be grouped in the Linear UI. */
@@ -1050,11 +1050,11 @@ export class Attachment extends Request {
   /** Custom metadata related to the attachment. */
   public metadata: L.Scalars["JSONObject"];
   /** Information about the source which created the attachment. */
-  public source?: L.Scalars["JSONObject"];
+  public source?: L.Scalars["JSONObject"] | null;
   /** An accessor helper to source.type, defines the source type of the attachment. */
-  public sourceType?: string;
+  public sourceType?: string | null;
   /** Content for the subtitle line in the Linear attachment widget. */
-  public subtitle?: string;
+  public subtitle?: string | null;
   /** Content for the title line in the Linear attachment widget. */
   public title: string;
   /**
@@ -1202,13 +1202,13 @@ export class AttachmentWebhookPayload {
   }
 
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the creator of the attachment. */
-  public creatorId?: string;
+  public creatorId?: string | null;
   /** The ID of the non-Linear user who created the attachment. */
-  public externalUserCreatorId?: string;
+  public externalUserCreatorId?: string | null;
   /** Whether attachments for the same source application should be grouped in the Linear UI. */
   public groupBySource: boolean;
   /** The ID of the entity. */
@@ -1218,13 +1218,13 @@ export class AttachmentWebhookPayload {
   /** Custom metadata related to the attachment. */
   public metadata: L.Scalars["JSONObject"];
   /** The ID of the issue this attachment belonged to originally. */
-  public originalIssueId?: string;
+  public originalIssueId?: string | null;
   /** Information about the source which created the attachment. */
-  public source?: L.Scalars["JSONObject"];
+  public source?: L.Scalars["JSONObject"] | null;
   /** The source type of the attachment. */
-  public sourceType?: string;
+  public sourceType?: string | null;
   /** Optional subtitle of the attachment. */
-  public subtitle?: string;
+  public subtitle?: string | null;
   /** The title of the attachment. */
   public title: string;
   /** The time at which the entity was updated. */
@@ -1257,21 +1257,21 @@ export class AuditEntry extends Request {
   }
 
   /** The ID of the user that caused the audit entry to be created. */
-  public actorId?: string;
+  public actorId?: string | null;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** Country code of request resulting to audit entry. */
-  public countryCode?: string;
+  public countryCode?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
   /** IP from actor when entry was recorded. */
-  public ip?: string;
+  public ip?: string | null;
   /** Additional metadata related to the audit entry. */
-  public metadata?: L.Scalars["JSONObject"];
+  public metadata?: L.Scalars["JSONObject"] | null;
   /** Additional information related to the request which performed the action. */
-  public requestInformation?: L.Scalars["JSONObject"];
+  public requestInformation?: L.Scalars["JSONObject"] | null;
   public type: string;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
@@ -1347,23 +1347,23 @@ export class AuditEntryWebhookPayload {
   }
 
   /** The ID of the user that caused the audit entry to be created. */
-  public actorId?: string;
+  public actorId?: string | null;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** Country code of request resulting to audit entry. */
-  public countryCode?: string;
+  public countryCode?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the entity. */
   public id: string;
   /** IP from actor when entry was recorded. */
-  public ip?: string;
+  public ip?: string | null;
   /** Additional metadata related to the audit entry. */
-  public metadata?: L.Scalars["JSONObject"];
+  public metadata?: L.Scalars["JSONObject"] | null;
   /** The ID of the organization that the audit entry belongs to. */
   public organizationId: string;
   /** Additional information related to the request which performed the action. */
-  public requestInformation?: L.Scalars["JSONObject"];
+  public requestInformation?: L.Scalars["JSONObject"] | null;
   /** The type of the audit entry. */
   public type: string;
   /** The time at which the entity was updated. */
@@ -1400,23 +1400,23 @@ export class AuthIdentityProvider extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** The issuer's custom entity ID. */
-  public issuerEntityId?: string;
+  public issuerEntityId?: string | null;
   /** The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference. */
-  public priority?: number;
+  public priority?: number | null;
   /** Whether SAML authentication is enabled for organization. */
   public samlEnabled: boolean;
   /** Whether SCIM provisioning is enabled for organization. */
   public scimEnabled: boolean;
   /** The service provider (Linear) custom entity ID. Defaults to https://auth.linear.app/sso */
-  public spEntityId?: string;
+  public spEntityId?: string | null;
   /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
-  public ssoBinding?: string;
+  public ssoBinding?: string | null;
   /** Sign in endpoint URL for the identity provider. */
-  public ssoEndpoint?: string;
+  public ssoEndpoint?: string | null;
   /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
-  public ssoSignAlgo?: string;
+  public ssoSignAlgo?: string | null;
   /** X.509 Signing Certificate in string form. */
-  public ssoSigningCert?: string;
+  public ssoSigningCert?: string | null;
   /** The type of identity provider. */
   public type: L.IdentityProviderType;
 }
@@ -1451,13 +1451,13 @@ export class AuthOrganization extends Request {
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The time at which deletion of the organization was requested. */
-  public deletionRequestedAt?: Date;
+  public deletionRequestedAt?: Date | null;
   /** Whether the organization is enabled. Used as a superuser tool to lock down the org. */
   public enabled: boolean;
   /** The unique identifier of the entity. */
   public id: string;
   /** The organization's logo URL. */
-  public logoUrl?: string;
+  public logoUrl?: string | null;
   /** The organization's name. */
   public name: string;
   /** Previously used URL keys for the organization (last 3 are kept and redirected). */
@@ -1472,7 +1472,7 @@ export class AuthOrganization extends Request {
   public serviceId: string;
   /** The organization's unique URL key. */
   public urlKey: string;
-  public userCount?: number;
+  public userCount?: number | null;
   /** The feature release channel the organization belongs to. */
   public releaseChannel: L.ReleaseChannel;
 }
@@ -1501,19 +1501,19 @@ export class AuthResolverResponse extends Request {
   }
 
   /** Should the signup flow allow access for the domain. */
-  public allowDomainAccess?: boolean;
+  public allowDomainAccess?: boolean | null;
   /** Email for the authenticated account. */
   public email: string;
   /** User account ID. */
   public id: string;
   /** ID of the organization last accessed by the user. */
-  public lastUsedOrganizationId?: string;
+  public lastUsedOrganizationId?: string | null;
   /** Application token. */
-  public token?: string;
+  public token?: string | null;
   /** List of organizations allowing this user account to join automatically. */
-  public availableOrganizations?: AuthOrganization[];
+  public availableOrganizations?: AuthOrganization[] | null;
   /** List of organization available to this user account but locked due to the current auth method. */
-  public lockedOrganizations?: AuthOrganization[];
+  public lockedOrganizations?: AuthOrganization[] | null;
   /** List of locked users that are locked by login restrictions */
   public lockedUsers: AuthUser[];
   /** List of active users that belong to the user account. */
@@ -1543,7 +1543,7 @@ export class AuthUser extends Request {
   /** Whether the user is active. */
   public active: boolean;
   /** An URL to the user's avatar image. */
-  public avatarUrl?: string;
+  public avatarUrl?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The user's display (nick) name. Unique within each organization. */
@@ -1591,40 +1591,40 @@ export class AuthenticationSessionResponse extends Request {
   }
 
   /** Used web browser. */
-  public browserType?: string;
+  public browserType?: string | null;
   /** Client used for the session */
-  public client?: string;
+  public client?: string | null;
   /** Country codes of all seen locations. */
   public countryCodes: string[];
   /** The time at which the entity was created. */
   public createdAt: Date;
   public id: string;
   /** IP address. */
-  public ip?: string;
+  public ip?: string | null;
   /** Identifies the session used to make the request. */
   public isCurrentSession: boolean;
   /** When was the session last seen */
-  public lastActiveAt?: Date;
+  public lastActiveAt?: Date | null;
   /** Human readable location */
-  public location?: string;
+  public location?: string | null;
   /** Location city name. */
-  public locationCity?: string;
+  public locationCity?: string | null;
   /** Location country name. */
-  public locationCountry?: string;
+  public locationCountry?: string | null;
   /** Location country code. */
-  public locationCountryCode?: string;
+  public locationCountryCode?: string | null;
   /** Location region code. */
-  public locationRegionCode?: string;
+  public locationRegionCode?: string | null;
   /** Name of the session, derived from the client and operating system */
   public name: string;
   /** Operating system used for the session */
-  public operatingSystem?: string;
+  public operatingSystem?: string | null;
   /** Service used for logging in. */
-  public service?: string;
+  public service?: string | null;
   /** Date when the session was last updated. */
   public updatedAt: Date;
   /** Session's user-agent. */
-  public userAgent?: string;
+  public userAgent?: string | null;
   /** Type of application used to authenticate. */
   public type: L.AuthenticationSessionType;
 }
@@ -1702,33 +1702,33 @@ export class Comment extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The comment content in markdown format. */
   public body: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The ID of the document content that the comment is associated with. */
-  public documentContentId?: string;
+  public documentContentId?: string | null;
   /** The time user edited the comment. */
-  public editedAt?: Date;
+  public editedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The ID of the initiative update that the comment is associated with. */
-  public initiativeUpdateId?: string;
+  public initiativeUpdateId?: string | null;
   /** The ID of the issue that the comment is associated with. */
-  public issueId?: string;
+  public issueId?: string | null;
   /** The ID of the parent comment under which the current comment is nested. */
-  public parentId?: string;
+  public parentId?: string | null;
   /** The ID of the project update that the comment is associated with. */
-  public projectUpdateId?: string;
+  public projectUpdateId?: string | null;
   /** The text that this comment references. Only defined for inline comments. */
-  public quotedText?: string;
+  public quotedText?: string | null;
   /** Emoji reaction summary, grouped by emoji type. */
   public reactionData: L.Scalars["JSONObject"];
   /** The time the resolvingUser resolved the thread. */
-  public resolvedAt?: Date;
+  public resolvedAt?: Date | null;
   /** The ID of the comment that resolved the thread. */
-  public resolvingCommentId?: string;
+  public resolvingCommentId?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -1739,13 +1739,13 @@ export class Comment extends Request {
   /** Reactions associated with the comment. */
   public reactions: Reaction[];
   /** The external services the comment is synced with. */
-  public syncedWith?: ExternalEntityInfo[];
+  public syncedWith?: ExternalEntityInfo[] | null;
   /** The bot that created the comment. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** The document content that the comment is associated with. */
-  public documentContent?: DocumentContent;
+  public documentContent?: DocumentContent | null;
   /** The external thread that the comment is synced with. */
-  public externalThread?: SyncedExternalThread;
+  public externalThread?: SyncedExternalThread | null;
   /** Agent session associated with this comment. */
   public get agentSession(): LinearFetch<AgentSession> | undefined {
     return this._agentSession?.id ? new AgentSessionQuery(this._request).fetch(this._agentSession?.id) : undefined;
@@ -1842,17 +1842,17 @@ export class CommentChildWebhookPayload {
   /** The body of the comment. */
   public body: string;
   /** The ID of the document content this comment belongs to. */
-  public documentContentId?: string;
+  public documentContentId?: string | null;
   /** The ID of the comment. */
   public id: string;
   /** The ID of the initiative update this comment belongs to. */
-  public initiativeUpdateId?: string;
+  public initiativeUpdateId?: string | null;
   /** The ID of the issue this comment belongs to. */
-  public issueId?: string;
+  public issueId?: string | null;
   /** The ID of the project update this comment belongs to. */
-  public projectUpdateId?: string;
+  public projectUpdateId?: string | null;
   /** The ID of the user who created this comment. */
-  public userId?: string;
+  public userId?: string | null;
 }
 /**
  * CommentConnection model
@@ -1946,61 +1946,61 @@ export class CommentWebhookPayload {
   }
 
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The body of the comment. */
   public body: string;
   /** The bot actor data for this comment. */
-  public botActor?: string;
+  public botActor?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the document content this comment belongs to. */
-  public documentContentId?: string;
+  public documentContentId?: string | null;
   /** When the comment was last edited. */
-  public editedAt?: string;
+  public editedAt?: string | null;
   /** The ID of the external user who created this comment. */
-  public externalUserId?: string;
+  public externalUserId?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the initiative update this comment belongs to. */
-  public initiativeUpdateId?: string;
+  public initiativeUpdateId?: string | null;
   /** The ID of the issue this comment belongs to. */
-  public issueId?: string;
+  public issueId?: string | null;
   /** The ID of the parent comment. */
-  public parentId?: string;
+  public parentId?: string | null;
   /** The ID of the post this comment belongs to. */
-  public postId?: string;
+  public postId?: string | null;
   /** The ID of the project update this comment belongs to. */
-  public projectUpdateId?: string;
+  public projectUpdateId?: string | null;
   /** The quoted text in this comment. */
-  public quotedText?: string;
+  public quotedText?: string | null;
   /** The reaction data for this comment. */
   public reactionData: L.Scalars["JSONObject"];
   /** When the comment was resolved. */
-  public resolvedAt?: string;
+  public resolvedAt?: string | null;
   /** The ID of the comment that resolved this comment. */
-  public resolvingCommentId?: string;
+  public resolvingCommentId?: string | null;
   /** The ID of the user who resolved this comment. */
-  public resolvingUserId?: string;
+  public resolvingUserId?: string | null;
   /** The entity this comment is synced with. */
-  public syncedWith?: L.Scalars["JSONObject"];
+  public syncedWith?: L.Scalars["JSONObject"] | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The ID of the user who created this comment. */
-  public userId?: string;
+  public userId?: string | null;
   /** The document content for this comment. */
-  public documentContent?: DocumentContentChildWebhookPayload;
+  public documentContent?: DocumentContentChildWebhookPayload | null;
   /** The external user who created this comment. */
-  public externalUser?: ExternalUserChildWebhookPayload;
+  public externalUser?: ExternalUserChildWebhookPayload | null;
   /** The initiative update this comment belongs to. */
-  public initiativeUpdate?: InitiativeUpdateChildWebhookPayload;
+  public initiativeUpdate?: InitiativeUpdateChildWebhookPayload | null;
   /** The issue this comment belongs to. */
-  public issue?: IssueChildWebhookPayload;
+  public issue?: IssueChildWebhookPayload | null;
   /** The parent comment. */
-  public parent?: CommentChildWebhookPayload;
+  public parent?: CommentChildWebhookPayload | null;
   /** The project update this comment belongs to. */
-  public projectUpdate?: ProjectUpdateChildWebhookPayload;
+  public projectUpdate?: ProjectUpdateChildWebhookPayload | null;
   /** The user who created this comment. */
-  public user?: UserChildWebhookPayload;
+  public user?: UserChildWebhookPayload | null;
 }
 /**
  * ContactPayload model
@@ -2122,31 +2122,31 @@ export class CustomView extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The color of the icon of the custom view. */
-  public color?: string;
+  public color?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The description of the custom view. */
-  public description?: string;
+  public description?: string | null;
   /** The filter applied to feed items in the custom view. */
-  public feedItemFilterData?: L.Scalars["JSONObject"];
+  public feedItemFilterData?: L.Scalars["JSONObject"] | null;
   /** The filter applied to issues in the custom view. */
   public filterData: L.Scalars["JSONObject"];
   /** The filters applied to issues in the custom view. */
   public filters: L.Scalars["JSONObject"];
   /** The icon of the custom view. */
-  public icon?: string;
+  public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The filter applied to initiatives in the custom view. */
-  public initiativeFilterData?: L.Scalars["JSONObject"];
+  public initiativeFilterData?: L.Scalars["JSONObject"] | null;
   /** The model name of the custom view. */
   public modelName: string;
   /** The name of the custom view. */
   public name: string;
   /** The filter applied to projects in the custom view. */
-  public projectFilterData?: L.Scalars["JSONObject"];
+  public projectFilterData?: L.Scalars["JSONObject"] | null;
   /** Whether the custom view is shared with everyone in the organization. */
   public shared: boolean;
   /** The custom view's unique URL slug. */
@@ -2157,11 +2157,11 @@ export class CustomView extends Request {
    */
   public updatedAt: Date;
   /** The organizations default view preferences for this custom view. */
-  public organizationViewPreferences?: ViewPreferences;
+  public organizationViewPreferences?: ViewPreferences | null;
   /** The current users view preferences for this custom view. */
-  public userViewPreferences?: ViewPreferences;
+  public userViewPreferences?: ViewPreferences | null;
   /** The calculated view preferences values for this custom view. */
-  public viewPreferencesValues?: ViewPreferencesValues;
+  public viewPreferencesValues?: ViewPreferencesValues | null;
   /** The user who created the custom view. */
   public get creator(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._creator.id);
@@ -2300,7 +2300,7 @@ export class CustomViewNotificationSubscription extends Request {
   /** Whether the subscription is active or not. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -2313,9 +2313,9 @@ export class CustomViewNotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The type of view to which the notification subscription context is associated with. */
-  public contextViewType?: L.ContextViewType;
+  public contextViewType?: L.ContextViewType | null;
   /** The type of user view to which the notification subscription context is associated with. */
-  public userContextViewType?: L.UserContextViewType;
+  public userContextViewType?: L.UserContextViewType | null;
   /** The custom view subscribed to. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return new CustomViewQuery(this._request).fetch(this._customView.id);
@@ -2433,11 +2433,11 @@ export class CustomViewSuggestionPayload extends Request {
   }
 
   /** The suggested view description. */
-  public description?: string;
+  public description?: string | null;
   /** The suggested view icon. */
-  public icon?: string;
+  public icon?: string | null;
   /** The suggested view name. */
-  public name?: string;
+  public name?: string | null;
 }
 /**
  * A customer whose needs will be tied to issues or projects.
@@ -2477,7 +2477,7 @@ export class Customer extends Request {
   /** The approximate number of needs of the customer. */
   public approximateNeedCount: number;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The domains associated with this customer. */
@@ -2487,17 +2487,17 @@ export class Customer extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** The customer's logo URL. */
-  public logoUrl?: string;
+  public logoUrl?: string | null;
   /** The ID of the main source, when a customer has multiple sources. Must be one of externalIds. */
-  public mainSourceId?: string;
+  public mainSourceId?: string | null;
   /** The customer's name. */
   public name: string;
   /** The annual revenue generated by the customer. */
-  public revenue?: number;
+  public revenue?: number | null;
   /** The size of the customer. */
-  public size?: number;
+  public size?: number | null;
   /** The ID of the Slack channel used to interact with the customer. */
-  public slackChannelId?: string;
+  public slackChannelId?: string | null;
   /** The customer's unique URL slug. */
   public slugId: string;
   /**
@@ -2633,9 +2633,9 @@ export class CustomerNeed extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The need content in markdown format. */
-  public body?: string;
+  public body?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -2648,9 +2648,9 @@ export class CustomerNeed extends Request {
    */
   public updatedAt: Date;
   /** The URL of the underlying attachment, if any */
-  public url?: string;
+  public url?: string | null;
   /** The project attachment this need is referencing. */
-  public projectAttachment?: ProjectAttachment;
+  public projectAttachment?: ProjectAttachment | null;
   /** The attachment this need is referencing. */
   public get attachment(): LinearFetch<Attachment> | undefined {
     return this._attachment?.id ? new AttachmentQuery(this._request).fetch(this._attachment?.id) : undefined;
@@ -2773,15 +2773,15 @@ export class CustomerNeedChildWebhookPayload {
   }
 
   /** The ID of the attachment this need is referencing. */
-  public attachmentId?: string;
+  public attachmentId?: string | null;
   /** The ID of the customer that this need is attached to. */
-  public customerId?: string;
+  public customerId?: string | null;
   /** The ID of the customer need. */
   public id: string;
   /** The ID of the issue this need is referencing. */
-  public issueId?: string;
+  public issueId?: string | null;
   /** The ID of the project this need is referencing. */
-  public projectId?: string;
+  public projectId?: string | null;
 }
 /**
  * CustomerNeedConnection model
@@ -2841,7 +2841,7 @@ export class CustomerNeedNotification extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Related customer need. */
@@ -2850,24 +2850,24 @@ export class CustomerNeedNotification extends Request {
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
    */
-  public emailedAt?: Date;
+  public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
-  public readAt?: Date;
+  public readAt?: Date | null;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
-  public snoozedUntilAt?: Date;
+  public snoozedUntilAt?: Date | null;
   /** Notification type. */
   public type: string;
   /** The time at which a notification was unsnoozed.. */
-  public unsnoozedAt?: Date;
+  public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The bot that caused the notification. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
   /** The user that caused the notification. */
@@ -3006,41 +3006,41 @@ export class CustomerNeedWebhookPayload {
   }
 
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The ID of the attachment this need is referencing. */
-  public attachmentId?: string;
+  public attachmentId?: string | null;
   /** The body of the need in Markdown format. */
-  public body?: string;
+  public body?: string | null;
   /** The ID of the comment this need is referencing. */
-  public commentId?: string;
+  public commentId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the creator of the customer need. */
-  public creatorId?: string;
+  public creatorId?: string | null;
   /** The ID of the customer that this need is attached to. */
-  public customerId?: string;
+  public customerId?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this need is referencing. */
-  public issueId?: string;
+  public issueId?: string | null;
   /** The issue ID this customer need was originally created on. Will be undefined if the customer need hasn't been moved. */
-  public originalIssueId?: string;
+  public originalIssueId?: string | null;
   /** The priority of the need. */
   public priority: number;
   /** The ID of the project attachment this need is referencing. */
-  public projectAttachmentId?: string;
+  public projectAttachmentId?: string | null;
   /** The ID of the project this need is referencing. */
-  public projectId?: string;
+  public projectId?: string | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The attachment this need is referencing. */
-  public attachment?: AttachmentWebhookPayload;
+  public attachment?: AttachmentWebhookPayload | null;
   /** The customer that this need is attached to. */
-  public customer?: CustomerChildWebhookPayload;
+  public customer?: CustomerChildWebhookPayload | null;
   /** The issue this need is referencing. */
-  public issue?: IssueChildWebhookPayload;
+  public issue?: IssueChildWebhookPayload | null;
   /** The project this need is referencing. */
-  public project?: ProjectChildWebhookPayload;
+  public project?: ProjectChildWebhookPayload | null;
 }
 /**
  * A customer related notification.
@@ -3075,7 +3075,7 @@ export class CustomerNotification extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Related customer. */
@@ -3084,24 +3084,24 @@ export class CustomerNotification extends Request {
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
    */
-  public emailedAt?: Date;
+  public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
-  public readAt?: Date;
+  public readAt?: Date | null;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
-  public snoozedUntilAt?: Date;
+  public snoozedUntilAt?: Date | null;
   /** Notification type. */
   public type: string;
   /** The time at which a notification was unsnoozed.. */
-  public unsnoozedAt?: Date;
+  public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The bot that caused the notification. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
   /** The user that caused the notification. */
@@ -3176,7 +3176,7 @@ export class CustomerNotificationSubscription extends Request {
   /** Whether the subscription is active or not. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -3189,9 +3189,9 @@ export class CustomerNotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The type of view to which the notification subscription context is associated with. */
-  public contextViewType?: L.ContextViewType;
+  public contextViewType?: L.ContextViewType | null;
   /** The type of user view to which the notification subscription context is associated with. */
-  public userContextViewType?: L.UserContextViewType;
+  public userContextViewType?: L.UserContextViewType | null;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -3316,13 +3316,13 @@ export class CustomerStatus extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The UI color of the status as a HEX string. */
   public color: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Description of the status. */
-  public description?: string;
+  public description?: string | null;
   /** The display name of the status. */
   public displayName: string;
   /** The unique identifier of the entity. */
@@ -3337,7 +3337,7 @@ export class CustomerStatus extends Request {
    */
   public updatedAt: Date;
   /** The type of the customer status. */
-  public type?: L.CustomerStatusType;
+  public type?: L.CustomerStatusType | null;
 
   /** Creates a new customer status. */
   public create(input: L.CustomerStatusCreateInput) {
@@ -3370,7 +3370,7 @@ export class CustomerStatusChildWebhookPayload {
   /** The color of the customer status. */
   public color: string;
   /** The description of the customer status. */
-  public description?: string;
+  public description?: string | null;
   /** The display name of the customer status. */
   public displayName: string;
   /** The ID of the customer status. */
@@ -3378,7 +3378,7 @@ export class CustomerStatusChildWebhookPayload {
   /** The name of the customer status. */
   public name: string;
   /** The type of the customer status. */
-  public type?: string;
+  public type?: string | null;
 }
 /**
  * CustomerStatusConnection model
@@ -3451,13 +3451,13 @@ export class CustomerTier extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The UI color of the tier as a HEX string. */
   public color: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Description of the tier. */
-  public description?: string;
+  public description?: string | null;
   /** The display name of the tier. */
   public displayName: string;
   /** The unique identifier of the entity. */
@@ -3502,7 +3502,7 @@ export class CustomerTierChildWebhookPayload {
   /** The color of the customer tier. */
   public color: string;
   /** The description of the customer tier. */
-  public description?: string;
+  public description?: string | null;
   /** The display name of the customer tier. */
   public displayName: string;
   /** The ID of the customer tier. */
@@ -3592,7 +3592,7 @@ export class CustomerWebhookPayload {
   /** The approximate number of needs of the customer. */
   public approximateNeedCount: number;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The domains associated with this customer. */
@@ -3602,33 +3602,33 @@ export class CustomerWebhookPayload {
   /** The ID of the entity. */
   public id: string;
   /** The customer's logo URL. */
-  public logoUrl?: string;
+  public logoUrl?: string | null;
   /** The ID of the main source, when a customer has multiple sources. Must be one of externalIds. */
-  public mainSourceId?: string;
+  public mainSourceId?: string | null;
   /** The name of the customer. */
   public name: string;
   /** The ID of the user who owns the customer. */
-  public ownerId?: string;
+  public ownerId?: string | null;
   /** The annual revenue generated by the customer. */
-  public revenue?: number;
+  public revenue?: number | null;
   /** The size of the customer. */
-  public size?: number;
+  public size?: number | null;
   /** The ID of the Slack channel used to interact with the customer. */
-  public slackChannelId?: string;
+  public slackChannelId?: string | null;
   /** The customer's unique URL slug. */
   public slugId: string;
   /** The ID of the customer status. */
-  public statusId?: string;
+  public statusId?: string | null;
   /** The ID of the customer tier. */
-  public tierId?: string;
+  public tierId?: string | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The URL of the customer. */
   public url: string;
   /** The customer status. */
-  public status?: CustomerStatusChildWebhookPayload;
+  public status?: CustomerStatusChildWebhookPayload | null;
   /** The customer tier. */
-  public tier?: CustomerTierChildWebhookPayload;
+  public tier?: CustomerTierChildWebhookPayload | null;
 }
 /**
  * A set of issues to be resolved in a specified amount of time.
@@ -3669,11 +3669,11 @@ export class Cycle extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the cycle was automatically archived by the auto pruning process. */
-  public autoArchivedAt?: Date;
+  public autoArchivedAt?: Date | null;
   /** The completion time of the cycle. If null, the cycle hasn't been completed. */
-  public completedAt?: Date;
+  public completedAt?: Date | null;
   /** The number of completed issues in the cycle after each day. */
   public completedIssueCountHistory: number[];
   /** The number of completed estimation points after each day. */
@@ -3681,7 +3681,7 @@ export class Cycle extends Request {
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The cycle's description. */
-  public description?: string;
+  public description?: string | null;
   /** The end time of the cycle. */
   public endsAt: Date;
   /** The unique identifier of the entity. */
@@ -3701,7 +3701,7 @@ export class Cycle extends Request {
   /** The total number of issues in the cycle after each day. */
   public issueCountHistory: number[];
   /** The custom name of the cycle. */
-  public name?: string;
+  public name?: string | null;
   /** The number of the cycle. */
   public number: number;
   /** The overall progress of the cycle. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
@@ -3800,7 +3800,7 @@ export class CycleChildWebhookPayload {
   /** The ID of the cycle. */
   public id: string;
   /** The name of the cycle. */
-  public name?: string;
+  public name?: string | null;
   /** The number of the cycle. */
   public number: number;
   /** The start date of the cycle. */
@@ -3868,7 +3868,7 @@ export class CycleNotificationSubscription extends Request {
   /** Whether the subscription is active or not. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -3881,9 +3881,9 @@ export class CycleNotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The type of view to which the notification subscription context is associated with. */
-  public contextViewType?: L.ContextViewType;
+  public contextViewType?: L.ContextViewType | null;
   /** The type of user view to which the notification subscription context is associated with. */
-  public userContextViewType?: L.UserContextViewType;
+  public userContextViewType?: L.UserContextViewType | null;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -4015,11 +4015,11 @@ export class CycleWebhookPayload {
   }
 
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The time at which the cycle was automatically archived by the auto pruning process. */
-  public autoArchivedAt?: string;
+  public autoArchivedAt?: string | null;
   /** The completion time of the cycle. If null, the cycle hasn't been completed. */
-  public completedAt?: string;
+  public completedAt?: string | null;
   /** The number of completed issues in the cycle after each day. */
   public completedIssueCountHistory: number[];
   /** The number of completed estimation points after each day. */
@@ -4027,7 +4027,7 @@ export class CycleWebhookPayload {
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The cycle's description. */
-  public description?: string;
+  public description?: string | null;
   /** The end date of the cycle. */
   public endsAt: string;
   /** The ID of the entity. */
@@ -4035,11 +4035,11 @@ export class CycleWebhookPayload {
   /** The number of in progress estimation points after each day. */
   public inProgressScopeHistory: number[];
   /** The ID of the cycle inherited from. */
-  public inheritedFromId?: string;
+  public inheritedFromId?: string | null;
   /** The total number of issues in the cycle after each day. */
   public issueCountHistory: number[];
   /** The name of the cycle. */
-  public name?: string;
+  public name?: string | null;
   /** The number of the cycle. */
   public number: number;
   /** The total number of estimation points after each day. */
@@ -4113,19 +4113,19 @@ export class Document extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The color of the icon. */
-  public color?: string;
+  public color?: string | null;
   /** The documents content in markdown format. */
-  public content?: string;
+  public content?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The ID of the document content associated with the document. */
-  public documentContentId?: string;
+  public documentContentId?: string | null;
   /** The time at which the document was hidden. Null if the entity has not been hidden. */
-  public hiddenAt?: Date;
+  public hiddenAt?: Date | null;
   /** The icon of the document. */
-  public icon?: string;
+  public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The document's unique URL slug. */
@@ -4135,7 +4135,7 @@ export class Document extends Request {
   /** The document title. */
   public title: string;
   /** A flag that indicates whether the document is in the trash bin. */
-  public trashed?: boolean;
+  public trashed?: boolean | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -4261,15 +4261,15 @@ export class DocumentChildWebhookPayload {
   /** The ID of the document. */
   public id: string;
   /** The ID of the initiative this document belongs to. */
-  public initiativeId?: string;
+  public initiativeId?: string | null;
   /** The ID of the project this document belongs to. */
-  public projectId?: string;
+  public projectId?: string | null;
   /** The title of the document. */
   public title: string;
   /** The initiative this document belongs to. */
-  public initiative?: InitiativeChildWebhookPayload;
+  public initiative?: InitiativeChildWebhookPayload | null;
   /** The project this document belongs to. */
-  public project?: ProjectChildWebhookPayload;
+  public project?: ProjectChildWebhookPayload | null;
 }
 /**
  * DocumentConnection model
@@ -4323,24 +4323,24 @@ export class DocumentContent extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The document content in markdown format. */
-  public content?: string;
+  public content?: string | null;
   /** The document content state as a base64 encoded string. */
-  public contentState?: string;
+  public contentState?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
   /** The time at which the document content was restored from a previous version. */
-  public restoredAt?: Date;
+  public restoredAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The AI prompt rules that the content is associated with. */
-  public aiPromptRules?: AiPromptRules;
+  public aiPromptRules?: AiPromptRules | null;
   /** The document that the content is associated with. */
   public get document(): LinearFetch<Document> | undefined {
     return this._document?.id ? new DocumentQuery(this._request).fetch(this._document?.id) : undefined;
@@ -4396,9 +4396,9 @@ export class DocumentContentChildWebhookPayload {
   }
 
   /** The document this document content belongs to. */
-  public document?: DocumentChildWebhookPayload;
+  public document?: DocumentChildWebhookPayload | null;
   /** The project this document belongs to. */
-  public project?: ProjectChildWebhookPayload;
+  public project?: ProjectChildWebhookPayload | null;
 }
 /**
  * DocumentContentHistoryPayload model
@@ -4434,7 +4434,7 @@ export class DocumentContentHistoryType extends Request {
   }
 
   /** The ID of the author of the change. */
-  public actorIds?: string[];
+  public actorIds?: string[] | null;
   /** The date when the document content history snapshot was taken. This can be different than createdAt since the content is captured from its state at the previously known updatedAt timestamp in the case of an update. On document create, these timestamps can be the same. */
   public contentDataSnapshotAt: Date;
   /** The date when the document content history entry was created. */
@@ -4476,9 +4476,9 @@ export class DocumentNotification extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** Related comment ID. Null if the notification is not related to a comment. */
-  public commentId?: string;
+  public commentId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Related document ID. */
@@ -4487,28 +4487,28 @@ export class DocumentNotification extends Request {
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
    */
-  public emailedAt?: Date;
+  public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Related parent comment ID. Null if the notification is not related to a comment. */
-  public parentCommentId?: string;
+  public parentCommentId?: string | null;
   /** Name of the reaction emoji related to the notification. */
-  public reactionEmoji?: string;
+  public reactionEmoji?: string | null;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
-  public readAt?: Date;
+  public readAt?: Date | null;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
-  public snoozedUntilAt?: Date;
+  public snoozedUntilAt?: Date | null;
   /** Notification type. */
   public type: string;
   /** The time at which a notification was unsnoozed.. */
-  public unsnoozedAt?: Date;
+  public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The bot that caused the notification. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
   /** The user that caused the notification. */
@@ -4629,19 +4629,19 @@ export class DocumentSearchResult extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The color of the icon. */
-  public color?: string;
+  public color?: string | null;
   /** The documents content in markdown format. */
-  public content?: string;
+  public content?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The ID of the document content associated with the document. */
-  public documentContentId?: string;
+  public documentContentId?: string | null;
   /** The time at which the document was hidden. Null if the entity has not been hidden. */
-  public hiddenAt?: Date;
+  public hiddenAt?: Date | null;
   /** The icon of the document. */
-  public icon?: string;
+  public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Metadata related to search result. */
@@ -4653,7 +4653,7 @@ export class DocumentSearchResult extends Request {
   /** The document title. */
   public title: string;
   /** A flag that indicates whether the document is in the trash bin. */
-  public trashed?: boolean;
+  public trashed?: boolean | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -4742,45 +4742,45 @@ export class DocumentWebhookPayload {
   }
 
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The color of the document. */
-  public color?: string;
+  public color?: string | null;
   /** The content of the document. */
-  public content?: string;
+  public content?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the user who created the document. */
-  public creatorId?: string;
+  public creatorId?: string | null;
   /** The description of the document. */
-  public description?: string;
+  public description?: string | null;
   /** The time at which the document was hidden. */
-  public hiddenAt?: string;
+  public hiddenAt?: string | null;
   /** The icon of the document. */
-  public icon?: string;
+  public icon?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the initiative this document belongs to. */
-  public initiativeId?: string;
+  public initiativeId?: string | null;
   /** The ID of the last template that was applied to this document. */
-  public lastAppliedTemplateId?: string;
+  public lastAppliedTemplateId?: string | null;
   /** The ID of the project this document belongs to. */
-  public projectId?: string;
+  public projectId?: string | null;
   /** The ID of the resource folder this document belongs to. */
-  public resourceFolderId?: string;
+  public resourceFolderId?: string | null;
   /** The document's unique URL slug. */
   public slugId: string;
   /** The order of the item in the resources list. */
   public sortOrder: number;
   /** The IDs of the users who are subscribed to this document. */
-  public subscriberIds?: string[];
+  public subscriberIds?: string[] | null;
   /** The title of the document. */
   public title: string;
   /** A flag that indicates whether the document is in the trash bin. */
-  public trashed?: boolean;
+  public trashed?: boolean | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The ID of the user who last updated the document. */
-  public updatedById?: string;
+  public updatedById?: string | null;
 }
 /**
  * A general purpose draft. Used for comments, project updates, etc.
@@ -4820,13 +4820,13 @@ export class Draft extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The text content as a Prosemirror document. */
   public bodyData: Record<string, unknown>;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Additional properties for the draft. */
-  public data?: L.Scalars["JSONObject"];
+  public data?: L.Scalars["JSONObject"] | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Whether the draft was autogenerated for the user. */
@@ -4976,7 +4976,7 @@ export class EmailIntakeAddress extends Request {
   /** Unique email address user name (before @) used for incoming email. */
   public address: string;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Whether issues created from that email address will be turned into customer requests. */
@@ -4984,25 +4984,25 @@ export class EmailIntakeAddress extends Request {
   /** Whether the email address is enabled. */
   public enabled: boolean;
   /** The email address used to forward emails to the intake address. */
-  public forwardingEmailAddress?: string;
+  public forwardingEmailAddress?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The auto-reply message for issue canceled. If not set, the default reply will be used. */
-  public issueCanceledAutoReply?: string;
+  public issueCanceledAutoReply?: string | null;
   /** Whether the auto-reply for issue canceled is enabled. */
   public issueCanceledAutoReplyEnabled: boolean;
   /** The auto-reply message for issue completed. If not set, the default reply will be used. */
-  public issueCompletedAutoReply?: string;
+  public issueCompletedAutoReply?: string | null;
   /** Whether the auto-reply for issue completed is enabled. */
   public issueCompletedAutoReplyEnabled: boolean;
   /** The auto-reply message for issue created. If not set, the default reply will be used. */
-  public issueCreatedAutoReply?: string;
+  public issueCreatedAutoReply?: string | null;
   /** Whether the auto-reply for issue created is enabled. */
   public issueCreatedAutoReplyEnabled: boolean;
   /** Whether email replies are enabled. */
   public repliesEnabled: boolean;
   /** The name to be used for outgoing emails. */
-  public senderName?: string;
+  public senderName?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -5011,7 +5011,7 @@ export class EmailIntakeAddress extends Request {
   /** Whether the commenter's name is included in the email replies. */
   public useUserNamesInReplies: boolean;
   /** The SES domain identity that the email address is associated with. */
-  public sesDomainIdentity?: SesDomainIdentity;
+  public sesDomainIdentity?: SesDomainIdentity | null;
   /** The type of the email address. */
   public type: L.EmailIntakeAddressType;
   /** The user who created the email intake address. */
@@ -5140,7 +5140,7 @@ export class Emoji extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -5244,7 +5244,7 @@ export class Entity extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -5279,7 +5279,7 @@ export class EntityExternalLink extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -5401,9 +5401,9 @@ export class EntityWebhookPayload {
   /** The type of resource, i.e., the name of the entity. */
   public type: string;
   /** In case of an update event, previous values of all updated properties. */
-  public updatedFrom?: L.Scalars["JSONObject"];
+  public updatedFrom?: L.Scalars["JSONObject"] | null;
   /** URL for the entity. */
-  public url?: string;
+  public url?: string | null;
   /** The ID of the webhook that sent this event. */
   public webhookId: string;
   /** Unix timestamp in milliseconds when the webhook was sent. */
@@ -5428,7 +5428,7 @@ export class ExternalEntityInfo extends Request {
   /** The name of the service this entity is synced with. */
   public service: L.ExternalSyncService;
   /** Metadata about the external entity. */
-  public metadata?: L.ExternalEntityInfoMetadata;
+  public metadata?: L.ExternalEntityInfoMetadata | null;
 }
 /**
  * Metadata about the external GitHub entity.
@@ -5445,11 +5445,11 @@ export class ExternalEntityInfoGithubMetadata extends Request {
   }
 
   /** The number of the issue. */
-  public number?: number;
+  public number?: number | null;
   /** The owner of the repository. */
-  public owner?: string;
+  public owner?: string | null;
   /** The repository name. */
-  public repo?: string;
+  public repo?: string | null;
 }
 /**
  * Metadata about the external Jira entity.
@@ -5466,11 +5466,11 @@ export class ExternalEntityInfoJiraMetadata extends Request {
   }
 
   /** The key of the Jira issue. */
-  public issueKey?: string;
+  public issueKey?: string | null;
   /** The id of the Jira issue type. */
-  public issueTypeId?: string;
+  public issueTypeId?: string | null;
   /** The id of the Jira project. */
-  public projectId?: string;
+  public projectId?: string | null;
 }
 /**
  * Metadata about the external Slack entity.
@@ -5488,13 +5488,13 @@ export class ExternalEntitySlackMetadata extends Request {
   }
 
   /** The id of the Slack channel. */
-  public channelId?: string;
+  public channelId?: string | null;
   /** The name of the Slack channel. */
-  public channelName?: string;
+  public channelName?: string | null;
   /** Whether the entity originated from Slack (not Linear). */
   public isFromSlack: boolean;
   /** The URL of the Slack message. */
-  public messageUrl?: string;
+  public messageUrl?: string | null;
 }
 /**
  * An external authenticated (e.g., through Slack) user which doesn't have a Linear account, but can create and update entities in Linear from the external system that authenticated them.
@@ -5517,19 +5517,19 @@ export class ExternalUser extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** An URL to the external user's avatar image. */
-  public avatarUrl?: string;
+  public avatarUrl?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The external user's display name. Unique within each organization. Can match the display name of an actual user. */
   public displayName: string;
   /** The external user's email address. */
-  public email?: string;
+  public email?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The last time the external user was seen interacting with Linear. */
-  public lastSeen?: Date;
+  public lastSeen?: Date | null;
   /** The external user's full name. */
   public name: string;
   /**
@@ -5611,7 +5611,7 @@ export class Facet extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -5624,7 +5624,7 @@ export class Facet extends Request {
    */
   public updatedAt: Date;
   /** The owning page. */
-  public sourcePage?: L.FacetPageSource;
+  public sourcePage?: L.FacetPageSource | null;
   /** The owning feed user. */
   public get sourceFeedUser(): LinearFetch<User> | undefined {
     return this._sourceFeedUser?.id ? new UserQuery(this._request).fetch(this._sourceFeedUser?.id) : undefined;
@@ -5747,15 +5747,15 @@ export class Favorite extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The name of the folder. Only applies to favorites of type folder. */
-  public folderName?: string;
+  public folderName?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The type of favorited predefined view. */
-  public predefinedViewType?: string;
+  public predefinedViewType?: string | null;
   /** The order of the item in the favorites list. */
   public sortOrder: number;
   /** The type of the favorite. */
@@ -5766,11 +5766,11 @@ export class Favorite extends Request {
    */
   public updatedAt: Date;
   /** URL of the favorited entity. Folders return 'null' value. */
-  public url?: string;
+  public url?: string | null;
   /** The targeted tab of the initiative. */
-  public initiativeTab?: L.InitiativeTab;
+  public initiativeTab?: L.InitiativeTab | null;
   /** The targeted tab of the project. */
-  public projectTab?: L.ProjectTab;
+  public projectTab?: L.ProjectTab | null;
   /** The favorited custom view. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -5966,11 +5966,11 @@ export class FetchDataPayload extends Request {
   }
 
   /** The fetched data based on the natural language query. */
-  public data?: L.Scalars["JSONObject"];
+  public data?: L.Scalars["JSONObject"] | null;
   /** The filters used to fetch the data. */
-  public filters?: L.Scalars["JSONObject"];
+  public filters?: L.Scalars["JSONObject"] | null;
   /** The GraphQL query used to fetch the data. */
-  public query?: string;
+  public query?: string | null;
   /** Whether the fetch operation was successful. */
   public success: boolean;
 }
@@ -6042,9 +6042,9 @@ export class GitAutomationState extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** [DEPRECATED] The target branch, if null, the automation will be triggered on any branch. */
-  public branchPattern?: string;
+  public branchPattern?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -6055,7 +6055,7 @@ export class GitAutomationState extends Request {
    */
   public updatedAt: Date;
   /** The target branch associated to this automation state. */
-  public targetBranch?: GitAutomationTargetBranch;
+  public targetBranch?: GitAutomationTargetBranch | null;
   /** The event that triggers the automation. */
   public event: L.GitAutomationStates;
   /** The associated workflow state. */
@@ -6151,7 +6151,7 @@ export class GitAutomationTargetBranch extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The target branch pattern. */
   public branchPattern: string;
   /** The time at which the entity was created. */
@@ -6368,7 +6368,7 @@ export class IdentityProvider extends Request {
   /** Whether users are allowed to change their name and display name even if SCIM is enabled. */
   public allowNameChange: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Whether the identity provider is the default identity provider migrated from organization level settings. */
@@ -6376,23 +6376,23 @@ export class IdentityProvider extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** The issuer's custom entity ID. */
-  public issuerEntityId?: string;
+  public issuerEntityId?: string | null;
   /** The SAML priority used to pick default workspace in SAML SP initiated flow, when same domain is claimed for SAML by multiple workspaces. Lower priority value means higher preference. */
-  public priority?: number;
+  public priority?: number | null;
   /** Whether SAML authentication is enabled for organization. */
   public samlEnabled: boolean;
   /** Whether SCIM provisioning is enabled for organization. */
   public scimEnabled: boolean;
   /** The service provider (Linear) custom entity ID. Defaults to https://auth.linear.app/sso */
-  public spEntityId?: string;
+  public spEntityId?: string | null;
   /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
-  public ssoBinding?: string;
+  public ssoBinding?: string | null;
   /** Sign in endpoint URL for the identity provider. */
-  public ssoEndpoint?: string;
+  public ssoEndpoint?: string | null;
   /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
-  public ssoSignAlgo?: string;
+  public ssoSignAlgo?: string | null;
   /** X.509 Signing Certificate in string form. */
-  public ssoSigningCert?: string;
+  public ssoSigningCert?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -6420,7 +6420,7 @@ export class ImageUploadFromUrlPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The URL containing the image. */
-  public url?: string;
+  public url?: string | null;
 }
 /**
  * An initiative to group projects.
@@ -6471,21 +6471,21 @@ export class Initiative extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The initiative's color. */
-  public color?: string;
+  public color?: string | null;
   /** The time at which the initiative was moved into completed status. */
-  public completedAt?: Date;
+  public completedAt?: Date | null;
   /** The initiative's content in markdown format. */
-  public content?: string;
+  public content?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The description of the initiative. */
-  public description?: string;
+  public description?: string | null;
   /** The time at which the initiative health was updated. */
-  public healthUpdatedAt?: Date;
+  public healthUpdatedAt?: Date | null;
   /** The icon of the initiative. */
-  public icon?: string;
+  public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The name of the initiative. */
@@ -6495,17 +6495,17 @@ export class Initiative extends Request {
   /** The sort order of the initiative within the organization. */
   public sortOrder: number;
   /** The time at which the initiative was moved into active status. */
-  public startedAt?: Date;
+  public startedAt?: Date | null;
   /** The estimated completion date of the initiative. */
-  public targetDate?: L.Scalars["TimelessDate"];
+  public targetDate?: L.Scalars["TimelessDate"] | null;
   /** A flag that indicates whether the initiative is in the trash bin. */
-  public trashed?: boolean;
+  public trashed?: boolean | null;
   /** The frequency at which to prompt for updates. When not set, reminders are inherited from workspace. */
-  public updateReminderFrequency?: number;
+  public updateReminderFrequency?: number | null;
   /** The n-weekly frequency at which to prompt for updates. When not set, reminders are inherited from workspace. */
-  public updateReminderFrequencyInWeeks?: number;
+  public updateReminderFrequencyInWeeks?: number | null;
   /** The hour at which to prompt for updates. */
-  public updateRemindersHour?: number;
+  public updateRemindersHour?: number | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -6514,17 +6514,17 @@ export class Initiative extends Request {
   /** Initiative URL. */
   public url: string;
   /** The content of the initiative description. */
-  public documentContent?: DocumentContent;
+  public documentContent?: DocumentContent | null;
   /** The resolution of the reminder frequency. */
   public frequencyResolution: L.FrequencyResolutionType;
   /** The health of the initiative. */
-  public health?: L.InitiativeUpdateHealthType;
+  public health?: L.InitiativeUpdateHealthType | null;
   /** The status of the initiative. One of Planned, Active, Completed */
   public status: L.InitiativeStatus;
   /** The resolution of the initiative's estimated completion date. */
-  public targetDateResolution?: L.DateResolutionType;
+  public targetDateResolution?: L.DateResolutionType | null;
   /** The day at which to prompt for updates. */
-  public updateRemindersDay?: L.Day;
+  public updateRemindersDay?: L.Day | null;
   /** The user who created the initiative. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -6707,7 +6707,7 @@ export class InitiativeHistory extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The events that happened while recording that history. */
@@ -6794,41 +6794,41 @@ export class InitiativeNotification extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** Related comment ID. Null if the notification is not related to a comment. */
-  public commentId?: string;
+  public commentId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /**
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
    */
-  public emailedAt?: Date;
+  public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Related initiative ID. */
   public initiativeId: string;
   /** Related initiative update ID. */
-  public initiativeUpdateId?: string;
+  public initiativeUpdateId?: string | null;
   /** Related parent comment ID. Null if the notification is not related to a comment. */
-  public parentCommentId?: string;
+  public parentCommentId?: string | null;
   /** Name of the reaction emoji related to the notification. */
-  public reactionEmoji?: string;
+  public reactionEmoji?: string | null;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
-  public readAt?: Date;
+  public readAt?: Date | null;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
-  public snoozedUntilAt?: Date;
+  public snoozedUntilAt?: Date | null;
   /** Notification type. */
   public type: string;
   /** The time at which a notification was unsnoozed.. */
-  public unsnoozedAt?: Date;
+  public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The bot that caused the notification. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
   /** The user that caused the notification. */
@@ -6925,7 +6925,7 @@ export class InitiativeNotificationSubscription extends Request {
   /** Whether the subscription is active or not. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -6938,9 +6938,9 @@ export class InitiativeNotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The type of view to which the notification subscription context is associated with. */
-  public contextViewType?: L.ContextViewType;
+  public contextViewType?: L.ContextViewType | null;
   /** The type of user view to which the notification subscription context is associated with. */
-  public userContextViewType?: L.UserContextViewType;
+  public userContextViewType?: L.UserContextViewType | null;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -7067,7 +7067,7 @@ export class InitiativeRelation extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -7181,7 +7181,7 @@ export class InitiativeToProject extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -7306,7 +7306,7 @@ export class InitiativeUpdate extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The update content in markdown format. */
   public body: string;
   /** Number of comments associated with the initiative update. */
@@ -7314,11 +7314,11 @@ export class InitiativeUpdate extends Request {
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The diff between the current update and the previous one. */
-  public diff?: L.Scalars["JSONObject"];
+  public diff?: L.Scalars["JSONObject"] | null;
   /** The diff between the current update and the previous one, formatted as markdown. */
-  public diffMarkdown?: string;
+  public diffMarkdown?: string | null;
   /** The time the update was edited. */
-  public editedAt?: Date;
+  public editedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Whether initiative update diff should be hidden. */
@@ -7521,7 +7521,7 @@ export class InitiativeUpdateWebhookPayload {
   }
 
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The body of the initiative update. */
   public body: string;
   /** The body data of the initiative update. */
@@ -7543,7 +7543,7 @@ export class InitiativeUpdateWebhookPayload {
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The URL of the initiative update. */
-  public url?: string;
+  public url?: string | null;
   /** The user id of the initiative update. */
   public userId: string;
   /** The initiative that the initiative update belongs to. */
@@ -7599,73 +7599,73 @@ export class InitiativeWebhookPayload {
   }
 
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The color of the initiative. */
-  public color?: string;
+  public color?: string | null;
   /** When the initiative was completed. */
-  public completedAt?: string;
+  public completedAt?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the user who created the initiative. */
-  public creatorId?: string;
+  public creatorId?: string | null;
   /** The description of the initiative. */
   public description: string;
   /** The resolution of the update reminder frequency. */
   public frequencyResolution: string;
   /** The health status of the initiative. */
-  public health?: string;
+  public health?: string | null;
   /** When the health status was last updated. */
-  public healthUpdatedAt?: string;
+  public healthUpdatedAt?: string | null;
   /** The icon of the initiative. */
-  public icon?: string;
+  public icon?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the last update for this initiative. */
-  public lastUpdateId?: string;
+  public lastUpdateId?: string | null;
   /** The name of the initiative. */
   public name: string;
   /** The ID of the organization this initiative belongs to. */
   public organizationId: string;
   /** The ID of the user who owns the initiative. */
-  public ownerId?: string;
+  public ownerId?: string | null;
   /** The unique slug identifier of the initiative. */
   public slugId: string;
   /** The sort order of the initiative within the organization. */
   public sortOrder: number;
   /** When the initiative was started. */
-  public startedAt?: string;
+  public startedAt?: string | null;
   /** The current status of the initiative. */
   public status: string;
   /** The target date of the initiative. */
-  public targetDate?: string;
+  public targetDate?: string | null;
   /** The resolution of the target date. */
-  public targetDateResolution?: string;
+  public targetDateResolution?: string | null;
   /** Whether the initiative is trashed. */
-  public trashed?: boolean;
+  public trashed?: boolean | null;
   /** The frequency of update reminders. */
-  public updateReminderFrequency?: number;
+  public updateReminderFrequency?: number | null;
   /** The frequency of update reminders in weeks. */
-  public updateReminderFrequencyInWeeks?: number;
+  public updateReminderFrequencyInWeeks?: number | null;
   /** The day of the week for update reminders. */
-  public updateRemindersDay?: number;
+  public updateRemindersDay?: number | null;
   /** The hour of the day for update reminders. */
-  public updateRemindersHour?: number;
+  public updateRemindersHour?: number | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The URL of the initiative. */
   public url: string;
   /** The projects associated with the initiative. */
-  public projects?: ProjectChildWebhookPayload[];
+  public projects?: ProjectChildWebhookPayload[] | null;
   /** The sub-initiatives associated with the initiative. */
-  public subInitiatives?: InitiativeChildWebhookPayload[];
+  public subInitiatives?: InitiativeChildWebhookPayload[] | null;
   /** The user who created the initiative. */
-  public creator?: UserChildWebhookPayload;
+  public creator?: UserChildWebhookPayload | null;
   /** The last update for this initiative. */
-  public lastUpdate?: InitiativeUpdateChildWebhookPayload;
+  public lastUpdate?: InitiativeUpdateChildWebhookPayload | null;
   /** The user who owns the initiative. */
-  public owner?: UserChildWebhookPayload;
+  public owner?: UserChildWebhookPayload | null;
   /** The parent initiative associated with the initiative. */
-  public parentInitiative?: InitiativeChildWebhookPayload;
+  public parentInitiative?: InitiativeChildWebhookPayload | null;
 }
 /**
  * An integration with an external service.
@@ -7689,7 +7689,7 @@ export class Integration extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -7803,7 +7803,7 @@ export class IntegrationHasScopesPayload extends Request {
   /** Whether the integration has the required scopes. */
   public hasAllScopes: boolean;
   /** The missing scopes. */
-  public missingScopes?: string[];
+  public missingScopes?: string[] | null;
 }
 /**
  * IntegrationPayload model
@@ -7889,11 +7889,11 @@ export class IntegrationTemplate extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** ID of the foreign entity in the external integration this template is for, e.g., Slack channel ID. */
-  public foreignEntityId?: string;
+  public foreignEntityId?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /**
@@ -8013,42 +8013,42 @@ export class IntegrationsSettings extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
   public id: string;
   /** Whether to send a Slack message when a initiate update is created. */
-  public slackInitiativeUpdateCreated?: boolean;
+  public slackInitiativeUpdateCreated?: boolean | null;
   /** Whether to send a Slack message when a new issue is added to triage. */
-  public slackIssueAddedToTriage?: boolean;
+  public slackIssueAddedToTriage?: boolean | null;
   /** Whether to send a Slack message when an issue is added to the custom view. */
-  public slackIssueAddedToView?: boolean;
+  public slackIssueAddedToView?: boolean | null;
   /** Whether to send a Slack message when a new issue is created for the project or the team. */
-  public slackIssueCreated?: boolean;
+  public slackIssueCreated?: boolean | null;
   /** Whether to send a Slack message when a comment is created on any of the project or team's issues. */
-  public slackIssueNewComment?: boolean;
+  public slackIssueNewComment?: boolean | null;
   /** Whether to send a Slack message when an SLA is breached. */
-  public slackIssueSlaBreached?: boolean;
+  public slackIssueSlaBreached?: boolean | null;
   /** Whether to send a Slack message when an SLA is at high risk. */
-  public slackIssueSlaHighRisk?: boolean;
+  public slackIssueSlaHighRisk?: boolean | null;
   /** Whether to send a Slack message when any of the project or team's issues has a change in status. */
-  public slackIssueStatusChangedAll?: boolean;
+  public slackIssueStatusChangedAll?: boolean | null;
   /** Whether to send a Slack message when any of the project or team's issues change to completed or cancelled. */
-  public slackIssueStatusChangedDone?: boolean;
+  public slackIssueStatusChangedDone?: boolean | null;
   /** Whether to send a Slack message when a project update is created. */
-  public slackProjectUpdateCreated?: boolean;
+  public slackProjectUpdateCreated?: boolean | null;
   /** Whether to send a new project update to team Slack channels. */
-  public slackProjectUpdateCreatedToTeam?: boolean;
+  public slackProjectUpdateCreatedToTeam?: boolean | null;
   /** Whether to send a new project update to workspace Slack channel. */
-  public slackProjectUpdateCreatedToWorkspace?: boolean;
+  public slackProjectUpdateCreatedToWorkspace?: boolean | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The type of view to which the integration settings context is associated with. */
-  public contextViewType?: L.ContextViewType;
+  public contextViewType?: L.ContextViewType | null;
   /** Initiative which those settings apply to. */
   public get initiative(): LinearFetch<Initiative> | undefined {
     return this._initiative?.id ? new InitiativeQuery(this._request).fetch(this._initiative?.id) : undefined;
@@ -8202,35 +8202,35 @@ export class Issue extends Request {
   }
 
   /** The time at which the issue was added to a cycle. */
-  public addedToCycleAt?: Date;
+  public addedToCycleAt?: Date | null;
   /** The time at which the issue was added to a project. */
-  public addedToProjectAt?: Date;
+  public addedToProjectAt?: Date | null;
   /** The time at which the issue was added to a team. */
-  public addedToTeamAt?: Date;
+  public addedToTeamAt?: Date | null;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the issue was automatically archived by the auto pruning process. */
-  public autoArchivedAt?: Date;
+  public autoArchivedAt?: Date | null;
   /** The time at which the issue was automatically closed by the auto pruning process. */
-  public autoClosedAt?: Date;
+  public autoClosedAt?: Date | null;
   /** The order of the item in its column on the board. */
   public boardOrder: number;
   /** Suggested branch name for the issue. */
   public branchName: string;
   /** The time at which the issue was moved into canceled state. */
-  public canceledAt?: Date;
+  public canceledAt?: Date | null;
   /** The time at which the issue was moved into completed state. */
-  public completedAt?: Date;
+  public completedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk). */
   public customerTicketCount: number;
   /** The issue's description in markdown format. */
-  public description?: string;
+  public description?: string | null;
   /** The date at which the issue is due. */
-  public dueDate?: L.Scalars["TimelessDate"];
+  public dueDate?: L.Scalars["TimelessDate"] | null;
   /** The estimate of the complexity of the issue.. */
-  public estimate?: number;
+  public estimate?: number | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Issue's human readable identifier (e.g. ENG-123). */
@@ -8250,31 +8250,31 @@ export class Issue extends Request {
   /** Emoji reaction summary, grouped by emoji type. */
   public reactionData: L.Scalars["JSONObject"];
   /** The time at which the issue's SLA will breach. */
-  public slaBreachesAt?: Date;
+  public slaBreachesAt?: Date | null;
   /** The time at which the issue's SLA will enter high risk state. */
-  public slaHighRiskAt?: Date;
+  public slaHighRiskAt?: Date | null;
   /** The time at which the issue's SLA will enter medium risk state. */
-  public slaMediumRiskAt?: Date;
+  public slaMediumRiskAt?: Date | null;
   /** The time at which the issue's SLA began. */
-  public slaStartedAt?: Date;
+  public slaStartedAt?: Date | null;
   /** The type of SLA set on the issue. Calendar days or business days. */
-  public slaType?: string;
+  public slaType?: string | null;
   /** The time until an issue will be snoozed in Triage view. */
-  public snoozedUntilAt?: Date;
+  public snoozedUntilAt?: Date | null;
   /** The order of the item in relation to other items in the organization. */
   public sortOrder: number;
   /** The time at which the issue was moved into started state. */
-  public startedAt?: Date;
+  public startedAt?: Date | null;
   /** The time at which the issue entered triage. */
-  public startedTriageAt?: Date;
+  public startedTriageAt?: Date | null;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
-  public subIssueSortOrder?: number;
+  public subIssueSortOrder?: number | null;
   /** The issue's title. */
   public title: string;
   /** A flag that indicates whether the issue is in the trash bin. */
-  public trashed?: boolean;
+  public trashed?: boolean | null;
   /** The time at which the issue left triage. */
-  public triagedAt?: Date;
+  public triagedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -8285,11 +8285,11 @@ export class Issue extends Request {
   /** Reactions associated with the issue. */
   public reactions: Reaction[];
   /** The external services the issue is synced with. */
-  public syncedWith?: ExternalEntityInfo[];
+  public syncedWith?: ExternalEntityInfo[] | null;
   /** The bot that created the issue, if applicable. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** Integration type that created this issue, if applicable. */
-  public integrationSourceType?: L.IntegrationService;
+  public integrationSourceType?: L.IntegrationService | null;
   /** The external user who requested creation of the Asks issue on behalf of the creator. */
   public get asksExternalUserRequester(): LinearFetch<ExternalUser> | undefined {
     return this._asksExternalUserRequester?.id
@@ -8555,13 +8555,13 @@ export class IssueAssignedToYouNotificationWebhookPayload {
   }
 
   /** The ID of the actor who caused the notification. */
-  public actorId?: string;
+  public actorId?: string | null;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the external user who caused the notification. */
-  public externalUserActorId?: string;
+  public externalUserActorId?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this notification belongs to. */
@@ -8573,7 +8573,7 @@ export class IssueAssignedToYouNotificationWebhookPayload {
   /** The ID of the user who received the notification. */
   public userId: string;
   /** The actor who caused the notification. */
-  public actor?: UserChildWebhookPayload;
+  public actor?: UserChildWebhookPayload | null;
   /** The issue this notification belongs to. */
   public issue: IssueWithDescriptionChildWebhookPayload;
 }
@@ -8651,21 +8651,21 @@ export class IssueCommentMentionNotificationWebhookPayload {
   }
 
   /** The ID of the actor who caused the notification. */
-  public actorId?: string;
+  public actorId?: string | null;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The ID of the comment this notification belongs to. */
   public commentId: string;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the external user who caused the notification. */
-  public externalUserActorId?: string;
+  public externalUserActorId?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this notification belongs to. */
   public issueId: string;
   /** The ID of the parent comment for the comment this notification belongs to. */
-  public parentCommentId?: string;
+  public parentCommentId?: string | null;
   /** An issue comment mention notification type. */
   public type: "issueCommentMention";
   /** The time at which the entity was updated. */
@@ -8673,13 +8673,13 @@ export class IssueCommentMentionNotificationWebhookPayload {
   /** The ID of the user who received the notification. */
   public userId: string;
   /** The actor who caused the notification. */
-  public actor?: UserChildWebhookPayload;
+  public actor?: UserChildWebhookPayload | null;
   /** The comment this notification belongs to. */
   public comment: CommentChildWebhookPayload;
   /** The issue this notification belongs to. */
   public issue: IssueWithDescriptionChildWebhookPayload;
   /** The parent comment for the comment this notification belongs to. */
-  public parentComment?: CommentChildWebhookPayload;
+  public parentComment?: CommentChildWebhookPayload | null;
 }
 /**
  * Payload for an issue comment reaction notification.
@@ -8707,21 +8707,21 @@ export class IssueCommentReactionNotificationWebhookPayload {
   }
 
   /** The ID of the actor who caused the notification. */
-  public actorId?: string;
+  public actorId?: string | null;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The ID of the comment this notification belongs to. */
   public commentId: string;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the external user who caused the notification. */
-  public externalUserActorId?: string;
+  public externalUserActorId?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this notification belongs to. */
   public issueId: string;
   /** The ID of the parent comment for the comment this notification belongs to. */
-  public parentCommentId?: string;
+  public parentCommentId?: string | null;
   /** The emoji of the reaction this notification is for. */
   public reactionEmoji: string;
   /** An issue comment reaction notification type. */
@@ -8731,13 +8731,13 @@ export class IssueCommentReactionNotificationWebhookPayload {
   /** The ID of the user who received the notification. */
   public userId: string;
   /** The actor who caused the notification. */
-  public actor?: UserChildWebhookPayload;
+  public actor?: UserChildWebhookPayload | null;
   /** The comment this notification belongs to. */
   public comment: CommentChildWebhookPayload;
   /** The issue this notification belongs to. */
   public issue: IssueWithDescriptionChildWebhookPayload;
   /** The parent comment for the comment this notification belongs to. */
-  public parentComment?: CommentChildWebhookPayload;
+  public parentComment?: CommentChildWebhookPayload | null;
 }
 /**
  * IssueConnection model
@@ -8782,13 +8782,13 @@ export class IssueEmojiReactionNotificationWebhookPayload {
   }
 
   /** The ID of the actor who caused the notification. */
-  public actorId?: string;
+  public actorId?: string | null;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the external user who caused the notification. */
-  public externalUserActorId?: string;
+  public externalUserActorId?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this notification belongs to. */
@@ -8802,7 +8802,7 @@ export class IssueEmojiReactionNotificationWebhookPayload {
   /** The ID of the user who received the notification. */
   public userId: string;
   /** The actor who caused the notification. */
-  public actor?: UserChildWebhookPayload;
+  public actor?: UserChildWebhookPayload | null;
   /** The issue this notification belongs to. */
   public issue: IssueWithDescriptionChildWebhookPayload;
 }
@@ -8820,9 +8820,9 @@ export class IssueFilterSuggestionPayload extends Request {
   }
 
   /** The json filter that is suggested. */
-  public filter?: L.Scalars["JSONObject"];
+  public filter?: L.Scalars["JSONObject"] | null;
   /** The log id of the prompt, that created this filter. */
-  public logId?: string;
+  public logId?: string | null;
 }
 /**
  * A record of changes to an issue.
@@ -8923,96 +8923,96 @@ export class IssueHistory extends Request {
   }
 
   /** The id of user who made these changes. If null, possibly means that the change made by an integration. */
-  public actorId?: string;
+  public actorId?: string | null;
   /** ID's of labels that were added. */
-  public addedLabelIds?: string[];
+  public addedLabelIds?: string[] | null;
   /** Whether the issue is archived at the time of this history entry. */
-  public archived?: boolean;
+  public archived?: boolean | null;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The id of linked attachment. */
-  public attachmentId?: string;
+  public attachmentId?: string | null;
   /** Whether the issue was auto-archived. */
-  public autoArchived?: boolean;
+  public autoArchived?: boolean | null;
   /** Whether the issue was auto-closed. */
-  public autoClosed?: boolean;
+  public autoClosed?: boolean | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The id of linked customer need. */
-  public customerNeedId?: string;
+  public customerNeedId?: string | null;
   /** The id of user from whom the issue was re-assigned from. */
-  public fromAssigneeId?: string;
+  public fromAssigneeId?: string | null;
   /** The id of previous cycle of the issue. */
-  public fromCycleId?: string;
+  public fromCycleId?: string | null;
   /** What the due date was changed from. */
-  public fromDueDate?: L.Scalars["TimelessDate"];
+  public fromDueDate?: L.Scalars["TimelessDate"] | null;
   /** What the estimate was changed from. */
-  public fromEstimate?: number;
+  public fromEstimate?: number | null;
   /** The id of previous parent of the issue. */
-  public fromParentId?: string;
+  public fromParentId?: string | null;
   /** What the priority was changed from. */
-  public fromPriority?: number;
+  public fromPriority?: number | null;
   /** The id of previous project of the issue. */
-  public fromProjectId?: string;
+  public fromProjectId?: string | null;
   /** The id of previous workflow state of the issue. */
-  public fromStateId?: string;
+  public fromStateId?: string | null;
   /** The id of team from which the issue was moved from. */
-  public fromTeamId?: string;
+  public fromTeamId?: string | null;
   /** What the title was changed from. */
-  public fromTitle?: string;
+  public fromTitle?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** ID's of labels that were removed. */
-  public removedLabelIds?: string[];
+  public removedLabelIds?: string[] | null;
   /** The id of user to whom the issue was assigned to. */
-  public toAssigneeId?: string;
+  public toAssigneeId?: string | null;
   /** The id of new project created from the issue. */
-  public toConvertedProjectId?: string;
+  public toConvertedProjectId?: string | null;
   /** The id of new cycle of the issue. */
-  public toCycleId?: string;
+  public toCycleId?: string | null;
   /** What the due date was changed to. */
-  public toDueDate?: L.Scalars["TimelessDate"];
+  public toDueDate?: L.Scalars["TimelessDate"] | null;
   /** What the estimate was changed to. */
-  public toEstimate?: number;
+  public toEstimate?: number | null;
   /** The id of new parent of the issue. */
-  public toParentId?: string;
+  public toParentId?: string | null;
   /** What the priority was changed to. */
-  public toPriority?: number;
+  public toPriority?: number | null;
   /** The id of new project of the issue. */
-  public toProjectId?: string;
+  public toProjectId?: string | null;
   /** The id of new workflow state of the issue. */
-  public toStateId?: string;
+  public toStateId?: string | null;
   /** The id of team to which the issue was moved to. */
-  public toTeamId?: string;
+  public toTeamId?: string | null;
   /** What the title was changed to. */
-  public toTitle?: string;
+  public toTitle?: string | null;
   /** Whether the issue was trashed or un-trashed. */
-  public trashed?: boolean;
+  public trashed?: boolean | null;
   /** Boolean indicating if the issue was auto-assigned using the triage responsibility feature. */
-  public triageResponsibilityAutoAssigned?: boolean;
+  public triageResponsibilityAutoAssigned?: boolean | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** Whether the issue's description was updated. */
-  public updatedDescription?: boolean;
+  public updatedDescription?: boolean | null;
   /** The actors that performed the actions. This field may be empty in the case of integrations or automations. */
-  public actors?: User[];
+  public actors?: User[] | null;
   /** The labels that were added to the issue. */
-  public addedLabels?: IssueLabel[];
+  public addedLabels?: IssueLabel[] | null;
   /** The actors that edited the description of the issue, if any. */
-  public descriptionUpdatedBy?: User[];
+  public descriptionUpdatedBy?: User[] | null;
   /** Changed issue relationships. */
-  public relationChanges?: IssueRelationHistoryPayload[];
+  public relationChanges?: IssueRelationHistoryPayload[] | null;
   /** The labels that were removed from the issue. */
-  public removedLabels?: IssueLabel[];
+  public removedLabels?: IssueLabel[] | null;
   /** The users that were notified of the issue. */
-  public triageResponsibilityNotifiedUsers?: User[];
+  public triageResponsibilityNotifiedUsers?: User[] | null;
   /** The bot that performed the action. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** The import record. */
-  public issueImport?: IssueImport;
+  public issueImport?: IssueImport | null;
   /** The actor that performed the actions. This field may be empty in the case of integrations or automations. */
   public get actor(): LinearFetch<User> | undefined {
     return this._actor?.id ? new UserQuery(this._request).fetch(this._actor?.id) : undefined;
@@ -9148,33 +9148,33 @@ export class IssueImport extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The id for the user that started the job. */
-  public creatorId?: string;
+  public creatorId?: string | null;
   /** File URL for the uploaded CSV for the import, if there is one. */
-  public csvFileUrl?: string;
+  public csvFileUrl?: string | null;
   /** The display name of the import service. */
   public displayName: string;
   /** User readable error message, if one has occurred during the import. */
-  public error?: string;
+  public error?: string | null;
   /** Error code and metadata, if one has occurred during the import. */
-  public errorMetadata?: L.Scalars["JSONObject"];
+  public errorMetadata?: L.Scalars["JSONObject"] | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The data mapping configuration for the import job. */
-  public mapping?: L.Scalars["JSONObject"];
+  public mapping?: L.Scalars["JSONObject"] | null;
   /** Current step progress in % (0-100). */
-  public progress?: number;
+  public progress?: number | null;
   /** The service from which data will be imported. */
   public service: string;
   /** Metadata related to import service. */
-  public serviceMetadata?: L.Scalars["JSONObject"];
+  public serviceMetadata?: L.Scalars["JSONObject"] | null;
   /** The status for the import job. */
   public status: string;
   /** New team's name in cases when teamId not set. */
-  public teamName?: string;
+  public teamName?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -9224,7 +9224,7 @@ export class IssueImportDeletePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The import job that was deleted. */
-  public issueImport?: IssueImport;
+  public issueImport?: IssueImport | null;
 }
 /**
  * Whether a custom JQL query is valid or not
@@ -9241,9 +9241,9 @@ export class IssueImportJqlCheckPayload extends Request {
   }
 
   /** Returns an approximate number of issues matching the JQL query, if available */
-  public count?: number;
+  public count?: number | null;
   /** An error message returned by Jira when validating the JQL query. */
-  public error?: string;
+  public error?: string | null;
   /** Returns true if the JQL query has been validated successfully, false otherwise */
   public success: boolean;
 }
@@ -9266,7 +9266,7 @@ export class IssueImportPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** The import job that was created or updated. */
-  public issueImport?: IssueImport;
+  public issueImport?: IssueImport | null;
 }
 /**
  * Whether an issue import can be synced at the end of an import or not
@@ -9284,7 +9284,7 @@ export class IssueImportSyncCheckPayload extends Request {
   /** Returns true if the import can be synced, false otherwise */
   public canSync: boolean;
   /** An error message with a root cause of why the import cannot be synced */
-  public error?: string;
+  public error?: string | null;
 }
 /**
  * Labels that can be associated with issues.
@@ -9318,19 +9318,19 @@ export class IssueLabel extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The label's color as a HEX string. */
   public color: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The label's description. */
-  public description?: string;
+  public description?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Whether the label is a group. */
   public isGroup: boolean;
   /** The date when the label was last applied to an issue or project. */
-  public lastAppliedAt?: Date;
+  public lastAppliedAt?: Date | null;
   /** The label's name. */
   public name: string;
   /**
@@ -9422,7 +9422,7 @@ export class IssueLabelChildWebhookPayload {
   /** The name of the issue label. */
   public name: string;
   /** The parent ID of the issue label. */
-  public parentId?: string;
+  public parentId?: string | null;
 }
 /**
  * IssueLabelConnection model
@@ -9496,27 +9496,27 @@ export class IssueLabelWebhookPayload {
   }
 
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The color of the issue label. */
   public color: string;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The creator ID of the issue label. */
-  public creatorId?: string;
+  public creatorId?: string | null;
   /** The label's description. */
-  public description?: string;
+  public description?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The original label inherited from. */
-  public inheritedFromId?: string;
+  public inheritedFromId?: string | null;
   /** Whether the label is a group. */
   public isGroup: boolean;
   /** The name of the issue label. */
   public name: string;
   /** The parent ID of the issue label. */
-  public parentId?: string;
+  public parentId?: string | null;
   /** The team ID of the issue label. */
-  public teamId?: string;
+  public teamId?: string | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
 }
@@ -9541,13 +9541,13 @@ export class IssueMentionNotificationWebhookPayload {
   }
 
   /** The ID of the actor who caused the notification. */
-  public actorId?: string;
+  public actorId?: string | null;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the external user who caused the notification. */
-  public externalUserActorId?: string;
+  public externalUserActorId?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this notification belongs to. */
@@ -9559,7 +9559,7 @@ export class IssueMentionNotificationWebhookPayload {
   /** The ID of the user who received the notification. */
   public userId: string;
   /** The actor who caused the notification. */
-  public actor?: UserChildWebhookPayload;
+  public actor?: UserChildWebhookPayload | null;
   /** The issue this notification belongs to. */
   public issue: IssueWithDescriptionChildWebhookPayload;
 }
@@ -9588,21 +9588,21 @@ export class IssueNewCommentNotificationWebhookPayload {
   }
 
   /** The ID of the actor who caused the notification. */
-  public actorId?: string;
+  public actorId?: string | null;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The ID of the comment this notification belongs to. */
   public commentId: string;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the external user who caused the notification. */
-  public externalUserActorId?: string;
+  public externalUserActorId?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this notification belongs to. */
   public issueId: string;
   /** The ID of the parent comment for the comment this notification belongs to. */
-  public parentCommentId?: string;
+  public parentCommentId?: string | null;
   /** An issue new comment notification type. */
   public type: "issueNewComment";
   /** The time at which the entity was updated. */
@@ -9610,13 +9610,13 @@ export class IssueNewCommentNotificationWebhookPayload {
   /** The ID of the user who received the notification. */
   public userId: string;
   /** The actor who caused the notification. */
-  public actor?: UserChildWebhookPayload;
+  public actor?: UserChildWebhookPayload | null;
   /** The comment this notification belongs to. */
   public comment: CommentChildWebhookPayload;
   /** The issue this notification belongs to. */
   public issue: IssueWithDescriptionChildWebhookPayload;
   /** The parent comment for the comment this notification belongs to. */
-  public parentComment?: CommentChildWebhookPayload;
+  public parentComment?: CommentChildWebhookPayload | null;
 }
 /**
  * An issue related notification.
@@ -9663,41 +9663,41 @@ export class IssueNotification extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** Related comment ID. Null if the notification is not related to a comment. */
-  public commentId?: string;
+  public commentId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /**
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
    */
-  public emailedAt?: Date;
+  public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Related issue ID. */
   public issueId: string;
   /** Related parent comment ID. Null if the notification is not related to a comment. */
-  public parentCommentId?: string;
+  public parentCommentId?: string | null;
   /** Name of the reaction emoji related to the notification. */
-  public reactionEmoji?: string;
+  public reactionEmoji?: string | null;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
-  public readAt?: Date;
+  public readAt?: Date | null;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
-  public snoozedUntilAt?: Date;
+  public snoozedUntilAt?: Date | null;
   /** Notification type. */
   public type: string;
   /** The time at which a notification was unsnoozed.. */
-  public unsnoozedAt?: Date;
+  public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The subscriptions related to the notification. */
-  public subscriptions?: NotificationSubscription[];
+  public subscriptions?: NotificationSubscription[] | null;
   /** The bot that caused the notification. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
   /** The user that caused the notification. */
@@ -9816,7 +9816,7 @@ export class IssueRelation extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -10039,35 +10039,35 @@ export class IssueSearchResult extends Request {
   }
 
   /** The time at which the issue was added to a cycle. */
-  public addedToCycleAt?: Date;
+  public addedToCycleAt?: Date | null;
   /** The time at which the issue was added to a project. */
-  public addedToProjectAt?: Date;
+  public addedToProjectAt?: Date | null;
   /** The time at which the issue was added to a team. */
-  public addedToTeamAt?: Date;
+  public addedToTeamAt?: Date | null;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the issue was automatically archived by the auto pruning process. */
-  public autoArchivedAt?: Date;
+  public autoArchivedAt?: Date | null;
   /** The time at which the issue was automatically closed by the auto pruning process. */
-  public autoClosedAt?: Date;
+  public autoClosedAt?: Date | null;
   /** The order of the item in its column on the board. */
   public boardOrder: number;
   /** Suggested branch name for the issue. */
   public branchName: string;
   /** The time at which the issue was moved into canceled state. */
-  public canceledAt?: Date;
+  public canceledAt?: Date | null;
   /** The time at which the issue was moved into completed state. */
-  public completedAt?: Date;
+  public completedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Returns the number of Attachment resources which are created by customer support ticketing systems (e.g. Zendesk). */
   public customerTicketCount: number;
   /** The issue's description in markdown format. */
-  public description?: string;
+  public description?: string | null;
   /** The date at which the issue is due. */
-  public dueDate?: L.Scalars["TimelessDate"];
+  public dueDate?: L.Scalars["TimelessDate"] | null;
   /** The estimate of the complexity of the issue.. */
-  public estimate?: number;
+  public estimate?: number | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Issue's human readable identifier (e.g. ENG-123). */
@@ -10089,31 +10089,31 @@ export class IssueSearchResult extends Request {
   /** Emoji reaction summary, grouped by emoji type. */
   public reactionData: L.Scalars["JSONObject"];
   /** The time at which the issue's SLA will breach. */
-  public slaBreachesAt?: Date;
+  public slaBreachesAt?: Date | null;
   /** The time at which the issue's SLA will enter high risk state. */
-  public slaHighRiskAt?: Date;
+  public slaHighRiskAt?: Date | null;
   /** The time at which the issue's SLA will enter medium risk state. */
-  public slaMediumRiskAt?: Date;
+  public slaMediumRiskAt?: Date | null;
   /** The time at which the issue's SLA began. */
-  public slaStartedAt?: Date;
+  public slaStartedAt?: Date | null;
   /** The type of SLA set on the issue. Calendar days or business days. */
-  public slaType?: string;
+  public slaType?: string | null;
   /** The time until an issue will be snoozed in Triage view. */
-  public snoozedUntilAt?: Date;
+  public snoozedUntilAt?: Date | null;
   /** The order of the item in relation to other items in the organization. */
   public sortOrder: number;
   /** The time at which the issue was moved into started state. */
-  public startedAt?: Date;
+  public startedAt?: Date | null;
   /** The time at which the issue entered triage. */
-  public startedTriageAt?: Date;
+  public startedTriageAt?: Date | null;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
-  public subIssueSortOrder?: number;
+  public subIssueSortOrder?: number | null;
   /** The issue's title. */
   public title: string;
   /** A flag that indicates whether the issue is in the trash bin. */
-  public trashed?: boolean;
+  public trashed?: boolean | null;
   /** The time at which the issue left triage. */
-  public triagedAt?: Date;
+  public triagedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -10124,11 +10124,11 @@ export class IssueSearchResult extends Request {
   /** Reactions associated with the issue. */
   public reactions: Reaction[];
   /** The external services the issue is synced with. */
-  public syncedWith?: ExternalEntityInfo[];
+  public syncedWith?: ExternalEntityInfo[] | null;
   /** The bot that created the issue, if applicable. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** Integration type that created this issue, if applicable. */
-  public integrationSourceType?: L.IntegrationService;
+  public integrationSourceType?: L.IntegrationService | null;
   /** The external user who requested creation of the Asks issue on behalf of the creator. */
   public get asksExternalUserRequester(): LinearFetch<ExternalUser> | undefined {
     return this._asksExternalUserRequester?.id
@@ -10302,7 +10302,7 @@ export class IssueSlaWebhookPayload {
   /** The type of resource. */
   public type: string;
   /** URL for the issue. */
-  public url?: string;
+  public url?: string | null;
   /** The ID of the webhook that sent this event. */
   public webhookId: string;
   /** Unix timestamp in milliseconds when the webhook was sent. */
@@ -10329,7 +10329,7 @@ export class IssueStateSpan extends Request {
   }
 
   /** The timestamp when the issue left this state. Null if the issue is currently in this state. */
-  public endedAt?: Date;
+  public endedAt?: Date | null;
   /** The unique identifier of the state span. */
   public id: string;
   /** The timestamp when the issue entered this state. */
@@ -10383,13 +10383,13 @@ export class IssueStatusChangedNotificationWebhookPayload {
   }
 
   /** The ID of the actor who caused the notification. */
-  public actorId?: string;
+  public actorId?: string | null;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the external user who caused the notification. */
-  public externalUserActorId?: string;
+  public externalUserActorId?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this notification belongs to. */
@@ -10401,7 +10401,7 @@ export class IssueStatusChangedNotificationWebhookPayload {
   /** The ID of the user who received the notification. */
   public userId: string;
   /** The actor who caused the notification. */
-  public actor?: UserChildWebhookPayload;
+  public actor?: UserChildWebhookPayload | null;
   /** The issue this notification belongs to. */
   public issue: IssueWithDescriptionChildWebhookPayload;
 }
@@ -10443,23 +10443,23 @@ export class IssueSuggestion extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
-  public dismissalReason?: string;
+  public dismissalReason?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   public issueId: string;
   public stateChangedAt: Date;
-  public suggestedIssueId?: string;
-  public suggestedLabelId?: string;
-  public suggestedUserId?: string;
+  public suggestedIssueId?: string | null;
+  public suggestedLabelId?: string | null;
+  public suggestedUserId?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
-  public metadata?: IssueSuggestionMetadata;
+  public metadata?: IssueSuggestionMetadata | null;
   public state: L.IssueSuggestionState;
   public type: L.IssueSuggestionType;
   public get issue(): LinearFetch<Issue> | undefined {
@@ -10528,13 +10528,13 @@ export class IssueSuggestionMetadata extends Request {
     this.variant = data.variant ?? undefined;
   }
 
-  public appliedAutomationRuleId?: string;
-  public classification?: string;
-  public evalLogId?: string;
-  public rank?: number;
-  public reasons?: string[];
-  public score?: number;
-  public variant?: string;
+  public appliedAutomationRuleId?: string | null;
+  public classification?: string | null;
+  public evalLogId?: string | null;
+  public rank?: number | null;
+  public reasons?: string[] | null;
+  public score?: number | null;
+  public variant?: string | null;
 }
 /**
  * IssueTitleSuggestionFromCustomerRequestPayload model
@@ -10575,13 +10575,13 @@ export class IssueUnassignedFromYouNotificationWebhookPayload {
   }
 
   /** The ID of the actor who caused the notification. */
-  public actorId?: string;
+  public actorId?: string | null;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the external user who caused the notification. */
-  public externalUserActorId?: string;
+  public externalUserActorId?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this notification belongs to. */
@@ -10593,7 +10593,7 @@ export class IssueUnassignedFromYouNotificationWebhookPayload {
   /** The ID of the user who received the notification. */
   public userId: string;
   /** The actor who caused the notification. */
-  public actor?: UserChildWebhookPayload;
+  public actor?: UserChildWebhookPayload | null;
   /** The issue this notification belongs to. */
   public issue: IssueWithDescriptionChildWebhookPayload;
 }
@@ -10675,57 +10675,57 @@ export class IssueWebhookPayload {
   }
 
   /** The time at which the issue was added to a cycle. */
-  public addedToCycleAt?: string;
+  public addedToCycleAt?: string | null;
   /** The time at which the issue was added to a project. */
-  public addedToProjectAt?: string;
+  public addedToProjectAt?: string | null;
   /** The time at which the issue was added to a team. */
-  public addedToTeamAt?: string;
+  public addedToTeamAt?: string | null;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The ID of the user that is assigned to the issue. */
-  public assigneeId?: string;
+  public assigneeId?: string | null;
   /** The time at which the issue was auto-archived. */
-  public autoArchivedAt?: string;
+  public autoArchivedAt?: string | null;
   /** The time at which the issue was auto-closed. */
-  public autoClosedAt?: string;
+  public autoClosedAt?: string | null;
   /** The bot actor data for this issue. */
-  public botActor?: string;
+  public botActor?: string | null;
   /** The time at which the issue was canceled. */
-  public canceledAt?: string;
+  public canceledAt?: string | null;
   /** The time at which the issue was completed. */
-  public completedAt?: string;
+  public completedAt?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the user that created the issue. */
-  public creatorId?: string;
+  public creatorId?: string | null;
   /** The ID of the cycle that the issue belongs to. */
-  public cycleId?: string;
+  public cycleId?: string | null;
   /** The ID of the agent user that the issue is delegated to. */
-  public delegateId?: string;
+  public delegateId?: string | null;
   /** The description of the issue. */
-  public description?: string;
+  public description?: string | null;
   /** The description data of the issue. */
-  public descriptionData?: string;
+  public descriptionData?: string | null;
   /** The due date of the issue. */
-  public dueDate?: string;
+  public dueDate?: string | null;
   /** The estimate of the complexity of the issue.. */
-  public estimate?: number;
+  public estimate?: number | null;
   /** The ID of the external user that created the issue. */
-  public externalUserCreatorId?: string;
+  public externalUserCreatorId?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The identifier of the issue. */
   public identifier: string;
   /** Integration type that created this issue, if applicable. */
-  public integrationSourceType?: string;
+  public integrationSourceType?: string | null;
   /** Id of the labels associated with this issue. */
   public labelIds: string[];
   /** The ID of the last template that was applied to the issue. */
-  public lastAppliedTemplateId?: string;
+  public lastAppliedTemplateId?: string | null;
   /** The issue's unique number. */
   public number: number;
   /** The ID of the parent issue. */
-  public parentId?: string;
+  public parentId?: string | null;
   /** Previous identifiers of the issue if it has been moved between teams. */
   public previousIdentifiers: string[];
   /** The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low. */
@@ -10735,49 +10735,49 @@ export class IssueWebhookPayload {
   /** The order of the item in relation to other items in the organization, when ordered by priority. */
   public prioritySortOrder: number;
   /** The ID of the project that the issue belongs to. */
-  public projectId?: string;
+  public projectId?: string | null;
   /** The ID of the project milestone that the issue belongs to. */
-  public projectMilestoneId?: string;
+  public projectMilestoneId?: string | null;
   /** The reaction data for this issue. */
   public reactionData: L.Scalars["JSONObject"];
   /** The ID of the recurring issue template that created the issue. */
-  public recurringIssueTemplateId?: string;
+  public recurringIssueTemplateId?: string | null;
   /** The time at which the issue would breach its SLA. */
-  public slaBreachesAt?: string;
+  public slaBreachesAt?: string | null;
   /** The time at which the issue would enter SLA high risk. */
-  public slaHighRiskAt?: string;
+  public slaHighRiskAt?: string | null;
   /** The time at which the issue would enter SLA medium risk. */
-  public slaMediumRiskAt?: string;
+  public slaMediumRiskAt?: string | null;
   /** The time at which the issue's SLA started. */
-  public slaStartedAt?: string;
+  public slaStartedAt?: string | null;
   /** The type of SLA the issue is under. */
-  public slaType?: string;
+  public slaType?: string | null;
   /** The time until an issue will be snoozed in Triage view. */
-  public snoozedUntilAt?: string;
+  public snoozedUntilAt?: string | null;
   /** The order of the item in relation to other items in the organization. */
   public sortOrder: number;
   /** The ID of the source comment that the issue was created from. */
-  public sourceCommentId?: string;
+  public sourceCommentId?: string | null;
   /** The time at which the issue was moved into started state. */
-  public startedAt?: string;
+  public startedAt?: string | null;
   /** The time at which the issue entered triage. */
-  public startedTriageAt?: string;
+  public startedTriageAt?: string | null;
   /** The ID of the issue's current workflow state. */
   public stateId: string;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
-  public subIssueSortOrder?: number;
+  public subIssueSortOrder?: number | null;
   /** The IDs of the users that are subscribed to the issue. */
   public subscriberIds: string[];
   /** The entity this issue is synced with. */
-  public syncedWith?: L.Scalars["JSONObject"];
+  public syncedWith?: L.Scalars["JSONObject"] | null;
   /** The ID of the team that the issue belongs to. */
   public teamId: string;
   /** The issue's title. */
   public title: string;
   /** A flag that indicates whether the issue is in the trash bin. */
-  public trashed?: boolean;
+  public trashed?: boolean | null;
   /** The time at which the issue was triaged. */
-  public triagedAt?: string;
+  public triagedAt?: string | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The URL of the issue. */
@@ -10785,23 +10785,23 @@ export class IssueWebhookPayload {
   /** The labels associated with this issue. */
   public labels: IssueLabelChildWebhookPayload[];
   /** The user that is assigned to the issue. */
-  public assignee?: UserChildWebhookPayload;
+  public assignee?: UserChildWebhookPayload | null;
   /** The user that created the issue. */
-  public creator?: UserChildWebhookPayload;
+  public creator?: UserChildWebhookPayload | null;
   /** The cycle that the issue belongs to. */
-  public cycle?: CycleChildWebhookPayload;
+  public cycle?: CycleChildWebhookPayload | null;
   /** The agent user that the issue is delegated to. */
-  public delegate?: UserChildWebhookPayload;
+  public delegate?: UserChildWebhookPayload | null;
   /** The external user that created the issue. */
-  public externalUserCreator?: ExternalUserChildWebhookPayload;
+  public externalUserCreator?: ExternalUserChildWebhookPayload | null;
   /** The project that the issue belongs to. */
-  public project?: ProjectChildWebhookPayload;
+  public project?: ProjectChildWebhookPayload | null;
   /** The project milestone that the issue belongs to. */
-  public projectMilestone?: ProjectMilestoneChildWebhookPayload;
+  public projectMilestone?: ProjectMilestoneChildWebhookPayload | null;
   /** The issue's current workflow state. */
   public state: WorkflowStateChildWebhookPayload;
   /** The team that the issue belongs to. */
-  public team?: TeamChildWebhookPayload;
+  public team?: TeamChildWebhookPayload | null;
 }
 /**
  * Certain properties of an issue, including its description.
@@ -10820,7 +10820,7 @@ export class IssueWithDescriptionChildWebhookPayload {
   }
 
   /** The description of the issue. */
-  public description?: string;
+  public description?: string | null;
   /** The ID of the issue. */
   public id: string;
   /** The identifier of the issue. */
@@ -10875,7 +10875,7 @@ export class LabelNotificationSubscription extends Request {
   /** Whether the subscription is active or not. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -10888,9 +10888,9 @@ export class LabelNotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The type of view to which the notification subscription context is associated with. */
-  public contextViewType?: L.ContextViewType;
+  public contextViewType?: L.ContextViewType | null;
   /** The type of user view to which the notification subscription context is associated with. */
-  public userContextViewType?: L.UserContextViewType;
+  public userContextViewType?: L.UserContextViewType | null;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -11024,31 +11024,31 @@ export class Notification extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /**
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
    */
-  public emailedAt?: Date;
+  public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
-  public readAt?: Date;
+  public readAt?: Date | null;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
-  public snoozedUntilAt?: Date;
+  public snoozedUntilAt?: Date | null;
   /** Notification type. */
   public type: string;
   /** The time at which a notification was unsnoozed.. */
-  public unsnoozedAt?: Date;
+  public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The bot that caused the notification. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
   /** The user that caused the notification. */
@@ -11296,7 +11296,7 @@ export class NotificationDeliveryPreferences extends Request {
   }
 
   /** The delivery preferences for the mobile channel. */
-  public mobile?: NotificationDeliveryPreferencesChannel;
+  public mobile?: NotificationDeliveryPreferencesChannel | null;
 }
 /**
  * A user's notification delivery preferences.
@@ -11312,9 +11312,9 @@ export class NotificationDeliveryPreferencesChannel extends Request {
   }
 
   /** [DEPRECATED] Whether notifications are enabled for this channel. Use notificationChannelPreferences instead. */
-  public notificationsDisabled?: boolean;
+  public notificationsDisabled?: boolean | null;
   /** The schedule for notifications on this channel. */
-  public schedule?: NotificationDeliveryPreferencesSchedule;
+  public schedule?: NotificationDeliveryPreferencesSchedule | null;
 }
 /**
  * A user's notification delivery schedule for a particular day.
@@ -11330,9 +11330,9 @@ export class NotificationDeliveryPreferencesDay extends Request {
   }
 
   /** The time notifications end. */
-  public end?: string;
+  public end?: string | null;
   /** The time notifications start. */
-  public start?: string;
+  public start?: string | null;
 }
 /**
  * A user's notification delivery schedule for a particular day.
@@ -11354,7 +11354,7 @@ export class NotificationDeliveryPreferencesSchedule extends Request {
   }
 
   /** Whether the schedule is disabled. */
-  public disabled?: boolean;
+  public disabled?: boolean | null;
   /** Delivery preferences for Friday. */
   public friday: NotificationDeliveryPreferencesDay;
   /** Delivery preferences for Monday. */
@@ -11428,7 +11428,7 @@ export class NotificationSubscription extends Request {
   /** Whether the subscription is active or not. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -11439,9 +11439,9 @@ export class NotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The type of view to which the notification subscription context is associated with. */
-  public contextViewType?: L.ContextViewType;
+  public contextViewType?: L.ContextViewType | null;
   /** The type of user view to which the notification subscription context is associated with. */
-  public userContextViewType?: L.UserContextViewType;
+  public userContextViewType?: L.UserContextViewType | null;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -11737,23 +11737,23 @@ export class OauthClientApproval extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The reason the request for the OAuth client approval was denied. */
-  public denyReason?: string;
+  public denyReason?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** New scopes that were requested for approval after the initial request. */
-  public newlyRequestedScopes?: string[];
+  public newlyRequestedScopes?: string[] | null;
   /** The uuid of the OAuth client being requested for installation. */
   public oauthClientId: string;
   /** The reason the person wants to install this OAuth client. */
-  public requestReason?: string;
+  public requestReason?: string | null;
   /** The person who requested installing the OAuth client. */
   public requesterId: string;
   /** The person who responded to the request to install the OAuth client. */
-  public responderId?: string;
+  public responderId?: string | null;
   /** The scopes the app has been approved for. */
   public scopes: string[];
   /**
@@ -11796,33 +11796,33 @@ export class OauthClientApprovalNotification extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /**
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
    */
-  public emailedAt?: Date;
+  public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Related OAuth client approval request ID. */
   public oauthClientApprovalId: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
-  public readAt?: Date;
+  public readAt?: Date | null;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
-  public snoozedUntilAt?: Date;
+  public snoozedUntilAt?: Date | null;
   /** Notification type. */
   public type: string;
   /** The time at which a notification was unsnoozed.. */
-  public unsnoozedAt?: Date;
+  public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The bot that caused the notification. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** The OAuth client approval request related to the notification. */
   public oauthClientApproval: OauthClientApproval;
   /** The category of the notification. */
@@ -11936,13 +11936,13 @@ export class Organization extends Request {
   /** Whether the organization has enabled resolved thread AI summaries. */
   public aiThreadSummariesEnabled: boolean;
   /** [DEPRECATED] Whether member users are allowed to send invites. */
-  public allowMembersToInvite?: boolean;
+  public allowMembersToInvite?: boolean | null;
   /** Allowed authentication providers, empty array means all are allowed. */
   public allowedAuthServices: string[];
   /** Allowed file upload content types */
-  public allowedFileUploadContentTypes?: string[];
+  public allowedFileUploadContentTypes?: string[] | null;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Aproximate number of issues in the organization, including archived ones. */
@@ -11954,13 +11954,13 @@ export class Organization extends Request {
   /** Whether the organization is using Customers. */
   public customersEnabled: boolean;
   /** The time at which deletion of the organization was requested. */
-  public deletionRequestedAt?: Date;
+  public deletionRequestedAt?: Date | null;
   /** Whether the organization has enabled the feed feature. */
   public feedEnabled: boolean;
   /** The month at which the fiscal year starts. Defaults to January (0). */
   public fiscalYearStartMonth: number;
   /** How git branches are formatted. If null, default formatting will be used. */
-  public gitBranchFormat?: string;
+  public gitBranchFormat?: string | null;
   /** Whether issue descriptions should be included in Git integration linkback messages. */
   public gitLinkbackDescriptionsEnabled: boolean;
   /** Whether the Git integration linkback messages should be sent to private repositories. */
@@ -11972,11 +11972,11 @@ export class Organization extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** The n-weekly frequency at which to prompt for initiative updates. When not set, reminders are off. */
-  public initiativeUpdateReminderFrequencyInWeeks?: number;
+  public initiativeUpdateReminderFrequencyInWeeks?: number | null;
   /** The hour at which to prompt for initiative updates. */
   public initiativeUpdateRemindersHour: number;
   /** The organization's logo URL. */
-  public logoUrl?: string;
+  public logoUrl?: string | null;
   /** The organization's name. */
   public name: string;
   /** Rolling 30-day total upload volume for the organization, in megabytes. */
@@ -11984,13 +11984,13 @@ export class Organization extends Request {
   /** Previously used URL keys for the organization (last 3 are kept and redirected). */
   public previousUrlKeys: string[];
   /** The n-weekly frequency at which to prompt for project updates. When not set, reminders are off. */
-  public projectUpdateReminderFrequencyInWeeks?: number;
+  public projectUpdateReminderFrequencyInWeeks?: number | null;
   /** The hour at which to prompt for project updates. */
   public projectUpdateRemindersHour: number;
   /** [DEPRECATED] Whether workspace label creation, update, and deletion is restricted to admins. */
-  public restrictLabelManagementToAdmins?: boolean;
+  public restrictLabelManagementToAdmins?: boolean | null;
   /** [DEPRECATED] Whether team creation is restricted to admins. */
-  public restrictTeamCreationToAdmins?: boolean;
+  public restrictTeamCreationToAdmins?: boolean | null;
   /** Whether the organization is using a roadmap. */
   public roadmapEnabled: boolean;
   /** Whether SAML authentication is enabled for organization. */
@@ -12000,9 +12000,9 @@ export class Organization extends Request {
   /** Security settings for the organization. */
   public securitySettings: L.Scalars["JSONObject"];
   /** The time at which the trial will end. */
-  public trialEndsAt?: Date;
+  public trialEndsAt?: Date | null;
   /** The time at which the trial started. */
-  public trialStartsAt?: Date;
+  public trialStartsAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -12013,13 +12013,13 @@ export class Organization extends Request {
   /** Number of active users in the organization. */
   public userCount: number;
   /** IP restriction configurations. */
-  public ipRestrictions?: OrganizationIpRestriction[];
+  public ipRestrictions?: OrganizationIpRestriction[] | null;
   /** The organization's project statuses. */
   public projectStatuses: ProjectStatus[];
   /** The organization's subscription to a paid plan. */
-  public subscription?: PaidSubscription;
+  public subscription?: PaidSubscription | null;
   /** Default schedule for how often feed summaries are generated. */
-  public defaultFeedSummarySchedule?: L.FeedSummarySchedule;
+  public defaultFeedSummarySchedule?: L.FeedSummarySchedule | null;
   /** The day at which to prompt for initiative updates. */
   public initiativeUpdateRemindersDay: L.Day;
   /** The day at which to prompt for project updates. */
@@ -12135,13 +12135,13 @@ export class OrganizationDomain extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** Whether the domains was claimed by the organization through DNS verification. */
-  public claimed?: boolean;
+  public claimed?: boolean | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Prevent users with this domain to create new workspaces. */
-  public disableOrganizationCreation?: boolean;
+  public disableOrganizationCreation?: boolean | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Domain name. */
@@ -12152,11 +12152,11 @@ export class OrganizationDomain extends Request {
    */
   public updatedAt: Date;
   /** E-mail used to verify this domain. */
-  public verificationEmail?: string;
+  public verificationEmail?: string | null;
   /** Is this domain verified. */
   public verified: boolean;
   /** The identity provider the domain belongs to. */
-  public identityProvider?: IdentityProvider;
+  public identityProvider?: IdentityProvider | null;
   /** What type of auth is the domain used for. */
   public authType: L.OrganizationDomainAuthType;
   /** The user who added the domain. */
@@ -12218,21 +12218,21 @@ export class OrganizationInvite extends Request {
   }
 
   /** The time at which the invite was accepted. Null, if the invite hasn't been accepted. */
-  public acceptedAt?: Date;
+  public acceptedAt?: Date | null;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The invitees email address. */
   public email: string;
   /** The time at which the invite will be expiring. Null, if the invite shouldn't expire. */
-  public expiresAt?: Date;
+  public expiresAt?: Date | null;
   /** The invite was sent to external address. */
   public external: boolean;
   /** The unique identifier of the entity. */
   public id: string;
   /** Extra metadata associated with the organization invite. */
-  public metadata?: L.Scalars["JSONObject"];
+  public metadata?: L.Scalars["JSONObject"] | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -12332,7 +12332,7 @@ export class OrganizationInviteFullDetailsPayload extends Request {
   /** ID of the workspace the invite is for. */
   public organizationId: string;
   /** URL of the workspace logo the invite is for. */
-  public organizationLogoUrl?: string;
+  public organizationLogoUrl?: string | null;
   /** Name of the workspace the invite is for. */
   public organizationName: string;
   /** What user role the invite should grant. */
@@ -12385,7 +12385,7 @@ export class OrganizationIpRestriction extends Request {
   }
 
   /** Optional restriction description. */
-  public description?: string;
+  public description?: string | null;
   /** Whether the restriction is enabled. */
   public enabled: boolean;
   /** IP range in CIDR format. */
@@ -12493,47 +12493,47 @@ export class OtherNotificationWebhookPayload {
   }
 
   /** The ID of the actor who caused the notification. */
-  public actorId?: string;
+  public actorId?: string | null;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The ID of the comment this notification belongs to. */
-  public commentId?: string;
+  public commentId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the document this notification belongs to. */
-  public documentId?: string;
+  public documentId?: string | null;
   /** The ID of the external user who caused the notification. */
-  public externalUserActorId?: string;
+  public externalUserActorId?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the issue this notification belongs to. */
-  public issueId?: string;
+  public issueId?: string | null;
   /** The ID of the parent comment this notification belongs to. */
-  public parentCommentId?: string;
+  public parentCommentId?: string | null;
   /** The ID of the project this notification belongs to. */
-  public projectId?: string;
+  public projectId?: string | null;
   /** The ID of the project update this notification belongs to. */
-  public projectUpdateId?: string;
+  public projectUpdateId?: string | null;
   /** The emoji of the reaction this notification is for. */
-  public reactionEmoji?: string;
+  public reactionEmoji?: string | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The ID of the user who received the notification. */
   public userId: string;
   /** The actor who caused the notification. */
-  public actor?: UserChildWebhookPayload;
+  public actor?: UserChildWebhookPayload | null;
   /** The comment this notification belongs to. */
-  public comment?: CommentChildWebhookPayload;
+  public comment?: CommentChildWebhookPayload | null;
   /** The document this notification belongs to. */
-  public document?: DocumentChildWebhookPayload;
+  public document?: DocumentChildWebhookPayload | null;
   /** The issue this notification belongs to. */
-  public issue?: IssueWithDescriptionChildWebhookPayload;
+  public issue?: IssueWithDescriptionChildWebhookPayload | null;
   /** The parent comment this notification belongs to. */
-  public parentComment?: CommentChildWebhookPayload;
+  public parentComment?: CommentChildWebhookPayload | null;
   /** The project this notification belongs to. */
-  public project?: ProjectChildWebhookPayload;
+  public project?: ProjectChildWebhookPayload | null;
   /** The project update this notification belongs to. */
-  public projectUpdate?: ProjectUpdateChildWebhookPayload;
+  public projectUpdate?: ProjectUpdateChildWebhookPayload | null;
   /** The type of the notification. */
   public type: L.OtherNotificationType;
 }
@@ -12553,13 +12553,13 @@ export class PageInfo extends Request {
   }
 
   /** Cursor representing the last result in the paginated results. */
-  public endCursor?: string;
+  public endCursor?: string | null;
   /** Indicates if there are more results when paginating forward. */
   public hasNextPage: boolean;
   /** Indicates if there are more results when paginating backward. */
   public hasPreviousPage: boolean;
   /** Cursor representing the first result in the paginated results. */
-  public startCursor?: string;
+  public startCursor?: string | null;
 }
 /**
  * The paid subscription of an organization.
@@ -12589,11 +12589,11 @@ export class PaidSubscription extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The date the subscription is scheduled to be canceled, if any. */
-  public cancelAt?: Date;
+  public cancelAt?: Date | null;
   /** The date the subscription was canceled, if any. */
-  public canceledAt?: Date;
+  public canceledAt?: Date | null;
   /** The collection method for this subscription, either automatically charged or invoiced. */
   public collectionMethod: string;
   /** The time at which the entity was created. */
@@ -12601,15 +12601,15 @@ export class PaidSubscription extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** The date the subscription will be billed next. */
-  public nextBillingAt?: Date;
+  public nextBillingAt?: Date | null;
   /** The subscription type of a pending change. Null if no change pending. */
-  public pendingChangeType?: string;
+  public pendingChangeType?: string | null;
   /** The number of seats in the subscription. */
   public seats: number;
   /** The maximum number of seats that will be billed in the subscription. */
-  public seatsMaximum?: number;
+  public seatsMaximum?: number | null;
   /** The minimum number of seats that will be billed in the subscription. */
-  public seatsMinimum?: number;
+  public seatsMinimum?: number | null;
   /** The subscription type. */
   public type: string;
   /**
@@ -12680,39 +12680,39 @@ export class PostNotification extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** Related comment ID. Null if the notification is not related to a comment. */
-  public commentId?: string;
+  public commentId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /**
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
    */
-  public emailedAt?: Date;
+  public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Related parent comment ID. Null if the notification is not related to a comment. */
-  public parentCommentId?: string;
+  public parentCommentId?: string | null;
   /** Related post ID. */
   public postId: string;
   /** Name of the reaction emoji related to the notification. */
-  public reactionEmoji?: string;
+  public reactionEmoji?: string | null;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
-  public readAt?: Date;
+  public readAt?: Date | null;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
-  public snoozedUntilAt?: Date;
+  public snoozedUntilAt?: Date | null;
   /** Notification type. */
   public type: string;
   /** The time at which a notification was unsnoozed.. */
-  public unsnoozedAt?: Date;
+  public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The bot that caused the notification. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
   /** The user that caused the notification. */
@@ -12816,29 +12816,29 @@ export class Project extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the project was automatically archived by the auto pruning process. */
-  public autoArchivedAt?: Date;
+  public autoArchivedAt?: Date | null;
   /** The time at which the project was moved into canceled state. */
-  public canceledAt?: Date;
+  public canceledAt?: Date | null;
   /** The project's color. */
   public color: string;
   /** The time at which the project was moved into completed state. */
-  public completedAt?: Date;
+  public completedAt?: Date | null;
   /** The number of completed issues in the project after each week. */
   public completedIssueCountHistory: number[];
   /** The number of completed estimation points after each week. */
   public completedScopeHistory: number[];
   /** The project's content in markdown format. */
-  public content?: string;
+  public content?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The project's description. */
   public description: string;
   /** The time at which the project health was updated. */
-  public healthUpdatedAt?: Date;
+  public healthUpdatedAt?: Date | null;
   /** The icon of the project. */
-  public icon?: string;
+  public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The number of in progress estimation points after each week. */
@@ -12858,7 +12858,7 @@ export class Project extends Request {
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   public progress: number;
   /** The time until which project update reminders are paused. */
-  public projectUpdateRemindersPausedUntilAt?: Date;
+  public projectUpdateRemindersPausedUntilAt?: Date | null;
   /** The overall scope (total estimate points) of the project. */
   public scope: number;
   /** The total number of estimation points after each week. */
@@ -12874,21 +12874,21 @@ export class Project extends Request {
   /** The sort order for the project within the organization. */
   public sortOrder: number;
   /** The estimated start date of the project. */
-  public startDate?: L.Scalars["TimelessDate"];
+  public startDate?: L.Scalars["TimelessDate"] | null;
   /** The time at which the project was moved into started state. */
-  public startedAt?: Date;
+  public startedAt?: Date | null;
   /** [DEPRECATED] The type of the state. */
   public state: string;
   /** The estimated completion date of the project. */
-  public targetDate?: L.Scalars["TimelessDate"];
+  public targetDate?: L.Scalars["TimelessDate"] | null;
   /** A flag that indicates whether the project is in the trash bin. */
-  public trashed?: boolean;
+  public trashed?: boolean | null;
   /** The frequency at which to prompt for updates. When not set, reminders are inherited from workspace. */
-  public updateReminderFrequency?: number;
+  public updateReminderFrequency?: number | null;
   /** The n-weekly frequency at which to prompt for updates. When not set, reminders are inherited from workspace. */
-  public updateReminderFrequencyInWeeks?: number;
+  public updateReminderFrequencyInWeeks?: number | null;
   /** The hour at which to prompt for updates. */
-  public updateRemindersHour?: number;
+  public updateRemindersHour?: number | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -12897,17 +12897,17 @@ export class Project extends Request {
   /** Project URL. */
   public url: string;
   /** The content of the project description. */
-  public documentContent?: DocumentContent;
+  public documentContent?: DocumentContent | null;
   /** The resolution of the reminder frequency. */
   public frequencyResolution: L.FrequencyResolutionType;
   /** The health of the project. */
-  public health?: L.ProjectUpdateHealthType;
+  public health?: L.ProjectUpdateHealthType | null;
   /** The resolution of the project's start date. */
-  public startDateResolution?: L.DateResolutionType;
+  public startDateResolution?: L.DateResolutionType | null;
   /** The resolution of the project's estimated completion date. */
-  public targetDateResolution?: L.DateResolutionType;
+  public targetDateResolution?: L.DateResolutionType | null;
   /** The day at which to prompt for updates. */
-  public updateRemindersDay?: L.Day;
+  public updateRemindersDay?: L.Day | null;
   /** The project was created based on this issue. */
   public get convertedFromIssue(): LinearFetch<Issue> | undefined {
     return this._convertedFromIssue?.id ? new IssueQuery(this._request).fetch(this._convertedFromIssue?.id) : undefined;
@@ -13107,7 +13107,7 @@ export class ProjectAttachment extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -13115,11 +13115,11 @@ export class ProjectAttachment extends Request {
   /** Custom metadata related to the attachment. */
   public metadata: L.Scalars["JSONObject"];
   /** Information about the external source which created the attachment. */
-  public source?: L.Scalars["JSONObject"];
+  public source?: L.Scalars["JSONObject"] | null;
   /** An accessor helper to source.type, defines the source type of the attachment. */
-  public sourceType?: string;
+  public sourceType?: string | null;
   /** Optional subtitle of the attachment */
-  public subtitle?: string;
+  public subtitle?: string | null;
   /** Title of the attachment. */
   public title: string;
   /**
@@ -13192,9 +13192,9 @@ export class ProjectFilterSuggestionPayload extends Request {
   }
 
   /** The json filter that is suggested. */
-  public filter?: L.Scalars["JSONObject"];
+  public filter?: L.Scalars["JSONObject"] | null;
   /** The log id of the prompt, that created this filter. */
-  public logId?: string;
+  public logId?: string | null;
 }
 /**
  * An history associated with a project.
@@ -13216,7 +13216,7 @@ export class ProjectHistory extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The events that happened while recording that history. */
@@ -13286,19 +13286,19 @@ export class ProjectLabel extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The label's color as a HEX string. */
   public color: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The label's description. */
-  public description?: string;
+  public description?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Whether the label is a group. */
   public isGroup: boolean;
   /** The date when the label was last applied to an issue or project. */
-  public lastAppliedAt?: Date;
+  public lastAppliedAt?: Date | null;
   /** The label's name. */
   public name: string;
   /**
@@ -13374,7 +13374,7 @@ export class ProjectLabelChildWebhookPayload {
   /** The name of the project label. */
   public name: string;
   /** The parent ID of the project label. */
-  public parentId?: string;
+  public parentId?: string | null;
 }
 /**
  * ProjectLabelConnection model
@@ -13446,15 +13446,15 @@ export class ProjectLabelWebhookPayload {
   }
 
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The color of the project label. */
   public color: string;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The creator ID of the project label. */
-  public creatorId?: string;
+  public creatorId?: string | null;
   /** The label's description. */
-  public description?: string;
+  public description?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** Whether the label is a group. */
@@ -13462,7 +13462,7 @@ export class ProjectLabelWebhookPayload {
   /** The name of the project label. */
   public name: string;
   /** The parent ID of the project label. */
-  public parentId?: string;
+  public parentId?: string | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
 }
@@ -13492,11 +13492,11 @@ export class ProjectMilestone extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The project milestone's description in markdown format. */
-  public description?: string;
+  public description?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The name of the project milestone. */
@@ -13506,14 +13506,14 @@ export class ProjectMilestone extends Request {
   /** The order of the milestone in relation to other milestones within a project. */
   public sortOrder: number;
   /** The planned completion date of the milestone. */
-  public targetDate?: L.Scalars["TimelessDate"];
+  public targetDate?: L.Scalars["TimelessDate"] | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The content of the project milestone description. */
-  public documentContent?: DocumentContent;
+  public documentContent?: DocumentContent | null;
   /** The status of the project milestone. */
   public status: L.ProjectMilestoneStatus;
   /** The project of the milestone. */
@@ -13626,9 +13626,9 @@ export class ProjectMilestoneMovePayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** A snapshot of the issues that were moved to new teams, if the user selected to do it, containing an array of mappings between an issue and its previous team. Store on the client to use for undoing a previous milestone move. */
-  public previousIssueTeamIds?: ProjectMilestoneMoveIssueToTeam[];
+  public previousIssueTeamIds?: ProjectMilestoneMoveIssueToTeam[] | null;
   /** A snapshot of the project that had new teams added to it, if the user selected to do it, containing an array of mappings between a project and its previous teams. Store on the client to use for undoing a previous milestone move. */
-  public previousProjectTeamIds?: ProjectMilestoneMoveProjectTeams;
+  public previousProjectTeamIds?: ProjectMilestoneMoveProjectTeams | null;
   /** The project milestone that was created or updated. */
   public get projectMilestone(): LinearFetch<ProjectMilestone> | undefined {
     return new ProjectMilestoneQuery(this._request).fetch(this._projectMilestone.id);
@@ -13731,43 +13731,43 @@ export class ProjectNotification extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** Related comment ID. Null if the notification is not related to a comment. */
-  public commentId?: string;
+  public commentId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /**
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
    */
-  public emailedAt?: Date;
+  public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Related parent comment ID. Null if the notification is not related to a comment. */
-  public parentCommentId?: string;
+  public parentCommentId?: string | null;
   /** Related project ID. */
   public projectId: string;
   /** Related project milestone ID. */
-  public projectMilestoneId?: string;
+  public projectMilestoneId?: string | null;
   /** Related project update ID. */
-  public projectUpdateId?: string;
+  public projectUpdateId?: string | null;
   /** Name of the reaction emoji related to the notification. */
-  public reactionEmoji?: string;
+  public reactionEmoji?: string | null;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
-  public readAt?: Date;
+  public readAt?: Date | null;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
-  public snoozedUntilAt?: Date;
+  public snoozedUntilAt?: Date | null;
   /** Notification type. */
   public type: string;
   /** The time at which a notification was unsnoozed.. */
-  public unsnoozedAt?: Date;
+  public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The bot that caused the notification. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
   /** The user that caused the notification. */
@@ -13862,7 +13862,7 @@ export class ProjectNotificationSubscription extends Request {
   /** Whether the subscription is active or not. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -13875,9 +13875,9 @@ export class ProjectNotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The type of view to which the notification subscription context is associated with. */
-  public contextViewType?: L.ContextViewType;
+  public contextViewType?: L.ContextViewType | null;
   /** The type of user view to which the notification subscription context is associated with. */
-  public userContextViewType?: L.UserContextViewType;
+  public userContextViewType?: L.UserContextViewType | null;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -14012,7 +14012,7 @@ export class ProjectRelation extends Request {
   /** The type of anchor on the project end of the relation. */
   public anchorType: string;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -14231,29 +14231,29 @@ export class ProjectSearchResult extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the project was automatically archived by the auto pruning process. */
-  public autoArchivedAt?: Date;
+  public autoArchivedAt?: Date | null;
   /** The time at which the project was moved into canceled state. */
-  public canceledAt?: Date;
+  public canceledAt?: Date | null;
   /** The project's color. */
   public color: string;
   /** The time at which the project was moved into completed state. */
-  public completedAt?: Date;
+  public completedAt?: Date | null;
   /** The number of completed issues in the project after each week. */
   public completedIssueCountHistory: number[];
   /** The number of completed estimation points after each week. */
   public completedScopeHistory: number[];
   /** The project's content in markdown format. */
-  public content?: string;
+  public content?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The project's description. */
   public description: string;
   /** The time at which the project health was updated. */
-  public healthUpdatedAt?: Date;
+  public healthUpdatedAt?: Date | null;
   /** The icon of the project. */
-  public icon?: string;
+  public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The number of in progress estimation points after each week. */
@@ -14275,7 +14275,7 @@ export class ProjectSearchResult extends Request {
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   public progress: number;
   /** The time until which project update reminders are paused. */
-  public projectUpdateRemindersPausedUntilAt?: Date;
+  public projectUpdateRemindersPausedUntilAt?: Date | null;
   /** The overall scope (total estimate points) of the project. */
   public scope: number;
   /** The total number of estimation points after each week. */
@@ -14291,21 +14291,21 @@ export class ProjectSearchResult extends Request {
   /** The sort order for the project within the organization. */
   public sortOrder: number;
   /** The estimated start date of the project. */
-  public startDate?: L.Scalars["TimelessDate"];
+  public startDate?: L.Scalars["TimelessDate"] | null;
   /** The time at which the project was moved into started state. */
-  public startedAt?: Date;
+  public startedAt?: Date | null;
   /** [DEPRECATED] The type of the state. */
   public state: string;
   /** The estimated completion date of the project. */
-  public targetDate?: L.Scalars["TimelessDate"];
+  public targetDate?: L.Scalars["TimelessDate"] | null;
   /** A flag that indicates whether the project is in the trash bin. */
-  public trashed?: boolean;
+  public trashed?: boolean | null;
   /** The frequency at which to prompt for updates. When not set, reminders are inherited from workspace. */
-  public updateReminderFrequency?: number;
+  public updateReminderFrequency?: number | null;
   /** The n-weekly frequency at which to prompt for updates. When not set, reminders are inherited from workspace. */
-  public updateReminderFrequencyInWeeks?: number;
+  public updateReminderFrequencyInWeeks?: number | null;
   /** The hour at which to prompt for updates. */
-  public updateRemindersHour?: number;
+  public updateRemindersHour?: number | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -14314,17 +14314,17 @@ export class ProjectSearchResult extends Request {
   /** Project URL. */
   public url: string;
   /** The content of the project description. */
-  public documentContent?: DocumentContent;
+  public documentContent?: DocumentContent | null;
   /** The resolution of the reminder frequency. */
   public frequencyResolution: L.FrequencyResolutionType;
   /** The health of the project. */
-  public health?: L.ProjectUpdateHealthType;
+  public health?: L.ProjectUpdateHealthType | null;
   /** The resolution of the project's start date. */
-  public startDateResolution?: L.DateResolutionType;
+  public startDateResolution?: L.DateResolutionType | null;
   /** The resolution of the project's estimated completion date. */
-  public targetDateResolution?: L.DateResolutionType;
+  public targetDateResolution?: L.DateResolutionType | null;
   /** The day at which to prompt for updates. */
-  public updateRemindersDay?: L.Day;
+  public updateRemindersDay?: L.Day | null;
   /** The project was created based on this issue. */
   public get convertedFromIssue(): LinearFetch<Issue> | undefined {
     return this._convertedFromIssue?.id ? new IssueQuery(this._request).fetch(this._convertedFromIssue?.id) : undefined;
@@ -14416,13 +14416,13 @@ export class ProjectStatus extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The UI color of the status as a HEX string. */
   public color: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Description of the status. */
-  public description?: string;
+  public description?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Whether or not a project can be in this status indefinitely. */
@@ -14611,7 +14611,7 @@ export class ProjectUpdate extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The update content in markdown format. */
   public body: string;
   /** Number of comments associated with the project update. */
@@ -14619,11 +14619,11 @@ export class ProjectUpdate extends Request {
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The diff between the current update and the previous one. */
-  public diff?: L.Scalars["JSONObject"];
+  public diff?: L.Scalars["JSONObject"] | null;
   /** The diff between the current update and the previous one, formatted as markdown. */
-  public diffMarkdown?: string;
+  public diffMarkdown?: string | null;
   /** The time the update was edited. */
-  public editedAt?: Date;
+  public editedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Whether project update diff should be hidden. */
@@ -14830,7 +14830,7 @@ export class ProjectUpdateWebhookPayload {
   }
 
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The body of the project update. */
   public body: string;
   /** The body data of the project update. */
@@ -14852,7 +14852,7 @@ export class ProjectUpdateWebhookPayload {
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The URL of the project update. */
-  public url?: string;
+  public url?: string | null;
   /** The user id of the project update. */
   public userId: string;
   /** The project that the project update belongs to. */
@@ -14919,37 +14919,37 @@ export class ProjectWebhookPayload {
   }
 
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The auto archived at timestamp of the project. */
-  public autoArchivedAt?: string;
+  public autoArchivedAt?: string | null;
   /** The canceled at timestamp of the project. */
-  public canceledAt?: string;
+  public canceledAt?: string | null;
   /** The project's color. */
   public color: string;
   /** The completed at timestamp of the project. */
-  public completedAt?: string;
+  public completedAt?: string | null;
   /** The number of completed issues in the project after each week. */
   public completedIssueCountHistory: number[];
   /** The number of completed estimation points after each week. */
   public completedScopeHistory: number[];
   /** The content of the project. */
-  public content?: string;
+  public content?: string | null;
   /** The ID of the issue that was converted to the project. */
-  public convertedFromIssueId?: string;
+  public convertedFromIssueId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The ID of the user who created the project. */
-  public creatorId?: string;
+  public creatorId?: string | null;
   /** The project's description. */
   public description: string;
   /** The document content ID of the project. */
-  public documentContentId?: string;
+  public documentContentId?: string | null;
   /** The health of the project. */
-  public health?: string;
+  public health?: string | null;
   /** The time at which the project health was updated. */
-  public healthUpdatedAt?: string;
+  public healthUpdatedAt?: string | null;
   /** The icon of the project. */
-  public icon?: string;
+  public icon?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The number of in progress estimation points after each week. */
@@ -14959,11 +14959,11 @@ export class ProjectWebhookPayload {
   /** IDs of the labels associated with this project. */
   public labelIds: string[];
   /** The ID of the last template that was applied to the project. */
-  public lastAppliedTemplateId?: string;
+  public lastAppliedTemplateId?: string | null;
   /** The ID of the last update posted for this project. */
-  public lastUpdateId?: string;
+  public lastUpdateId?: string | null;
   /** The ID of the project lead. */
-  public leadId?: string;
+  public leadId?: string | null;
   /** IDs of the members of the project. */
   public memberIds: string[];
   /** The project's name. */
@@ -14973,7 +14973,7 @@ export class ProjectWebhookPayload {
   /** The sort order for the project within the organization, when ordered by priority. */
   public prioritySortOrder: number;
   /** The time at which the project update reminders were paused until. */
-  public projectUpdateRemindersPausedUntilAt?: string;
+  public projectUpdateRemindersPausedUntilAt?: string | null;
   /** The total number of estimation points after each week. */
   public scopeHistory: number[];
   /** The project's unique URL slug. */
@@ -14981,33 +14981,33 @@ export class ProjectWebhookPayload {
   /** The sort order for the project within the organization. */
   public sortOrder: number;
   /** The estimated start date of the project. */
-  public startDate?: string;
+  public startDate?: string | null;
   /** The resolution of the project's estimated start date. */
-  public startDateResolution?: string;
+  public startDateResolution?: string | null;
   /** The time at which the project was moved into started state. */
-  public startedAt?: string;
+  public startedAt?: string | null;
   /** The ID of the project status. */
   public statusId: string;
   /** The target date of the project. */
-  public targetDate?: string;
+  public targetDate?: string | null;
   /** The resolution of the project's target date. */
-  public targetDateResolution?: string;
+  public targetDateResolution?: string | null;
   /** IDs of the teams associated with this project. */
   public teamIds: string[];
   /** The trashed status of the project. */
-  public trashed?: boolean;
+  public trashed?: boolean | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The URL of the project. */
   public url: string;
   /** The initiatives associated with the project. */
-  public initiatives?: InitiativeChildWebhookPayload[];
+  public initiatives?: InitiativeChildWebhookPayload[] | null;
   /** The milestones associated with the project. */
-  public milestones?: ProjectMilestoneChildWebhookPayload[];
+  public milestones?: ProjectMilestoneChildWebhookPayload[] | null;
   /** The project lead. */
-  public lead?: UserChildWebhookPayload;
+  public lead?: UserChildWebhookPayload | null;
   /** The project status. */
-  public status?: ProjectStatusChildWebhookPayload;
+  public status?: ProjectStatusChildWebhookPayload | null;
 }
 /**
  * A pull request related notification.
@@ -15041,35 +15041,35 @@ export class PullRequestNotification extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /**
    * The time at when an email reminder for this notification was sent to the user. Null, if no email
    *     reminder has been sent.
    */
-  public emailedAt?: Date;
+  public emailedAt?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Related pull request comment ID. Null if the notification is not related to a pull request comment. */
-  public pullRequestCommentId?: string;
+  public pullRequestCommentId?: string | null;
   /** Related pull request. */
   public pullRequestId: string;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
-  public readAt?: Date;
+  public readAt?: Date | null;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
-  public snoozedUntilAt?: Date;
+  public snoozedUntilAt?: Date | null;
   /** Notification type. */
   public type: string;
   /** The time at which a notification was unsnoozed.. */
-  public unsnoozedAt?: Date;
+  public unsnoozedAt?: Date | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** The bot that caused the notification. */
-  public botActor?: ActorBot;
+  public botActor?: ActorBot | null;
   /** The category of the notification. */
   public category: L.NotificationCategory;
   /** The user that caused the notification. */
@@ -15115,7 +15115,7 @@ export class PushSubscription extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -15186,7 +15186,7 @@ export class RateLimitPayload extends Request {
   }
 
   /** The identifier we rate limit on. */
-  public identifier?: string;
+  public identifier?: string | null;
   /** The kind of rate limit selected for this request. */
   public kind: string;
   /** The state of the rate limit. */
@@ -15252,7 +15252,7 @@ export class Reaction extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Name of the reaction's emoji. */
@@ -15369,37 +15369,37 @@ export class ReactionWebhookPayload {
   }
 
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The ID of the comment that the reaction is associated with. */
-  public commentId?: string;
+  public commentId?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** Name of the reaction's emoji. */
   public emoji: string;
   /** The ID of the external user that created the reaction. */
-  public externalUserId?: string;
+  public externalUserId?: string | null;
   /** The ID of the entity. */
   public id: string;
   /** The ID of the initiative update that the reaction is associated with. */
-  public initiativeUpdateId?: string;
+  public initiativeUpdateId?: string | null;
   /** The ID of the issue that the reaction is associated with. */
-  public issueId?: string;
+  public issueId?: string | null;
   /** The ID of the post that the reaction is associated with. */
-  public postId?: string;
+  public postId?: string | null;
   /** The ID of the project update that the reaction is associated with. */
-  public projectUpdateId?: string;
+  public projectUpdateId?: string | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The ID of the user that created the reaction. */
-  public userId?: string;
+  public userId?: string | null;
   /** The comment the reaction is associated with. */
-  public comment?: CommentChildWebhookPayload;
+  public comment?: CommentChildWebhookPayload | null;
   /** The issue the reaction is associated with. */
-  public issue?: IssueChildWebhookPayload;
+  public issue?: IssueChildWebhookPayload | null;
   /** The project update the reaction is associated with. */
-  public projectUpdate?: ProjectUpdateChildWebhookPayload;
+  public projectUpdate?: ProjectUpdateChildWebhookPayload | null;
   /** The user that created the reaction. */
-  public user?: UserChildWebhookPayload;
+  public user?: UserChildWebhookPayload | null;
 }
 /**
  * A generic payload return from entity archive mutations.
@@ -15526,7 +15526,7 @@ export class RepositorySuggestion extends Request {
   /** Confidence score from 0.0 to 1.0. */
   public confidence: number;
   /** Hostname of the Git service (e.g., 'github.com', 'github.company.com'). */
-  public hostname?: string;
+  public hostname?: string | null;
   /** The full name of the repository in owner/name format (e.g., 'acme/backend'). */
   public repositoryFullName: string;
 }
@@ -15572,13 +15572,13 @@ export class Roadmap extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The roadmap's color. */
-  public color?: string;
+  public color?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The description of the roadmap. */
-  public description?: string;
+  public description?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The name of the roadmap. */
@@ -15740,7 +15740,7 @@ export class RoadmapToProject extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -15931,7 +15931,7 @@ export class SesDomainIdentity extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** Whether the domain is fully verified and can be used for sending emails. */
   public canSendFromCustomDomain: boolean;
   /** The time at which the entity was created. */
@@ -16028,9 +16028,9 @@ export class SlackChannelConnectPayload extends Request {
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether it's recommended to connect main Slack integration. */
-  public nudgeToConnectMainSlackIntegration?: boolean;
+  public nudgeToConnectMainSlackIntegration?: boolean | null;
   /** Whether it's recommended to update main Slack integration. */
-  public nudgeToUpdateMainSlackIntegration?: boolean;
+  public nudgeToUpdateMainSlackIntegration?: boolean | null;
   /** Whether the operation was successful. */
   public success: boolean;
   /** The integration that was created or updated. */
@@ -16068,31 +16068,31 @@ export class SlackChannelNameMapping extends Request {
   }
 
   /** Whether or not to use AI to generate titles for Asks created in this channel. */
-  public aiTitles?: boolean;
+  public aiTitles?: boolean | null;
   /** Whether or not @-mentioning the bot should automatically create an Ask with the message. */
-  public autoCreateOnBotMention?: boolean;
+  public autoCreateOnBotMention?: boolean | null;
   /** Whether or not using the :ticket: emoji in this channel should automatically create Asks. */
-  public autoCreateOnEmoji?: boolean;
+  public autoCreateOnEmoji?: boolean | null;
   /** Whether or not top-level messages in this channel should automatically create Asks. */
-  public autoCreateOnMessage?: boolean;
+  public autoCreateOnMessage?: boolean | null;
   /** The optional template ID to use for Asks auto-created in this channel. If not set, auto-created Asks won't use any template. */
-  public autoCreateTemplateId?: string;
+  public autoCreateTemplateId?: string | null;
   /** Whether or not the Linear Asks bot has been added to this Slack channel. */
-  public botAdded?: boolean;
+  public botAdded?: boolean | null;
   /** The Slack channel ID. */
   public id: string;
   /** Whether or not the Slack channel is private. */
-  public isPrivate?: boolean;
+  public isPrivate?: boolean | null;
   /** Whether or not the Slack channel is shared with an external org. */
-  public isShared?: boolean;
+  public isShared?: boolean | null;
   /** The Slack channel name. */
   public name: string;
   /** Whether or not synced Slack threads should be updated with a message when their Ask is accepted from triage. */
-  public postAcceptedFromTriageUpdates?: boolean;
+  public postAcceptedFromTriageUpdates?: boolean | null;
   /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is canceled. */
-  public postCancellationUpdates?: boolean;
+  public postCancellationUpdates?: boolean | null;
   /** Whether or not synced Slack threads should be updated with a message and emoji when their Ask is completed. */
-  public postCompletionUpdates?: boolean;
+  public postCompletionUpdates?: boolean | null;
   /** Which teams are connected to the channel and settings for those teams. */
   public teams: SlackAsksTeamSettings[];
 }
@@ -16153,8 +16153,8 @@ export class SyncedExternalThread extends Request {
   }
 
   /** The display name of the thread. */
-  public displayName?: string;
-  public id?: string;
+  public displayName?: string | null;
+  public id?: string | null;
   /** Whether this thread is syncing with the external service. */
   public isConnected: boolean;
   /** Whether the current user has the corresponding personal integration connected for the external service. */
@@ -16162,13 +16162,13 @@ export class SyncedExternalThread extends Request {
   /** Whether a connected personal integration is required to comment in this thread. */
   public isPersonalIntegrationRequired: boolean;
   /** The display name of the source. */
-  public name?: string;
+  public name?: string | null;
   /** The sub type of the external source. */
-  public subType?: string;
+  public subType?: string | null;
   /** The type of the external source. */
   public type: string;
   /** The external url of the thread. */
-  public url?: string;
+  public url?: string | null;
 }
 /**
  * An organizational unit that contains issues.
@@ -16266,21 +16266,21 @@ export class Team extends Request {
   /** Whether to enable resolved thread AI summaries. */
   public aiThreadSummariesEnabled: boolean;
   /** Whether all members in the workspace can join the team. Only used for public teams. */
-  public allMembersCanJoin?: boolean;
+  public allMembersCanJoin?: boolean | null;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** Period after which automatically closed and completed issues are automatically archived in months. */
   public autoArchivePeriod: number;
   /** Whether child issues should automatically close when their parent issue is closed */
-  public autoCloseChildIssues?: boolean;
+  public autoCloseChildIssues?: boolean | null;
   /** Whether parent issues should automatically close when all child issues are closed */
-  public autoCloseParentIssues?: boolean;
+  public autoCloseParentIssues?: boolean | null;
   /** Period after which issues are automatically closed in months. Null/undefined means disabled. */
-  public autoClosePeriod?: number;
+  public autoClosePeriod?: number | null;
   /** The canceled workflow state which auto closed issues will be set to. Defaults to the first canceled state. */
-  public autoCloseStateId?: string;
+  public autoCloseStateId?: string | null;
   /** The team's color. */
-  public color?: string;
+  public color?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Calendar feed URL (iCal) for cycles. */
@@ -16302,17 +16302,17 @@ export class Team extends Request {
   /** What to use as a default estimate for unestimated issues. */
   public defaultIssueEstimate: number;
   /** The id of the default template to use for new issues created by members of the team. */
-  public defaultTemplateForMembersId?: string;
+  public defaultTemplateForMembersId?: string | null;
   /** The id of the default template to use for new issues created by non-members of the team. */
-  public defaultTemplateForNonMembersId?: string;
+  public defaultTemplateForNonMembersId?: string | null;
   /** The team's description. */
-  public description?: string;
+  public description?: string | null;
   /** The name of the team including its parent team name if it has one. */
   public displayName: string;
   /** Whether to group recent issue history entries. */
   public groupIssueHistory: boolean;
   /** The icon of the team. */
-  public icon?: string;
+  public icon?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Whether the team should inherit its estimation settings from its parent. Only applies to sub-teams. */
@@ -16342,7 +16342,7 @@ export class Team extends Request {
   /** Whether an issue needs to have a priority set before leaving triage. */
   public requirePriorityToLeaveTriage: boolean;
   /** The SCIM group name for the team. */
-  public scimGroupName?: string;
+  public scimGroupName?: string | null;
   /** Whether the team is managed by SCIM integration. */
   public scimManaged: boolean;
   /** Security settings for the team. */
@@ -16649,7 +16649,7 @@ export class TeamMembership extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -16786,7 +16786,7 @@ export class TeamNotificationSubscription extends Request {
   /** Whether the subscription is active or not. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -16799,9 +16799,9 @@ export class TeamNotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The type of view to which the notification subscription context is associated with. */
-  public contextViewType?: L.ContextViewType;
+  public contextViewType?: L.ContextViewType | null;
   /** The type of user view to which the notification subscription context is associated with. */
-  public userContextViewType?: L.UserContextViewType;
+  public userContextViewType?: L.UserContextViewType | null;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -16943,7 +16943,7 @@ export class TeamWithParentWebhookPayload {
   /** The name of the team. */
   public name: string;
   /** The parent team's unique identifier, if any. */
-  public parentId?: string;
+  public parentId?: string | null;
 }
 /**
  * A template object used for creating entities faster.
@@ -16976,15 +16976,15 @@ export class Template extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Template description. */
-  public description?: string;
+  public description?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The date when the template was last applied. */
-  public lastAppliedAt?: Date;
+  public lastAppliedAt?: Date | null;
   /** The name of the template. */
   public name: string;
   /** The sort order of the template. */
@@ -17121,13 +17121,13 @@ export class TimeSchedule extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The identifier of the external schedule. */
-  public externalId?: string;
+  public externalId?: string | null;
   /** The URL to the external schedule. */
-  public externalUrl?: string;
+  public externalUrl?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The name of the schedule. */
@@ -17138,7 +17138,7 @@ export class TimeSchedule extends Request {
    */
   public updatedAt: Date;
   /** The schedule entries. */
-  public entries?: TimeScheduleEntry[];
+  public entries?: TimeScheduleEntry[] | null;
   /** The identifier of the Linear integration populating the schedule. */
   public get integration(): LinearFetch<Integration> | undefined {
     return this._integration?.id ? new IntegrationQuery(this._request).fetch(this._integration?.id) : undefined;
@@ -17206,9 +17206,9 @@ export class TimeScheduleEntry extends Request {
   /** The start date of the schedule in ISO 8601 date-time format. */
   public startsAt: Date;
   /** The email, name or reference to the user on schedule. This is used in case the external user could not be mapped to a Linear user id. */
-  public userEmail?: string;
+  public userEmail?: string | null;
   /** The Linear user id of the user on schedule. If the user cannot be mapped to a Linear user then `userEmail` can be used as a reference. */
-  public userId?: string;
+  public userId?: string | null;
 }
 /**
  * TimeSchedulePayload model
@@ -17265,7 +17265,7 @@ export class TriageResponsibility extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -17276,7 +17276,7 @@ export class TriageResponsibility extends Request {
    */
   public updatedAt: Date;
   /** Set of users used for triage responsibility. */
-  public manualSelection?: TriageResponsibilityManualSelection;
+  public manualSelection?: TriageResponsibilityManualSelection | null;
   /** The action to take when an issue is added to triage. */
   public action: L.TriageResponsibilityAction;
   /** The user currently responsible for triage. */
@@ -17405,7 +17405,7 @@ export class UploadFile extends Request {
   public contentType: string;
   /** The filename. */
   public filename: string;
-  public metaData?: L.Scalars["JSONObject"];
+  public metaData?: L.Scalars["JSONObject"] | null;
   /** The size of the uploaded file. */
   public size: number;
   /** The signed URL the for the uploaded file. (assigned automatically). */
@@ -17449,7 +17449,7 @@ export class UploadPayload extends Request {
   /** Whether the operation was successful. */
   public success: boolean;
   /** Object describing the file to be uploaded. */
-  public uploadFile?: UploadFile;
+  public uploadFile?: UploadFile | null;
 }
 /**
  * A user that has access to the the resources of an organization.
@@ -17501,13 +17501,13 @@ export class User extends Request {
   /** Whether the user is an app. */
   public app: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The background color of the avatar for users without set avatar. */
   public avatarBackgroundColor: string;
   /** An URL to the user's avatar image. */
-  public avatarUrl?: string;
+  public avatarUrl?: string | null;
   /** [DEPRECATED] Hash for the user to be used in calendar URLs. */
-  public calendarHash?: string;
+  public calendarHash?: string | null;
   /** Whether this user can access any public team in the organization. */
   public canAccessAnyPublicTeam: boolean;
   /** The time at which the entity was created. */
@@ -17515,15 +17515,15 @@ export class User extends Request {
   /** Number of issues created. */
   public createdIssueCount: number;
   /** A short description of the user, either its title or bio. */
-  public description?: string;
+  public description?: string | null;
   /** Reason why is the account disabled. */
-  public disableReason?: string;
+  public disableReason?: string | null;
   /** The user's display (nick) name. Unique within each organization. */
   public displayName: string;
   /** The user's email address. */
   public email: string;
   /** The user's GitHub user ID. */
-  public gitHubUserId?: string;
+  public gitHubUserId?: string | null;
   /** Whether the user is a guest in the workspace and limited to accessing a subset of teams. */
   public guest: boolean;
   /** The unique identifier of the entity. */
@@ -17539,21 +17539,21 @@ export class User extends Request {
   /** Whether the user is mentionable. */
   public isMentionable: boolean;
   /** The last time the user was seen online. */
-  public lastSeen?: Date;
+  public lastSeen?: Date | null;
   /** The user's full name. */
   public name: string;
   /** Whether the user is an organization owner. */
   public owner: boolean;
   /** The emoji to represent the user current status. */
-  public statusEmoji?: string;
+  public statusEmoji?: string | null;
   /** The label of the user current status. */
-  public statusLabel?: string;
+  public statusLabel?: string | null;
   /** A date at which the user current status should be cleared. */
-  public statusUntilAt?: Date;
+  public statusUntilAt?: Date | null;
   /** Whether this agent user supports agent sessions. */
   public supportsAgentSessions: boolean;
   /** The local timezone of the user. */
-  public timezone?: string;
+  public timezone?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -17618,7 +17618,7 @@ export class UserActorWebhookPayload {
   }
 
   /** The avatar URL of the user. */
-  public avatarUrl?: string;
+  public avatarUrl?: string | null;
   /** The email of the user. */
   public email: string;
   /** The ID of the user. */
@@ -17660,7 +17660,7 @@ export class UserChildWebhookPayload {
   }
 
   /** The avatar URL of the user. */
-  public avatarUrl?: string;
+  public avatarUrl?: string | null;
   /** The email of the user. */
   public email: string;
   /** The ID of the user. */
@@ -17732,7 +17732,7 @@ export class UserNotificationSubscription extends Request {
   /** Whether the subscription is active or not. */
   public active: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -17745,9 +17745,9 @@ export class UserNotificationSubscription extends Request {
    */
   public updatedAt: Date;
   /** The type of view to which the notification subscription context is associated with. */
-  public contextViewType?: L.ContextViewType;
+  public contextViewType?: L.ContextViewType | null;
   /** The type of user view to which the notification subscription context is associated with. */
-  public userContextViewType?: L.UserContextViewType;
+  public userContextViewType?: L.UserContextViewType | null;
   /** The contextual custom view associated with the notification subscription. */
   public get customView(): LinearFetch<CustomView> | undefined {
     return this._customView?.id ? new CustomViewQuery(this._request).fetch(this._customView?.id) : undefined;
@@ -17892,15 +17892,15 @@ export class UserSettings extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** Whether to auto-assign newly created issues to the current user by default. */
   public autoAssignToSelf: boolean;
   /** Hash for the user to be used in calendar URLs. */
-  public calendarHash?: string;
+  public calendarHash?: string | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The user's last seen time for the pulse feed. */
-  public feedLastSeenTime?: Date;
+  public feedLastSeenTime?: Date | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** Whether to show full user names instead of display names. */
@@ -17927,9 +17927,9 @@ export class UserSettings extends Request {
   /** The notification delivery preferences for the user. Note: notificationDisabled field is deprecated in favor of notificationChannelPreferences. */
   public notificationDeliveryPreferences: NotificationDeliveryPreferences;
   /** The user's theme for a given mode and device type. */
-  public theme?: UserSettingsTheme;
+  public theme?: UserSettingsTheme | null;
   /** The user's feed summary schedule preference. */
-  public feedSummarySchedule?: L.FeedSummarySchedule;
+  public feedSummarySchedule?: L.FeedSummarySchedule | null;
   /** The user associated with these settings. */
   public get user(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._user.id);
@@ -17987,7 +17987,7 @@ export class UserSettingsCustomTheme extends Request {
   /** The contrast value. */
   public contrast: number;
   /** Optional sidebar theme colors. */
-  public sidebar?: UserSettingsCustomSidebarTheme;
+  public sidebar?: UserSettingsCustomSidebarTheme | null;
 }
 /**
  * UserSettingsFlagPayload model
@@ -18005,13 +18005,13 @@ export class UserSettingsFlagPayload extends Request {
   }
 
   /** The flag key which was updated. */
-  public flag?: string;
+  public flag?: string | null;
   /** The identifier of the last sync operation. */
   public lastSyncId: number;
   /** Whether the operation was successful. */
   public success: boolean;
   /** The flag value after update. */
-  public value?: number;
+  public value?: number | null;
 }
 /**
  * UserSettingsFlagsResetPayload model
@@ -18067,7 +18067,7 @@ export class UserSettingsTheme extends Request {
   }
 
   /** The custom theme definition, only present when preset is 'custom'. */
-  public custom?: UserSettingsCustomTheme;
+  public custom?: UserSettingsCustomTheme | null;
   /** The theme preset. */
   public preset: L.UserSettingsThemePreset;
 }
@@ -18104,15 +18104,15 @@ export class UserWebhookPayload {
   /** Whether the user is an app. */
   public app: boolean;
   /** The time at which the entity was archived. */
-  public archivedAt?: string;
+  public archivedAt?: string | null;
   /** The avatar URL of the user. */
-  public avatarUrl?: string;
+  public avatarUrl?: string | null;
   /** The time at which the entity was created. */
   public createdAt: string;
   /** The description of the user. */
-  public description?: string;
+  public description?: string | null;
   /** The reason the user is disabled. */
-  public disableReason?: string;
+  public disableReason?: string | null;
   /** The display name of the user. */
   public displayName: string;
   /** The email of the user. */
@@ -18124,9 +18124,9 @@ export class UserWebhookPayload {
   /** The name of the user. */
   public name: string;
   /** Whether the user is an owner. */
-  public owner?: boolean;
+  public owner?: boolean | null;
   /** The local timezone of the user. */
-  public timezone?: string;
+  public timezone?: string | null;
   /** The time at which the entity was updated. */
   public updatedAt: string;
   /** The URL of the user. */
@@ -18151,7 +18151,7 @@ export class ViewPreferences extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The unique identifier of the entity. */
@@ -18217,11 +18217,11 @@ export class ViewPreferencesValues extends Request {
   }
 
   /** The issue grouping. */
-  public issueGrouping?: string;
+  public issueGrouping?: string | null;
   /** Whether to show completed issues. */
-  public showCompletedIssues?: string;
+  public showCompletedIssues?: string | null;
   /** The issue ordering. */
-  public viewOrdering?: string;
+  public viewOrdering?: string | null;
 }
 /**
  * A webhook used to send HTTP notifications over data updates.
@@ -18252,7 +18252,7 @@ export class Webhook extends Request {
   /** Whether the Webhook is enabled for all public teams, including teams created after the webhook was created. */
   public allPublicTeams: boolean;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Whether the Webhook is enabled. */
@@ -18260,18 +18260,18 @@ export class Webhook extends Request {
   /** The unique identifier of the entity. */
   public id: string;
   /** Webhook label. */
-  public label?: string;
+  public label?: string | null;
   /** The resource types this webhook is subscribed to. */
   public resourceTypes: string[];
   /** Secret token for verifying the origin on the recipient side. */
-  public secret?: string;
+  public secret?: string | null;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
    */
   public updatedAt: Date;
   /** Webhook URL. */
-  public url?: string;
+  public url?: string | null;
   /** The user who created the webhook. */
   public get creator(): LinearFetch<User> | undefined {
     return this._creator?.id ? new UserQuery(this._request).fetch(this._creator?.id) : undefined;
@@ -18348,11 +18348,11 @@ export class WebhookFailureEvent extends Request {
   /** The unique execution ID of the webhook push. This is retained between retries of the same push. */
   public executionId: string;
   /** The HTTP status code returned by the recipient. */
-  public httpStatus?: number;
+  public httpStatus?: number | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The HTTP response body returned by the recipient or error occured. */
-  public responseOrError?: string;
+  public responseOrError?: string | null;
   /** The URL that the webhook was trying to push to. */
   public url: string;
   /** The webhook that this failure event is associated with. */
@@ -18419,13 +18419,13 @@ export class WorkflowState extends Request {
   }
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
-  public archivedAt?: Date;
+  public archivedAt?: Date | null;
   /** The state's UI color as a HEX string. */
   public color: string;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** Description of the state. */
-  public description?: string;
+  public description?: string | null;
   /** The unique identifier of the entity. */
   public id: string;
   /** The state's name. */
