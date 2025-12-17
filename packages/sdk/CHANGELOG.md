@@ -1,5 +1,11 @@
 # Change Log
 
+## 67.0.0
+
+### Major Changes
+
+- eaef10e: Removed built-in fetch polyfill in favor of using Node.js native fetch
+
 ## 66.0.1
 
 ### Patch Changes

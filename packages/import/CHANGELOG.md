@@ -1,5 +1,21 @@
 # Change Log
 
+## 3.0.0
+
+### Major Changes
+
+- 1097485: Migrate linear-import to tsdown.
+
+  BREAKING CHANGE: `@linear/import` used to export library internals as
+  individual files. The library is not being installed by any third-party
+  dependency. If you rely on the external exports, please let us know, so
+  we can re-expose them.
+
+### Patch Changes
+
+- Updated dependencies [eaef10e]
+  - @linear/sdk@67.0.0
+
 ## 2.2.49
 
 ### Patch Changes
