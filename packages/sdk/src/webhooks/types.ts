@@ -5,13 +5,13 @@ import {
   AppUserTeamAccessChangedWebhookPayload as AppUserTeamAccessChangedWebhookPayloadType,
   AttachmentWebhookPayload,
   AuditEntryWebhookPayload,
+  EntityWebhookPayload as BaseEntityWebhookPayload,
   CommentWebhookPayload,
   CustomerNeedWebhookPayload,
   CustomerWebhookPayload,
   CycleWebhookPayload,
   DataWebhookPayload,
   DocumentWebhookPayload,
-  EntityWebhookPayload,
   InitiativeUpdateWebhookPayload,
   InitiativeWebhookPayload,
   IssueLabelWebhookPayload,
@@ -24,6 +24,17 @@ import {
   ReactionWebhookPayload,
   UserWebhookPayload,
 } from "../_generated_documents.js";
+
+// These two fields are added to every webhook payload before being sent but are not represented in the GraphQL schema.
+// See: https://linear.app/developers/webhooks#other-events-payload
+type WebhookExtras = {
+  /** ID uniquely identifying this webhook. */
+  webhookId: string;
+  /** UNIX timestamp when the webhook was sent. */
+  webhookTimestamp: number;
+};
+
+type EntityWebhookPayload = BaseEntityWebhookPayload & WebhookExtras;
 
 /**
  * Union type representing all possible Linear webhook payloads.
@@ -142,10 +153,11 @@ export interface LinearWebhookHandler {
 /**
  * A webhook payload for an app user notification webhook.
  */
-export interface AppUserNotificationWebhookPayloadWithNotification extends AppUserNotificationWebhookPayload {
-  notification: NotificationWebhookPayload;
-  type: "AppUserNotification";
-}
+export type AppUserNotificationWebhookPayloadWithNotification = WebhookExtras &
+  AppUserNotificationWebhookPayload & {
+    notification: NotificationWebhookPayload;
+    type: "AppUserNotification";
+  };
 
 /**
  * A webhook payload for an entity-specific webhook.
@@ -297,27 +309,31 @@ export type EntityWebhookPayloadWithUserData = EntityWebhookPayload & {
 /**
  * A webhook payload for an Agent Session Event webhook.
  */
-export type AgentSessionEventWebhookPayload = AgentSessionEventWebhookPayloadType & {
-  type: "AgentSessionEvent";
-};
+export type AgentSessionEventWebhookPayload = WebhookExtras &
+  AgentSessionEventWebhookPayloadType & {
+    type: "AgentSessionEvent";
+  };
 
 /**
  * A webhook payload for an Issue SLA webhook with a narrowed `type`.
  */
-export type IssueSlaWebhookPayload = IssueSlaWebhookPayloadType & {
-  type: "IssueSLA";
-};
+export type IssueSlaWebhookPayload = WebhookExtras &
+  IssueSlaWebhookPayloadType & {
+    type: "IssueSLA";
+  };
 
 /**
  * A webhook payload for an OAuth App webhook with a narrowed `type`.
  */
-export type OAuthAppWebhookPayload = OAuthAppWebhookPayloadType & {
-  type: "OAuthApp";
-};
+export type OAuthAppWebhookPayload = WebhookExtras &
+  OAuthAppWebhookPayloadType & {
+    type: "OAuthApp";
+  };
 
 /**
  * A webhook payload for an App User Team Access Changed webhook with a narrowed `type`.
  */
-export type AppUserTeamAccessChangedWebhookPayload = AppUserTeamAccessChangedWebhookPayloadType & {
-  type: "PermissionChange";
-};
+export type AppUserTeamAccessChangedWebhookPayload = WebhookExtras &
+  AppUserTeamAccessChangedWebhookPayloadType & {
+    type: "PermissionChange";
+  };

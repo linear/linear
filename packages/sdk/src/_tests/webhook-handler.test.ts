@@ -4,7 +4,12 @@ import getPort from "get-port";
 import http from "http";
 import { v4 as uuidv4 } from "uuid";
 import { describe, expect, it } from "vitest";
-import { LINEAR_WEBHOOK_SIGNATURE_HEADER, LinearWebhookClient } from "../webhooks/index.js";
+import {
+  LINEAR_WEBHOOK_SIGNATURE_HEADER,
+  LinearWebhookClient,
+  LinearWebhookPayload,
+  LinearWebhookEventTypeMap,
+} from "../webhooks/index.js";
 
 export interface SignedBody {
   body: Buffer;
@@ -217,6 +222,26 @@ describe("webhooks handlers", () => {
       server.close();
       handler.removeAllListeners();
     }
+  });
+});
+
+describe("webhook payload type", () => {
+  it("contains a webhookId field", () => {
+    type PayloadWebhookId = LinearWebhookPayload["webhookId"];
+    type EventTypeWebhookId = LinearWebhookEventTypeMap[keyof LinearWebhookEventTypeMap]["webhookId"];
+
+    // Here we are testing that these keys exist on the base webhook types, and that they are equal. The runtime
+    // comparisons of these strings are a no-op, but type errors will be caught by build:types.
+    expect<PayloadWebhookId>("").toBe<EventTypeWebhookId>("");
+  });
+
+  it("contains a webhookTimestamp field", () => {
+    type PayloadWebhookId = LinearWebhookPayload["webhookTimestamp"];
+    type EventTypeWebhookId = LinearWebhookEventTypeMap[keyof LinearWebhookEventTypeMap]["webhookTimestamp"];
+
+    // Here we are testing that these keys exist on the base webhook types, and that they are equal. The runtime
+    // comparisons of these numbers are a no-op, but type errors will be caught by build:types.
+    expect<PayloadWebhookId>(0).toBe<EventTypeWebhookId>(0);
   });
 });
 
