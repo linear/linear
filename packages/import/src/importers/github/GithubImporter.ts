@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Importer, ImportResult } from "../../types";
-import { githubClient } from "./client";
+import type { Importer, ImportResult } from "../../types.ts";
+import { githubClient } from "./client.ts";
 
 interface GITHUB_ISSUE {
   id: string;

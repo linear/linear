@@ -1,6 +1,6 @@
 import csv from "csvtojson";
-import { Importer, ImportResult, IssuePriority } from "../../types";
-import { safeParseInt } from "../../utils/parseInt";
+import type { Importer, ImportResult, IssuePriority } from "../../types.ts";
+import { safeParseInt } from "../../utils/parseInt.ts";
 
 type GitLabStatus = "opened" | "closed";
 

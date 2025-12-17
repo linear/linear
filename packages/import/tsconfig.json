@@ -5,11 +5,10 @@
     "outDir": "dist",
     "declarationDir": "dist",
     "noEmit": true,
-    "module": "es2015",
-    "moduleResolution": "bundler",
     // @types/inquirer@7.3.3 does not pass internal type checks on new TypeScript versions.
     // Should be removed after upgrading to a newer inquirer version.
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
   },
-  "exclude": ["bin", "src/_tests", "dist", "rollup.config.js"]
+  "exclude": ["bin", "src/_tests", "dist"]
 }

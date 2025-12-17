@@ -3,12 +3,12 @@ import { LinearClient } from "@linear/sdk";
 import chalk from "chalk";
 import { Presets, SingleBar } from "cli-progress";
 import { format } from "date-fns";
-import * as inquirer from "inquirer";
-import { uniq } from "lodash";
+import inquirer from "inquirer";
+import uniq from "lodash/uniq.js";
 import ora from "ora";
-import { handleLabels } from "./helpers/labelManager";
-import { Comment, Importer, ImportResult } from "./types";
-import { replaceImagesInMarkdown } from "./utils/replaceImages";
+import { handleLabels } from "./helpers/labelManager.ts";
+import type { Comment, Importer, ImportResult } from "./types.ts";
+import { replaceImagesInMarkdown } from "./utils/replaceImages.ts";
 
 type Id = string;
 

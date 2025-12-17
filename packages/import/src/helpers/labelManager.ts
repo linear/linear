@@ -1,6 +1,6 @@
-import { IssueLabel, LinearClient } from "@linear/sdk";
+import { type IssueLabel, LinearClient } from "@linear/sdk";
 import _ from "lodash";
-import { ImportResult } from "../types";
+import type { ImportResult } from "../types.ts";
 
 type Id = string;
 const WORKSPACE_ID = "workspace";

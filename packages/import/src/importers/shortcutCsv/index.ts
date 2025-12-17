@@ -1,6 +1,6 @@
-import * as inquirer from "inquirer";
-import { Importer } from "../../types";
-import { ShortcutCsvImporter } from "./ShortcutCsvImporter";
+import inquirer from "inquirer";
+import type { Importer } from "../../types.ts";
+import { ShortcutCsvImporter } from "./ShortcutCsvImporter.ts";
 
 const BASE_PATH = process.cwd();
 

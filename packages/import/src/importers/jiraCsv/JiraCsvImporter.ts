@@ -1,8 +1,7 @@
 import csv from "csvtojson";
-import { Importer, ImportResult, IssuePriority } from "../../types";
-import { safeParseInt } from "../../utils/parseInt";
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
-const j2m = require("jira2md");
+import j2m from "jira2md";
+import type { Importer, ImportResult, IssuePriority } from "../../types.ts";
+import { safeParseInt } from "../../utils/parseInt.ts";
 
 type JiraPriority = "Highest" | "High" | "Medium" | "Low" | "Lowest";
 

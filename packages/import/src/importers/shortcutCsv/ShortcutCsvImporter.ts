@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable eqeqeq */
 import csv from "csvtojson";
-import { Importer, ImportResult } from "../../types";
-import { safeParseInt } from "../../utils/parseInt";
+import type { Importer, ImportResult } from "../../types.ts";
+import { safeParseInt } from "../../utils/parseInt.ts";
 
 type ShortcutStoryType = "feature" | "bug" | "chore";
 

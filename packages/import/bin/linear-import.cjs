@@ -7,4 +7,4 @@ if (process.argv.length > 2) {
   }
 }
 
-require("../dist/cli");
+require("../dist/cli.cjs");
