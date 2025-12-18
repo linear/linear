@@ -4162,8 +4162,12 @@ fragment BaseWebhookPayload on BaseWebhookPayload {
   __typename
   # ID of the organization for which the webhook belongs to.
   organizationId
+  # The ID of the webhook that sent this event.
+  webhookId
   # The time the payload was created.
   createdAt
+  # Unix timestamp in milliseconds when the webhook was sent.
+  webhookTimestamp
 }
 
 # Certain properties of a comment.
@@ -5109,12 +5113,16 @@ fragment OAuthAppWebhookPayload on OAuthAppWebhookPayload {
   organizationId
   # Id of the OAuth client that was revoked.
   oauthClientId
+  # The ID of the webhook that sent this event.
+  webhookId
   # The time the payload was created.
   createdAt
   # The type of action that triggered the webhook.
   action
   # The type of resource.
   type
+  # Unix timestamp in milliseconds when the webhook was sent.
+  webhookTimestamp
 }
 
 # Payload for OAuth authorization webhook events.
@@ -5134,6 +5142,8 @@ fragment OAuthAuthorizationWebhookPayload on OAuthAuthorizationWebhookPayload {
   organizationId
   # ID of the user that the authorization belongs to.
   userId
+  # The ID of the webhook that sent this event.
+  webhookId
   # The number of currently active tokens for the user for this client.
   activeTokensForUser
   # The time the payload was created.
@@ -5142,6 +5152,8 @@ fragment OAuthAuthorizationWebhookPayload on OAuthAuthorizationWebhookPayload {
   action
   # The type of resource.
   type
+  # Unix timestamp in milliseconds when the webhook was sent.
+  webhookTimestamp
 }
 
 # Payload for a comment webhook.
@@ -5690,6 +5702,8 @@ fragment UserWebhookPayload on UserWebhookPayload {
 # Payload for agent session webhook events.
 fragment AgentSessionEventWebhookPayload on AgentSessionEventWebhookPayload {
   __typename
+  # A formatted prompt string containing the relevant context for the agent session, including issue details, comments, and guidance. Present only for `created` events.
+  promptContext
   # Guidance to inform the agent's behavior, which comes from configuration at the level of the workspace, parent teams, and/or current team for this session. The nearest team-specific guidance should take highest precendence.
   guidance {
     ...GuidanceRuleWebhookPayload
@@ -5700,6 +5714,8 @@ fragment AgentSessionEventWebhookPayload on AgentSessionEventWebhookPayload {
   appUserId
   # ID of the organization for which the webhook belongs to.
   organizationId
+  # The ID of the webhook that sent this event.
+  webhookId
   # The agent activity that was created.
   agentActivity {
     ...AgentActivityWebhookPayload
@@ -5718,6 +5734,8 @@ fragment AgentSessionEventWebhookPayload on AgentSessionEventWebhookPayload {
   action
   # The type of resource.
   type
+  # Unix timestamp in milliseconds when the webhook was sent.
+  webhookTimestamp
 }
 
 # Payload for an agent activity webhook.
@@ -6428,12 +6446,16 @@ fragment AppUserNotificationWebhookPayload on AppUserNotificationWebhookPayload 
   appUserId
   # ID of the organization for which the webhook belongs to.
   organizationId
+  # The ID of the webhook that sent this event.
+  webhookId
   # The time the payload was created.
   createdAt
   # The type of action that triggered the webhook.
   action
   # The type of resource.
   type
+  # Unix timestamp in milliseconds when the webhook was sent.
+  webhookTimestamp
 }
 
 # Payload for app user team access change webhook events.
@@ -6449,12 +6471,16 @@ fragment AppUserTeamAccessChangedWebhookPayload on AppUserTeamAccessChangedWebho
   addedTeamIds
   # IDs of the teams the app user was removed from.
   removedTeamIds
+  # The ID of the webhook that sent this event.
+  webhookId
   # The time the payload was created.
   createdAt
   # The type of action that triggered the webhook.
   action
   # The type of resource.
   type
+  # Unix timestamp in milliseconds when the webhook was sent.
+  webhookTimestamp
   # Whether the app user can access all public teams.
   canAccessAllPublicTeams
 }
@@ -6464,12 +6490,16 @@ fragment CustomResourceWebhookPayload on CustomResourceWebhookPayload {
   __typename
   # ID of the organization for which the webhook belongs to.
   organizationId
+  # The ID of the webhook that sent this event.
+  webhookId
   # The time the payload was created.
   createdAt
   # The type of action that triggered the webhook.
   action
   # The type of resource.
   type
+  # Unix timestamp in milliseconds when the webhook was sent.
+  webhookTimestamp
 }
 
 # Payload for entity-related webhook events.
@@ -6479,6 +6509,8 @@ fragment EntityWebhookPayload on EntityWebhookPayload {
   organizationId
   # In case of an update event, previous values of all updated properties.
   updatedFrom
+  # The ID of the webhook that sent this event.
+  webhookId
   # The time the payload was created.
   createdAt
   # The type of action that triggered the webhook.
@@ -6487,6 +6519,8 @@ fragment EntityWebhookPayload on EntityWebhookPayload {
   type
   # URL for the entity.
   url
+  # Unix timestamp in milliseconds when the webhook was sent.
+  webhookTimestamp
 }
 
 # Payload for issue SLA webhook events.
@@ -6494,6 +6528,8 @@ fragment IssueSlaWebhookPayload on IssueSlaWebhookPayload {
   __typename
   # ID of the organization for which the webhook belongs to.
   organizationId
+  # The ID of the webhook that sent this event.
+  webhookId
   # The issue that the SLA event is about.
   issueData {
     ...IssueWebhookPayload
@@ -6506,6 +6542,8 @@ fragment IssueSlaWebhookPayload on IssueSlaWebhookPayload {
   type
   # URL for the issue.
   url
+  # Unix timestamp in milliseconds when the webhook was sent.
+  webhookTimestamp
 }
 
 # Payload returned by semantic search.

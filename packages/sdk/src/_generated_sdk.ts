@@ -645,7 +645,10 @@ export class AgentSessionEventWebhookPayload {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.oauthClientId = data.oauthClientId;
     this.organizationId = data.organizationId;
+    this.promptContext = data.promptContext ?? undefined;
     this.type = data.type;
+    this.webhookId = data.webhookId;
+    this.webhookTimestamp = data.webhookTimestamp;
     this.agentActivity = data.agentActivity ? new AgentActivityWebhookPayload(data.agentActivity) : undefined;
     this.agentSession = new AgentSessionWebhookPayload(data.agentSession);
     this.guidance = data.guidance ? data.guidance.map(node => new GuidanceRuleWebhookPayload(node)) : undefined;
@@ -664,8 +667,14 @@ export class AgentSessionEventWebhookPayload {
   public oauthClientId: string;
   /** ID of the organization for which the webhook belongs to. */
   public organizationId: string;
+  /** A formatted prompt string containing the relevant context for the agent session, including issue details, comments, and guidance. Present only for `created` events. */
+  public promptContext?: string;
   /** The type of resource. */
   public type: string;
+  /** The ID of the webhook that sent this event. */
+  public webhookId: string;
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  public webhookTimestamp: number;
   /** Guidance to inform the agent's behavior, which comes from configuration at the level of the workspace, parent teams, and/or current team for this session. The nearest team-specific guidance should take highest precendence. */
   public guidance?: GuidanceRuleWebhookPayload[];
   /** The previous comments in the thread before this agent was mentioned and the session was initiated, if any. Present only for `created` events where the session was initiated by mentioning the agent in a child comment of a thread. */
@@ -822,6 +831,8 @@ export class AppUserNotificationWebhookPayload {
     this.oauthClientId = data.oauthClientId;
     this.organizationId = data.organizationId;
     this.type = data.type;
+    this.webhookId = data.webhookId;
+    this.webhookTimestamp = data.webhookTimestamp;
   }
 
   /** The type of action that triggered the webhook. */
@@ -836,6 +847,10 @@ export class AppUserNotificationWebhookPayload {
   public organizationId: string;
   /** The type of resource. */
   public type: string;
+  /** The ID of the webhook that sent this event. */
+  public webhookId: string;
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  public webhookTimestamp: number;
 }
 /**
  * Payload for app user team access change webhook events.
@@ -853,6 +868,8 @@ export class AppUserTeamAccessChangedWebhookPayload {
     this.organizationId = data.organizationId;
     this.removedTeamIds = data.removedTeamIds;
     this.type = data.type;
+    this.webhookId = data.webhookId;
+    this.webhookTimestamp = data.webhookTimestamp;
   }
 
   /** The type of action that triggered the webhook. */
@@ -873,6 +890,10 @@ export class AppUserTeamAccessChangedWebhookPayload {
   public removedTeamIds: string[];
   /** The type of resource. */
   public type: string;
+  /** The ID of the webhook that sent this event. */
+  public webhookId: string;
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  public webhookTimestamp: number;
 }
 /**
  * Public information of the OAuth application.
@@ -1616,12 +1637,18 @@ export class BaseWebhookPayload {
   public constructor(data: L.BaseWebhookPayloadFragment) {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.organizationId = data.organizationId;
+    this.webhookId = data.webhookId;
+    this.webhookTimestamp = data.webhookTimestamp;
   }
 
   /** The time the payload was created. */
   public createdAt: Date;
   /** ID of the organization for which the webhook belongs to. */
   public organizationId: string;
+  /** The ID of the webhook that sent this event. */
+  public webhookId: string;
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  public webhookTimestamp: number;
 }
 /**
  * A comment associated with an issue.
@@ -2032,6 +2059,8 @@ export class CustomResourceWebhookPayload {
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.organizationId = data.organizationId;
     this.type = data.type;
+    this.webhookId = data.webhookId;
+    this.webhookTimestamp = data.webhookTimestamp;
   }
 
   /** The type of action that triggered the webhook. */
@@ -2042,6 +2071,10 @@ export class CustomResourceWebhookPayload {
   public organizationId: string;
   /** The type of resource. */
   public type: string;
+  /** The ID of the webhook that sent this event. */
+  public webhookId: string;
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  public webhookTimestamp: number;
 }
 /**
  * A custom view that has been saved by a user.
@@ -5355,6 +5388,8 @@ export class EntityWebhookPayload {
     this.type = data.type;
     this.updatedFrom = data.updatedFrom ?? undefined;
     this.url = data.url ?? undefined;
+    this.webhookId = data.webhookId;
+    this.webhookTimestamp = data.webhookTimestamp;
   }
 
   /** The type of action that triggered the webhook. */
@@ -5369,6 +5404,10 @@ export class EntityWebhookPayload {
   public updatedFrom?: L.Scalars["JSONObject"];
   /** URL for the entity. */
   public url?: string;
+  /** The ID of the webhook that sent this event. */
+  public webhookId: string;
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  public webhookTimestamp: number;
 }
 /**
  * Information about an external entity.
@@ -10249,6 +10288,8 @@ export class IssueSlaWebhookPayload {
     this.organizationId = data.organizationId;
     this.type = data.type;
     this.url = data.url ?? undefined;
+    this.webhookId = data.webhookId;
+    this.webhookTimestamp = data.webhookTimestamp;
     this.issueData = new IssueWebhookPayload(data.issueData);
   }
 
@@ -10262,6 +10303,10 @@ export class IssueSlaWebhookPayload {
   public type: string;
   /** URL for the issue. */
   public url?: string;
+  /** The ID of the webhook that sent this event. */
+  public webhookId: string;
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  public webhookTimestamp: number;
   /** The issue that the SLA event is about. */
   public issueData: IssueWebhookPayload;
 }
@@ -11587,6 +11632,8 @@ export class OAuthAppWebhookPayload {
     this.oauthClientId = data.oauthClientId;
     this.organizationId = data.organizationId;
     this.type = data.type;
+    this.webhookId = data.webhookId;
+    this.webhookTimestamp = data.webhookTimestamp;
   }
 
   /** The type of action that triggered the webhook. */
@@ -11599,6 +11646,10 @@ export class OAuthAppWebhookPayload {
   public organizationId: string;
   /** The type of resource. */
   public type: string;
+  /** The ID of the webhook that sent this event. */
+  public webhookId: string;
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  public webhookTimestamp: number;
 }
 /**
  * Payload for OAuth authorization webhook events.
@@ -11614,6 +11665,8 @@ export class OAuthAuthorizationWebhookPayload {
     this.organizationId = data.organizationId;
     this.type = data.type;
     this.userId = data.userId;
+    this.webhookId = data.webhookId;
+    this.webhookTimestamp = data.webhookTimestamp;
     this.oauthClient = new OauthClientChildWebhookPayload(data.oauthClient);
     this.user = new UserChildWebhookPayload(data.user);
   }
@@ -11632,6 +11685,10 @@ export class OAuthAuthorizationWebhookPayload {
   public type: string;
   /** ID of the user that the authorization belongs to. */
   public userId: string;
+  /** The ID of the webhook that sent this event. */
+  public webhookId: string;
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  public webhookTimestamp: number;
   /** Details of the OAuth client the authorization belongs to. */
   public oauthClient: OauthClientChildWebhookPayload;
   /** Details of the user that the authorization belongs to. */

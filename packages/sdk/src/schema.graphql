@@ -482,6 +482,10 @@ type AgentSession implements Node {
   """
   plan: JSON
   """
+  [Internal] A formatted prompt string containing relevant context for the agent session, including issue details, comments, and guidance.
+  """
+  promptContext: String
+  """
   The comment that this agent session was spawned from, if from a different thread.
   """
   sourceComment: Comment
@@ -604,9 +608,21 @@ type AgentSessionEventWebhookPayload {
   """
   previousComments: [CommentChildWebhookPayload!]
   """
+  A formatted prompt string containing the relevant context for the agent session, including issue details, comments, and guidance. Present only for `created` events.
+  """
+  promptContext: String
+  """
   The type of resource.
   """
   type: String!
+  """
+  The ID of the webhook that sent this event.
+  """
+  webhookId: String!
+  """
+  Unix timestamp in milliseconds when the webhook was sent.
+  """
+  webhookTimestamp: Float!
 }
 
 type AgentSessionPayload {
@@ -813,6 +829,14 @@ type AppUserNotificationWebhookPayload {
   The type of resource.
   """
   type: String!
+  """
+  The ID of the webhook that sent this event.
+  """
+  webhookId: String!
+  """
+  Unix timestamp in milliseconds when the webhook was sent.
+  """
+  webhookTimestamp: Float!
 }
 
 """
@@ -855,6 +879,14 @@ type AppUserTeamAccessChangedWebhookPayload {
   The type of resource.
   """
   type: String!
+  """
+  The ID of the webhook that sent this event.
+  """
+  webhookId: String!
+  """
+  Unix timestamp in milliseconds when the webhook was sent.
+  """
+  webhookTimestamp: Float!
 }
 
 """
@@ -1799,6 +1831,14 @@ type BaseWebhookPayload {
   ID of the organization for which the webhook belongs to.
   """
   organizationId: String!
+  """
+  The ID of the webhook that sent this event.
+  """
+  webhookId: String!
+  """
+  Unix timestamp in milliseconds when the webhook was sent.
+  """
+  webhookTimestamp: Float!
 }
 
 """
@@ -2640,6 +2680,14 @@ type CustomResourceWebhookPayload {
   The type of resource.
   """
   type: String!
+  """
+  The ID of the webhook that sent this event.
+  """
+  webhookId: String!
+  """
+  Unix timestamp in milliseconds when the webhook was sent.
+  """
+  webhookTimestamp: Float!
 }
 
 """
@@ -7374,6 +7422,14 @@ type EntityWebhookPayload {
   URL for the entity.
   """
   url: String
+  """
+  The ID of the webhook that sent this event.
+  """
+  webhookId: String!
+  """
+  Unix timestamp in milliseconds when the webhook was sent.
+  """
+  webhookTimestamp: Float!
 }
 
 """
@@ -7822,6 +7878,14 @@ type Favorite implements Node {
   """
   pullRequest: PullRequest
   """
+  [ALPHA] The favorited release.
+  """
+  release: Release
+  """
+  [ALPHA] The favorited release pipeline.
+  """
+  releasePipeline: ReleasePipeline
+  """
   The order of the item in the favorites list.
   """
   sortOrder: Float!
@@ -7931,6 +7995,14 @@ input FavoriteCreateInput {
   The identifier of the pull request to favorite.
   """
   pullRequestId: String
+  """
+  [ALPHA] The identifier of the release to favorite.
+  """
+  releaseId: String
+  """
+  [ALPHA] The identifier of the release pipeline to favorite.
+  """
+  releasePipelineId: String
   """
   The position of the item in the favorites list.
   """
@@ -12262,7 +12334,7 @@ input IssueCollectionFilter {
   """
   Comparator for the identifier.
   """
-  id: IDComparator
+  id: IssueIDComparator
   """
   Filters that issue labels must satisfy.
   """
@@ -13015,7 +13087,7 @@ input IssueFilter {
   """
   Comparator for the identifier.
   """
-  id: IDComparator
+  id: IssueIDComparator
   """
   Filters that issue labels must satisfy.
   """
@@ -13420,6 +13492,28 @@ type IssueHistoryEdge {
   """
   cursor: String!
   node: IssueHistory!
+}
+
+"""
+Comparator for issue identifiers.
+"""
+input IssueIDComparator {
+  """
+  Equals constraint.
+  """
+  eq: ID
+  """
+  In-array constraint.
+  """
+  in: [ID!]
+  """
+  Not-equals constraint.
+  """
+  neq: ID
+  """
+  Not-in-array constraint.
+  """
+  nin: [ID!]
 }
 
 """
@@ -15181,6 +15275,14 @@ type IssueSlaWebhookPayload {
   URL for the issue.
   """
   url: String
+  """
+  The ID of the webhook that sent this event.
+  """
+  webhookId: String!
+  """
+  Unix timestamp in milliseconds when the webhook was sent.
+  """
+  webhookTimestamp: Float!
 }
 
 """
@@ -21659,7 +21761,7 @@ input NullableIssueFilter {
   """
   Comparator for the identifier.
   """
-  id: IDComparator
+  id: IssueIDComparator
   """
   Filters that issue labels must satisfy.
   """
@@ -22418,6 +22520,14 @@ type OAuthAppWebhookPayload {
   The type of resource.
   """
   type: String!
+  """
+  The ID of the webhook that sent this event.
+  """
+  webhookId: String!
+  """
+  Unix timestamp in milliseconds when the webhook was sent.
+  """
+  webhookTimestamp: Float!
 }
 
 """
@@ -22460,6 +22570,14 @@ type OAuthAuthorizationWebhookPayload {
   ID of the user that the authorization belongs to.
   """
   userId: String!
+  """
+  The ID of the webhook that sent this event.
+  """
+  webhookId: String!
+  """
+  Unix timestamp in milliseconds when the webhook was sent.
+  """
+  webhookTimestamp: Float!
 }
 
 """
@@ -31692,9 +31810,17 @@ type Release implements Node {
   """
   archivedAt: DateTime
   """
+  The time at which the release was canceled.
+  """
+  canceledAt: DateTime
+  """
   The commit SHA associated with this release.
   """
   commitSha: String
+  """
+  The time at which the release was completed.
+  """
+  completedAt: DateTime
   """
   The time at which the entity was created.
   """
@@ -31719,6 +31845,18 @@ type Release implements Node {
   The current stage of the release.
   """
   stage: ReleaseStage!
+  """
+  The estimated start date of the release.
+  """
+  startDate: TimelessDate
+  """
+  The time at which the release was started.
+  """
+  startedAt: DateTime
+  """
+  The estimated completion date of the release.
+  """
+  targetDate: TimelessDate
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
