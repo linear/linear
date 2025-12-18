@@ -316,6 +316,8 @@ export type AgentSession = Node & {
   issue?: Maybe<Issue>;
   /** A dynamically updated list of the agent's execution strategy. */
   plan?: Maybe<Scalars["JSON"]>;
+  /** [Internal] A formatted prompt string containing relevant context for the agent session, including issue details, comments, and guidance. */
+  promptContext?: Maybe<Scalars["String"]>;
   /** The comment that this agent session was spawned from, if from a different thread. */
   sourceComment?: Maybe<Comment>;
   /** Metadata about the external source that created this agent session. */
@@ -404,8 +406,14 @@ export type AgentSessionEventWebhookPayload = {
   organizationId: Scalars["String"];
   /** The previous comments in the thread before this agent was mentioned and the session was initiated, if any. Present only for `created` events where the session was initiated by mentioning the agent in a child comment of a thread. */
   previousComments?: Maybe<Array<CommentChildWebhookPayload>>;
+  /** A formatted prompt string containing the relevant context for the agent session, including issue details, comments, and guidance. Present only for `created` events. */
+  promptContext?: Maybe<Scalars["String"]>;
   /** The type of resource. */
   type: Scalars["String"];
+  /** The ID of the webhook that sent this event. */
+  webhookId: Scalars["String"];
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  webhookTimestamp: Scalars["Float"];
 };
 
 export type AgentSessionPayload = {
@@ -530,6 +538,10 @@ export type AppUserNotificationWebhookPayload = {
   organizationId: Scalars["String"];
   /** The type of resource. */
   type: Scalars["String"];
+  /** The ID of the webhook that sent this event. */
+  webhookId: Scalars["String"];
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  webhookTimestamp: Scalars["Float"];
 };
 
 /** Payload for app user team access change webhook events. */
@@ -553,6 +565,10 @@ export type AppUserTeamAccessChangedWebhookPayload = {
   removedTeamIds: Array<Scalars["String"]>;
   /** The type of resource. */
   type: Scalars["String"];
+  /** The ID of the webhook that sent this event. */
+  webhookId: Scalars["String"];
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  webhookTimestamp: Scalars["Float"];
 };
 
 /** Public information of the OAuth application. */
@@ -1096,6 +1112,10 @@ export type BaseWebhookPayload = {
   createdAt: Scalars["DateTime"];
   /** ID of the organization for which the webhook belongs to. */
   organizationId: Scalars["String"];
+  /** The ID of the webhook that sent this event. */
+  webhookId: Scalars["String"];
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  webhookTimestamp: Scalars["Float"];
 };
 
 /** Comparator for booleans. */
@@ -1554,6 +1574,10 @@ export type CustomResourceWebhookPayload = {
   organizationId: Scalars["String"];
   /** The type of resource. */
   type: Scalars["String"];
+  /** The ID of the webhook that sent this event. */
+  webhookId: Scalars["String"];
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  webhookTimestamp: Scalars["Float"];
 };
 
 /** A custom view that has been saved by a user. */
@@ -4248,6 +4272,10 @@ export type EntityWebhookPayload = {
   updatedFrom?: Maybe<Scalars["JSONObject"]>;
   /** URL for the entity. */
   url?: Maybe<Scalars["String"]>;
+  /** The ID of the webhook that sent this event. */
+  webhookId: Scalars["String"];
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  webhookTimestamp: Scalars["Float"];
 };
 
 /** Comparator for estimates. */
@@ -4504,6 +4532,10 @@ export type Favorite = Node & {
   projectTeam?: Maybe<Team>;
   /** The favorited pull request. */
   pullRequest?: Maybe<PullRequest>;
+  /** [ALPHA] The favorited release. */
+  release?: Maybe<Release>;
+  /** [ALPHA] The favorited release pipeline. */
+  releasePipeline?: Maybe<ReleasePipeline>;
   /** The order of the item in the favorites list. */
   sortOrder: Scalars["Float"];
   /** [Internal] Favorite's title text (name of the favorite'd object or folder). */
@@ -4577,6 +4609,10 @@ export type FavoriteCreateInput = {
   projectTab?: InputMaybe<ProjectTab>;
   /** The identifier of the pull request to favorite. */
   pullRequestId?: InputMaybe<Scalars["String"]>;
+  /** [ALPHA] The identifier of the release to favorite. */
+  releaseId?: InputMaybe<Scalars["String"]>;
+  /** [ALPHA] The identifier of the release pipeline to favorite. */
+  releasePipelineId?: InputMaybe<Scalars["String"]>;
   /** The position of the item in the favorites list. */
   sortOrder?: InputMaybe<Scalars["Float"]>;
   /** The identifier of the user to favorite. */
@@ -7019,7 +7055,7 @@ export type IssueCollectionFilter = {
   /** [Internal] Comparator for filtering issues which have suggested teams. */
   hasSuggestedTeams?: InputMaybe<RelationExistsComparator>;
   /** Comparator for the identifier. */
-  id?: InputMaybe<IdComparator>;
+  id?: InputMaybe<IssueIdComparator>;
   /** Filters that issue labels must satisfy. */
   labels?: InputMaybe<IssueLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
@@ -7415,7 +7451,7 @@ export type IssueFilter = {
   /** [Internal] Comparator for filtering issues which have suggested teams. */
   hasSuggestedTeams?: InputMaybe<RelationExistsComparator>;
   /** Comparator for the identifier. */
-  id?: InputMaybe<IdComparator>;
+  id?: InputMaybe<IssueIdComparator>;
   /** Filters that issue labels must satisfy. */
   labels?: InputMaybe<IssueLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
@@ -7635,6 +7671,18 @@ export type IssueHistoryEdge = {
   /** Used in `before` and `after` args */
   cursor: Scalars["String"];
   node: IssueHistory;
+};
+
+/** Comparator for issue identifiers. */
+export type IssueIdComparator = {
+  /** Equals constraint. */
+  eq?: InputMaybe<Scalars["ID"]>;
+  /** In-array constraint. */
+  in?: InputMaybe<Array<Scalars["ID"]>>;
+  /** Not-equals constraint. */
+  neq?: InputMaybe<Scalars["ID"]>;
+  /** Not-in-array constraint. */
+  nin?: InputMaybe<Array<Scalars["ID"]>>;
 };
 
 /** An import job for data from an external service. */
@@ -8542,6 +8590,10 @@ export type IssueSlaWebhookPayload = {
   type: Scalars["String"];
   /** URL for the issue. */
   url?: Maybe<Scalars["String"]>;
+  /** The ID of the webhook that sent this event. */
+  webhookId: Scalars["String"];
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  webhookTimestamp: Scalars["Float"];
 };
 
 /** Issue sorting options. */
@@ -12250,7 +12302,7 @@ export type NullableIssueFilter = {
   /** [Internal] Comparator for filtering issues which have suggested teams. */
   hasSuggestedTeams?: InputMaybe<RelationExistsComparator>;
   /** Comparator for the identifier. */
-  id?: InputMaybe<IdComparator>;
+  id?: InputMaybe<IssueIdComparator>;
   /** Filters that issue labels must satisfy. */
   labels?: InputMaybe<IssueLabelCollectionFilter>;
   /** Filters that the last applied template must satisfy. */
@@ -12642,6 +12694,10 @@ export type OAuthAppWebhookPayload = {
   organizationId: Scalars["String"];
   /** The type of resource. */
   type: Scalars["String"];
+  /** The ID of the webhook that sent this event. */
+  webhookId: Scalars["String"];
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  webhookTimestamp: Scalars["Float"];
 };
 
 /** Payload for OAuth authorization webhook events. */
@@ -12665,6 +12721,10 @@ export type OAuthAuthorizationWebhookPayload = {
   user: UserChildWebhookPayload;
   /** ID of the user that the authorization belongs to. */
   userId: Scalars["String"];
+  /** The ID of the webhook that sent this event. */
+  webhookId: Scalars["String"];
+  /** Unix timestamp in milliseconds when the webhook was sent. */
+  webhookTimestamp: Scalars["Float"];
 };
 
 /** The different requests statuses possible for an OAuth client approval request. */
@@ -17646,8 +17706,12 @@ export type Release = Node & {
   __typename?: "Release";
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars["DateTime"]>;
+  /** The time at which the release was canceled. */
+  canceledAt?: Maybe<Scalars["DateTime"]>;
   /** The commit SHA associated with this release. */
   commitSha?: Maybe<Scalars["String"]>;
+  /** The time at which the release was completed. */
+  completedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
@@ -17660,6 +17724,12 @@ export type Release = Node & {
   slugId: Scalars["String"];
   /** The current stage of the release. */
   stage: ReleaseStage;
+  /** The estimated start date of the release. */
+  startDate?: Maybe<Scalars["TimelessDate"]>;
+  /** The time at which the release was started. */
+  startedAt?: Maybe<Scalars["DateTime"]>;
+  /** The estimated completion date of the release. */
+  targetDate?: Maybe<Scalars["TimelessDate"]>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -24816,7 +24886,7 @@ export type AuthenticationSessionResponseFragment = { __typename: "Authenticatio
 
 export type BaseWebhookPayloadFragment = { __typename: "BaseWebhookPayload" } & Pick<
   BaseWebhookPayload,
-  "organizationId" | "createdAt"
+  "organizationId" | "webhookId" | "createdAt" | "webhookTimestamp"
 >;
 
 export type CommentChildWebhookPayloadFragment = { __typename: "CommentChildWebhookPayload" } & Pick<
@@ -25401,12 +25471,20 @@ export type OrganizationOriginWebhookPayloadFragment = { __typename: "Organizati
 
 export type OAuthAppWebhookPayloadFragment = { __typename: "OAuthAppWebhookPayload" } & Pick<
   OAuthAppWebhookPayload,
-  "organizationId" | "oauthClientId" | "createdAt" | "action" | "type"
+  "organizationId" | "oauthClientId" | "webhookId" | "createdAt" | "action" | "type" | "webhookTimestamp"
 >;
 
 export type OAuthAuthorizationWebhookPayloadFragment = { __typename: "OAuthAuthorizationWebhookPayload" } & Pick<
   OAuthAuthorizationWebhookPayload,
-  "oauthClientId" | "organizationId" | "userId" | "activeTokensForUser" | "createdAt" | "action" | "type"
+  | "oauthClientId"
+  | "organizationId"
+  | "userId"
+  | "webhookId"
+  | "activeTokensForUser"
+  | "createdAt"
+  | "action"
+  | "type"
+  | "webhookTimestamp"
 > & {
     oauthClient: { __typename: "OauthClientChildWebhookPayload" } & Pick<OauthClientChildWebhookPayload, "id" | "name">;
     user: { __typename: "UserChildWebhookPayload" } & Pick<
@@ -25833,7 +25911,15 @@ export type UserWebhookPayloadFragment = { __typename: "UserWebhookPayload" } & 
 
 export type AgentSessionEventWebhookPayloadFragment = { __typename: "AgentSessionEventWebhookPayload" } & Pick<
   AgentSessionEventWebhookPayload,
-  "oauthClientId" | "appUserId" | "organizationId" | "createdAt" | "action" | "type"
+  | "promptContext"
+  | "oauthClientId"
+  | "appUserId"
+  | "organizationId"
+  | "webhookId"
+  | "createdAt"
+  | "action"
+  | "type"
+  | "webhookTimestamp"
 > & {
     guidance?: Maybe<Array<{ __typename: "GuidanceRuleWebhookPayload" } & Pick<GuidanceRuleWebhookPayload, "body">>>;
     agentActivity?: Maybe<
@@ -26394,7 +26480,7 @@ export type IssueWebhookPayloadFragment = { __typename: "IssueWebhookPayload" } 
 
 export type AppUserNotificationWebhookPayloadFragment = { __typename: "AppUserNotificationWebhookPayload" } & Pick<
   AppUserNotificationWebhookPayload,
-  "oauthClientId" | "appUserId" | "organizationId" | "createdAt" | "action" | "type"
+  "oauthClientId" | "appUserId" | "organizationId" | "webhookId" | "createdAt" | "action" | "type" | "webhookTimestamp"
 >;
 
 export type AppUserTeamAccessChangedWebhookPayloadFragment = {
@@ -26406,25 +26492,27 @@ export type AppUserTeamAccessChangedWebhookPayloadFragment = {
   | "organizationId"
   | "addedTeamIds"
   | "removedTeamIds"
+  | "webhookId"
   | "createdAt"
   | "action"
   | "type"
+  | "webhookTimestamp"
   | "canAccessAllPublicTeams"
 >;
 
 export type CustomResourceWebhookPayloadFragment = { __typename: "CustomResourceWebhookPayload" } & Pick<
   CustomResourceWebhookPayload,
-  "organizationId" | "createdAt" | "action" | "type"
+  "organizationId" | "webhookId" | "createdAt" | "action" | "type" | "webhookTimestamp"
 >;
 
 export type EntityWebhookPayloadFragment = { __typename: "EntityWebhookPayload" } & Pick<
   EntityWebhookPayload,
-  "organizationId" | "updatedFrom" | "createdAt" | "action" | "type" | "url"
+  "organizationId" | "updatedFrom" | "webhookId" | "createdAt" | "action" | "type" | "url" | "webhookTimestamp"
 >;
 
 export type IssueSlaWebhookPayloadFragment = { __typename: "IssueSlaWebhookPayload" } & Pick<
   IssueSlaWebhookPayload,
-  "organizationId" | "createdAt" | "action" | "type" | "url"
+  "organizationId" | "webhookId" | "createdAt" | "action" | "type" | "url" | "webhookTimestamp"
 > & {
     issueData: { __typename: "IssueWebhookPayload" } & Pick<
       IssueWebhookPayload,
@@ -57011,7 +57099,9 @@ export const BaseWebhookPayloadFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookId" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookTimestamp" } },
         ],
       },
     },
@@ -57533,9 +57623,11 @@ export const OAuthAppWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "organizationId" } },
           { kind: "Field", name: { kind: "Name", value: "oauthClientId" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookId" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "action" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookTimestamp" } },
         ],
       },
     },
@@ -57589,10 +57681,12 @@ export const OAuthAuthorizationWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "oauthClientId" } },
           { kind: "Field", name: { kind: "Name", value: "organizationId" } },
           { kind: "Field", name: { kind: "Name", value: "userId" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookId" } },
           { kind: "Field", name: { kind: "Name", value: "activeTokensForUser" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "action" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookTimestamp" } },
         ],
       },
     },
@@ -58536,6 +58630,7 @@ export const AgentSessionEventWebhookPayloadFragmentDoc = {
         kind: "SelectionSet",
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
+          { kind: "Field", name: { kind: "Name", value: "promptContext" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "guidance" },
@@ -58547,6 +58642,7 @@ export const AgentSessionEventWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "oauthClientId" } },
           { kind: "Field", name: { kind: "Name", value: "appUserId" } },
           { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "agentActivity" },
@@ -58574,6 +58670,7 @@ export const AgentSessionEventWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "action" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookTimestamp" } },
         ],
       },
     },
@@ -59159,9 +59256,11 @@ export const AppUserNotificationWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "oauthClientId" } },
           { kind: "Field", name: { kind: "Name", value: "appUserId" } },
           { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookId" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "action" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookTimestamp" } },
         ],
       },
     },
@@ -59183,9 +59282,11 @@ export const AppUserTeamAccessChangedWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "organizationId" } },
           { kind: "Field", name: { kind: "Name", value: "addedTeamIds" } },
           { kind: "Field", name: { kind: "Name", value: "removedTeamIds" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookId" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "action" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookTimestamp" } },
           { kind: "Field", name: { kind: "Name", value: "canAccessAllPublicTeams" } },
         ],
       },
@@ -59204,9 +59305,11 @@ export const CustomResourceWebhookPayloadFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookId" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "action" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookTimestamp" } },
         ],
       },
     },
@@ -59225,10 +59328,12 @@ export const EntityWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "organizationId" } },
           { kind: "Field", name: { kind: "Name", value: "updatedFrom" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookId" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "action" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookTimestamp" } },
         ],
       },
     },
@@ -59463,6 +59568,7 @@ export const IssueSlaWebhookPayloadFragmentDoc = {
         selections: [
           { kind: "Field", name: { kind: "Name", value: "__typename" } },
           { kind: "Field", name: { kind: "Name", value: "organizationId" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookId" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "issueData" },
@@ -59475,6 +59581,7 @@ export const IssueSlaWebhookPayloadFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "action" } },
           { kind: "Field", name: { kind: "Name", value: "type" } },
           { kind: "Field", name: { kind: "Name", value: "url" } },
+          { kind: "Field", name: { kind: "Name", value: "webhookTimestamp" } },
         ],
       },
     },
