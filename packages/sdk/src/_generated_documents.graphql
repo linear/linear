@@ -2223,6 +2223,8 @@ fragment AgentSession on AgentSession {
   dismissedBy {
     id
   }
+  # URLs of external resources associated with this session.
+  externalUrls
 }
 
 # A set of issues to be resolved in a specified amount of time.
@@ -4808,6 +4810,24 @@ fragment IssueRelationHistoryPayload on IssueRelationHistoryPayload {
   type
 }
 
+# Join table between agent sessions and pull requests.
+fragment AgentSessionToPullRequest on AgentSessionToPullRequest {
+  __typename
+  # The agent session that the pull request is associated with.
+  agentSession {
+    id
+  }
+  # The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+  #     been updated after creation.
+  updatedAt
+  # The time at which the entity was archived. Null if the entity has not been archived.
+  archivedAt
+  # The time at which the entity was created.
+  createdAt
+  # The unique identifier of the entity.
+  id
+}
+
 # Join table between projects and initiatives.
 fragment InitiativeToProject on InitiativeToProject {
   __typename
@@ -7140,6 +7160,16 @@ fragment AgentSessionPayload on AgentSessionPayload {
   success
 }
 
+fragment AgentSessionToPullRequestConnection on AgentSessionToPullRequestConnection {
+  __typename
+  nodes {
+    ...AgentSessionToPullRequest
+  }
+  pageInfo {
+    ...PageInfo
+  }
+}
+
 fragment AsksChannelConnectPayload on AsksChannelConnectPayload {
   __typename
   # The identifier of the last sync operation.
@@ -7156,6 +7186,14 @@ fragment AsksChannelConnectPayload on AsksChannelConnectPayload {
   addBot
   # Whether the operation was successful.
   success
+}
+
+fragment AsksWebFormsAuthResponse on AsksWebFormsAuthResponse {
+  __typename
+  # User display name.
+  name
+  # User email.
+  email
 }
 
 fragment AttachmentConnection on AttachmentConnection {
@@ -15377,6 +15415,15 @@ mutation airbyteIntegrationConnect(
 ) {
   airbyteIntegrationConnect(input: $input) {
     ...IntegrationPayload
+  }
+}
+# Authenticate a user to the Asks web forms app.
+mutation asksWebFormsAuth(
+  # The magic login code.
+  $token: String!
+) {
+  asksWebFormsAuth(token: $token) {
+    ...AsksWebFormsAuthResponse
   }
 }
 # Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
