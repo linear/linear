@@ -510,6 +510,7 @@ export class AgentSession extends Request {
     this.dismissedAt = parseDate(data.dismissedAt) ?? undefined;
     this.endedAt = parseDate(data.endedAt) ?? undefined;
     this.externalLink = data.externalLink ?? undefined;
+    this.externalUrls = parseJson(data.externalUrls) ?? {};
     this.id = data.id;
     this.plan = parseJson(data.plan) ?? undefined;
     this.sourceMetadata = parseJson(data.sourceMetadata) ?? undefined;
@@ -536,6 +537,8 @@ export class AgentSession extends Request {
   public endedAt?: Date | null;
   /** The URL of an external agent-hosted page associated with this session. */
   public externalLink?: string | null;
+  /** URLs of external resources associated with this session. */
+  public externalUrls: Record<string, unknown>;
   /** The unique identifier of the entity. */
   public id: string;
   /** A dynamically updated list of the agent's execution strategy. */
@@ -711,6 +714,67 @@ export class AgentSessionPayload extends Request {
   /** The ID of agent session that was created or updated. */
   public get agentSessionId(): string | undefined {
     return this._agentSession?.id;
+  }
+}
+/**
+ * Join table between agent sessions and pull requests.
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AgentSessionToPullRequestFragment response data
+ */
+export class AgentSessionToPullRequest extends Request {
+  private _agentSession: L.AgentSessionToPullRequestFragment["agentSession"];
+
+  public constructor(request: LinearRequest, data: L.AgentSessionToPullRequestFragment) {
+    super(request);
+    this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.createdAt = parseDate(data.createdAt) ?? new Date();
+    this.id = data.id;
+    this.updatedAt = parseDate(data.updatedAt) ?? new Date();
+    this._agentSession = data.agentSession;
+  }
+
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  public archivedAt?: Date | null;
+  /** The time at which the entity was created. */
+  public createdAt: Date;
+  /** The unique identifier of the entity. */
+  public id: string;
+  /**
+   * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  public updatedAt: Date;
+  /** The agent session that the pull request is associated with. */
+  public get agentSession(): LinearFetch<AgentSession> | undefined {
+    return new AgentSessionQuery(this._request).fetch(this._agentSession.id);
+  }
+  /** The ID of agent session that the pull request is associated with. */
+  public get agentSessionId(): string | undefined {
+    return this._agentSession?.id;
+  }
+}
+/**
+ * AgentSessionToPullRequestConnection model
+ *
+ * @param request - function to call the graphql client
+ * @param fetch - function to trigger a refetch of this AgentSessionToPullRequestConnection model
+ * @param data - AgentSessionToPullRequestConnection response data
+ */
+export class AgentSessionToPullRequestConnection extends Connection<AgentSessionToPullRequest> {
+  public constructor(
+    request: LinearRequest,
+    fetch: (
+      connection?: LinearConnectionVariables
+    ) => LinearFetch<LinearConnection<AgentSessionToPullRequest> | undefined>,
+    data: L.AgentSessionToPullRequestConnectionFragment
+  ) {
+    super(
+      request,
+      fetch,
+      data.nodes.map(node => new AgentSessionToPullRequest(request, node)),
+      new PageInfo(request, data.pageInfo)
+    );
   }
 }
 /**
@@ -1004,6 +1068,24 @@ export class AsksChannelConnectPayload extends Request {
   public get integrationId(): string | undefined {
     return this._integration?.id;
   }
+}
+/**
+ * AsksWebFormsAuthResponse model
+ *
+ * @param request - function to call the graphql client
+ * @param data - L.AsksWebFormsAuthResponseFragment response data
+ */
+export class AsksWebFormsAuthResponse extends Request {
+  public constructor(request: LinearRequest, data: L.AsksWebFormsAuthResponseFragment) {
+    super(request);
+    this.email = data.email;
+    this.name = data.name;
+  }
+
+  /** User email. */
+  public email: string;
+  /** User display name. */
+  public name: string;
 }
 /**
  * Issue attachment (e.g. support ticket, pull request).
@@ -18212,12 +18294,15 @@ export class ViewPreferencesValues extends Request {
   public constructor(request: LinearRequest, data: L.ViewPreferencesValuesFragment) {
     super(request);
     this.issueGrouping = data.issueGrouping ?? undefined;
+    this.issueSubGrouping = data.issueSubGrouping ?? undefined;
     this.showCompletedIssues = data.showCompletedIssues ?? undefined;
     this.viewOrdering = data.viewOrdering ?? undefined;
   }
 
   /** The issue grouping. */
   public issueGrouping?: string | null;
+  /** The issue sub grouping. */
+  public issueSubGrouping?: string | null;
   /** Whether to show completed issues. */
   public showCompletedIssues?: string | null;
   /** The issue ordering. */
@@ -22606,6 +22691,35 @@ export class AirbyteIntegrationConnectMutation extends Request {
     const data = response.airbyteIntegrationConnect;
 
     return new IntegrationPayload(this._request, data);
+  }
+}
+
+/**
+ * A fetchable AsksWebFormsAuth Mutation
+ *
+ * @param request - function to call the graphql client
+ */
+export class AsksWebFormsAuthMutation extends Request {
+  public constructor(request: LinearRequest) {
+    super(request);
+  }
+
+  /**
+   * Call the AsksWebFormsAuth mutation and return a AsksWebFormsAuthResponse
+   *
+   * @param token - required token to pass to asksWebFormsAuth
+   * @returns parsed response from AsksWebFormsAuthMutation
+   */
+  public async fetch(token: string): LinearFetch<AsksWebFormsAuthResponse> {
+    const response = await this._request<L.AsksWebFormsAuthMutation, L.AsksWebFormsAuthMutationVariables>(
+      L.AsksWebFormsAuthDocument,
+      {
+        token,
+      }
+    );
+    const data = response.asksWebFormsAuth;
+
+    return new AsksWebFormsAuthResponse(this._request, data);
   }
 }
 
@@ -39146,6 +39260,15 @@ export class LinearSdk extends Request {
    */
   public airbyteIntegrationConnect(input: L.AirbyteConfigurationInput): LinearFetch<IntegrationPayload> {
     return new AirbyteIntegrationConnectMutation(this._request).fetch(input);
+  }
+  /**
+   * Authenticate a user to the Asks web forms app.
+   *
+   * @param token - required token to pass to asksWebFormsAuth
+   * @returns AsksWebFormsAuthResponse
+   */
+  public asksWebFormsAuth(token: string): LinearFetch<AsksWebFormsAuthResponse> {
+    return new AsksWebFormsAuthMutation(this._request).fetch(token);
   }
   /**
    * Creates a new attachment, or updates existing if the same `url` and `issueId` is used.

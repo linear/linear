@@ -470,6 +470,10 @@ type AgentSession implements Node {
   """
   externalLink: String
   """
+  URLs of external resources associated with this session.
+  """
+  externalUrls: JSON!
+  """
   The unique identifier of the entity.
   """
   id: ID!
@@ -485,6 +489,35 @@ type AgentSession implements Node {
   [Internal] A formatted prompt string containing relevant context for the agent session, including issue details, comments, and guidance.
   """
   promptContext: String
+  """
+  [Internal] Pull requests associated with this agent session.
+  """
+  pullRequests(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): AgentSessionToPullRequestConnection!
   """
   The comment that this agent session was spawned from, if from a different thread.
   """
@@ -546,6 +579,10 @@ input AgentSessionCreateOnComment {
   The URL of an external agent-hosted page associated with this session.
   """
   externalLink: String
+  """
+  URLs of external resources associated with this session.
+  """
+  externalUrls: [AgentSessionExternalUrlInput!]
 }
 
 input AgentSessionCreateOnIssue {
@@ -553,6 +590,10 @@ input AgentSessionCreateOnIssue {
   The URL of an external agent-hosted page associated with this session.
   """
   externalLink: String
+  """
+  URLs of external resources associated with this session.
+  """
+  externalUrls: [AgentSessionExternalUrlInput!]
   """
   The issue that this session will be associated with.
   """
@@ -625,6 +666,20 @@ type AgentSessionEventWebhookPayload {
   webhookTimestamp: Float!
 }
 
+"""
+Input for an external URL associated with an agent session.
+"""
+input AgentSessionExternalUrlInput {
+  """
+  Optional label for the URL.
+  """
+  label: String
+  """
+  The URL of the external resource.
+  """
+  url: String!
+}
+
 type AgentSessionPayload {
   """
   The agent session that was created or updated.
@@ -653,6 +708,51 @@ enum AgentSessionStatus {
 }
 
 """
+Join table between agent sessions and pull requests.
+"""
+type AgentSessionToPullRequest implements Node {
+  """
+  The agent session that the pull request is associated with.
+  """
+  agentSession: AgentSession!
+  """
+  The time at which the entity was archived. Null if the entity has not been archived.
+  """
+  archivedAt: DateTime
+  """
+  The time at which the entity was created.
+  """
+  createdAt: DateTime!
+  """
+  The unique identifier of the entity.
+  """
+  id: ID!
+  """
+  The pull request that the agent session is associated with.
+  """
+  pullRequest: PullRequest!
+  """
+  The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+      been updated after creation.
+  """
+  updatedAt: DateTime!
+}
+
+type AgentSessionToPullRequestConnection {
+  edges: [AgentSessionToPullRequestEdge!]!
+  nodes: [AgentSessionToPullRequest!]!
+  pageInfo: PageInfo!
+}
+
+type AgentSessionToPullRequestEdge {
+  """
+  Used in `before` and `after` args
+  """
+  cursor: String!
+  node: AgentSessionToPullRequest!
+}
+
+"""
 The type of an agent session.
 """
 enum AgentSessionType {
@@ -661,12 +761,28 @@ enum AgentSessionType {
 
 input AgentSessionUpdateExternalUrlInput {
   """
+  URLs of external resources to be added to this session.
+  """
+  addedExternalUrls: [AgentSessionExternalUrlInput!]
+  """
   The URL of an external agent-hosted page associated with this session.
   """
   externalLink: String
+  """
+  URLs of external resources associated with this session. Replaces existing URLs.
+  """
+  externalUrls: [AgentSessionExternalUrlInput!]
+  """
+  URLs to be removed from this session.
+  """
+  removedExternalUrls: [String!]
 }
 
 input AgentSessionUpdateInput {
+  """
+  URLs of external resources to be added to this session. Only updatable by the OAuth application that owns the session.
+  """
+  addedExternalUrls: [AgentSessionExternalUrlInput!]
   """
   [Internal] The time the agent session was dismissed. Only updatable by internal clients.
   """
@@ -676,9 +792,17 @@ input AgentSessionUpdateInput {
   """
   externalLink: String
   """
+  URLs of external resources associated with this session. Replaces existing URLs. Only updatable by the OAuth application that owns the session. If supplied, addedExternalUrls and removedExternalUrls are ignored.
+  """
+  externalUrls: [AgentSessionExternalUrlInput!]
+  """
   A dynamically updated list of the agent's execution strategy. Only updatable by the OAuth application that owns the session.
   """
   plan: JSONObject
+  """
+  URLs to be removed from this session. Only updatable by the OAuth application that owns the session.
+  """
+  removedExternalUrls: [String!]
 }
 
 """
@@ -994,6 +1118,17 @@ type AsksChannelConnectPayload {
   Whether the operation was successful.
   """
   success: Boolean!
+}
+
+type AsksWebFormsAuthResponse {
+  """
+  User email.
+  """
+  email: String!
+  """
+  User display name.
+  """
+  name: String!
 }
 
 """
@@ -16631,6 +16766,15 @@ type Mutation {
     input: AirbyteConfigurationInput!
   ): IntegrationPayload!
   """
+  Authenticate a user to the Asks web forms app.
+  """
+  asksWebFormsAuth(
+    """
+    The magic login code.
+    """
+    token: String!
+  ): AsksWebFormsAuthResponse!
+  """
   Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
   """
   attachmentCreate(
@@ -31938,6 +32082,14 @@ input ReleaseCreateInput {
   """
   stageId: String
   """
+  The estimated start date of the release.
+  """
+  startDate: TimelessDate
+  """
+  The estimated completion date of the release.
+  """
+  targetDate: TimelessDate
+  """
   The version of the release.
   """
   version: String
@@ -32358,6 +32510,14 @@ input ReleaseUpdateInput {
   The current stage of the release.
   """
   stageId: String
+  """
+  The estimated start date of the release.
+  """
+  startDate: TimelessDate
+  """
+  The estimated completion date of the release.
+  """
+  targetDate: TimelessDate
   """
   The version of the release.
   """
@@ -35086,6 +35246,10 @@ input TeamUpdateInput {
   """
   requirePriorityToLeaveTriage: Boolean
   """
+  [Internal] When the team was retired.
+  """
+  retiredAt: DateTime
+  """
   Whether the team is managed by SCIM integration. Mutation restricted to workspace admins or owners and only unsetting is allowed!
   """
   scimManaged: Boolean
@@ -37068,6 +37232,10 @@ type ViewPreferencesValues {
   The issue grouping.
   """
   issueGrouping: String
+  """
+  The issue sub grouping.
+  """
+  issueSubGrouping: String
   """
   Whether to show completed issues.
   """
