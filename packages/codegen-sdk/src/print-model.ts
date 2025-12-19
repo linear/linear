@@ -165,31 +165,46 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
         printDebug("fields.scalar"),
         printLines(
           model.fields.scalar.map(field =>
-            printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}`)
+            printModelField(
+              field,
+              `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}${field.nonNull ? "" : " | null"}`
+            )
           )
         ),
         printDebug("fields.scalarList"),
         printLines(
           model.fields.scalarList.map(field =>
-            printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}`)
+            printModelField(
+              field,
+              `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}${field.nonNull ? "" : " | null"}`
+            )
           )
         ),
         printDebug("fields.list"),
         printLines(
           model.fields.list.map(field =>
-            printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.listType}[]`)
+            printModelField(
+              field,
+              `public ${field.name}${field.nonNull ? "" : "?"}: ${field.listType}[]${field.nonNull ? "" : " | null"}`
+            )
           )
         ),
         printDebug("fields.object"),
         printLines(
           model.fields.object.map((field /** Ignore objects returned by an operation */) =>
-            printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.object.name.value}`)
+            printModelField(
+              field,
+              `public ${field.name}${field.nonNull ? "" : "?"}: ${field.object.name.value}${field.nonNull ? "" : " | null"}`
+            )
           )
         ),
         printDebug("fields.enum"),
         printLines(
           model.fields.enum.map(field =>
-            printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}`)
+            printModelField(
+              field,
+              `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}${field.nonNull ? "" : " | null"}`
+            )
           )
         ),
         printDebug("fields.union"),
@@ -199,7 +214,10 @@ function printModel(context: SdkPluginContext, model: SdkModel): string {
               // Skip webhook payload union types as they are manually typed
               return undefined;
             }
-            return printModelField(field, `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}`);
+            return printModelField(
+              field,
+              `public ${field.name}${field.nonNull ? "" : "?"}: ${field.type}${field.nonNull ? "" : " | null"}`
+            );
           })
         ),
       ])}

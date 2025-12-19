@@ -136,7 +136,7 @@ function printOperationArgs(context: SdkPluginContext, operation: SdkOperation):
  * Prints the type with array and undefined check
  */
 function printResponseType(type: string, listType?: string) {
-  return `${type}${listType ? "[]" : ""} | undefined`;
+  return `${type}${listType ? "[]" : ""} | undefined | null`;
 }
 
 /**
@@ -157,7 +157,7 @@ function printModelQueryTest(context: SdkPluginContext, operation: SdkOperation,
     operation.name,
     [`Test ${operation.name} query`],
     printLines([
-      sdkOperations.length ? `let _${fieldName}: ${fieldType} | undefined` : undefined,
+      sdkOperations.length ? `let _${fieldName}: ${fieldType} | undefined | null` : undefined,
       "\n",
       printComment([`Test the ${sdkKey || "root"} model query for ${operation.name}`]),
       printIt(
@@ -240,13 +240,13 @@ function printConnectionQueryTest(context: SdkPluginContext, operation: SdkOpera
     printLines([
       itemOperation
         ? printLines([
-            `let _${itemField}: ${itemTypes} | undefined`,
-            ...(itemArgs.map(arg => `let _${itemField}_${arg.name}: ${arg.type} | undefined`) ?? []),
+            `let _${itemField}: ${itemTypes} | undefined | null`,
+            ...(itemArgs.map(arg => `let _${itemField}_${arg.name}: ${arg.type} | undefined | null`) ?? []),
             ...(optionalIdArg && itemArgs.length === 0
               ? [
                   `let _${itemField}_${optionalIdArg.variable.name.value}: ${lowerCase(
                     reduceTypeName(optionalIdArg.type)
-                  )} | undefined`,
+                  )} | undefined | null`,
                 ]
               : []),
             "\n",
