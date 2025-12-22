@@ -11,5 +11,6 @@ jobs:
       - uses: actions/stale@v10
         with:
           days-before-stale: 180
+          days-before-close: 0
           stale-issue-message: "This issue has seen no recent activity and has been automatically closed for house-keeping purposes."
           stale-pr-message: "This PR has seen no recent activity and has been automatically closed for house-keeping purposes."
