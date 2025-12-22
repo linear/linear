@@ -308,7 +308,10 @@ export type AgentSession = Node & {
   dismissedBy?: Maybe<User>;
   /** The time the agent session ended. */
   endedAt?: Maybe<Scalars["DateTime"]>;
-  /** The URL of an external agent-hosted page associated with this session. */
+  /**
+   * The URL of an external agent-hosted page associated with this session.
+   * @deprecated Use externalUrls instead.
+   */
   externalLink?: Maybe<Scalars["String"]>;
   /** URLs of external resources associated with this session. */
   externalUrls: Scalars["JSON"];
@@ -375,7 +378,7 @@ export type AgentSessionCreateInput = {
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
   /** The issue that this session will be associated with. */
-  issueId: Scalars["String"];
+  issueId?: InputMaybe<Scalars["String"]>;
 };
 
 export type AgentSessionCreateOnComment = {
@@ -13514,6 +13517,8 @@ export type OrganizationUpdateInput = {
   gitLinkbackMessagesEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether the Git integration linkback messages should be sent for public repositories. */
   gitPublicLinkbackMessagesEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** Whether HIPAA compliance is enabled for organization. */
+  hipaaComplianceEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** [ALPHA] The n-weekly frequency at which to prompt for initiative updates. */
   initiativeUpdateReminderFrequencyInWeeks?: InputMaybe<Scalars["Float"]>;
   /** [ALPHA] The day at which initiative updates are sent. */

@@ -1581,8 +1581,8 @@
               "name": "String",
               "ofType": null
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use externalUrls instead."
           },
           {
             "name": "externalUrls",
@@ -1962,13 +1962,9 @@
             "name": "issueId",
             "description": "The issue that this session will be associated with.",
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -85153,6 +85149,18 @@
           {
             "name": "gitPublicLinkbackMessagesEnabled",
             "description": "Whether the Git integration linkback messages should be sent for public repositories.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hipaaComplianceEnabled",
+            "description": "Whether HIPAA compliance is enabled for organization.",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
