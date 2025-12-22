@@ -468,7 +468,7 @@ type AgentSession implements Node {
   """
   The URL of an external agent-hosted page associated with this session.
   """
-  externalLink: String
+  externalLink: String @deprecated(reason: "Use externalUrls instead.")
   """
   URLs of external resources associated with this session.
   """
@@ -567,7 +567,7 @@ input AgentSessionCreateInput {
   """
   The issue that this session will be associated with.
   """
-  issueId: String!
+  issueId: String
 }
 
 input AgentSessionCreateOnComment {
@@ -23945,6 +23945,10 @@ input OrganizationUpdateInput {
   Whether the Git integration linkback messages should be sent for public repositories.
   """
   gitPublicLinkbackMessagesEnabled: Boolean
+  """
+  Whether HIPAA compliance is enabled for organization.
+  """
+  hipaaComplianceEnabled: Boolean
   """
   [ALPHA] The n-weekly frequency at which to prompt for initiative updates.
   """
