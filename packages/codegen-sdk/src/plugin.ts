@@ -61,8 +61,6 @@ export const plugin: PluginFunction<SdkPluginConfig> = async (
 
     return {
       prepend: [
-        /** Import DocumentNode */
-        "import { DocumentNode } from 'graphql/language/ast.js'",
         /** Import document namespace */
         `import * as ${Sdk.NAMESPACE} from '${config.documentFile}.js'`,
       ].filter(nonNullable),

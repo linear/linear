@@ -1,4 +1,3 @@
-import { DocumentNode } from "graphql/language/ast.js";
 import { parseLinearError } from "./error.js";
 import { LinearGraphQLClient } from "./graphql-client.js";
 import { LinearClientOptions, LinearClientParsedOptions } from "./types.js";
@@ -58,7 +57,7 @@ export class LinearClient extends LinearSdk {
     const parsedOptions = parseClientOptions(options);
     const graphQLClient = new LinearGraphQLClient(parsedOptions.apiUrl, parsedOptions);
 
-    super(<Data, Variables extends Record<string, unknown>>(doc: DocumentNode, vars?: Variables) =>
+    super(<Data, Variables extends Record<string, unknown>>(doc: string, vars?: Variables) =>
       /** Call the LinearGraphQLClient */
       this.client.request<Data, Variables>(doc, vars).catch(error => {
         /** Catch and wrap errors from the LinearGraphQLClient */
