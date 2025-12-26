@@ -1,4 +1,3 @@
-import { DocumentNode } from "graphql/language/ast.js";
 import { print } from "graphql/language/printer.js";
 import { parseLinearError } from "./error.js";
 import { GraphQLRequestContext, LinearRawResponse } from "./types.js";
@@ -101,7 +100,7 @@ export class LinearGraphQLClient {
    * Send a GraphQL document to the server.
    */
   public async request<Data, Variables extends Record<string, unknown>>(
-    document: DocumentNode | string,
+    document: string,
     variables?: Variables,
     requestHeaders?: RequestInit["headers"]
   ): Promise<Data> {

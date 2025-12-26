@@ -419,9 +419,9 @@ describe("readme.md", () => {
       });
 
       /** Create the custom request function */
-      const customLinearRequest: LinearRequest = <Data, Variables>(document: DocumentNode, variables?: Variables) => {
+      const customLinearRequest: LinearRequest = <Data, Variables>(doc: string, variables?: Variables) => {
         /** The request must take a GraphQL document and variables, then return a promise for the result */
-        return customGraphqlClient.request<Data, Variables>(print(document), variables).catch(error => {
+        return customGraphqlClient.request<Data, Variables>(doc, variables).catch(error => {
           /** Optionally catch and parse errors from the Linear API */
           throw parseLinearError(error);
         });
