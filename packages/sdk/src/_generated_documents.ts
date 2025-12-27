@@ -8276,9 +8276,9 @@ export type IssueRelationConnection = {
 export type IssueRelationCreateInput = {
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
-  /** The identifier of the issue that is related to another issue. */
+  /** The identifier of the issue that is related to another issue. Can be a UUID or issue identifier (e.g., 'LIN-123'). */
   issueId: Scalars["String"];
-  /** The identifier of the related issue. */
+  /** The identifier of the related issue. Can be a UUID or issue identifier (e.g., 'LIN-123'). */
   relatedIssueId: Scalars["String"];
   /** The type of relation of the issue to the related issue. */
   type: IssueRelationType;
@@ -8319,9 +8319,9 @@ export enum IssueRelationType {
 }
 
 export type IssueRelationUpdateInput = {
-  /** The identifier of the issue that is related to another issue. */
+  /** The identifier of the issue that is related to another issue. Can be a UUID or issue identifier (e.g., 'LIN-123'). */
   issueId?: InputMaybe<Scalars["String"]>;
-  /** The identifier of the related issue. */
+  /** The identifier of the related issue. Can be a UUID or issue identifier (e.g., 'LIN-123'). */
   relatedIssueId?: InputMaybe<Scalars["String"]>;
   /** The type of relation of the issue to the related issue. */
   type?: InputMaybe<Scalars["String"]>;
