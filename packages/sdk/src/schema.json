@@ -51291,7 +51291,7 @@
           },
           {
             "name": "issueId",
-            "description": "The identifier of the issue that is related to another issue.",
+            "description": "The identifier of the issue that is related to another issue. Can be a UUID or issue identifier (e.g., 'LIN-123').",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -51307,7 +51307,7 @@
           },
           {
             "name": "relatedIssueId",
-            "description": "The identifier of the related issue.",
+            "description": "The identifier of the related issue. Can be a UUID or issue identifier (e.g., 'LIN-123').",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -51530,7 +51530,7 @@
         "inputFields": [
           {
             "name": "issueId",
-            "description": "The identifier of the issue that is related to another issue.",
+            "description": "The identifier of the issue that is related to another issue. Can be a UUID or issue identifier (e.g., 'LIN-123').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
@@ -51542,7 +51542,7 @@
           },
           {
             "name": "relatedIssueId",
-            "description": "The identifier of the related issue.",
+            "description": "The identifier of the related issue. Can be a UUID or issue identifier (e.g., 'LIN-123').",
             "type": {
               "kind": "SCALAR",
               "name": "String",
