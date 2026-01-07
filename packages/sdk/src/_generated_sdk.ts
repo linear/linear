@@ -1,9 +1,8 @@
-import { DocumentNode } from "graphql/language/ast.js";
 import * as L from "./_generated_documents.js";
 
 /** The function for calling the graphql client */
 export type LinearRequest = <Response, Variables extends Record<string, unknown>>(
-  doc: DocumentNode,
+  doc: string,
   variables?: Variables
 ) => Promise<Response>;
 
@@ -18689,7 +18688,7 @@ export class AdministrableTeamsQuery extends Request {
    */
   public async fetch(variables?: L.AdministrableTeamsQueryVariables): LinearFetch<TeamConnection> {
     const response = await this._request<L.AdministrableTeamsQuery, L.AdministrableTeamsQueryVariables>(
-      L.AdministrableTeamsDocument,
+      L.AdministrableTeamsDocument.toString(),
       variables
     );
     const data = response.administrableTeams;
@@ -18726,7 +18725,7 @@ export class AgentActivitiesQuery extends Request {
    */
   public async fetch(variables?: L.AgentActivitiesQueryVariables): LinearFetch<AgentActivityConnection> {
     const response = await this._request<L.AgentActivitiesQuery, L.AgentActivitiesQueryVariables>(
-      L.AgentActivitiesDocument,
+      L.AgentActivitiesDocument.toString(),
       variables
     );
     const data = response.agentActivities;
@@ -18762,9 +18761,12 @@ export class AgentActivityQuery extends Request {
    * @returns parsed response from AgentActivityQuery
    */
   public async fetch(id: string): LinearFetch<AgentActivity> {
-    const response = await this._request<L.AgentActivityQuery, L.AgentActivityQueryVariables>(L.AgentActivityDocument, {
-      id,
-    });
+    const response = await this._request<L.AgentActivityQuery, L.AgentActivityQueryVariables>(
+      L.AgentActivityDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.agentActivity;
 
     return new AgentActivity(this._request, data);
@@ -18788,9 +18790,12 @@ export class AgentSessionQuery extends Request {
    * @returns parsed response from AgentSessionQuery
    */
   public async fetch(id: string): LinearFetch<AgentSession> {
-    const response = await this._request<L.AgentSessionQuery, L.AgentSessionQueryVariables>(L.AgentSessionDocument, {
-      id,
-    });
+    const response = await this._request<L.AgentSessionQuery, L.AgentSessionQueryVariables>(
+      L.AgentSessionDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.agentSession;
 
     return new AgentSession(this._request, data);
@@ -18815,7 +18820,7 @@ export class AgentSessionsQuery extends Request {
    */
   public async fetch(variables?: L.AgentSessionsQueryVariables): LinearFetch<AgentSessionConnection> {
     const response = await this._request<L.AgentSessionsQuery, L.AgentSessionsQueryVariables>(
-      L.AgentSessionsDocument,
+      L.AgentSessionsDocument.toString(),
       variables
     );
     const data = response.agentSessions;
@@ -18852,7 +18857,7 @@ export class ApplicationInfoQuery extends Request {
    */
   public async fetch(clientId: string): LinearFetch<Application> {
     const response = await this._request<L.ApplicationInfoQuery, L.ApplicationInfoQueryVariables>(
-      L.ApplicationInfoDocument,
+      L.ApplicationInfoDocument.toString(),
       {
         clientId,
       }
@@ -18880,9 +18885,12 @@ export class AttachmentQuery extends Request {
    * @returns parsed response from AttachmentQuery
    */
   public async fetch(id: string): LinearFetch<Attachment> {
-    const response = await this._request<L.AttachmentQuery, L.AttachmentQueryVariables>(L.AttachmentDocument, {
-      id,
-    });
+    const response = await this._request<L.AttachmentQuery, L.AttachmentQueryVariables>(
+      L.AttachmentDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.attachment;
 
     return new Attachment(this._request, data);
@@ -18907,7 +18915,7 @@ export class AttachmentIssueQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<Issue> {
     const response = await this._request<L.AttachmentIssueQuery, L.AttachmentIssueQueryVariables>(
-      L.AttachmentIssueDocument,
+      L.AttachmentIssueDocument.toString(),
       {
         id,
       }
@@ -18936,7 +18944,7 @@ export class AttachmentsQuery extends Request {
    */
   public async fetch(variables?: L.AttachmentsQueryVariables): LinearFetch<AttachmentConnection> {
     const response = await this._request<L.AttachmentsQuery, L.AttachmentsQueryVariables>(
-      L.AttachmentsDocument,
+      L.AttachmentsDocument.toString(),
       variables
     );
     const data = response.attachments;
@@ -18977,7 +18985,7 @@ export class AttachmentsForUrlQuery extends Request {
     variables?: Omit<L.AttachmentsForUrlQueryVariables, "url">
   ): LinearFetch<AttachmentConnection> {
     const response = await this._request<L.AttachmentsForUrlQuery, L.AttachmentsForUrlQueryVariables>(
-      L.AttachmentsForUrlDocument,
+      L.AttachmentsForUrlDocument.toString(),
       {
         url,
         ...variables,
@@ -19018,7 +19026,7 @@ export class AuditEntriesQuery extends Request {
    */
   public async fetch(variables?: L.AuditEntriesQueryVariables): LinearFetch<AuditEntryConnection> {
     const response = await this._request<L.AuditEntriesQuery, L.AuditEntriesQueryVariables>(
-      L.AuditEntriesDocument,
+      L.AuditEntriesDocument.toString(),
       variables
     );
     const data = response.auditEntries;
@@ -19054,7 +19062,7 @@ export class AuditEntryTypesQuery extends Request {
    */
   public async fetch(): LinearFetch<AuditEntryType[]> {
     const response = await this._request<L.AuditEntryTypesQuery, L.AuditEntryTypesQueryVariables>(
-      L.AuditEntryTypesDocument,
+      L.AuditEntryTypesDocument.toString(),
       {}
     );
     const data = response.auditEntryTypes;
@@ -19082,7 +19090,7 @@ export class AuthenticationSessionsQuery extends Request {
    */
   public async fetch(): LinearFetch<AuthenticationSessionResponse[]> {
     const response = await this._request<L.AuthenticationSessionsQuery, L.AuthenticationSessionsQueryVariables>(
-      L.AuthenticationSessionsDocument,
+      L.AuthenticationSessionsDocument.toString(),
       {}
     );
     const data = response.authenticationSessions;
@@ -19110,7 +19118,7 @@ export class AvailableUsersQuery extends Request {
    */
   public async fetch(): LinearFetch<AuthResolverResponse> {
     const response = await this._request<L.AvailableUsersQuery, L.AvailableUsersQueryVariables>(
-      L.AvailableUsersDocument,
+      L.AvailableUsersDocument.toString(),
       {}
     );
     const data = response.availableUsers;
@@ -19136,7 +19144,10 @@ export class CommentQuery extends Request {
    * @returns parsed response from CommentQuery
    */
   public async fetch(variables?: L.CommentQueryVariables): LinearFetch<Comment> {
-    const response = await this._request<L.CommentQuery, L.CommentQueryVariables>(L.CommentDocument, variables);
+    const response = await this._request<L.CommentQuery, L.CommentQueryVariables>(
+      L.CommentDocument.toString(),
+      variables
+    );
     const data = response.comment;
 
     return new Comment(this._request, data);
@@ -19160,7 +19171,10 @@ export class CommentsQuery extends Request {
    * @returns parsed response from CommentsQuery
    */
   public async fetch(variables?: L.CommentsQueryVariables): LinearFetch<CommentConnection> {
-    const response = await this._request<L.CommentsQuery, L.CommentsQueryVariables>(L.CommentsDocument, variables);
+    const response = await this._request<L.CommentsQuery, L.CommentsQueryVariables>(
+      L.CommentsDocument.toString(),
+      variables
+    );
     const data = response.comments;
 
     return new CommentConnection(
@@ -19194,9 +19208,12 @@ export class CustomViewQuery extends Request {
    * @returns parsed response from CustomViewQuery
    */
   public async fetch(id: string): LinearFetch<CustomView> {
-    const response = await this._request<L.CustomViewQuery, L.CustomViewQueryVariables>(L.CustomViewDocument, {
-      id,
-    });
+    const response = await this._request<L.CustomViewQuery, L.CustomViewQueryVariables>(
+      L.CustomViewDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.customView;
 
     return new CustomView(this._request, data);
@@ -19221,7 +19238,7 @@ export class CustomViewHasSubscribersQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<CustomViewHasSubscribersPayload> {
     const response = await this._request<L.CustomViewHasSubscribersQuery, L.CustomViewHasSubscribersQueryVariables>(
-      L.CustomViewHasSubscribersDocument,
+      L.CustomViewHasSubscribersDocument.toString(),
       {
         id,
       }
@@ -19250,7 +19267,7 @@ export class CustomViewsQuery extends Request {
    */
   public async fetch(variables?: L.CustomViewsQueryVariables): LinearFetch<CustomViewConnection> {
     const response = await this._request<L.CustomViewsQuery, L.CustomViewsQueryVariables>(
-      L.CustomViewsDocument,
+      L.CustomViewsDocument.toString(),
       variables
     );
     const data = response.customViews;
@@ -19286,7 +19303,7 @@ export class CustomerQuery extends Request {
    * @returns parsed response from CustomerQuery
    */
   public async fetch(id: string): LinearFetch<Customer> {
-    const response = await this._request<L.CustomerQuery, L.CustomerQueryVariables>(L.CustomerDocument, {
+    const response = await this._request<L.CustomerQuery, L.CustomerQueryVariables>(L.CustomerDocument.toString(), {
       id,
     });
     const data = response.customer;
@@ -19313,7 +19330,7 @@ export class CustomerNeedQuery extends Request {
    */
   public async fetch(variables?: L.CustomerNeedQueryVariables): LinearFetch<CustomerNeed> {
     const response = await this._request<L.CustomerNeedQuery, L.CustomerNeedQueryVariables>(
-      L.CustomerNeedDocument,
+      L.CustomerNeedDocument.toString(),
       variables
     );
     const data = response.customerNeed;
@@ -19340,7 +19357,7 @@ export class CustomerNeedsQuery extends Request {
    */
   public async fetch(variables?: L.CustomerNeedsQueryVariables): LinearFetch<CustomerNeedConnection> {
     const response = await this._request<L.CustomerNeedsQuery, L.CustomerNeedsQueryVariables>(
-      L.CustomerNeedsDocument,
+      L.CustomerNeedsDocument.toString(),
       variables
     );
     const data = response.customerNeeds;
@@ -19377,7 +19394,7 @@ export class CustomerStatusQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<CustomerStatus> {
     const response = await this._request<L.CustomerStatusQuery, L.CustomerStatusQueryVariables>(
-      L.CustomerStatusDocument,
+      L.CustomerStatusDocument.toString(),
       {
         id,
       }
@@ -19406,7 +19423,7 @@ export class CustomerStatusesQuery extends Request {
    */
   public async fetch(variables?: L.CustomerStatusesQueryVariables): LinearFetch<CustomerStatusConnection> {
     const response = await this._request<L.CustomerStatusesQuery, L.CustomerStatusesQueryVariables>(
-      L.CustomerStatusesDocument,
+      L.CustomerStatusesDocument.toString(),
       variables
     );
     const data = response.customerStatuses;
@@ -19442,9 +19459,12 @@ export class CustomerTierQuery extends Request {
    * @returns parsed response from CustomerTierQuery
    */
   public async fetch(id: string): LinearFetch<CustomerTier> {
-    const response = await this._request<L.CustomerTierQuery, L.CustomerTierQueryVariables>(L.CustomerTierDocument, {
-      id,
-    });
+    const response = await this._request<L.CustomerTierQuery, L.CustomerTierQueryVariables>(
+      L.CustomerTierDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.customerTier;
 
     return new CustomerTier(this._request, data);
@@ -19469,7 +19489,7 @@ export class CustomerTiersQuery extends Request {
    */
   public async fetch(variables?: L.CustomerTiersQueryVariables): LinearFetch<CustomerTierConnection> {
     const response = await this._request<L.CustomerTiersQuery, L.CustomerTiersQueryVariables>(
-      L.CustomerTiersDocument,
+      L.CustomerTiersDocument.toString(),
       variables
     );
     const data = response.customerTiers;
@@ -19505,7 +19525,10 @@ export class CustomersQuery extends Request {
    * @returns parsed response from CustomersQuery
    */
   public async fetch(variables?: L.CustomersQueryVariables): LinearFetch<CustomerConnection> {
-    const response = await this._request<L.CustomersQuery, L.CustomersQueryVariables>(L.CustomersDocument, variables);
+    const response = await this._request<L.CustomersQuery, L.CustomersQueryVariables>(
+      L.CustomersDocument.toString(),
+      variables
+    );
     const data = response.customers;
 
     return new CustomerConnection(
@@ -19539,7 +19562,7 @@ export class CycleQuery extends Request {
    * @returns parsed response from CycleQuery
    */
   public async fetch(id: string): LinearFetch<Cycle> {
-    const response = await this._request<L.CycleQuery, L.CycleQueryVariables>(L.CycleDocument, {
+    const response = await this._request<L.CycleQuery, L.CycleQueryVariables>(L.CycleDocument.toString(), {
       id,
     });
     const data = response.cycle;
@@ -19565,7 +19588,7 @@ export class CyclesQuery extends Request {
    * @returns parsed response from CyclesQuery
    */
   public async fetch(variables?: L.CyclesQueryVariables): LinearFetch<CycleConnection> {
-    const response = await this._request<L.CyclesQuery, L.CyclesQueryVariables>(L.CyclesDocument, variables);
+    const response = await this._request<L.CyclesQuery, L.CyclesQueryVariables>(L.CyclesDocument.toString(), variables);
     const data = response.cycles;
 
     return new CycleConnection(
@@ -19599,7 +19622,7 @@ export class DocumentQuery extends Request {
    * @returns parsed response from DocumentQuery
    */
   public async fetch(id: string): LinearFetch<Document> {
-    const response = await this._request<L.DocumentQuery, L.DocumentQueryVariables>(L.DocumentDocument, {
+    const response = await this._request<L.DocumentQuery, L.DocumentQueryVariables>(L.DocumentDocument.toString(), {
       id,
     });
     const data = response.document;
@@ -19626,7 +19649,7 @@ export class DocumentContentHistoryQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<DocumentContentHistoryPayload> {
     const response = await this._request<L.DocumentContentHistoryQuery, L.DocumentContentHistoryQueryVariables>(
-      L.DocumentContentHistoryDocument,
+      L.DocumentContentHistoryDocument.toString(),
       {
         id,
       }
@@ -19654,7 +19677,10 @@ export class DocumentsQuery extends Request {
    * @returns parsed response from DocumentsQuery
    */
   public async fetch(variables?: L.DocumentsQueryVariables): LinearFetch<DocumentConnection> {
-    const response = await this._request<L.DocumentsQuery, L.DocumentsQueryVariables>(L.DocumentsDocument, variables);
+    const response = await this._request<L.DocumentsQuery, L.DocumentsQueryVariables>(
+      L.DocumentsDocument.toString(),
+      variables
+    );
     const data = response.documents;
 
     return new DocumentConnection(
@@ -19689,7 +19715,7 @@ export class EmailIntakeAddressQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<EmailIntakeAddress> {
     const response = await this._request<L.EmailIntakeAddressQuery, L.EmailIntakeAddressQueryVariables>(
-      L.EmailIntakeAddressDocument,
+      L.EmailIntakeAddressDocument.toString(),
       {
         id,
       }
@@ -19717,7 +19743,7 @@ export class EmojiQuery extends Request {
    * @returns parsed response from EmojiQuery
    */
   public async fetch(id: string): LinearFetch<Emoji> {
-    const response = await this._request<L.EmojiQuery, L.EmojiQueryVariables>(L.EmojiDocument, {
+    const response = await this._request<L.EmojiQuery, L.EmojiQueryVariables>(L.EmojiDocument.toString(), {
       id,
     });
     const data = response.emoji;
@@ -19743,7 +19769,7 @@ export class EmojisQuery extends Request {
    * @returns parsed response from EmojisQuery
    */
   public async fetch(variables?: L.EmojisQueryVariables): LinearFetch<EmojiConnection> {
-    const response = await this._request<L.EmojisQuery, L.EmojisQueryVariables>(L.EmojisDocument, variables);
+    const response = await this._request<L.EmojisQuery, L.EmojisQueryVariables>(L.EmojisDocument.toString(), variables);
     const data = response.emojis;
 
     return new EmojiConnection(
@@ -19778,7 +19804,7 @@ export class EntityExternalLinkQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<EntityExternalLink> {
     const response = await this._request<L.EntityExternalLinkQuery, L.EntityExternalLinkQueryVariables>(
-      L.EntityExternalLinkDocument,
+      L.EntityExternalLinkDocument.toString(),
       {
         id,
       }
@@ -19806,9 +19832,12 @@ export class ExternalUserQuery extends Request {
    * @returns parsed response from ExternalUserQuery
    */
   public async fetch(id: string): LinearFetch<ExternalUser> {
-    const response = await this._request<L.ExternalUserQuery, L.ExternalUserQueryVariables>(L.ExternalUserDocument, {
-      id,
-    });
+    const response = await this._request<L.ExternalUserQuery, L.ExternalUserQueryVariables>(
+      L.ExternalUserDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.externalUser;
 
     return new ExternalUser(this._request, data);
@@ -19833,7 +19862,7 @@ export class ExternalUsersQuery extends Request {
    */
   public async fetch(variables?: L.ExternalUsersQueryVariables): LinearFetch<ExternalUserConnection> {
     const response = await this._request<L.ExternalUsersQuery, L.ExternalUsersQueryVariables>(
-      L.ExternalUsersDocument,
+      L.ExternalUsersDocument.toString(),
       variables
     );
     const data = response.externalUsers;
@@ -19869,7 +19898,7 @@ export class FavoriteQuery extends Request {
    * @returns parsed response from FavoriteQuery
    */
   public async fetch(id: string): LinearFetch<Favorite> {
-    const response = await this._request<L.FavoriteQuery, L.FavoriteQueryVariables>(L.FavoriteDocument, {
+    const response = await this._request<L.FavoriteQuery, L.FavoriteQueryVariables>(L.FavoriteDocument.toString(), {
       id,
     });
     const data = response.favorite;
@@ -19895,7 +19924,10 @@ export class FavoritesQuery extends Request {
    * @returns parsed response from FavoritesQuery
    */
   public async fetch(variables?: L.FavoritesQueryVariables): LinearFetch<FavoriteConnection> {
-    const response = await this._request<L.FavoritesQuery, L.FavoritesQueryVariables>(L.FavoritesDocument, variables);
+    const response = await this._request<L.FavoritesQuery, L.FavoritesQueryVariables>(
+      L.FavoritesDocument.toString(),
+      variables
+    );
     const data = response.favorites;
 
     return new FavoriteConnection(
@@ -19929,9 +19961,12 @@ export class InitiativeQuery extends Request {
    * @returns parsed response from InitiativeQuery
    */
   public async fetch(id: string): LinearFetch<Initiative> {
-    const response = await this._request<L.InitiativeQuery, L.InitiativeQueryVariables>(L.InitiativeDocument, {
-      id,
-    });
+    const response = await this._request<L.InitiativeQuery, L.InitiativeQueryVariables>(
+      L.InitiativeDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.initiative;
 
     return new Initiative(this._request, data);
@@ -19956,7 +19991,7 @@ export class InitiativeRelationQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<ProjectRelation> {
     const response = await this._request<L.InitiativeRelationQuery, L.InitiativeRelationQueryVariables>(
-      L.InitiativeRelationDocument,
+      L.InitiativeRelationDocument.toString(),
       {
         id,
       }
@@ -19985,7 +20020,7 @@ export class InitiativeRelationsQuery extends Request {
    */
   public async fetch(variables?: L.InitiativeRelationsQueryVariables): LinearFetch<InitiativeRelationConnection> {
     const response = await this._request<L.InitiativeRelationsQuery, L.InitiativeRelationsQueryVariables>(
-      L.InitiativeRelationsDocument,
+      L.InitiativeRelationsDocument.toString(),
       variables
     );
     const data = response.initiativeRelations;
@@ -20022,7 +20057,7 @@ export class InitiativeToProjectQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<InitiativeToProject> {
     const response = await this._request<L.InitiativeToProjectQuery, L.InitiativeToProjectQueryVariables>(
-      L.InitiativeToProjectDocument,
+      L.InitiativeToProjectDocument.toString(),
       {
         id,
       }
@@ -20051,7 +20086,7 @@ export class InitiativeToProjectsQuery extends Request {
    */
   public async fetch(variables?: L.InitiativeToProjectsQueryVariables): LinearFetch<InitiativeToProjectConnection> {
     const response = await this._request<L.InitiativeToProjectsQuery, L.InitiativeToProjectsQueryVariables>(
-      L.InitiativeToProjectsDocument,
+      L.InitiativeToProjectsDocument.toString(),
       variables
     );
     const data = response.initiativeToProjects;
@@ -20088,7 +20123,7 @@ export class InitiativeUpdateQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<InitiativeUpdate> {
     const response = await this._request<L.InitiativeUpdateQuery, L.InitiativeUpdateQueryVariables>(
-      L.InitiativeUpdateDocument,
+      L.InitiativeUpdateDocument.toString(),
       {
         id,
       }
@@ -20117,7 +20152,7 @@ export class InitiativeUpdatesQuery extends Request {
    */
   public async fetch(variables?: L.InitiativeUpdatesQueryVariables): LinearFetch<InitiativeUpdateConnection> {
     const response = await this._request<L.InitiativeUpdatesQuery, L.InitiativeUpdatesQueryVariables>(
-      L.InitiativeUpdatesDocument,
+      L.InitiativeUpdatesDocument.toString(),
       variables
     );
     const data = response.initiativeUpdates;
@@ -20154,7 +20189,7 @@ export class InitiativesQuery extends Request {
    */
   public async fetch(variables?: L.InitiativesQueryVariables): LinearFetch<InitiativeConnection> {
     const response = await this._request<L.InitiativesQuery, L.InitiativesQueryVariables>(
-      L.InitiativesDocument,
+      L.InitiativesDocument.toString(),
       variables
     );
     const data = response.initiatives;
@@ -20190,9 +20225,12 @@ export class IntegrationQuery extends Request {
    * @returns parsed response from IntegrationQuery
    */
   public async fetch(id: string): LinearFetch<Integration> {
-    const response = await this._request<L.IntegrationQuery, L.IntegrationQueryVariables>(L.IntegrationDocument, {
-      id,
-    });
+    const response = await this._request<L.IntegrationQuery, L.IntegrationQueryVariables>(
+      L.IntegrationDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.integration;
 
     return new Integration(this._request, data);
@@ -20218,7 +20256,7 @@ export class IntegrationHasScopesQuery extends Request {
    */
   public async fetch(integrationId: string, scopes: string[]): LinearFetch<IntegrationHasScopesPayload> {
     const response = await this._request<L.IntegrationHasScopesQuery, L.IntegrationHasScopesQueryVariables>(
-      L.IntegrationHasScopesDocument,
+      L.IntegrationHasScopesDocument.toString(),
       {
         integrationId,
         scopes,
@@ -20248,7 +20286,7 @@ export class IntegrationTemplateQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<IntegrationTemplate> {
     const response = await this._request<L.IntegrationTemplateQuery, L.IntegrationTemplateQueryVariables>(
-      L.IntegrationTemplateDocument,
+      L.IntegrationTemplateDocument.toString(),
       {
         id,
       }
@@ -20277,7 +20315,7 @@ export class IntegrationTemplatesQuery extends Request {
    */
   public async fetch(variables?: L.IntegrationTemplatesQueryVariables): LinearFetch<IntegrationTemplateConnection> {
     const response = await this._request<L.IntegrationTemplatesQuery, L.IntegrationTemplatesQueryVariables>(
-      L.IntegrationTemplatesDocument,
+      L.IntegrationTemplatesDocument.toString(),
       variables
     );
     const data = response.integrationTemplates;
@@ -20314,7 +20352,7 @@ export class IntegrationsQuery extends Request {
    */
   public async fetch(variables?: L.IntegrationsQueryVariables): LinearFetch<IntegrationConnection> {
     const response = await this._request<L.IntegrationsQuery, L.IntegrationsQueryVariables>(
-      L.IntegrationsDocument,
+      L.IntegrationsDocument.toString(),
       variables
     );
     const data = response.integrations;
@@ -20351,7 +20389,7 @@ export class IntegrationsSettingsQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<IntegrationsSettings> {
     const response = await this._request<L.IntegrationsSettingsQuery, L.IntegrationsSettingsQueryVariables>(
-      L.IntegrationsSettingsDocument,
+      L.IntegrationsSettingsDocument.toString(),
       {
         id,
       }
@@ -20379,7 +20417,7 @@ export class IssueQuery extends Request {
    * @returns parsed response from IssueQuery
    */
   public async fetch(id: string): LinearFetch<Issue> {
-    const response = await this._request<L.IssueQuery, L.IssueQueryVariables>(L.IssueDocument, {
+    const response = await this._request<L.IssueQuery, L.IssueQueryVariables>(L.IssueDocument.toString(), {
       id,
     });
     const data = response.issue;
@@ -20410,7 +20448,7 @@ export class IssueFigmaFileKeySearchQuery extends Request {
     variables?: Omit<L.IssueFigmaFileKeySearchQueryVariables, "fileKey">
   ): LinearFetch<IssueConnection> {
     const response = await this._request<L.IssueFigmaFileKeySearchQuery, L.IssueFigmaFileKeySearchQueryVariables>(
-      L.IssueFigmaFileKeySearchDocument,
+      L.IssueFigmaFileKeySearchDocument.toString(),
       {
         fileKey,
         ...variables,
@@ -20455,7 +20493,7 @@ export class IssueFilterSuggestionQuery extends Request {
     variables?: Omit<L.IssueFilterSuggestionQueryVariables, "prompt">
   ): LinearFetch<IssueFilterSuggestionPayload> {
     const response = await this._request<L.IssueFilterSuggestionQuery, L.IssueFilterSuggestionQueryVariables>(
-      L.IssueFilterSuggestionDocument,
+      L.IssueFilterSuggestionDocument.toString(),
       {
         prompt,
         ...variables,
@@ -20486,7 +20524,7 @@ export class IssueImportCheckCsvQuery extends Request {
    */
   public async fetch(csvUrl: string, service: string): LinearFetch<IssueImportCheckPayload> {
     const response = await this._request<L.IssueImportCheckCsvQuery, L.IssueImportCheckCsvQueryVariables>(
-      L.IssueImportCheckCsvDocument,
+      L.IssueImportCheckCsvDocument.toString(),
       {
         csvUrl,
         service,
@@ -20516,7 +20554,7 @@ export class IssueImportCheckSyncQuery extends Request {
    */
   public async fetch(issueImportId: string): LinearFetch<IssueImportSyncCheckPayload> {
     const response = await this._request<L.IssueImportCheckSyncQuery, L.IssueImportCheckSyncQueryVariables>(
-      L.IssueImportCheckSyncDocument,
+      L.IssueImportCheckSyncDocument.toString(),
       {
         issueImportId,
       }
@@ -20555,7 +20593,7 @@ export class IssueImportJqlCheckQuery extends Request {
     jql: string
   ): LinearFetch<IssueImportJqlCheckPayload> {
     const response = await this._request<L.IssueImportJqlCheckQuery, L.IssueImportJqlCheckQueryVariables>(
-      L.IssueImportJqlCheckDocument,
+      L.IssueImportJqlCheckDocument.toString(),
       {
         jiraEmail,
         jiraHostname,
@@ -20587,9 +20625,12 @@ export class IssueLabelQuery extends Request {
    * @returns parsed response from IssueLabelQuery
    */
   public async fetch(id: string): LinearFetch<IssueLabel> {
-    const response = await this._request<L.IssueLabelQuery, L.IssueLabelQueryVariables>(L.IssueLabelDocument, {
-      id,
-    });
+    const response = await this._request<L.IssueLabelQuery, L.IssueLabelQueryVariables>(
+      L.IssueLabelDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.issueLabel;
 
     return new IssueLabel(this._request, data);
@@ -20614,7 +20655,7 @@ export class IssueLabelsQuery extends Request {
    */
   public async fetch(variables?: L.IssueLabelsQueryVariables): LinearFetch<IssueLabelConnection> {
     const response = await this._request<L.IssueLabelsQuery, L.IssueLabelsQueryVariables>(
-      L.IssueLabelsDocument,
+      L.IssueLabelsDocument.toString(),
       variables
     );
     const data = response.issueLabels;
@@ -20650,7 +20691,7 @@ export class IssuePriorityValuesQuery extends Request {
    */
   public async fetch(): LinearFetch<IssuePriorityValue[]> {
     const response = await this._request<L.IssuePriorityValuesQuery, L.IssuePriorityValuesQueryVariables>(
-      L.IssuePriorityValuesDocument,
+      L.IssuePriorityValuesDocument.toString(),
       {}
     );
     const data = response.issuePriorityValues;
@@ -20678,9 +20719,12 @@ export class IssueRelationQuery extends Request {
    * @returns parsed response from IssueRelationQuery
    */
   public async fetch(id: string): LinearFetch<IssueRelation> {
-    const response = await this._request<L.IssueRelationQuery, L.IssueRelationQueryVariables>(L.IssueRelationDocument, {
-      id,
-    });
+    const response = await this._request<L.IssueRelationQuery, L.IssueRelationQueryVariables>(
+      L.IssueRelationDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.issueRelation;
 
     return new IssueRelation(this._request, data);
@@ -20705,7 +20749,7 @@ export class IssueRelationsQuery extends Request {
    */
   public async fetch(variables?: L.IssueRelationsQueryVariables): LinearFetch<IssueRelationConnection> {
     const response = await this._request<L.IssueRelationsQuery, L.IssueRelationsQueryVariables>(
-      L.IssueRelationsDocument,
+      L.IssueRelationsDocument.toString(),
       variables
     );
     const data = response.issueRelations;
@@ -20742,7 +20786,7 @@ export class IssueSearchQuery extends Request {
    */
   public async fetch(variables?: L.IssueSearchQueryVariables): LinearFetch<IssueConnection> {
     const response = await this._request<L.IssueSearchQuery, L.IssueSearchQueryVariables>(
-      L.IssueSearchDocument,
+      L.IssueSearchDocument.toString(),
       variables
     );
     const data = response.issueSearch;
@@ -20781,7 +20825,7 @@ export class IssueTitleSuggestionFromCustomerRequestQuery extends Request {
     const response = await this._request<
       L.IssueTitleSuggestionFromCustomerRequestQuery,
       L.IssueTitleSuggestionFromCustomerRequestQueryVariables
-    >(L.IssueTitleSuggestionFromCustomerRequestDocument, {
+    >(L.IssueTitleSuggestionFromCustomerRequestDocument.toString(), {
       request,
     });
     const data = response.issueTitleSuggestionFromCustomerRequest;
@@ -20808,7 +20852,7 @@ export class IssueVcsBranchSearchQuery extends Request {
    */
   public async fetch(branchName: string): LinearFetch<Issue | undefined> {
     const response = await this._request<L.IssueVcsBranchSearchQuery, L.IssueVcsBranchSearchQueryVariables>(
-      L.IssueVcsBranchSearchDocument,
+      L.IssueVcsBranchSearchDocument.toString(),
       {
         branchName,
       }
@@ -20836,7 +20880,7 @@ export class IssuesQuery extends Request {
    * @returns parsed response from IssuesQuery
    */
   public async fetch(variables?: L.IssuesQueryVariables): LinearFetch<IssueConnection> {
-    const response = await this._request<L.IssuesQuery, L.IssuesQueryVariables>(L.IssuesDocument, variables);
+    const response = await this._request<L.IssuesQuery, L.IssuesQueryVariables>(L.IssuesDocument.toString(), variables);
     const data = response.issues;
 
     return new IssueConnection(
@@ -20883,9 +20927,12 @@ export class NotificationQuery extends Request {
     | PullRequestNotification
     | Notification
   > {
-    const response = await this._request<L.NotificationQuery, L.NotificationQueryVariables>(L.NotificationDocument, {
-      id,
-    });
+    const response = await this._request<L.NotificationQuery, L.NotificationQueryVariables>(
+      L.NotificationDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.notification;
 
     switch (data.__typename) {
@@ -20944,7 +20991,7 @@ export class NotificationSubscriptionQuery extends Request {
     | NotificationSubscription
   > {
     const response = await this._request<L.NotificationSubscriptionQuery, L.NotificationSubscriptionQueryVariables>(
-      L.NotificationSubscriptionDocument,
+      L.NotificationSubscriptionDocument.toString(),
       {
         id,
       }
@@ -21001,7 +21048,7 @@ export class NotificationSubscriptionsQuery extends Request {
     variables?: L.NotificationSubscriptionsQueryVariables
   ): LinearFetch<NotificationSubscriptionConnection> {
     const response = await this._request<L.NotificationSubscriptionsQuery, L.NotificationSubscriptionsQueryVariables>(
-      L.NotificationSubscriptionsDocument,
+      L.NotificationSubscriptionsDocument.toString(),
       variables
     );
     const data = response.notificationSubscriptions;
@@ -21038,7 +21085,7 @@ export class NotificationsQuery extends Request {
    */
   public async fetch(variables?: L.NotificationsQueryVariables): LinearFetch<NotificationConnection> {
     const response = await this._request<L.NotificationsQuery, L.NotificationsQueryVariables>(
-      L.NotificationsDocument,
+      L.NotificationsDocument.toString(),
       variables
     );
     const data = response.notifications;
@@ -21073,7 +21120,10 @@ export class OrganizationQuery extends Request {
    * @returns parsed response from OrganizationQuery
    */
   public async fetch(): LinearFetch<Organization> {
-    const response = await this._request<L.OrganizationQuery, L.OrganizationQueryVariables>(L.OrganizationDocument, {});
+    const response = await this._request<L.OrganizationQuery, L.OrganizationQueryVariables>(
+      L.OrganizationDocument.toString(),
+      {}
+    );
     const data = response.organization;
 
     return new Organization(this._request, data);
@@ -21098,7 +21148,7 @@ export class OrganizationExistsQuery extends Request {
    */
   public async fetch(urlKey: string): LinearFetch<OrganizationExistsPayload> {
     const response = await this._request<L.OrganizationExistsQuery, L.OrganizationExistsQueryVariables>(
-      L.OrganizationExistsDocument,
+      L.OrganizationExistsDocument.toString(),
       {
         urlKey,
       }
@@ -21127,7 +21177,7 @@ export class OrganizationInviteQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<OrganizationInvite> {
     const response = await this._request<L.OrganizationInviteQuery, L.OrganizationInviteQueryVariables>(
-      L.OrganizationInviteDocument,
+      L.OrganizationInviteDocument.toString(),
       {
         id,
       }
@@ -21156,7 +21206,7 @@ export class OrganizationInvitesQuery extends Request {
    */
   public async fetch(variables?: L.OrganizationInvitesQueryVariables): LinearFetch<OrganizationInviteConnection> {
     const response = await this._request<L.OrganizationInvitesQuery, L.OrganizationInvitesQueryVariables>(
-      L.OrganizationInvitesDocument,
+      L.OrganizationInvitesDocument.toString(),
       variables
     );
     const data = response.organizationInvites;
@@ -21192,7 +21242,7 @@ export class ProjectQuery extends Request {
    * @returns parsed response from ProjectQuery
    */
   public async fetch(id: string): LinearFetch<Project> {
-    const response = await this._request<L.ProjectQuery, L.ProjectQueryVariables>(L.ProjectDocument, {
+    const response = await this._request<L.ProjectQuery, L.ProjectQueryVariables>(L.ProjectDocument.toString(), {
       id,
     });
     const data = response.project;
@@ -21219,7 +21269,7 @@ export class ProjectFilterSuggestionQuery extends Request {
    */
   public async fetch(prompt: string): LinearFetch<ProjectFilterSuggestionPayload> {
     const response = await this._request<L.ProjectFilterSuggestionQuery, L.ProjectFilterSuggestionQueryVariables>(
-      L.ProjectFilterSuggestionDocument,
+      L.ProjectFilterSuggestionDocument.toString(),
       {
         prompt,
       }
@@ -21247,9 +21297,12 @@ export class ProjectLabelQuery extends Request {
    * @returns parsed response from ProjectLabelQuery
    */
   public async fetch(id: string): LinearFetch<ProjectLabel> {
-    const response = await this._request<L.ProjectLabelQuery, L.ProjectLabelQueryVariables>(L.ProjectLabelDocument, {
-      id,
-    });
+    const response = await this._request<L.ProjectLabelQuery, L.ProjectLabelQueryVariables>(
+      L.ProjectLabelDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.projectLabel;
 
     return new ProjectLabel(this._request, data);
@@ -21274,7 +21327,7 @@ export class ProjectLabelsQuery extends Request {
    */
   public async fetch(variables?: L.ProjectLabelsQueryVariables): LinearFetch<ProjectLabelConnection> {
     const response = await this._request<L.ProjectLabelsQuery, L.ProjectLabelsQueryVariables>(
-      L.ProjectLabelsDocument,
+      L.ProjectLabelsDocument.toString(),
       variables
     );
     const data = response.projectLabels;
@@ -21311,7 +21364,7 @@ export class ProjectMilestoneQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<ProjectMilestone> {
     const response = await this._request<L.ProjectMilestoneQuery, L.ProjectMilestoneQueryVariables>(
-      L.ProjectMilestoneDocument,
+      L.ProjectMilestoneDocument.toString(),
       {
         id,
       }
@@ -21340,7 +21393,7 @@ export class ProjectMilestonesQuery extends Request {
    */
   public async fetch(variables?: L.ProjectMilestonesQueryVariables): LinearFetch<ProjectMilestoneConnection> {
     const response = await this._request<L.ProjectMilestonesQuery, L.ProjectMilestonesQueryVariables>(
-      L.ProjectMilestonesDocument,
+      L.ProjectMilestonesDocument.toString(),
       variables
     );
     const data = response.projectMilestones;
@@ -21377,7 +21430,7 @@ export class ProjectRelationQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<ProjectRelation> {
     const response = await this._request<L.ProjectRelationQuery, L.ProjectRelationQueryVariables>(
-      L.ProjectRelationDocument,
+      L.ProjectRelationDocument.toString(),
       {
         id,
       }
@@ -21406,7 +21459,7 @@ export class ProjectRelationsQuery extends Request {
    */
   public async fetch(variables?: L.ProjectRelationsQueryVariables): LinearFetch<ProjectRelationConnection> {
     const response = await this._request<L.ProjectRelationsQuery, L.ProjectRelationsQueryVariables>(
-      L.ProjectRelationsDocument,
+      L.ProjectRelationsDocument.toString(),
       variables
     );
     const data = response.projectRelations;
@@ -21442,9 +21495,12 @@ export class ProjectStatusQuery extends Request {
    * @returns parsed response from ProjectStatusQuery
    */
   public async fetch(id: string): LinearFetch<ProjectStatus> {
-    const response = await this._request<L.ProjectStatusQuery, L.ProjectStatusQueryVariables>(L.ProjectStatusDocument, {
-      id,
-    });
+    const response = await this._request<L.ProjectStatusQuery, L.ProjectStatusQueryVariables>(
+      L.ProjectStatusDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.projectStatus;
 
     return new ProjectStatus(this._request, data);
@@ -21469,7 +21525,7 @@ export class ProjectStatusesQuery extends Request {
    */
   public async fetch(variables?: L.ProjectStatusesQueryVariables): LinearFetch<ProjectStatusConnection> {
     const response = await this._request<L.ProjectStatusesQuery, L.ProjectStatusesQueryVariables>(
-      L.ProjectStatusesDocument,
+      L.ProjectStatusesDocument.toString(),
       variables
     );
     const data = response.projectStatuses;
@@ -21505,9 +21561,12 @@ export class ProjectUpdateQuery extends Request {
    * @returns parsed response from ProjectUpdateQuery
    */
   public async fetch(id: string): LinearFetch<ProjectUpdate> {
-    const response = await this._request<L.ProjectUpdateQuery, L.ProjectUpdateQueryVariables>(L.ProjectUpdateDocument, {
-      id,
-    });
+    const response = await this._request<L.ProjectUpdateQuery, L.ProjectUpdateQueryVariables>(
+      L.ProjectUpdateDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.projectUpdate;
 
     return new ProjectUpdate(this._request, data);
@@ -21532,7 +21591,7 @@ export class ProjectUpdatesQuery extends Request {
    */
   public async fetch(variables?: L.ProjectUpdatesQueryVariables): LinearFetch<ProjectUpdateConnection> {
     const response = await this._request<L.ProjectUpdatesQuery, L.ProjectUpdatesQueryVariables>(
-      L.ProjectUpdatesDocument,
+      L.ProjectUpdatesDocument.toString(),
       variables
     );
     const data = response.projectUpdates;
@@ -21568,7 +21627,10 @@ export class ProjectsQuery extends Request {
    * @returns parsed response from ProjectsQuery
    */
   public async fetch(variables?: L.ProjectsQueryVariables): LinearFetch<ProjectConnection> {
-    const response = await this._request<L.ProjectsQuery, L.ProjectsQueryVariables>(L.ProjectsDocument, variables);
+    const response = await this._request<L.ProjectsQuery, L.ProjectsQueryVariables>(
+      L.ProjectsDocument.toString(),
+      variables
+    );
     const data = response.projects;
 
     return new ProjectConnection(
@@ -21603,7 +21665,7 @@ export class PushSubscriptionTestQuery extends Request {
    */
   public async fetch(variables?: L.PushSubscriptionTestQueryVariables): LinearFetch<PushSubscriptionTestPayload> {
     const response = await this._request<L.PushSubscriptionTestQuery, L.PushSubscriptionTestQueryVariables>(
-      L.PushSubscriptionTestDocument,
+      L.PushSubscriptionTestDocument.toString(),
       variables
     );
     const data = response.pushSubscriptionTest;
@@ -21629,7 +21691,7 @@ export class RateLimitStatusQuery extends Request {
    */
   public async fetch(): LinearFetch<RateLimitPayload> {
     const response = await this._request<L.RateLimitStatusQuery, L.RateLimitStatusQueryVariables>(
-      L.RateLimitStatusDocument,
+      L.RateLimitStatusDocument.toString(),
       {}
     );
     const data = response.rateLimitStatus;
@@ -21655,7 +21717,7 @@ export class RoadmapQuery extends Request {
    * @returns parsed response from RoadmapQuery
    */
   public async fetch(id: string): LinearFetch<Roadmap> {
-    const response = await this._request<L.RoadmapQuery, L.RoadmapQueryVariables>(L.RoadmapDocument, {
+    const response = await this._request<L.RoadmapQuery, L.RoadmapQueryVariables>(L.RoadmapDocument.toString(), {
       id,
     });
     const data = response.roadmap;
@@ -21682,7 +21744,7 @@ export class RoadmapToProjectQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<RoadmapToProject> {
     const response = await this._request<L.RoadmapToProjectQuery, L.RoadmapToProjectQueryVariables>(
-      L.RoadmapToProjectDocument,
+      L.RoadmapToProjectDocument.toString(),
       {
         id,
       }
@@ -21711,7 +21773,7 @@ export class RoadmapToProjectsQuery extends Request {
    */
   public async fetch(variables?: L.RoadmapToProjectsQueryVariables): LinearFetch<RoadmapToProjectConnection> {
     const response = await this._request<L.RoadmapToProjectsQuery, L.RoadmapToProjectsQueryVariables>(
-      L.RoadmapToProjectsDocument,
+      L.RoadmapToProjectsDocument.toString(),
       variables
     );
     const data = response.roadmapToProjects;
@@ -21747,7 +21809,10 @@ export class RoadmapsQuery extends Request {
    * @returns parsed response from RoadmapsQuery
    */
   public async fetch(variables?: L.RoadmapsQueryVariables): LinearFetch<RoadmapConnection> {
-    const response = await this._request<L.RoadmapsQuery, L.RoadmapsQueryVariables>(L.RoadmapsDocument, variables);
+    const response = await this._request<L.RoadmapsQuery, L.RoadmapsQueryVariables>(
+      L.RoadmapsDocument.toString(),
+      variables
+    );
     const data = response.roadmaps;
 
     return new RoadmapConnection(
@@ -21786,7 +21851,7 @@ export class SearchDocumentsQuery extends Request {
     variables?: Omit<L.SearchDocumentsQueryVariables, "term">
   ): LinearFetch<DocumentSearchPayload> {
     const response = await this._request<L.SearchDocumentsQuery, L.SearchDocumentsQueryVariables>(
-      L.SearchDocumentsDocument,
+      L.SearchDocumentsDocument.toString(),
       {
         term,
         ...variables,
@@ -21819,10 +21884,13 @@ export class SearchIssuesQuery extends Request {
     term: string,
     variables?: Omit<L.SearchIssuesQueryVariables, "term">
   ): LinearFetch<IssueSearchPayload> {
-    const response = await this._request<L.SearchIssuesQuery, L.SearchIssuesQueryVariables>(L.SearchIssuesDocument, {
-      term,
-      ...variables,
-    });
+    const response = await this._request<L.SearchIssuesQuery, L.SearchIssuesQueryVariables>(
+      L.SearchIssuesDocument.toString(),
+      {
+        term,
+        ...variables,
+      }
+    );
     const data = response.searchIssues;
 
     return new IssueSearchPayload(this._request, data);
@@ -21851,7 +21919,7 @@ export class SearchProjectsQuery extends Request {
     variables?: Omit<L.SearchProjectsQueryVariables, "term">
   ): LinearFetch<ProjectSearchPayload> {
     const response = await this._request<L.SearchProjectsQuery, L.SearchProjectsQueryVariables>(
-      L.SearchProjectsDocument,
+      L.SearchProjectsDocument.toString(),
       {
         term,
         ...variables,
@@ -21885,7 +21953,7 @@ export class SemanticSearchQuery extends Request {
     variables?: Omit<L.SemanticSearchQueryVariables, "query">
   ): LinearFetch<SemanticSearchPayload> {
     const response = await this._request<L.SemanticSearchQuery, L.SemanticSearchQueryVariables>(
-      L.SemanticSearchDocument,
+      L.SemanticSearchDocument.toString(),
       {
         query,
         ...variables,
@@ -21921,7 +21989,7 @@ export class SsoUrlFromEmailQuery extends Request {
     variables?: Omit<L.SsoUrlFromEmailQueryVariables, "email" | "type">
   ): LinearFetch<SsoUrlFromEmailResponse> {
     const response = await this._request<L.SsoUrlFromEmailQuery, L.SsoUrlFromEmailQueryVariables>(
-      L.SsoUrlFromEmailDocument,
+      L.SsoUrlFromEmailDocument.toString(),
       {
         email,
         type,
@@ -21951,7 +22019,7 @@ export class TeamQuery extends Request {
    * @returns parsed response from TeamQuery
    */
   public async fetch(id: string): LinearFetch<Team> {
-    const response = await this._request<L.TeamQuery, L.TeamQueryVariables>(L.TeamDocument, {
+    const response = await this._request<L.TeamQuery, L.TeamQueryVariables>(L.TeamDocument.toString(), {
       id,
     });
     const data = response.team;
@@ -21978,7 +22046,7 @@ export class TeamMembershipQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<TeamMembership> {
     const response = await this._request<L.TeamMembershipQuery, L.TeamMembershipQueryVariables>(
-      L.TeamMembershipDocument,
+      L.TeamMembershipDocument.toString(),
       {
         id,
       }
@@ -22007,7 +22075,7 @@ export class TeamMembershipsQuery extends Request {
    */
   public async fetch(variables?: L.TeamMembershipsQueryVariables): LinearFetch<TeamMembershipConnection> {
     const response = await this._request<L.TeamMembershipsQuery, L.TeamMembershipsQueryVariables>(
-      L.TeamMembershipsDocument,
+      L.TeamMembershipsDocument.toString(),
       variables
     );
     const data = response.teamMemberships;
@@ -22043,7 +22111,7 @@ export class TeamsQuery extends Request {
    * @returns parsed response from TeamsQuery
    */
   public async fetch(variables?: L.TeamsQueryVariables): LinearFetch<TeamConnection> {
-    const response = await this._request<L.TeamsQuery, L.TeamsQueryVariables>(L.TeamsDocument, variables);
+    const response = await this._request<L.TeamsQuery, L.TeamsQueryVariables>(L.TeamsDocument.toString(), variables);
     const data = response.teams;
 
     return new TeamConnection(
@@ -22077,7 +22145,7 @@ export class TemplateQuery extends Request {
    * @returns parsed response from TemplateQuery
    */
   public async fetch(id: string): LinearFetch<Template> {
-    const response = await this._request<L.TemplateQuery, L.TemplateQueryVariables>(L.TemplateDocument, {
+    const response = await this._request<L.TemplateQuery, L.TemplateQueryVariables>(L.TemplateDocument.toString(), {
       id,
     });
     const data = response.template;
@@ -22102,7 +22170,10 @@ export class TemplatesQuery extends Request {
    * @returns parsed response from TemplatesQuery
    */
   public async fetch(): LinearFetch<Template[]> {
-    const response = await this._request<L.TemplatesQuery, L.TemplatesQueryVariables>(L.TemplatesDocument, {});
+    const response = await this._request<L.TemplatesQuery, L.TemplatesQueryVariables>(
+      L.TemplatesDocument.toString(),
+      {}
+    );
     const data = response.templates;
 
     return data.map(node => {
@@ -22129,7 +22200,7 @@ export class TemplatesForIntegrationQuery extends Request {
    */
   public async fetch(integrationType: string): LinearFetch<Template[]> {
     const response = await this._request<L.TemplatesForIntegrationQuery, L.TemplatesForIntegrationQueryVariables>(
-      L.TemplatesForIntegrationDocument,
+      L.TemplatesForIntegrationDocument.toString(),
       {
         integrationType,
       }
@@ -22159,9 +22230,12 @@ export class TimeScheduleQuery extends Request {
    * @returns parsed response from TimeScheduleQuery
    */
   public async fetch(id: string): LinearFetch<TimeSchedule> {
-    const response = await this._request<L.TimeScheduleQuery, L.TimeScheduleQueryVariables>(L.TimeScheduleDocument, {
-      id,
-    });
+    const response = await this._request<L.TimeScheduleQuery, L.TimeScheduleQueryVariables>(
+      L.TimeScheduleDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.timeSchedule;
 
     return new TimeSchedule(this._request, data);
@@ -22186,7 +22260,7 @@ export class TimeSchedulesQuery extends Request {
    */
   public async fetch(variables?: L.TimeSchedulesQueryVariables): LinearFetch<TimeScheduleConnection> {
     const response = await this._request<L.TimeSchedulesQuery, L.TimeSchedulesQueryVariables>(
-      L.TimeSchedulesDocument,
+      L.TimeSchedulesDocument.toString(),
       variables
     );
     const data = response.timeSchedules;
@@ -22223,7 +22297,7 @@ export class TriageResponsibilitiesQuery extends Request {
    */
   public async fetch(variables?: L.TriageResponsibilitiesQueryVariables): LinearFetch<TriageResponsibilityConnection> {
     const response = await this._request<L.TriageResponsibilitiesQuery, L.TriageResponsibilitiesQueryVariables>(
-      L.TriageResponsibilitiesDocument,
+      L.TriageResponsibilitiesDocument.toString(),
       variables
     );
     const data = response.triageResponsibilities;
@@ -22260,7 +22334,7 @@ export class TriageResponsibilityQuery extends Request {
    */
   public async fetch(id: string): LinearFetch<TriageResponsibility> {
     const response = await this._request<L.TriageResponsibilityQuery, L.TriageResponsibilityQueryVariables>(
-      L.TriageResponsibilityDocument,
+      L.TriageResponsibilityDocument.toString(),
       {
         id,
       }
@@ -22288,7 +22362,7 @@ export class UserQuery extends Request {
    * @returns parsed response from UserQuery
    */
   public async fetch(id: string): LinearFetch<User> {
-    const response = await this._request<L.UserQuery, L.UserQueryVariables>(L.UserDocument, {
+    const response = await this._request<L.UserQuery, L.UserQueryVariables>(L.UserDocument.toString(), {
       id,
     });
     const data = response.user;
@@ -22313,7 +22387,10 @@ export class UserSettingsQuery extends Request {
    * @returns parsed response from UserSettingsQuery
    */
   public async fetch(): LinearFetch<UserSettings> {
-    const response = await this._request<L.UserSettingsQuery, L.UserSettingsQueryVariables>(L.UserSettingsDocument, {});
+    const response = await this._request<L.UserSettingsQuery, L.UserSettingsQueryVariables>(
+      L.UserSettingsDocument.toString(),
+      {}
+    );
     const data = response.userSettings;
 
     return new UserSettings(this._request, data);
@@ -22337,7 +22414,7 @@ export class UsersQuery extends Request {
    * @returns parsed response from UsersQuery
    */
   public async fetch(variables?: L.UsersQueryVariables): LinearFetch<UserConnection> {
-    const response = await this._request<L.UsersQuery, L.UsersQueryVariables>(L.UsersDocument, variables);
+    const response = await this._request<L.UsersQuery, L.UsersQueryVariables>(L.UsersDocument.toString(), variables);
     const data = response.users;
 
     return new UserConnection(
@@ -22374,7 +22451,7 @@ export class VerifyGitHubEnterpriseServerInstallationQuery extends Request {
     const response = await this._request<
       L.VerifyGitHubEnterpriseServerInstallationQuery,
       L.VerifyGitHubEnterpriseServerInstallationQueryVariables
-    >(L.VerifyGitHubEnterpriseServerInstallationDocument, {
+    >(L.VerifyGitHubEnterpriseServerInstallationDocument.toString(), {
       integrationId,
     });
     const data = response.verifyGitHubEnterpriseServerInstallation;
@@ -22399,7 +22476,7 @@ export class ViewerQuery extends Request {
    * @returns parsed response from ViewerQuery
    */
   public async fetch(): LinearFetch<User> {
-    const response = await this._request<L.ViewerQuery, L.ViewerQueryVariables>(L.ViewerDocument, {});
+    const response = await this._request<L.ViewerQuery, L.ViewerQueryVariables>(L.ViewerDocument.toString(), {});
     const data = response.viewer;
 
     return new User(this._request, data);
@@ -22423,7 +22500,7 @@ export class WebhookQuery extends Request {
    * @returns parsed response from WebhookQuery
    */
   public async fetch(id: string): LinearFetch<Webhook> {
-    const response = await this._request<L.WebhookQuery, L.WebhookQueryVariables>(L.WebhookDocument, {
+    const response = await this._request<L.WebhookQuery, L.WebhookQueryVariables>(L.WebhookDocument.toString(), {
       id,
     });
     const data = response.webhook;
@@ -22449,7 +22526,10 @@ export class WebhooksQuery extends Request {
    * @returns parsed response from WebhooksQuery
    */
   public async fetch(variables?: L.WebhooksQueryVariables): LinearFetch<WebhookConnection> {
-    const response = await this._request<L.WebhooksQuery, L.WebhooksQueryVariables>(L.WebhooksDocument, variables);
+    const response = await this._request<L.WebhooksQuery, L.WebhooksQueryVariables>(
+      L.WebhooksDocument.toString(),
+      variables
+    );
     const data = response.webhooks;
 
     return new WebhookConnection(
@@ -22483,9 +22563,12 @@ export class WorkflowStateQuery extends Request {
    * @returns parsed response from WorkflowStateQuery
    */
   public async fetch(id: string): LinearFetch<WorkflowState> {
-    const response = await this._request<L.WorkflowStateQuery, L.WorkflowStateQueryVariables>(L.WorkflowStateDocument, {
-      id,
-    });
+    const response = await this._request<L.WorkflowStateQuery, L.WorkflowStateQueryVariables>(
+      L.WorkflowStateDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.workflowState;
 
     return new WorkflowState(this._request, data);
@@ -22510,7 +22593,7 @@ export class WorkflowStatesQuery extends Request {
    */
   public async fetch(variables?: L.WorkflowStatesQueryVariables): LinearFetch<WorkflowStateConnection> {
     const response = await this._request<L.WorkflowStatesQuery, L.WorkflowStatesQueryVariables>(
-      L.WorkflowStatesDocument,
+      L.WorkflowStatesDocument.toString(),
       variables
     );
     const data = response.workflowStates;
@@ -22547,7 +22630,7 @@ export class CreateAgentActivityMutation extends Request {
    */
   public async fetch(input: L.AgentActivityCreateInput): LinearFetch<AgentActivityPayload> {
     const response = await this._request<L.CreateAgentActivityMutation, L.CreateAgentActivityMutationVariables>(
-      L.CreateAgentActivityDocument,
+      L.CreateAgentActivityDocument.toString(),
       {
         input,
       }
@@ -22578,7 +22661,7 @@ export class AgentSessionCreateOnCommentMutation extends Request {
     const response = await this._request<
       L.AgentSessionCreateOnCommentMutation,
       L.AgentSessionCreateOnCommentMutationVariables
-    >(L.AgentSessionCreateOnCommentDocument, {
+    >(L.AgentSessionCreateOnCommentDocument.toString(), {
       input,
     });
     const data = response.agentSessionCreateOnComment;
@@ -22607,7 +22690,7 @@ export class AgentSessionCreateOnIssueMutation extends Request {
     const response = await this._request<
       L.AgentSessionCreateOnIssueMutation,
       L.AgentSessionCreateOnIssueMutationVariables
-    >(L.AgentSessionCreateOnIssueDocument, {
+    >(L.AgentSessionCreateOnIssueDocument.toString(), {
       input,
     });
     const data = response.agentSessionCreateOnIssue;
@@ -22635,7 +22718,7 @@ export class UpdateAgentSessionMutation extends Request {
    */
   public async fetch(id: string, input: L.AgentSessionUpdateInput): LinearFetch<AgentSessionPayload> {
     const response = await this._request<L.UpdateAgentSessionMutation, L.UpdateAgentSessionMutationVariables>(
-      L.UpdateAgentSessionDocument,
+      L.UpdateAgentSessionDocument.toString(),
       {
         id,
         input,
@@ -22668,7 +22751,7 @@ export class AgentSessionUpdateExternalUrlMutation extends Request {
     const response = await this._request<
       L.AgentSessionUpdateExternalUrlMutation,
       L.AgentSessionUpdateExternalUrlMutationVariables
-    >(L.AgentSessionUpdateExternalUrlDocument, {
+    >(L.AgentSessionUpdateExternalUrlDocument.toString(), {
       id,
       input,
     });
@@ -22698,7 +22781,7 @@ export class AirbyteIntegrationConnectMutation extends Request {
     const response = await this._request<
       L.AirbyteIntegrationConnectMutation,
       L.AirbyteIntegrationConnectMutationVariables
-    >(L.AirbyteIntegrationConnectDocument, {
+    >(L.AirbyteIntegrationConnectDocument.toString(), {
       input,
     });
     const data = response.airbyteIntegrationConnect;
@@ -22725,7 +22808,7 @@ export class AsksWebFormsAuthMutation extends Request {
    */
   public async fetch(token: string): LinearFetch<AsksWebFormsAuthResponse> {
     const response = await this._request<L.AsksWebFormsAuthMutation, L.AsksWebFormsAuthMutationVariables>(
-      L.AsksWebFormsAuthDocument,
+      L.AsksWebFormsAuthDocument.toString(),
       {
         token,
       }
@@ -22754,7 +22837,7 @@ export class CreateAttachmentMutation extends Request {
    */
   public async fetch(input: L.AttachmentCreateInput): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.CreateAttachmentMutation, L.CreateAttachmentMutationVariables>(
-      L.CreateAttachmentDocument,
+      L.CreateAttachmentDocument.toString(),
       {
         input,
       }
@@ -22783,7 +22866,7 @@ export class DeleteAttachmentMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteAttachmentMutation, L.DeleteAttachmentMutationVariables>(
-      L.DeleteAttachmentDocument,
+      L.DeleteAttachmentDocument.toString(),
       {
         id,
       }
@@ -22822,7 +22905,7 @@ export class AttachmentLinkDiscordMutation extends Request {
     variables?: Omit<L.AttachmentLinkDiscordMutationVariables, "channelId" | "issueId" | "messageId" | "url">
   ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkDiscordMutation, L.AttachmentLinkDiscordMutationVariables>(
-      L.AttachmentLinkDiscordDocument,
+      L.AttachmentLinkDiscordDocument.toString(),
       {
         channelId,
         issueId,
@@ -22861,7 +22944,7 @@ export class AttachmentLinkFrontMutation extends Request {
     variables?: Omit<L.AttachmentLinkFrontMutationVariables, "conversationId" | "issueId">
   ): LinearFetch<FrontAttachmentPayload> {
     const response = await this._request<L.AttachmentLinkFrontMutation, L.AttachmentLinkFrontMutationVariables>(
-      L.AttachmentLinkFrontDocument,
+      L.AttachmentLinkFrontDocument.toString(),
       {
         conversationId,
         issueId,
@@ -22900,7 +22983,7 @@ export class AttachmentLinkGitHubIssueMutation extends Request {
     const response = await this._request<
       L.AttachmentLinkGitHubIssueMutation,
       L.AttachmentLinkGitHubIssueMutationVariables
-    >(L.AttachmentLinkGitHubIssueDocument, {
+    >(L.AttachmentLinkGitHubIssueDocument.toString(), {
       issueId,
       url,
       ...variables,
@@ -22935,7 +23018,7 @@ export class AttachmentLinkGitHubPrMutation extends Request {
     variables?: Omit<L.AttachmentLinkGitHubPrMutationVariables, "issueId" | "url">
   ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkGitHubPrMutation, L.AttachmentLinkGitHubPrMutationVariables>(
-      L.AttachmentLinkGitHubPrDocument,
+      L.AttachmentLinkGitHubPrDocument.toString(),
       {
         issueId,
         url,
@@ -22979,7 +23062,7 @@ export class AttachmentLinkGitLabMrMutation extends Request {
     >
   ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkGitLabMrMutation, L.AttachmentLinkGitLabMrMutationVariables>(
-      L.AttachmentLinkGitLabMrDocument,
+      L.AttachmentLinkGitLabMrDocument.toString(),
       {
         issueId,
         number,
@@ -23018,7 +23101,7 @@ export class AttachmentLinkIntercomMutation extends Request {
     variables?: Omit<L.AttachmentLinkIntercomMutationVariables, "conversationId" | "issueId">
   ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkIntercomMutation, L.AttachmentLinkIntercomMutationVariables>(
-      L.AttachmentLinkIntercomDocument,
+      L.AttachmentLinkIntercomDocument.toString(),
       {
         conversationId,
         issueId,
@@ -23055,7 +23138,7 @@ export class AttachmentLinkJiraIssueMutation extends Request {
     variables?: Omit<L.AttachmentLinkJiraIssueMutationVariables, "issueId" | "jiraIssueId">
   ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkJiraIssueMutation, L.AttachmentLinkJiraIssueMutationVariables>(
-      L.AttachmentLinkJiraIssueDocument,
+      L.AttachmentLinkJiraIssueDocument.toString(),
       {
         issueId,
         jiraIssueId,
@@ -23094,7 +23177,7 @@ export class AttachmentLinkSalesforceMutation extends Request {
     const response = await this._request<
       L.AttachmentLinkSalesforceMutation,
       L.AttachmentLinkSalesforceMutationVariables
-    >(L.AttachmentLinkSalesforceDocument, {
+    >(L.AttachmentLinkSalesforceDocument.toString(), {
       issueId,
       url,
       ...variables,
@@ -23129,7 +23212,7 @@ export class AttachmentLinkSlackMutation extends Request {
     variables?: Omit<L.AttachmentLinkSlackMutationVariables, "issueId" | "url">
   ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkSlackMutation, L.AttachmentLinkSlackMutationVariables>(
-      L.AttachmentLinkSlackDocument,
+      L.AttachmentLinkSlackDocument.toString(),
       {
         issueId,
         url,
@@ -23166,7 +23249,7 @@ export class AttachmentLinkUrlMutation extends Request {
     variables?: Omit<L.AttachmentLinkUrlMutationVariables, "issueId" | "url">
   ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkUrlMutation, L.AttachmentLinkUrlMutationVariables>(
-      L.AttachmentLinkUrlDocument,
+      L.AttachmentLinkUrlDocument.toString(),
       {
         issueId,
         url,
@@ -23203,7 +23286,7 @@ export class AttachmentLinkZendeskMutation extends Request {
     variables?: Omit<L.AttachmentLinkZendeskMutationVariables, "issueId" | "ticketId">
   ): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentLinkZendeskMutation, L.AttachmentLinkZendeskMutationVariables>(
-      L.AttachmentLinkZendeskDocument,
+      L.AttachmentLinkZendeskDocument.toString(),
       {
         issueId,
         ticketId,
@@ -23234,7 +23317,7 @@ export class AttachmentSyncToSlackMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.AttachmentSyncToSlackMutation, L.AttachmentSyncToSlackMutationVariables>(
-      L.AttachmentSyncToSlackDocument,
+      L.AttachmentSyncToSlackDocument.toString(),
       {
         id,
       }
@@ -23264,7 +23347,7 @@ export class UpdateAttachmentMutation extends Request {
    */
   public async fetch(id: string, input: L.AttachmentUpdateInput): LinearFetch<AttachmentPayload> {
     const response = await this._request<L.UpdateAttachmentMutation, L.UpdateAttachmentMutationVariables>(
-      L.UpdateAttachmentDocument,
+      L.UpdateAttachmentDocument.toString(),
       {
         id,
         input,
@@ -23294,7 +23377,7 @@ export class CreateCommentMutation extends Request {
    */
   public async fetch(input: L.CommentCreateInput): LinearFetch<CommentPayload> {
     const response = await this._request<L.CreateCommentMutation, L.CreateCommentMutationVariables>(
-      L.CreateCommentDocument,
+      L.CreateCommentDocument.toString(),
       {
         input,
       }
@@ -23323,7 +23406,7 @@ export class DeleteCommentMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteCommentMutation, L.DeleteCommentMutationVariables>(
-      L.DeleteCommentDocument,
+      L.DeleteCommentDocument.toString(),
       {
         id,
       }
@@ -23356,7 +23439,7 @@ export class CommentResolveMutation extends Request {
     variables?: Omit<L.CommentResolveMutationVariables, "id">
   ): LinearFetch<CommentPayload> {
     const response = await this._request<L.CommentResolveMutation, L.CommentResolveMutationVariables>(
-      L.CommentResolveDocument,
+      L.CommentResolveDocument.toString(),
       {
         id,
         ...variables,
@@ -23386,7 +23469,7 @@ export class CommentUnresolveMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<CommentPayload> {
     const response = await this._request<L.CommentUnresolveMutation, L.CommentUnresolveMutationVariables>(
-      L.CommentUnresolveDocument,
+      L.CommentUnresolveDocument.toString(),
       {
         id,
       }
@@ -23421,7 +23504,7 @@ export class UpdateCommentMutation extends Request {
     variables?: Omit<L.UpdateCommentMutationVariables, "id" | "input">
   ): LinearFetch<CommentPayload> {
     const response = await this._request<L.UpdateCommentMutation, L.UpdateCommentMutationVariables>(
-      L.UpdateCommentDocument,
+      L.UpdateCommentDocument.toString(),
       {
         id,
         input,
@@ -23452,7 +23535,7 @@ export class CreateContactMutation extends Request {
    */
   public async fetch(input: L.ContactCreateInput): LinearFetch<ContactPayload> {
     const response = await this._request<L.CreateContactMutation, L.CreateContactMutationVariables>(
-      L.CreateContactDocument,
+      L.CreateContactDocument.toString(),
       {
         input,
       }
@@ -23481,7 +23564,7 @@ export class CreateCsvExportReportMutation extends Request {
    */
   public async fetch(variables?: L.CreateCsvExportReportMutationVariables): LinearFetch<CreateCsvExportReportPayload> {
     const response = await this._request<L.CreateCsvExportReportMutation, L.CreateCsvExportReportMutationVariables>(
-      L.CreateCsvExportReportDocument,
+      L.CreateCsvExportReportDocument.toString(),
       variables
     );
     const data = response.createCsvExportReport;
@@ -23514,7 +23597,7 @@ export class CreateInitiativeUpdateReminderMutation extends Request {
     const response = await this._request<
       L.CreateInitiativeUpdateReminderMutation,
       L.CreateInitiativeUpdateReminderMutationVariables
-    >(L.CreateInitiativeUpdateReminderDocument, {
+    >(L.CreateInitiativeUpdateReminderDocument.toString(), {
       initiativeId,
       ...variables,
     });
@@ -23548,7 +23631,7 @@ export class CreateOrganizationFromOnboardingMutation extends Request {
     const response = await this._request<
       L.CreateOrganizationFromOnboardingMutation,
       L.CreateOrganizationFromOnboardingMutationVariables
-    >(L.CreateOrganizationFromOnboardingDocument, {
+    >(L.CreateOrganizationFromOnboardingDocument.toString(), {
       input,
       ...variables,
     });
@@ -23582,7 +23665,7 @@ export class CreateProjectUpdateReminderMutation extends Request {
     const response = await this._request<
       L.CreateProjectUpdateReminderMutation,
       L.CreateProjectUpdateReminderMutationVariables
-    >(L.CreateProjectUpdateReminderDocument, {
+    >(L.CreateProjectUpdateReminderDocument.toString(), {
       projectId,
       ...variables,
     });
@@ -23610,7 +23693,7 @@ export class CreateCustomViewMutation extends Request {
    */
   public async fetch(input: L.CustomViewCreateInput): LinearFetch<CustomViewPayload> {
     const response = await this._request<L.CreateCustomViewMutation, L.CreateCustomViewMutationVariables>(
-      L.CreateCustomViewDocument,
+      L.CreateCustomViewDocument.toString(),
       {
         input,
       }
@@ -23639,7 +23722,7 @@ export class DeleteCustomViewMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteCustomViewMutation, L.DeleteCustomViewMutationVariables>(
-      L.DeleteCustomViewDocument,
+      L.DeleteCustomViewDocument.toString(),
       {
         id,
       }
@@ -23669,7 +23752,7 @@ export class UpdateCustomViewMutation extends Request {
    */
   public async fetch(id: string, input: L.CustomViewUpdateInput): LinearFetch<CustomViewPayload> {
     const response = await this._request<L.UpdateCustomViewMutation, L.UpdateCustomViewMutationVariables>(
-      L.UpdateCustomViewDocument,
+      L.UpdateCustomViewDocument.toString(),
       {
         id,
         input,
@@ -23699,7 +23782,7 @@ export class CreateCustomerMutation extends Request {
    */
   public async fetch(input: L.CustomerCreateInput): LinearFetch<CustomerPayload> {
     const response = await this._request<L.CreateCustomerMutation, L.CreateCustomerMutationVariables>(
-      L.CreateCustomerDocument,
+      L.CreateCustomerDocument.toString(),
       {
         input,
       }
@@ -23728,7 +23811,7 @@ export class DeleteCustomerMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteCustomerMutation, L.DeleteCustomerMutationVariables>(
-      L.DeleteCustomerDocument,
+      L.DeleteCustomerDocument.toString(),
       {
         id,
       }
@@ -23758,7 +23841,7 @@ export class CustomerMergeMutation extends Request {
    */
   public async fetch(sourceCustomerId: string, targetCustomerId: string): LinearFetch<CustomerPayload> {
     const response = await this._request<L.CustomerMergeMutation, L.CustomerMergeMutationVariables>(
-      L.CustomerMergeDocument,
+      L.CustomerMergeDocument.toString(),
       {
         sourceCustomerId,
         targetCustomerId,
@@ -23788,7 +23871,7 @@ export class ArchiveCustomerNeedMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<CustomerNeedArchivePayload> {
     const response = await this._request<L.ArchiveCustomerNeedMutation, L.ArchiveCustomerNeedMutationVariables>(
-      L.ArchiveCustomerNeedDocument,
+      L.ArchiveCustomerNeedDocument.toString(),
       {
         id,
       }
@@ -23817,7 +23900,7 @@ export class CreateCustomerNeedMutation extends Request {
    */
   public async fetch(input: L.CustomerNeedCreateInput): LinearFetch<CustomerNeedPayload> {
     const response = await this._request<L.CreateCustomerNeedMutation, L.CreateCustomerNeedMutationVariables>(
-      L.CreateCustomerNeedDocument,
+      L.CreateCustomerNeedDocument.toString(),
       {
         input,
       }
@@ -23848,7 +23931,7 @@ export class CustomerNeedCreateFromAttachmentMutation extends Request {
     const response = await this._request<
       L.CustomerNeedCreateFromAttachmentMutation,
       L.CustomerNeedCreateFromAttachmentMutationVariables
-    >(L.CustomerNeedCreateFromAttachmentDocument, {
+    >(L.CustomerNeedCreateFromAttachmentDocument.toString(), {
       input,
     });
     const data = response.customerNeedCreateFromAttachment;
@@ -23879,7 +23962,7 @@ export class DeleteCustomerNeedMutation extends Request {
     variables?: Omit<L.DeleteCustomerNeedMutationVariables, "id">
   ): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteCustomerNeedMutation, L.DeleteCustomerNeedMutationVariables>(
-      L.DeleteCustomerNeedDocument,
+      L.DeleteCustomerNeedDocument.toString(),
       {
         id,
         ...variables,
@@ -23909,7 +23992,7 @@ export class UnarchiveCustomerNeedMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<CustomerNeedArchivePayload> {
     const response = await this._request<L.UnarchiveCustomerNeedMutation, L.UnarchiveCustomerNeedMutationVariables>(
-      L.UnarchiveCustomerNeedDocument,
+      L.UnarchiveCustomerNeedDocument.toString(),
       {
         id,
       }
@@ -23939,7 +24022,7 @@ export class UpdateCustomerNeedMutation extends Request {
    */
   public async fetch(id: string, input: L.CustomerNeedUpdateInput): LinearFetch<CustomerNeedUpdatePayload> {
     const response = await this._request<L.UpdateCustomerNeedMutation, L.UpdateCustomerNeedMutationVariables>(
-      L.UpdateCustomerNeedDocument,
+      L.UpdateCustomerNeedDocument.toString(),
       {
         id,
         input,
@@ -23969,7 +24052,7 @@ export class CreateCustomerStatusMutation extends Request {
    */
   public async fetch(input: L.CustomerStatusCreateInput): LinearFetch<CustomerStatusPayload> {
     const response = await this._request<L.CreateCustomerStatusMutation, L.CreateCustomerStatusMutationVariables>(
-      L.CreateCustomerStatusDocument,
+      L.CreateCustomerStatusDocument.toString(),
       {
         input,
       }
@@ -23998,7 +24081,7 @@ export class DeleteCustomerStatusMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteCustomerStatusMutation, L.DeleteCustomerStatusMutationVariables>(
-      L.DeleteCustomerStatusDocument,
+      L.DeleteCustomerStatusDocument.toString(),
       {
         id,
       }
@@ -24028,7 +24111,7 @@ export class UpdateCustomerStatusMutation extends Request {
    */
   public async fetch(id: string, input: L.CustomerStatusUpdateInput): LinearFetch<CustomerStatusPayload> {
     const response = await this._request<L.UpdateCustomerStatusMutation, L.UpdateCustomerStatusMutationVariables>(
-      L.UpdateCustomerStatusDocument,
+      L.UpdateCustomerStatusDocument.toString(),
       {
         id,
         input,
@@ -24058,7 +24141,7 @@ export class CreateCustomerTierMutation extends Request {
    */
   public async fetch(input: L.CustomerTierCreateInput): LinearFetch<CustomerTierPayload> {
     const response = await this._request<L.CreateCustomerTierMutation, L.CreateCustomerTierMutationVariables>(
-      L.CreateCustomerTierDocument,
+      L.CreateCustomerTierDocument.toString(),
       {
         input,
       }
@@ -24087,7 +24170,7 @@ export class DeleteCustomerTierMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteCustomerTierMutation, L.DeleteCustomerTierMutationVariables>(
-      L.DeleteCustomerTierDocument,
+      L.DeleteCustomerTierDocument.toString(),
       {
         id,
       }
@@ -24117,7 +24200,7 @@ export class UpdateCustomerTierMutation extends Request {
    */
   public async fetch(id: string, input: L.CustomerTierUpdateInput): LinearFetch<CustomerTierPayload> {
     const response = await this._request<L.UpdateCustomerTierMutation, L.UpdateCustomerTierMutationVariables>(
-      L.UpdateCustomerTierDocument,
+      L.UpdateCustomerTierDocument.toString(),
       {
         id,
         input,
@@ -24147,7 +24230,7 @@ export class CustomerUnsyncMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<CustomerPayload> {
     const response = await this._request<L.CustomerUnsyncMutation, L.CustomerUnsyncMutationVariables>(
-      L.CustomerUnsyncDocument,
+      L.CustomerUnsyncDocument.toString(),
       {
         id,
       }
@@ -24177,7 +24260,7 @@ export class UpdateCustomerMutation extends Request {
    */
   public async fetch(id: string, input: L.CustomerUpdateInput): LinearFetch<CustomerPayload> {
     const response = await this._request<L.UpdateCustomerMutation, L.UpdateCustomerMutationVariables>(
-      L.UpdateCustomerDocument,
+      L.UpdateCustomerDocument.toString(),
       {
         id,
         input,
@@ -24207,7 +24290,7 @@ export class CustomerUpsertMutation extends Request {
    */
   public async fetch(input: L.CustomerUpsertInput): LinearFetch<CustomerPayload> {
     const response = await this._request<L.CustomerUpsertMutation, L.CustomerUpsertMutationVariables>(
-      L.CustomerUpsertDocument,
+      L.CustomerUpsertDocument.toString(),
       {
         input,
       }
@@ -24236,7 +24319,7 @@ export class ArchiveCycleMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<CycleArchivePayload> {
     const response = await this._request<L.ArchiveCycleMutation, L.ArchiveCycleMutationVariables>(
-      L.ArchiveCycleDocument,
+      L.ArchiveCycleDocument.toString(),
       {
         id,
       }
@@ -24264,9 +24347,12 @@ export class CreateCycleMutation extends Request {
    * @returns parsed response from CreateCycleMutation
    */
   public async fetch(input: L.CycleCreateInput): LinearFetch<CyclePayload> {
-    const response = await this._request<L.CreateCycleMutation, L.CreateCycleMutationVariables>(L.CreateCycleDocument, {
-      input,
-    });
+    const response = await this._request<L.CreateCycleMutation, L.CreateCycleMutationVariables>(
+      L.CreateCycleDocument.toString(),
+      {
+        input,
+      }
+    );
     const data = response.cycleCreate;
 
     return new CyclePayload(this._request, data);
@@ -24291,7 +24377,7 @@ export class CycleShiftAllMutation extends Request {
    */
   public async fetch(input: L.CycleShiftAllInput): LinearFetch<CyclePayload> {
     const response = await this._request<L.CycleShiftAllMutation, L.CycleShiftAllMutationVariables>(
-      L.CycleShiftAllDocument,
+      L.CycleShiftAllDocument.toString(),
       {
         input,
       }
@@ -24322,7 +24408,7 @@ export class CycleStartUpcomingCycleTodayMutation extends Request {
     const response = await this._request<
       L.CycleStartUpcomingCycleTodayMutation,
       L.CycleStartUpcomingCycleTodayMutationVariables
-    >(L.CycleStartUpcomingCycleTodayDocument, {
+    >(L.CycleStartUpcomingCycleTodayDocument.toString(), {
       id,
     });
     const data = response.cycleStartUpcomingCycleToday;
@@ -24349,10 +24435,13 @@ export class UpdateCycleMutation extends Request {
    * @returns parsed response from UpdateCycleMutation
    */
   public async fetch(id: string, input: L.CycleUpdateInput): LinearFetch<CyclePayload> {
-    const response = await this._request<L.UpdateCycleMutation, L.UpdateCycleMutationVariables>(L.UpdateCycleDocument, {
-      id,
-      input,
-    });
+    const response = await this._request<L.UpdateCycleMutation, L.UpdateCycleMutationVariables>(
+      L.UpdateCycleDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
     const data = response.cycleUpdate;
 
     return new CyclePayload(this._request, data);
@@ -24377,7 +24466,7 @@ export class CreateDocumentMutation extends Request {
    */
   public async fetch(input: L.DocumentCreateInput): LinearFetch<DocumentPayload> {
     const response = await this._request<L.CreateDocumentMutation, L.CreateDocumentMutationVariables>(
-      L.CreateDocumentDocument,
+      L.CreateDocumentDocument.toString(),
       {
         input,
       }
@@ -24406,7 +24495,7 @@ export class DeleteDocumentMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DocumentArchivePayload> {
     const response = await this._request<L.DeleteDocumentMutation, L.DeleteDocumentMutationVariables>(
-      L.DeleteDocumentDocument,
+      L.DeleteDocumentDocument.toString(),
       {
         id,
       }
@@ -24435,7 +24524,7 @@ export class UnarchiveDocumentMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DocumentArchivePayload> {
     const response = await this._request<L.UnarchiveDocumentMutation, L.UnarchiveDocumentMutationVariables>(
-      L.UnarchiveDocumentDocument,
+      L.UnarchiveDocumentDocument.toString(),
       {
         id,
       }
@@ -24465,7 +24554,7 @@ export class UpdateDocumentMutation extends Request {
    */
   public async fetch(id: string, input: L.DocumentUpdateInput): LinearFetch<DocumentPayload> {
     const response = await this._request<L.UpdateDocumentMutation, L.UpdateDocumentMutationVariables>(
-      L.UpdateDocumentDocument,
+      L.UpdateDocumentDocument.toString(),
       {
         id,
         input,
@@ -24497,7 +24586,7 @@ export class CreateEmailIntakeAddressMutation extends Request {
     const response = await this._request<
       L.CreateEmailIntakeAddressMutation,
       L.CreateEmailIntakeAddressMutationVariables
-    >(L.CreateEmailIntakeAddressDocument, {
+    >(L.CreateEmailIntakeAddressDocument.toString(), {
       input,
     });
     const data = response.emailIntakeAddressCreate;
@@ -24526,7 +24615,7 @@ export class DeleteEmailIntakeAddressMutation extends Request {
     const response = await this._request<
       L.DeleteEmailIntakeAddressMutation,
       L.DeleteEmailIntakeAddressMutationVariables
-    >(L.DeleteEmailIntakeAddressDocument, {
+    >(L.DeleteEmailIntakeAddressDocument.toString(), {
       id,
     });
     const data = response.emailIntakeAddressDelete;
@@ -24555,7 +24644,7 @@ export class EmailIntakeAddressRotateMutation extends Request {
     const response = await this._request<
       L.EmailIntakeAddressRotateMutation,
       L.EmailIntakeAddressRotateMutationVariables
-    >(L.EmailIntakeAddressRotateDocument, {
+    >(L.EmailIntakeAddressRotateDocument.toString(), {
       id,
     });
     const data = response.emailIntakeAddressRotate;
@@ -24585,7 +24674,7 @@ export class UpdateEmailIntakeAddressMutation extends Request {
     const response = await this._request<
       L.UpdateEmailIntakeAddressMutation,
       L.UpdateEmailIntakeAddressMutationVariables
-    >(L.UpdateEmailIntakeAddressDocument, {
+    >(L.UpdateEmailIntakeAddressDocument.toString(), {
       id,
       input,
     });
@@ -24615,7 +24704,7 @@ export class EmailTokenUserAccountAuthMutation extends Request {
     const response = await this._request<
       L.EmailTokenUserAccountAuthMutation,
       L.EmailTokenUserAccountAuthMutationVariables
-    >(L.EmailTokenUserAccountAuthDocument, {
+    >(L.EmailTokenUserAccountAuthDocument.toString(), {
       input,
     });
     const data = response.emailTokenUserAccountAuth;
@@ -24642,7 +24731,7 @@ export class EmailUnsubscribeMutation extends Request {
    */
   public async fetch(input: L.EmailUnsubscribeInput): LinearFetch<EmailUnsubscribePayload> {
     const response = await this._request<L.EmailUnsubscribeMutation, L.EmailUnsubscribeMutationVariables>(
-      L.EmailUnsubscribeDocument,
+      L.EmailUnsubscribeDocument.toString(),
       {
         input,
       }
@@ -24673,7 +24762,7 @@ export class EmailUserAccountAuthChallengeMutation extends Request {
     const response = await this._request<
       L.EmailUserAccountAuthChallengeMutation,
       L.EmailUserAccountAuthChallengeMutationVariables
-    >(L.EmailUserAccountAuthChallengeDocument, {
+    >(L.EmailUserAccountAuthChallengeDocument.toString(), {
       input,
     });
     const data = response.emailUserAccountAuthChallenge;
@@ -24699,9 +24788,12 @@ export class CreateEmojiMutation extends Request {
    * @returns parsed response from CreateEmojiMutation
    */
   public async fetch(input: L.EmojiCreateInput): LinearFetch<EmojiPayload> {
-    const response = await this._request<L.CreateEmojiMutation, L.CreateEmojiMutationVariables>(L.CreateEmojiDocument, {
-      input,
-    });
+    const response = await this._request<L.CreateEmojiMutation, L.CreateEmojiMutationVariables>(
+      L.CreateEmojiDocument.toString(),
+      {
+        input,
+      }
+    );
     const data = response.emojiCreate;
 
     return new EmojiPayload(this._request, data);
@@ -24725,9 +24817,12 @@ export class DeleteEmojiMutation extends Request {
    * @returns parsed response from DeleteEmojiMutation
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
-    const response = await this._request<L.DeleteEmojiMutation, L.DeleteEmojiMutationVariables>(L.DeleteEmojiDocument, {
-      id,
-    });
+    const response = await this._request<L.DeleteEmojiMutation, L.DeleteEmojiMutationVariables>(
+      L.DeleteEmojiDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.emojiDelete;
 
     return new DeletePayload(this._request, data);
@@ -24754,7 +24849,7 @@ export class CreateEntityExternalLinkMutation extends Request {
     const response = await this._request<
       L.CreateEntityExternalLinkMutation,
       L.CreateEntityExternalLinkMutationVariables
-    >(L.CreateEntityExternalLinkDocument, {
+    >(L.CreateEntityExternalLinkDocument.toString(), {
       input,
     });
     const data = response.entityExternalLinkCreate;
@@ -24783,7 +24878,7 @@ export class DeleteEntityExternalLinkMutation extends Request {
     const response = await this._request<
       L.DeleteEntityExternalLinkMutation,
       L.DeleteEntityExternalLinkMutationVariables
-    >(L.DeleteEntityExternalLinkDocument, {
+    >(L.DeleteEntityExternalLinkDocument.toString(), {
       id,
     });
     const data = response.entityExternalLinkDelete;
@@ -24813,7 +24908,7 @@ export class UpdateEntityExternalLinkMutation extends Request {
     const response = await this._request<
       L.UpdateEntityExternalLinkMutation,
       L.UpdateEntityExternalLinkMutationVariables
-    >(L.UpdateEntityExternalLinkDocument, {
+    >(L.UpdateEntityExternalLinkDocument.toString(), {
       id,
       input,
     });
@@ -24841,7 +24936,7 @@ export class CreateFavoriteMutation extends Request {
    */
   public async fetch(input: L.FavoriteCreateInput): LinearFetch<FavoritePayload> {
     const response = await this._request<L.CreateFavoriteMutation, L.CreateFavoriteMutationVariables>(
-      L.CreateFavoriteDocument,
+      L.CreateFavoriteDocument.toString(),
       {
         input,
       }
@@ -24870,7 +24965,7 @@ export class DeleteFavoriteMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteFavoriteMutation, L.DeleteFavoriteMutationVariables>(
-      L.DeleteFavoriteDocument,
+      L.DeleteFavoriteDocument.toString(),
       {
         id,
       }
@@ -24900,7 +24995,7 @@ export class UpdateFavoriteMutation extends Request {
    */
   public async fetch(id: string, input: L.FavoriteUpdateInput): LinearFetch<FavoritePayload> {
     const response = await this._request<L.UpdateFavoriteMutation, L.UpdateFavoriteMutationVariables>(
-      L.UpdateFavoriteDocument,
+      L.UpdateFavoriteDocument.toString(),
       {
         id,
         input,
@@ -24937,12 +25032,15 @@ export class FileUploadMutation extends Request {
     size: number,
     variables?: Omit<L.FileUploadMutationVariables, "contentType" | "filename" | "size">
   ): LinearFetch<UploadPayload> {
-    const response = await this._request<L.FileUploadMutation, L.FileUploadMutationVariables>(L.FileUploadDocument, {
-      contentType,
-      filename,
-      size,
-      ...variables,
-    });
+    const response = await this._request<L.FileUploadMutation, L.FileUploadMutationVariables>(
+      L.FileUploadDocument.toString(),
+      {
+        contentType,
+        filename,
+        size,
+        ...variables,
+      }
+    );
     const data = response.fileUpload;
 
     return new UploadPayload(this._request, data);
@@ -24969,7 +25067,7 @@ export class CreateGitAutomationStateMutation extends Request {
     const response = await this._request<
       L.CreateGitAutomationStateMutation,
       L.CreateGitAutomationStateMutationVariables
-    >(L.CreateGitAutomationStateDocument, {
+    >(L.CreateGitAutomationStateDocument.toString(), {
       input,
     });
     const data = response.gitAutomationStateCreate;
@@ -24998,7 +25096,7 @@ export class DeleteGitAutomationStateMutation extends Request {
     const response = await this._request<
       L.DeleteGitAutomationStateMutation,
       L.DeleteGitAutomationStateMutationVariables
-    >(L.DeleteGitAutomationStateDocument, {
+    >(L.DeleteGitAutomationStateDocument.toString(), {
       id,
     });
     const data = response.gitAutomationStateDelete;
@@ -25028,7 +25126,7 @@ export class UpdateGitAutomationStateMutation extends Request {
     const response = await this._request<
       L.UpdateGitAutomationStateMutation,
       L.UpdateGitAutomationStateMutationVariables
-    >(L.UpdateGitAutomationStateDocument, {
+    >(L.UpdateGitAutomationStateDocument.toString(), {
       id,
       input,
     });
@@ -25058,7 +25156,7 @@ export class CreateGitAutomationTargetBranchMutation extends Request {
     const response = await this._request<
       L.CreateGitAutomationTargetBranchMutation,
       L.CreateGitAutomationTargetBranchMutationVariables
-    >(L.CreateGitAutomationTargetBranchDocument, {
+    >(L.CreateGitAutomationTargetBranchDocument.toString(), {
       input,
     });
     const data = response.gitAutomationTargetBranchCreate;
@@ -25087,7 +25185,7 @@ export class DeleteGitAutomationTargetBranchMutation extends Request {
     const response = await this._request<
       L.DeleteGitAutomationTargetBranchMutation,
       L.DeleteGitAutomationTargetBranchMutationVariables
-    >(L.DeleteGitAutomationTargetBranchDocument, {
+    >(L.DeleteGitAutomationTargetBranchDocument.toString(), {
       id,
     });
     const data = response.gitAutomationTargetBranchDelete;
@@ -25120,7 +25218,7 @@ export class UpdateGitAutomationTargetBranchMutation extends Request {
     const response = await this._request<
       L.UpdateGitAutomationTargetBranchMutation,
       L.UpdateGitAutomationTargetBranchMutationVariables
-    >(L.UpdateGitAutomationTargetBranchDocument, {
+    >(L.UpdateGitAutomationTargetBranchDocument.toString(), {
       id,
       input,
     });
@@ -25148,7 +25246,7 @@ export class GoogleUserAccountAuthMutation extends Request {
    */
   public async fetch(input: L.GoogleUserAccountAuthInput): LinearFetch<AuthResolverResponse> {
     const response = await this._request<L.GoogleUserAccountAuthMutation, L.GoogleUserAccountAuthMutationVariables>(
-      L.GoogleUserAccountAuthDocument,
+      L.GoogleUserAccountAuthDocument.toString(),
       {
         input,
       }
@@ -25177,7 +25275,7 @@ export class ImageUploadFromUrlMutation extends Request {
    */
   public async fetch(url: string): LinearFetch<ImageUploadFromUrlPayload> {
     const response = await this._request<L.ImageUploadFromUrlMutation, L.ImageUploadFromUrlMutationVariables>(
-      L.ImageUploadFromUrlDocument,
+      L.ImageUploadFromUrlDocument.toString(),
       {
         url,
       }
@@ -25214,7 +25312,7 @@ export class ImportFileUploadMutation extends Request {
     variables?: Omit<L.ImportFileUploadMutationVariables, "contentType" | "filename" | "size">
   ): LinearFetch<UploadPayload> {
     const response = await this._request<L.ImportFileUploadMutation, L.ImportFileUploadMutationVariables>(
-      L.ImportFileUploadDocument,
+      L.ImportFileUploadDocument.toString(),
       {
         contentType,
         filename,
@@ -25246,7 +25344,7 @@ export class ArchiveInitiativeMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<InitiativeArchivePayload> {
     const response = await this._request<L.ArchiveInitiativeMutation, L.ArchiveInitiativeMutationVariables>(
-      L.ArchiveInitiativeDocument,
+      L.ArchiveInitiativeDocument.toString(),
       {
         id,
       }
@@ -25275,7 +25373,7 @@ export class CreateInitiativeMutation extends Request {
    */
   public async fetch(input: L.InitiativeCreateInput): LinearFetch<InitiativePayload> {
     const response = await this._request<L.CreateInitiativeMutation, L.CreateInitiativeMutationVariables>(
-      L.CreateInitiativeDocument,
+      L.CreateInitiativeDocument.toString(),
       {
         input,
       }
@@ -25304,7 +25402,7 @@ export class DeleteInitiativeMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteInitiativeMutation, L.DeleteInitiativeMutationVariables>(
-      L.DeleteInitiativeDocument,
+      L.DeleteInitiativeDocument.toString(),
       {
         id,
       }
@@ -25335,7 +25433,7 @@ export class CreateInitiativeRelationMutation extends Request {
     const response = await this._request<
       L.CreateInitiativeRelationMutation,
       L.CreateInitiativeRelationMutationVariables
-    >(L.CreateInitiativeRelationDocument, {
+    >(L.CreateInitiativeRelationDocument.toString(), {
       input,
     });
     const data = response.initiativeRelationCreate;
@@ -25364,7 +25462,7 @@ export class DeleteInitiativeRelationMutation extends Request {
     const response = await this._request<
       L.DeleteInitiativeRelationMutation,
       L.DeleteInitiativeRelationMutationVariables
-    >(L.DeleteInitiativeRelationDocument, {
+    >(L.DeleteInitiativeRelationDocument.toString(), {
       id,
     });
     const data = response.initiativeRelationDelete;
@@ -25394,7 +25492,7 @@ export class UpdateInitiativeRelationMutation extends Request {
     const response = await this._request<
       L.UpdateInitiativeRelationMutation,
       L.UpdateInitiativeRelationMutationVariables
-    >(L.UpdateInitiativeRelationDocument, {
+    >(L.UpdateInitiativeRelationDocument.toString(), {
       id,
       input,
     });
@@ -25424,7 +25522,7 @@ export class CreateInitiativeToProjectMutation extends Request {
     const response = await this._request<
       L.CreateInitiativeToProjectMutation,
       L.CreateInitiativeToProjectMutationVariables
-    >(L.CreateInitiativeToProjectDocument, {
+    >(L.CreateInitiativeToProjectDocument.toString(), {
       input,
     });
     const data = response.initiativeToProjectCreate;
@@ -25453,7 +25551,7 @@ export class DeleteInitiativeToProjectMutation extends Request {
     const response = await this._request<
       L.DeleteInitiativeToProjectMutation,
       L.DeleteInitiativeToProjectMutationVariables
-    >(L.DeleteInitiativeToProjectDocument, {
+    >(L.DeleteInitiativeToProjectDocument.toString(), {
       id,
     });
     const data = response.initiativeToProjectDelete;
@@ -25483,7 +25581,7 @@ export class UpdateInitiativeToProjectMutation extends Request {
     const response = await this._request<
       L.UpdateInitiativeToProjectMutation,
       L.UpdateInitiativeToProjectMutationVariables
-    >(L.UpdateInitiativeToProjectDocument, {
+    >(L.UpdateInitiativeToProjectDocument.toString(), {
       id,
       input,
     });
@@ -25511,7 +25609,7 @@ export class UnarchiveInitiativeMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<InitiativeArchivePayload> {
     const response = await this._request<L.UnarchiveInitiativeMutation, L.UnarchiveInitiativeMutationVariables>(
-      L.UnarchiveInitiativeDocument,
+      L.UnarchiveInitiativeDocument.toString(),
       {
         id,
       }
@@ -25541,7 +25639,7 @@ export class UpdateInitiativeMutation extends Request {
    */
   public async fetch(id: string, input: L.InitiativeUpdateInput): LinearFetch<InitiativePayload> {
     const response = await this._request<L.UpdateInitiativeMutation, L.UpdateInitiativeMutationVariables>(
-      L.UpdateInitiativeDocument,
+      L.UpdateInitiativeDocument.toString(),
       {
         id,
         input,
@@ -25571,7 +25669,7 @@ export class ArchiveInitiativeUpdateMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<InitiativeUpdateArchivePayload> {
     const response = await this._request<L.ArchiveInitiativeUpdateMutation, L.ArchiveInitiativeUpdateMutationVariables>(
-      L.ArchiveInitiativeUpdateDocument,
+      L.ArchiveInitiativeUpdateDocument.toString(),
       {
         id,
       }
@@ -25600,7 +25698,7 @@ export class CreateInitiativeUpdateMutation extends Request {
    */
   public async fetch(input: L.InitiativeUpdateCreateInput): LinearFetch<InitiativeUpdatePayload> {
     const response = await this._request<L.CreateInitiativeUpdateMutation, L.CreateInitiativeUpdateMutationVariables>(
-      L.CreateInitiativeUpdateDocument,
+      L.CreateInitiativeUpdateDocument.toString(),
       {
         input,
       }
@@ -25631,7 +25729,7 @@ export class UnarchiveInitiativeUpdateMutation extends Request {
     const response = await this._request<
       L.UnarchiveInitiativeUpdateMutation,
       L.UnarchiveInitiativeUpdateMutationVariables
-    >(L.UnarchiveInitiativeUpdateDocument, {
+    >(L.UnarchiveInitiativeUpdateDocument.toString(), {
       id,
     });
     const data = response.initiativeUpdateUnarchive;
@@ -25659,7 +25757,7 @@ export class UpdateInitiativeUpdateMutation extends Request {
    */
   public async fetch(id: string, input: L.InitiativeUpdateUpdateInput): LinearFetch<InitiativeUpdatePayload> {
     const response = await this._request<L.UpdateInitiativeUpdateMutation, L.UpdateInitiativeUpdateMutationVariables>(
-      L.UpdateInitiativeUpdateDocument,
+      L.UpdateInitiativeUpdateDocument.toString(),
       {
         id,
         input,
@@ -25689,7 +25787,7 @@ export class ArchiveIntegrationMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.ArchiveIntegrationMutation, L.ArchiveIntegrationMutationVariables>(
-      L.ArchiveIntegrationDocument,
+      L.ArchiveIntegrationDocument.toString(),
       {
         id,
       }
@@ -25721,7 +25819,7 @@ export class IntegrationAsksConnectChannelMutation extends Request {
     const response = await this._request<
       L.IntegrationAsksConnectChannelMutation,
       L.IntegrationAsksConnectChannelMutationVariables
-    >(L.IntegrationAsksConnectChannelDocument, {
+    >(L.IntegrationAsksConnectChannelDocument.toString(), {
       code,
       redirectUri,
     });
@@ -25753,7 +25851,7 @@ export class DeleteIntegrationMutation extends Request {
     variables?: Omit<L.DeleteIntegrationMutationVariables, "id">
   ): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteIntegrationMutation, L.DeleteIntegrationMutationVariables>(
-      L.DeleteIntegrationDocument,
+      L.DeleteIntegrationDocument.toString(),
       {
         id,
         ...variables,
@@ -25784,7 +25882,7 @@ export class IntegrationDiscordMutation extends Request {
    */
   public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationDiscordMutation, L.IntegrationDiscordMutationVariables>(
-      L.IntegrationDiscordDocument,
+      L.IntegrationDiscordDocument.toString(),
       {
         code,
         redirectUri,
@@ -25815,7 +25913,7 @@ export class IntegrationFigmaMutation extends Request {
    */
   public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationFigmaMutation, L.IntegrationFigmaMutationVariables>(
-      L.IntegrationFigmaDocument,
+      L.IntegrationFigmaDocument.toString(),
       {
         code,
         redirectUri,
@@ -25846,7 +25944,7 @@ export class IntegrationFrontMutation extends Request {
    */
   public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationFrontMutation, L.IntegrationFrontMutationVariables>(
-      L.IntegrationFrontDocument,
+      L.IntegrationFrontDocument.toString(),
       {
         code,
         redirectUri,
@@ -25879,7 +25977,7 @@ export class IntegrationGitHubEnterpriseServerConnectMutation extends Request {
     const response = await this._request<
       L.IntegrationGitHubEnterpriseServerConnectMutation,
       L.IntegrationGitHubEnterpriseServerConnectMutationVariables
-    >(L.IntegrationGitHubEnterpriseServerConnectDocument, {
+    >(L.IntegrationGitHubEnterpriseServerConnectDocument.toString(), {
       githubUrl,
       organizationName,
     });
@@ -25913,7 +26011,7 @@ export class IntegrationGitHubPersonalMutation extends Request {
     const response = await this._request<
       L.IntegrationGitHubPersonalMutation,
       L.IntegrationGitHubPersonalMutationVariables
-    >(L.IntegrationGitHubPersonalDocument, {
+    >(L.IntegrationGitHubPersonalDocument.toString(), {
       code,
       ...variables,
     });
@@ -25942,7 +26040,7 @@ export class CreateIntegrationGithubCommitMutation extends Request {
     const response = await this._request<
       L.CreateIntegrationGithubCommitMutation,
       L.CreateIntegrationGithubCommitMutationVariables
-    >(L.CreateIntegrationGithubCommitDocument, {});
+    >(L.CreateIntegrationGithubCommitDocument.toString(), {});
     const data = response.integrationGithubCommitCreate;
 
     return new GitHubCommitIntegrationPayload(this._request, data);
@@ -25975,7 +26073,7 @@ export class IntegrationGithubConnectMutation extends Request {
     const response = await this._request<
       L.IntegrationGithubConnectMutation,
       L.IntegrationGithubConnectMutationVariables
-    >(L.IntegrationGithubConnectDocument, {
+    >(L.IntegrationGithubConnectDocument.toString(), {
       code,
       installationId,
       ...variables,
@@ -26007,7 +26105,7 @@ export class IntegrationGithubImportConnectMutation extends Request {
     const response = await this._request<
       L.IntegrationGithubImportConnectMutation,
       L.IntegrationGithubImportConnectMutationVariables
-    >(L.IntegrationGithubImportConnectDocument, {
+    >(L.IntegrationGithubImportConnectDocument.toString(), {
       code,
       installationId,
     });
@@ -26037,7 +26135,7 @@ export class IntegrationGithubImportRefreshMutation extends Request {
     const response = await this._request<
       L.IntegrationGithubImportRefreshMutation,
       L.IntegrationGithubImportRefreshMutationVariables
-    >(L.IntegrationGithubImportRefreshDocument, {
+    >(L.IntegrationGithubImportRefreshDocument.toString(), {
       id,
     });
     const data = response.integrationGithubImportRefresh;
@@ -26067,7 +26165,7 @@ export class IntegrationGitlabConnectMutation extends Request {
     const response = await this._request<
       L.IntegrationGitlabConnectMutation,
       L.IntegrationGitlabConnectMutationVariables
-    >(L.IntegrationGitlabConnectDocument, {
+    >(L.IntegrationGitlabConnectDocument.toString(), {
       accessToken,
       gitlabUrl,
     });
@@ -26096,7 +26194,7 @@ export class IntegrationGongMutation extends Request {
    */
   public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationGongMutation, L.IntegrationGongMutationVariables>(
-      L.IntegrationGongDocument,
+      L.IntegrationGongDocument.toString(),
       {
         code,
         redirectUri,
@@ -26126,7 +26224,7 @@ export class IntegrationGoogleSheetsMutation extends Request {
    */
   public async fetch(code: string): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationGoogleSheetsMutation, L.IntegrationGoogleSheetsMutationVariables>(
-      L.IntegrationGoogleSheetsDocument,
+      L.IntegrationGoogleSheetsDocument.toString(),
       {
         code,
       }
@@ -26161,7 +26259,7 @@ export class IntegrationIntercomMutation extends Request {
     variables?: Omit<L.IntegrationIntercomMutationVariables, "code" | "redirectUri">
   ): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationIntercomMutation, L.IntegrationIntercomMutationVariables>(
-      L.IntegrationIntercomDocument,
+      L.IntegrationIntercomDocument.toString(),
       {
         code,
         redirectUri,
@@ -26193,7 +26291,7 @@ export class DeleteIntegrationIntercomMutation extends Request {
     const response = await this._request<
       L.DeleteIntegrationIntercomMutation,
       L.DeleteIntegrationIntercomMutationVariables
-    >(L.DeleteIntegrationIntercomDocument, {});
+    >(L.DeleteIntegrationIntercomDocument.toString(), {});
     const data = response.integrationIntercomDelete;
 
     return new IntegrationPayload(this._request, data);
@@ -26220,7 +26318,7 @@ export class UpdateIntegrationIntercomSettingsMutation extends Request {
     const response = await this._request<
       L.UpdateIntegrationIntercomSettingsMutation,
       L.UpdateIntegrationIntercomSettingsMutationVariables
-    >(L.UpdateIntegrationIntercomSettingsDocument, {
+    >(L.UpdateIntegrationIntercomSettingsDocument.toString(), {
       input,
     });
     const data = response.integrationIntercomSettingsUpdate;
@@ -26247,7 +26345,7 @@ export class IntegrationJiraPersonalMutation extends Request {
    */
   public async fetch(variables?: L.IntegrationJiraPersonalMutationVariables): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationJiraPersonalMutation, L.IntegrationJiraPersonalMutationVariables>(
-      L.IntegrationJiraPersonalDocument,
+      L.IntegrationJiraPersonalDocument.toString(),
       variables
     );
     const data = response.integrationJiraPersonal;
@@ -26273,7 +26371,7 @@ export class IntegrationLoomMutation extends Request {
    */
   public async fetch(): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationLoomMutation, L.IntegrationLoomMutationVariables>(
-      L.IntegrationLoomDocument,
+      L.IntegrationLoomDocument.toString(),
       {}
     );
     const data = response.integrationLoom;
@@ -26300,7 +26398,7 @@ export class IntegrationRequestMutation extends Request {
    */
   public async fetch(input: L.IntegrationRequestInput): LinearFetch<IntegrationRequestPayload> {
     const response = await this._request<L.IntegrationRequestMutation, L.IntegrationRequestMutationVariables>(
-      L.IntegrationRequestDocument,
+      L.IntegrationRequestDocument.toString(),
       {
         input,
       }
@@ -26331,7 +26429,7 @@ export class IntegrationSalesforceMutation extends Request {
    */
   public async fetch(code: string, redirectUri: string, subdomain: string): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationSalesforceMutation, L.IntegrationSalesforceMutationVariables>(
-      L.IntegrationSalesforceDocument,
+      L.IntegrationSalesforceDocument.toString(),
       {
         code,
         redirectUri,
@@ -26366,7 +26464,7 @@ export class IntegrationSentryConnectMutation extends Request {
     const response = await this._request<
       L.IntegrationSentryConnectMutation,
       L.IntegrationSentryConnectMutationVariables
-    >(L.IntegrationSentryConnectDocument, {
+    >(L.IntegrationSentryConnectDocument.toString(), {
       code,
       installationId,
       organizationSlug,
@@ -26401,7 +26499,7 @@ export class IntegrationSlackMutation extends Request {
     variables?: Omit<L.IntegrationSlackMutationVariables, "code" | "redirectUri">
   ): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationSlackMutation, L.IntegrationSlackMutationVariables>(
-      L.IntegrationSlackDocument,
+      L.IntegrationSlackDocument.toString(),
       {
         code,
         redirectUri,
@@ -26433,7 +26531,7 @@ export class IntegrationSlackAsksMutation extends Request {
    */
   public async fetch(code: string, redirectUri: string): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationSlackAsksMutation, L.IntegrationSlackAsksMutationVariables>(
-      L.IntegrationSlackAsksDocument,
+      L.IntegrationSlackAsksDocument.toString(),
       {
         code,
         redirectUri,
@@ -26467,7 +26565,7 @@ export class IntegrationSlackCustomViewNotificationsMutation extends Request {
     const response = await this._request<
       L.IntegrationSlackCustomViewNotificationsMutation,
       L.IntegrationSlackCustomViewNotificationsMutationVariables
-    >(L.IntegrationSlackCustomViewNotificationsDocument, {
+    >(L.IntegrationSlackCustomViewNotificationsDocument.toString(), {
       code,
       customViewId,
       redirectUri,
@@ -26500,7 +26598,7 @@ export class IntegrationSlackCustomerChannelLinkMutation extends Request {
     const response = await this._request<
       L.IntegrationSlackCustomerChannelLinkMutation,
       L.IntegrationSlackCustomerChannelLinkMutationVariables
-    >(L.IntegrationSlackCustomerChannelLinkDocument, {
+    >(L.IntegrationSlackCustomerChannelLinkDocument.toString(), {
       code,
       customerId,
       redirectUri,
@@ -26532,7 +26630,7 @@ export class IntegrationSlackImportEmojisMutation extends Request {
     const response = await this._request<
       L.IntegrationSlackImportEmojisMutation,
       L.IntegrationSlackImportEmojisMutationVariables
-    >(L.IntegrationSlackImportEmojisDocument, {
+    >(L.IntegrationSlackImportEmojisDocument.toString(), {
       code,
       redirectUri,
     });
@@ -26562,7 +26660,7 @@ export class IntegrationSlackOrAsksUpdateSlackTeamNameMutation extends Request {
     const response = await this._request<
       L.IntegrationSlackOrAsksUpdateSlackTeamNameMutation,
       L.IntegrationSlackOrAsksUpdateSlackTeamNameMutationVariables
-    >(L.IntegrationSlackOrAsksUpdateSlackTeamNameDocument, {
+    >(L.IntegrationSlackOrAsksUpdateSlackTeamNameDocument.toString(), {
       integrationId,
     });
     const data = response.integrationSlackOrAsksUpdateSlackTeamName;
@@ -26592,7 +26690,7 @@ export class IntegrationSlackOrgProjectUpdatesPostMutation extends Request {
     const response = await this._request<
       L.IntegrationSlackOrgProjectUpdatesPostMutation,
       L.IntegrationSlackOrgProjectUpdatesPostMutationVariables
-    >(L.IntegrationSlackOrgProjectUpdatesPostDocument, {
+    >(L.IntegrationSlackOrgProjectUpdatesPostDocument.toString(), {
       code,
       redirectUri,
     });
@@ -26623,7 +26721,7 @@ export class IntegrationSlackPersonalMutation extends Request {
     const response = await this._request<
       L.IntegrationSlackPersonalMutation,
       L.IntegrationSlackPersonalMutationVariables
-    >(L.IntegrationSlackPersonalDocument, {
+    >(L.IntegrationSlackPersonalDocument.toString(), {
       code,
       redirectUri,
     });
@@ -26659,7 +26757,7 @@ export class IntegrationSlackPostMutation extends Request {
     variables?: Omit<L.IntegrationSlackPostMutationVariables, "code" | "redirectUri" | "teamId">
   ): LinearFetch<SlackChannelConnectPayload> {
     const response = await this._request<L.IntegrationSlackPostMutation, L.IntegrationSlackPostMutationVariables>(
-      L.IntegrationSlackPostDocument,
+      L.IntegrationSlackPostDocument.toString(),
       {
         code,
         redirectUri,
@@ -26701,7 +26799,7 @@ export class IntegrationSlackProjectPostMutation extends Request {
     const response = await this._request<
       L.IntegrationSlackProjectPostMutation,
       L.IntegrationSlackProjectPostMutationVariables
-    >(L.IntegrationSlackProjectPostDocument, {
+    >(L.IntegrationSlackProjectPostDocument.toString(), {
       code,
       projectId,
       redirectUri,
@@ -26733,7 +26831,7 @@ export class CreateIntegrationTemplateMutation extends Request {
     const response = await this._request<
       L.CreateIntegrationTemplateMutation,
       L.CreateIntegrationTemplateMutationVariables
-    >(L.CreateIntegrationTemplateDocument, {
+    >(L.CreateIntegrationTemplateDocument.toString(), {
       input,
     });
     const data = response.integrationTemplateCreate;
@@ -26762,7 +26860,7 @@ export class DeleteIntegrationTemplateMutation extends Request {
     const response = await this._request<
       L.DeleteIntegrationTemplateMutation,
       L.DeleteIntegrationTemplateMutationVariables
-    >(L.DeleteIntegrationTemplateDocument, {
+    >(L.DeleteIntegrationTemplateDocument.toString(), {
       id,
     });
     const data = response.integrationTemplateDelete;
@@ -26797,7 +26895,7 @@ export class IntegrationZendeskMutation extends Request {
     subdomain: string
   ): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.IntegrationZendeskMutation, L.IntegrationZendeskMutationVariables>(
-      L.IntegrationZendeskDocument,
+      L.IntegrationZendeskDocument.toString(),
       {
         code,
         redirectUri,
@@ -26831,7 +26929,7 @@ export class CreateIntegrationsSettingsMutation extends Request {
     const response = await this._request<
       L.CreateIntegrationsSettingsMutation,
       L.CreateIntegrationsSettingsMutationVariables
-    >(L.CreateIntegrationsSettingsDocument, {
+    >(L.CreateIntegrationsSettingsDocument.toString(), {
       input,
     });
     const data = response.integrationsSettingsCreate;
@@ -26861,7 +26959,7 @@ export class UpdateIntegrationsSettingsMutation extends Request {
     const response = await this._request<
       L.UpdateIntegrationsSettingsMutation,
       L.UpdateIntegrationsSettingsMutationVariables
-    >(L.UpdateIntegrationsSettingsDocument, {
+    >(L.UpdateIntegrationsSettingsDocument.toString(), {
       id,
       input,
     });
@@ -26890,7 +26988,7 @@ export class IssueAddLabelMutation extends Request {
    */
   public async fetch(id: string, labelId: string): LinearFetch<IssuePayload> {
     const response = await this._request<L.IssueAddLabelMutation, L.IssueAddLabelMutationVariables>(
-      L.IssueAddLabelDocument,
+      L.IssueAddLabelDocument.toString(),
       {
         id,
         labelId,
@@ -26924,7 +27022,7 @@ export class ArchiveIssueMutation extends Request {
     variables?: Omit<L.ArchiveIssueMutationVariables, "id">
   ): LinearFetch<IssueArchivePayload> {
     const response = await this._request<L.ArchiveIssueMutation, L.ArchiveIssueMutationVariables>(
-      L.ArchiveIssueDocument,
+      L.ArchiveIssueDocument.toString(),
       {
         id,
         ...variables,
@@ -26954,7 +27052,7 @@ export class CreateIssueBatchMutation extends Request {
    */
   public async fetch(input: L.IssueBatchCreateInput): LinearFetch<IssueBatchPayload> {
     const response = await this._request<L.CreateIssueBatchMutation, L.CreateIssueBatchMutationVariables>(
-      L.CreateIssueBatchDocument,
+      L.CreateIssueBatchDocument.toString(),
       {
         input,
       }
@@ -26984,7 +27082,7 @@ export class UpdateIssueBatchMutation extends Request {
    */
   public async fetch(ids: L.Scalars["UUID"][], input: L.IssueUpdateInput): LinearFetch<IssueBatchPayload> {
     const response = await this._request<L.UpdateIssueBatchMutation, L.UpdateIssueBatchMutationVariables>(
-      L.UpdateIssueBatchDocument,
+      L.UpdateIssueBatchDocument.toString(),
       {
         ids,
         input,
@@ -27013,9 +27111,12 @@ export class CreateIssueMutation extends Request {
    * @returns parsed response from CreateIssueMutation
    */
   public async fetch(input: L.IssueCreateInput): LinearFetch<IssuePayload> {
-    const response = await this._request<L.CreateIssueMutation, L.CreateIssueMutationVariables>(L.CreateIssueDocument, {
-      input,
-    });
+    const response = await this._request<L.CreateIssueMutation, L.CreateIssueMutationVariables>(
+      L.CreateIssueDocument.toString(),
+      {
+        input,
+      }
+    );
     const data = response.issueCreate;
 
     return new IssuePayload(this._request, data);
@@ -27043,10 +27144,13 @@ export class DeleteIssueMutation extends Request {
     id: string,
     variables?: Omit<L.DeleteIssueMutationVariables, "id">
   ): LinearFetch<IssueArchivePayload> {
-    const response = await this._request<L.DeleteIssueMutation, L.DeleteIssueMutationVariables>(L.DeleteIssueDocument, {
-      id,
-      ...variables,
-    });
+    const response = await this._request<L.DeleteIssueMutation, L.DeleteIssueMutationVariables>(
+      L.DeleteIssueDocument.toString(),
+      {
+        id,
+        ...variables,
+      }
+    );
     const data = response.issueDelete;
 
     return new IssueArchivePayload(this._request, data);
@@ -27073,7 +27177,7 @@ export class IssueExternalSyncDisableMutation extends Request {
     const response = await this._request<
       L.IssueExternalSyncDisableMutation,
       L.IssueExternalSyncDisableMutationVariables
-    >(L.IssueExternalSyncDisableDocument, {
+    >(L.IssueExternalSyncDisableDocument.toString(), {
       attachmentId,
     });
     const data = response.issueExternalSyncDisable;
@@ -27106,7 +27210,7 @@ export class IssueImportCreateAsanaMutation extends Request {
     variables?: Omit<L.IssueImportCreateAsanaMutationVariables, "asanaTeamName" | "asanaToken">
   ): LinearFetch<IssueImportPayload> {
     const response = await this._request<L.IssueImportCreateAsanaMutation, L.IssueImportCreateAsanaMutationVariables>(
-      L.IssueImportCreateAsanaDocument,
+      L.IssueImportCreateAsanaDocument.toString(),
       {
         asanaTeamName,
         asanaToken,
@@ -27143,7 +27247,7 @@ export class IssueImportCreateCsvJiraMutation extends Request {
     const response = await this._request<
       L.IssueImportCreateCsvJiraMutation,
       L.IssueImportCreateCsvJiraMutationVariables
-    >(L.IssueImportCreateCsvJiraDocument, {
+    >(L.IssueImportCreateCsvJiraDocument.toString(), {
       csvUrl,
       ...variables,
     });
@@ -27179,7 +27283,7 @@ export class IssueImportCreateClubhouseMutation extends Request {
     const response = await this._request<
       L.IssueImportCreateClubhouseMutation,
       L.IssueImportCreateClubhouseMutationVariables
-    >(L.IssueImportCreateClubhouseDocument, {
+    >(L.IssueImportCreateClubhouseDocument.toString(), {
       clubhouseGroupName,
       clubhouseToken,
       ...variables,
@@ -27208,7 +27312,7 @@ export class IssueImportCreateGithubMutation extends Request {
    */
   public async fetch(variables?: L.IssueImportCreateGithubMutationVariables): LinearFetch<IssueImportPayload> {
     const response = await this._request<L.IssueImportCreateGithubMutation, L.IssueImportCreateGithubMutationVariables>(
-      L.IssueImportCreateGithubDocument,
+      L.IssueImportCreateGithubDocument.toString(),
       variables
     );
     const data = response.issueImportCreateGithub;
@@ -27248,7 +27352,7 @@ export class IssueImportCreateJiraMutation extends Request {
     >
   ): LinearFetch<IssueImportPayload> {
     const response = await this._request<L.IssueImportCreateJiraMutation, L.IssueImportCreateJiraMutationVariables>(
-      L.IssueImportCreateJiraDocument,
+      L.IssueImportCreateJiraDocument.toString(),
       {
         jiraEmail,
         jiraHostname,
@@ -27281,7 +27385,7 @@ export class DeleteIssueImportMutation extends Request {
    */
   public async fetch(issueImportId: string): LinearFetch<IssueImportDeletePayload> {
     const response = await this._request<L.DeleteIssueImportMutation, L.DeleteIssueImportMutationVariables>(
-      L.DeleteIssueImportDocument,
+      L.DeleteIssueImportDocument.toString(),
       {
         issueImportId,
       }
@@ -27311,7 +27415,7 @@ export class IssueImportProcessMutation extends Request {
    */
   public async fetch(issueImportId: string, mapping: L.Scalars["JSONObject"]): LinearFetch<IssueImportPayload> {
     const response = await this._request<L.IssueImportProcessMutation, L.IssueImportProcessMutationVariables>(
-      L.IssueImportProcessDocument,
+      L.IssueImportProcessDocument.toString(),
       {
         issueImportId,
         mapping,
@@ -27342,7 +27446,7 @@ export class UpdateIssueImportMutation extends Request {
    */
   public async fetch(id: string, input: L.IssueImportUpdateInput): LinearFetch<IssueImportPayload> {
     const response = await this._request<L.UpdateIssueImportMutation, L.UpdateIssueImportMutationVariables>(
-      L.UpdateIssueImportDocument,
+      L.UpdateIssueImportDocument.toString(),
       {
         id,
         input,
@@ -27376,7 +27480,7 @@ export class CreateIssueLabelMutation extends Request {
     variables?: Omit<L.CreateIssueLabelMutationVariables, "input">
   ): LinearFetch<IssueLabelPayload> {
     const response = await this._request<L.CreateIssueLabelMutation, L.CreateIssueLabelMutationVariables>(
-      L.CreateIssueLabelDocument,
+      L.CreateIssueLabelDocument.toString(),
       {
         input,
         ...variables,
@@ -27406,7 +27510,7 @@ export class DeleteIssueLabelMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteIssueLabelMutation, L.DeleteIssueLabelMutationVariables>(
-      L.DeleteIssueLabelDocument,
+      L.DeleteIssueLabelDocument.toString(),
       {
         id,
       }
@@ -27435,7 +27539,7 @@ export class IssueLabelRestoreMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<IssueLabelPayload> {
     const response = await this._request<L.IssueLabelRestoreMutation, L.IssueLabelRestoreMutationVariables>(
-      L.IssueLabelRestoreDocument,
+      L.IssueLabelRestoreDocument.toString(),
       {
         id,
       }
@@ -27464,7 +27568,7 @@ export class IssueLabelRetireMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<IssueLabelPayload> {
     const response = await this._request<L.IssueLabelRetireMutation, L.IssueLabelRetireMutationVariables>(
-      L.IssueLabelRetireDocument,
+      L.IssueLabelRetireDocument.toString(),
       {
         id,
       }
@@ -27499,7 +27603,7 @@ export class UpdateIssueLabelMutation extends Request {
     variables?: Omit<L.UpdateIssueLabelMutationVariables, "id" | "input">
   ): LinearFetch<IssueLabelPayload> {
     const response = await this._request<L.UpdateIssueLabelMutation, L.UpdateIssueLabelMutationVariables>(
-      L.UpdateIssueLabelDocument,
+      L.UpdateIssueLabelDocument.toString(),
       {
         id,
         input,
@@ -27534,7 +27638,7 @@ export class CreateIssueRelationMutation extends Request {
     variables?: Omit<L.CreateIssueRelationMutationVariables, "input">
   ): LinearFetch<IssueRelationPayload> {
     const response = await this._request<L.CreateIssueRelationMutation, L.CreateIssueRelationMutationVariables>(
-      L.CreateIssueRelationDocument,
+      L.CreateIssueRelationDocument.toString(),
       {
         input,
         ...variables,
@@ -27564,7 +27668,7 @@ export class DeleteIssueRelationMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteIssueRelationMutation, L.DeleteIssueRelationMutationVariables>(
-      L.DeleteIssueRelationDocument,
+      L.DeleteIssueRelationDocument.toString(),
       {
         id,
       }
@@ -27594,7 +27698,7 @@ export class UpdateIssueRelationMutation extends Request {
    */
   public async fetch(id: string, input: L.IssueRelationUpdateInput): LinearFetch<IssueRelationPayload> {
     const response = await this._request<L.UpdateIssueRelationMutation, L.UpdateIssueRelationMutationVariables>(
-      L.UpdateIssueRelationDocument,
+      L.UpdateIssueRelationDocument.toString(),
       {
         id,
         input,
@@ -27625,7 +27729,7 @@ export class IssueReminderMutation extends Request {
    */
   public async fetch(id: string, reminderAt: Date): LinearFetch<IssuePayload> {
     const response = await this._request<L.IssueReminderMutation, L.IssueReminderMutationVariables>(
-      L.IssueReminderDocument,
+      L.IssueReminderDocument.toString(),
       {
         id,
         reminderAt,
@@ -27656,7 +27760,7 @@ export class IssueRemoveLabelMutation extends Request {
    */
   public async fetch(id: string, labelId: string): LinearFetch<IssuePayload> {
     const response = await this._request<L.IssueRemoveLabelMutation, L.IssueRemoveLabelMutationVariables>(
-      L.IssueRemoveLabelDocument,
+      L.IssueRemoveLabelDocument.toString(),
       {
         id,
         labelId,
@@ -27687,7 +27791,7 @@ export class IssueSubscribeMutation extends Request {
    */
   public async fetch(id: string, variables?: Omit<L.IssueSubscribeMutationVariables, "id">): LinearFetch<IssuePayload> {
     const response = await this._request<L.IssueSubscribeMutation, L.IssueSubscribeMutationVariables>(
-      L.IssueSubscribeDocument,
+      L.IssueSubscribeDocument.toString(),
       {
         id,
         ...variables,
@@ -27717,7 +27821,7 @@ export class UnarchiveIssueMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<IssueArchivePayload> {
     const response = await this._request<L.UnarchiveIssueMutation, L.UnarchiveIssueMutationVariables>(
-      L.UnarchiveIssueDocument,
+      L.UnarchiveIssueDocument.toString(),
       {
         id,
       }
@@ -27750,7 +27854,7 @@ export class IssueUnsubscribeMutation extends Request {
     variables?: Omit<L.IssueUnsubscribeMutationVariables, "id">
   ): LinearFetch<IssuePayload> {
     const response = await this._request<L.IssueUnsubscribeMutation, L.IssueUnsubscribeMutationVariables>(
-      L.IssueUnsubscribeDocument,
+      L.IssueUnsubscribeDocument.toString(),
       {
         id,
         ...variables,
@@ -27780,10 +27884,13 @@ export class UpdateIssueMutation extends Request {
    * @returns parsed response from UpdateIssueMutation
    */
   public async fetch(id: string, input: L.IssueUpdateInput): LinearFetch<IssuePayload> {
-    const response = await this._request<L.UpdateIssueMutation, L.UpdateIssueMutationVariables>(L.UpdateIssueDocument, {
-      id,
-      input,
-    });
+    const response = await this._request<L.UpdateIssueMutation, L.UpdateIssueMutationVariables>(
+      L.UpdateIssueDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
     const data = response.issueUpdate;
 
     return new IssuePayload(this._request, data);
@@ -27810,7 +27917,7 @@ export class JoinOrganizationFromOnboardingMutation extends Request {
     const response = await this._request<
       L.JoinOrganizationFromOnboardingMutation,
       L.JoinOrganizationFromOnboardingMutationVariables
-    >(L.JoinOrganizationFromOnboardingDocument, {
+    >(L.JoinOrganizationFromOnboardingDocument.toString(), {
       input,
     });
     const data = response.joinOrganizationFromOnboarding;
@@ -27837,7 +27944,7 @@ export class LeaveOrganizationMutation extends Request {
    */
   public async fetch(organizationId: string): LinearFetch<CreateOrJoinOrganizationResponse> {
     const response = await this._request<L.LeaveOrganizationMutation, L.LeaveOrganizationMutationVariables>(
-      L.LeaveOrganizationDocument,
+      L.LeaveOrganizationDocument.toString(),
       {
         organizationId,
       }
@@ -27865,7 +27972,10 @@ export class LogoutMutation extends Request {
    * @returns parsed response from LogoutMutation
    */
   public async fetch(variables?: L.LogoutMutationVariables): LinearFetch<LogoutResponse> {
-    const response = await this._request<L.LogoutMutation, L.LogoutMutationVariables>(L.LogoutDocument, variables);
+    const response = await this._request<L.LogoutMutation, L.LogoutMutationVariables>(
+      L.LogoutDocument.toString(),
+      variables
+    );
     const data = response.logout;
 
     return new LogoutResponse(this._request, data);
@@ -27890,7 +28000,7 @@ export class LogoutAllSessionsMutation extends Request {
    */
   public async fetch(variables?: L.LogoutAllSessionsMutationVariables): LinearFetch<LogoutResponse> {
     const response = await this._request<L.LogoutAllSessionsMutation, L.LogoutAllSessionsMutationVariables>(
-      L.LogoutAllSessionsDocument,
+      L.LogoutAllSessionsDocument.toString(),
       variables
     );
     const data = response.logoutAllSessions;
@@ -27917,7 +28027,7 @@ export class LogoutOtherSessionsMutation extends Request {
    */
   public async fetch(variables?: L.LogoutOtherSessionsMutationVariables): LinearFetch<LogoutResponse> {
     const response = await this._request<L.LogoutOtherSessionsMutation, L.LogoutOtherSessionsMutationVariables>(
-      L.LogoutOtherSessionsDocument,
+      L.LogoutOtherSessionsDocument.toString(),
       variables
     );
     const data = response.logoutOtherSessions;
@@ -27944,7 +28054,7 @@ export class LogoutSessionMutation extends Request {
    */
   public async fetch(sessionId: string): LinearFetch<LogoutResponse> {
     const response = await this._request<L.LogoutSessionMutation, L.LogoutSessionMutationVariables>(
-      L.LogoutSessionDocument,
+      L.LogoutSessionDocument.toString(),
       {
         sessionId,
       }
@@ -27973,7 +28083,7 @@ export class ArchiveNotificationMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<NotificationArchivePayload> {
     const response = await this._request<L.ArchiveNotificationMutation, L.ArchiveNotificationMutationVariables>(
-      L.ArchiveNotificationDocument,
+      L.ArchiveNotificationDocument.toString(),
       {
         id,
       }
@@ -28002,7 +28112,7 @@ export class NotificationArchiveAllMutation extends Request {
    */
   public async fetch(input: L.NotificationEntityInput): LinearFetch<NotificationBatchActionPayload> {
     const response = await this._request<L.NotificationArchiveAllMutation, L.NotificationArchiveAllMutationVariables>(
-      L.NotificationArchiveAllDocument,
+      L.NotificationArchiveAllDocument.toString(),
       {
         input,
       }
@@ -28039,7 +28149,7 @@ export class UpdateNotificationCategoryChannelSubscriptionMutation extends Reque
     const response = await this._request<
       L.UpdateNotificationCategoryChannelSubscriptionMutation,
       L.UpdateNotificationCategoryChannelSubscriptionMutationVariables
-    >(L.UpdateNotificationCategoryChannelSubscriptionDocument, {
+    >(L.UpdateNotificationCategoryChannelSubscriptionDocument.toString(), {
       category,
       channel,
       subscribe,
@@ -28069,7 +28179,7 @@ export class NotificationMarkReadAllMutation extends Request {
    */
   public async fetch(input: L.NotificationEntityInput, readAt: Date): LinearFetch<NotificationBatchActionPayload> {
     const response = await this._request<L.NotificationMarkReadAllMutation, L.NotificationMarkReadAllMutationVariables>(
-      L.NotificationMarkReadAllDocument,
+      L.NotificationMarkReadAllDocument.toString(),
       {
         input,
         readAt,
@@ -28101,7 +28211,7 @@ export class NotificationMarkUnreadAllMutation extends Request {
     const response = await this._request<
       L.NotificationMarkUnreadAllMutation,
       L.NotificationMarkUnreadAllMutationVariables
-    >(L.NotificationMarkUnreadAllDocument, {
+    >(L.NotificationMarkUnreadAllDocument.toString(), {
       input,
     });
     const data = response.notificationMarkUnreadAll;
@@ -28132,7 +28242,7 @@ export class NotificationSnoozeAllMutation extends Request {
     snoozedUntilAt: Date
   ): LinearFetch<NotificationBatchActionPayload> {
     const response = await this._request<L.NotificationSnoozeAllMutation, L.NotificationSnoozeAllMutationVariables>(
-      L.NotificationSnoozeAllDocument,
+      L.NotificationSnoozeAllDocument.toString(),
       {
         input,
         snoozedUntilAt,
@@ -28164,7 +28274,7 @@ export class CreateNotificationSubscriptionMutation extends Request {
     const response = await this._request<
       L.CreateNotificationSubscriptionMutation,
       L.CreateNotificationSubscriptionMutationVariables
-    >(L.CreateNotificationSubscriptionDocument, {
+    >(L.CreateNotificationSubscriptionDocument.toString(), {
       input,
     });
     const data = response.notificationSubscriptionCreate;
@@ -28193,7 +28303,7 @@ export class DeleteNotificationSubscriptionMutation extends Request {
     const response = await this._request<
       L.DeleteNotificationSubscriptionMutation,
       L.DeleteNotificationSubscriptionMutationVariables
-    >(L.DeleteNotificationSubscriptionDocument, {
+    >(L.DeleteNotificationSubscriptionDocument.toString(), {
       id,
     });
     const data = response.notificationSubscriptionDelete;
@@ -28226,7 +28336,7 @@ export class UpdateNotificationSubscriptionMutation extends Request {
     const response = await this._request<
       L.UpdateNotificationSubscriptionMutation,
       L.UpdateNotificationSubscriptionMutationVariables
-    >(L.UpdateNotificationSubscriptionDocument, {
+    >(L.UpdateNotificationSubscriptionDocument.toString(), {
       id,
       input,
     });
@@ -28254,7 +28364,7 @@ export class UnarchiveNotificationMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<NotificationArchivePayload> {
     const response = await this._request<L.UnarchiveNotificationMutation, L.UnarchiveNotificationMutationVariables>(
-      L.UnarchiveNotificationDocument,
+      L.UnarchiveNotificationDocument.toString(),
       {
         id,
       }
@@ -28284,7 +28394,7 @@ export class NotificationUnsnoozeAllMutation extends Request {
    */
   public async fetch(input: L.NotificationEntityInput, unsnoozedAt: Date): LinearFetch<NotificationBatchActionPayload> {
     const response = await this._request<L.NotificationUnsnoozeAllMutation, L.NotificationUnsnoozeAllMutationVariables>(
-      L.NotificationUnsnoozeAllDocument,
+      L.NotificationUnsnoozeAllDocument.toString(),
       {
         input,
         unsnoozedAt,
@@ -28315,7 +28425,7 @@ export class UpdateNotificationMutation extends Request {
    */
   public async fetch(id: string, input: L.NotificationUpdateInput): LinearFetch<NotificationPayload> {
     const response = await this._request<L.UpdateNotificationMutation, L.UpdateNotificationMutationVariables>(
-      L.UpdateNotificationDocument,
+      L.UpdateNotificationDocument.toString(),
       {
         id,
         input,
@@ -28346,7 +28456,7 @@ export class DeleteOrganizationCancelMutation extends Request {
     const response = await this._request<
       L.DeleteOrganizationCancelMutation,
       L.DeleteOrganizationCancelMutationVariables
-    >(L.DeleteOrganizationCancelDocument, {});
+    >(L.DeleteOrganizationCancelDocument.toString(), {});
     const data = response.organizationCancelDelete;
 
     return new OrganizationCancelDeletePayload(this._request, data);
@@ -28371,7 +28481,7 @@ export class DeleteOrganizationMutation extends Request {
    */
   public async fetch(input: L.DeleteOrganizationInput): LinearFetch<OrganizationDeletePayload> {
     const response = await this._request<L.DeleteOrganizationMutation, L.DeleteOrganizationMutationVariables>(
-      L.DeleteOrganizationDocument,
+      L.DeleteOrganizationDocument.toString(),
       {
         input,
       }
@@ -28401,7 +28511,7 @@ export class OrganizationDeleteChallengeMutation extends Request {
     const response = await this._request<
       L.OrganizationDeleteChallengeMutation,
       L.OrganizationDeleteChallengeMutationVariables
-    >(L.OrganizationDeleteChallengeDocument, {});
+    >(L.OrganizationDeleteChallengeDocument.toString(), {});
     const data = response.organizationDeleteChallenge;
 
     return new OrganizationDeletePayload(this._request, data);
@@ -28428,7 +28538,7 @@ export class DeleteOrganizationDomainMutation extends Request {
     const response = await this._request<
       L.DeleteOrganizationDomainMutation,
       L.DeleteOrganizationDomainMutationVariables
-    >(L.DeleteOrganizationDomainDocument, {
+    >(L.DeleteOrganizationDomainDocument.toString(), {
       id,
     });
     const data = response.organizationDomainDelete;
@@ -28457,7 +28567,7 @@ export class CreateOrganizationInviteMutation extends Request {
     const response = await this._request<
       L.CreateOrganizationInviteMutation,
       L.CreateOrganizationInviteMutationVariables
-    >(L.CreateOrganizationInviteDocument, {
+    >(L.CreateOrganizationInviteDocument.toString(), {
       input,
     });
     const data = response.organizationInviteCreate;
@@ -28486,7 +28596,7 @@ export class DeleteOrganizationInviteMutation extends Request {
     const response = await this._request<
       L.DeleteOrganizationInviteMutation,
       L.DeleteOrganizationInviteMutationVariables
-    >(L.DeleteOrganizationInviteDocument, {
+    >(L.DeleteOrganizationInviteDocument.toString(), {
       id,
     });
     const data = response.organizationInviteDelete;
@@ -28516,7 +28626,7 @@ export class UpdateOrganizationInviteMutation extends Request {
     const response = await this._request<
       L.UpdateOrganizationInviteMutation,
       L.UpdateOrganizationInviteMutationVariables
-    >(L.UpdateOrganizationInviteDocument, {
+    >(L.UpdateOrganizationInviteDocument.toString(), {
       id,
       input,
     });
@@ -28543,7 +28653,7 @@ export class OrganizationStartTrialMutation extends Request {
    */
   public async fetch(): LinearFetch<OrganizationStartTrialPayload> {
     const response = await this._request<L.OrganizationStartTrialMutation, L.OrganizationStartTrialMutationVariables>(
-      L.OrganizationStartTrialDocument,
+      L.OrganizationStartTrialDocument.toString(),
       {}
     );
     const data = response.organizationStartTrial;
@@ -28572,7 +28682,7 @@ export class OrganizationStartTrialForPlanMutation extends Request {
     const response = await this._request<
       L.OrganizationStartTrialForPlanMutation,
       L.OrganizationStartTrialForPlanMutationVariables
-    >(L.OrganizationStartTrialForPlanDocument, {
+    >(L.OrganizationStartTrialForPlanDocument.toString(), {
       input,
     });
     const data = response.organizationStartTrialForPlan;
@@ -28599,7 +28709,7 @@ export class UpdateOrganizationMutation extends Request {
    */
   public async fetch(input: L.OrganizationUpdateInput): LinearFetch<OrganizationPayload> {
     const response = await this._request<L.UpdateOrganizationMutation, L.UpdateOrganizationMutationVariables>(
-      L.UpdateOrganizationDocument,
+      L.UpdateOrganizationDocument.toString(),
       {
         input,
       }
@@ -28629,7 +28739,7 @@ export class ProjectAddLabelMutation extends Request {
    */
   public async fetch(id: string, labelId: string): LinearFetch<ProjectPayload> {
     const response = await this._request<L.ProjectAddLabelMutation, L.ProjectAddLabelMutationVariables>(
-      L.ProjectAddLabelDocument,
+      L.ProjectAddLabelDocument.toString(),
       {
         id,
         labelId,
@@ -28663,7 +28773,7 @@ export class ArchiveProjectMutation extends Request {
     variables?: Omit<L.ArchiveProjectMutationVariables, "id">
   ): LinearFetch<ProjectArchivePayload> {
     const response = await this._request<L.ArchiveProjectMutation, L.ArchiveProjectMutationVariables>(
-      L.ArchiveProjectDocument,
+      L.ArchiveProjectDocument.toString(),
       {
         id,
         ...variables,
@@ -28697,7 +28807,7 @@ export class CreateProjectMutation extends Request {
     variables?: Omit<L.CreateProjectMutationVariables, "input">
   ): LinearFetch<ProjectPayload> {
     const response = await this._request<L.CreateProjectMutation, L.CreateProjectMutationVariables>(
-      L.CreateProjectDocument,
+      L.CreateProjectDocument.toString(),
       {
         input,
         ...variables,
@@ -28727,7 +28837,7 @@ export class DeleteProjectMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<ProjectArchivePayload> {
     const response = await this._request<L.DeleteProjectMutation, L.DeleteProjectMutationVariables>(
-      L.DeleteProjectDocument,
+      L.DeleteProjectDocument.toString(),
       {
         id,
       }
@@ -28759,7 +28869,7 @@ export class ProjectExternalSyncDisableMutation extends Request {
     const response = await this._request<
       L.ProjectExternalSyncDisableMutation,
       L.ProjectExternalSyncDisableMutationVariables
-    >(L.ProjectExternalSyncDisableDocument, {
+    >(L.ProjectExternalSyncDisableDocument.toString(), {
       projectId,
       syncSource,
     });
@@ -28787,7 +28897,7 @@ export class CreateProjectLabelMutation extends Request {
    */
   public async fetch(input: L.ProjectLabelCreateInput): LinearFetch<ProjectLabelPayload> {
     const response = await this._request<L.CreateProjectLabelMutation, L.CreateProjectLabelMutationVariables>(
-      L.CreateProjectLabelDocument,
+      L.CreateProjectLabelDocument.toString(),
       {
         input,
       }
@@ -28816,7 +28926,7 @@ export class DeleteProjectLabelMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteProjectLabelMutation, L.DeleteProjectLabelMutationVariables>(
-      L.DeleteProjectLabelDocument,
+      L.DeleteProjectLabelDocument.toString(),
       {
         id,
       }
@@ -28845,7 +28955,7 @@ export class ProjectLabelRestoreMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<ProjectLabelPayload> {
     const response = await this._request<L.ProjectLabelRestoreMutation, L.ProjectLabelRestoreMutationVariables>(
-      L.ProjectLabelRestoreDocument,
+      L.ProjectLabelRestoreDocument.toString(),
       {
         id,
       }
@@ -28874,7 +28984,7 @@ export class ProjectLabelRetireMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<ProjectLabelPayload> {
     const response = await this._request<L.ProjectLabelRetireMutation, L.ProjectLabelRetireMutationVariables>(
-      L.ProjectLabelRetireDocument,
+      L.ProjectLabelRetireDocument.toString(),
       {
         id,
       }
@@ -28904,7 +29014,7 @@ export class UpdateProjectLabelMutation extends Request {
    */
   public async fetch(id: string, input: L.ProjectLabelUpdateInput): LinearFetch<ProjectLabelPayload> {
     const response = await this._request<L.UpdateProjectLabelMutation, L.UpdateProjectLabelMutationVariables>(
-      L.UpdateProjectLabelDocument,
+      L.UpdateProjectLabelDocument.toString(),
       {
         id,
         input,
@@ -28934,7 +29044,7 @@ export class CreateProjectMilestoneMutation extends Request {
    */
   public async fetch(input: L.ProjectMilestoneCreateInput): LinearFetch<ProjectMilestonePayload> {
     const response = await this._request<L.CreateProjectMilestoneMutation, L.CreateProjectMilestoneMutationVariables>(
-      L.CreateProjectMilestoneDocument,
+      L.CreateProjectMilestoneDocument.toString(),
       {
         input,
       }
@@ -28963,7 +29073,7 @@ export class DeleteProjectMilestoneMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteProjectMilestoneMutation, L.DeleteProjectMilestoneMutationVariables>(
-      L.DeleteProjectMilestoneDocument,
+      L.DeleteProjectMilestoneDocument.toString(),
       {
         id,
       }
@@ -28993,7 +29103,7 @@ export class UpdateProjectMilestoneMutation extends Request {
    */
   public async fetch(id: string, input: L.ProjectMilestoneUpdateInput): LinearFetch<ProjectMilestonePayload> {
     const response = await this._request<L.UpdateProjectMilestoneMutation, L.UpdateProjectMilestoneMutationVariables>(
-      L.UpdateProjectMilestoneDocument,
+      L.UpdateProjectMilestoneDocument.toString(),
       {
         id,
         input,
@@ -29023,7 +29133,7 @@ export class CreateProjectRelationMutation extends Request {
    */
   public async fetch(input: L.ProjectRelationCreateInput): LinearFetch<ProjectRelationPayload> {
     const response = await this._request<L.CreateProjectRelationMutation, L.CreateProjectRelationMutationVariables>(
-      L.CreateProjectRelationDocument,
+      L.CreateProjectRelationDocument.toString(),
       {
         input,
       }
@@ -29052,7 +29162,7 @@ export class DeleteProjectRelationMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteProjectRelationMutation, L.DeleteProjectRelationMutationVariables>(
-      L.DeleteProjectRelationDocument,
+      L.DeleteProjectRelationDocument.toString(),
       {
         id,
       }
@@ -29082,7 +29192,7 @@ export class UpdateProjectRelationMutation extends Request {
    */
   public async fetch(id: string, input: L.ProjectRelationUpdateInput): LinearFetch<ProjectRelationPayload> {
     const response = await this._request<L.UpdateProjectRelationMutation, L.UpdateProjectRelationMutationVariables>(
-      L.UpdateProjectRelationDocument,
+      L.UpdateProjectRelationDocument.toString(),
       {
         id,
         input,
@@ -29113,7 +29223,7 @@ export class ProjectRemoveLabelMutation extends Request {
    */
   public async fetch(id: string, labelId: string): LinearFetch<ProjectPayload> {
     const response = await this._request<L.ProjectRemoveLabelMutation, L.ProjectRemoveLabelMutationVariables>(
-      L.ProjectRemoveLabelDocument,
+      L.ProjectRemoveLabelDocument.toString(),
       {
         id,
         labelId,
@@ -29143,7 +29253,7 @@ export class ArchiveProjectStatusMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<ProjectStatusArchivePayload> {
     const response = await this._request<L.ArchiveProjectStatusMutation, L.ArchiveProjectStatusMutationVariables>(
-      L.ArchiveProjectStatusDocument,
+      L.ArchiveProjectStatusDocument.toString(),
       {
         id,
       }
@@ -29172,7 +29282,7 @@ export class CreateProjectStatusMutation extends Request {
    */
   public async fetch(input: L.ProjectStatusCreateInput): LinearFetch<ProjectStatusPayload> {
     const response = await this._request<L.CreateProjectStatusMutation, L.CreateProjectStatusMutationVariables>(
-      L.CreateProjectStatusDocument,
+      L.CreateProjectStatusDocument.toString(),
       {
         input,
       }
@@ -29201,7 +29311,7 @@ export class UnarchiveProjectStatusMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<ProjectStatusArchivePayload> {
     const response = await this._request<L.UnarchiveProjectStatusMutation, L.UnarchiveProjectStatusMutationVariables>(
-      L.UnarchiveProjectStatusDocument,
+      L.UnarchiveProjectStatusDocument.toString(),
       {
         id,
       }
@@ -29231,7 +29341,7 @@ export class UpdateProjectStatusMutation extends Request {
    */
   public async fetch(id: string, input: L.ProjectStatusUpdateInput): LinearFetch<ProjectStatusPayload> {
     const response = await this._request<L.UpdateProjectStatusMutation, L.UpdateProjectStatusMutationVariables>(
-      L.UpdateProjectStatusDocument,
+      L.UpdateProjectStatusDocument.toString(),
       {
         id,
         input,
@@ -29261,7 +29371,7 @@ export class UnarchiveProjectMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<ProjectArchivePayload> {
     const response = await this._request<L.UnarchiveProjectMutation, L.UnarchiveProjectMutationVariables>(
-      L.UnarchiveProjectDocument,
+      L.UnarchiveProjectDocument.toString(),
       {
         id,
       }
@@ -29291,7 +29401,7 @@ export class UpdateProjectMutation extends Request {
    */
   public async fetch(id: string, input: L.ProjectUpdateInput): LinearFetch<ProjectPayload> {
     const response = await this._request<L.UpdateProjectMutation, L.UpdateProjectMutationVariables>(
-      L.UpdateProjectDocument,
+      L.UpdateProjectDocument.toString(),
       {
         id,
         input,
@@ -29321,7 +29431,7 @@ export class ArchiveProjectUpdateMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<ProjectUpdateArchivePayload> {
     const response = await this._request<L.ArchiveProjectUpdateMutation, L.ArchiveProjectUpdateMutationVariables>(
-      L.ArchiveProjectUpdateDocument,
+      L.ArchiveProjectUpdateDocument.toString(),
       {
         id,
       }
@@ -29350,7 +29460,7 @@ export class CreateProjectUpdateMutation extends Request {
    */
   public async fetch(input: L.ProjectUpdateCreateInput): LinearFetch<ProjectUpdatePayload> {
     const response = await this._request<L.CreateProjectUpdateMutation, L.CreateProjectUpdateMutationVariables>(
-      L.CreateProjectUpdateDocument,
+      L.CreateProjectUpdateDocument.toString(),
       {
         input,
       }
@@ -29379,7 +29489,7 @@ export class DeleteProjectUpdateMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteProjectUpdateMutation, L.DeleteProjectUpdateMutationVariables>(
-      L.DeleteProjectUpdateDocument,
+      L.DeleteProjectUpdateDocument.toString(),
       {
         id,
       }
@@ -29408,7 +29518,7 @@ export class UnarchiveProjectUpdateMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<ProjectUpdateArchivePayload> {
     const response = await this._request<L.UnarchiveProjectUpdateMutation, L.UnarchiveProjectUpdateMutationVariables>(
-      L.UnarchiveProjectUpdateDocument,
+      L.UnarchiveProjectUpdateDocument.toString(),
       {
         id,
       }
@@ -29438,7 +29548,7 @@ export class UpdateProjectUpdateMutation extends Request {
    */
   public async fetch(id: string, input: L.ProjectUpdateUpdateInput): LinearFetch<ProjectUpdatePayload> {
     const response = await this._request<L.UpdateProjectUpdateMutation, L.UpdateProjectUpdateMutationVariables>(
-      L.UpdateProjectUpdateDocument,
+      L.UpdateProjectUpdateDocument.toString(),
       {
         id,
         input,
@@ -29468,7 +29578,7 @@ export class CreatePushSubscriptionMutation extends Request {
    */
   public async fetch(input: L.PushSubscriptionCreateInput): LinearFetch<PushSubscriptionPayload> {
     const response = await this._request<L.CreatePushSubscriptionMutation, L.CreatePushSubscriptionMutationVariables>(
-      L.CreatePushSubscriptionDocument,
+      L.CreatePushSubscriptionDocument.toString(),
       {
         input,
       }
@@ -29497,7 +29607,7 @@ export class DeletePushSubscriptionMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<PushSubscriptionPayload> {
     const response = await this._request<L.DeletePushSubscriptionMutation, L.DeletePushSubscriptionMutationVariables>(
-      L.DeletePushSubscriptionDocument,
+      L.DeletePushSubscriptionDocument.toString(),
       {
         id,
       }
@@ -29526,7 +29636,7 @@ export class CreateReactionMutation extends Request {
    */
   public async fetch(input: L.ReactionCreateInput): LinearFetch<ReactionPayload> {
     const response = await this._request<L.CreateReactionMutation, L.CreateReactionMutationVariables>(
-      L.CreateReactionDocument,
+      L.CreateReactionDocument.toString(),
       {
         input,
       }
@@ -29555,7 +29665,7 @@ export class DeleteReactionMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteReactionMutation, L.DeleteReactionMutationVariables>(
-      L.DeleteReactionDocument,
+      L.DeleteReactionDocument.toString(),
       {
         id,
       }
@@ -29588,7 +29698,7 @@ export class RefreshGoogleSheetsDataMutation extends Request {
     variables?: Omit<L.RefreshGoogleSheetsDataMutationVariables, "id">
   ): LinearFetch<IntegrationPayload> {
     const response = await this._request<L.RefreshGoogleSheetsDataMutation, L.RefreshGoogleSheetsDataMutationVariables>(
-      L.RefreshGoogleSheetsDataDocument,
+      L.RefreshGoogleSheetsDataDocument.toString(),
       {
         id,
         ...variables,
@@ -29620,7 +29730,7 @@ export class ResendOrganizationInviteMutation extends Request {
     const response = await this._request<
       L.ResendOrganizationInviteMutation,
       L.ResendOrganizationInviteMutationVariables
-    >(L.ResendOrganizationInviteDocument, {
+    >(L.ResendOrganizationInviteDocument.toString(), {
       id,
     });
     const data = response.resendOrganizationInvite;
@@ -29649,7 +29759,7 @@ export class ResendOrganizationInviteByEmailMutation extends Request {
     const response = await this._request<
       L.ResendOrganizationInviteByEmailMutation,
       L.ResendOrganizationInviteByEmailMutationVariables
-    >(L.ResendOrganizationInviteByEmailDocument, {
+    >(L.ResendOrganizationInviteByEmailDocument.toString(), {
       email,
     });
     const data = response.resendOrganizationInviteByEmail;
@@ -29676,7 +29786,7 @@ export class ArchiveRoadmapMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<RoadmapArchivePayload> {
     const response = await this._request<L.ArchiveRoadmapMutation, L.ArchiveRoadmapMutationVariables>(
-      L.ArchiveRoadmapDocument,
+      L.ArchiveRoadmapDocument.toString(),
       {
         id,
       }
@@ -29705,7 +29815,7 @@ export class CreateRoadmapMutation extends Request {
    */
   public async fetch(input: L.RoadmapCreateInput): LinearFetch<RoadmapPayload> {
     const response = await this._request<L.CreateRoadmapMutation, L.CreateRoadmapMutationVariables>(
-      L.CreateRoadmapDocument,
+      L.CreateRoadmapDocument.toString(),
       {
         input,
       }
@@ -29734,7 +29844,7 @@ export class DeleteRoadmapMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteRoadmapMutation, L.DeleteRoadmapMutationVariables>(
-      L.DeleteRoadmapDocument,
+      L.DeleteRoadmapDocument.toString(),
       {
         id,
       }
@@ -29763,7 +29873,7 @@ export class CreateRoadmapToProjectMutation extends Request {
    */
   public async fetch(input: L.RoadmapToProjectCreateInput): LinearFetch<RoadmapToProjectPayload> {
     const response = await this._request<L.CreateRoadmapToProjectMutation, L.CreateRoadmapToProjectMutationVariables>(
-      L.CreateRoadmapToProjectDocument,
+      L.CreateRoadmapToProjectDocument.toString(),
       {
         input,
       }
@@ -29792,7 +29902,7 @@ export class DeleteRoadmapToProjectMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteRoadmapToProjectMutation, L.DeleteRoadmapToProjectMutationVariables>(
-      L.DeleteRoadmapToProjectDocument,
+      L.DeleteRoadmapToProjectDocument.toString(),
       {
         id,
       }
@@ -29822,7 +29932,7 @@ export class UpdateRoadmapToProjectMutation extends Request {
    */
   public async fetch(id: string, input: L.RoadmapToProjectUpdateInput): LinearFetch<RoadmapToProjectPayload> {
     const response = await this._request<L.UpdateRoadmapToProjectMutation, L.UpdateRoadmapToProjectMutationVariables>(
-      L.UpdateRoadmapToProjectDocument,
+      L.UpdateRoadmapToProjectDocument.toString(),
       {
         id,
         input,
@@ -29852,7 +29962,7 @@ export class UnarchiveRoadmapMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<RoadmapArchivePayload> {
     const response = await this._request<L.UnarchiveRoadmapMutation, L.UnarchiveRoadmapMutationVariables>(
-      L.UnarchiveRoadmapDocument,
+      L.UnarchiveRoadmapDocument.toString(),
       {
         id,
       }
@@ -29882,7 +29992,7 @@ export class UpdateRoadmapMutation extends Request {
    */
   public async fetch(id: string, input: L.RoadmapUpdateInput): LinearFetch<RoadmapPayload> {
     const response = await this._request<L.UpdateRoadmapMutation, L.UpdateRoadmapMutationVariables>(
-      L.UpdateRoadmapDocument,
+      L.UpdateRoadmapDocument.toString(),
       {
         id,
         input,
@@ -29914,7 +30024,7 @@ export class SamlTokenUserAccountAuthMutation extends Request {
     const response = await this._request<
       L.SamlTokenUserAccountAuthMutation,
       L.SamlTokenUserAccountAuthMutationVariables
-    >(L.SamlTokenUserAccountAuthDocument, {
+    >(L.SamlTokenUserAccountAuthDocument.toString(), {
       input,
     });
     const data = response.samlTokenUserAccountAuth;
@@ -29944,10 +30054,13 @@ export class CreateTeamMutation extends Request {
     input: L.TeamCreateInput,
     variables?: Omit<L.CreateTeamMutationVariables, "input">
   ): LinearFetch<TeamPayload> {
-    const response = await this._request<L.CreateTeamMutation, L.CreateTeamMutationVariables>(L.CreateTeamDocument, {
-      input,
-      ...variables,
-    });
+    const response = await this._request<L.CreateTeamMutation, L.CreateTeamMutationVariables>(
+      L.CreateTeamDocument.toString(),
+      {
+        input,
+        ...variables,
+      }
+    );
     const data = response.teamCreate;
 
     return new TeamPayload(this._request, data);
@@ -29972,7 +30085,7 @@ export class DeleteTeamCyclesMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<TeamPayload> {
     const response = await this._request<L.DeleteTeamCyclesMutation, L.DeleteTeamCyclesMutationVariables>(
-      L.DeleteTeamCyclesDocument,
+      L.DeleteTeamCyclesDocument.toString(),
       {
         id,
       }
@@ -30000,9 +30113,12 @@ export class DeleteTeamMutation extends Request {
    * @returns parsed response from DeleteTeamMutation
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
-    const response = await this._request<L.DeleteTeamMutation, L.DeleteTeamMutationVariables>(L.DeleteTeamDocument, {
-      id,
-    });
+    const response = await this._request<L.DeleteTeamMutation, L.DeleteTeamMutationVariables>(
+      L.DeleteTeamDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.teamDelete;
 
     return new DeletePayload(this._request, data);
@@ -30027,7 +30143,7 @@ export class DeleteTeamKeyMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteTeamKeyMutation, L.DeleteTeamKeyMutationVariables>(
-      L.DeleteTeamKeyDocument,
+      L.DeleteTeamKeyDocument.toString(),
       {
         id,
       }
@@ -30056,7 +30172,7 @@ export class CreateTeamMembershipMutation extends Request {
    */
   public async fetch(input: L.TeamMembershipCreateInput): LinearFetch<TeamMembershipPayload> {
     const response = await this._request<L.CreateTeamMembershipMutation, L.CreateTeamMembershipMutationVariables>(
-      L.CreateTeamMembershipDocument,
+      L.CreateTeamMembershipDocument.toString(),
       {
         input,
       }
@@ -30089,7 +30205,7 @@ export class DeleteTeamMembershipMutation extends Request {
     variables?: Omit<L.DeleteTeamMembershipMutationVariables, "id">
   ): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteTeamMembershipMutation, L.DeleteTeamMembershipMutationVariables>(
-      L.DeleteTeamMembershipDocument,
+      L.DeleteTeamMembershipDocument.toString(),
       {
         id,
         ...variables,
@@ -30120,7 +30236,7 @@ export class UpdateTeamMembershipMutation extends Request {
    */
   public async fetch(id: string, input: L.TeamMembershipUpdateInput): LinearFetch<TeamMembershipPayload> {
     const response = await this._request<L.UpdateTeamMembershipMutation, L.UpdateTeamMembershipMutationVariables>(
-      L.UpdateTeamMembershipDocument,
+      L.UpdateTeamMembershipDocument.toString(),
       {
         id,
         input,
@@ -30150,7 +30266,7 @@ export class UnarchiveTeamMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<TeamArchivePayload> {
     const response = await this._request<L.UnarchiveTeamMutation, L.UnarchiveTeamMutationVariables>(
-      L.UnarchiveTeamDocument,
+      L.UnarchiveTeamDocument.toString(),
       {
         id,
       }
@@ -30184,11 +30300,14 @@ export class UpdateTeamMutation extends Request {
     input: L.TeamUpdateInput,
     variables?: Omit<L.UpdateTeamMutationVariables, "id" | "input">
   ): LinearFetch<TeamPayload> {
-    const response = await this._request<L.UpdateTeamMutation, L.UpdateTeamMutationVariables>(L.UpdateTeamDocument, {
-      id,
-      input,
-      ...variables,
-    });
+    const response = await this._request<L.UpdateTeamMutation, L.UpdateTeamMutationVariables>(
+      L.UpdateTeamDocument.toString(),
+      {
+        id,
+        input,
+        ...variables,
+      }
+    );
     const data = response.teamUpdate;
 
     return new TeamPayload(this._request, data);
@@ -30213,7 +30332,7 @@ export class CreateTemplateMutation extends Request {
    */
   public async fetch(input: L.TemplateCreateInput): LinearFetch<TemplatePayload> {
     const response = await this._request<L.CreateTemplateMutation, L.CreateTemplateMutationVariables>(
-      L.CreateTemplateDocument,
+      L.CreateTemplateDocument.toString(),
       {
         input,
       }
@@ -30242,7 +30361,7 @@ export class DeleteTemplateMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteTemplateMutation, L.DeleteTemplateMutationVariables>(
-      L.DeleteTemplateDocument,
+      L.DeleteTemplateDocument.toString(),
       {
         id,
       }
@@ -30272,7 +30391,7 @@ export class UpdateTemplateMutation extends Request {
    */
   public async fetch(id: string, input: L.TemplateUpdateInput): LinearFetch<TemplatePayload> {
     const response = await this._request<L.UpdateTemplateMutation, L.UpdateTemplateMutationVariables>(
-      L.UpdateTemplateDocument,
+      L.UpdateTemplateDocument.toString(),
       {
         id,
         input,
@@ -30302,7 +30421,7 @@ export class CreateTimeScheduleMutation extends Request {
    */
   public async fetch(input: L.TimeScheduleCreateInput): LinearFetch<TimeSchedulePayload> {
     const response = await this._request<L.CreateTimeScheduleMutation, L.CreateTimeScheduleMutationVariables>(
-      L.CreateTimeScheduleDocument,
+      L.CreateTimeScheduleDocument.toString(),
       {
         input,
       }
@@ -30331,7 +30450,7 @@ export class DeleteTimeScheduleMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteTimeScheduleMutation, L.DeleteTimeScheduleMutationVariables>(
-      L.DeleteTimeScheduleDocument,
+      L.DeleteTimeScheduleDocument.toString(),
       {
         id,
       }
@@ -30362,7 +30481,7 @@ export class TimeScheduleRefreshIntegrationScheduleMutation extends Request {
     const response = await this._request<
       L.TimeScheduleRefreshIntegrationScheduleMutation,
       L.TimeScheduleRefreshIntegrationScheduleMutationVariables
-    >(L.TimeScheduleRefreshIntegrationScheduleDocument, {
+    >(L.TimeScheduleRefreshIntegrationScheduleDocument.toString(), {
       id,
     });
     const data = response.timeScheduleRefreshIntegrationSchedule;
@@ -30390,7 +30509,7 @@ export class UpdateTimeScheduleMutation extends Request {
    */
   public async fetch(id: string, input: L.TimeScheduleUpdateInput): LinearFetch<TimeSchedulePayload> {
     const response = await this._request<L.UpdateTimeScheduleMutation, L.UpdateTimeScheduleMutationVariables>(
-      L.UpdateTimeScheduleDocument,
+      L.UpdateTimeScheduleDocument.toString(),
       {
         id,
         input,
@@ -30423,7 +30542,7 @@ export class TimeScheduleUpsertExternalMutation extends Request {
     const response = await this._request<
       L.TimeScheduleUpsertExternalMutation,
       L.TimeScheduleUpsertExternalMutationVariables
-    >(L.TimeScheduleUpsertExternalDocument, {
+    >(L.TimeScheduleUpsertExternalDocument.toString(), {
       externalId,
       input,
     });
@@ -30453,7 +30572,7 @@ export class CreateTriageResponsibilityMutation extends Request {
     const response = await this._request<
       L.CreateTriageResponsibilityMutation,
       L.CreateTriageResponsibilityMutationVariables
-    >(L.CreateTriageResponsibilityDocument, {
+    >(L.CreateTriageResponsibilityDocument.toString(), {
       input,
     });
     const data = response.triageResponsibilityCreate;
@@ -30482,7 +30601,7 @@ export class DeleteTriageResponsibilityMutation extends Request {
     const response = await this._request<
       L.DeleteTriageResponsibilityMutation,
       L.DeleteTriageResponsibilityMutationVariables
-    >(L.DeleteTriageResponsibilityDocument, {
+    >(L.DeleteTriageResponsibilityDocument.toString(), {
       id,
     });
     const data = response.triageResponsibilityDelete;
@@ -30512,7 +30631,7 @@ export class UpdateTriageResponsibilityMutation extends Request {
     const response = await this._request<
       L.UpdateTriageResponsibilityMutation,
       L.UpdateTriageResponsibilityMutationVariables
-    >(L.UpdateTriageResponsibilityDocument, {
+    >(L.UpdateTriageResponsibilityDocument.toString(), {
       id,
       input,
     });
@@ -30541,7 +30660,7 @@ export class UserChangeRoleMutation extends Request {
    */
   public async fetch(id: string, role: L.UserRoleType): LinearFetch<UserAdminPayload> {
     const response = await this._request<L.UserChangeRoleMutation, L.UserChangeRoleMutationVariables>(
-      L.UserChangeRoleDocument,
+      L.UserChangeRoleDocument.toString(),
       {
         id,
         role,
@@ -30571,7 +30690,7 @@ export class UserDemoteAdminMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<UserAdminPayload> {
     const response = await this._request<L.UserDemoteAdminMutation, L.UserDemoteAdminMutationVariables>(
-      L.UserDemoteAdminDocument,
+      L.UserDemoteAdminDocument.toString(),
       {
         id,
       }
@@ -30600,7 +30719,7 @@ export class UserDemoteMemberMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<UserAdminPayload> {
     const response = await this._request<L.UserDemoteMemberMutation, L.UserDemoteMemberMutationVariables>(
-      L.UserDemoteMemberDocument,
+      L.UserDemoteMemberDocument.toString(),
       {
         id,
       }
@@ -30630,7 +30749,7 @@ export class UserDiscordConnectMutation extends Request {
    */
   public async fetch(code: string, redirectUri: string): LinearFetch<UserPayload> {
     const response = await this._request<L.UserDiscordConnectMutation, L.UserDiscordConnectMutationVariables>(
-      L.UserDiscordConnectDocument,
+      L.UserDiscordConnectDocument.toString(),
       {
         code,
         redirectUri,
@@ -30662,7 +30781,7 @@ export class UserExternalUserDisconnectMutation extends Request {
     const response = await this._request<
       L.UserExternalUserDisconnectMutation,
       L.UserExternalUserDisconnectMutationVariables
-    >(L.UserExternalUserDisconnectDocument, {
+    >(L.UserExternalUserDisconnectDocument.toString(), {
       service,
     });
     const data = response.userExternalUserDisconnect;
@@ -30690,7 +30809,7 @@ export class UpdateUserFlagMutation extends Request {
    */
   public async fetch(flag: L.UserFlagType, operation: L.UserFlagUpdateOperation): LinearFetch<UserSettingsFlagPayload> {
     const response = await this._request<L.UpdateUserFlagMutation, L.UpdateUserFlagMutationVariables>(
-      L.UpdateUserFlagDocument,
+      L.UpdateUserFlagDocument.toString(),
       {
         flag,
         operation,
@@ -30720,7 +30839,7 @@ export class UserPromoteAdminMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<UserAdminPayload> {
     const response = await this._request<L.UserPromoteAdminMutation, L.UserPromoteAdminMutationVariables>(
-      L.UserPromoteAdminDocument,
+      L.UserPromoteAdminDocument.toString(),
       {
         id,
       }
@@ -30749,7 +30868,7 @@ export class UserPromoteMemberMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<UserAdminPayload> {
     const response = await this._request<L.UserPromoteMemberMutation, L.UserPromoteMemberMutationVariables>(
-      L.UserPromoteMemberDocument,
+      L.UserPromoteMemberDocument.toString(),
       {
         id,
       }
@@ -30780,7 +30899,7 @@ export class UserSettingsFlagsResetMutation extends Request {
     variables?: L.UserSettingsFlagsResetMutationVariables
   ): LinearFetch<UserSettingsFlagsResetPayload> {
     const response = await this._request<L.UserSettingsFlagsResetMutation, L.UserSettingsFlagsResetMutationVariables>(
-      L.UserSettingsFlagsResetDocument,
+      L.UserSettingsFlagsResetDocument.toString(),
       variables
     );
     const data = response.userSettingsFlagsReset;
@@ -30808,7 +30927,7 @@ export class UpdateUserSettingsMutation extends Request {
    */
   public async fetch(id: string, input: L.UserSettingsUpdateInput): LinearFetch<UserSettingsPayload> {
     const response = await this._request<L.UpdateUserSettingsMutation, L.UpdateUserSettingsMutationVariables>(
-      L.UpdateUserSettingsDocument,
+      L.UpdateUserSettingsDocument.toString(),
       {
         id,
         input,
@@ -30837,9 +30956,12 @@ export class SuspendUserMutation extends Request {
    * @returns parsed response from SuspendUserMutation
    */
   public async fetch(id: string): LinearFetch<UserAdminPayload> {
-    const response = await this._request<L.SuspendUserMutation, L.SuspendUserMutationVariables>(L.SuspendUserDocument, {
-      id,
-    });
+    const response = await this._request<L.SuspendUserMutation, L.SuspendUserMutationVariables>(
+      L.SuspendUserDocument.toString(),
+      {
+        id,
+      }
+    );
     const data = response.userSuspend;
 
     return new UserAdminPayload(this._request, data);
@@ -30866,7 +30988,7 @@ export class UserUnlinkFromIdentityProviderMutation extends Request {
     const response = await this._request<
       L.UserUnlinkFromIdentityProviderMutation,
       L.UserUnlinkFromIdentityProviderMutationVariables
-    >(L.UserUnlinkFromIdentityProviderDocument, {
+    >(L.UserUnlinkFromIdentityProviderDocument.toString(), {
       id,
     });
     const data = response.userUnlinkFromIdentityProvider;
@@ -30893,7 +31015,7 @@ export class UnsuspendUserMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<UserAdminPayload> {
     const response = await this._request<L.UnsuspendUserMutation, L.UnsuspendUserMutationVariables>(
-      L.UnsuspendUserDocument,
+      L.UnsuspendUserDocument.toString(),
       {
         id,
       }
@@ -30922,10 +31044,13 @@ export class UpdateUserMutation extends Request {
    * @returns parsed response from UpdateUserMutation
    */
   public async fetch(id: string, input: L.UserUpdateInput): LinearFetch<UserPayload> {
-    const response = await this._request<L.UpdateUserMutation, L.UpdateUserMutationVariables>(L.UpdateUserDocument, {
-      id,
-      input,
-    });
+    const response = await this._request<L.UpdateUserMutation, L.UpdateUserMutationVariables>(
+      L.UpdateUserDocument.toString(),
+      {
+        id,
+        input,
+      }
+    );
     const data = response.userUpdate;
 
     return new UserPayload(this._request, data);
@@ -30950,7 +31075,7 @@ export class CreateViewPreferencesMutation extends Request {
    */
   public async fetch(input: L.ViewPreferencesCreateInput): LinearFetch<ViewPreferencesPayload> {
     const response = await this._request<L.CreateViewPreferencesMutation, L.CreateViewPreferencesMutationVariables>(
-      L.CreateViewPreferencesDocument,
+      L.CreateViewPreferencesDocument.toString(),
       {
         input,
       }
@@ -30979,7 +31104,7 @@ export class DeleteViewPreferencesMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteViewPreferencesMutation, L.DeleteViewPreferencesMutationVariables>(
-      L.DeleteViewPreferencesDocument,
+      L.DeleteViewPreferencesDocument.toString(),
       {
         id,
       }
@@ -31009,7 +31134,7 @@ export class UpdateViewPreferencesMutation extends Request {
    */
   public async fetch(id: string, input: L.ViewPreferencesUpdateInput): LinearFetch<ViewPreferencesPayload> {
     const response = await this._request<L.UpdateViewPreferencesMutation, L.UpdateViewPreferencesMutationVariables>(
-      L.UpdateViewPreferencesDocument,
+      L.UpdateViewPreferencesDocument.toString(),
       {
         id,
         input,
@@ -31039,7 +31164,7 @@ export class CreateWebhookMutation extends Request {
    */
   public async fetch(input: L.WebhookCreateInput): LinearFetch<WebhookPayload> {
     const response = await this._request<L.CreateWebhookMutation, L.CreateWebhookMutationVariables>(
-      L.CreateWebhookDocument,
+      L.CreateWebhookDocument.toString(),
       {
         input,
       }
@@ -31068,7 +31193,7 @@ export class DeleteWebhookMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<DeletePayload> {
     const response = await this._request<L.DeleteWebhookMutation, L.DeleteWebhookMutationVariables>(
-      L.DeleteWebhookDocument,
+      L.DeleteWebhookDocument.toString(),
       {
         id,
       }
@@ -31098,7 +31223,7 @@ export class UpdateWebhookMutation extends Request {
    */
   public async fetch(id: string, input: L.WebhookUpdateInput): LinearFetch<WebhookPayload> {
     const response = await this._request<L.UpdateWebhookMutation, L.UpdateWebhookMutationVariables>(
-      L.UpdateWebhookDocument,
+      L.UpdateWebhookDocument.toString(),
       {
         id,
         input,
@@ -31128,7 +31253,7 @@ export class ArchiveWorkflowStateMutation extends Request {
    */
   public async fetch(id: string): LinearFetch<WorkflowStateArchivePayload> {
     const response = await this._request<L.ArchiveWorkflowStateMutation, L.ArchiveWorkflowStateMutationVariables>(
-      L.ArchiveWorkflowStateDocument,
+      L.ArchiveWorkflowStateDocument.toString(),
       {
         id,
       }
@@ -31157,7 +31282,7 @@ export class CreateWorkflowStateMutation extends Request {
    */
   public async fetch(input: L.WorkflowStateCreateInput): LinearFetch<WorkflowStatePayload> {
     const response = await this._request<L.CreateWorkflowStateMutation, L.CreateWorkflowStateMutationVariables>(
-      L.CreateWorkflowStateDocument,
+      L.CreateWorkflowStateDocument.toString(),
       {
         input,
       }
@@ -31187,7 +31312,7 @@ export class UpdateWorkflowStateMutation extends Request {
    */
   public async fetch(id: string, input: L.WorkflowStateUpdateInput): LinearFetch<WorkflowStatePayload> {
     const response = await this._request<L.UpdateWorkflowStateMutation, L.UpdateWorkflowStateMutationVariables>(
-      L.UpdateWorkflowStateDocument,
+      L.UpdateWorkflowStateDocument.toString(),
       {
         id,
         input,
@@ -31230,7 +31355,7 @@ export class AgentSession_ActivitiesQuery extends Request {
     variables?: Omit<L.AgentSession_ActivitiesQueryVariables, "id">
   ): LinearFetch<AgentActivityConnection> {
     const response = await this._request<L.AgentSession_ActivitiesQuery, L.AgentSession_ActivitiesQueryVariables>(
-      L.AgentSession_ActivitiesDocument,
+      L.AgentSession_ActivitiesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -31287,7 +31412,7 @@ export class AttachmentIssue_AttachmentsQuery extends Request {
     const response = await this._request<
       L.AttachmentIssue_AttachmentsQuery,
       L.AttachmentIssue_AttachmentsQueryVariables
-    >(L.AttachmentIssue_AttachmentsDocument, {
+    >(L.AttachmentIssue_AttachmentsDocument.toString(), {
       id: this._id,
       ...this._variables,
       ...variables,
@@ -31330,7 +31455,7 @@ export class AttachmentIssue_BotActorQuery extends Request {
    */
   public async fetch(): LinearFetch<ActorBot | undefined> {
     const response = await this._request<L.AttachmentIssue_BotActorQuery, L.AttachmentIssue_BotActorQueryVariables>(
-      L.AttachmentIssue_BotActorDocument,
+      L.AttachmentIssue_BotActorDocument.toString(),
       {
         id: this._id,
       }
@@ -31370,7 +31495,7 @@ export class AttachmentIssue_ChildrenQuery extends Request {
    */
   public async fetch(variables?: Omit<L.AttachmentIssue_ChildrenQueryVariables, "id">): LinearFetch<IssueConnection> {
     const response = await this._request<L.AttachmentIssue_ChildrenQuery, L.AttachmentIssue_ChildrenQueryVariables>(
-      L.AttachmentIssue_ChildrenDocument,
+      L.AttachmentIssue_ChildrenDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -31423,7 +31548,7 @@ export class AttachmentIssue_CommentsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.AttachmentIssue_CommentsQueryVariables, "id">): LinearFetch<CommentConnection> {
     const response = await this._request<L.AttachmentIssue_CommentsQuery, L.AttachmentIssue_CommentsQueryVariables>(
-      L.AttachmentIssue_CommentsDocument,
+      L.AttachmentIssue_CommentsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -31478,7 +31603,7 @@ export class AttachmentIssue_DocumentsQuery extends Request {
     variables?: Omit<L.AttachmentIssue_DocumentsQueryVariables, "id">
   ): LinearFetch<DocumentConnection> {
     const response = await this._request<L.AttachmentIssue_DocumentsQuery, L.AttachmentIssue_DocumentsQueryVariables>(
-      L.AttachmentIssue_DocumentsDocument,
+      L.AttachmentIssue_DocumentsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -31535,7 +31660,7 @@ export class AttachmentIssue_FormerAttachmentsQuery extends Request {
     const response = await this._request<
       L.AttachmentIssue_FormerAttachmentsQuery,
       L.AttachmentIssue_FormerAttachmentsQueryVariables
-    >(L.AttachmentIssue_FormerAttachmentsDocument, {
+    >(L.AttachmentIssue_FormerAttachmentsDocument.toString(), {
       id: this._id,
       ...this._variables,
       ...variables,
@@ -31590,7 +31715,7 @@ export class AttachmentIssue_FormerNeedsQuery extends Request {
     const response = await this._request<
       L.AttachmentIssue_FormerNeedsQuery,
       L.AttachmentIssue_FormerNeedsQueryVariables
-    >(L.AttachmentIssue_FormerNeedsDocument, {
+    >(L.AttachmentIssue_FormerNeedsDocument.toString(), {
       id: this._id,
       ...this._variables,
       ...variables,
@@ -31643,7 +31768,7 @@ export class AttachmentIssue_HistoryQuery extends Request {
     variables?: Omit<L.AttachmentIssue_HistoryQueryVariables, "id">
   ): LinearFetch<IssueHistoryConnection> {
     const response = await this._request<L.AttachmentIssue_HistoryQuery, L.AttachmentIssue_HistoryQueryVariables>(
-      L.AttachmentIssue_HistoryDocument,
+      L.AttachmentIssue_HistoryDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -31700,7 +31825,7 @@ export class AttachmentIssue_InverseRelationsQuery extends Request {
     const response = await this._request<
       L.AttachmentIssue_InverseRelationsQuery,
       L.AttachmentIssue_InverseRelationsQueryVariables
-    >(L.AttachmentIssue_InverseRelationsDocument, {
+    >(L.AttachmentIssue_InverseRelationsDocument.toString(), {
       id: this._id,
       ...this._variables,
       ...variables,
@@ -31753,7 +31878,7 @@ export class AttachmentIssue_LabelsQuery extends Request {
     variables?: Omit<L.AttachmentIssue_LabelsQueryVariables, "id">
   ): LinearFetch<IssueLabelConnection> {
     const response = await this._request<L.AttachmentIssue_LabelsQuery, L.AttachmentIssue_LabelsQueryVariables>(
-      L.AttachmentIssue_LabelsDocument,
+      L.AttachmentIssue_LabelsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -31808,7 +31933,7 @@ export class AttachmentIssue_NeedsQuery extends Request {
     variables?: Omit<L.AttachmentIssue_NeedsQueryVariables, "id">
   ): LinearFetch<CustomerNeedConnection> {
     const response = await this._request<L.AttachmentIssue_NeedsQuery, L.AttachmentIssue_NeedsQueryVariables>(
-      L.AttachmentIssue_NeedsDocument,
+      L.AttachmentIssue_NeedsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -31863,7 +31988,7 @@ export class AttachmentIssue_RelationsQuery extends Request {
     variables?: Omit<L.AttachmentIssue_RelationsQueryVariables, "id">
   ): LinearFetch<IssueRelationConnection> {
     const response = await this._request<L.AttachmentIssue_RelationsQuery, L.AttachmentIssue_RelationsQueryVariables>(
-      L.AttachmentIssue_RelationsDocument,
+      L.AttachmentIssue_RelationsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -31918,7 +32043,7 @@ export class AttachmentIssue_SubscribersQuery extends Request {
     const response = await this._request<
       L.AttachmentIssue_SubscribersQuery,
       L.AttachmentIssue_SubscribersQueryVariables
-    >(L.AttachmentIssue_SubscribersDocument, {
+    >(L.AttachmentIssue_SubscribersDocument.toString(), {
       id: this._id,
       ...this._variables,
       ...variables,
@@ -31963,7 +32088,7 @@ export class Comment_BotActorQuery extends Request {
    */
   public async fetch(variables?: L.Comment_BotActorQueryVariables): LinearFetch<ActorBot | undefined> {
     const response = await this._request<L.Comment_BotActorQuery, L.Comment_BotActorQueryVariables>(
-      L.Comment_BotActorDocument,
+      L.Comment_BotActorDocument.toString(),
       variables
     );
     const data = response.comment.botActor;
@@ -31995,7 +32120,7 @@ export class Comment_ChildrenQuery extends Request {
    */
   public async fetch(variables?: L.Comment_ChildrenQueryVariables): LinearFetch<CommentConnection> {
     const response = await this._request<L.Comment_ChildrenQuery, L.Comment_ChildrenQueryVariables>(
-      L.Comment_ChildrenDocument,
+      L.Comment_ChildrenDocument.toString(),
       variables
     );
     const data = response.comment.children;
@@ -32038,7 +32163,7 @@ export class Comment_CreatedIssuesQuery extends Request {
    */
   public async fetch(variables?: L.Comment_CreatedIssuesQueryVariables): LinearFetch<IssueConnection> {
     const response = await this._request<L.Comment_CreatedIssuesQuery, L.Comment_CreatedIssuesQueryVariables>(
-      L.Comment_CreatedIssuesDocument,
+      L.Comment_CreatedIssuesDocument.toString(),
       variables
     );
     const data = response.comment.createdIssues;
@@ -32081,7 +32206,7 @@ export class Comment_DocumentContentQuery extends Request {
    */
   public async fetch(variables?: L.Comment_DocumentContentQueryVariables): LinearFetch<DocumentContent | undefined> {
     const response = await this._request<L.Comment_DocumentContentQuery, L.Comment_DocumentContentQueryVariables>(
-      L.Comment_DocumentContentDocument,
+      L.Comment_DocumentContentDocument.toString(),
       variables
     );
     const data = response.comment.documentContent;
@@ -32115,7 +32240,7 @@ export class Comment_ExternalThreadQuery extends Request {
     variables?: L.Comment_ExternalThreadQueryVariables
   ): LinearFetch<SyncedExternalThread | undefined> {
     const response = await this._request<L.Comment_ExternalThreadQuery, L.Comment_ExternalThreadQueryVariables>(
-      L.Comment_ExternalThreadDocument,
+      L.Comment_ExternalThreadDocument.toString(),
       variables
     );
     const data = response.comment.externalThread;
@@ -32151,7 +32276,7 @@ export class Comment_DocumentContent_AiPromptRulesQuery extends Request {
     const response = await this._request<
       L.Comment_DocumentContent_AiPromptRulesQuery,
       L.Comment_DocumentContent_AiPromptRulesQueryVariables
-    >(L.Comment_DocumentContent_AiPromptRulesDocument, variables);
+    >(L.Comment_DocumentContent_AiPromptRulesDocument.toString(), variables);
     const data = response.comment.documentContent?.aiPromptRules;
 
     return data ? new AiPromptRules(this._request, data) : undefined;
@@ -32189,7 +32314,7 @@ export class CustomView_InitiativesQuery extends Request {
     variables?: Omit<L.CustomView_InitiativesQueryVariables, "id">
   ): LinearFetch<InitiativeConnection> {
     const response = await this._request<L.CustomView_InitiativesQuery, L.CustomView_InitiativesQueryVariables>(
-      L.CustomView_InitiativesDocument,
+      L.CustomView_InitiativesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -32238,7 +32363,7 @@ export class CustomView_IssuesQuery extends Request {
    */
   public async fetch(variables?: Omit<L.CustomView_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
     const response = await this._request<L.CustomView_IssuesQuery, L.CustomView_IssuesQueryVariables>(
-      L.CustomView_IssuesDocument,
+      L.CustomView_IssuesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -32285,7 +32410,7 @@ export class CustomView_OrganizationViewPreferencesQuery extends Request {
     const response = await this._request<
       L.CustomView_OrganizationViewPreferencesQuery,
       L.CustomView_OrganizationViewPreferencesQueryVariables
-    >(L.CustomView_OrganizationViewPreferencesDocument, {
+    >(L.CustomView_OrganizationViewPreferencesDocument.toString(), {
       id: this._id,
     });
     const data = response.customView.organizationViewPreferences;
@@ -32319,7 +32444,7 @@ export class CustomView_ProjectsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.CustomView_ProjectsQueryVariables, "id">): LinearFetch<ProjectConnection> {
     const response = await this._request<L.CustomView_ProjectsQuery, L.CustomView_ProjectsQueryVariables>(
-      L.CustomView_ProjectsDocument,
+      L.CustomView_ProjectsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -32366,7 +32491,7 @@ export class CustomView_UserViewPreferencesQuery extends Request {
     const response = await this._request<
       L.CustomView_UserViewPreferencesQuery,
       L.CustomView_UserViewPreferencesQueryVariables
-    >(L.CustomView_UserViewPreferencesDocument, {
+    >(L.CustomView_UserViewPreferencesDocument.toString(), {
       id: this._id,
     });
     const data = response.customView.userViewPreferences;
@@ -32398,7 +32523,7 @@ export class CustomView_ViewPreferencesValuesQuery extends Request {
     const response = await this._request<
       L.CustomView_ViewPreferencesValuesQuery,
       L.CustomView_ViewPreferencesValuesQueryVariables
-    >(L.CustomView_ViewPreferencesValuesDocument, {
+    >(L.CustomView_ViewPreferencesValuesDocument.toString(), {
       id: this._id,
     });
     const data = response.customView.viewPreferencesValues;
@@ -32430,7 +32555,7 @@ export class CustomView_OrganizationViewPreferences_PreferencesQuery extends Req
     const response = await this._request<
       L.CustomView_OrganizationViewPreferences_PreferencesQuery,
       L.CustomView_OrganizationViewPreferences_PreferencesQueryVariables
-    >(L.CustomView_OrganizationViewPreferences_PreferencesDocument, {
+    >(L.CustomView_OrganizationViewPreferences_PreferencesDocument.toString(), {
       id: this._id,
     });
     const data = response.customView.organizationViewPreferences?.preferences;
@@ -32462,7 +32587,7 @@ export class CustomView_UserViewPreferences_PreferencesQuery extends Request {
     const response = await this._request<
       L.CustomView_UserViewPreferences_PreferencesQuery,
       L.CustomView_UserViewPreferences_PreferencesQueryVariables
-    >(L.CustomView_UserViewPreferences_PreferencesDocument, {
+    >(L.CustomView_UserViewPreferences_PreferencesDocument.toString(), {
       id: this._id,
     });
     const data = response.customView.userViewPreferences?.preferences;
@@ -32498,7 +32623,7 @@ export class CustomerNeed_ProjectAttachmentQuery extends Request {
     const response = await this._request<
       L.CustomerNeed_ProjectAttachmentQuery,
       L.CustomerNeed_ProjectAttachmentQueryVariables
-    >(L.CustomerNeed_ProjectAttachmentDocument, variables);
+    >(L.CustomerNeed_ProjectAttachmentDocument.toString(), variables);
     const data = response.customerNeed.projectAttachment;
 
     return data ? new ProjectAttachment(this._request, data) : undefined;
@@ -32529,11 +32654,14 @@ export class Cycle_IssuesQuery extends Request {
    * @returns parsed response from Cycle_IssuesQuery
    */
   public async fetch(variables?: Omit<L.Cycle_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
-    const response = await this._request<L.Cycle_IssuesQuery, L.Cycle_IssuesQueryVariables>(L.Cycle_IssuesDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.Cycle_IssuesQuery, L.Cycle_IssuesQueryVariables>(
+      L.Cycle_IssuesDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.cycle.issues;
 
     return new IssueConnection(
@@ -32584,7 +32712,7 @@ export class Cycle_UncompletedIssuesUponCloseQuery extends Request {
     const response = await this._request<
       L.Cycle_UncompletedIssuesUponCloseQuery,
       L.Cycle_UncompletedIssuesUponCloseQueryVariables
-    >(L.Cycle_UncompletedIssuesUponCloseDocument, {
+    >(L.Cycle_UncompletedIssuesUponCloseDocument.toString(), {
       id: this._id,
       ...this._variables,
       ...variables,
@@ -32631,7 +32759,7 @@ export class Document_CommentsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Document_CommentsQueryVariables, "id">): LinearFetch<CommentConnection> {
     const response = await this._request<L.Document_CommentsQuery, L.Document_CommentsQueryVariables>(
-      L.Document_CommentsDocument,
+      L.Document_CommentsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -32678,7 +32806,7 @@ export class EmailIntakeAddress_SesDomainIdentityQuery extends Request {
     const response = await this._request<
       L.EmailIntakeAddress_SesDomainIdentityQuery,
       L.EmailIntakeAddress_SesDomainIdentityQueryVariables
-    >(L.EmailIntakeAddress_SesDomainIdentityDocument, {
+    >(L.EmailIntakeAddress_SesDomainIdentityDocument.toString(), {
       id: this._id,
     });
     const data = response.emailIntakeAddress.sesDomainIdentity;
@@ -32712,7 +32840,7 @@ export class Favorite_ChildrenQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Favorite_ChildrenQueryVariables, "id">): LinearFetch<FavoriteConnection> {
     const response = await this._request<L.Favorite_ChildrenQuery, L.Favorite_ChildrenQueryVariables>(
-      L.Favorite_ChildrenDocument,
+      L.Favorite_ChildrenDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -32757,7 +32885,7 @@ export class Initiative_DocumentContentQuery extends Request {
    */
   public async fetch(): LinearFetch<DocumentContent | undefined> {
     const response = await this._request<L.Initiative_DocumentContentQuery, L.Initiative_DocumentContentQueryVariables>(
-      L.Initiative_DocumentContentDocument,
+      L.Initiative_DocumentContentDocument.toString(),
       {
         id: this._id,
       }
@@ -32793,7 +32921,7 @@ export class Initiative_DocumentsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Initiative_DocumentsQueryVariables, "id">): LinearFetch<DocumentConnection> {
     const response = await this._request<L.Initiative_DocumentsQuery, L.Initiative_DocumentsQueryVariables>(
-      L.Initiative_DocumentsDocument,
+      L.Initiative_DocumentsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -32844,7 +32972,7 @@ export class Initiative_HistoryQuery extends Request {
     variables?: Omit<L.Initiative_HistoryQueryVariables, "id">
   ): LinearFetch<InitiativeHistoryConnection> {
     const response = await this._request<L.Initiative_HistoryQuery, L.Initiative_HistoryQueryVariables>(
-      L.Initiative_HistoryDocument,
+      L.Initiative_HistoryDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -32901,7 +33029,7 @@ export class Initiative_InitiativeUpdatesQuery extends Request {
     const response = await this._request<
       L.Initiative_InitiativeUpdatesQuery,
       L.Initiative_InitiativeUpdatesQueryVariables
-    >(L.Initiative_InitiativeUpdatesDocument, {
+    >(L.Initiative_InitiativeUpdatesDocument.toString(), {
       id: this._id,
       ...this._variables,
       ...variables,
@@ -32950,7 +33078,7 @@ export class Initiative_LinksQuery extends Request {
     variables?: Omit<L.Initiative_LinksQueryVariables, "id">
   ): LinearFetch<EntityExternalLinkConnection> {
     const response = await this._request<L.Initiative_LinksQuery, L.Initiative_LinksQueryVariables>(
-      L.Initiative_LinksDocument,
+      L.Initiative_LinksDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -32999,7 +33127,7 @@ export class Initiative_ProjectsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Initiative_ProjectsQueryVariables, "id">): LinearFetch<ProjectConnection> {
     const response = await this._request<L.Initiative_ProjectsQuery, L.Initiative_ProjectsQueryVariables>(
-      L.Initiative_ProjectsDocument,
+      L.Initiative_ProjectsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33054,7 +33182,7 @@ export class Initiative_SubInitiativesQuery extends Request {
     variables?: Omit<L.Initiative_SubInitiativesQueryVariables, "id">
   ): LinearFetch<InitiativeConnection> {
     const response = await this._request<L.Initiative_SubInitiativesQuery, L.Initiative_SubInitiativesQueryVariables>(
-      L.Initiative_SubInitiativesDocument,
+      L.Initiative_SubInitiativesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33101,7 +33229,7 @@ export class Initiative_DocumentContent_AiPromptRulesQuery extends Request {
     const response = await this._request<
       L.Initiative_DocumentContent_AiPromptRulesQuery,
       L.Initiative_DocumentContent_AiPromptRulesQueryVariables
-    >(L.Initiative_DocumentContent_AiPromptRulesDocument, {
+    >(L.Initiative_DocumentContent_AiPromptRulesDocument.toString(), {
       id: this._id,
     });
     const data = response.initiative.documentContent?.aiPromptRules;
@@ -33141,7 +33269,7 @@ export class InitiativeUpdate_CommentsQuery extends Request {
     variables?: Omit<L.InitiativeUpdate_CommentsQueryVariables, "id">
   ): LinearFetch<CommentConnection> {
     const response = await this._request<L.InitiativeUpdate_CommentsQuery, L.InitiativeUpdate_CommentsQueryVariables>(
-      L.InitiativeUpdate_CommentsDocument,
+      L.InitiativeUpdate_CommentsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33190,7 +33318,7 @@ export class Issue_AttachmentsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Issue_AttachmentsQueryVariables, "id">): LinearFetch<AttachmentConnection> {
     const response = await this._request<L.Issue_AttachmentsQuery, L.Issue_AttachmentsQueryVariables>(
-      L.Issue_AttachmentsDocument,
+      L.Issue_AttachmentsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33235,7 +33363,7 @@ export class Issue_BotActorQuery extends Request {
    */
   public async fetch(): LinearFetch<ActorBot | undefined> {
     const response = await this._request<L.Issue_BotActorQuery, L.Issue_BotActorQueryVariables>(
-      L.Issue_BotActorDocument,
+      L.Issue_BotActorDocument.toString(),
       {
         id: this._id,
       }
@@ -33271,7 +33399,7 @@ export class Issue_ChildrenQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Issue_ChildrenQueryVariables, "id">): LinearFetch<IssueConnection> {
     const response = await this._request<L.Issue_ChildrenQuery, L.Issue_ChildrenQueryVariables>(
-      L.Issue_ChildrenDocument,
+      L.Issue_ChildrenDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33320,7 +33448,7 @@ export class Issue_CommentsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Issue_CommentsQueryVariables, "id">): LinearFetch<CommentConnection> {
     const response = await this._request<L.Issue_CommentsQuery, L.Issue_CommentsQueryVariables>(
-      L.Issue_CommentsDocument,
+      L.Issue_CommentsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33369,7 +33497,7 @@ export class Issue_DocumentsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Issue_DocumentsQueryVariables, "id">): LinearFetch<DocumentConnection> {
     const response = await this._request<L.Issue_DocumentsQuery, L.Issue_DocumentsQueryVariables>(
-      L.Issue_DocumentsDocument,
+      L.Issue_DocumentsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33424,7 +33552,7 @@ export class Issue_FormerAttachmentsQuery extends Request {
     variables?: Omit<L.Issue_FormerAttachmentsQueryVariables, "id">
   ): LinearFetch<AttachmentConnection> {
     const response = await this._request<L.Issue_FormerAttachmentsQuery, L.Issue_FormerAttachmentsQueryVariables>(
-      L.Issue_FormerAttachmentsDocument,
+      L.Issue_FormerAttachmentsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33473,7 +33601,7 @@ export class Issue_FormerNeedsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Issue_FormerNeedsQueryVariables, "id">): LinearFetch<CustomerNeedConnection> {
     const response = await this._request<L.Issue_FormerNeedsQuery, L.Issue_FormerNeedsQueryVariables>(
-      L.Issue_FormerNeedsDocument,
+      L.Issue_FormerNeedsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33521,11 +33649,14 @@ export class Issue_HistoryQuery extends Request {
    * @returns parsed response from Issue_HistoryQuery
    */
   public async fetch(variables?: Omit<L.Issue_HistoryQueryVariables, "id">): LinearFetch<IssueHistoryConnection> {
-    const response = await this._request<L.Issue_HistoryQuery, L.Issue_HistoryQueryVariables>(L.Issue_HistoryDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.Issue_HistoryQuery, L.Issue_HistoryQueryVariables>(
+      L.Issue_HistoryDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.issue.history;
 
     return new IssueHistoryConnection(
@@ -33574,7 +33705,7 @@ export class Issue_InverseRelationsQuery extends Request {
     variables?: Omit<L.Issue_InverseRelationsQueryVariables, "id">
   ): LinearFetch<IssueRelationConnection> {
     const response = await this._request<L.Issue_InverseRelationsQuery, L.Issue_InverseRelationsQueryVariables>(
-      L.Issue_InverseRelationsDocument,
+      L.Issue_InverseRelationsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33622,11 +33753,14 @@ export class Issue_LabelsQuery extends Request {
    * @returns parsed response from Issue_LabelsQuery
    */
   public async fetch(variables?: Omit<L.Issue_LabelsQueryVariables, "id">): LinearFetch<IssueLabelConnection> {
-    const response = await this._request<L.Issue_LabelsQuery, L.Issue_LabelsQueryVariables>(L.Issue_LabelsDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.Issue_LabelsQuery, L.Issue_LabelsQueryVariables>(
+      L.Issue_LabelsDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.issue.labels;
 
     return new IssueLabelConnection(
@@ -33668,11 +33802,14 @@ export class Issue_NeedsQuery extends Request {
    * @returns parsed response from Issue_NeedsQuery
    */
   public async fetch(variables?: Omit<L.Issue_NeedsQueryVariables, "id">): LinearFetch<CustomerNeedConnection> {
-    const response = await this._request<L.Issue_NeedsQuery, L.Issue_NeedsQueryVariables>(L.Issue_NeedsDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.Issue_NeedsQuery, L.Issue_NeedsQueryVariables>(
+      L.Issue_NeedsDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.issue.needs;
 
     return new CustomerNeedConnection(
@@ -33715,7 +33852,7 @@ export class Issue_RelationsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Issue_RelationsQueryVariables, "id">): LinearFetch<IssueRelationConnection> {
     const response = await this._request<L.Issue_RelationsQuery, L.Issue_RelationsQueryVariables>(
-      L.Issue_RelationsDocument,
+      L.Issue_RelationsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33764,7 +33901,7 @@ export class Issue_SubscribersQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Issue_SubscribersQueryVariables, "id">): LinearFetch<UserConnection> {
     const response = await this._request<L.Issue_SubscribersQuery, L.Issue_SubscribersQueryVariables>(
-      L.Issue_SubscribersDocument,
+      L.Issue_SubscribersDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33813,7 +33950,7 @@ export class IssueLabel_ChildrenQuery extends Request {
    */
   public async fetch(variables?: Omit<L.IssueLabel_ChildrenQueryVariables, "id">): LinearFetch<IssueLabelConnection> {
     const response = await this._request<L.IssueLabel_ChildrenQuery, L.IssueLabel_ChildrenQueryVariables>(
-      L.IssueLabel_ChildrenDocument,
+      L.IssueLabel_ChildrenDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33862,7 +33999,7 @@ export class IssueLabel_IssuesQuery extends Request {
    */
   public async fetch(variables?: Omit<L.IssueLabel_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
     const response = await this._request<L.IssueLabel_IssuesQuery, L.IssueLabel_IssuesQueryVariables>(
-      L.IssueLabel_IssuesDocument,
+      L.IssueLabel_IssuesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -33919,7 +34056,7 @@ export class IssueVcsBranchSearch_AttachmentsQuery extends Request {
     const response = await this._request<
       L.IssueVcsBranchSearch_AttachmentsQuery,
       L.IssueVcsBranchSearch_AttachmentsQueryVariables
-    >(L.IssueVcsBranchSearch_AttachmentsDocument, {
+    >(L.IssueVcsBranchSearch_AttachmentsDocument.toString(), {
       branchName: this._branchName,
       ...this._variables,
       ...variables,
@@ -33967,7 +34104,7 @@ export class IssueVcsBranchSearch_BotActorQuery extends Request {
     const response = await this._request<
       L.IssueVcsBranchSearch_BotActorQuery,
       L.IssueVcsBranchSearch_BotActorQueryVariables
-    >(L.IssueVcsBranchSearch_BotActorDocument, {
+    >(L.IssueVcsBranchSearch_BotActorDocument.toString(), {
       branchName: this._branchName,
     });
     const data = response.issueVcsBranchSearch?.botActor;
@@ -34009,7 +34146,7 @@ export class IssueVcsBranchSearch_ChildrenQuery extends Request {
     const response = await this._request<
       L.IssueVcsBranchSearch_ChildrenQuery,
       L.IssueVcsBranchSearch_ChildrenQueryVariables
-    >(L.IssueVcsBranchSearch_ChildrenDocument, {
+    >(L.IssueVcsBranchSearch_ChildrenDocument.toString(), {
       branchName: this._branchName,
       ...this._variables,
       ...variables,
@@ -34067,7 +34204,7 @@ export class IssueVcsBranchSearch_CommentsQuery extends Request {
     const response = await this._request<
       L.IssueVcsBranchSearch_CommentsQuery,
       L.IssueVcsBranchSearch_CommentsQueryVariables
-    >(L.IssueVcsBranchSearch_CommentsDocument, {
+    >(L.IssueVcsBranchSearch_CommentsDocument.toString(), {
       branchName: this._branchName,
       ...this._variables,
       ...variables,
@@ -34125,7 +34262,7 @@ export class IssueVcsBranchSearch_DocumentsQuery extends Request {
     const response = await this._request<
       L.IssueVcsBranchSearch_DocumentsQuery,
       L.IssueVcsBranchSearch_DocumentsQueryVariables
-    >(L.IssueVcsBranchSearch_DocumentsDocument, {
+    >(L.IssueVcsBranchSearch_DocumentsDocument.toString(), {
       branchName: this._branchName,
       ...this._variables,
       ...variables,
@@ -34183,7 +34320,7 @@ export class IssueVcsBranchSearch_FormerAttachmentsQuery extends Request {
     const response = await this._request<
       L.IssueVcsBranchSearch_FormerAttachmentsQuery,
       L.IssueVcsBranchSearch_FormerAttachmentsQueryVariables
-    >(L.IssueVcsBranchSearch_FormerAttachmentsDocument, {
+    >(L.IssueVcsBranchSearch_FormerAttachmentsDocument.toString(), {
       branchName: this._branchName,
       ...this._variables,
       ...variables,
@@ -34241,7 +34378,7 @@ export class IssueVcsBranchSearch_FormerNeedsQuery extends Request {
     const response = await this._request<
       L.IssueVcsBranchSearch_FormerNeedsQuery,
       L.IssueVcsBranchSearch_FormerNeedsQueryVariables
-    >(L.IssueVcsBranchSearch_FormerNeedsDocument, {
+    >(L.IssueVcsBranchSearch_FormerNeedsDocument.toString(), {
       branchName: this._branchName,
       ...this._variables,
       ...variables,
@@ -34299,7 +34436,7 @@ export class IssueVcsBranchSearch_HistoryQuery extends Request {
     const response = await this._request<
       L.IssueVcsBranchSearch_HistoryQuery,
       L.IssueVcsBranchSearch_HistoryQueryVariables
-    >(L.IssueVcsBranchSearch_HistoryDocument, {
+    >(L.IssueVcsBranchSearch_HistoryDocument.toString(), {
       branchName: this._branchName,
       ...this._variables,
       ...variables,
@@ -34357,7 +34494,7 @@ export class IssueVcsBranchSearch_InverseRelationsQuery extends Request {
     const response = await this._request<
       L.IssueVcsBranchSearch_InverseRelationsQuery,
       L.IssueVcsBranchSearch_InverseRelationsQueryVariables
-    >(L.IssueVcsBranchSearch_InverseRelationsDocument, {
+    >(L.IssueVcsBranchSearch_InverseRelationsDocument.toString(), {
       branchName: this._branchName,
       ...this._variables,
       ...variables,
@@ -34415,7 +34552,7 @@ export class IssueVcsBranchSearch_LabelsQuery extends Request {
     const response = await this._request<
       L.IssueVcsBranchSearch_LabelsQuery,
       L.IssueVcsBranchSearch_LabelsQueryVariables
-    >(L.IssueVcsBranchSearch_LabelsDocument, {
+    >(L.IssueVcsBranchSearch_LabelsDocument.toString(), {
       branchName: this._branchName,
       ...this._variables,
       ...variables,
@@ -34471,7 +34608,7 @@ export class IssueVcsBranchSearch_NeedsQuery extends Request {
     variables?: Omit<L.IssueVcsBranchSearch_NeedsQueryVariables, "branchName">
   ): LinearFetch<CustomerNeedConnection | undefined> {
     const response = await this._request<L.IssueVcsBranchSearch_NeedsQuery, L.IssueVcsBranchSearch_NeedsQueryVariables>(
-      L.IssueVcsBranchSearch_NeedsDocument,
+      L.IssueVcsBranchSearch_NeedsDocument.toString(),
       {
         branchName: this._branchName,
         ...this._variables,
@@ -34531,7 +34668,7 @@ export class IssueVcsBranchSearch_RelationsQuery extends Request {
     const response = await this._request<
       L.IssueVcsBranchSearch_RelationsQuery,
       L.IssueVcsBranchSearch_RelationsQueryVariables
-    >(L.IssueVcsBranchSearch_RelationsDocument, {
+    >(L.IssueVcsBranchSearch_RelationsDocument.toString(), {
       branchName: this._branchName,
       ...this._variables,
       ...variables,
@@ -34589,7 +34726,7 @@ export class IssueVcsBranchSearch_SubscribersQuery extends Request {
     const response = await this._request<
       L.IssueVcsBranchSearch_SubscribersQuery,
       L.IssueVcsBranchSearch_SubscribersQueryVariables
-    >(L.IssueVcsBranchSearch_SubscribersDocument, {
+    >(L.IssueVcsBranchSearch_SubscribersDocument.toString(), {
       branchName: this._branchName,
       ...this._variables,
       ...variables,
@@ -34637,7 +34774,7 @@ export class Organization_IntegrationsQuery extends Request {
    */
   public async fetch(variables?: L.Organization_IntegrationsQueryVariables): LinearFetch<IntegrationConnection> {
     const response = await this._request<L.Organization_IntegrationsQuery, L.Organization_IntegrationsQueryVariables>(
-      L.Organization_IntegrationsDocument,
+      L.Organization_IntegrationsDocument.toString(),
       variables
     );
     const data = response.organization.integrations;
@@ -34680,7 +34817,7 @@ export class Organization_LabelsQuery extends Request {
    */
   public async fetch(variables?: L.Organization_LabelsQueryVariables): LinearFetch<IssueLabelConnection> {
     const response = await this._request<L.Organization_LabelsQuery, L.Organization_LabelsQueryVariables>(
-      L.Organization_LabelsDocument,
+      L.Organization_LabelsDocument.toString(),
       variables
     );
     const data = response.organization.labels;
@@ -34723,7 +34860,7 @@ export class Organization_ProjectLabelsQuery extends Request {
    */
   public async fetch(variables?: L.Organization_ProjectLabelsQueryVariables): LinearFetch<ProjectLabelConnection> {
     const response = await this._request<L.Organization_ProjectLabelsQuery, L.Organization_ProjectLabelsQueryVariables>(
-      L.Organization_ProjectLabelsDocument,
+      L.Organization_ProjectLabelsDocument.toString(),
       variables
     );
     const data = response.organization.projectLabels;
@@ -34760,7 +34897,7 @@ export class Organization_SubscriptionQuery extends Request {
    */
   public async fetch(): LinearFetch<PaidSubscription | undefined> {
     const response = await this._request<L.Organization_SubscriptionQuery, L.Organization_SubscriptionQueryVariables>(
-      L.Organization_SubscriptionDocument,
+      L.Organization_SubscriptionDocument.toString(),
       {}
     );
     const data = response.organization.subscription;
@@ -34792,7 +34929,7 @@ export class Organization_TeamsQuery extends Request {
    */
   public async fetch(variables?: L.Organization_TeamsQueryVariables): LinearFetch<TeamConnection> {
     const response = await this._request<L.Organization_TeamsQuery, L.Organization_TeamsQueryVariables>(
-      L.Organization_TeamsDocument,
+      L.Organization_TeamsDocument.toString(),
       variables
     );
     const data = response.organization.teams;
@@ -34835,7 +34972,7 @@ export class Organization_TemplatesQuery extends Request {
    */
   public async fetch(variables?: L.Organization_TemplatesQueryVariables): LinearFetch<TemplateConnection> {
     const response = await this._request<L.Organization_TemplatesQuery, L.Organization_TemplatesQueryVariables>(
-      L.Organization_TemplatesDocument,
+      L.Organization_TemplatesDocument.toString(),
       variables
     );
     const data = response.organization.templates;
@@ -34878,7 +35015,7 @@ export class Organization_UsersQuery extends Request {
    */
   public async fetch(variables?: L.Organization_UsersQueryVariables): LinearFetch<UserConnection> {
     const response = await this._request<L.Organization_UsersQuery, L.Organization_UsersQueryVariables>(
-      L.Organization_UsersDocument,
+      L.Organization_UsersDocument.toString(),
       variables
     );
     const data = response.organization.users;
@@ -34923,7 +35060,7 @@ export class Project_CommentsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Project_CommentsQueryVariables, "id">): LinearFetch<CommentConnection> {
     const response = await this._request<L.Project_CommentsQuery, L.Project_CommentsQueryVariables>(
-      L.Project_CommentsDocument,
+      L.Project_CommentsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -34968,7 +35105,7 @@ export class Project_DocumentContentQuery extends Request {
    */
   public async fetch(): LinearFetch<DocumentContent | undefined> {
     const response = await this._request<L.Project_DocumentContentQuery, L.Project_DocumentContentQueryVariables>(
-      L.Project_DocumentContentDocument,
+      L.Project_DocumentContentDocument.toString(),
       {
         id: this._id,
       }
@@ -35004,7 +35141,7 @@ export class Project_DocumentsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Project_DocumentsQueryVariables, "id">): LinearFetch<DocumentConnection> {
     const response = await this._request<L.Project_DocumentsQuery, L.Project_DocumentsQueryVariables>(
-      L.Project_DocumentsDocument,
+      L.Project_DocumentsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35059,7 +35196,7 @@ export class Project_ExternalLinksQuery extends Request {
     variables?: Omit<L.Project_ExternalLinksQueryVariables, "id">
   ): LinearFetch<EntityExternalLinkConnection> {
     const response = await this._request<L.Project_ExternalLinksQuery, L.Project_ExternalLinksQueryVariables>(
-      L.Project_ExternalLinksDocument,
+      L.Project_ExternalLinksDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35108,7 +35245,7 @@ export class Project_HistoryQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Project_HistoryQueryVariables, "id">): LinearFetch<ProjectHistoryConnection> {
     const response = await this._request<L.Project_HistoryQuery, L.Project_HistoryQueryVariables>(
-      L.Project_HistoryDocument,
+      L.Project_HistoryDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35165,7 +35302,7 @@ export class Project_InitiativeToProjectsQuery extends Request {
     const response = await this._request<
       L.Project_InitiativeToProjectsQuery,
       L.Project_InitiativeToProjectsQueryVariables
-    >(L.Project_InitiativeToProjectsDocument, {
+    >(L.Project_InitiativeToProjectsDocument.toString(), {
       id: this._id,
       ...this._variables,
       ...variables,
@@ -35212,7 +35349,7 @@ export class Project_InitiativesQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Project_InitiativesQueryVariables, "id">): LinearFetch<InitiativeConnection> {
     const response = await this._request<L.Project_InitiativesQuery, L.Project_InitiativesQueryVariables>(
-      L.Project_InitiativesDocument,
+      L.Project_InitiativesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35267,7 +35404,7 @@ export class Project_InverseRelationsQuery extends Request {
     variables?: Omit<L.Project_InverseRelationsQueryVariables, "id">
   ): LinearFetch<ProjectRelationConnection> {
     const response = await this._request<L.Project_InverseRelationsQuery, L.Project_InverseRelationsQueryVariables>(
-      L.Project_InverseRelationsDocument,
+      L.Project_InverseRelationsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35316,7 +35453,7 @@ export class Project_IssuesQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Project_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
     const response = await this._request<L.Project_IssuesQuery, L.Project_IssuesQueryVariables>(
-      L.Project_IssuesDocument,
+      L.Project_IssuesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35365,7 +35502,7 @@ export class Project_LabelsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Project_LabelsQueryVariables, "id">): LinearFetch<ProjectLabelConnection> {
     const response = await this._request<L.Project_LabelsQuery, L.Project_LabelsQueryVariables>(
-      L.Project_LabelsDocument,
+      L.Project_LabelsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35414,7 +35551,7 @@ export class Project_MembersQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Project_MembersQueryVariables, "id">): LinearFetch<UserConnection> {
     const response = await this._request<L.Project_MembersQuery, L.Project_MembersQueryVariables>(
-      L.Project_MembersDocument,
+      L.Project_MembersDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35462,11 +35599,14 @@ export class Project_NeedsQuery extends Request {
    * @returns parsed response from Project_NeedsQuery
    */
   public async fetch(variables?: Omit<L.Project_NeedsQueryVariables, "id">): LinearFetch<CustomerNeedConnection> {
-    const response = await this._request<L.Project_NeedsQuery, L.Project_NeedsQueryVariables>(L.Project_NeedsDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.Project_NeedsQuery, L.Project_NeedsQueryVariables>(
+      L.Project_NeedsDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.project.needs;
 
     return new CustomerNeedConnection(
@@ -35515,7 +35655,7 @@ export class Project_ProjectMilestonesQuery extends Request {
     variables?: Omit<L.Project_ProjectMilestonesQueryVariables, "id">
   ): LinearFetch<ProjectMilestoneConnection> {
     const response = await this._request<L.Project_ProjectMilestonesQuery, L.Project_ProjectMilestonesQueryVariables>(
-      L.Project_ProjectMilestonesDocument,
+      L.Project_ProjectMilestonesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35570,7 +35710,7 @@ export class Project_ProjectUpdatesQuery extends Request {
     variables?: Omit<L.Project_ProjectUpdatesQueryVariables, "id">
   ): LinearFetch<ProjectUpdateConnection> {
     const response = await this._request<L.Project_ProjectUpdatesQuery, L.Project_ProjectUpdatesQueryVariables>(
-      L.Project_ProjectUpdatesDocument,
+      L.Project_ProjectUpdatesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35621,7 +35761,7 @@ export class Project_RelationsQuery extends Request {
     variables?: Omit<L.Project_RelationsQueryVariables, "id">
   ): LinearFetch<ProjectRelationConnection> {
     const response = await this._request<L.Project_RelationsQuery, L.Project_RelationsQueryVariables>(
-      L.Project_RelationsDocument,
+      L.Project_RelationsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35669,11 +35809,14 @@ export class Project_TeamsQuery extends Request {
    * @returns parsed response from Project_TeamsQuery
    */
   public async fetch(variables?: Omit<L.Project_TeamsQueryVariables, "id">): LinearFetch<TeamConnection> {
-    const response = await this._request<L.Project_TeamsQuery, L.Project_TeamsQueryVariables>(L.Project_TeamsDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.Project_TeamsQuery, L.Project_TeamsQueryVariables>(
+      L.Project_TeamsDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.project.teams;
 
     return new TeamConnection(
@@ -35714,7 +35857,7 @@ export class Project_DocumentContent_AiPromptRulesQuery extends Request {
     const response = await this._request<
       L.Project_DocumentContent_AiPromptRulesQuery,
       L.Project_DocumentContent_AiPromptRulesQueryVariables
-    >(L.Project_DocumentContent_AiPromptRulesDocument, {
+    >(L.Project_DocumentContent_AiPromptRulesDocument.toString(), {
       id: this._id,
     });
     const data = response.project.documentContent?.aiPromptRules;
@@ -35754,7 +35897,7 @@ export class ProjectLabel_ChildrenQuery extends Request {
     variables?: Omit<L.ProjectLabel_ChildrenQueryVariables, "id">
   ): LinearFetch<ProjectLabelConnection> {
     const response = await this._request<L.ProjectLabel_ChildrenQuery, L.ProjectLabel_ChildrenQueryVariables>(
-      L.ProjectLabel_ChildrenDocument,
+      L.ProjectLabel_ChildrenDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35807,7 +35950,7 @@ export class ProjectLabel_ProjectsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.ProjectLabel_ProjectsQueryVariables, "id">): LinearFetch<ProjectConnection> {
     const response = await this._request<L.ProjectLabel_ProjectsQuery, L.ProjectLabel_ProjectsQueryVariables>(
-      L.ProjectLabel_ProjectsDocument,
+      L.ProjectLabel_ProjectsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35854,7 +35997,7 @@ export class ProjectMilestone_DocumentContentQuery extends Request {
     const response = await this._request<
       L.ProjectMilestone_DocumentContentQuery,
       L.ProjectMilestone_DocumentContentQueryVariables
-    >(L.ProjectMilestone_DocumentContentDocument, {
+    >(L.ProjectMilestone_DocumentContentDocument.toString(), {
       id: this._id,
     });
     const data = response.projectMilestone.documentContent;
@@ -35892,7 +36035,7 @@ export class ProjectMilestone_IssuesQuery extends Request {
    */
   public async fetch(variables?: Omit<L.ProjectMilestone_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
     const response = await this._request<L.ProjectMilestone_IssuesQuery, L.ProjectMilestone_IssuesQueryVariables>(
-      L.ProjectMilestone_IssuesDocument,
+      L.ProjectMilestone_IssuesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -35939,7 +36082,7 @@ export class ProjectMilestone_DocumentContent_AiPromptRulesQuery extends Request
     const response = await this._request<
       L.ProjectMilestone_DocumentContent_AiPromptRulesQuery,
       L.ProjectMilestone_DocumentContent_AiPromptRulesQueryVariables
-    >(L.ProjectMilestone_DocumentContent_AiPromptRulesDocument, {
+    >(L.ProjectMilestone_DocumentContent_AiPromptRulesDocument.toString(), {
       id: this._id,
     });
     const data = response.projectMilestone.documentContent?.aiPromptRules;
@@ -35977,7 +36120,7 @@ export class ProjectUpdate_CommentsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.ProjectUpdate_CommentsQueryVariables, "id">): LinearFetch<CommentConnection> {
     const response = await this._request<L.ProjectUpdate_CommentsQuery, L.ProjectUpdate_CommentsQueryVariables>(
-      L.ProjectUpdate_CommentsDocument,
+      L.ProjectUpdate_CommentsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -36026,7 +36169,7 @@ export class Roadmap_ProjectsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Roadmap_ProjectsQueryVariables, "id">): LinearFetch<ProjectConnection> {
     const response = await this._request<L.Roadmap_ProjectsQuery, L.Roadmap_ProjectsQueryVariables>(
-      L.Roadmap_ProjectsDocument,
+      L.Roadmap_ProjectsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -36083,7 +36226,7 @@ export class SearchDocuments_ArchivePayloadQuery extends Request {
     const response = await this._request<
       L.SearchDocuments_ArchivePayloadQuery,
       L.SearchDocuments_ArchivePayloadQueryVariables
-    >(L.SearchDocuments_ArchivePayloadDocument, {
+    >(L.SearchDocuments_ArchivePayloadDocument.toString(), {
       term: this._term,
       ...this._variables,
       ...variables,
@@ -36127,7 +36270,7 @@ export class SearchIssues_ArchivePayloadQuery extends Request {
     const response = await this._request<
       L.SearchIssues_ArchivePayloadQuery,
       L.SearchIssues_ArchivePayloadQueryVariables
-    >(L.SearchIssues_ArchivePayloadDocument, {
+    >(L.SearchIssues_ArchivePayloadDocument.toString(), {
       term: this._term,
       ...this._variables,
       ...variables,
@@ -36171,7 +36314,7 @@ export class SearchProjects_ArchivePayloadQuery extends Request {
     const response = await this._request<
       L.SearchProjects_ArchivePayloadQuery,
       L.SearchProjects_ArchivePayloadQueryVariables
-    >(L.SearchProjects_ArchivePayloadDocument, {
+    >(L.SearchProjects_ArchivePayloadDocument.toString(), {
       term: this._term,
       ...this._variables,
       ...variables,
@@ -36206,11 +36349,14 @@ export class Team_CyclesQuery extends Request {
    * @returns parsed response from Team_CyclesQuery
    */
   public async fetch(variables?: Omit<L.Team_CyclesQueryVariables, "id">): LinearFetch<CycleConnection> {
-    const response = await this._request<L.Team_CyclesQuery, L.Team_CyclesQueryVariables>(L.Team_CyclesDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.Team_CyclesQuery, L.Team_CyclesQueryVariables>(
+      L.Team_CyclesDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.team.cycles;
 
     return new CycleConnection(
@@ -36259,7 +36405,7 @@ export class Team_GitAutomationStatesQuery extends Request {
     variables?: Omit<L.Team_GitAutomationStatesQueryVariables, "id">
   ): LinearFetch<GitAutomationStateConnection> {
     const response = await this._request<L.Team_GitAutomationStatesQuery, L.Team_GitAutomationStatesQueryVariables>(
-      L.Team_GitAutomationStatesDocument,
+      L.Team_GitAutomationStatesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -36307,11 +36453,14 @@ export class Team_IssuesQuery extends Request {
    * @returns parsed response from Team_IssuesQuery
    */
   public async fetch(variables?: Omit<L.Team_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
-    const response = await this._request<L.Team_IssuesQuery, L.Team_IssuesQueryVariables>(L.Team_IssuesDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.Team_IssuesQuery, L.Team_IssuesQueryVariables>(
+      L.Team_IssuesDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.team.issues;
 
     return new IssueConnection(
@@ -36353,11 +36502,14 @@ export class Team_LabelsQuery extends Request {
    * @returns parsed response from Team_LabelsQuery
    */
   public async fetch(variables?: Omit<L.Team_LabelsQueryVariables, "id">): LinearFetch<IssueLabelConnection> {
-    const response = await this._request<L.Team_LabelsQuery, L.Team_LabelsQueryVariables>(L.Team_LabelsDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.Team_LabelsQuery, L.Team_LabelsQueryVariables>(
+      L.Team_LabelsDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.team.labels;
 
     return new IssueLabelConnection(
@@ -36399,11 +36551,14 @@ export class Team_MembersQuery extends Request {
    * @returns parsed response from Team_MembersQuery
    */
   public async fetch(variables?: Omit<L.Team_MembersQueryVariables, "id">): LinearFetch<UserConnection> {
-    const response = await this._request<L.Team_MembersQuery, L.Team_MembersQueryVariables>(L.Team_MembersDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.Team_MembersQuery, L.Team_MembersQueryVariables>(
+      L.Team_MembersDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.team.members;
 
     return new UserConnection(
@@ -36446,7 +36601,7 @@ export class Team_MembershipsQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Team_MembershipsQueryVariables, "id">): LinearFetch<TeamMembershipConnection> {
     const response = await this._request<L.Team_MembershipsQuery, L.Team_MembershipsQueryVariables>(
-      L.Team_MembershipsDocument,
+      L.Team_MembershipsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -36494,11 +36649,14 @@ export class Team_ProjectsQuery extends Request {
    * @returns parsed response from Team_ProjectsQuery
    */
   public async fetch(variables?: Omit<L.Team_ProjectsQueryVariables, "id">): LinearFetch<ProjectConnection> {
-    const response = await this._request<L.Team_ProjectsQuery, L.Team_ProjectsQueryVariables>(L.Team_ProjectsDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.Team_ProjectsQuery, L.Team_ProjectsQueryVariables>(
+      L.Team_ProjectsDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.team.projects;
 
     return new ProjectConnection(
@@ -36540,11 +36698,14 @@ export class Team_StatesQuery extends Request {
    * @returns parsed response from Team_StatesQuery
    */
   public async fetch(variables?: Omit<L.Team_StatesQueryVariables, "id">): LinearFetch<WorkflowStateConnection> {
-    const response = await this._request<L.Team_StatesQuery, L.Team_StatesQueryVariables>(L.Team_StatesDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.Team_StatesQuery, L.Team_StatesQueryVariables>(
+      L.Team_StatesDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.team.states;
 
     return new WorkflowStateConnection(
@@ -36587,7 +36748,7 @@ export class Team_TemplatesQuery extends Request {
    */
   public async fetch(variables?: Omit<L.Team_TemplatesQueryVariables, "id">): LinearFetch<TemplateConnection> {
     const response = await this._request<L.Team_TemplatesQuery, L.Team_TemplatesQueryVariables>(
-      L.Team_TemplatesDocument,
+      L.Team_TemplatesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -36635,11 +36796,14 @@ export class Team_WebhooksQuery extends Request {
    * @returns parsed response from Team_WebhooksQuery
    */
   public async fetch(variables?: Omit<L.Team_WebhooksQueryVariables, "id">): LinearFetch<WebhookConnection> {
-    const response = await this._request<L.Team_WebhooksQuery, L.Team_WebhooksQueryVariables>(L.Team_WebhooksDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.Team_WebhooksQuery, L.Team_WebhooksQueryVariables>(
+      L.Team_WebhooksDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.team.webhooks;
 
     return new WebhookConnection(
@@ -36680,7 +36844,7 @@ export class TriageResponsibility_ManualSelectionQuery extends Request {
     const response = await this._request<
       L.TriageResponsibility_ManualSelectionQuery,
       L.TriageResponsibility_ManualSelectionQueryVariables
-    >(L.TriageResponsibility_ManualSelectionDocument, {
+    >(L.TriageResponsibility_ManualSelectionDocument.toString(), {
       id: this._id,
     });
     const data = response.triageResponsibility.manualSelection;
@@ -36714,7 +36878,7 @@ export class User_AssignedIssuesQuery extends Request {
    */
   public async fetch(variables?: Omit<L.User_AssignedIssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
     const response = await this._request<L.User_AssignedIssuesQuery, L.User_AssignedIssuesQueryVariables>(
-      L.User_AssignedIssuesDocument,
+      L.User_AssignedIssuesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -36763,7 +36927,7 @@ export class User_CreatedIssuesQuery extends Request {
    */
   public async fetch(variables?: Omit<L.User_CreatedIssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
     const response = await this._request<L.User_CreatedIssuesQuery, L.User_CreatedIssuesQueryVariables>(
-      L.User_CreatedIssuesDocument,
+      L.User_CreatedIssuesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -36812,7 +36976,7 @@ export class User_DelegatedIssuesQuery extends Request {
    */
   public async fetch(variables?: Omit<L.User_DelegatedIssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
     const response = await this._request<L.User_DelegatedIssuesQuery, L.User_DelegatedIssuesQueryVariables>(
-      L.User_DelegatedIssuesDocument,
+      L.User_DelegatedIssuesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -36860,11 +37024,14 @@ export class User_DraftsQuery extends Request {
    * @returns parsed response from User_DraftsQuery
    */
   public async fetch(variables?: Omit<L.User_DraftsQueryVariables, "id">): LinearFetch<DraftConnection> {
-    const response = await this._request<L.User_DraftsQuery, L.User_DraftsQueryVariables>(L.User_DraftsDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.User_DraftsQuery, L.User_DraftsQueryVariables>(
+      L.User_DraftsDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.user.drafts;
 
     return new DraftConnection(
@@ -36909,7 +37076,7 @@ export class User_TeamMembershipsQuery extends Request {
     variables?: Omit<L.User_TeamMembershipsQueryVariables, "id">
   ): LinearFetch<TeamMembershipConnection> {
     const response = await this._request<L.User_TeamMembershipsQuery, L.User_TeamMembershipsQueryVariables>(
-      L.User_TeamMembershipsDocument,
+      L.User_TeamMembershipsDocument.toString(),
       {
         id: this._id,
         ...this._variables,
@@ -36957,11 +37124,14 @@ export class User_TeamsQuery extends Request {
    * @returns parsed response from User_TeamsQuery
    */
   public async fetch(variables?: Omit<L.User_TeamsQueryVariables, "id">): LinearFetch<TeamConnection> {
-    const response = await this._request<L.User_TeamsQuery, L.User_TeamsQueryVariables>(L.User_TeamsDocument, {
-      id: this._id,
-      ...this._variables,
-      ...variables,
-    });
+    const response = await this._request<L.User_TeamsQuery, L.User_TeamsQueryVariables>(
+      L.User_TeamsDocument.toString(),
+      {
+        id: this._id,
+        ...this._variables,
+        ...variables,
+      }
+    );
     const data = response.user.teams;
 
     return new TeamConnection(
@@ -36998,7 +37168,7 @@ export class UserSettings_NotificationCategoryPreferencesQuery extends Request {
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferencesQuery,
       L.UserSettings_NotificationCategoryPreferencesQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferencesDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferencesDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences;
 
     return new NotificationCategoryPreferences(this._request, data);
@@ -37024,7 +37194,7 @@ export class UserSettings_NotificationChannelPreferencesQuery extends Request {
     const response = await this._request<
       L.UserSettings_NotificationChannelPreferencesQuery,
       L.UserSettings_NotificationChannelPreferencesQueryVariables
-    >(L.UserSettings_NotificationChannelPreferencesDocument, {});
+    >(L.UserSettings_NotificationChannelPreferencesDocument.toString(), {});
     const data = response.userSettings.notificationChannelPreferences;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37050,7 +37220,7 @@ export class UserSettings_NotificationDeliveryPreferencesQuery extends Request {
     const response = await this._request<
       L.UserSettings_NotificationDeliveryPreferencesQuery,
       L.UserSettings_NotificationDeliveryPreferencesQueryVariables
-    >(L.UserSettings_NotificationDeliveryPreferencesDocument, {});
+    >(L.UserSettings_NotificationDeliveryPreferencesDocument.toString(), {});
     const data = response.userSettings.notificationDeliveryPreferences;
 
     return new NotificationDeliveryPreferences(this._request, data);
@@ -37080,7 +37250,7 @@ export class UserSettings_ThemeQuery extends Request {
    */
   public async fetch(variables?: L.UserSettings_ThemeQueryVariables): LinearFetch<UserSettingsTheme | undefined> {
     const response = await this._request<L.UserSettings_ThemeQuery, L.UserSettings_ThemeQueryVariables>(
-      L.UserSettings_ThemeDocument,
+      L.UserSettings_ThemeDocument.toString(),
       variables
     );
     const data = response.userSettings.theme;
@@ -37108,7 +37278,7 @@ export class UserSettings_NotificationCategoryPreferences_AppsAndIntegrationsQue
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_AppsAndIntegrationsQuery,
       L.UserSettings_NotificationCategoryPreferences_AppsAndIntegrationsQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_AppsAndIntegrationsDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_AppsAndIntegrationsDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.appsAndIntegrations;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37134,7 +37304,7 @@ export class UserSettings_NotificationCategoryPreferences_AssignmentsQuery exten
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_AssignmentsQuery,
       L.UserSettings_NotificationCategoryPreferences_AssignmentsQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_AssignmentsDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_AssignmentsDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.assignments;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37160,7 +37330,7 @@ export class UserSettings_NotificationCategoryPreferences_CommentsAndRepliesQuer
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_CommentsAndRepliesQuery,
       L.UserSettings_NotificationCategoryPreferences_CommentsAndRepliesQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_CommentsAndRepliesDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_CommentsAndRepliesDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.commentsAndReplies;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37186,7 +37356,7 @@ export class UserSettings_NotificationCategoryPreferences_CustomersQuery extends
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_CustomersQuery,
       L.UserSettings_NotificationCategoryPreferences_CustomersQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_CustomersDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_CustomersDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.customers;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37212,7 +37382,7 @@ export class UserSettings_NotificationCategoryPreferences_DocumentChangesQuery e
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_DocumentChangesQuery,
       L.UserSettings_NotificationCategoryPreferences_DocumentChangesQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_DocumentChangesDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_DocumentChangesDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.documentChanges;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37238,7 +37408,7 @@ export class UserSettings_NotificationCategoryPreferences_FeedQuery extends Requ
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_FeedQuery,
       L.UserSettings_NotificationCategoryPreferences_FeedQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_FeedDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_FeedDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.feed;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37264,7 +37434,7 @@ export class UserSettings_NotificationCategoryPreferences_MentionsQuery extends 
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_MentionsQuery,
       L.UserSettings_NotificationCategoryPreferences_MentionsQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_MentionsDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_MentionsDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.mentions;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37290,7 +37460,7 @@ export class UserSettings_NotificationCategoryPreferences_PostsAndUpdatesQuery e
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_PostsAndUpdatesQuery,
       L.UserSettings_NotificationCategoryPreferences_PostsAndUpdatesQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_PostsAndUpdatesDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_PostsAndUpdatesDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.postsAndUpdates;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37316,7 +37486,7 @@ export class UserSettings_NotificationCategoryPreferences_ReactionsQuery extends
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_ReactionsQuery,
       L.UserSettings_NotificationCategoryPreferences_ReactionsQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_ReactionsDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_ReactionsDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.reactions;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37342,7 +37512,7 @@ export class UserSettings_NotificationCategoryPreferences_RemindersQuery extends
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_RemindersQuery,
       L.UserSettings_NotificationCategoryPreferences_RemindersQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_RemindersDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_RemindersDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.reminders;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37368,7 +37538,7 @@ export class UserSettings_NotificationCategoryPreferences_ReviewsQuery extends R
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_ReviewsQuery,
       L.UserSettings_NotificationCategoryPreferences_ReviewsQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_ReviewsDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_ReviewsDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.reviews;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37394,7 +37564,7 @@ export class UserSettings_NotificationCategoryPreferences_StatusChangesQuery ext
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_StatusChangesQuery,
       L.UserSettings_NotificationCategoryPreferences_StatusChangesQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_StatusChangesDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_StatusChangesDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.statusChanges;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37420,7 +37590,7 @@ export class UserSettings_NotificationCategoryPreferences_SubscriptionsQuery ext
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_SubscriptionsQuery,
       L.UserSettings_NotificationCategoryPreferences_SubscriptionsQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_SubscriptionsDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_SubscriptionsDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.subscriptions;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37446,7 +37616,7 @@ export class UserSettings_NotificationCategoryPreferences_SystemQuery extends Re
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_SystemQuery,
       L.UserSettings_NotificationCategoryPreferences_SystemQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_SystemDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_SystemDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.system;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37472,7 +37642,7 @@ export class UserSettings_NotificationCategoryPreferences_TriageQuery extends Re
     const response = await this._request<
       L.UserSettings_NotificationCategoryPreferences_TriageQuery,
       L.UserSettings_NotificationCategoryPreferences_TriageQueryVariables
-    >(L.UserSettings_NotificationCategoryPreferences_TriageDocument, {});
+    >(L.UserSettings_NotificationCategoryPreferences_TriageDocument.toString(), {});
     const data = response.userSettings.notificationCategoryPreferences.triage;
 
     return new NotificationChannelPreferences(this._request, data);
@@ -37498,7 +37668,7 @@ export class UserSettings_NotificationDeliveryPreferences_MobileQuery extends Re
     const response = await this._request<
       L.UserSettings_NotificationDeliveryPreferences_MobileQuery,
       L.UserSettings_NotificationDeliveryPreferences_MobileQueryVariables
-    >(L.UserSettings_NotificationDeliveryPreferences_MobileDocument, {});
+    >(L.UserSettings_NotificationDeliveryPreferences_MobileDocument.toString(), {});
     const data = response.userSettings.notificationDeliveryPreferences.mobile;
 
     return data ? new NotificationDeliveryPreferencesChannel(this._request, data) : undefined;
@@ -37524,7 +37694,7 @@ export class UserSettings_NotificationDeliveryPreferences_Mobile_ScheduleQuery e
     const response = await this._request<
       L.UserSettings_NotificationDeliveryPreferences_Mobile_ScheduleQuery,
       L.UserSettings_NotificationDeliveryPreferences_Mobile_ScheduleQueryVariables
-    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_ScheduleDocument, {});
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_ScheduleDocument.toString(), {});
     const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule;
 
     return data ? new NotificationDeliveryPreferencesSchedule(this._request, data) : undefined;
@@ -37550,7 +37720,7 @@ export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Friday
     const response = await this._request<
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_FridayQuery,
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_FridayQueryVariables
-    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_FridayDocument, {});
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_FridayDocument.toString(), {});
     const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.friday;
 
     return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
@@ -37576,7 +37746,7 @@ export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Monday
     const response = await this._request<
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_MondayQuery,
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_MondayQueryVariables
-    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_MondayDocument, {});
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_MondayDocument.toString(), {});
     const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.monday;
 
     return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
@@ -37602,7 +37772,7 @@ export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Saturd
     const response = await this._request<
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SaturdayQuery,
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SaturdayQueryVariables
-    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SaturdayDocument, {});
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SaturdayDocument.toString(), {});
     const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.saturday;
 
     return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
@@ -37628,7 +37798,7 @@ export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Sunday
     const response = await this._request<
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SundayQuery,
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SundayQueryVariables
-    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SundayDocument, {});
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_SundayDocument.toString(), {});
     const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.sunday;
 
     return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
@@ -37654,7 +37824,7 @@ export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Thursd
     const response = await this._request<
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_ThursdayQuery,
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_ThursdayQueryVariables
-    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_ThursdayDocument, {});
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_ThursdayDocument.toString(), {});
     const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.thursday;
 
     return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
@@ -37680,7 +37850,7 @@ export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Tuesda
     const response = await this._request<
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_TuesdayQuery,
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_TuesdayQueryVariables
-    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_TuesdayDocument, {});
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_TuesdayDocument.toString(), {});
     const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.tuesday;
 
     return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
@@ -37706,7 +37876,7 @@ export class UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_Wednes
     const response = await this._request<
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_WednesdayQuery,
       L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_WednesdayQueryVariables
-    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_WednesdayDocument, {});
+    >(L.UserSettings_NotificationDeliveryPreferences_Mobile_Schedule_WednesdayDocument.toString(), {});
     const data = response.userSettings.notificationDeliveryPreferences.mobile?.schedule?.wednesday;
 
     return data ? new NotificationDeliveryPreferencesDay(this._request, data) : undefined;
@@ -37738,7 +37908,7 @@ export class UserSettings_Theme_CustomQuery extends Request {
     variables?: L.UserSettings_Theme_CustomQueryVariables
   ): LinearFetch<UserSettingsCustomTheme | undefined> {
     const response = await this._request<L.UserSettings_Theme_CustomQuery, L.UserSettings_Theme_CustomQueryVariables>(
-      L.UserSettings_Theme_CustomDocument,
+      L.UserSettings_Theme_CustomDocument.toString(),
       variables
     );
     const data = response.userSettings.theme?.custom;
@@ -37774,7 +37944,7 @@ export class UserSettings_Theme_Custom_SidebarQuery extends Request {
     const response = await this._request<
       L.UserSettings_Theme_Custom_SidebarQuery,
       L.UserSettings_Theme_Custom_SidebarQueryVariables
-    >(L.UserSettings_Theme_Custom_SidebarDocument, variables);
+    >(L.UserSettings_Theme_Custom_SidebarDocument.toString(), variables);
     const data = response.userSettings.theme?.custom?.sidebar;
 
     return data ? new UserSettingsCustomSidebarTheme(this._request, data) : undefined;
@@ -37804,7 +37974,7 @@ export class Viewer_AssignedIssuesQuery extends Request {
    */
   public async fetch(variables?: L.Viewer_AssignedIssuesQueryVariables): LinearFetch<IssueConnection> {
     const response = await this._request<L.Viewer_AssignedIssuesQuery, L.Viewer_AssignedIssuesQueryVariables>(
-      L.Viewer_AssignedIssuesDocument,
+      L.Viewer_AssignedIssuesDocument.toString(),
       variables
     );
     const data = response.viewer.assignedIssues;
@@ -37847,7 +38017,7 @@ export class Viewer_CreatedIssuesQuery extends Request {
    */
   public async fetch(variables?: L.Viewer_CreatedIssuesQueryVariables): LinearFetch<IssueConnection> {
     const response = await this._request<L.Viewer_CreatedIssuesQuery, L.Viewer_CreatedIssuesQueryVariables>(
-      L.Viewer_CreatedIssuesDocument,
+      L.Viewer_CreatedIssuesDocument.toString(),
       variables
     );
     const data = response.viewer.createdIssues;
@@ -37890,7 +38060,7 @@ export class Viewer_DelegatedIssuesQuery extends Request {
    */
   public async fetch(variables?: L.Viewer_DelegatedIssuesQueryVariables): LinearFetch<IssueConnection> {
     const response = await this._request<L.Viewer_DelegatedIssuesQuery, L.Viewer_DelegatedIssuesQueryVariables>(
-      L.Viewer_DelegatedIssuesDocument,
+      L.Viewer_DelegatedIssuesDocument.toString(),
       variables
     );
     const data = response.viewer.delegatedIssues;
@@ -37933,7 +38103,7 @@ export class Viewer_DraftsQuery extends Request {
    */
   public async fetch(variables?: L.Viewer_DraftsQueryVariables): LinearFetch<DraftConnection> {
     const response = await this._request<L.Viewer_DraftsQuery, L.Viewer_DraftsQueryVariables>(
-      L.Viewer_DraftsDocument,
+      L.Viewer_DraftsDocument.toString(),
       variables
     );
     const data = response.viewer.drafts;
@@ -37976,7 +38146,7 @@ export class Viewer_TeamMembershipsQuery extends Request {
    */
   public async fetch(variables?: L.Viewer_TeamMembershipsQueryVariables): LinearFetch<TeamMembershipConnection> {
     const response = await this._request<L.Viewer_TeamMembershipsQuery, L.Viewer_TeamMembershipsQueryVariables>(
-      L.Viewer_TeamMembershipsDocument,
+      L.Viewer_TeamMembershipsDocument.toString(),
       variables
     );
     const data = response.viewer.teamMemberships;
@@ -38019,7 +38189,7 @@ export class Viewer_TeamsQuery extends Request {
    */
   public async fetch(variables?: L.Viewer_TeamsQueryVariables): LinearFetch<TeamConnection> {
     const response = await this._request<L.Viewer_TeamsQuery, L.Viewer_TeamsQueryVariables>(
-      L.Viewer_TeamsDocument,
+      L.Viewer_TeamsDocument.toString(),
       variables
     );
     const data = response.viewer.teams;
@@ -38064,7 +38234,7 @@ export class WorkflowState_IssuesQuery extends Request {
    */
   public async fetch(variables?: Omit<L.WorkflowState_IssuesQueryVariables, "id">): LinearFetch<IssueConnection> {
     const response = await this._request<L.WorkflowState_IssuesQuery, L.WorkflowState_IssuesQueryVariables>(
-      L.WorkflowState_IssuesDocument,
+      L.WorkflowState_IssuesDocument.toString(),
       {
         id: this._id,
         ...this._variables,
