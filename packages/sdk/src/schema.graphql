@@ -565,7 +565,7 @@ input AgentSessionCreateInput {
   """
   id: String
   """
-  The issue that this session will be associated with.
+  The issue that this session will be associated with. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   issueId: String
 }
@@ -595,7 +595,7 @@ input AgentSessionCreateOnIssue {
   """
   externalUrls: [AgentSessionExternalUrlInput!]
   """
-  The issue that this session will be associated with.
+  The issue that this session will be associated with. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   issueId: String!
 }
@@ -1306,7 +1306,7 @@ input AttachmentCreateInput {
   """
   id: String
   """
-  The issue to associate the attachment with.
+  The issue to associate the attachment with. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   issueId: String!
   """
@@ -2387,7 +2387,7 @@ input CommentCreateInput {
   """
   initiativeUpdateId: String
   """
-  The issue to associate the comment with.
+  The issue to associate the comment with. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   issueId: String
   """
@@ -3955,7 +3955,7 @@ input CustomerNeedCreateInput {
   """
   id: String
   """
-  The issue this need is referencing.
+  The issue this need is referencing. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   issueId: String
   """
@@ -4199,7 +4199,7 @@ input CustomerNeedUpdateInput {
   """
   id: String
   """
-  The issue this need is referencing.
+  The issue this need is referencing. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   issueId: String
   """
@@ -6326,7 +6326,7 @@ input DocumentCreateInput {
   """
   initiativeId: String
   """
-  [Internal] Related issue for the document.
+  Related issue for the document. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   issueId: String
   """
@@ -6737,7 +6737,7 @@ input DocumentUpdateInput {
   """
   initiativeId: String
   """
-  [Internal] Related issue for the document.
+  Related issue for the document. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   issueId: String
   """
@@ -7017,6 +7017,10 @@ type EmailIntakeAddress implements Node {
   """
   issueCanceledAutoReply: String
   """
+  The auto-reply ProseMirror JSON for issue canceled. If not set, the default reply will be used.
+  """
+  issueCanceledAutoReplyData: JSONObject
+  """
   Whether the auto-reply for issue canceled is enabled.
   """
   issueCanceledAutoReplyEnabled: Boolean!
@@ -7025,6 +7029,10 @@ type EmailIntakeAddress implements Node {
   """
   issueCompletedAutoReply: String
   """
+  The auto-reply ProseMirror JSON for issue completed. If not set, the default reply will be used.
+  """
+  issueCompletedAutoReplyData: JSONObject
+  """
   Whether the auto-reply for issue completed is enabled.
   """
   issueCompletedAutoReplyEnabled: Boolean!
@@ -7032,6 +7040,10 @@ type EmailIntakeAddress implements Node {
   The auto-reply message for issue created. If not set, the default reply will be used.
   """
   issueCreatedAutoReply: String
+  """
+  The auto-reply ProseMirror JSON for issue created. If not set, the default reply will be used.
+  """
+  issueCreatedAutoReplyData: JSONObject
   """
   Whether the auto-reply for issue created is enabled.
   """
@@ -8095,7 +8107,7 @@ input FavoriteCreateInput {
   """
   initiativeTab: InitiativeTab
   """
-  The identifier of the issue to favorite.
+  The identifier of the issue to favorite. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   issueId: String
   """
@@ -12794,7 +12806,7 @@ input IssueCreateInput {
   """
   lastAppliedTemplateId: String
   """
-  The identifier of the parent issue.
+  The identifier of the parent issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   parentId: String
   """
@@ -14554,11 +14566,11 @@ input IssueRelationCreateInput {
   """
   id: String
   """
-  The identifier of the issue that is related to another issue.
+  The identifier of the issue that is related to another issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   issueId: String!
   """
-  The identifier of the related issue.
+  The identifier of the related issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   relatedIssueId: String!
   """
@@ -14616,11 +14628,11 @@ enum IssueRelationType {
 
 input IssueRelationUpdateInput {
   """
-  The identifier of the issue that is related to another issue.
+  The identifier of the issue that is related to another issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   issueId: String
   """
-  The identifier of the related issue.
+  The identifier of the related issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   relatedIssueId: String
   """
@@ -15869,7 +15881,7 @@ input IssueToReleaseCreateInput {
   """
   id: String
   """
-  The identifier of the issue
+  The identifier of the issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   issueId: String!
   """
@@ -16005,7 +16017,7 @@ input IssueUpdateInput {
   """
   lastAppliedTemplateId: String
   """
-  The identifier of the parent issue.
+  The identifier of the parent issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   parentId: String
   """
@@ -16813,7 +16825,7 @@ type Mutation {
     """
     id: String
     """
-    The issue for which to link the Discord message.
+    The issue for which to link the Discord message. Can be a UUID or issue identifier (e.g., 'LIN-123').
     """
     issueId: String!
     """
@@ -16850,7 +16862,7 @@ type Mutation {
     """
     id: String
     """
-    The issue for which to link the Front conversation.
+    The issue for which to link the Front conversation. Can be a UUID or issue identifier (e.g., 'LIN-123').
     """
     issueId: String!
     """
@@ -16875,7 +16887,7 @@ type Mutation {
     """
     id: String
     """
-    The Linear issue for which to link the GitHub issue.
+    The Linear issue for which to link the GitHub issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
     """
     issueId: String!
     """
@@ -16904,7 +16916,7 @@ type Mutation {
     """
     id: String
     """
-    The issue for which to link the GitHub pull request.
+    The issue for which to link the GitHub pull request. Can be a UUID or issue identifier (e.g., 'LIN-123').
     """
     issueId: String!
     """
@@ -16937,7 +16949,7 @@ type Mutation {
     """
     id: String
     """
-    The issue for which to link the GitLab merge request.
+    The issue for which to link the GitLab merge request. Can be a UUID or issue identifier (e.g., 'LIN-123').
     """
     issueId: String!
     """
@@ -16978,7 +16990,7 @@ type Mutation {
     """
     id: String
     """
-    The issue for which to link the Intercom conversation.
+    The issue for which to link the Intercom conversation. Can be a UUID or issue identifier (e.g., 'LIN-123').
     """
     issueId: String!
     """
@@ -17007,7 +17019,7 @@ type Mutation {
     """
     id: String
     """
-    The issue for which to link the Jira issue.
+    The issue for which to link the Jira issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
     """
     issueId: String!
     """
@@ -17040,7 +17052,7 @@ type Mutation {
     """
     id: String
     """
-    The issue for which to link the Salesforce case.
+    The issue for which to link the Salesforce case. Can be a UUID or issue identifier (e.g., 'LIN-123').
     """
     issueId: String!
     """
@@ -17069,7 +17081,7 @@ type Mutation {
     """
     id: String
     """
-    The issue to which to link the Slack message.
+    The issue to which to link the Slack message. Can be a UUID or issue identifier (e.g., 'LIN-123').
     """
     issueId: String!
     """
@@ -17102,7 +17114,7 @@ type Mutation {
     """
     id: String
     """
-    The issue for which to link the url.
+    The issue for which to link the url. Can be a UUID or issue identifier (e.g., 'LIN-123').
     """
     issueId: String!
     """
@@ -17131,7 +17143,7 @@ type Mutation {
     """
     id: String
     """
-    The issue for which to link the Zendesk ticket.
+    The issue for which to link the Zendesk ticket. Can be a UUID or issue identifier (e.g., 'LIN-123').
     """
     issueId: String!
     """
@@ -19157,7 +19169,7 @@ type Mutation {
   """
   issueToReleaseDeleteByIssueAndRelease(
     """
-    The identifier of the issue
+    The identifier of the issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
     """
     issueId: String!
     """
@@ -24837,6 +24849,35 @@ type Project implements Node {
   """
   inProgressScopeHistory: [Float!]!
   """
+  Associations of this project to parent initiatives.
+  """
+  initiativeToProjects(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): InitiativeToProjectConnection!
+  """
   Initiatives that this project belongs to.
   """
   initiatives(
@@ -27396,6 +27437,35 @@ type ProjectSearchResult implements Node {
   The number of in progress estimation points after each week.
   """
   inProgressScopeHistory: [Float!]!
+  """
+  Associations of this project to parent initiatives.
+  """
+  initiativeToProjects(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): InitiativeToProjectConnection!
   """
   Initiatives that this project belongs to.
   """
@@ -31801,7 +31871,7 @@ input ReactionCreateInput {
   """
   initiativeUpdateId: String
   """
-  The issue to associate the reaction with.
+  The issue to associate the reaction with. Can be a UUID or issue identifier (e.g., 'LIN-123').
   """
   issueId: String
   """

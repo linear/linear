@@ -2931,6 +2931,12 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   sesDomainIdentity {
     ...SesDomainIdentity
   }
+  # The auto-reply ProseMirror JSON for issue canceled. If not set, the default reply will be used.
+  issueCanceledAutoReplyData
+  # The auto-reply ProseMirror JSON for issue completed. If not set, the default reply will be used.
+  issueCompletedAutoReplyData
+  # The auto-reply ProseMirror JSON for issue created. If not set, the default reply will be used.
+  issueCreatedAutoReplyData
   # The auto-reply message for issue canceled. If not set, the default reply will be used.
   issueCanceledAutoReply
   # The auto-reply message for issue completed. If not set, the default reply will be used.
@@ -12944,6 +12950,35 @@ query project_history(
     }
   }
 }
+# Associations of this project to parent initiatives.
+query project_initiativeToProjects(
+  $id: String!
+  # A cursor to be used with first for forward pagination
+  $after: String
+  # A cursor to be used with last for backward pagination.
+  $before: String
+  # The number of items to forward paginate (used with after). Defaults to 50.
+  $first: Int
+  # Should archived resources be included (default: false)
+  $includeArchived: Boolean
+  # The number of items to backward paginate (used with before). Defaults to 50.
+  $last: Int
+  # By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+  $orderBy: PaginationOrderBy
+) {
+  project(id: $id) {
+    initiativeToProjects(
+      after: $after
+      before: $before
+      first: $first
+      includeArchived: $includeArchived
+      last: $last
+      orderBy: $orderBy
+    ) {
+      ...InitiativeToProjectConnection
+    }
+  }
+}
 # Initiatives that this project belongs to.
 query project_initiatives(
   $id: String!
@@ -15456,7 +15491,7 @@ mutation attachmentLinkDiscord(
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
-  # The issue for which to link the Discord message.
+  # The issue for which to link the Discord message. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
   # The Discord message ID for the message to link.
   $messageId: String!
@@ -15488,7 +15523,7 @@ mutation attachmentLinkFront(
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
-  # The issue for which to link the Front conversation.
+  # The issue for which to link the Front conversation. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
   # The title to use for the attachment.
   $title: String
@@ -15512,7 +15547,7 @@ mutation attachmentLinkGitHubIssue(
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
-  # The Linear issue for which to link the GitHub issue.
+  # The Linear issue for which to link the GitHub issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
   # The title to use for the attachment.
   $title: String
@@ -15538,7 +15573,7 @@ mutation attachmentLinkGitHubPR(
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
-  # The issue for which to link the GitHub pull request.
+  # The issue for which to link the GitHub pull request. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
   # [Internal] The kind of link between the issue and the pull request.
   $linkKind: GitLinkKind
@@ -15567,7 +15602,7 @@ mutation attachmentLinkGitLabMR(
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
-  # The issue for which to link the GitLab merge request.
+  # The issue for which to link the GitLab merge request. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
   # The GitLab merge request number to link.
   $number: Float!
@@ -15601,7 +15636,7 @@ mutation attachmentLinkIntercom(
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
-  # The issue for which to link the Intercom conversation.
+  # The issue for which to link the Intercom conversation. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
   # An optional Intercom conversation part ID to link to
   $partId: String
@@ -15628,7 +15663,7 @@ mutation attachmentLinkJiraIssue(
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
-  # The issue for which to link the Jira issue.
+  # The issue for which to link the Jira issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
   # The Jira issue key or ID to link.
   $jiraIssueId: String!
@@ -15657,7 +15692,7 @@ mutation attachmentLinkSalesforce(
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
-  # The issue for which to link the Salesforce case.
+  # The issue for which to link the Salesforce case. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
   # The title to use for the attachment.
   $title: String
@@ -15683,7 +15718,7 @@ mutation attachmentLinkSlack(
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
-  # The issue to which to link the Slack message.
+  # The issue to which to link the Slack message. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
   # Whether to begin syncing the message's Slack thread with a comment thread on the issue.
   $syncToCommentThread: Boolean
@@ -15712,7 +15747,7 @@ mutation attachmentLinkURL(
   $displayIconUrl: String
   # The id for the attachment.
   $id: String
-  # The issue for which to link the url.
+  # The issue for which to link the url. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
   # The title to use for the attachment.
   $title: String
@@ -15738,7 +15773,7 @@ mutation attachmentLinkZendesk(
   $displayIconUrl: String
   # Optional attachment ID that may be provided through the API.
   $id: String
-  # The issue for which to link the Zendesk ticket.
+  # The issue for which to link the Zendesk ticket. Can be a UUID or issue identifier (e.g., 'LIN-123').
   $issueId: String!
   # The Zendesk ticket ID to link.
   $ticketId: String!

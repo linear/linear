@@ -5037,10 +5037,13 @@ export class EmailIntakeAddress extends Request {
     this.forwardingEmailAddress = data.forwardingEmailAddress ?? undefined;
     this.id = data.id;
     this.issueCanceledAutoReply = data.issueCanceledAutoReply ?? undefined;
+    this.issueCanceledAutoReplyData = data.issueCanceledAutoReplyData ?? undefined;
     this.issueCanceledAutoReplyEnabled = data.issueCanceledAutoReplyEnabled;
     this.issueCompletedAutoReply = data.issueCompletedAutoReply ?? undefined;
+    this.issueCompletedAutoReplyData = data.issueCompletedAutoReplyData ?? undefined;
     this.issueCompletedAutoReplyEnabled = data.issueCompletedAutoReplyEnabled;
     this.issueCreatedAutoReply = data.issueCreatedAutoReply ?? undefined;
+    this.issueCreatedAutoReplyData = data.issueCreatedAutoReplyData ?? undefined;
     this.issueCreatedAutoReplyEnabled = data.issueCreatedAutoReplyEnabled;
     this.repliesEnabled = data.repliesEnabled;
     this.senderName = data.senderName ?? undefined;
@@ -5071,14 +5074,20 @@ export class EmailIntakeAddress extends Request {
   public id: string;
   /** The auto-reply message for issue canceled. If not set, the default reply will be used. */
   public issueCanceledAutoReply?: string | null;
+  /** The auto-reply ProseMirror JSON for issue canceled. If not set, the default reply will be used. */
+  public issueCanceledAutoReplyData?: L.Scalars["JSONObject"] | null;
   /** Whether the auto-reply for issue canceled is enabled. */
   public issueCanceledAutoReplyEnabled: boolean;
   /** The auto-reply message for issue completed. If not set, the default reply will be used. */
   public issueCompletedAutoReply?: string | null;
+  /** The auto-reply ProseMirror JSON for issue completed. If not set, the default reply will be used. */
+  public issueCompletedAutoReplyData?: L.Scalars["JSONObject"] | null;
   /** Whether the auto-reply for issue completed is enabled. */
   public issueCompletedAutoReplyEnabled: boolean;
   /** The auto-reply message for issue created. If not set, the default reply will be used. */
   public issueCreatedAutoReply?: string | null;
+  /** The auto-reply ProseMirror JSON for issue created. If not set, the default reply will be used. */
+  public issueCreatedAutoReplyData?: L.Scalars["JSONObject"] | null;
   /** Whether the auto-reply for issue created is enabled. */
   public issueCreatedAutoReplyEnabled: boolean;
   /** Whether email replies are enabled. */
@@ -13073,6 +13082,10 @@ export class Project extends Request {
   /** History entries associated with the project. */
   public history(variables?: Omit<L.Project_HistoryQueryVariables, "id">) {
     return new Project_HistoryQuery(this._request, this.id, variables).fetch(variables);
+  }
+  /** Associations of this project to parent initiatives. */
+  public initiativeToProjects(variables?: Omit<L.Project_InitiativeToProjectsQueryVariables, "id">) {
+    return new Project_InitiativeToProjectsQuery(this._request, this.id, variables).fetch(variables);
   }
   /** Initiatives that this project belongs to. */
   public initiatives(variables?: Omit<L.Project_InitiativesQueryVariables, "id">) {
@@ -35105,6 +35118,61 @@ export class Project_HistoryQuery extends Request {
     const data = response.project.history;
 
     return new ProjectHistoryConnection(
+      this._request,
+      connection =>
+        this.fetch(
+          defaultConnection({
+            ...this._variables,
+            ...variables,
+            ...connection,
+          })
+        ),
+      data
+    );
+  }
+}
+
+/**
+ * A fetchable Project_InitiativeToProjects Query
+ *
+ * @param request - function to call the graphql client
+ * @param id - required id to pass to project
+ * @param variables - variables without 'id' to pass into the Project_InitiativeToProjectsQuery
+ */
+export class Project_InitiativeToProjectsQuery extends Request {
+  private _id: string;
+  private _variables?: Omit<L.Project_InitiativeToProjectsQueryVariables, "id">;
+
+  public constructor(
+    request: LinearRequest,
+    id: string,
+    variables?: Omit<L.Project_InitiativeToProjectsQueryVariables, "id">
+  ) {
+    super(request);
+    this._id = id;
+    this._variables = variables;
+  }
+
+  /**
+   * Call the Project_InitiativeToProjects query and return a InitiativeToProjectConnection
+   *
+   * @param variables - variables without 'id' to pass into the Project_InitiativeToProjectsQuery
+   * @returns parsed response from Project_InitiativeToProjectsQuery
+   */
+  public async fetch(
+    variables?: Omit<L.Project_InitiativeToProjectsQueryVariables, "id">
+  ): LinearFetch<InitiativeToProjectConnection> {
+    const response = await this._request<
+      L.Project_InitiativeToProjectsQuery,
+      L.Project_InitiativeToProjectsQueryVariables
+    >(L.Project_InitiativeToProjectsDocument, {
+      id: this._id,
+      ...this._variables,
+      ...variables,
+    });
+    const data = response.project.initiativeToProjects;
+
+    return new InitiativeToProjectConnection(
       this._request,
       connection =>
         this.fetch(
