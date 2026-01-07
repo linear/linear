@@ -112,7 +112,7 @@ function printOperationCall(context: SdkPluginContext, operation: SdkOperation):
     `public async ${Sdk.FETCH_NAME}(${operation.fetchArgs.printInput}): ${operation.print.promise} {
       const ${Sdk.RESPONSE_NAME} = await this._${Sdk.REQUEST_NAME}<${responseType}, ${
         operation.print.variables
-      }>(${printList([operation.print.document + ".toString()", printOperationArgs(operation)])})
+      }>(${printList([`${operation.print.document}.toString()`, printOperationArgs(operation)])})
         ${printSet(`const ${Sdk.DATA_NAME}`, `${operation.print.responsePath}`)}
         ${isNullableConnectionOperation ? `if(${Sdk.DATA_NAME}){` : ""}
         ${operationCall}
