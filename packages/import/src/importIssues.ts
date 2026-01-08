@@ -284,7 +284,7 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
     try {
       const createdIssue = await createIssueWithRetries(client, {
         teamId,
-        projectId: projectId as unknown as string,
+        projectId: issue.projectId || (projectId as unknown as string),
         title: issue.title,
         description,
         priority: issue.priority,
@@ -295,6 +295,8 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
         completedAt: issue.completedAt,
         dueDate: formattedDueDate,
         estimate: issue.estimate,
+        cycleId: issue.cycleId,
+        projectMilestoneId: issue.projectMilestoneId,
       });
 
       if (issue.archived) {
