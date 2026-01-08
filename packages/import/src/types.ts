@@ -30,6 +30,12 @@ export interface Issue {
   archived?: boolean;
   /** Issue estimate */
   estimate?: number;
+  /** The project ID associated with the issue */
+  projectId?: string;
+  /** The cycle ID associated with the issue */
+  cycleId?: string;
+  /** The project milestone ID associated with the issue */
+  projectMilestoneId?: string;
 }
 
 /** Issue comment */

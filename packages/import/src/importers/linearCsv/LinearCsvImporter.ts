@@ -13,6 +13,9 @@ interface LinearIssueType {
   Estimate: string;
   Priority: LinearPriority;
   Project: string;
+  "Project Id": string;
+  Milestone: string;
+  "Milestone Id": string;
   Creator: string;
   Assignee: string;
   Labels: string;
@@ -20,6 +23,7 @@ interface LinearIssueType {
   "Cycle Name": string;
   "Cycle Start": string;
   "Cycle End": string;
+  "Cycle Id": string;
   Created: string;
   Updated: string;
   Started: string;
@@ -83,6 +87,9 @@ export class LinearCsvImporter implements Importer {
         startedAt: !!row.Started ? new Date(row.Started) : undefined,
         estimate: safeParseInt(row.Estimate),
         labels,
+        projectId: row["Project Id"] || undefined,
+        cycleId: row["Cycle Id"] || undefined,
+        projectMilestoneId: row["Milestone Id"] || undefined,
       });
 
       for (const lab of labels) {

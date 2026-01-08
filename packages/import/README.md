@@ -121,6 +121,9 @@ The following fields are supported:
 - `Estimate` - Issue estimate
 - `Created` - Issue creation date
 - `Completed` - Issue completion date (if has completed status)
+- `Project Id` - The project ID to assign the issue to
+- `Cycle Id` - The cycle ID to assign the issue to
+- `Milestone Id` - The project milestone ID to assign the issue to
 
 ### GitLab CSV
 
