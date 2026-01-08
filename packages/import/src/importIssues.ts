@@ -18,9 +18,12 @@ interface ImportAnswers {
   includeProject?: string;
   selfAssign?: boolean;
   targetAssignee?: string;
-  targetProjectId?: boolean;
+  targetProjectId?: string;
   targetTeamId?: string;
   teamName?: string;
+  useProvidedProject?: boolean;
+  useProvidedCycle?: boolean;
+  useProvidedMilestone?: boolean;
 }
 
 enum IssueStatus {
@@ -123,6 +126,36 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
       },
       when: (answers: ImportAnswers) => {
         return answers.includeProject;
+      },
+    },
+    {
+      type: "confirm",
+      name: "useProvidedProject",
+      message: "Do you want to use project data provided in the CSV?",
+      default: true,
+      when: () => {
+        // Only show this for Linear CSV imports that have project data
+        return importer.name === "Linear (CSV)" && !!importData.issues.find(issue => !!issue.projectId);
+      },
+    },
+    {
+      type: "confirm",
+      name: "useProvidedCycle",
+      message: "Do you want to use cycle data provided in the CSV?",
+      default: true,
+      when: () => {
+        // Only show this for Linear CSV imports that have cycle data
+        return importer.name === "Linear (CSV)" && !!importData.issues.find(issue => !!issue.cycleId);
+      },
+    },
+    {
+      type: "confirm",
+      name: "useProvidedMilestone",
+      message: "Do you want to use milestone data provided in the CSV?",
+      default: true,
+      when: () => {
+        // Only show this for Linear CSV imports that have milestone data
+        return importer.name === "Linear (CSV)" && !!importData.issues.find(issue => !!issue.projectMilestoneId);
       },
     },
     {
@@ -281,10 +314,21 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
 
     const formattedDueDate = issue.dueDate ? format(issue.dueDate, "yyyy-MM-dd") : undefined;
 
+    // Determine which project/cycle/milestone to use based on user's choice
+    let finalProjectId: string | undefined;
+    if (importAnswers.useProvidedProject !== false && issue.projectId) {
+      finalProjectId = issue.projectId;
+    } else {
+      finalProjectId = projectId as unknown as string;
+    }
+
+    const finalCycleId = importAnswers.useProvidedCycle !== false ? issue.cycleId : undefined;
+    const finalMilestoneId = importAnswers.useProvidedMilestone !== false ? issue.projectMilestoneId : undefined;
+
     try {
       const createdIssue = await createIssueWithRetries(client, {
         teamId,
-        projectId: issue.projectId || (projectId as unknown as string),
+        projectId: finalProjectId,
         title: issue.title,
         description,
         priority: issue.priority,
@@ -295,8 +339,8 @@ export const importIssues = async (apiKey: string, importer: Importer, apiUrl?: 
         completedAt: issue.completedAt,
         dueDate: formattedDueDate,
         estimate: issue.estimate,
-        cycleId: issue.cycleId,
-        projectMilestoneId: issue.projectMilestoneId,
+        cycleId: finalCycleId,
+        projectMilestoneId: finalMilestoneId,
       });
 
       if (issue.archived) {
