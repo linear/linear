@@ -446,6 +446,10 @@ type AgentSession implements Node {
   """
   comment: Comment
   """
+  Serialized JSON representing the contexts this session is related to, for direct chat sessions.
+  """
+  context: JSON!
+  """
   The time at which the entity was created.
   """
   createdAt: DateTime!
@@ -539,9 +543,9 @@ type AgentSession implements Node {
   """
   summary: String
   """
-  The type of the agent session.
+  [DEPRECATED] The type of the agent session.
   """
-  type: AgentSessionType!
+  type: AgentSessionType @deprecated(reason: "This field is slated for removal.")
   """
   The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
       been updated after creation.
@@ -560,6 +564,10 @@ input AgentSessionCreateInput {
   The app user (agent) to create a session for.
   """
   appUserId: String!
+  """
+  Serialized JSON representing the page contexts this session is related to. Used for direct chat sessions to provide context about the current page (e.g., Issue, Project).
+  """
+  context: JSONObject
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -671,9 +679,9 @@ Input for an external URL associated with an agent session.
 """
 input AgentSessionExternalUrlInput {
   """
-  Optional label for the URL.
+  Label for the URL.
   """
-  label: String
+  label: String!
   """
   The URL of the external resource.
   """
@@ -753,7 +761,7 @@ type AgentSessionToPullRequestEdge {
 }
 
 """
-The type of an agent session.
+[DEPRECATED] The type of an agent session.
 """
 enum AgentSessionType {
   commentThread
@@ -7017,10 +7025,6 @@ type EmailIntakeAddress implements Node {
   """
   issueCanceledAutoReply: String
   """
-  The auto-reply ProseMirror JSON for issue canceled. If not set, the default reply will be used.
-  """
-  issueCanceledAutoReplyData: JSONObject
-  """
   Whether the auto-reply for issue canceled is enabled.
   """
   issueCanceledAutoReplyEnabled: Boolean!
@@ -7029,10 +7033,6 @@ type EmailIntakeAddress implements Node {
   """
   issueCompletedAutoReply: String
   """
-  The auto-reply ProseMirror JSON for issue completed. If not set, the default reply will be used.
-  """
-  issueCompletedAutoReplyData: JSONObject
-  """
   Whether the auto-reply for issue completed is enabled.
   """
   issueCompletedAutoReplyEnabled: Boolean!
@@ -7040,10 +7040,6 @@ type EmailIntakeAddress implements Node {
   The auto-reply message for issue created. If not set, the default reply will be used.
   """
   issueCreatedAutoReply: String
-  """
-  The auto-reply ProseMirror JSON for issue created. If not set, the default reply will be used.
-  """
-  issueCreatedAutoReplyData: JSONObject
   """
   Whether the auto-reply for issue created is enabled.
   """
@@ -7256,6 +7252,10 @@ type EmailUnsubscribePayload {
 }
 
 input EmailUserAccountAuthChallengeInput {
+  """
+  Response from the login challenge.
+  """
+  challengeResponse: String
   """
   Auth code for the client initiating the sequence.
   """
@@ -22981,6 +22981,10 @@ type Organization implements Node {
   """
   aiDiscussionSummariesEnabled: Boolean!
   """
+  [INTERNAL] Configure per-modality AI host providers and model families.
+  """
+  aiProviderConfiguration: JSONObject
+  """
   Whether the organization has enabled resolved thread AI summaries.
   """
   aiThreadSummariesEnabled: Boolean!
@@ -23889,6 +23893,10 @@ input OrganizationUpdateInput {
   Whether the organization has enabled AI discussion summaries for issues.
   """
   aiDiscussionSummariesEnabled: Boolean
+  """
+  [INTERNAL] Configure per-modality AI host providers and model families.
+  """
+  aiProviderConfiguration: JSONObject
   """
   [INTERNAL] Whether the organization has opted in to AI telemetry.
   """
