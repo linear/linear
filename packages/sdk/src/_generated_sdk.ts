@@ -505,6 +505,7 @@ export class AgentSession extends Request {
   public constructor(request: LinearRequest, data: L.AgentSessionFragment) {
     super(request);
     this.archivedAt = parseDate(data.archivedAt) ?? undefined;
+    this.context = parseJson(data.context) ?? {};
     this.createdAt = parseDate(data.createdAt) ?? new Date();
     this.dismissedAt = parseDate(data.dismissedAt) ?? undefined;
     this.endedAt = parseDate(data.endedAt) ?? undefined;
@@ -517,7 +518,7 @@ export class AgentSession extends Request {
     this.summary = data.summary ?? undefined;
     this.updatedAt = parseDate(data.updatedAt) ?? new Date();
     this.status = data.status;
-    this.type = data.type;
+    this.type = data.type ?? undefined;
     this._appUser = data.appUser;
     this._comment = data.comment ?? undefined;
     this._creator = data.creator ?? undefined;
@@ -528,6 +529,8 @@ export class AgentSession extends Request {
 
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   public archivedAt?: Date | null;
+  /** Serialized JSON representing the contexts this session is related to, for direct chat sessions. */
+  public context: Record<string, unknown>;
   /** The time at which the entity was created. */
   public createdAt: Date;
   /** The time the agent session was dismissed. */
@@ -555,8 +558,8 @@ export class AgentSession extends Request {
   public updatedAt: Date;
   /** The current status of the agent session. */
   public status: L.AgentSessionStatus;
-  /** The type of the agent session. */
-  public type: L.AgentSessionType;
+  /** [DEPRECATED] The type of the agent session. */
+  public type?: L.AgentSessionType | null;
   /** The agent user that is associated with this agent session. */
   public get appUser(): LinearFetch<User> | undefined {
     return new UserQuery(this._request).fetch(this._appUser.id);
@@ -5036,13 +5039,10 @@ export class EmailIntakeAddress extends Request {
     this.forwardingEmailAddress = data.forwardingEmailAddress ?? undefined;
     this.id = data.id;
     this.issueCanceledAutoReply = data.issueCanceledAutoReply ?? undefined;
-    this.issueCanceledAutoReplyData = data.issueCanceledAutoReplyData ?? undefined;
     this.issueCanceledAutoReplyEnabled = data.issueCanceledAutoReplyEnabled;
     this.issueCompletedAutoReply = data.issueCompletedAutoReply ?? undefined;
-    this.issueCompletedAutoReplyData = data.issueCompletedAutoReplyData ?? undefined;
     this.issueCompletedAutoReplyEnabled = data.issueCompletedAutoReplyEnabled;
     this.issueCreatedAutoReply = data.issueCreatedAutoReply ?? undefined;
-    this.issueCreatedAutoReplyData = data.issueCreatedAutoReplyData ?? undefined;
     this.issueCreatedAutoReplyEnabled = data.issueCreatedAutoReplyEnabled;
     this.repliesEnabled = data.repliesEnabled;
     this.senderName = data.senderName ?? undefined;
@@ -5073,20 +5073,14 @@ export class EmailIntakeAddress extends Request {
   public id: string;
   /** The auto-reply message for issue canceled. If not set, the default reply will be used. */
   public issueCanceledAutoReply?: string | null;
-  /** The auto-reply ProseMirror JSON for issue canceled. If not set, the default reply will be used. */
-  public issueCanceledAutoReplyData?: L.Scalars["JSONObject"] | null;
   /** Whether the auto-reply for issue canceled is enabled. */
   public issueCanceledAutoReplyEnabled: boolean;
   /** The auto-reply message for issue completed. If not set, the default reply will be used. */
   public issueCompletedAutoReply?: string | null;
-  /** The auto-reply ProseMirror JSON for issue completed. If not set, the default reply will be used. */
-  public issueCompletedAutoReplyData?: L.Scalars["JSONObject"] | null;
   /** Whether the auto-reply for issue completed is enabled. */
   public issueCompletedAutoReplyEnabled: boolean;
   /** The auto-reply message for issue created. If not set, the default reply will be used. */
   public issueCreatedAutoReply?: string | null;
-  /** The auto-reply ProseMirror JSON for issue created. If not set, the default reply will be used. */
-  public issueCreatedAutoReplyData?: L.Scalars["JSONObject"] | null;
   /** Whether the auto-reply for issue created is enabled. */
   public issueCreatedAutoReplyEnabled: boolean;
   /** Whether email replies are enabled. */

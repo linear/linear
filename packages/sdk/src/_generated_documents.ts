@@ -298,6 +298,8 @@ export type AgentSession = Node & {
   archivedAt?: Maybe<Scalars["DateTime"]>;
   /** The comment this agent session is associated with. */
   comment?: Maybe<Comment>;
+  /** Serialized JSON representing the contexts this session is related to, for direct chat sessions. */
+  context: Scalars["JSON"];
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
   /** The human user responsible for the agent session. Null if the session was initiated via automation or by an agent user, with no responsible human user. */
@@ -335,8 +337,11 @@ export type AgentSession = Node & {
   status: AgentSessionStatus;
   /** A summary of the activities in this session. */
   summary?: Maybe<Scalars["String"]>;
-  /** The type of the agent session. */
-  type: AgentSessionType;
+  /**
+   * [DEPRECATED] The type of the agent session.
+   * @deprecated This field is slated for removal.
+   */
+  type?: Maybe<AgentSessionType>;
   /**
    * The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
    *     been updated after creation.
@@ -375,6 +380,8 @@ export type AgentSessionConnection = {
 export type AgentSessionCreateInput = {
   /** The app user (agent) to create a session for. */
   appUserId: Scalars["String"];
+  /** Serialized JSON representing the page contexts this session is related to. Used for direct chat sessions to provide context about the current page (e.g., Issue, Project). */
+  context?: InputMaybe<Scalars["JSONObject"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
   /** The issue that this session will be associated with. Can be a UUID or issue identifier (e.g., 'LIN-123'). */
@@ -439,8 +446,8 @@ export type AgentSessionEventWebhookPayload = {
 
 /** Input for an external URL associated with an agent session. */
 export type AgentSessionExternalUrlInput = {
-  /** Optional label for the URL. */
-  label?: InputMaybe<Scalars["String"]>;
+  /** Label for the URL. */
+  label: Scalars["String"];
   /** The URL of the external resource. */
   url: Scalars["String"];
 };
@@ -499,7 +506,7 @@ export type AgentSessionToPullRequestEdge = {
   node: AgentSessionToPullRequest;
 };
 
-/** The type of an agent session. */
+/** [DEPRECATED] The type of an agent session. */
 export enum AgentSessionType {
   CommentThread = "commentThread",
 }
@@ -4026,20 +4033,14 @@ export type EmailIntakeAddress = Node & {
   id: Scalars["ID"];
   /** The auto-reply message for issue canceled. If not set, the default reply will be used. */
   issueCanceledAutoReply?: Maybe<Scalars["String"]>;
-  /** The auto-reply ProseMirror JSON for issue canceled. If not set, the default reply will be used. */
-  issueCanceledAutoReplyData?: Maybe<Scalars["JSONObject"]>;
   /** Whether the auto-reply for issue canceled is enabled. */
   issueCanceledAutoReplyEnabled: Scalars["Boolean"];
   /** The auto-reply message for issue completed. If not set, the default reply will be used. */
   issueCompletedAutoReply?: Maybe<Scalars["String"]>;
-  /** The auto-reply ProseMirror JSON for issue completed. If not set, the default reply will be used. */
-  issueCompletedAutoReplyData?: Maybe<Scalars["JSONObject"]>;
   /** Whether the auto-reply for issue completed is enabled. */
   issueCompletedAutoReplyEnabled: Scalars["Boolean"];
   /** The auto-reply message for issue created. If not set, the default reply will be used. */
   issueCreatedAutoReply?: Maybe<Scalars["String"]>;
-  /** The auto-reply ProseMirror JSON for issue created. If not set, the default reply will be used. */
-  issueCreatedAutoReplyData?: Maybe<Scalars["JSONObject"]>;
   /** Whether the auto-reply for issue created is enabled. */
   issueCreatedAutoReplyEnabled: Scalars["Boolean"];
   /** The organization that the email address is associated with. */
@@ -4162,6 +4163,8 @@ export type EmailUnsubscribePayload = {
 };
 
 export type EmailUserAccountAuthChallengeInput = {
+  /** Response from the login challenge. */
+  challengeResponse?: InputMaybe<Scalars["String"]>;
   /** Auth code for the client initiating the sequence. */
   clientAuthCode?: InputMaybe<Scalars["String"]>;
   /** The email for which to generate the magic login code. */
@@ -12969,6 +12972,8 @@ export type Organization = Node & {
   aiAddonEnabled: Scalars["Boolean"];
   /** Whether the organization has enabled AI discussion summaries for issues. */
   aiDiscussionSummariesEnabled: Scalars["Boolean"];
+  /** [INTERNAL] Configure per-modality AI host providers and model families. */
+  aiProviderConfiguration?: Maybe<Scalars["JSONObject"]>;
   /** Whether the organization has enabled resolved thread AI summaries. */
   aiThreadSummariesEnabled: Scalars["Boolean"];
   /**
@@ -13489,6 +13494,8 @@ export type OrganizationUpdateInput = {
   aiAddonEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether the organization has enabled AI discussion summaries for issues. */
   aiDiscussionSummariesEnabled?: InputMaybe<Scalars["Boolean"]>;
+  /** [INTERNAL] Configure per-modality AI host providers and model families. */
+  aiProviderConfiguration?: InputMaybe<Scalars["JSONObject"]>;
   /** [INTERNAL] Whether the organization has opted in to AI telemetry. */
   aiTelemetryEnabled?: InputMaybe<Scalars["Boolean"]>;
   /** Whether the organization has enabled resolved thread AI summaries. */
@@ -23777,6 +23784,7 @@ export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   | "plan"
   | "summary"
   | "sourceMetadata"
+  | "context"
   | "externalLink"
   | "status"
   | "updatedAt"
@@ -23785,9 +23793,9 @@ export type AgentSessionFragment = { __typename: "AgentSession" } & Pick<
   | "endedAt"
   | "startedAt"
   | "dismissedAt"
-  | "type"
   | "id"
   | "externalUrls"
+  | "type"
 > & {
     appUser: { __typename?: "User" } & Pick<User, "id">;
     sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -24234,9 +24242,6 @@ export type AgentActivityFragment = { __typename: "AgentActivity" } & Pick<
 
 export type EmailIntakeAddressFragment = { __typename: "EmailIntakeAddress" } & Pick<
   EmailIntakeAddress,
-  | "issueCanceledAutoReplyData"
-  | "issueCompletedAutoReplyData"
-  | "issueCreatedAutoReplyData"
   | "issueCanceledAutoReply"
   | "issueCompletedAutoReply"
   | "issueCreatedAutoReply"
@@ -27158,6 +27163,7 @@ export type AgentSessionConnectionFragment = { __typename: "AgentSessionConnecti
       | "plan"
       | "summary"
       | "sourceMetadata"
+      | "context"
       | "externalLink"
       | "status"
       | "updatedAt"
@@ -27166,9 +27172,9 @@ export type AgentSessionConnectionFragment = { __typename: "AgentSessionConnecti
       | "endedAt"
       | "startedAt"
       | "dismissedAt"
-      | "type"
       | "id"
       | "externalUrls"
+      | "type"
     > & {
         appUser: { __typename?: "User" } & Pick<User, "id">;
         sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -32396,6 +32402,7 @@ export type AgentSessionQuery = { __typename?: "Query" } & {
     | "plan"
     | "summary"
     | "sourceMetadata"
+    | "context"
     | "externalLink"
     | "status"
     | "updatedAt"
@@ -32404,9 +32411,9 @@ export type AgentSessionQuery = { __typename?: "Query" } & {
     | "endedAt"
     | "startedAt"
     | "dismissedAt"
-    | "type"
     | "id"
     | "externalUrls"
+    | "type"
   > & {
       appUser: { __typename?: "User" } & Pick<User, "id">;
       sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -32479,6 +32486,7 @@ export type AgentSessionsQuery = { __typename?: "Query" } & {
         | "plan"
         | "summary"
         | "sourceMetadata"
+        | "context"
         | "externalLink"
         | "status"
         | "updatedAt"
@@ -32487,9 +32495,9 @@ export type AgentSessionsQuery = { __typename?: "Query" } & {
         | "endedAt"
         | "startedAt"
         | "dismissedAt"
-        | "type"
         | "id"
         | "externalUrls"
+        | "type"
       > & {
           appUser: { __typename?: "User" } & Pick<User, "id">;
           sourceComment?: Maybe<{ __typename?: "Comment" } & Pick<Comment, "id">>;
@@ -35730,9 +35738,6 @@ export type EmailIntakeAddressQueryVariables = Exact<{
 export type EmailIntakeAddressQuery = { __typename?: "Query" } & {
   emailIntakeAddress: { __typename: "EmailIntakeAddress" } & Pick<
     EmailIntakeAddress,
-    | "issueCanceledAutoReplyData"
-    | "issueCompletedAutoReplyData"
-    | "issueCreatedAutoReplyData"
     | "issueCanceledAutoReply"
     | "issueCompletedAutoReply"
     | "issueCreatedAutoReply"
@@ -57210,9 +57215,6 @@ export const EmailIntakeAddressFragmentDoc = new TypedDocumentString(
   sesDomainIdentity {
     ...SesDomainIdentity
   }
-  issueCanceledAutoReplyData
-  issueCompletedAutoReplyData
-  issueCreatedAutoReplyData
   issueCanceledAutoReply
   issueCompletedAutoReply
   issueCreatedAutoReply
@@ -60795,6 +60797,7 @@ export const AgentSessionFragmentDoc = new TypedDocumentString(
   plan
   summary
   sourceMetadata
+  context
   externalLink
   appUser {
     id
@@ -60818,12 +60821,12 @@ export const AgentSessionFragmentDoc = new TypedDocumentString(
   endedAt
   startedAt
   dismissedAt
-  type
   id
   dismissedBy {
     id
   }
   externalUrls
+  type
 }
     `,
   { fragmentName: "AgentSession" }
@@ -60844,6 +60847,7 @@ export const AgentSessionConnectionFragmentDoc = new TypedDocumentString(
   plan
   summary
   sourceMetadata
+  context
   externalLink
   appUser {
     id
@@ -60867,12 +60871,12 @@ export const AgentSessionConnectionFragmentDoc = new TypedDocumentString(
   endedAt
   startedAt
   dismissedAt
-  type
   id
   dismissedBy {
     id
   }
   externalUrls
+  type
 }
 fragment PageInfo on PageInfo {
   __typename
@@ -70745,6 +70749,7 @@ export const AgentSessionDocument = new TypedDocumentString(`
   plan
   summary
   sourceMetadata
+  context
   externalLink
   appUser {
     id
@@ -70768,12 +70773,12 @@ export const AgentSessionDocument = new TypedDocumentString(`
   endedAt
   startedAt
   dismissedAt
-  type
   id
   dismissedBy {
     id
   }
   externalUrls
+  type
 }`) as unknown as TypedDocumentString<AgentSessionQuery, AgentSessionQueryVariables>;
 export const AgentSession_ActivitiesDocument = new TypedDocumentString(`
     query agentSession_activities($id: String!, $after: String, $before: String, $filter: AgentActivityFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
@@ -70897,6 +70902,7 @@ export const AgentSessionsDocument = new TypedDocumentString(`
   plan
   summary
   sourceMetadata
+  context
   externalLink
   appUser {
     id
@@ -70920,12 +70926,12 @@ export const AgentSessionsDocument = new TypedDocumentString(`
   endedAt
   startedAt
   dismissedAt
-  type
   id
   dismissedBy {
     id
   }
   externalUrls
+  type
 }
 fragment AgentSessionConnection on AgentSessionConnection {
   __typename
@@ -75600,9 +75606,6 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   sesDomainIdentity {
     ...SesDomainIdentity
   }
-  issueCanceledAutoReplyData
-  issueCompletedAutoReplyData
-  issueCreatedAutoReplyData
   issueCanceledAutoReply
   issueCompletedAutoReply
   issueCreatedAutoReply
