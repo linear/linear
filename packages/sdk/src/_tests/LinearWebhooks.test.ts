@@ -57,6 +57,28 @@ describe("webhooks", () => {
         webhook.verify(rawBody, signature, (parsedBody as Record<string, number>)[LINEAR_WEBHOOK_TS_FIELD])
       ).toBeTruthy();
     });
+
+    it("correct signature, string timestamp from header should pass verification", async () => {
+      const webhook = new LinearWebhookClient("SECRET");
+      const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
+      const timestampString = String(new Date().getTime());
+      expect(() => webhook.verify(rawBody, signature, timestampString)).toBeTruthy();
+    });
+
+    it("correct signature, invalid string timestamp from header should fail verification", async () => {
+      const webhook = new LinearWebhookClient("SECRET");
+      const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
+      const invalidTimestampString = String(new Date().getTime() - 1_000_000);
+      expect(() => webhook.verify(rawBody, signature, invalidTimestampString)).toThrowError(
+        "Invalid webhook timestamp"
+      );
+    });
+
+    it("correct signature, non-numeric string timestamp should fail verification", async () => {
+      const webhook = new LinearWebhookClient("SECRET");
+      const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
+      expect(() => webhook.verify(rawBody, signature, "not-a-number")).toThrowError("Invalid webhook timestamp");
+    });
   });
 
   describe("parseData", () => {
@@ -64,6 +86,14 @@ describe("webhooks", () => {
       const client = new LinearWebhookClient("SECRET");
       const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
       const payload = client.parseData(rawBody, signature);
+      expect(payload).toEqual(parsedBody);
+    });
+
+    it("should return the parsed payload if valid and with a string timestamp from header", () => {
+      const client = new LinearWebhookClient("SECRET");
+      const signature = crypto.createHmac("sha256", "SECRET").update(rawBody).digest("hex");
+      const timestampString = String(new Date().getTime());
+      const payload = client.parseData(rawBody, signature, timestampString);
       expect(payload).toEqual(parsedBody);
     });
 

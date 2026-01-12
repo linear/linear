@@ -8,6 +8,7 @@ import {
 } from "./types.js";
 
 export const LINEAR_WEBHOOK_SIGNATURE_HEADER = "linear-signature";
+export const LINEAR_WEBHOOK_TS_HEADER = "linear-timestamp";
 export const LINEAR_WEBHOOK_TS_FIELD = "webhookTimestamp";
 
 /**
@@ -24,6 +25,7 @@ export const LINEAR_WEBHOOK_TS_FIELD = "webhookTimestamp";
 interface HttpAdapter {
   method: string;
   signature: string | null;
+  timestamp: string | null;
   readRawBody: () => Promise<Buffer>;
   send: (status: number, body: string) => Response | void;
 }
@@ -67,7 +69,7 @@ export class LinearWebhookClient {
 
         let parsedPayload: LinearWebhookPayload;
         try {
-          parsedPayload = this.parseVerifiedPayload(rawBody, signature);
+          parsedPayload = this.parseVerifiedPayload(rawBody, signature, adapter.timestamp);
         } catch {
           return adapter.send(400, "Invalid webhook");
         }
@@ -144,6 +146,7 @@ export class LinearWebhookClient {
     return {
       method: request.method,
       signature: request.headers.get(LINEAR_WEBHOOK_SIGNATURE_HEADER),
+      timestamp: request.headers.get(LINEAR_WEBHOOK_TS_HEADER),
       readRawBody: async () => Buffer.from(await request.arrayBuffer()),
       send: (status, body) => new Response(body, { status }),
     };
@@ -158,11 +161,18 @@ export class LinearWebhookClient {
    * @returns Helpers to read input and send responses in a unified way
    */
   private createNodeAdapter(incomingMessage: IncomingMessage, res: ServerResponse): HttpAdapter {
-    const headerValue = incomingMessage.headers[LINEAR_WEBHOOK_SIGNATURE_HEADER];
-    const signature = Array.isArray(headerValue) ? (headerValue[0] ?? null) : ((headerValue ?? null) as string | null);
+    const signatureHeader = incomingMessage.headers[LINEAR_WEBHOOK_SIGNATURE_HEADER];
+    const signature = Array.isArray(signatureHeader)
+      ? (signatureHeader[0] ?? null)
+      : ((signatureHeader ?? null) as string | null);
+    const timestampHeader = incomingMessage.headers[LINEAR_WEBHOOK_TS_HEADER];
+    const timestamp = Array.isArray(timestampHeader)
+      ? (timestampHeader[0] ?? null)
+      : ((timestampHeader ?? null) as string | null);
     return {
       method: incomingMessage.method || "",
       signature,
+      timestamp,
       readRawBody: async () => {
         const chunks: Buffer[] = [];
         for await (const chunk of incomingMessage) {
@@ -198,12 +208,18 @@ export class LinearWebhookClient {
    *
    * @param rawBody - Raw request body as a Buffer
    * @param signature - The value of the `linear-signature` header
+   * @param timestampHeader - The value of the `linear-timestamp` header (preferred over body field)
    * @returns The verified and parsed webhook payload
    */
-  private parseVerifiedPayload(rawBody: Buffer, signature: string): LinearWebhookPayload {
+  private parseVerifiedPayload(
+    rawBody: Buffer,
+    signature: string,
+    timestampHeader: string | null
+  ): LinearWebhookPayload {
     const parsedBody = this.parseBodyAsWebhookPayload(rawBody);
+    const timestamp = timestampHeader ?? parsedBody.webhookTimestamp;
 
-    const verified = this.verify(rawBody, signature, parsedBody.webhookTimestamp);
+    const verified = this.verify(rawBody, signature, timestamp);
     if (!verified) {
       throw new Error("Invalid webhook signature");
     }
@@ -245,10 +261,11 @@ export class LinearWebhookClient {
    *
    * @param rawBody The webhook request raw body
    * @param signature The signature to verify
-   * @param timestamp The `webhookTimestamp` field from the request parsed body
+   * @param timestamp The timestamp value - either from the `linear-timestamp` header (string)
+   *                  or the `webhookTimestamp` field from the request parsed body (number)
    * @returns True if the signature is valid
    */
-  public verify(rawBody: Buffer, signature: string, timestamp?: number): boolean {
+  public verify(rawBody: Buffer, signature: string, timestamp?: number | string): boolean {
     const verificationBuffer = Buffer.from(crypto.createHmac("sha256", this.secret).update(rawBody).digest("hex"));
     const signatureBuffer = Buffer.from(signature);
 
@@ -261,7 +278,11 @@ export class LinearWebhookClient {
     }
 
     if (timestamp) {
-      const timeDiff = Math.abs(new Date().getTime() - timestamp);
+      const timestampMs = typeof timestamp === "string" ? parseInt(timestamp, 10) : timestamp;
+      if (isNaN(timestampMs)) {
+        throw new Error("Invalid webhook timestamp");
+      }
+      const timeDiff = Math.abs(new Date().getTime() - timestampMs);
       // Throw error if more than one minute delta between provided ts and current time
       if (timeDiff > 1000 * 60) {
         throw new Error("Invalid webhook timestamp");
@@ -276,9 +297,10 @@ export class LinearWebhookClient {
    *
    * @param rawBody The webhook request raw body
    * @param signature The signature to verify
-   * @param timestamp The `webhookTimestamp` field from the request parsed body
+   * @param timestamp The timestamp value - either from the `linear-timestamp` header (string)
+   *                  or the `webhookTimestamp` field from the request parsed body (number)
    */
-  public parseData(rawBody: Buffer, signature: string, timestamp?: number): LinearWebhookPayload {
+  public parseData(rawBody: Buffer, signature: string, timestamp?: number | string): LinearWebhookPayload {
     const verified = this.verify(rawBody, signature, timestamp);
     if (!verified) {
       throw new Error("Invalid webhook signature");
