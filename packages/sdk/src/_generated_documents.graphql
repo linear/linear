@@ -2178,6 +2178,8 @@ fragment AgentSession on AgentSession {
   summary
   # Metadata about the external source that created this agent session.
   sourceMetadata
+  # Serialized JSON representing the contexts this session is related to, for direct chat sessions.
+  context
   # The URL of an external agent-hosted page associated with this session.
   externalLink
   # The agent user that is associated with this agent session.
@@ -2215,8 +2217,6 @@ fragment AgentSession on AgentSession {
   startedAt
   # The time the agent session was dismissed.
   dismissedAt
-  # The type of the agent session.
-  type
   # The unique identifier of the entity.
   id
   # The user who dismissed the agent session.
@@ -2225,6 +2225,8 @@ fragment AgentSession on AgentSession {
   }
   # URLs of external resources associated with this session.
   externalUrls
+  # [DEPRECATED] The type of the agent session.
+  type
 }
 
 # A set of issues to be resolved in a specified amount of time.
@@ -2931,12 +2933,6 @@ fragment EmailIntakeAddress on EmailIntakeAddress {
   sesDomainIdentity {
     ...SesDomainIdentity
   }
-  # The auto-reply ProseMirror JSON for issue canceled. If not set, the default reply will be used.
-  issueCanceledAutoReplyData
-  # The auto-reply ProseMirror JSON for issue completed. If not set, the default reply will be used.
-  issueCompletedAutoReplyData
-  # The auto-reply ProseMirror JSON for issue created. If not set, the default reply will be used.
-  issueCreatedAutoReplyData
   # The auto-reply message for issue canceled. If not set, the default reply will be used.
   issueCanceledAutoReply
   # The auto-reply message for issue completed. If not set, the default reply will be used.
