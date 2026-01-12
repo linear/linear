@@ -280,7 +280,7 @@ export class LinearWebhookClient {
     if (timestamp) {
       const timestampMs = typeof timestamp === "string" ? parseInt(timestamp, 10) : timestamp;
       if (isNaN(timestampMs)) {
-        throw new Error("Invalid webhook timestamp");
+        throw new Error(`Invalid webhook timestamp: ${timestamp}`);
       }
       const timeDiff = Math.abs(new Date().getTime() - timestampMs);
       // Throw error if more than one minute delta between provided ts and current time
