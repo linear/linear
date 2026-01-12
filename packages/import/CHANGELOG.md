@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.0.5
+
+### Patch Changes
+
+- Updated dependencies [cf50e66]
+  - @linear/sdk@70.0.0
+
 ## 3.0.4
 
 ### Patch Changes
