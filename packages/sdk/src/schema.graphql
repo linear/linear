@@ -811,6 +811,21 @@ input AgentSessionUpdateInput {
   URLs to be removed from this session. Only updatable by the OAuth application that owns the session.
   """
   removedExternalUrls: [String!]
+  """
+  [Internal] User-specific state for the agent session. Only updatable by internal clients.
+  """
+  userState: [AgentSessionUserStateInput!]
+}
+
+input AgentSessionUserStateInput {
+  """
+  The time at which the user most recently viewed the session.
+  """
+  lastReadAt: DateTime
+  """
+  The ID of the user this state belongs to.
+  """
+  userId: String!
 }
 
 """
@@ -5241,6 +5256,39 @@ type Cycle implements Node {
   """
   description: String
   """
+  [Internal] Documents associated with the cycle.
+  """
+  documents(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned documents.
+    """
+    filter: DocumentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): DocumentConnection!
+  """
   The end time of the cycle.
   """
   endsAt: DateTime!
@@ -5313,6 +5361,35 @@ type Cycle implements Node {
     """
     orderBy: PaginationOrderBy
   ): IssueConnection!
+  """
+  [Internal] Links associated with the cycle.
+  """
+  links(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): EntityExternalLinkConnection!
   """
   The custom name of the cycle.
   """
@@ -6085,6 +6162,10 @@ type Document implements Node {
   """
   creator: User
   """
+  [Internal] The cycle that the document is associated with.
+  """
+  cycle: Cycle
+  """
   The ID of the document content associated with the document.
   """
   documentContentId: String
@@ -6116,6 +6197,10 @@ type Document implements Node {
   The project that the document is associated with.
   """
   project: Project
+  """
+  [Internal] The release that the document is associated with.
+  """
+  release: Release
   """
   The document's unique URL slug.
   """
@@ -6322,6 +6407,10 @@ input DocumentCreateInput {
   """
   content: String
   """
+  [Internal] Related cycle for the document.
+  """
+  cycleId: String
+  """
   The icon of the document.
   """
   icon: String
@@ -6345,6 +6434,10 @@ input DocumentCreateInput {
   Related project for the document.
   """
   projectId: String
+  """
+  [Internal] Related release for the document.
+  """
+  releaseId: String
   """
   [Internal] The resource folder containing the document.
   """
@@ -6645,6 +6738,10 @@ type DocumentSearchResult implements Node {
   """
   creator: User
   """
+  [Internal] The cycle that the document is associated with.
+  """
+  cycle: Cycle
+  """
   The ID of the document content associated with the document.
   """
   documentContentId: String
@@ -6680,6 +6777,10 @@ type DocumentSearchResult implements Node {
   The project that the document is associated with.
   """
   project: Project
+  """
+  [Internal] The release that the document is associated with.
+  """
+  release: Release
   """
   The document's unique URL slug.
   """
@@ -6733,6 +6834,10 @@ input DocumentUpdateInput {
   """
   content: String
   """
+  [Internal] Related cycle for the document.
+  """
+  cycleId: String
+  """
   The time at which the document was hidden.
   """
   hiddenAt: DateTime
@@ -6756,6 +6861,10 @@ input DocumentUpdateInput {
   Related project for the document.
   """
   projectId: String
+  """
+  [Internal] Related release for the document.
+  """
+  releaseId: String
   """
   [Internal] The resource folder containing the document.
   """
@@ -7458,6 +7567,10 @@ type EntityExternalLinkConnection {
 
 input EntityExternalLinkCreateInput {
   """
+  [Internal] The cycle associated with the link.
+  """
+  cycleId: String
+  """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
   id: String
@@ -7473,6 +7586,10 @@ input EntityExternalLinkCreateInput {
   The project associated with the link.
   """
   projectId: String
+  """
+  [Internal] The release associated with the link.
+  """
+  releaseId: String
   """
   [Internal] The resource folder containing the link.
   """
@@ -19938,6 +20055,15 @@ type Mutation {
     id: String!
   ): ReleaseArchivePayload!
   """
+  [ALPHA] Marks the most recent started release for a pipeline as completed.
+  """
+  releaseComplete(
+    """
+    The input containing the pipeline ID.
+    """
+    input: ReleaseCompleteInput!
+  ): ReleasePayload!
+  """
   [ALPHA] Creates a new release.
   """
   releaseCreate(
@@ -32052,9 +32178,75 @@ type Release implements Node {
   """
   createdAt: DateTime!
   """
+  The release's description.
+  """
+  description: String
+  """
+  [Internal] Documents associated with the release.
+  """
+  documents(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    Filter returned documents.
+    """
+    filter: DocumentFilter
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): DocumentConnection!
+  """
   The unique identifier of the entity.
   """
   id: ID!
+  """
+  [Internal] Links associated with the release.
+  """
+  links(
+    """
+    A cursor to be used with first for forward pagination
+    """
+    after: String
+    """
+    A cursor to be used with last for backward pagination.
+    """
+    before: String
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+    """
+    Should archived resources be included (default: false)
+    """
+    includeArchived: Boolean
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): EntityExternalLinkConnection!
   """
   The name of the release.
   """
@@ -32124,6 +32316,13 @@ enum ReleaseChannel {
   public
 }
 
+input ReleaseCompleteInput {
+  """
+  The identifier of the pipeline to mark the latest started release as completed.
+  """
+  pipelineId: String!
+}
+
 type ReleaseConnection {
   edges: [ReleaseEdge!]!
   nodes: [Release!]!
@@ -32139,6 +32338,10 @@ input ReleaseCreateInput {
   Debug information for release creation diagnostics.
   """
   debugSink: ReleaseDebugSinkInput
+  """
+  The description of the release.
+  """
+  description: String
   """
   The identifier in UUID v4 format. If none is provided, the backend will generate one.
   """
@@ -32580,6 +32783,10 @@ input ReleaseUpdateInput {
   The commit SHA associated with this release.
   """
   commitSha: String
+  """
+  The description of the release.
+  """
+  description: String
   """
   The name of the release.
   """
@@ -35130,6 +35337,14 @@ type TeamPayload {
 }
 
 """
+[Internal] How to handle sub-teams when retiring a parent team.
+"""
+enum TeamRetirementSubTeamHandling {
+  retire
+  unnest
+}
+
+"""
 All possible roles within a team in terms of access to team settings and operations.
 """
 enum TeamRoleType {
@@ -35267,6 +35482,10 @@ input TeamUpdateInput {
   Whether to group recent issue history entries.
   """
   groupIssueHistory: Boolean
+  """
+  [Internal] How to handle sub-teams when retiring. Required if the team has active sub-teams.
+  """
+  handleSubTeamsOnRetirement: TeamRetirementSubTeamHandling
   """
   The icon of the team.
   """
@@ -37339,6 +37558,7 @@ enum ViewType {
   backlog
   board
   completedCycle
+  createdReviews
   customView
   customViews
   customer
