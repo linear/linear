@@ -535,6 +535,15 @@ export type AgentSessionUpdateInput = {
   plan?: InputMaybe<Scalars["JSONObject"]>;
   /** URLs to be removed from this session. Only updatable by the OAuth application that owns the session. */
   removedExternalUrls?: InputMaybe<Array<Scalars["String"]>>;
+  /** [Internal] User-specific state for the agent session. Only updatable by internal clients. */
+  userState?: InputMaybe<Array<AgentSessionUserStateInput>>;
+};
+
+export type AgentSessionUserStateInput = {
+  /** The time at which the user most recently viewed the session. */
+  lastReadAt?: InputMaybe<Scalars["DateTime"]>;
+  /** The ID of the user this state belongs to. */
+  userId: Scalars["String"];
 };
 
 /** Payload for an agent session webhook. */
@@ -3028,6 +3037,8 @@ export type Cycle = Node & {
   currentProgress: Scalars["JSONObject"];
   /** The cycle's description. */
   description?: Maybe<Scalars["String"]>;
+  /** [Internal] Documents associated with the cycle. */
+  documents: DocumentConnection;
   /** The end time of the cycle. */
   endsAt: Scalars["DateTime"];
   /** The unique identifier of the entity. */
@@ -3050,6 +3061,8 @@ export type Cycle = Node & {
   issueCountHistory: Array<Scalars["Float"]>;
   /** Issues associated with the cycle. */
   issues: IssueConnection;
+  /** [Internal] Links associated with the cycle. */
+  links: EntityExternalLinkConnection;
   /** The custom name of the cycle. */
   name?: Maybe<Scalars["String"]>;
   /** The number of the cycle. */
@@ -3074,10 +3087,31 @@ export type Cycle = Node & {
 };
 
 /** A set of issues to be resolved in a specified amount of time. */
+export type CycleDocumentsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<DocumentFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** A set of issues to be resolved in a specified amount of time. */
 export type CycleIssuesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   filter?: InputMaybe<IssueFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** A set of issues to be resolved in a specified amount of time. */
+export type CycleLinksArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
   includeArchived?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
@@ -3487,6 +3521,8 @@ export type Document = Node & {
   createdAt: Scalars["DateTime"];
   /** The user who created the document. */
   creator?: Maybe<User>;
+  /** [Internal] The cycle that the document is associated with. */
+  cycle?: Maybe<Cycle>;
   /** The ID of the document content associated with the document. */
   documentContentId?: Maybe<Scalars["String"]>;
   /** The time at which the document was hidden. Null if the entity has not been hidden. */
@@ -3503,6 +3539,8 @@ export type Document = Node & {
   lastAppliedTemplate?: Maybe<Template>;
   /** The project that the document is associated with. */
   project?: Maybe<Project>;
+  /** [Internal] The release that the document is associated with. */
+  release?: Maybe<Release>;
   /** The document's unique URL slug. */
   slugId: Scalars["String"];
   /** The order of the item in the resources list. */
@@ -3640,6 +3678,8 @@ export type DocumentCreateInput = {
   color?: InputMaybe<Scalars["String"]>;
   /** The document content as markdown. */
   content?: InputMaybe<Scalars["String"]>;
+  /** [Internal] Related cycle for the document. */
+  cycleId?: InputMaybe<Scalars["String"]>;
   /** The icon of the document. */
   icon?: InputMaybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
@@ -3652,6 +3692,8 @@ export type DocumentCreateInput = {
   lastAppliedTemplateId?: InputMaybe<Scalars["String"]>;
   /** Related project for the document. */
   projectId?: InputMaybe<Scalars["String"]>;
+  /** [Internal] Related release for the document. */
+  releaseId?: InputMaybe<Scalars["String"]>;
   /** [Internal] The resource folder containing the document. */
   resourceFolderId?: InputMaybe<Scalars["String"]>;
   /** The order of the item in the resources list. */
@@ -3809,6 +3851,8 @@ export type DocumentSearchResult = Node & {
   createdAt: Scalars["DateTime"];
   /** The user who created the document. */
   creator?: Maybe<User>;
+  /** [Internal] The cycle that the document is associated with. */
+  cycle?: Maybe<Cycle>;
   /** The ID of the document content associated with the document. */
   documentContentId?: Maybe<Scalars["String"]>;
   /** The time at which the document was hidden. Null if the entity has not been hidden. */
@@ -3827,6 +3871,8 @@ export type DocumentSearchResult = Node & {
   metadata: Scalars["JSONObject"];
   /** The project that the document is associated with. */
   project?: Maybe<Project>;
+  /** [Internal] The release that the document is associated with. */
+  release?: Maybe<Release>;
   /** The document's unique URL slug. */
   slugId: Scalars["String"];
   /** The order of the item in the resources list. */
@@ -3870,6 +3916,8 @@ export type DocumentUpdateInput = {
   color?: InputMaybe<Scalars["String"]>;
   /** The document content as markdown. */
   content?: InputMaybe<Scalars["String"]>;
+  /** [Internal] Related cycle for the document. */
+  cycleId?: InputMaybe<Scalars["String"]>;
   /** The time at which the document was hidden. */
   hiddenAt?: InputMaybe<Scalars["DateTime"]>;
   /** The icon of the document. */
@@ -3882,6 +3930,8 @@ export type DocumentUpdateInput = {
   lastAppliedTemplateId?: InputMaybe<Scalars["String"]>;
   /** Related project for the document. */
   projectId?: InputMaybe<Scalars["String"]>;
+  /** [Internal] Related release for the document. */
+  releaseId?: InputMaybe<Scalars["String"]>;
   /** [Internal] The resource folder containing the document. */
   resourceFolderId?: InputMaybe<Scalars["String"]>;
   /** The order of the item in the resources list. */
@@ -4299,6 +4349,8 @@ export type EntityExternalLinkConnection = {
 };
 
 export type EntityExternalLinkCreateInput = {
+  /** [Internal] The cycle associated with the link. */
+  cycleId?: InputMaybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
   /** The initiative associated with the link. */
@@ -4307,6 +4359,8 @@ export type EntityExternalLinkCreateInput = {
   label: Scalars["String"];
   /** The project associated with the link. */
   projectId?: InputMaybe<Scalars["String"]>;
+  /** [Internal] The release associated with the link. */
+  releaseId?: InputMaybe<Scalars["String"]>;
   /** [Internal] The resource folder containing the link. */
   resourceFolderId?: InputMaybe<Scalars["String"]>;
   /** The order of the item in the entities resources list. */
@@ -9963,6 +10017,8 @@ export type Mutation = {
   refreshGoogleSheetsData: IntegrationPayload;
   /** [ALPHA] Archives a release. */
   releaseArchive: ReleaseArchivePayload;
+  /** [ALPHA] Marks the most recent started release for a pipeline as completed. */
+  releaseComplete: ReleasePayload;
   /** [ALPHA] Creates a new release. */
   releaseCreate: ReleasePayload;
   /** [ALPHA] Archives a release pipeline. */
@@ -11380,6 +11436,10 @@ export type MutationRefreshGoogleSheetsDataArgs = {
 
 export type MutationReleaseArchiveArgs = {
   id: Scalars["String"];
+};
+
+export type MutationReleaseCompleteArgs = {
+  input: ReleaseCompleteInput;
 };
 
 export type MutationReleaseCreateArgs = {
@@ -17841,8 +17901,14 @@ export type Release = Node & {
   completedAt?: Maybe<Scalars["DateTime"]>;
   /** The time at which the entity was created. */
   createdAt: Scalars["DateTime"];
+  /** The release's description. */
+  description?: Maybe<Scalars["String"]>;
+  /** [Internal] Documents associated with the release. */
+  documents: DocumentConnection;
   /** The unique identifier of the entity. */
   id: Scalars["ID"];
+  /** [Internal] Links associated with the release. */
+  links: EntityExternalLinkConnection;
   /** The name of the release. */
   name: Scalars["String"];
   /** The pipeline this release belongs to. */
@@ -17866,6 +17932,27 @@ export type Release = Node & {
   version?: Maybe<Scalars["String"]>;
 };
 
+/** [Internal] A release. */
+export type ReleaseDocumentsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  filter?: InputMaybe<DocumentFilter>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** [Internal] A release. */
+export type ReleaseLinksArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  includeArchived?: InputMaybe<Scalars["Boolean"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
 /** A generic payload return from entity archive mutations. */
 export type ReleaseArchivePayload = ArchivePayload & {
   __typename?: "ReleaseArchivePayload";
@@ -17887,6 +17974,11 @@ export enum ReleaseChannel {
   Public = "public",
 }
 
+export type ReleaseCompleteInput = {
+  /** The identifier of the pipeline to mark the latest started release as completed. */
+  pipelineId: Scalars["String"];
+};
+
 export type ReleaseConnection = {
   __typename?: "ReleaseConnection";
   edges: Array<ReleaseEdge>;
@@ -17899,6 +17991,8 @@ export type ReleaseCreateInput = {
   commitSha?: InputMaybe<Scalars["String"]>;
   /** Debug information for release creation diagnostics. */
   debugSink?: InputMaybe<ReleaseDebugSinkInput>;
+  /** The description of the release. */
+  description?: InputMaybe<Scalars["String"]>;
   /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars["String"]>;
   /** Issue identifiers (e.g. ENG-123) to associate with this release. */
@@ -18163,6 +18257,8 @@ export type ReleaseStageUpdateInput = {
 export type ReleaseUpdateInput = {
   /** The commit SHA associated with this release. */
   commitSha?: InputMaybe<Scalars["String"]>;
+  /** The description of the release. */
+  description?: InputMaybe<Scalars["String"]>;
   /** The name of the release. */
   name?: InputMaybe<Scalars["String"]>;
   /** The identifier of the pipeline this release belongs to. */
@@ -19606,6 +19702,12 @@ export type TeamPayload = {
   team?: Maybe<Team>;
 };
 
+/** [Internal] How to handle sub-teams when retiring a parent team. */
+export enum TeamRetirementSubTeamHandling {
+  Retire = "retire",
+  Unnest = "unnest",
+}
+
 /** All possible roles within a team in terms of access to team settings and operations. */
 export enum TeamRoleType {
   Member = "member",
@@ -19680,6 +19782,8 @@ export type TeamUpdateInput = {
   description?: InputMaybe<Scalars["String"]>;
   /** Whether to group recent issue history entries. */
   groupIssueHistory?: InputMaybe<Scalars["Boolean"]>;
+  /** [Internal] How to handle sub-teams when retiring. Required if the team has active sub-teams. */
+  handleSubTeamsOnRetirement?: InputMaybe<TeamRetirementSubTeamHandling>;
   /** The icon of the team. */
   icon?: InputMaybe<Scalars["String"]>;
   /** Whether the team should inherit estimation settings from its parent. Only applies to sub-teams. */
@@ -20886,6 +20990,7 @@ export enum ViewType {
   Backlog = "backlog",
   Board = "board",
   CompletedCycle = "completedCycle",
+  CreatedReviews = "createdReviews",
   CustomView = "customView",
   CustomViews = "customViews",
   Customer = "customer",

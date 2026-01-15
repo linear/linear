@@ -42488,6 +42488,7 @@ export {
   SendStrategy,
   SlaStatus,
   SlackChannelType,
+  TeamRetirementSubTeamHandling,
   TeamRoleType,
   TriageResponsibilityAction,
   UserContextViewType,
