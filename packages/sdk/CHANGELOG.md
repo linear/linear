@@ -1,5 +1,89 @@
 # Change Log
 
+## 71.0.0
+
+### Major Changes
+
+- d2956ef: feat(schema): [breaking] Input field 'allowedAiProviders' was removed from input object type 'OrganizationUpdateInput' (OrganizationUpdateInput.allowedAiProviders)
+
+  feat(schema): [dangerous] Input field 'hasSharedUsers' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.hasSharedUsers)
+
+  feat(schema): [dangerous] Input field 'sharedWith' was added to input object type 'IssueCollectionFilter' (IssueCollectionFilter.sharedWith)
+
+  feat(schema): [dangerous] Input field 'hasSharedUsers' was added to input object type 'IssueFilter' (IssueFilter.hasSharedUsers)
+
+  feat(schema): [dangerous] Input field 'sharedWith' was added to input object type 'IssueFilter' (IssueFilter.sharedWith)
+
+  feat(schema): [dangerous] Input field 'hasSharedUsers' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.hasSharedUsers)
+
+  feat(schema): [dangerous] Input field 'sharedWith' was added to input object type 'NullableIssueFilter' (NullableIssueFilter.sharedWith)
+
+  feat(schema): [dangerous] Enum value 'myIssuesSharedWithMe' was added to enum 'ViewType' (ViewType.myIssuesSharedWithMe)
+
+  feat(schema): [non_breaking] Field 'AgentActivityWebhookPayload.userId' changed type from 'String' to 'String!' (AgentActivityWebhookPayload.userId)
+
+  feat(schema): [non_breaking] Field 'url' was added to object type 'AgentSession' (AgentSession.url)
+
+  feat(schema): [non_breaking] Input field 'AgentSessionCreateInput.context' description changed from 'Serialized JSON representing the page contexts this session is related to. Used for direct chat sessions to provide context about the current page (e.g., Issue, Project).' to '[Internal] Serialized JSON representing the page contexts this session is related to. Used for direct chat sessions to provide context about the current page (e.g., Issue, Project).' (AgentSessionCreateInput.context)
+
+  feat(schema): [non_breaking] Field 'url' was added to object type 'AgentSessionWebhookPayload' (AgentSessionWebhookPayload.url)
+
+  feat(schema): [non_breaking] Field 'Organization.allowedAiProviders' description changed from '[INTERNAL] Permitted AI providers in order of preference. Empty array means all providers are allowed.' to '[INTERNAL] Permitted AI providers.' (Organization.allowedAiProviders)
+
+  feat(schema): [non_breaking] Field 'Organization.allowedAiProviders' is deprecated (Organization.allowedAiProviders)
+
+  feat(schema): [non_breaking] Field 'Organization.allowedAiProviders' has deprecation reason 'Use aiProviderConfiguration instead.' (Organization.allowedAiProviders)
+
+### Minor Changes
+
+- d7a2eee: feat(schema): [dangerous] Input field 'userState' was added to input object type 'AgentSessionUpdateInput' (AgentSessionUpdateInput.userState)
+
+  feat(schema): [dangerous] Input field 'cycleId' was added to input object type 'DocumentCreateInput' (DocumentCreateInput.cycleId)
+
+  feat(schema): [dangerous] Input field 'releaseId' was added to input object type 'DocumentCreateInput' (DocumentCreateInput.releaseId)
+
+  feat(schema): [dangerous] Input field 'cycleId' was added to input object type 'DocumentUpdateInput' (DocumentUpdateInput.cycleId)
+
+  feat(schema): [dangerous] Input field 'releaseId' was added to input object type 'DocumentUpdateInput' (DocumentUpdateInput.releaseId)
+
+  feat(schema): [dangerous] Input field 'cycleId' was added to input object type 'EntityExternalLinkCreateInput' (EntityExternalLinkCreateInput.cycleId)
+
+  feat(schema): [dangerous] Input field 'releaseId' was added to input object type 'EntityExternalLinkCreateInput' (EntityExternalLinkCreateInput.releaseId)
+
+  feat(schema): [dangerous] Input field 'description' was added to input object type 'ReleaseCreateInput' (ReleaseCreateInput.description)
+
+  feat(schema): [dangerous] Input field 'description' was added to input object type 'ReleaseUpdateInput' (ReleaseUpdateInput.description)
+
+  feat(schema): [dangerous] Input field 'handleSubTeamsOnRetirement' was added to input object type 'TeamUpdateInput' (TeamUpdateInput.handleSubTeamsOnRetirement)
+
+  feat(schema): [dangerous] Enum value 'createdReviews' was added to enum 'ViewType' (ViewType.createdReviews)
+
+  feat(schema): [non_breaking] Type 'AgentSessionUserStateInput' was added (AgentSessionUserStateInput)
+
+  feat(schema): [non_breaking] Type 'ReleaseCompleteInput' was added (ReleaseCompleteInput)
+
+  feat(schema): [non_breaking] Type 'TeamRetirementSubTeamHandling' was added (TeamRetirementSubTeamHandling)
+
+  feat(schema): [non_breaking] Field 'documents' was added to object type 'Cycle' (Cycle.documents)
+
+  feat(schema): [non_breaking] Field 'links' was added to object type 'Cycle' (Cycle.links)
+
+  feat(schema): [non_breaking] Field 'cycle' was added to object type 'Document' (Document.cycle)
+
+  feat(schema): [non_breaking] Field 'release' was added to object type 'Document' (Document.release)
+
+  feat(schema): [non_breaking] Field 'cycle' was added to object type 'DocumentSearchResult' (DocumentSearchResult.cycle)
+
+  feat(schema): [non_breaking] Field 'release' was added to object type 'DocumentSearchResult' (DocumentSearchResult.release)
+
+  feat(schema): [non_breaking] Field 'releaseComplete' was added to object type 'Mutation' (Mutation.releaseComplete)
+
+  feat(schema): [non_breaking] Field 'description' was added to object type 'Release' (Release.description)
+
+  feat(schema): [non_breaking] Field 'documents' was added to object type 'Release' (Release.documents)
+
+  feat(schema): [non_breaking] Field 'links' was added to object type 'Release' (Release.links)
+
 ## 70.0.0
 
 ### Major Changes
